@@ -1,0 +1,7 @@
+baseURL = "https://docs.gopher.rocks"
+theme = "hugo-theme-learn"
+languageCode = "en-us"
+title = "Gopher.Rocks Documentation"
+publishDir = "../dist/docs"
+[outputs]
+home = [ "HTML", "RSS", "JSON"]
