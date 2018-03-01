@@ -35,11 +35,9 @@ func init() {
 		log.Fatalf("GOPATH is not set!")
 	}
 	gopath = g
-	storageReader = storage.Reader{
-		Lister: &memory.Lister{},
-		Getter: &memory.Getter{},
-	}
-	storageWriter = &memory.Saver{}
+	mem := memory.New()
+	storageReader = mem
+	storageWriter = mem
 }
 
 // App is where all routes and middleware for buffalo
