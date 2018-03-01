@@ -1,7 +1,6 @@
-baseURL = "https://docs.gopher.rocks"
+baseURL = "https://docs.gomods.io"
 theme = "hugo-theme-learn"
 languageCode = "en-us"
-title = "Gopher.Rocks Documentation"
-publishDir = "../dist/docs"
+title = "gomods.io Documentation"
 [outputs]
 home = [ "HTML", "RSS", "JSON"]
