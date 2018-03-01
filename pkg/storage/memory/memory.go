@@ -23,5 +23,8 @@ func (e *getterSaverImpl) key(baseURL, module string) string {
 }
 
 func New() GetterSaver {
-	return &getterSaverImpl{RWMutex: new(sync.RWMutex)}
+	return &getterSaverImpl{
+		RWMutex:  new(sync.RWMutex),
+		versions: make(map[string][]*storage.Version),
+	}
 }
