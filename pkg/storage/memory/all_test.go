@@ -8,6 +8,11 @@ import (
 
 type MemoryTests struct {
 	suite.Suite
+	mem GetterSaver
+}
+
+func (m *MemoryTests) BeforeTest() {
+	m.mem = New()
 }
 
 func TestMemoryStorage(t *testing.T) {
