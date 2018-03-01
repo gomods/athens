@@ -17,11 +17,15 @@ Here's what was discussed on slack + various other forums:
 After code passes tests, the publisher can hit a webhook to tell the registry to fetch
 code for the given tag from the given repository. The webhook will then do the following:
 
-* Check if the repository is already "known" (the owner of the repository will need to register it prior) - Fail if it isn't
-* Check if the given tag already exists (we want versions to be immutable) - Fail if it does
-* Download the code from the given tag and store it in a CDN
+- Check if the repository is already "known" (the owner of the repository will need to register it prior)
+   - Fail if it isn't
+- Check if the given tag already exists on the Athens server (we want versions to be immutable)
+  - Fail if it does
+- Download the code from the given tag and store it in a CDN
 
 We may need to require users to be authorized to hit the webhooks.
+
+This flow is only valid for when Athens is functioning as a registry (see below).
 
 ## Manual Uploads
 
@@ -35,11 +39,15 @@ parse it out.
 
 Athens will ship with a CLI to construct and upload the zip file.
 
+This flow is only valid for when Athens is functioning as a registry (see below).
+
 ## VCS
 
 Also note that, since Athens can act as a proxy, it may not store any code
 and just refer to a VCS repository + tag. See below for details on the
 proxy.
+
+This flow is only valid for when Athens is functioning as a proxy (see below).
 
 # How Will Modules Be Served?
 
