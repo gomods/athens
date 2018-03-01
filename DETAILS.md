@@ -35,6 +35,12 @@ parse it out.
 
 Athens will ship with a CLI to construct and upload the zip file.
 
+## VCS
+
+Also note that, since Athens can act as a proxy, it may not store any code
+and just refer to a VCS repository + tag. See below for details on the
+proxy.
+
 # How Will Modules Be Served?
 
 We will provide two mechanisms for downloading modules: a proxy and a registry.
