@@ -11,7 +11,7 @@ type MemoryTests struct {
 	mem GetterSaver
 }
 
-func (m *MemoryTests) BeforeTest() {
+func (m *MemoryTests) SetupTest() {
 	m.mem = New()
 }
 
