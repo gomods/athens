@@ -104,8 +104,6 @@ server lives at `gomods.io`):
 $ go get gomods.io/my/package@v1
 ```
 
-The new caninocal import path for this package is `gomods.io/my/package`. This also allows for import paths to be
-specified in packages, for example:
 
 ```go
 package captainhook // import gomods.io/captainhook
