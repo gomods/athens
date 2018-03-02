@@ -75,10 +75,10 @@ The only thing I ask is that you follow the
 
 Great question (especially for an alpha project)! The short answer is this:
 
-> The basic pieces are in place, but the CLI and the server makes it near-impossible to
-> use this thing in the real world
+> The basic pieces are in place for a proxy, but the CLI and the server makes
+> it near-impossible to use this thing in the real world
 
-And here are some details:
+## Some Additional Details
 
 The basic API and storage system work, but the proxy is limited for real world use right now.
 
