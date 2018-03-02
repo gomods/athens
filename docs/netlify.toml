@@ -1,0 +1,6 @@
+[Settings]
+    ID = "gomods-athens"
+
+[build]
+    base = "docs/"
+    publish = "docs/public/"
