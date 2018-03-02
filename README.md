@@ -17,74 +17,6 @@ to a description of each:
 * [Module registry](./REGISTRY.md)
 * [CLI](./CLI.md)
 
-# Storage
-
-This server can be approximately split into the API surface and the backing storage. The API
-surface is specified in the vgo modules paper (see above), and the backing storage approximately
-reflects the API surface -- in most cases, versions are stored "under" their modules, and
-modules are stored "under" their base paths.
-
-Currently, there is only an in-memory storage driver. That means whenever the server dies,
-all module metadata (version, name, `go.mod` files) and module source is deleted.
-
-There are a few more storage modules on deck:
-
-* Local disk
-* RDBMS's + cloud blob stores (for the source zips)
-* Cloud databases + cloud blob stores (for the source zips)
-
-# Does it Work?
-
-Great question (especially for an alpha project)! The short answer is this:
-
-> The basic pieces are in place, but the CLI and the server makes it near-impossible to
-> use this thing in the real world
-
-And here are some details:
-
-The basic API and storage system work, but the proxy is limited for real world use right now.
-
-First, it only stores modules in memory, so that's a major issue if you want to use it for anything
-real.
-
-Second, it doesn't hold any packages other than the ones you upload to it. A package proxy
-is pretty much only as useful as the packages it stores. You can work around that by declaring
-dependencies as `file:///` URLs if you want, but that defeats much of the purpose of this project.
-
-When athens has better storage drivers (at least persistent ones!), it'll be easier to load it up
-with modules (i.e. by running a background job to crawl your `GOPATH`). At that point, it'll be
-more practical to successfully run `vgo get` inside a less-trivial project.
-
-Finally, here's what the whole workflow looks like in the real world (spoiler alert: the CLI needs
-work). The setup:
-
-* First, I uploaded a basic module to the server using the CLI (see above) using the following command
-  from the root of this repo:
-  `console ./athens ./testmodule arschles.com testmodule v1.0.0`
-* Then I created a new module with the following files in it:
-  * A single `go.mod` file with only the following line in it: `module "foo.bar/baz"`
-  * A `main.go` file with the following in it:
-
-```go
-package main
-func main() {}
-```
-
-Finally, from the root of the new module, I ran `vgo get arschles.com/testmodule@v1.0.0` and got the
-following output:
-
-```console
-$ vgo get arschles.com/testmodule@v1.0.0
-vgo: downloading arschles.com/testmodule v1.0.0
-vgo: import "arschles.com/testmodule": zip for arschles.com/testmodule@v1.0. has unexpected file testmodule/.DS_Store
-```
-
-As you can see, the CLI uploaded a file to athens that's not `.go`, `go.mod`, or anything else
-that `vgo` allows, so at least the CLI needs some work (and the server needs some sanity checks too).
-
-You can get around all of this by manually zipping up your code and uploading it with `curl` or
-similar, but like I said, that's super impractical. Yay alpha software!
-
 # Development
 
 The server is written using [Buffalo](https://gobuffalo.io/), so it's fairly straightforward
@@ -138,3 +70,55 @@ The only thing I ask is that you follow the
 
 * ["Go and Versioning"](https://research.swtch.com/vgo) papers
 * [vgo wiki](https://github.com/golang/go/wiki/vgo)
+
+# Does it Work?
+
+Great question (especially for an alpha project)! The short answer is this:
+
+> The basic pieces are in place, but the CLI and the server makes it near-impossible to
+> use this thing in the real world
+
+And here are some details:
+
+The basic API and storage system work, but the proxy is limited for real world use right now.
+
+First, it only stores modules in memory, so that's a major issue if you want to use it for anything
+real.
+
+Second, it doesn't hold any packages other than the ones you upload to it. A package proxy
+is pretty much only as useful as the packages it stores. You can work around that by declaring
+dependencies as `file:///` URLs if you want, but that defeats much of the purpose of this project.
+
+When athens has better storage drivers (at least persistent ones!), it'll be easier to load it up
+with modules (i.e. by running a background job to crawl your `GOPATH`). At that point, it'll be
+more practical to successfully run `vgo get` inside a less-trivial project.
+
+Finally, here's what the whole workflow looks like in the real world (spoiler alert: the CLI needs
+work). The setup:
+
+* First, I uploaded a basic module to the server using the CLI (see above) using the following command
+  from the root of this repo:
+  `console ./athens ./testmodule arschles.com testmodule v1.0.0`
+* Then I created a new module with the following files in it:
+  * A single `go.mod` file with only the following line in it: `module "foo.bar/baz"`
+  * A `main.go` file with the following in it:
+
+```go
+package main
+func main() {}
+```
+
+Finally, from the root of the new module, I ran `vgo get arschles.com/testmodule@v1.0.0` and got the
+following output:
+
+```console
+$ vgo get arschles.com/testmodule@v1.0.0
+vgo: downloading arschles.com/testmodule v1.0.0
+vgo: import "arschles.com/testmodule": zip for arschles.com/testmodule@v1.0. has unexpected file testmodule/.DS_Store
+```
+
+As you can see, the CLI uploaded a file to athens that's not `.go`, `go.mod`, or anything else
+that `vgo` allows, so at least the CLI needs some work (and the server needs some sanity checks too).
+
+You can get around all of this by manually zipping up your code and uploading it with `curl` or
+similar, but like I said, that's super impractical. Yay alpha software!
