@@ -1,14 +1,14 @@
 # The Athens CLI
 
-Athens provides a crude "admin" API that allows you to upload new versions of modules
-to the [registry](./REGISTRY.md).
+The Athens registry provides a crude "admin" API that allows you to upload new
+versions of modules to the [registry](./REGISTRY.md).
 
-_Note: The API is crude mostly because it currently has no concept of
-authentication or authorization. Everybody has "god mode"!_
+_Note: The API is currently crude mostly because it currently is not protected
+by authentication or authorization. Everybody has "god mode"!_
 
-Athens provides a basic CLI that makes it convenient to upload a new module,
-or new version of a module, to the server. Find the code for it in the
-[./cli](./cli) directory, and build it with the following:
+Athens provides a basic CLI for the registry that makes it convenient to
+upload a new module, or new version of a module, to the server. Find the code
+for it in the [./cli](./cli) directory, and build it with the following:
 
 ```console
 make cli
