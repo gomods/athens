@@ -14,5 +14,4 @@ func (m *MemoryTests) TestList() {
 	for i, expectedVersion := range retVersions {
 		r.Equal(expectedVersion, versions[i])
 	}
-
 }
