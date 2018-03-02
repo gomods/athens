@@ -18,3 +18,10 @@ this basic functionality:
   * Authentication is done with Github login (other login systems may be
     supported in the future)
 * It is capable of verifying module source code integrity
+* The registry names modules according to the `module "abc"` directive
+  in the `go.mod` file. The custom module naming enables custom import
+  directives like this:
+
+  ```go
+  package mycustompackage // import "my/custom/package"
+  ```
