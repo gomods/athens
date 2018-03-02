@@ -4,10 +4,10 @@ import (
 	"github.com/gomods/athens/pkg/storage"
 )
 
-func (l *listerSaverImpl) List(basePath, module string) ([]string, error) {
+func (l *storageImpl) List(basePath, module string) ([]string, error) {
 	return nil, nil
 }
 
-func (l *listerSaverImpl) All() (map[string][]*storage.RevInfo, error) {
+func (l *storageImpl) All() (map[string][]*storage.RevInfo, error) {
 	return nil, nil
 }

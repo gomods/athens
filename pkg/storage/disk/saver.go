@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 )
 
-func (s *listerSaverImpl) Save(baseURL, module, vsn string, mod, zip []byte) error {
+func (s *storageImpl) Save(baseURL, module, vsn string, mod, zip []byte) error {
 	p := &payload{
 		baseURL:     baseURL,
 		module:      module,

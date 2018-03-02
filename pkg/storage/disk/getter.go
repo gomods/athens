@@ -4,8 +4,6 @@ import (
 	"github.com/gomods/athens/pkg/storage"
 )
 
-type Getter struct{}
-
-func (v *listerSaverImpl) Get(baseURL, module, vsn string) (*storage.Version, error) {
+func (v *storageImpl) Get(baseURL, module, vsn string) (*storage.Version, error) {
 	return nil, nil
 }

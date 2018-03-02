@@ -1,29 +1,28 @@
 package disk
 
 import (
-	"io/ioutil"
 	"path/filepath"
 
 	"github.com/gomods/athens/pkg/storage"
 )
 
-// ListerSaver is the only interface defined by the disk storage. Use
-// NewListerSaver to create one of these. Everything is all in one
+// Storage is the only interface defined by the disk storage. Use
+// NewStorage to create one of these. Everything is all in one
 // because it all has to share the same tree
-type ListerSaver interface {
+type Storage interface {
 	storage.Lister
 	storage.Getter
 	storage.Saver
 }
 
-type listerSaverImpl struct {
+type storageImpl struct {
 	rootDir string
 }
 
-// NewListerSaver returns a new ListerSaver implementation that stores
+// NewStorage returns a new ListerSaver implementation that stores
 // everything under rootDir
-func NewListerSaver(rootDir string) ListerSaver {
-	return &listerSaverImpl{rootDir: rootDir}
+func NewStorage(rootDir string) Storage {
+	return &storageImpl{rootDir: rootDir}
 
 }
 
