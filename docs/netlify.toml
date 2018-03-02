@@ -4,3 +4,4 @@
 [build]
     base = "docs/"
     publish = "docs/public/"
+    command = "hugo -v"
