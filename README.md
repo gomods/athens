@@ -8,6 +8,15 @@ the download protocol specified [here](https://research.swtch.com/vgo-module)
 (under "Download Protocol"), and a few additional API endpoints to make it more useful. See
 [API.md](./API.md) for more information.
 
+# Architecture
+
+Athens is composed roughly of three logical pieces. The below list contains links
+to a description of each:
+
+* [Module proxy](./PROXY.md)
+* [Module registry](./REGISTRY.md)
+* [CLI](./CLI.md)
+
 # Storage
 
 This server can be approximately split into the API surface and the backing storage. The API
@@ -23,37 +32,6 @@ There are a few more storage modules on deck:
 * Local disk
 * RDBMS's + cloud blob stores (for the source zips)
 * Cloud databases + cloud blob stores (for the source zips)
-
-# CLI
-
-In addition to the standard vgo API, there is also a crude "admin" API that allows you to upload
-new versions of modules to the server. The API is crude mostly because it has no concept of
-authentication or authorization. Everybody has "god mode"!
-
-There's a very basic CLI that makes it easy(ish) to upload a new module to the server. Find the
-code for it in the [./cli](./cli) directory, and build it with the following:
-
-```console
-make cli
-```
-
-You'll get a `athens` binary in the same directory. The binary is limited
-right now. Run it like this:
-
-```console
-./athens <directory> <baseURL> <module> <version>
-```
-
-A few additional notes on this CLI:
-
-* It is hard coded to make requests against `http://localhost:3000`, so you'll need to have the
-  Athens server running to successfully use it (see [Development](#development) above)
-* `<directory>` will be zipped up and uploaded to the Athens server
-* ... and it needs to have a `go.mod` file in its root
-* The go.mod file's 'module' directive must match `<module>`. `athens` won't read that
-  value yet (that's planned though)
-* If there are any `vendor` directories under `<directory>`, they won't be ignored yet, but that's
-  planned
 
 # Does it Work?
 
