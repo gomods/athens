@@ -11,6 +11,11 @@ const (
 	module  = "my/module"
 )
 
+var (
+	mod = []byte("123")
+	zip = []byte("456")
+)
+
 type MemoryTests struct {
 	suite.Suite
 	mem GetterSaver
