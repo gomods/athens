@@ -3,11 +3,7 @@ package memory
 func (m *MemoryTests) TestGet() {
 	mem := m.mem
 	r := m.Require()
-	const (
-		baseURL = "base.com"
-		module  = "my/module"
-		version = "v1.0.0"
-	)
+	const version = "v1.0.0"
 	var (
 		gomod = []byte(`module "my/module"`)
 		zip   = []byte("asdasdfasdfa")

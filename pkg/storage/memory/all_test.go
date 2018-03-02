@@ -6,6 +6,11 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
+const (
+	baseURL = "base.com"
+	module  = "my/module"
+)
+
 type MemoryTests struct {
 	suite.Suite
 	mem GetterSaver
