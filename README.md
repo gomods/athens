@@ -1,5 +1,7 @@
 # Athens
 
+[![Build Status](https://travis-ci.org/gomods/athens.svg?branch=master)](https://travis-ci.org/gomods/athens)
+
 _This is a very early alpha release, and the API will be changing as the proxy API changes._
 _Do not run this in production. This warning will be changed or removed as the project and the proxy API changes._
 
