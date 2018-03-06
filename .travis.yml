@@ -4,4 +4,4 @@ go:
   - "1.8"
   - "1.9"
   - "1.10.x"
-script: go test ./...
+script: go test -v $(go list ./... | grep -v /vendor/)
