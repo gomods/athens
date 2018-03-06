@@ -34,16 +34,3 @@ func NewStorage(rootDir string) Storage {
 	return &storageImpl{rootDir: rootDir}
 
 }
-
-type payload struct {
-	root        string
-	baseURL     string
-	module      string
-	version     string
-	moduleBytes []byte
-	zipBytes    []byte
-}
-
-func (p *payload) diskLocation() string {
-	return filepath.Join(p.root, p.baseURL, p.module, p.version)
-}
