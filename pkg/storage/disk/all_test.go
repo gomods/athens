@@ -32,7 +32,7 @@ func (d *DiskTests) SetupTest() {
 }
 
 func (d *DiskTests) TearDownTest() {
-	d.Require().NoError(os.Remove(d.rootDir))
+	d.Require().NoError(os.RemoveAll(d.rootDir))
 }
 
 func TestDiskStorage(t *testing.T) {
