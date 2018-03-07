@@ -1,5 +1,8 @@
 cli: 
-	go build -o vgp ./cmd/cli
+	go build -o athens ./cmd/cli
 
 docs:
 	cd docs && hugo
+
+test:
+	go test ./...
