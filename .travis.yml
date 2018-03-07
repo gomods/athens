@@ -1,3 +1,5 @@
+services:
+  - mongodb
 language: go
 install: false
 go:
