@@ -1,0 +1,126 @@
+.page-header{
+    height: 100vh;
+    background-position: center center;
+    background-size: cover;
+    margin: 0;
+    padding: 0;
+    border: 0;
+
+    .carousel .carousel-indicators{
+        bottom: 60px;
+    }
+
+    .container{
+        padding-top: 226px;
+        color: #FFFFFF;
+    }
+
+    .title{
+        color: $white-color;
+    }
+
+    &.header-small{
+        height: 65vh;
+        min-height: 65vh;
+
+        .container{
+            padding-top: 20vh;
+        }
+    }
+}
+
+.header-filter{
+    position: relative;
+
+    &:before,
+    &:after{
+        position: absolute;
+        z-index: 1;
+        width: 100%;
+        height: 100%;
+        display: block;
+        left: 0;
+        top: 0;
+        content: "";
+    }
+    &::before{
+        background-color: rgba(0,0,0,.5);
+    }
+
+    .container{
+        z-index: 2;
+        position: relative;
+    }
+
+    &[filter-color="purple"],
+    &[filter-color="primary"]{
+        &:after{
+            @include linear-gradient(rgba($purple-100,.56), rgba($purple-300,.95));
+
+        }
+    }
+    &[filter-color="blue"],
+    &[filter-color="info"]{
+        &:after{
+            @include linear-gradient(rgba($cyan-100,.56), rgba($cyan-300,.95));
+        }
+    }
+    &[filter-color="green"],
+    &[filter-color="success"]{
+        &:after{
+            @include linear-gradient(rgba($green-200,.56), rgba($green-400,.95));
+        }
+    }
+    &[filter-color="orange"],
+    &[filter-color="warning"]{
+        &:after{
+            @include linear-gradient(rgba($orange-100,.56), rgba($orange-300,.95));
+        }
+    }
+
+    &[filter-color="red"],
+    &[filter-color="danger"]{
+        &:after{
+            @include linear-gradient(rgba($red-200,.56), rgba($red-400,.95));
+        }
+    }
+    &[filter-color="rose"]{
+        &:after{
+            @include linear-gradient(rgba($pink-100,.56), rgba($pink-300,.95));
+        }
+    }
+}
+.clear-filter{
+    &:before{
+        display: none;
+    }
+}
+
+.header-1,
+.header-2,
+.header-3{
+    .wrapper{
+        background: #CCCCCC;
+    }
+}
+
+.header-2{
+    .page-header{
+        .container{
+            padding-top:25vh;
+        }
+        .card{
+            margin-top: 60px;
+        }
+    }
+
+}
+
+.header-3{
+    .btn{
+        margin: 0;
+    }
+    h6{
+        margin-bottom: 0;
+    }
+}

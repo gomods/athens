@@ -1,0 +1,47 @@
+.panel{
+    background-color: transparent;
+    border: 0 none;
+    box-shadow: none;
+    .panel-heading{
+        background-color: transparent;
+        border-bottom: 1px solid #ddd;
+        padding: 25px 10px 5px 0px;
+        .panel-title{
+            font-size: 15px;
+            font-weight: bolder;
+        }
+        a{
+            color: $black-color;
+            &:hover,
+            &:active,
+            &[aria-expanded="true"]{
+                color: $brand-primary;
+            }
+            &[aria-expanded="true"],
+            &.expanded{
+                i{
+                    @include rotate-180();
+                }
+            }
+
+        }
+        i{
+            float: right;
+            @extend .animation-transition-fast;
+        }
+
+    }
+
+    .panel-body{
+        border: 0 none;
+        padding: 15px 0px 5px;
+    }
+    &.panel-default{
+        .panel-heading + .panel-collapse {
+            .panel-body{
+                 border: 0 none;
+            }
+        }
+
+    }
+}

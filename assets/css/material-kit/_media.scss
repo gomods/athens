@@ -1,0 +1,47 @@
+.media{
+    .avatar{
+        margin: 0 auto;
+        width: 64px;
+        height: 64px;
+        overflow: hidden;
+        border-radius: 50%;
+        margin-right: 15px;
+        @include shadow-6dp();
+
+        img{
+            width: 100%;
+        }
+    }
+
+    .media-heading small{
+        font-family: $font-family-sans-serif;
+    }
+    .media-body{
+        padding-right: 10px;
+
+        .media .media-body{
+            padding-right: 0px;
+        }
+    }
+    .media-footer{
+        .btn{
+            margin-bottom: 20px;
+
+        }
+
+        &:after{
+            display: table;
+            content: " ";
+            clear: both;
+        }
+    }
+    p{
+        color: $gray-color;
+        font-size: $font-paragraph;
+        line-height: 1.6em;
+    }
+}
+.media-left,
+.media>.pull-left{
+    padding: 10px;
+}

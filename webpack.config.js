@@ -67,6 +67,12 @@ module.exports = {
       loader: "babel-loader",
       exclude: /node_modules/
     },
+    { 
+      test: /\.png$/, use: [ "url-loader?mimetype=image/png" ] 
+    },
+    { 
+      test: /\.cur$/, use: [ "url-loader?mimetype=image/cur" ] 
+    },
       {
         test: /\.s[ac]ss$/,
         use: ExtractTextPlugin.extract({

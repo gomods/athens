@@ -1,0 +1,52 @@
+.contactus-1{
+    .info{
+        padding: 0;
+        margin: 0;
+
+        &:first-child{
+            margin-top: 30px;
+        }
+
+        .info-title{
+            margin-top: 20px;
+            color: $white-color;
+        }
+
+        .icon{
+            margin-top: 14px;
+            color: $white-color;
+        }
+    }
+
+    .card-contact{
+        margin-top: 30px;
+    }
+}
+
+.contactus-2{
+    padding: 0;
+
+    .card-contact{
+        max-width: 560px;
+        margin: 80px 0 80px 150px;
+
+        .info{
+            padding: 0;
+            margin: 0;
+        }
+    }
+    .map{
+        width: 100%;
+        height: 100%;
+        position: absolute;
+    }
+
+    .info-horizontal .icon{
+        margin-top: 26px;
+
+        > i{
+            font-size: 2.2em;
+            max-width: 45px;
+        }
+    }
+}

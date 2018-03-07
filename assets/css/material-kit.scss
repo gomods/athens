@@ -1,0 +1,63 @@
+/*! =========================================================
+ *
+ * Material Kit PRO - V1.2.1
+ *
+ * =========================================================
+ *
+ * Product Page: https://www.creative-tim.com/product/material-kit-pro
+ * Available with purchase of license from https://www.creative-tim.com/product/material-kit-pro
+ * Copyright 2017 Creative Tim (https://www.creative-tim.com)
+ * License Creative Tim (https://www.creative-tim.com/license)
+ *
+ * ========================================================= */
+
+@import 'material-kit/variables';
+@import 'material-kit/mixins';
+@import 'material-kit/shadows';
+@import 'material-kit/misc';
+
+// core sass
+@import 'material-kit/form';
+@import 'material-kit/buttons';
+@import 'material-kit/checkboxes';
+@import 'material-kit/togglebutton';
+@import 'material-kit/radios';
+@import 'material-kit/inputs';
+@import 'material-kit/pagination';
+@import 'material-kit/labels';
+@import 'material-kit/pills';
+
+@import 'material-kit/navbar';
+@import 'material-kit/dropdown';
+@import 'material-kit/alerts';
+@import 'material-kit/progress';
+@import 'material-kit/typography';
+@import 'material-kit/tabs';
+@import 'material-kit/popups';
+@import 'material-kit/carousel';
+@import 'material-kit/cards';
+@import 'material-kit/dialogs';
+@import 'material-kit/panels';
+@import 'material-kit/dividers';
+
+@import 'material-kit/images';
+@import 'material-kit/media';
+@import 'material-kit/info-areas';
+@import 'material-kit/tables';
+@import 'material-kit/select';
+@import 'material-kit/tags';
+@import 'material-kit/fileupload';
+@import 'material-kit/flexisel';
+
+
+@import 'material-kit/sections';
+
+// External plugins
+@import 'material-kit/plugins/_plugin-nouislider';
+@import 'material-kit/plugins/_plugin-datetime-picker';
+@import 'material-kit/plugins/_plugin-bootstrap-select';
+
+@import 'material-kit/ripples';
+@import 'material-kit/example-pages';
+
+@import 'material-kit/responsive';

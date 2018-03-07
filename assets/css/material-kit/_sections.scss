@@ -1,0 +1,135 @@
+.section-white{
+    background: #FFFFFF;
+}
+.section-white-to-gray{
+    background-color: #fff;
+    background: rgba(0, 0, 0, 0) linear-gradient(0deg, #e5e5e5 0%, #fff 100%) repeat scroll 0 0;
+}
+.section-gray{
+    background: #E5E5E5;
+}
+.section-light-gray{
+    background: #eee;
+}
+
+// colored sections
+.section-primary{
+    @include linear-gradient($purple-100, $purple-300);
+}
+.section-info{
+    @include linear-gradient($cyan-100, $cyan-300);
+}
+.section-success{
+    @include linear-gradient($green-100, $green-300);
+}
+.section-warning{
+    @include linear-gradient($orange-100, $orange-300);
+}
+.section-danger{
+    @include linear-gradient($red-100, $red-300);
+}
+.section-rose{
+    @include linear-gradient($pink-100, $pink-300);
+}
+
+.section-space{
+    height: 70px;
+    display: block;
+}
+.section{
+    padding: 70px 0;
+}
+.section-navbars{
+    padding-bottom: 0;
+}
+
+.section-full-screen{
+    height: 100vh;
+}
+.section-signup{
+    padding-top: 20vh;
+}
+.section-dark,
+.section-image{
+    background-color: #343434;
+    background-size: 200% 240%;
+    @include radial-gradient(#232323,#585858);
+}
+
+.section-dark,
+.section-image{
+    .title,
+    .card-plain .card-title,
+    .card-plain .icon i{
+        color: $white-color;
+    }
+
+    .description,
+    .card-plain .card-description,
+    .card-plain .icon{
+        color: rgba($white-color, .76);
+    }
+
+    .card-plain{
+        [class*="text-"],
+        ul li b{
+            color: $white-color;
+        }
+        .category{
+            color: rgba($white-color,.5);
+        }
+    }
+
+    .card .card-image .colored-shadow{
+        top: 0px;
+    }
+
+}
+
+.section-image{
+    position: relative;
+
+    &:after{
+        position: absolute;
+        z-index: 1;
+        width: 100%;
+        height: 100%;
+        display: block;
+        left: 0;
+        top: 0;
+        content: "";
+        background-color: rgba(0,0,0,.7);
+    }
+
+    .container{
+        z-index: 2;
+        position: relative;
+    }
+}
+
+.section,
+.section-image{
+    background-position: center center;
+    background-size: cover;
+}
+
+[class*="features-"],
+[class*="team-"],
+[class*="projects-"],
+[class*="pricing-"],
+[class*="testimonials-"],
+[class*="contactus-"]{
+    padding: 80px 0;
+}
+
+@import 'sections/_headers';
+@import 'sections/_features';
+@import 'sections/_blogs';
+@import 'sections/_team';
+@import 'sections/_projects';
+@import 'sections/_pricing';
+@import 'sections/_testimonials';
+@import 'sections/_contactus';
+@import 'sections/_footers';
+
+@import 'sections/_social-subscribe-lines';
