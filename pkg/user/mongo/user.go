@@ -1,6 +1,7 @@
 package mongo
 
 import (
+	"errors"
 	"strings"
 
 	"github.com/gomods/athens/pkg/user"
@@ -70,5 +71,5 @@ func (m *MongoUserStore) Save(u *user.User) error {
 
 // Update updates a user in the Mongo Store
 func (m *MongoUserStore) Update(*user.User) error {
-	return nil
+	return errors.New("not implemented")
 }

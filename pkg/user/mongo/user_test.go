@@ -14,7 +14,7 @@ func TestConnect(t *testing.T) {
 }
 
 func TestCreate(t *testing.T) {
-	m := setup(t)
+	setup(t)
 	defer m.s.Close()
 	g := &user.User{}
 	g.AccessToken = "accesstoken"
@@ -37,10 +37,10 @@ func TestCreate(t *testing.T) {
 	}
 }
 
-func setup(t *testing.T) *MongoUserStore {
+func setup(t *testing.T) {
 	var err error
 	if m == nil {
-		m := NewMongoUserStore("mongodb://127.0.0.1:27017")
+		m = NewMongoUserStore("mongodb://127.0.0.1:27017")
 		err = m.Connect()
 		if err != nil {
 			t.Error(err)
@@ -51,7 +51,6 @@ func setup(t *testing.T) *MongoUserStore {
 			t.Error(err)
 			t.FailNow()
 		}
-		return m
+
 	}
-	return nil
 }
