@@ -5,7 +5,6 @@ import (
 )
 
 func (d *DiskTests) TestLocationFuncs() {
-	const version = "v1.2.1"
 	r := d.Require()
 	storage := d.storage.(*storageImpl)
 	moduleLoc := storage.moduleDiskLocation(baseURL, module)
