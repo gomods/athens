@@ -8,8 +8,8 @@ import (
 	"github.com/gomods/athens/pkg/storage"
 )
 
-func (v *storageImpl) Get(baseURL, module, vsn string) (*storage.Version, error) {
-	versionedPath := v.versionDiskLocation(baseURL, module, vsn)
+func (v *storageImpl) Get(baseURL, module, version string) (*storage.Version, error) {
+	versionedPath := v.versionDiskLocation(baseURL, module, version)
 
 	mod, err := ioutil.ReadFile(filepath.Join(versionedPath, "go.mod"))
 	if err != nil {
@@ -24,9 +24,9 @@ func (v *storageImpl) Get(baseURL, module, vsn string) (*storage.Version, error)
 	// TODO: store the time in the saver, and parse it here
 	return &storage.Version{
 		RevInfo: storage.RevInfo{
-			Version: vsn,
-			Name:    vsn,
-			Short:   vsn,
+			Version: version,
+			Name:    version,
+			Short:   version,
 			Time:    time.Now(),
 		},
 		Mod: mod,
