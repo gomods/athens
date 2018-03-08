@@ -1,0 +1,7 @@
+services:
+  - mongodb
+language: go
+install: false
+go:
+  - "1.10.x"
+script: go test ./...
