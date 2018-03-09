@@ -42,12 +42,13 @@ func init() {
 func App() *buffalo.App {
 	storage, err := newStorage()
 	if err != nil {
-		return log.Fatalf("error creating proxy storage (%s)", err)
+		log.Fatalf("storage error (%s)", err)
+		return nil
 	}
 	mgoStore := mongo.NewMongoUserStore("127.0.0.1:27017")
-	err := mgoStore.Connect()
-	if err != nil {
-		panic(err)
+	if err := mgoStore.Connect(); err != nil {
+		log.Fatalf("mongo connection erorr (%s)", err)
+		return nil
 	}
 
 	if app == nil {
