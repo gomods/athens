@@ -51,6 +51,8 @@ func App() *buffalo.App {
 		return nil
 	}
 
+	cdnGetter := newCDNGetter()
+
 	if app == nil {
 		app = buffalo.New(buffalo.Options{
 			Env: ENV,
@@ -87,7 +89,7 @@ func App() *buffalo.App {
 		app.Use(T.Middleware())
 
 		// serve go-get requests
-		app.Use(GoGet())
+		app.Use(GoGet(cdnGetter))
 		app.GET("/", homeHandler)
 
 		app.GET("/{base_url:.+}/{module}/@v/list", listHandler(storage))
