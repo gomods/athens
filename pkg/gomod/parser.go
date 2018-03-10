@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	moduleRegexp = "module \"([a-zA-Z/.]*)\""
+	moduleRegexp = `module "([\w\.@:%_\+-.~#?&]+/.+)"`
 )
 
 type GomodParser interface {
