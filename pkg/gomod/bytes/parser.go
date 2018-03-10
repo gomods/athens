@@ -1,9 +1,9 @@
-package content
+package bytes
 
 import (
 	"bytes"
 
-	"github.com/gomods/athens/pkg/parser"
+	"github.com/gomods/athens/pkg/gomod"
 )
 
 func NewContentParser(content []byte) parser.GomodParser {

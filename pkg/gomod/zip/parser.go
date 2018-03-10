@@ -4,7 +4,7 @@ import (
 	"archive/zip"
 	"fmt"
 
-	"github.com/gomods/athens/pkg/parser"
+	"github.com/gomods/athens/pkg/gomod"
 )
 
 const (

@@ -3,7 +3,7 @@ package file
 import (
 	"os"
 
-	"github.com/gomods/athens/pkg/parser"
+	"github.com/gomods/athens/pkg/gomod"
 )
 
 func NewFileParser(filepath string) parser.GomodParser {
