@@ -11,6 +11,7 @@ const (
 	gomodFilename = "go.mod"
 )
 
+// NewZipParser creates shorthand for parsing module name out of zip package containing go.mod file
 func NewZipParser(reader zip.ReadCloser) parser.GomodParser {
 	return zipParser{zipReader: reader}
 }

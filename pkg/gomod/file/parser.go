@@ -6,6 +6,7 @@ import (
 	"github.com/gomods/athens/pkg/gomod"
 )
 
+// NewFileParser creates shorthand for parsing module name out of file specified by filepath
 func NewFileParser(filepath string) parser.GomodParser {
 	return fileParser{filepath: filepath}
 }

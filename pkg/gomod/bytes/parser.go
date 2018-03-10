@@ -6,6 +6,7 @@ import (
 	"github.com/gomods/athens/pkg/gomod"
 )
 
+// NewContentParser creates shorthand for parsing module name out of file content
 func NewContentParser(content []byte) parser.GomodParser {
 	return contentParser{content: content}
 }
