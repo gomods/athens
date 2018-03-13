@@ -23,8 +23,8 @@ func (d *DiskTests) TestGetSaveListRoundTrip() {
 	retVersion := listedVersions[0]
 	r.Equal(version, retVersion)
 	gotten, err := d.storage.Get(baseURL, module, version)
-	defer gotten.Zip.Close()
 	r.NoError(err)
+	defer gotten.Zip.Close()
 	r.Equal(version, gotten.RevInfo.Version)
 	r.Equal(version, gotten.RevInfo.Name)
 	r.Equal(version, gotten.RevInfo.Short)
