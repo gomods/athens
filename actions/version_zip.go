@@ -18,9 +18,11 @@ func versionZipHandler(getter storage.Getter) func(c buffalo.Context) error {
 		if err != nil {
 			return err
 		}
+		defer version.Zip.Close()
+
 		c.Response().WriteHeader(http.StatusOK)
-		io.Copy(c.Response(), version.Zip)
-		version.Zip.Close()
+
+		_, err = io.Copy(c.Response(), version.Zip)
 		return err
 	}
 }
