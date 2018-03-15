@@ -78,22 +78,24 @@ func App() *buffalo.App {
 			app.Stop(err)
 		}
 		app.Use(T.Middleware())
-	}
-	app.GET("/", homeHandler)
 
-	if MODE == "proxy" {
-		if err := addProxyRoutes(app); err != nil {
-			log.Fatalf("error adding proxy routes (%s)", err)
-		}
-	} else if MODE == "registry" {
-		if err := addRegistryRoutes(app); err != nil {
-			log.Fatalf("error adding registry routes (%s)", err)
-		}
-	}
+		app.GET("/", homeHandler)
 
-	// serve files from the public directory:
-	// has to be last
-	app.ServeFiles("/", assetsBox)
+		if MODE == "proxy" {
+			if err := addProxyRoutes(app); err != nil {
+				log.Fatalf("error adding proxy routes (%s)", err)
+			}
+		} else if MODE == "registry" {
+			if err := addRegistryRoutes(app); err != nil {
+				log.Fatalf("error adding registry routes (%s)", err)
+			}
+		}
+
+		// serve files from the public directory:
+		// has to be last
+		app.ServeFiles("/", assetsBox)
+
+	}
 
 	return app
 }
