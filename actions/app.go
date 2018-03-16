@@ -82,11 +82,13 @@ func App() *buffalo.App {
 		app.GET("/", homeHandler)
 
 		if MODE == "proxy" {
+			log.Printf("starting athens in proxy mode")
 			if err := addProxyRoutes(app); err != nil {
 				log.Fatalf("error adding proxy routes (%s)", err)
 				return nil
 			}
 		} else if MODE == "registry" {
+			log.Printf("starting athens in registry mode")
 			if err := addRegistryRoutes(app); err != nil {
 				log.Fatalf("error adding registry routes (%s)", err)
 				return nil
