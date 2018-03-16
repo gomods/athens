@@ -84,11 +84,16 @@ func App() *buffalo.App {
 		if MODE == "proxy" {
 			if err := addProxyRoutes(app); err != nil {
 				log.Fatalf("error adding proxy routes (%s)", err)
+				return nil
 			}
 		} else if MODE == "registry" {
 			if err := addRegistryRoutes(app); err != nil {
 				log.Fatalf("error adding registry routes (%s)", err)
+				return nil
 			}
+		} else {
+			log.Fatalf("unsupported mode %s, exiting", MODE)
+			return nil
 		}
 
 		// serve files from the public directory:
