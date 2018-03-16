@@ -16,4 +16,5 @@ func addProxyRoutes(app *buffalo.App) error {
 	app.GET("/{base_url:.+}/{module}/@v/{version}.zip", versionZipHandler(storage))
 	app.POST("/admin/upload/{base_url:[a-zA-Z./]+}/{module}/{version}", uploadHandler(storage))
 	app.POST("/admin/fetch/{base_url:[a-zA-Z./]+}/{owner}/{repo}/{ref}/{version}", fetchHandler(storage))
+	return nil
 }
