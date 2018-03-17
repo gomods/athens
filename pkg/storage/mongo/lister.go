@@ -7,10 +7,10 @@ import (
 	"github.com/gomods/athens/pkg/storage"
 )
 
-func (s *storageImpl) List(baseURL, module string) ([]string, error) {
+func (s *MongoModuleStore) List(baseURL, module string) ([]string, error) {
 	c := s.s.DB(s.d).C(s.c)
-	result := make([]*storage.Module, 0)
-	err := c.Find(bson.M{"BaseUrl": baseURL, "Name": module}).All(result)
+	result := make([]storage.Module, 0)
+	err := c.Find(bson.M{"base_url": baseURL, "module": module}).All(&result)
 	if err != nil {
 		if strings.Contains(err.Error(), "not found") {
 			err = storage.ErrNotFound{Module: module, BasePath: baseURL}

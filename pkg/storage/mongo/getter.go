@@ -10,10 +10,10 @@ import (
 	"github.com/gomods/athens/pkg/storage"
 )
 
-func (s *storageImpl) Get(baseURL, module, vsn string) (*storage.Version, error) {
+func (s *MongoModuleStore) Get(baseURL, module, vsn string) (*storage.Version, error) {
 	c := s.s.DB(s.d).C(s.c)
 	result := &storage.Module{}
-	err := c.Find(bson.M{"BaseUrl": baseURL, "Name": module, "Version": vsn}).One(result)
+	err := c.Find(bson.M{"base_url": baseURL, "module": module, "version": vsn}).One(result)
 	if err != nil {
 		if strings.Contains(err.Error(), "not found") {
 			err = storage.ErrVersionNotFound{BasePath: baseURL, Module: module, Version: vsn}

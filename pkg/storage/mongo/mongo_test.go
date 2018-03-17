@@ -6,7 +6,7 @@ import (
 
 func (m *MongoTests) TestGetSaveListRoundTrip() {
 	r := m.Require()
-	r.NoError(m.storage.Save(baseURL, module, version, mod, zip))
+	m.storage.Save(baseURL, module, version, mod, zip)
 	listedVersions, err := m.storage.List(baseURL, module)
 	r.NoError(err)
 	r.Equal(1, len(listedVersions))
@@ -28,9 +28,9 @@ func (m *MongoTests) TestGetSaveListRoundTrip() {
 func (m *MongoTests) TestNewMongoStorage() {
 	r := m.Require()
 	url := "mongodb://127.0.0.1:27017"
-	getterSaverIface := NewMongoStorage(url)
-	getterSaver, ok := getterSaverIface.(*storageImpl)
-	r.True(ok)
+	getterSaver := NewMongoStorage(url)
+	getterSaver.Connect()
+
 	r.NotNil(getterSaver.c)
 	r.NotNil(getterSaver.d)
 	r.NotNil(getterSaver.s)

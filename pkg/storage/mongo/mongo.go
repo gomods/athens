@@ -2,10 +2,9 @@ package mongo
 
 import (
 	"github.com/globalsign/mgo"
-	"github.com/gomods/athens/pkg/storage"
 )
 
-type storageImpl struct {
+type MongoModuleStore struct {
 	s   *mgo.Session
 	d   string // database
 	c   string // collection
@@ -15,11 +14,11 @@ type storageImpl struct {
 // NewMongoStorage  returns an unconnected Mongo Module Storage
 // that satisfies the Storage interface.  You must call
 // Connect() on the returned store before using it.
-func NewMongoStorage(url string) storage.StorageConnector {
-	return &storageImpl{url: url}
+func NewMongoStorage(url string) *MongoModuleStore {
+	return &MongoModuleStore{url: url}
 }
 
-func (m *storageImpl) Connect() error {
+func (m *MongoModuleStore) Connect() error {
 	s, err := mgo.Dial(m.url)
 	if err != nil {
 		return err
@@ -31,7 +30,7 @@ func (m *storageImpl) Connect() error {
 	m.c = "modules"
 
 	index := mgo.Index{
-		Key:        []string{"BaseURL", "Name", "Version"},
+		Key:        []string{"base_url", "module", "version"},
 		Unique:     true,
 		DropDups:   true,
 		Background: true,
