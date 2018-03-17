@@ -6,7 +6,7 @@ require("./nouislider.min.js");
 require("eonasdan-bootstrap-datetimepicker/src/js/bootstrap-datetimepicker.js");
 require("./bootstrap-selectpicker.js");
 require("./bootstrap-tagsinput.js");
-require("./jasny-bootstrap.min.js");
+require("jasny-bootstrap/dist/js/jasny-bootstrap.min.js");
 require("./material-kit.js?v=1.2.1");
 $(() => {
 
