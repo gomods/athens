@@ -2,7 +2,6 @@ package mongo
 
 import (
 	"bytes"
-	"errors"
 	"io/ioutil"
 	"strings"
 	"time"
@@ -17,8 +16,9 @@ func (s *storageImpl) Get(baseURL, module, vsn string) (*storage.Version, error)
 	err := c.Find(bson.M{"BaseUrl": baseURL, "Name": module, "Version": vsn}).One(result)
 	if err != nil {
 		if strings.Contains(err.Error(), "not found") {
-			err = errors.New("module not found")
+			err = storage.ErrVersionNotFound{BasePath: baseURL, Module: module, Version: vsn}
 		}
+		return nil, err
 	}
 	return &storage.Version{
 		RevInfo: storage.RevInfo{

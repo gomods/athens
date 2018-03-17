@@ -1,7 +1,6 @@
 package mongo
 
 import (
-	"errors"
 	"strings"
 
 	"github.com/globalsign/mgo/bson"
@@ -14,8 +13,9 @@ func (s *storageImpl) List(baseURL, module string) ([]string, error) {
 	err := c.Find(bson.M{"BaseUrl": baseURL, "Name": module}).All(result)
 	if err != nil {
 		if strings.Contains(err.Error(), "not found") {
-			err = errors.New("module not found")
+			err = storage.ErrNotFound{Module: module, BasePath: baseURL}
 		}
+		return nil, err
 	}
 
 	versions := make([]string, len(result))

@@ -16,7 +16,8 @@ func (e *getterSaverImpl) key(baseURL, module string) string {
 	return fmt.Sprintf("%s/%s", baseURL, module)
 }
 
-func New() storage.Storage {
+// NewMemoryStorage creates new in-memory storage
+func NewMemoryStorage() storage.Storage {
 	return &getterSaverImpl{
 		RWMutex:  new(sync.RWMutex),
 		versions: make(map[string][]*storage.Version),
