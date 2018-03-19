@@ -1,9 +1,11 @@
-package disk
+package fs
 
 import (
 	"io/ioutil"
 	"os"
 	"testing"
+
+	"github.com/spf13/afero"
 
 	"github.com/stretchr/testify/suite"
 )
@@ -26,23 +28,23 @@ var (
 	zip = []byte("456")
 )
 
-type DiskTests struct {
+type FsTests struct {
 	suite.Suite
 	storage Storage
 	rootDir string
 }
 
-func (d *DiskTests) SetupTest() {
-	r, err := ioutil.TempDir("", "athens-disk-tests")
+func (d *FsTests) SetupTest() {
+	r, err := ioutil.TempDir("", "athens-fs-tests")
 	d.Require().NoError(err)
-	d.storage = NewStorage(r)
+	d.storage = NewStorage(r, afero.NewMemMapFs())
 	d.rootDir = r
 }
 
-func (d *DiskTests) TearDownTest() {
+func (d *FsTests) TearDownTest() {
 	d.Require().NoError(os.RemoveAll(d.rootDir))
 }
 
 func TestDiskStorage(t *testing.T) {
-	suite.Run(t, new(DiskTests))
+	suite.Run(t, new(FsTests))
 }

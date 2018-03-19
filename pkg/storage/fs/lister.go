@@ -1,12 +1,12 @@
-package disk
+package fs
 
 import (
-	"io/ioutil"
+	"github.com/spf13/afero"
 )
 
 func (l *storageImpl) List(basePath, module string) ([]string, error) {
-	loc := l.moduleDiskLocation(basePath, module)
-	fileInfos, err := ioutil.ReadDir(loc)
+	loc := l.moduleLocation(basePath, module)
+	fileInfos, err := afero.ReadDir(l.filesystem, loc)
 	if err != nil {
 		return nil, err
 	}

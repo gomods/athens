@@ -1,20 +1,20 @@
-package disk
+package fs
 
 import (
 	"io/ioutil"
 	"path/filepath"
 )
 
-func (d *DiskTests) TestLocationFuncs() {
+func (d *FsTests) TestLocationFuncs() {
 	r := d.Require()
 	storage := d.storage.(*storageImpl)
-	moduleLoc := storage.moduleDiskLocation(baseURL, module)
+	moduleLoc := storage.moduleLocation(baseURL, module)
 	r.Equal(filepath.Join(d.rootDir, baseURL, module), moduleLoc)
-	versionedLoc := storage.versionDiskLocation(baseURL, module, version)
+	versionedLoc := storage.versionLocation(baseURL, module, version)
 	r.Equal(filepath.Join(d.rootDir, baseURL, module, version), versionedLoc)
 }
 
-func (d *DiskTests) TestGetSaveListRoundTrip() {
+func (d *FsTests) TestGetSaveListRoundTrip() {
 	r := d.Require()
 	r.NoError(d.storage.Save(baseURL, module, version, mod, zip))
 	listedVersions, err := d.storage.List(baseURL, module)
