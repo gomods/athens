@@ -5,6 +5,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/gomods/athens/pkg/storage"
 	"github.com/spf13/afero"
 
 	"github.com/stretchr/testify/suite"
@@ -30,7 +31,7 @@ var (
 
 type FsTests struct {
 	suite.Suite
-	storage Storage
+	storage storage.Storage
 	rootDir string
 }
 

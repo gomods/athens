@@ -7,15 +7,6 @@ import (
 	"github.com/spf13/afero"
 )
 
-// Storage is the only interface defined by the disk storage. Use
-// NewStorage to create one of these. Everything is all in one
-// because it all has to share the same tree
-type Storage interface {
-	storage.Lister
-	storage.Getter
-	storage.Saver
-}
-
 type storageImpl struct {
 	rootDir    string
 	filesystem afero.Fs
@@ -32,7 +23,7 @@ func (s *storageImpl) versionLocation(baseURL, module, version string) string {
 
 // NewStorage returns a new ListerSaver implementation that stores
 // everything under rootDir
-func NewStorage(rootDir string, filesystem afero.Fs) Storage {
+func NewStorage(rootDir string, filesystem afero.Fs) storage.Storage {
 	return &storageImpl{rootDir: rootDir, filesystem: filesystem}
 
 }
