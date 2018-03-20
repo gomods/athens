@@ -1,6 +1,7 @@
 package file
 
 import (
+	"os"
 	"strings"
 	"testing"
 )
@@ -18,5 +19,14 @@ func TestFileParser_ModuleName(t *testing.T) {
 	if !strings.EqualFold(got, expectedModuleName) {
 		t.Fatalf(`Module names do not match.. \n 
 Expected %s .. Got %s`, expectedModuleName, got)
+	}
+}
+
+func TestFileParser_FileNotFound(t *testing.T) {
+	parser := NewFileParser("../../../go.mod")
+
+	_, err := parser.ModuleName()
+	if !os.IsNotExist(err) {
+		t.Fatalf("file does not exist but got %v instead", err)
 	}
 }
