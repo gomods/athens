@@ -2,7 +2,6 @@ package file
 
 import (
 	"os"
-	"syscall"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -23,8 +22,6 @@ func TestFileParser_ModuleName(t *testing.T) {
 		{"testdata/go.2.mod", "", parser.ErrNotFound},
 		{"testdata/go.3.mod", "", parser.ErrNotFound},
 		{"testdata/go.4.mod", "", parser.ErrNotFound},
-		// TODO make it clearer
-		{"/not/exist", "", &os.PathError{Op: "open", Path: "/not/exist", Err: syscall.ENOENT}},
 	}
 
 	for _, tc := range testCases {
@@ -36,4 +33,10 @@ func TestFileParser_ModuleName(t *testing.T) {
 			a.Equal(tc.expectedErr, actualErr)
 		})
 	}
+}
+
+func TestFileParser_ModuleName_FileNotFound(t *testing.T) {
+	fp := NewFileParser("/not/exist")
+	_, err := fp.ModuleName()
+	assert.True(t, os.IsNotExist(err))
 }

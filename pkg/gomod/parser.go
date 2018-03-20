@@ -12,6 +12,7 @@ const (
 )
 
 var (
+	re = regexp.MustCompile(moduleRegexp)
 	// ErrNotFound describe an error when can't find module name
 	ErrNotFound = errors.New("name not found")
 )
@@ -24,8 +25,6 @@ type GomodParser interface {
 // Parse parses file passed as a reader and returns module name out of it.
 func Parse(reader io.Reader) (string, error) {
 	scanner := bufio.NewScanner(reader)
-
-	re := regexp.MustCompile(moduleRegexp)
 
 	for scanner.Scan() {
 		line := scanner.Text()

@@ -8,7 +8,7 @@ import (
 	parser "github.com/gomods/athens/pkg/gomod"
 )
 
-func TestBytesSuite_ModuleName(t *testing.T) {
+func TestContentParser_ModuleName(t *testing.T) {
 	a := assert.New(t)
 
 	var testCases = []struct {
