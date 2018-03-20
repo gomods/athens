@@ -1,11 +1,9 @@
-package fs
+package mongo
 
 import (
 	"testing"
 
 	"github.com/gomods/athens/pkg/storage"
-	"github.com/spf13/afero"
-
 	"github.com/stretchr/testify/suite"
 )
 
@@ -27,26 +25,19 @@ var (
 	zip = []byte("456")
 )
 
-type FsTests struct {
+type MongoTests struct {
 	suite.Suite
-	storage storage.Storage
-	rootDir string
-	fs      afero.Fs
+	storage storage.StorageConnector
 }
 
-func (d *FsTests) SetupTest() {
-	memFs := afero.NewMemMapFs()
-	r, err := afero.TempDir(memFs, "", "athens-fs-tests")
-	d.Require().NoError(err)
-	d.storage = NewStorage(r, memFs)
-	d.rootDir = r
-	d.fs = memFs
-}
+func (d *MongoTests) SetupTest() {
+	store := NewMongoStorage("mongodb://127.0.0.1:27017")
+	store.Connect()
 
-func (d *FsTests) TearDownTest() {
-	d.Require().NoError(d.fs.RemoveAll(d.rootDir))
+	store.s.DB(store.d).C(store.c).RemoveAll(nil)
+	d.storage = store
 }
 
 func TestDiskStorage(t *testing.T) {
-	suite.Run(t, new(FsTests))
+	suite.Run(t, new(MongoTests))
 }

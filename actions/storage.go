@@ -3,11 +3,11 @@ package actions
 import (
 	"fmt"
 
-	"github.com/spf13/afero"
-
 	"github.com/gobuffalo/envy"
 	"github.com/gomods/athens/pkg/storage"
 	"github.com/gomods/athens/pkg/storage/fs"
+	"github.com/gomods/athens/pkg/storage/mongo"
+	"github.com/spf13/afero"
 )
 
 func newStorage() (storage.Storage, error) {
@@ -26,6 +26,12 @@ func newStorage() (storage.Storage, error) {
 			return nil, fmt.Errorf("missing disk storage root (%s)", err)
 		}
 		return fs.NewStorage(rootLocation, afero.NewOsFs()), nil
+	case "mongo":
+		mongoURI, err := envy.MustGet("ATHENS_MONGO_STORAGE_URL")
+		if err != nil {
+			return nil, fmt.Errorf("missing mongo URL (%s)", err)
+		}
+		return mongo.NewMongoStorage(mongoURI), nil
 	default:
 		return nil, fmt.Errorf("storage type %s is unknown", storageType)
 	}
