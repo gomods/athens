@@ -3,23 +3,23 @@ package zip
 import (
 	"archive/zip"
 	"errors"
+	"io"
+	"io/ioutil"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"github.com/gomods/athens/pkg/gomod"
-	"io/ioutil"
-	"io"
-	"os"
-	"github.com/stretchr/testify/require"
 )
 
 func TestZipParser_ModuleName(t *testing.T) {
 	a := assert.New(t)
 
 	var testCases = []struct {
-		file     string
-		dstFileName     string
+		file        string
+		dstFileName string
 		expected    string
 		expectedErr error
 	}{

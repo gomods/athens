@@ -2,10 +2,10 @@ package parser
 
 import (
 	"bytes"
+	"errors"
 	"io"
 	"testing"
 
-	"errors"
 	"github.com/stretchr/testify/assert"
 )
 
