@@ -5,8 +5,6 @@ import (
 
 	"github.com/gomods/athens/pkg/storage"
 	"github.com/stretchr/testify/suite"
-	"fmt"
-	"os"
 )
 
 const (
