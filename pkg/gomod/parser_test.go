@@ -31,6 +31,10 @@ func TestParse_checkVersion(t *testing.T) {
 		{"module ", false},
 		{"module github.com/gomods/athens", false},
 		{`module "github.com/gomods/athens"`, true},
+		{`module "github.com?gomods"`, false},
+		{`module "github.com.athens"`, false},
+		{`module "github.com&athens"`, false},
+		{`module "?github%com&athens"`, false},
 	}
 
 	for _, val := range cases {
