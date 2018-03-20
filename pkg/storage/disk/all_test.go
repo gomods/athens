@@ -5,6 +5,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/gomods/athens/pkg/storage"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -28,7 +29,7 @@ var (
 
 type DiskTests struct {
 	suite.Suite
-	storage Storage
+	storage storage.Storage
 	rootDir string
 }
 
