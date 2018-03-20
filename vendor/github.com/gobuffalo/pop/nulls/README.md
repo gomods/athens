@@ -1,4 +1,4 @@
-# github.com/markbates/pop/nulls
+# github.com/gobuffalo/pop/nulls
 
 This package should be used in place of the built-in null types in the `sql` package.
 
@@ -7,7 +7,7 @@ The real benefit of this packages comes in its implementation of `MarshalJSON` a
 ## Installation
 
 ``` bash
-$ go get github.com/markbates/pop/nulls
+$ go get github.com/gobuffalo/pop/nulls
 ```
 
 ## Supported Datatypes
