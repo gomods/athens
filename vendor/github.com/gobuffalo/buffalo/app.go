@@ -2,9 +2,11 @@ package buffalo
 
 import (
 	"context"
+	"fmt"
 	"net"
 	"net/http"
 	"os"
+	"runtime"
 	"strings"
 	"sync"
 	"syscall"
@@ -13,6 +15,7 @@ import (
 
 	"github.com/gobuffalo/envy"
 	"github.com/gorilla/mux"
+	"github.com/markbates/going/defaults"
 	"github.com/markbates/refresh/refresh/web"
 	"github.com/markbates/sigtx"
 	"github.com/pkg/errors"
@@ -31,6 +34,20 @@ type App struct {
 	routes        RouteList
 	root          *App
 	children      []*App
+}
+
+// Start is deprecated, and will be removed in v0.11.0. Use app.Serve instead.
+func (a *App) Start(port string) error {
+	warningMsg := "Start is deprecated, and will be removed in v0.11.0. Use app.Serve instead."
+	_, file, no, ok := runtime.Caller(1)
+	if ok {
+		warningMsg = fmt.Sprintf("%s Called from %s:%d", warningMsg, file, no)
+	}
+
+	logrus.Info(warningMsg)
+
+	a.Addr = defaults.String(a.Addr, fmt.Sprintf("%s:%s", envy.Get("ADDR", "127.0.0.1"), port))
+	return a.Serve()
 }
 
 // Serve the application at the specified address/port and listen for OS
@@ -153,7 +170,7 @@ func New(opts Options) *App {
 	}
 	a.router.NotFoundHandler = http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
 		c := a.newContext(RouteInfo{}, res, req)
-		err := errors.Errorf("path not found: %s %s", req.Method, req.URL.Path)
+		err := errors.Errorf("path not found: %s", req.URL.Path)
 		a.ErrorHandlers.Get(404)(404, err, c)
 	})
 
@@ -171,7 +188,10 @@ func (a *App) processPreHandlers(res http.ResponseWriter, req *http.Request) boo
 	sh := func(h http.Handler) bool {
 		h.ServeHTTP(res, req)
 		if br, ok := res.(*Response); ok {
-			if br.Status > 0 || br.Size > 0 {
+			if (br.Status < 200 || br.Status > 299) && br.Status > 0 {
+				return false
+			}
+			if br.Size > 0 {
 				return false
 			}
 		}

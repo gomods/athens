@@ -6,7 +6,7 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/gobuffalo/buffalo"
-	"github.com/gobuffalo/pop"
+	"github.com/markbates/pop"
 )
 
 // PopTransaction is a piece of Buffalo middleware that wraps each

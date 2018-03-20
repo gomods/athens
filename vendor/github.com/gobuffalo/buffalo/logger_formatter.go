@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"regexp"
 	"sort"
 	"strings"
 	"sync"
@@ -119,11 +118,15 @@ func (f *textFormatter) needsQuoting(text string) bool {
 	if len(text) == 0 {
 		return true
 	}
-	matched, err := regexp.MatchString("[^a-zA-Z\\-\\._\\/@\\^\\+]", text)
-	if err != nil {
-		return false
+	for _, ch := range text {
+		if !((ch >= 'a' && ch <= 'z') ||
+			(ch >= 'A' && ch <= 'Z') ||
+			(ch >= '0' && ch <= '9') ||
+			ch == '-' || ch == '.' || ch == '_' || ch == '/' || ch == '@' || ch == '^' || ch == '+') {
+			return true
+		}
 	}
-	return matched
+	return false
 }
 
 func (f *textFormatter) appendKeyValue(b *bytes.Buffer, key string, value interface{}) {
