@@ -2,13 +2,18 @@ package parser
 
 import (
 	"bufio"
-	"fmt"
+	"errors"
 	"io"
 	"regexp"
 )
 
 const (
 	moduleRegexp = `module "([\w\.@:%_\+-.~#?&]+/.+)"`
+)
+
+var (
+	// ErrNotFound describe an error when can't find module name
+	ErrNotFound = errors.New("name not found")
 )
 
 // GomodParser retrieves module name from parsable source
@@ -33,7 +38,7 @@ func Parse(reader io.Reader) (string, error) {
 		return "", err
 	}
 
-	return "", fmt.Errorf("name not found")
+	return "", ErrNotFound
 }
 
 func checkVersion(line string, expression *regexp.Regexp) (string, bool) {
