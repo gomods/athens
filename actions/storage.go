@@ -19,7 +19,7 @@ func newStorage() (storage.Storage, error) {
 		if err != nil {
 			return nil, fmt.Errorf("could not create temp dir for 'In Memory' storage (%s)", err)
 		}
-		return fs.NewStorage(tmpDir, afero.NewMemMapFs()), nil
+		return fs.NewStorage(tmpDir, memFs), nil
 	case "disk":
 		rootLocation, err := envy.MustGet("ATHENS_DISK_STORAGE_ROOT")
 		if err != nil {
