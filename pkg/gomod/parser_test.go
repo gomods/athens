@@ -24,19 +24,19 @@ func TestParse(t *testing.T) {
 		expected    string
 		expectedErr error
 	}{
-		{bytes.NewBuffer([]byte(`module "my/thing"`)), "my/thing", nil},
-		{bytes.NewBuffer([]byte(`module "github.com/gomods/athens"`)), "github.com/gomods/athens", nil},
-		{bytes.NewBuffer([]byte(`module "github.com.athens/gomods"`)), "github.com.athens/gomods", nil},
-		{bytes.NewBuffer([]byte(``)), "", ErrNotFound},
-		{bytes.NewBuffer([]byte(`module "my/thing2`)), "", ErrNotFound},
-		{bytes.NewBuffer([]byte(`module my/thing3`)), "", ErrNotFound},
-		{bytes.NewBuffer([]byte(`module github.com/gomods/athens`)), "", ErrNotFound},
-		{bytes.NewBuffer([]byte(`module "github.com?gomods"`)), "", ErrNotFound},
-		{bytes.NewBuffer([]byte(`module "github.com.athens"`)), "", ErrNotFound},
-		{bytes.NewBuffer([]byte(`module "github.com.athens"`)), "", ErrNotFound},
-		{bytes.NewBuffer([]byte(`module "github.com&athens"`)), "", ErrNotFound},
-		{bytes.NewBuffer([]byte(`module "?github%com&athens"`)), "", ErrNotFound},
-		{bytes.NewBuffer([]byte(`foobar`)), "", ErrNotFound},
+		{newBuf(`module "my/thing"`), "my/thing", nil},
+		{newBuf(`module "github.com/gomods/athens"`), "github.com/gomods/athens", nil},
+		{newBuf(`module "github.com.athens/gomods"`), "github.com.athens/gomods", nil},
+		{newBuf(``), "", ErrNotFound},
+		{newBuf(`module "my/thing2`), "", ErrNotFound},
+		{newBuf(`module my/thing3`), "", ErrNotFound},
+		{newBuf(`module github.com/gomods/athens`), "", ErrNotFound},
+		{newBuf(`module "github.com?gomods"`), "", ErrNotFound},
+		{newBuf(`module "github.com.athens"`), "", ErrNotFound},
+		{newBuf(`module "github.com.athens"`), "", ErrNotFound},
+		{newBuf(`module "github.com&athens"`), "", ErrNotFound},
+		{newBuf(`module "?github%com&athens"`), "", ErrNotFound},
+		{newBuf(`foobar`), "", ErrNotFound},
 		{new(errReader), "", errReaderError},
 	}
 
@@ -48,4 +48,8 @@ func TestParse(t *testing.T) {
 			a.Equal(tc.expectedErr, actualErr)
 		})
 	}
+}
+
+func newBuf(content string) io.Reader {
+	return bytes.NewBuffer([]byte(content))
 }

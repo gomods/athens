@@ -18,21 +18,24 @@ func TestZipParser_ModuleName(t *testing.T) {
 	a := assert.New(t)
 
 	var testCases = []struct {
-		zipfile     string
+		file     string
+		dstFileName     string
 		expected    string
 		expectedErr error
 	}{
-		{zipTestMod(t, "testdata/go.0.mod", "go.mod"), "my/thing", nil},
-		{zipTestMod(t, "testdata/go.1.mod", "go.mod"), "my/thing2", nil},
-		{zipTestMod(t, "testdata/go.2.mod", "go.mod"), "", parser.ErrNotFound},
-		{zipTestMod(t, "testdata/go.3.mod", "go.mod"), "", parser.ErrNotFound},
-		{zipTestMod(t, "testdata/go.4.mod", "go.mod"), "", parser.ErrNotFound},
-		{zipTestMod(t, "testdata/Gopkg.toml", "Gopkg.toml"), "", errors.New("go.mod not found")},
+		{"testdata/go.0.mod", "go.mod", "my/thing", nil},
+		{"testdata/go.1.mod", "go.mod", "my/thing2", nil},
+		{"testdata/go.2.mod", "go.mod", "", parser.ErrNotFound},
+		{"testdata/go.3.mod", "go.mod", "", parser.ErrNotFound},
+		{"testdata/go.4.mod", "go.mod", "", parser.ErrNotFound},
+		{"testdata/Gopkg.toml", "Gopkg.toml", "", errors.New("go.mod not found")},
 	}
 
 	for _, tc := range testCases {
-		t.Run("", func(t *testing.T) {
-			reader, err := zip.OpenReader(tc.zipfile)
+		t.Run(tc.file, func(t *testing.T) {
+			zipfile := zipTestMod(t, tc.file, tc.dstFileName)
+
+			reader, err := zip.OpenReader(zipfile)
 			a.NoError(err)
 			defer reader.Close()
 			fp := NewZipParser(*reader)
