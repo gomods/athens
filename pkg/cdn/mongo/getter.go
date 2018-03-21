@@ -11,7 +11,7 @@ type getter struct {
 	coll string
 }
 
-func (g *getter) Get(baseURL, module string) (string, error) {
+func (g *getter) Get(module string) (string, error) {
 	coll := g.conn.DB(g.db).C(g.coll)
 	params := bson.M{"module": module}
 	entry := Entry{}
