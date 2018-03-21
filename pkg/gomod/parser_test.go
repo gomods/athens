@@ -25,6 +25,7 @@ func TestParse(t *testing.T) {
 		expectedErr error
 	}{
 		{newBuf(`module "my/thing"`), "my/thing", nil},
+		{newBuf("module \"my/thing2\"\nmodule \"my/thing1\""), "my/thing2", nil},
 		{newBuf(`module "github.com/gomods/athens"`), "github.com/gomods/athens", nil},
 		{newBuf(`module "github.com.athens/gomods"`), "github.com.athens/gomods", nil},
 		{newBuf(``), "", ErrNotFound},
