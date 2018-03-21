@@ -1,10 +1,10 @@
 build:
-	go build .
+	buffalo build
 
 run: build
 	./athens
 	
-cli: 
+cli:
 	go build -o athens ./cmd/cli
 
 docs:
