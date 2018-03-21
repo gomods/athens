@@ -31,9 +31,9 @@ type RDBMSTests struct {
 }
 
 func (r *RDBMSTests) SetupTest() {
-	store := NewRDBMSStorage("development")
-	store.Connect()
 
+	store := NewRDBMSStorage("development_postgres")
+	store.Connect()
 	store.conn.TruncateAll()
 	r.storage = store
 }
