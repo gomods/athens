@@ -4,11 +4,11 @@ import (
 	"testing"
 
 	"github.com/gomods/athens/pkg/storage"
-	"github.com/stretchr/testify/suite"
+	"github.com/gobuffalo/suite"
+	"github.com/gomods/athens/actions"
 )
 
 const (
-	baseURL = "testbaseurl"
 	module  = "testmodule"
 	version = "v1.0.0"
 )
@@ -26,18 +26,22 @@ var (
 )
 
 type RDBMSTests struct {
-	suite.Suite
+	*suite.Action
 	storage storage.StorageConnector
 }
 
-func (r *RDBMSTests) SetupTest() {
-
+func (rd *RDBMSTests) SetupTest() {
 	store := NewRDBMSStorage("development_postgres")
 	store.Connect()
 	store.conn.TruncateAll()
-	r.storage = store
+	rd.storage = store
 }
 
 func TestDiskStorage(t *testing.T) {
 	suite.Run(t, new(RDBMSTests))
+}
+
+func Test_ActionSuite(t *testing.T) {
+	as := &RDBMSTests{suite.NewAction(actions.App())}
+	suite.Run(t, as)
 }

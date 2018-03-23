@@ -10,11 +10,12 @@ type RDBMSModuleStore struct {
 }
 
 // NewRDBMSStorage  returns an unconnected RDBMS Module Storage
-// that satisfies the Storage interface.  You must call
+// that satisfies the Storage interface. You must call
 // Connect() on the returned store before using it.
-func NewRDBMSStorage(e string) *RDBMSModuleStore {
+// connectionName
+func NewRDBMSStorage(connectionName string) *RDBMSModuleStore {
 	return &RDBMSModuleStore{
-		e: e,
+		e: connectionName,
 	}
 }
 

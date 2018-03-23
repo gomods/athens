@@ -2,17 +2,17 @@ package rdbms
 
 import (
 	"bytes"
-	"github.com/gomods/athens/pkg/storage"
-	"github.com/gomods/athens/pkg/storage/rdbms/models"
 	"io/ioutil"
 	"time"
+
+	"github.com/gomods/athens/pkg/storage"
+	"github.com/gomods/athens/pkg/storage/rdbms/models"
 )
 
-func (r *RDBMSModuleStore) Get(baseURL, module, vsn string) (*storage.Version, error) {
+func (r *RDBMSModuleStore) Get(module, vsn string) (*storage.Version, error) {
 	result := models.Module{}
-	query := r.conn.Where("base_url = ?", baseURL).Where("module = ?", module).Where("version = ?", vsn)
-	err := query.First(&result)
-	if err != nil {
+	query := r.conn.Where("module = ?", module).Where("version = ?", vsn)
+	if err := query.First(&result); err != nil {
 		return nil, err
 	}
 	return &storage.Version{

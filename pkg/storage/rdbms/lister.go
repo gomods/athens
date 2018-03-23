@@ -4,9 +4,9 @@ import (
 	"github.com/gomods/athens/pkg/storage/rdbms/models"
 )
 
-func (r *RDBMSModuleStore) List(baseURL, module string) ([]string, error) {
+func (r *RDBMSModuleStore) List(module string) ([]string, error) {
 	result := make([]models.Module, 0)
-	err := r.conn.Where("base_url = ?", baseURL).Where("module = ?", module).All(&result)
+	err := r.conn.Where("module = ?", module).All(&result)
 	if err != nil {
 		return nil, err
 	}

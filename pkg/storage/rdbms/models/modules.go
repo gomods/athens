@@ -2,18 +2,18 @@ package models
 
 import (
 	"encoding/json"
+	"time"
+
 	"github.com/gobuffalo/pop"
 	"github.com/gobuffalo/uuid"
 	"github.com/gobuffalo/validate"
 	"github.com/gobuffalo/validate/validators"
-	"time"
 )
 
 type Module struct {
 	ID        uuid.UUID `json:"id" db:"id"`
 	CreatedAt time.Time `json:"created_at" db:"created_at"`
 	UpdatedAt time.Time `json:"updated_at" db:"updated_at"`
-	BaseURL   string    `json:"base_url" db:"base_url"`
 	Module    string    `json:"module" db:"module"`
 	Version   string    `json:"version" db:"version"`
 	Mod       []byte    `json:"mod" db:"mod"`
@@ -39,7 +39,6 @@ func (m Modules) String() string {
 // This method is not required and may be deleted.
 func (m *Module) Validate(tx *pop.Connection) (*validate.Errors, error) {
 	return validate.Validate(
-		&validators.StringIsPresent{Field: m.BaseURL, Name: "BaseURL"},
 		&validators.StringIsPresent{Field: m.Module, Name: "Module"},
 		&validators.StringIsPresent{Field: m.Version, Name: "Version"},
 		&validators.BytesArePresent{Field: m.Mod, Name: "Mod"},

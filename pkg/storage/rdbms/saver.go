@@ -4,9 +4,8 @@ import (
 	"github.com/gomods/athens/pkg/storage/rdbms/models"
 )
 
-func (r *RDBMSModuleStore) Save(baseURL, module, version string, mod, zip []byte) error {
+func (r *RDBMSModuleStore) Save(module, version string, mod, zip []byte) error {
 	m := &models.Module{
-		BaseURL: baseURL,
 		Module:  module,
 		Version: version,
 		Mod:     mod,
