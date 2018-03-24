@@ -24,7 +24,7 @@ type gitCrawler struct {
 	ref      string
 }
 
-func NewGitCrawler(owner string, repoName string, ref string) (repo.RepoCrawler, error) {
+func NewGitCrawler(owner string, repoName string, ref string) (repo.Crawler, error) {
 	if owner == "" || repoName == "" {
 		return nil, errors.New("invalid repository identifier")
 	}

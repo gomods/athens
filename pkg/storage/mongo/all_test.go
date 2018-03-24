@@ -26,7 +26,7 @@ var (
 
 type MongoTests struct {
 	suite.Suite
-	storage storage.StorageConnector
+	storage storage.BackendConnector
 }
 
 func (d *MongoTests) SetupTest() {

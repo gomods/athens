@@ -10,7 +10,7 @@ import (
 	"github.com/spf13/afero"
 )
 
-func newStorage() (storage.Storage, error) {
+func newStorage() (storage.Backend, error) {
 	storageType := envy.Get("ATHENS_STORAGE_TYPE", "memory")
 	switch storageType {
 	case "memory":

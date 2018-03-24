@@ -2,7 +2,7 @@ package mongo
 
 import "github.com/gomods/athens/pkg/storage"
 
-func (s *MongoModuleStore) Save(module, version string, mod, zip []byte) error {
+func (s *ModuleStore) Save(module, version string, mod, zip []byte) error {
 	m := &storage.Module{
 		Module:  module,
 		Version: version,

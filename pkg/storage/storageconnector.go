@@ -1,30 +1,30 @@
 package storage
 
-// StorageConnector is a regular storage with Connect functionality
-type StorageConnector interface {
-	Storage
+// BackendConnector is a regular storage with Connect functionality
+type BackendConnector interface {
+	Backend
 	Connect() error
 }
 
-type noOpConnectedStorage struct {
-	s Storage
+type noOpConnectedBackend struct {
+	s Backend
 }
 
-// NoOpStorageConnector wraps storage with Connect functionality
-func NoOpStorageConnector(s Storage) StorageConnector {
-	return noOpConnectedStorage{s: s}
+// NoOpBackendConnector wraps storage with Connect functionality
+func NoOpBackendConnector(s Backend) BackendConnector {
+	return noOpConnectedBackend{s: s}
 }
 
-func (n noOpConnectedStorage) Connect() error {
+func (n noOpConnectedBackend) Connect() error {
 	return nil
 }
 
-func (n noOpConnectedStorage) Get(module, vsn string) (*Version, error) {
+func (n noOpConnectedBackend) Get(module, vsn string) (*Version, error) {
 	return n.s.Get(module, vsn)
 }
-func (n noOpConnectedStorage) List(module string) ([]string, error) {
+func (n noOpConnectedBackend) List(module string) ([]string, error) {
 	return n.s.List(module)
 }
-func (n noOpConnectedStorage) Save(module, version string, mod, zip []byte) error {
+func (n noOpConnectedBackend) Save(module, version string, mod, zip []byte) error {
 	return n.s.Save(module, version, mod, zip)
 }
