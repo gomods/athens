@@ -2,15 +2,18 @@
 # https://docs.docker.com/engine/userguide/eng-image/multistage-build/
 FROM gobuffalo/buffalo:v0.11.0 as builder
 
-RUN mkdir -p $GOPATH/src/github.com/gomods/athens
-WORKDIR $GOPATH/src/github.com/gomods/athens
+RUN mkdir -p $GOPATH/src/github.com/gomods/athens/cmd/proxy
+WORKDIR $GOPATH/src/github.com/gomods/athens/cmd/proxy
 
 # this will cache the npm install step, unless package.json changes
-ADD package.json .
-ADD yarn.lock .
+ADD cmd/proxy/package.json .
+ADD cmd/proxy/yarn.lock .
 RUN yarn install --no-progress
+
+WORKDIR $GOPATH/src/github.com/gomods/athens
+
 ADD . .
-RUN buffalo build --static -o /bin/app
+RUN cd cmd/proxy && buffalo build -s -o /bin/app
 
 FROM alpine
 RUN apk add --no-cache bash
