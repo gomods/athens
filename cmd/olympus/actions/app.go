@@ -61,6 +61,7 @@ func App() *buffalo.App {
 		app.Use(T.Middleware())
 
 		app.GET("/", homeHandler)
+		app.GET("/feed/{syncpoint:.*}", feedHandler())
 
 		app.ServeFiles("/", assetsBox) // serve files from the public directory
 	}
