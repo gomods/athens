@@ -30,7 +30,7 @@ type MongoTests struct {
 }
 
 func (d *MongoTests) SetupTest() {
-	store := NewMongoStorage("mongodb://127.0.0.1:27017")
+	store := NewStorage("mongodb://127.0.0.1:27017")
 	store.Connect()
 
 	store.s.DB(store.d).C(store.c).RemoveAll(nil)

@@ -31,7 +31,7 @@ func newStorage() (storage.Backend, error) {
 		if err != nil {
 			return nil, fmt.Errorf("missing mongo URL (%s)", err)
 		}
-		return mongo.NewMongoStorage(mongoURI), nil
+		return mongo.NewStorage(mongoURI), nil
 	default:
 		return nil, fmt.Errorf("storage type %s is unknown", storageType)
 	}
