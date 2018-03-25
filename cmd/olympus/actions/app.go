@@ -1,6 +1,8 @@
 package actions
 
 import (
+	"log"
+
 	"github.com/gobuffalo/buffalo"
 	"github.com/gobuffalo/buffalo/middleware"
 	"github.com/gobuffalo/buffalo/middleware/ssl"
@@ -60,8 +62,14 @@ func App() *buffalo.App {
 		}
 		app.Use(T.Middleware())
 
+		storage, err := newStorage()
+		if err != nil {
+			log.Fatalf("error creating storage (%s)", err)
+			return nil
+		}
+
 		app.GET("/", homeHandler)
-		app.GET("/feed/{syncpoint:.*}", feedHandler())
+		app.GET("/feed/{syncpoint:.*}", feedHandler(storage))
 
 		app.ServeFiles("/", assetsBox) // serve files from the public directory
 	}

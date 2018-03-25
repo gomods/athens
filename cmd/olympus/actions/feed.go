@@ -1,0 +1,21 @@
+package actions
+
+import (
+	"net/http"
+
+	"github.com/gobuffalo/buffalo"
+	"github.com/gomods/athens/pkg/storage"
+)
+
+func feedHandler(s storage.Storage) func(c buffalo.Context) error {
+	return func(c buffalo.Context) error {
+		_, err := getSyncPoint(c)
+		if err != nil {
+			return err
+		}
+
+		feed := make(map[string][]string)
+
+		return c.Render(http.StatusOK, olympus.JSON(feed))
+	}
+}
