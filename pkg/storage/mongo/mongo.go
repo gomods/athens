@@ -12,10 +12,10 @@ type ModuleStore struct {
 	url string
 }
 
-// NewMongoBackend returns an unconnected Mongo Module Backend
+// NewStorage returns an unconnected Mongo backed storage
 // that satisfies the Backend interface.  You must call
 // Connect() on the returned store before using it.
-func NewMongoBackend(url string) *ModuleStore {
+func NewStorage(url string) *ModuleStore {
 	return &ModuleStore{url: url}
 }
 
