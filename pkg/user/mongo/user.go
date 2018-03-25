@@ -10,6 +10,7 @@ import (
 	"github.com/globalsign/mgo/bson"
 )
 
+// UserStore represents a UserStore implementation backed by mongo.
 type UserStore struct {
 	s   *mgo.Session
 	d   string // database
@@ -24,6 +25,7 @@ func NewUserStore(url string) *UserStore {
 	return &UserStore{url: url}
 }
 
+// Connect establishes a session to the mongo cluster.
 func (m *UserStore) Connect() error {
 	s, err := mgo.Dial(m.url)
 	if err != nil {

@@ -10,6 +10,7 @@ import (
 	"github.com/gomods/athens/pkg/storage"
 )
 
+// Get a specific version of a module
 func (s *ModuleStore) Get(module, vsn string) (*storage.Version, error) {
 	c := s.s.DB(s.d).C(s.c)
 	result := &storage.Module{}

@@ -7,6 +7,7 @@ import (
 	"github.com/gomods/athens/pkg/storage"
 )
 
+// List lists all versions of a module
 func (s *ModuleStore) List(module string) ([]string, error) {
 	c := s.s.DB(s.d).C(s.c)
 	result := make([]storage.Module, 0)

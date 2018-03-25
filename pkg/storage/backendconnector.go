@@ -1,6 +1,6 @@
 package storage
 
-// BackendConnector is a regular storage with Connect functionality
+// BackendConnector is a regular storage backend with Connect functionality
 type BackendConnector interface {
 	Backend
 	Connect() error
@@ -10,7 +10,7 @@ type noOpConnectedBackend struct {
 	s Backend
 }
 
-// NoOpBackendConnector wraps storage with Connect functionality
+// NoOpBackendConnector wraps storage backend with Connect functionality
 func NoOpBackendConnector(s Backend) BackendConnector {
 	return noOpConnectedBackend{s: s}
 }

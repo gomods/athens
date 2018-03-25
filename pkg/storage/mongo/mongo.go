@@ -4,6 +4,7 @@ import (
 	"github.com/globalsign/mgo"
 )
 
+// ModuleStore represents a mongo backed storage backend.
 type ModuleStore struct {
 	s   *mgo.Session
 	d   string // database
@@ -18,6 +19,7 @@ func NewMongoBackend(url string) *ModuleStore {
 	return &ModuleStore{url: url}
 }
 
+// Connect conntect the the newly created mongo backend.
 func (m *ModuleStore) Connect() error {
 	s, err := mgo.Dial(m.url)
 	if err != nil {
