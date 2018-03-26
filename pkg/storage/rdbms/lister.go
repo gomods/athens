@@ -4,7 +4,8 @@ import (
 	"github.com/gomods/athens/pkg/storage/rdbms/models"
 )
 
-func (r *RDBMSModuleStore) List(module string) ([]string, error) {
+// List lists all versions of a module
+func (r *ModuleStore) List(module string) ([]string, error) {
 	result := make([]models.Module, 0)
 	err := r.conn.Where("module = ?", module).All(&result)
 	if err != nil {

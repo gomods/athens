@@ -4,7 +4,8 @@ import (
 	"github.com/gomods/athens/pkg/storage/rdbms/models"
 )
 
-func (r *RDBMSModuleStore) Save(module, version string, mod, zip []byte) error {
+// Save stores a module in rdbms storage.
+func (r *ModuleStore) Save(module, version string, mod, zip []byte) error {
 	m := &models.Module{
 		Module:  module,
 		Version: version,

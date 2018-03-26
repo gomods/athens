@@ -10,6 +10,7 @@ import (
 	"github.com/gobuffalo/validate/validators"
 )
 
+// Module is a model where data is stored.
 type Module struct {
 	ID        uuid.UUID `json:"id" db:"id"`
 	CreatedAt time.Time `json:"created_at" db:"created_at"`

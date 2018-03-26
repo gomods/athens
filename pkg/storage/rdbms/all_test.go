@@ -26,11 +26,11 @@ var (
 
 type RDBMSTestSuite struct {
 	*suite.Model
-	storage storage.StorageConnector
+	storage storage.BackendConnector
 }
 
 func (rd *RDBMSTestSuite) SetupTest() {
-	rd.storage = &RDBMSModuleStore{conn: rd.DB}
+	rd.storage = &ModuleStore{conn: rd.DB}
 	rd.Model.SetupTest()
 }
 

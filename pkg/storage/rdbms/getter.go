@@ -9,7 +9,8 @@ import (
 	"github.com/gomods/athens/pkg/storage/rdbms/models"
 )
 
-func (r *RDBMSModuleStore) Get(module, vsn string) (*storage.Version, error) {
+// Get a specific version of a module
+func (r *ModuleStore) Get(module, vsn string) (*storage.Version, error) {
 	result := models.Module{}
 	query := r.conn.Where("module = ?", module).Where("version = ?", vsn)
 	if err := query.First(&result); err != nil {
