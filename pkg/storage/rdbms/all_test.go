@@ -3,9 +3,8 @@ package rdbms
 import (
 	"testing"
 
-	"github.com/gomods/athens/pkg/storage"
 	"github.com/gobuffalo/suite"
-	"github.com/gomods/athens/actions"
+	"github.com/gomods/athens/pkg/storage"
 )
 
 const (
@@ -25,23 +24,16 @@ var (
 	zip = []byte("456")
 )
 
-type RDBMSTests struct {
-	*suite.Action
+type RDBMSTestSuite struct {
+	*suite.Model
 	storage storage.StorageConnector
 }
 
-func (rd *RDBMSTests) SetupTest() {
-	store := NewRDBMSStorage("development_postgres")
-	store.Connect()
-	store.conn.TruncateAll()
-	rd.storage = store
-}
-
-func TestDiskStorage(t *testing.T) {
-	suite.Run(t, new(RDBMSTests))
+func (rd *RDBMSTestSuite) SetupTest() {
+	rd.storage = &RDBMSModuleStore{conn: rd.DB}
+	rd.Model.SetupTest()
 }
 
 func Test_ActionSuite(t *testing.T) {
-	as := &RDBMSTests{suite.NewAction(actions.App())}
-	suite.Run(t, as)
+	suite.Run(t, &RDBMSTestSuite{Model: suite.NewModel()})
 }

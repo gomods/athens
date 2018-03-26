@@ -6,7 +6,7 @@ development:
   user: vgp
   password: vgp
 
-testing:
+test_postgres:
   dialect: "postgres"
   database: athens_development
   user: postgres

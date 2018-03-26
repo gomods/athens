@@ -4,15 +4,16 @@ import (
 	"io/ioutil"
 )
 
-func (rd *RDBMSTests) TestGetSaveListRoundTrip() {
+func (rd *RDBMSTestSuite) TestGetSaveListRoundTrip() {
 	r := rd.Require()
-	rd.storage.Save(baseURL, module, version, mod, zip)
-	listedVersions, err := rd.storage.List(baseURL, module)
+	err := rd.storage.Save(module, version, mod, zip)
+	r.NoError(err)
+	listedVersions, err := rd.storage.List(module)
 	r.NoError(err)
 	r.Equal(1, len(listedVersions))
 	retVersion := listedVersions[0]
 	r.Equal(version, retVersion)
-	gotten, err := rd.storage.Get(baseURL, module, version)
+	gotten, err := rd.storage.Get(module, version)
 	r.NoError(err)
 	defer gotten.Zip.Close()
 	r.Equal(version, gotten.RevInfo.Version)
@@ -25,7 +26,7 @@ func (rd *RDBMSTests) TestGetSaveListRoundTrip() {
 	r.Equal(zipContent, zip)
 }
 
-func (rd *RDBMSTests) TestNewRDBMSStorage() {
+func (rd *RDBMSTestSuite) TestNewRDBMSStorage() {
 	r := rd.Require()
 	e := "development"
 	getterSaver := NewRDBMSStorage(e)
