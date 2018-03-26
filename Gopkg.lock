@@ -572,6 +572,7 @@
   version = "v1.2.1"
 
 [[projects]]
+<<<<<<< HEAD
   name = "github.com/uber/jaeger-client-go"
   packages = [
     ".",
@@ -600,6 +601,12 @@
   ]
   revision = "4267858c0679cd4e47cefed8d7f70fd386cfb567"
   version = "v1.4.0"
+
+[[projects]]
+  name = "github.com/technosophos/moniker"
+  packages = ["."]
+  revision = "4d1d2a7d4b69cee56dadb6a7634945f829154858"
+  version = "0.1.0"
 
 [[projects]]
   branch = "master"
