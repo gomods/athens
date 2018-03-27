@@ -114,7 +114,7 @@ func App() *buffalo.App {
 	return app
 }
 
-func getStorage() (storage.Storage, error) {
+func getStorage() (storage.Backend, error) {
 	storageType := envy.Get("ATHENS_STORAGE_TYPE", "memory")
 	var storageRoot string
 	var err error

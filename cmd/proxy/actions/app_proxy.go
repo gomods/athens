@@ -5,7 +5,7 @@ import (
 	"github.com/gomods/athens/pkg/storage"
 )
 
-func addProxyRoutes(app *buffalo.App, storage storage.Storage) error {
+func addProxyRoutes(app *buffalo.App, storage storage.Backend) error {
 	app.GET("/", proxyHomeHandler)
 	app.GET("/{module:.+}/@v/list", listHandler(storage))
 	app.GET("/{module:.+}/@v/{version}.info", versionInfoHandler(storage))

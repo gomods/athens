@@ -7,7 +7,7 @@ import (
 	"github.com/gomods/athens/pkg/storage"
 )
 
-func feedHandler(s storage.Storage) func(c buffalo.Context) error {
+func feedHandler(s storage.Backend) func(c buffalo.Context) error {
 	return func(c buffalo.Context) error {
 		if _, err := getSyncPoint(c); err != nil {
 			return err

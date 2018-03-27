@@ -9,7 +9,7 @@ import (
 	"github.com/spf13/afero"
 )
 
-func newStorage(storageType, storageLocation string) (storage.Storage, error) {
+func newStorage(storageType, storageLocation string) (storage.Backend, error) {
 	switch storageType {
 	case "memory":
 		memFs := afero.NewMemMapFs()
@@ -21,7 +21,7 @@ func newStorage(storageType, storageLocation string) (storage.Storage, error) {
 	case "disk":
 		return fs.NewStorage(storageLocation, afero.NewOsFs()), nil
 	case "mongo":
-		return mongo.NewMongoStorage(storageLocation), nil
+		return mongo.NewStorage(storageLocation), nil
 	default:
 		return nil, fmt.Errorf("storage type %s is unknown", storageType)
 	}
