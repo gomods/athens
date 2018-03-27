@@ -33,5 +33,5 @@ func (rd *RDBMSTestSuite) TestNewRDBMSStorage() {
 	getterSaver.Connect()
 
 	r.NotNil(getterSaver.conn)
-	r.Equal(getterSaver.e, e)
+	r.Equal(getterSaver.connectionName, e)
 }
