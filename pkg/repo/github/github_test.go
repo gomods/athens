@@ -6,11 +6,11 @@ import (
 )
 
 func Test_Download(t *testing.T) {
-	o := "bketelsen"
-	r := "captainhook"
-	v := "v0.1.8"
+	owner := "bketelsen"
+	repo := "captainhook"
+	version := "v0.1.8"
 
-	fetcher, err := NewGitCrawler(o, r, v)
+	fetcher, err := NewGitCrawler(owner, repo, version)
 	if err != nil {
 		t.Error(err)
 	}

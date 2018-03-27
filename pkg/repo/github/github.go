@@ -64,18 +64,19 @@ func untar(content io.Reader, tmpDir string) (string, error) {
 	tr := tar.NewReader(gzr)
 	var dirName string
 
-fileLoop:
 	for {
 		hdr, err := tr.Next()
-		switch {
-		case err == io.EOF:
-			break fileLoop
 
-		case err != nil:
+		if err != nil {
+			if err == io.EOF {
+				break
+			}
+
 			return "", err
+		}
 
-		case hdr == nil:
-			continue fileLoop
+		if hdr == nil {
+			continue
 		}
 
 		target := filepath.Join(tmpDir, hdr.Name)
