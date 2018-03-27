@@ -2,14 +2,10 @@ package actions
 
 import (
 	"github.com/gobuffalo/buffalo"
+	"github.com/gomods/athens/pkg/storage"
 )
 
-func addProxyRoutes(app *buffalo.App) error {
-	storage, err := newStorage()
-	if err != nil {
-		return err
-	}
-
+func addProxyRoutes(app *buffalo.App, storage storage.Storage) error {
 	app.GET("/", proxyHomeHandler)
 	app.GET("/{module:.+}/@v/list", listHandler(storage))
 	app.GET("/{module:.+}/@v/{version}.info", versionInfoHandler(storage))

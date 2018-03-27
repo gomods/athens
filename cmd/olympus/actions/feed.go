@@ -9,8 +9,7 @@ import (
 
 func feedHandler(s storage.Storage) func(c buffalo.Context) error {
 	return func(c buffalo.Context) error {
-		_, err := getSyncPoint(c)
-		if err != nil {
+		if _, err := getSyncPoint(c); err != nil {
 			return err
 		}
 

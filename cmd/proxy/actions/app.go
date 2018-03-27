@@ -1,6 +1,7 @@
 package actions
 
 import (
+	"fmt"
 	"log"
 
 	// "github.com/gomods/athens/models"
@@ -11,6 +12,7 @@ import (
 	"github.com/gobuffalo/buffalo/middleware/ssl"
 	"github.com/gobuffalo/envy"
 	"github.com/gobuffalo/packr"
+	"github.com/gomods/athens/pkg/storage"
 	"github.com/gomods/athens/pkg/user"
 	"github.com/rs/cors"
 	"github.com/unrolled/secure"
@@ -83,7 +85,12 @@ func App() *buffalo.App {
 
 		if MODE == "proxy" {
 			log.Printf("starting athens in proxy mode")
-			if err := addProxyRoutes(app); err != nil {
+			store, err := getStorage()
+			if err != nil {
+				log.Fatalf("error getting storage configuration (%s)", err)
+				return nil
+			}
+			if err := addProxyRoutes(app, store); err != nil {
 				log.Fatalf("error adding proxy routes (%s)", err)
 				return nil
 			}
@@ -105,4 +112,25 @@ func App() *buffalo.App {
 	}
 
 	return app
+}
+
+func getStorage() (storage.Storage, error) {
+	storageType := envy.Get("ATHENS_STORAGE_TYPE", "memory")
+	var storageRoot string
+	var err error
+
+	switch storageType {
+	case "mongo":
+		storageRoot, err = envy.MustGet("ATHENS_MONGO_STORAGE_URL")
+		if err != nil {
+			return nil, fmt.Errorf("missing mongo URL (%s)", err)
+		}
+	case "disk":
+		storageRoot, err = envy.MustGet("ATHENS_DISK_STORAGE_ROOT")
+		if err != nil {
+			return nil, fmt.Errorf("missing disk storage root (%s)", err)
+		}
+	}
+
+	return newStorage(storageType, storageRoot)
 }
