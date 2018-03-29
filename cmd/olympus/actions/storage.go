@@ -7,8 +7,8 @@ import (
 	"github.com/gomods/athens/pkg/storage"
 	"github.com/gomods/athens/pkg/storage/fs"
 	"github.com/gomods/athens/pkg/storage/mongo"
-	"github.com/spf13/afero"
 	"github.com/gomods/athens/pkg/storage/rdbms"
+	"github.com/spf13/afero"
 )
 
 func newStorage() (storage.Backend, error) {

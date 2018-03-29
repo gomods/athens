@@ -13,7 +13,7 @@ script:
 before_script:
   - GO_FILES=$(find . -iname '*.go' -type f | grep -v /vendor/) # All the .go files, excluding vendor/
   - go get github.com/golang/lint/golint
-  - export POP_PATH=$PWD
+  - export POP_PATH=$PWD/cmd/proxy
   - export GO_ENV=test_postgres
   - go get -u -v github.com/gobuffalo/buffalo/buffalo
   - buffalo db create
