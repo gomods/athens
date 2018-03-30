@@ -1,7 +1,6 @@
 package github
 
 import (
-	"os"
 	"testing"
 )
 
@@ -10,12 +9,12 @@ func Test_Download(t *testing.T) {
 	repo := "captainhook"
 	version := "v0.1.8"
 
-	fetcher, err := NewGitCrawler(owner, repo, version)
+	fetcher, err := NewGitFetcher(owner, repo, version)
 	if err != nil {
 		t.Error(err)
 	}
 
-	path, err := fetcher.DownloadRepo()
+	path, err := fetcher.Fetch()
 	if err != nil {
 		t.Error(err)
 	}
@@ -23,5 +22,8 @@ func Test_Download(t *testing.T) {
 		t.Error("path null")
 	}
 	t.Log(path)
-	os.RemoveAll(path)
+	err = fetcher.Clear()
+	if err != nil {
+		t.Error(err)
+	}
 }

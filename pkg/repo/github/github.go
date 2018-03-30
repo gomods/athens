@@ -18,19 +18,20 @@ const (
 	tmpFileName         = "%s-%s-%s" // owner-repo-ref
 )
 
-type gitCrawler struct {
+type gitFetcher struct {
 	owner    string
 	repoName string
 	tag      string
+	dirName  string
 }
 
-// NewGitCrawler creates a new Crawler for repositories hosted on github
-func NewGitCrawler(owner string, repoName string, tag string) (repo.Crawler, error) {
+// NewGitFetcher creates a new Fetcher for repositories hosted on github
+func NewGitFetcher(owner string, repoName string, tag string) (repo.Fetcher, error) {
 	if owner == "" || repoName == "" {
 		return nil, errors.New("invalid repository identifier")
 	}
 
-	return &gitCrawler{
+	return &gitFetcher{
 		owner:    owner,
 		repoName: repoName,
 		tag:      tag,
@@ -38,7 +39,8 @@ func NewGitCrawler(owner string, repoName string, tag string) (repo.Crawler, err
 }
 
 // Fetches a tarball of a repo and untars it into a temp dir which is used later in the workflow.
-func (g gitCrawler) DownloadRepo() (string, error) {
+// TODO: make it prepare .zip instead of just code
+func (g gitFetcher) Fetch() (string, error) {
 	uri := fmt.Sprintf(fetchRepoURI, g.owner, g.repoName, g.tag)
 
 	resp, err := http.Get(uri)
@@ -48,13 +50,22 @@ func (g gitCrawler) DownloadRepo() (string, error) {
 	defer resp.Body.Close()
 
 	tmpDir := os.TempDir()
-	dirName, err := untar(resp.Body, tmpDir)
+	g.dirName, err = untar(resp.Body, tmpDir)
 	if err != nil {
 		os.Remove(tmpDir)
 		return "", err
 	}
 
-	return dirName, nil
+	return g.dirName, nil
+}
+
+// Clear removes all downloaded data
+func (g *gitFetcher) Clear() error {
+	if g.dirName == "" {
+		return nil
+	}
+
+	return os.RemoveAll(g.dirName)
 }
 
 func untar(content io.Reader, tmpDir string) (string, error) {
