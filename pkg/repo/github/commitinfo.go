@@ -37,7 +37,10 @@ func getCommitInfo(owner, repo, tag string) (CommitInfo, error) {
 	}
 
 	commitInfo.Name = commit.Sha
-	commitInfo.Short = commit.Sha[:12]
+	commitInfo.Short = commit.Sha
+	if commit.Sha != "" && len(commit.Sha) > 12 {
+		commitInfo.Short = commit.Sha[:12]
+	}
 	commitInfo.Time = commit.Commit.Author.Date
 
 	return commitInfo, nil
