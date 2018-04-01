@@ -25,7 +25,8 @@ func getCommitInfo(owner, repo, tag string) (CommitInfo, error) {
 
 	uri := fmt.Sprintf(fetchCommitURI, owner, repo, tag)
 
-	resp, err := http.Get(uri)
+	client := http.Client{Timeout: timeout * time.Second}
+	resp, err := client.Get(uri)
 	if err != nil {
 		return commitInfo, err
 	}

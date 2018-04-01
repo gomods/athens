@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/gomods/athens/pkg/gomod/file"
 	"github.com/gomods/athens/pkg/module"
@@ -21,6 +22,7 @@ import (
 const (
 	fetchRepoURI string = "https://api.github.com/repos/%s/%s/tarball/%s"
 	tmpFileName         = "%s-%s-%s" // owner-repo-ref
+	timeout             = 5 * 60
 )
 
 type gitFetcher struct {
@@ -47,7 +49,8 @@ func NewGitFetcher(owner string, repoName string, tag string) (repo.Fetcher, err
 func (g gitFetcher) Fetch() (string, error) {
 	uri := fmt.Sprintf(fetchRepoURI, g.owner, g.repoName, g.tag)
 
-	resp, err := http.Get(uri)
+	client := http.Client{Timeout: timeout * time.Second}
+	resp, err := client.Get(uri)
 	if err != nil {
 		return "", err
 	}
