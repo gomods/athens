@@ -3,12 +3,17 @@ package github
 import (
 	"archive/tar"
 	"compress/gzip"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"path/filepath"
+
+	"github.com/gomods/athens/pkg/gomod/file"
+	"github.com/gomods/athens/pkg/module"
 
 	"github.com/gomods/athens/pkg/repo"
 )
@@ -39,7 +44,6 @@ func NewGitFetcher(owner string, repoName string, tag string) (repo.Fetcher, err
 }
 
 // Fetches a tarball of a repo and untars it into a temp dir which is used later in the workflow.
-// TODO: make it prepare .zip instead of just code
 func (g gitFetcher) Fetch() (string, error) {
 	uri := fmt.Sprintf(fetchRepoURI, g.owner, g.repoName, g.tag)
 
@@ -52,8 +56,37 @@ func (g gitFetcher) Fetch() (string, error) {
 	tmpDir := os.TempDir()
 	g.dirName, err = untar(resp.Body, tmpDir)
 	if err != nil {
-		os.Remove(tmpDir)
+		os.RemoveAll(tmpDir)
 		return "", err
+	}
+
+	// Get module name from go.mod
+	gomodPath := filepath.Join(g.dirName, "go.mod")
+	parser := file.NewFileParser(gomodPath)
+
+	moduleName, err := parser.ModuleName()
+	if err != nil {
+		os.RemoveAll(tmpDir)
+		return g.dirName, err
+	}
+
+	// Generate zip
+	if err := g.generateZip(moduleName); err != nil {
+		os.RemoveAll(tmpDir)
+		return g.dirName, err
+	}
+
+	// Rename go.mod
+	verModPath := filepath.Join(g.dirName, g.tag+".mod")
+	if err := os.Rename(gomodPath, verModPath); err != nil {
+		os.RemoveAll(tmpDir)
+		return g.dirName, err
+	}
+
+	// Generate info
+	if err := g.generateInfo(); err != nil {
+		os.RemoveAll(tmpDir)
+		return g.dirName, err
 	}
 
 	return g.dirName, nil
@@ -66,6 +99,31 @@ func (g *gitFetcher) Clear() error {
 	}
 
 	return os.RemoveAll(g.dirName)
+}
+
+func (g *gitFetcher) generateZip(moduleName string) error {
+	zipContent, err := module.MakeZip(g.dirName, moduleName, g.tag)
+	if err != nil {
+		return err
+	}
+
+	zipPath := filepath.Join(g.dirName, g.tag+".zip")
+	return ioutil.WriteFile(zipPath, zipContent, os.ModePerm)
+}
+
+func (g *gitFetcher) generateInfo() error {
+	info, err := getCommitInfo(g.owner, g.repoName, g.tag)
+	if err != nil {
+		return err
+	}
+
+	infoContent, err := json.Marshal(info)
+	if err != nil {
+		return err
+	}
+
+	goinfoPath := filepath.Join(g.dirName, g.tag+".info")
+	return ioutil.WriteFile(goinfoPath, infoContent, os.ModePerm)
 }
 
 func untar(content io.Reader, tmpDir string) (string, error) {
