@@ -1,4 +1,4 @@
-package generics
+package repo
 
 import (
 	"bytes"
@@ -9,8 +9,6 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
-
-	"github.com/gomods/athens/pkg/repo"
 )
 
 const (
@@ -30,7 +28,7 @@ type genericFetcher struct {
 
 // NewGenericFetcher creates fetcher which uses go get tool to fetch sources
 // returns path of directory containing vx.y.z.(zip|info|mod)
-func NewGenericFetcher(repoURI, version string) (repo.Fetcher, error) {
+func NewGenericFetcher(repoURI, version string) (Fetcher, error) {
 	if !isVgoInstalled() {
 		return nil, errors.New("vgo not installed")
 	}

@@ -1,4 +1,4 @@
-package generics
+package repo
 
 import (
 	"os"
