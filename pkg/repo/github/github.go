@@ -1,3 +1,8 @@
+// Package github is working version only
+// We need to (re-)consider
+// - multiple go.mod files in one repo e.g (owner/repo/cli/go.mod owner/repo/web/go.mod)
+// - v2 (or any other vX) folder
+// - something else which I cannot think of right now because I had too many cakes today
 package github
 
 import (
