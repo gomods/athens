@@ -1,6 +1,7 @@
 package generics
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"io/ioutil"
@@ -14,6 +15,11 @@ import (
 
 const (
 	tmpRepoDir = "%s-%s" // owner-repo-ref
+)
+
+var (
+	// ErrLimitExceeded signals that github.com refused to serve the request due to exceeded quota
+	ErrLimitExceeded = errors.New("github limit exceeded")
 )
 
 type genericFetcher struct {
@@ -109,18 +115,27 @@ func getSources(repoRoot, repoURI, version string) (string, error) {
 	fullURI := fmt.Sprintf("%s@%s", uri, version)
 
 	gopathEnv := fmt.Sprintf("GOPATH=%s", repoRoot)
+	disableCgo := "CGO_ENABLED=0"
 
 	cmd := exec.Command("vgo", "get", fullURI)
 	cmd.Env = os.Environ()
-	cmd.Env = append([]string{gopathEnv}, cmd.Env...)
+	cmd.Env = append(cmd.Env, gopathEnv, disableCgo)
 	cmd.Dir = repoRoot
 
 	packagePath := filepath.Join(repoRoot, "src", "v", "cache", repoURI, "@v")
 
-	err := cmd.Run()
-	if err != nil && checkFiles(packagePath, version) == nil {
-		// is some compilation error
-		return packagePath, nil
+	o, err := cmd.CombinedOutput()
+	if err != nil {
+		switch {
+		case isLimitHit(o):
+			// github quota exceeded
+			return packagePath, ErrLimitExceeded
+		case checkFiles(packagePath, version) == nil:
+			// some compilation error
+			return packagePath, nil
+		default:
+			return packagePath, err
+		}
 	}
 
 	return packagePath, err
@@ -140,4 +155,8 @@ func checkFiles(path, version string) error {
 	}
 
 	return nil
+}
+
+func isLimitHit(o []byte) bool {
+	return bytes.Contains(o, []byte("403 response from api.github.com"))
 }

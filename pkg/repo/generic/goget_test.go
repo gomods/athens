@@ -17,6 +17,12 @@ func Test_Download(t *testing.T) {
 	}
 
 	path, err := fetcher.Fetch()
+
+	if err == ErrLimitExceeded {
+		t.Log("Skipped due to exceeded github quota")
+		t.Skip()
+	}
+
 	if err != nil {
 		t.Error(err)
 		t.Fail()
