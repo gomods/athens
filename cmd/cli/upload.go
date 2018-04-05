@@ -18,7 +18,7 @@ import (
 type uploadCmd struct {
 	moduleName string
 	version    string
-	baseUrl    string
+	baseURL    string
 }
 
 func newUploadCmd() *cobra.Command {
@@ -30,7 +30,7 @@ func newUploadCmd() *cobra.Command {
 		RunE:  upload(uploadCmd),
 	}
 	cmd.Flags().StringVarP(&uploadCmd.version, "version", "v", "v0.0.1", "The version of this module")
-	cmd.Flags().StringVarP(&uploadCmd.baseUrl, "base-url", "u", "http://localhost:3000/admin/upload", "The Athens base url.")
+	cmd.Flags().StringVarP(&uploadCmd.baseURL, "base-url", "u", "http://localhost:3000/admin/upload", "The Athens base url.")
 	return cmd
 }
 
@@ -60,7 +60,7 @@ func upload(c *uploadCmd) func(*cobra.Command, []string) error {
 			return fmt.Errorf("couldn't make zip (%s)", err)
 		}
 
-		uploadEndpoint := c.baseUrl + "/%s/%s"
+		uploadEndpoint := c.baseURL + "/%s/%s"
 		url := fmt.Sprintf(
 			uploadEndpoint,
 			c.moduleName,
