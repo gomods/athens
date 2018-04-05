@@ -10,7 +10,7 @@ import (
 func Test_Download(t *testing.T) {
 	version := "v0.1.8"
 	gitURI := "github.com/bketelsen/captainhook"
-	fs := afero.NewMemMapFs()
+	fs := afero.NewOsFs()
 	fetcher, err := NewGenericFetcher(fs, gitURI, version)
 	if err != nil {
 		t.Error(err)
