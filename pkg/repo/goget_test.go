@@ -4,13 +4,15 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/spf13/afero"
 )
 
 func Test_Download(t *testing.T) {
 	version := "v0.1.8"
 	gitURI := "github.com/bketelsen/captainhook"
-
-	fetcher, err := NewGenericFetcher(gitURI, version)
+	fs := afero.NewMemMapFs()
+	fetcher, err := NewGenericFetcher(fs, gitURI, version)
 	if err != nil {
 		t.Error(err)
 		t.Fail()
