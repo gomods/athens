@@ -6,12 +6,10 @@ import (
 	"io"
 	"testing"
 
+	"github.com/gomods/athens/pkg/gomod"
 	"github.com/spf13/afero"
-
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-
-	"github.com/gomods/athens/pkg/gomod"
 )
 
 func TestZipParser_ModuleName(t *testing.T) {

@@ -4,11 +4,9 @@ import (
 	"os"
 	"testing"
 
-	"github.com/spf13/afero"
-
-	"github.com/stretchr/testify/assert"
-
 	"github.com/gomods/athens/pkg/gomod"
+	"github.com/spf13/afero"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestFileParser_ModuleName(t *testing.T) {

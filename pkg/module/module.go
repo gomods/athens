@@ -8,9 +8,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/spf13/afero"
-
 	ignore "github.com/sabhiram/go-gitignore"
+	"github.com/spf13/afero"
 )
 
 const (

@@ -19,9 +19,8 @@ import (
 
 	"github.com/gomods/athens/pkg/gomod/file"
 	"github.com/gomods/athens/pkg/module"
-	"github.com/spf13/afero"
-
 	"github.com/gomods/athens/pkg/repo"
+	"github.com/spf13/afero"
 )
 
 const (

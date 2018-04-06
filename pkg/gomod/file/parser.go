@@ -1,9 +1,8 @@
 package file
 
 import (
-	"github.com/spf13/afero"
-
 	"github.com/gomods/athens/pkg/gomod"
+	"github.com/spf13/afero"
 )
 
 // NewFileParser creates shorthand for parsing module name out of file specified by filepath
