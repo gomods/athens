@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
+	"path"
 	"path/filepath"
 
 	parser "github.com/gomods/athens/pkg/gomod/file"
@@ -17,6 +19,7 @@ import (
 type uploadCmd struct {
 	moduleName string
 	version    string
+	baseURL    string
 }
 
 func newUploadCmd() *cobra.Command {
@@ -28,6 +31,7 @@ func newUploadCmd() *cobra.Command {
 		RunE:  upload(uploadCmd),
 	}
 	cmd.Flags().StringVarP(&uploadCmd.version, "version", "v", "v0.0.1", "The version of this module")
+	cmd.Flags().StringVarP(&uploadCmd.baseURL, "base-url", "u", "http://localhost:3000/admin/upload", "The Athens base url.")
 	return cmd
 }
 
@@ -58,11 +62,12 @@ func upload(c *uploadCmd) func(*cobra.Command, []string) error {
 			return fmt.Errorf("couldn't make zip (%s)", err)
 		}
 
-		url := fmt.Sprintf(
-			"http://localhost:3000/admin/upload/%s/%s",
-			c.moduleName,
-			c.version,
-		)
+		u, err := url.Parse(c.baseURL)
+		if err != nil {
+			return fmt.Errorf("not a valid base url (%s)", err)
+		}
+
+		u.Path = path.Join(u.Path, c.moduleName, c.version)
 		postBody := &payloads.Upload{
 			Module: modBytes,
 			Zip:    zipBytes,
@@ -71,8 +76,8 @@ func upload(c *uploadCmd) func(*cobra.Command, []string) error {
 		if err := json.NewEncoder(buf).Encode(postBody); err != nil {
 			return fmt.Errorf("error encoding json (%s)", err)
 		}
-		cmd.Printf("POSTing to %s", url)
-		resp, err := http.Post(url, "application/json", buf)
+		cmd.Printf("POSTing to %s", u)
+		resp, err := http.Post(u.String(), "application/json", buf)
 		if err != nil {
 			return fmt.Errorf("error uploading (%s)", err)
 		} else if resp.StatusCode != 200 {
