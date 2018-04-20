@@ -17,7 +17,7 @@ before_script:
   - export GO_ENV=test_postgres
   - export MINIO_ACCESS_KEY=minio
   - export MINIO_SECRET_KEY=minio123
-  - wget https://dl.minio.io/server/minio/release/linux-amd64/minio && chmod +x minio && ./minio server /data
+  - wget https://dl.minio.io/server/minio/release/linux-amd64/minio && chmod +x minio && ./minio server .
   - go get -u -v github.com/gobuffalo/buffalo/buffalo
   - go get -u -v golang.org/x/vgo
   - buffalo db create
