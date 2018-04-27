@@ -11,7 +11,7 @@ type multiReader struct {
 // TODO: please come up with better name, this one is horrible
 type PointedLog struct {
 	Log   Eventlog
-	Index int64
+	Index string
 }
 
 // NewMultiReader creates composite reader of specified readers.
@@ -27,7 +27,7 @@ func NewMultiReader(ch storage.Checker, ll ...Eventlog) Reader {
 	logs := make([]PointedLog, 0, len(ll))
 	for _, l := range ll {
 		// init to -1, not 0, 0 might mean first item and as this is excluding pointer we might lose it
-		logs = append(logs, PointedLog{Log: l, Index: -1})
+		logs = append(logs, PointedLog{Log: l})
 	}
 
 	return NewMultiReaderFrom(ch, logs...)
@@ -48,11 +48,15 @@ func NewMultiReaderFrom(ch storage.Checker, l ...PointedLog) Reader {
 	}
 }
 
-func (mr *multiReader) Read() []Event {
+func (mr *multiReader) Read() ([]Event, error) {
 	events := make([]Event, 0)
 
 	for _, r := range mr.logs {
-		ee := r.Log.Read()
+		ee, err := r.Log.Read()
+		if err != nil {
+			return nil, err
+		}
+
 		for _, e := range ee {
 			if exists(e, events, mr.checker) {
 				continue
@@ -61,19 +65,24 @@ func (mr *multiReader) Read() []Event {
 		}
 	}
 
-	return events
+	return events, nil
 }
 
-func (mr *multiReader) ReadFrom(index int64) []Event {
+func (mr *multiReader) ReadFrom(index string) ([]Event, error) {
 	events := make([]Event, 0)
 
 	for _, r := range mr.logs {
 		var ee []Event
+		var err error
 
-		if r.Index == -1 {
-			ee = r.Log.Read()
+		if r.Index == "" {
+			ee, err = r.Log.Read()
 		} else {
-			ee = r.Log.ReadFrom(r.Index)
+			ee, err = r.Log.ReadFrom(r.Index)
+		}
+
+		if err != nil {
+			return nil, err
 		}
 
 		for _, e := range ee {
@@ -84,7 +93,7 @@ func (mr *multiReader) ReadFrom(index int64) []Event {
 		}
 	}
 
-	return events
+	return events, nil
 }
 
 func exists(event Event, log []Event, checker storage.Checker) bool {
