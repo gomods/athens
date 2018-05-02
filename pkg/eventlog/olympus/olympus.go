@@ -20,15 +20,15 @@ func (o *Log) Read() ([]eventlog.Event, error) {
 
 // ReadFrom reads all events from the log starting at event with specified id (excluded).
 // If id is not found behaves like Read().
-func (o *Log) ReadFrom(id int64) ([]eventlog.Event, error) {
+func (o *Log) ReadFrom(id string) ([]eventlog.Event, error) {
 	// TODO: implement read from endpoint
 	return nil, nil
 }
 
 // Write appends Event to event log and returns its ID.
-func (o *Log) Write(event eventlog.Event) (int64, error) {
+func (o *Log) Write(event eventlog.Event) (string, error) {
 	// TODO: implement cache miss reporting
-	return -1, nil
+	return "", nil
 }
 
 // Clear is a method for clearing entire state of event log

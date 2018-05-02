@@ -8,7 +8,7 @@ type multiReader struct {
 }
 
 // PointedLog is collection of event logs with specified starting pointers used by ReadFrom function.
-// TODO: please come up with better name, this one is horrible
+// TODO: please come up with a better name, this one is horrible, ungly, undescriptive
 type PointedLog struct {
 	Log   Eventlog
 	Index string
@@ -21,7 +21,7 @@ type PointedLog struct {
 // R1: [C,D,E] - as r1.C...
 // R2: [A,D,F]
 // R3: [B, G]
-// result [im.A, im.B, r1.C, r1.D, r1.E, r2.F, r3.G]
+// result [r1.C, r1.D, r1.E, r2.F, r3.G]
 // r2.A, r2.D, r3.B - skipped due to deduplication checks
 func NewMultiReader(ch storage.Checker, ll ...Eventlog) Reader {
 	logs := make([]PointedLog, 0, len(ll))
@@ -37,10 +37,10 @@ func NewMultiReader(ch storage.Checker, ll ...Eventlog) Reader {
 // Order of readers matters in a way how Events are deduplicated.
 // Initial state:
 // - InMemory [A, B] - as im.A, im.B
-// R1: [C,D,E] - as r1.C... - pointer to D
+// R1: [B,C,E] - as r1.C... - pointer to D
 // R2: [A,D,F] - pointer to A
 // R3: [B, G] - pointer to B
-// result [im.A, im.B, r1.E, r2.D, r2.F, r3.G]
+// result [r1.E, r2.D, r2.F, r3.G]
 func NewMultiReaderFrom(ch storage.Checker, l ...PointedLog) Reader {
 	return &multiReader{
 		logs:    l,
