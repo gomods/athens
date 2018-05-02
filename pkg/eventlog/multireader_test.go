@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/globalsign/mgo/bson"
-
 	"github.com/stretchr/testify/suite"
 )
 
@@ -14,19 +13,19 @@ type MultiReaderTests struct {
 
 func (m *MultiReaderTests) TestDedupRead() {
 	inMemReader1 := &InMemoryReader{[]Event{
-		Event{ID: bson.NewObjectId(), Module: "c", Version: "v1"},
-		Event{ID: bson.NewObjectId(), Module: "d", Version: "v1"},
-		Event{ID: bson.NewObjectId(), Module: "e", Version: "v1"},
+		{ID: bson.NewObjectId(), Module: "c", Version: "v1"},
+		{ID: bson.NewObjectId(), Module: "d", Version: "v1"},
+		{ID: bson.NewObjectId(), Module: "e", Version: "v1"},
 	}}
 	inMemReader2 := &InMemoryReader{[]Event{
-		Event{ID: bson.NewObjectId(), Module: "a", Version: "v1"},
-		Event{ID: bson.NewObjectId(), Module: "d", Version: "v1"},
-		Event{ID: bson.NewObjectId(), Module: "f", Version: "v1"},
+		{ID: bson.NewObjectId(), Module: "a", Version: "v1"},
+		{ID: bson.NewObjectId(), Module: "d", Version: "v1"},
+		{ID: bson.NewObjectId(), Module: "f", Version: "v1"},
 	}}
 	inMemReader3 := &InMemoryReader{[]Event{
-		Event{ID: bson.NewObjectId(), Module: "b", Version: "v1"},
-		Event{ID: bson.NewObjectId(), Module: "e", Version: "v1"},
-		Event{ID: bson.NewObjectId(), Module: "c", Version: "v2"},
+		{ID: bson.NewObjectId(), Module: "b", Version: "v1"},
+		{ID: bson.NewObjectId(), Module: "e", Version: "v1"},
+		{ID: bson.NewObjectId(), Module: "c", Version: "v2"},
 	}}
 
 	storageChecker := ModuleStorageChecker{Module: "f"}
@@ -62,21 +61,21 @@ func (m *MultiReaderTests) TestDedupRead() {
 func (m *MultiReaderTests) TestDedupReadFrom() {
 	pointer1 := bson.NewObjectId()
 	inMemReader1 := &InMemoryReader{[]Event{
-		Event{ID: pointer1, Module: "c", Version: "v1"},
-		Event{ID: bson.NewObjectId(), Module: "d", Version: "v1"},
-		Event{ID: bson.NewObjectId(), Module: "e", Version: "v1"},
+		{ID: pointer1, Module: "c", Version: "v1"},
+		{ID: bson.NewObjectId(), Module: "d", Version: "v1"},
+		{ID: bson.NewObjectId(), Module: "e", Version: "v1"},
 	}}
 	pointer2 := bson.NewObjectId()
 	inMemReader2 := &InMemoryReader{[]Event{
-		Event{ID: bson.NewObjectId(), Module: "a", Version: "v1"},
-		Event{ID: pointer2, Module: "d", Version: "v1"},
-		Event{ID: bson.NewObjectId(), Module: "f", Version: "v1"},
+		{ID: bson.NewObjectId(), Module: "a", Version: "v1"},
+		{ID: pointer2, Module: "d", Version: "v1"},
+		{ID: bson.NewObjectId(), Module: "f", Version: "v1"},
 	}}
 	pointer3 := bson.NewObjectId()
 	inMemReader3 := &InMemoryReader{[]Event{
-		Event{ID: bson.NewObjectId(), Module: "b", Version: "v1"},
-		Event{ID: pointer3, Module: "e", Version: "v1"},
-		Event{ID: bson.NewObjectId(), Module: "c", Version: "v2"},
+		{ID: bson.NewObjectId(), Module: "b", Version: "v1"},
+		{ID: pointer3, Module: "e", Version: "v1"},
+		{ID: bson.NewObjectId(), Module: "c", Version: "v2"},
 	}}
 
 	storageChecker := ModuleStorageChecker{Module: "f"}
