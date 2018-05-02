@@ -56,19 +56,18 @@ func (m *Log) ReadFrom(id string) ([]eventlog.Event, error) {
 	var events []eventlog.Event
 
 	c := m.s.DB(m.d).C(m.c)
-	oid := bson.ObjectIdHex(id)
-	err := c.Find(bson.M{"_id": bson.M{"$gt": oid}}).All(&events)
+	err := c.Find(bson.M{"_id": bson.M{"$gt": id}}).All(&events)
 
 	return events, err
 }
 
 // Write appends Event to event log and returns its ID.
 func (m *Log) Write(event eventlog.Event) (string, error) {
-	event.ID = bson.NewObjectId()
+	event.ID = bson.NewObjectId().Hex()
 	c := m.s.DB(m.d).C(m.c)
 	err := c.Insert(event)
 
-	return event.ID.Hex(), err
+	return event.ID, err
 }
 
 // Clear is a method for clearing entire state of event log
@@ -80,7 +79,6 @@ func (m *Log) Clear(id string) error {
 		return err
 	}
 
-	oid := bson.ObjectIdHex(id)
-	_, err := c.RemoveAll(bson.M{"_id": bson.M{"$lte": oid}})
+	_, err := c.RemoveAll(bson.M{"_id": bson.M{"$lte": id}})
 	return err
 }

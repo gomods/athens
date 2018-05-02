@@ -13,19 +13,19 @@ type MultiReaderTests struct {
 
 func (m *MultiReaderTests) TestDedupRead() {
 	inMemReader1 := &InMemoryReader{[]Event{
-		{ID: bson.NewObjectId(), Module: "c", Version: "v1"},
-		{ID: bson.NewObjectId(), Module: "d", Version: "v1"},
-		{ID: bson.NewObjectId(), Module: "e", Version: "v1"},
+		{ID: bson.NewObjectId().Hex(), Module: "c", Version: "v1"},
+		{ID: bson.NewObjectId().Hex(), Module: "d", Version: "v1"},
+		{ID: bson.NewObjectId().Hex(), Module: "e", Version: "v1"},
 	}}
 	inMemReader2 := &InMemoryReader{[]Event{
-		{ID: bson.NewObjectId(), Module: "a", Version: "v1"},
-		{ID: bson.NewObjectId(), Module: "d", Version: "v1"},
-		{ID: bson.NewObjectId(), Module: "f", Version: "v1"},
+		{ID: bson.NewObjectId().Hex(), Module: "a", Version: "v1"},
+		{ID: bson.NewObjectId().Hex(), Module: "d", Version: "v1"},
+		{ID: bson.NewObjectId().Hex(), Module: "f", Version: "v1"},
 	}}
 	inMemReader3 := &InMemoryReader{[]Event{
-		{ID: bson.NewObjectId(), Module: "b", Version: "v1"},
-		{ID: bson.NewObjectId(), Module: "e", Version: "v1"},
-		{ID: bson.NewObjectId(), Module: "c", Version: "v2"},
+		{ID: bson.NewObjectId().Hex(), Module: "b", Version: "v1"},
+		{ID: bson.NewObjectId().Hex(), Module: "e", Version: "v1"},
+		{ID: bson.NewObjectId().Hex(), Module: "c", Version: "v2"},
 	}}
 
 	storageChecker := ModuleStorageChecker{Module: "f"}
@@ -59,32 +59,32 @@ func (m *MultiReaderTests) TestDedupRead() {
 }
 
 func (m *MultiReaderTests) TestDedupReadFrom() {
-	pointer1 := bson.NewObjectId()
+	pointer1 := bson.NewObjectId().Hex()
 	inMemReader1 := &InMemoryReader{[]Event{
 		{ID: pointer1, Module: "c", Version: "v1"},
-		{ID: bson.NewObjectId(), Module: "d", Version: "v1"},
-		{ID: bson.NewObjectId(), Module: "e", Version: "v1"},
+		{ID: bson.NewObjectId().Hex(), Module: "d", Version: "v1"},
+		{ID: bson.NewObjectId().Hex(), Module: "e", Version: "v1"},
 	}}
-	pointer2 := bson.NewObjectId()
+	pointer2 := bson.NewObjectId().Hex()
 	inMemReader2 := &InMemoryReader{[]Event{
-		{ID: bson.NewObjectId(), Module: "a", Version: "v1"},
+		{ID: bson.NewObjectId().Hex(), Module: "a", Version: "v1"},
 		{ID: pointer2, Module: "d", Version: "v1"},
-		{ID: bson.NewObjectId(), Module: "f", Version: "v1"},
+		{ID: bson.NewObjectId().Hex(), Module: "f", Version: "v1"},
 	}}
-	pointer3 := bson.NewObjectId()
+	pointer3 := bson.NewObjectId().Hex()
 	inMemReader3 := &InMemoryReader{[]Event{
-		{ID: bson.NewObjectId(), Module: "b", Version: "v1"},
+		{ID: bson.NewObjectId().Hex(), Module: "b", Version: "v1"},
 		{ID: pointer3, Module: "e", Version: "v1"},
-		{ID: bson.NewObjectId(), Module: "c", Version: "v2"},
+		{ID: bson.NewObjectId().Hex(), Module: "c", Version: "v2"},
 	}}
 
 	storageChecker := ModuleStorageChecker{Module: "f"}
 
-	pointedLog1 := PointedLog{Index: pointer1.Hex(), Log: inMemReader1}
-	pointedLog2 := PointedLog{Index: pointer2.Hex(), Log: inMemReader2}
-	pointedLog3 := PointedLog{Index: pointer3.Hex(), Log: inMemReader3}
+	sequencedLog1 := SequencedLog{Index: pointer1, Log: inMemReader1}
+	sequencedLog2 := SequencedLog{Index: pointer2, Log: inMemReader2}
+	sequencedLog3 := SequencedLog{Index: pointer3, Log: inMemReader3}
 
-	mr := NewMultiReaderFrom(storageChecker, pointedLog1, pointedLog2, pointedLog3)
+	mr := NewMultiReaderFrom(storageChecker, sequencedLog1, sequencedLog2, sequencedLog3)
 
 	r := m.Require()
 
@@ -122,7 +122,7 @@ func (m *InMemoryReader) ReadFrom(id string) ([]Event, error) {
 	var index int
 
 	for i, e := range m.mem {
-		if e.ID.Hex() == id {
+		if e.ID == id {
 			index = i
 			break
 		}
@@ -133,10 +133,10 @@ func (m *InMemoryReader) ReadFrom(id string) ([]Event, error) {
 
 // Write appends Event to event log and returns its ID.
 func (m *InMemoryReader) Write(event Event) (string, error) {
-	event.ID = bson.NewObjectId()
+	event.ID = bson.NewObjectId().Hex()
 	m.mem = append(m.mem, event)
 
-	return event.ID.Hex(), nil
+	return event.ID, nil
 
 }
 

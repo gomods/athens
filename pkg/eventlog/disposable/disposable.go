@@ -23,7 +23,7 @@ func (c *Log) Read() ([]eventlog.Event, error) {
 
 	if len(ee) > 0 {
 		last := ee[len(ee)-1]
-		return ee, c.e.Clear(last.ID.Hex())
+		return ee, c.e.Clear(last.ID)
 	}
 
 	return ee, nil
