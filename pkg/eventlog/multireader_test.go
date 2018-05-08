@@ -131,8 +131,8 @@ func (m *InMemoryReader) ReadFrom(id string) ([]Event, error) {
 	return m.mem[index+1:], nil
 }
 
-// Write appends Event to event log and returns its ID.
-func (m *InMemoryReader) Write(event Event) (string, error) {
+// Append appends Event to event log and returns its ID.
+func (m *InMemoryReader) Append(event Event) (string, error) {
 	event.ID = bson.NewObjectId().Hex()
 	m.mem = append(m.mem, event)
 
