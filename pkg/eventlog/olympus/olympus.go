@@ -25,8 +25,8 @@ func (o *Log) ReadFrom(id string) ([]eventlog.Event, error) {
 	return nil, nil
 }
 
-// Write appends Event to event log and returns its ID.
-func (o *Log) Write(event eventlog.Event) (string, error) {
+// Append appends Event to event log and returns its ID.
+func (o *Log) Append(event eventlog.Event) (string, error) {
 	// TODO: implement cache miss reporting
 	return "", nil
 }

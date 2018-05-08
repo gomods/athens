@@ -6,7 +6,7 @@ import (
 	"github.com/gomods/athens/pkg/eventlog"
 )
 
-// Log is event log fetched from olympus server
+// Log is event log fetched from backing mongo database
 type Log struct {
 	s   *mgo.Session
 	d   string // database
@@ -14,12 +14,12 @@ type Log struct {
 	url string
 }
 
-// NewLog creates log reader from remote log
+// NewLog creates event log from backing mongo database
 func NewLog(url string) (*Log, error) {
 	return NewLogWithCollection(url, "eventlog")
 }
 
-// NewLogWithCollection creates log reader from remote log
+// NewLogWithCollection creates event log from backing mongo database
 func NewLogWithCollection(url, collection string) (*Log, error) {
 	m := &Log{
 		url: url,
@@ -33,7 +33,7 @@ func NewLogWithCollection(url, collection string) (*Log, error) {
 func (m *Log) Connect() error {
 	s, err := mgo.Dial(m.url)
 	if err != nil {
-		panic(err)
+		return err
 	}
 	m.s = s
 
@@ -61,8 +61,8 @@ func (m *Log) ReadFrom(id string) ([]eventlog.Event, error) {
 	return events, err
 }
 
-// Write appends Event to event log and returns its ID.
-func (m *Log) Write(event eventlog.Event) (string, error) {
+// Append appends Event to event log and returns its ID.
+func (m *Log) Append(event eventlog.Event) (string, error) {
 	event.ID = bson.NewObjectId().Hex()
 	c := m.s.DB(m.d).C(m.c)
 	err := c.Insert(event)

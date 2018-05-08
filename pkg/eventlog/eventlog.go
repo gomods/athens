@@ -19,8 +19,8 @@ type Reader interface {
 
 // Appender is writer to append only event log.
 type Appender interface {
-	// Write appends Event to event log and returns its ID.
-	Write(event Event) (string, error)
+	// Append appends Event to event log and returns its ID.
+	Append(event Event) (string, error)
 }
 
 // Clearer is interface used to clear state of event log

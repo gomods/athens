@@ -44,7 +44,7 @@ func (c *Log) ReadFrom(id string) ([]eventlog.Event, error) {
 	return ee, nil
 }
 
-// Write appends Event to event log and returns its ID.
-func (c *Log) Write(event eventlog.Event) (string, error) {
-	return c.e.Write(event)
+// Append appends Event to event log and returns its ID.
+func (c *Log) Append(event eventlog.Event) (string, error) {
+	return c.e.Append(event)
 }

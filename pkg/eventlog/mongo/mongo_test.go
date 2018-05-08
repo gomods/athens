@@ -33,7 +33,7 @@ func (m *MongoTests) TestRead() {
 	r := m.Require()
 	versions := []string{"v1.0.0", "v1.1.0", "v1.2.0"}
 	for _, version := range versions {
-		_, err := m.log.Write(eventlog.Event{Module: "m1", Version: version, Time: time.Now()})
+		_, err := m.log.Append(eventlog.Event{Module: "m1", Version: version, Time: time.Now()})
 		r.NoError(err)
 	}
 
@@ -49,7 +49,7 @@ func (m *MongoTests) TestReadFrom() {
 	versions := []string{"v1.0.0", "v1.1.0", "v1.2.0"}
 	pointers := make(map[string]string)
 	for _, version := range versions {
-		p, _ := m.log.Write(eventlog.Event{Module: "m1", Version: version, Time: time.Now()})
+		p, _ := m.log.Append(eventlog.Event{Module: "m1", Version: version, Time: time.Now()})
 		pointers[version] = p
 	}
 
@@ -71,7 +71,7 @@ func (m *MongoTests) TestClear() {
 	r := m.Require()
 	versions := []string{"v1.0.0", "v1.1.0", "v1.2.0"}
 	for _, version := range versions {
-		m.log.Write(eventlog.Event{Module: "m1", Version: version, Time: time.Now()})
+		m.log.Append(eventlog.Event{Module: "m1", Version: version, Time: time.Now()})
 	}
 
 	retVersions, err := m.log.Read()
@@ -91,7 +91,7 @@ func (m *MongoTests) TestClearFrom() {
 	versions := []string{"v1.0.0", "v1.1.0", "v1.2.0"}
 	pointers := make(map[string]string)
 	for _, version := range versions {
-		p, _ := m.log.Write(eventlog.Event{Module: "m1", Version: version, Time: time.Now()})
+		p, _ := m.log.Append(eventlog.Event{Module: "m1", Version: version, Time: time.Now()})
 		pointers[version] = p
 	}
 
