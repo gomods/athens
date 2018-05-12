@@ -19,6 +19,10 @@ func (n noOpConnectedBackend) Connect() error {
 	return nil
 }
 
+func (n noOpConnectedBackend) Exists(module, version string) bool {
+	return n.s.Exists(module, version)
+}
+
 func (n noOpConnectedBackend) Get(module, vsn string) (*Version, error) {
 	return n.s.Get(module, vsn)
 }
