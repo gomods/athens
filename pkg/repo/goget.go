@@ -88,7 +88,7 @@ func isVgoInstalled() bool {
 func setupTmp(fs afero.Fs, repoDirName string) (string, string, error) {
 	gopathDir, err := afero.TempDir(fs, "", "")
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 
 	path := filepath.Join(gopathDir, "src", repoDirName)
