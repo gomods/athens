@@ -28,7 +28,6 @@ func Test_Download(t *testing.T) {
 	}
 
 	t.Log(path)
-
 	if _, err := memFs.Stat(filepath.Join(path, version+".mod")); err != nil {
 		t.Error(err)
 		t.Fail()
