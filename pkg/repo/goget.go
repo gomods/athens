@@ -51,7 +51,7 @@ func (g *genericFetcher) Fetch() (string, error) {
 	escapedURI := strings.Replace(g.repoURI, "/", "-", -1)
 	repoDirName := fmt.Sprintf(tmpRepoDir, escapedURI, g.version)
 
-	repoRoot, err := setupTmp(g.fs, repoDirName)
+	gopath, repoRoot, err := setupTmp(g.fs, repoDirName)
 	if err != nil {
 		return "", err
 	}
@@ -59,7 +59,7 @@ func (g *genericFetcher) Fetch() (string, error) {
 
 	prepareStructure(g.fs, repoRoot)
 
-	dirName, err := getSources(g.fs, repoRoot, g.repoURI, g.version)
+	dirName, err := getSources(g.fs, gopath, repoRoot, g.repoURI, g.version)
 
 	return dirName, err
 }
@@ -85,14 +85,15 @@ func isVgoInstalled() bool {
 	return false
 }
 
-func setupTmp(fs afero.Fs, repoDirName string) (string, error) {
-	tmpDir, err := afero.TempDir(fs, "", "")
+func setupTmp(fs afero.Fs, repoDirName string) (string, string, error) {
+	gopathDir, err := afero.TempDir(fs, "", "")
 	if err != nil {
 		return "", err
 	}
-	path := filepath.Join(tmpDir, repoDirName)
 
-	return path, fs.MkdirAll(path, os.ModeDir|os.ModePerm)
+	path := filepath.Join(gopathDir, "src", repoDirName)
+
+	return gopathDir, path, fs.MkdirAll(path, os.ModeDir|os.ModePerm)
 }
 
 // Hacky thing makes vgo not to complain
@@ -109,7 +110,7 @@ func prepareStructure(fs afero.Fs, repoRoot string) error {
 	return afero.WriteFile(fs, sourcePath, sourceContent, 0666)
 }
 
-func getSources(fs afero.Fs, repoRoot, repoURI, version string) (string, error) {
+func getSources(fs afero.Fs, gopath, repoRoot, repoURI, version string) (string, error) {
 	version = strings.TrimPrefix(version, "@")
 	if !strings.HasPrefix(version, "v") {
 		version = "v" + version
@@ -118,7 +119,7 @@ func getSources(fs afero.Fs, repoRoot, repoURI, version string) (string, error) 
 
 	fullURI := fmt.Sprintf("%s@%s", uri, version)
 
-	gopathEnv := fmt.Sprintf("GOPATH=%s", repoRoot)
+	gopathEnv := fmt.Sprintf("GOPATH=%s", gopath)
 	disableCgo := "CGO_ENABLED=0"
 
 	cmd := exec.Command("vgo", "get", fullURI)
@@ -126,7 +127,7 @@ func getSources(fs afero.Fs, repoRoot, repoURI, version string) (string, error) 
 	cmd.Env = append(cmd.Env, gopathEnv, disableCgo)
 	cmd.Dir = repoRoot
 
-	packagePath := filepath.Join(repoRoot, "src", "v", "cache", repoURI, "@v")
+	packagePath := filepath.Join(gopath, "src", "v", "cache", repoURI, "@v")
 
 	o, err := cmd.CombinedOutput()
 	if err != nil {
