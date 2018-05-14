@@ -9,7 +9,7 @@ import (
 )
 
 func newEventlog() (eventlog.Reader, error) {
-	mongoURI, err := envy.MustGet("OLYMPUS_MONGO_STORAGE_URL")
+	mongoURI, err := envy.MustGet("ATHENS_MONGO_STORAGE_URL")
 	if err != nil {
 		return nil, fmt.Errorf("missing mongo URL (%s)", err)
 	}
