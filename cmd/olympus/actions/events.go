@@ -21,6 +21,6 @@ func eventlogHandler(r eventlog.Reader) func(c buffalo.Context) error {
 		if err != nil {
 			return err
 		}
-		return c.Render(http.StatusOK, olympus.JSON(events))
+		return c.Render(http.StatusOK, renderEng.JSON(events))
 	}
 }
