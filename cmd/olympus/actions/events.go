@@ -34,7 +34,11 @@ func cachemissHandler(l eventlog.Appender) func(c buffalo.Context) error {
 			return err
 		}
 		e := eventlog.Event{Module: cm.Name, Version: cm.Version, Time: time.Now()}
-		l.Append(e)
-		return nil
+		id, err := l.Append(e)
+		if err != nil {
+			return err
+		}
+		e.ID = id
+		return c.Render(http.StatusOK, renderEng.JSON(e))
 	}
 }
