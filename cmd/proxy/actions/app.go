@@ -13,10 +13,6 @@ import (
 	"github.com/gobuffalo/envy"
 	"github.com/gobuffalo/gocraft-work-adapter"
 	"github.com/gobuffalo/packr"
-	proxystate "github.com/gomods/athens/pkg/proxy/state"
-	mongostate "github.com/gomods/athens/pkg/proxy/state/mongo"
-	"github.com/gomods/athens/pkg/storage"
-	"github.com/gomods/athens/pkg/storage/mongo"
 	"github.com/gomods/athens/pkg/user"
 	"github.com/rs/cors"
 	"github.com/unrolled/secure"
@@ -37,8 +33,6 @@ var T *i18n.Translator
 
 var gopath string
 var userStore *user.Store
-var s storage.Backend
-var ps proxystate.Store
 
 func init() {
 	g, err := envy.MustGet("GOPATH")
@@ -46,23 +40,6 @@ func init() {
 		log.Fatalf("GOPATH is not set!")
 	}
 	gopath = g
-
-	mongoURI, err := envy.MustGet("NewStorage")
-	if err != nil {
-		log.Fatalf("Storage uri not provided")
-	}
-
-	ms := mongo.NewStorage(mongoURI)
-	if err := ms.Connect(); err != nil {
-		log.Fatalf("Unable to connect to backing store: %v", err)
-	}
-	s = ms
-
-	mps := mongostate.NewStateStore(mongoURI)
-	if err := mps.Connect(); err != nil {
-		log.Fatalf("Unable to connect to backing state store: %v", err)
-	}
-	ps = mps
 }
 
 // App is where all routes and middleware for buffalo

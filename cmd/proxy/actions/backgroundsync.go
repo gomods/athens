@@ -10,41 +10,44 @@ import (
 	"github.com/gomods/athens/pkg/eventlog"
 	"github.com/gomods/athens/pkg/eventlog/olympus"
 	proxystate "github.com/gomods/athens/pkg/proxy/state"
+	"github.com/gomods/athens/pkg/storage"
 	olympusStore "github.com/gomods/athens/pkg/storage/olympus"
 )
 
-// ProcessModuleJob porcesses job from a queue and downloads missing module
-func ProcessModuleJob(args worker.Args) error {
-	olympusEndpoint, ok := args["olympusEndpoint"].(string)
-	if !ok {
-		return errors.New("olympus endpoint not provided")
-	}
-	event, ok := args["event"].(eventlog.Event)
-	if !ok {
-		return errors.New("event to process not provided")
-	}
+// GetProcessModuleJob porcesses job from a queue and downloads missing module
+func GetProcessModuleJob(s storage.Backend, ps proxystate.Store) worker.Handler {
+	return func(args worker.Args) error {
+		olympusEndpoint, ok := args["olympusEndpoint"].(string)
+		if !ok {
+			return errors.New("olympus endpoint not provided")
+		}
+		event, ok := args["event"].(eventlog.Event)
+		if !ok {
+			return errors.New("event to process not provided")
+		}
 
-	if s.Exists(event.Module, event.Version) {
-		return nil
-	}
+		if s.Exists(event.Module, event.Version) {
+			return nil
+		}
 
-	os := olympusStore.NewStorage(olympusEndpoint)
-	version, err := os.Get(event.Module, event.Version)
-	if err != nil {
-		return err
-	}
+		os := olympusStore.NewStorage(olympusEndpoint)
+		version, err := os.Get(event.Module, event.Version)
+		if err != nil {
+			return err
+		}
 
-	zip, err := ioutil.ReadAll(version.Zip)
-	if err != nil {
-		return err
-	}
+		zip, err := ioutil.ReadAll(version.Zip)
+		if err != nil {
+			return err
+		}
 
-	return s.Save(event.Module, event.Version, version.Mod, zip)
+		return s.Save(event.Module, event.Version, version.Mod, zip)
+	}
 }
 
 // SyncLoop is synchronization background job meant to run in a goroutine
 // pulling event log from olympus
-func SyncLoop() {
+func SyncLoop(s storage.Backend, ps proxystate.Store) {
 	olympusEndpoint, sequenceID := getLoopState(ps)
 
 	for {
