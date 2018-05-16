@@ -4,13 +4,20 @@ import (
 	"log"
 
 	// "github.com/gomods/athens/models"
+	"github.com/garyburd/redigo/redis"
 	"github.com/gobuffalo/buffalo"
 	"github.com/gobuffalo/buffalo/middleware"
 	"github.com/gobuffalo/buffalo/middleware/csrf"
 	"github.com/gobuffalo/buffalo/middleware/i18n"
 	"github.com/gobuffalo/buffalo/middleware/ssl"
+	"github.com/gobuffalo/buffalo/worker"
 	"github.com/gobuffalo/envy"
+	"github.com/gobuffalo/gocraft-work-adapter"
 	"github.com/gobuffalo/packr"
+	proxystate "github.com/gomods/athens/pkg/proxy/state"
+	mongostate "github.com/gomods/athens/pkg/proxy/state/mongo"
+	"github.com/gomods/athens/pkg/storage"
+	"github.com/gomods/athens/pkg/storage/mongo"
 	"github.com/gomods/athens/pkg/user"
 	"github.com/rs/cors"
 	"github.com/unrolled/secure"
@@ -31,6 +38,9 @@ var T *i18n.Translator
 
 var gopath string
 var userStore *user.Store
+var w worker.Worker
+var s storage.Backend
+var ps proxystate.Store
 
 func init() {
 	g, err := envy.MustGet("GOPATH")
@@ -38,6 +48,27 @@ func init() {
 		log.Fatalf("GOPATH is not set!")
 	}
 	gopath = g
+	w = app.Worker
+	w.Register("process_module", processModuleJob)
+
+	mongoURI, err := envy.MustGet("NewStorage")
+	if err != nil {
+		log.Fatalf("Storage uri not provided")
+	}
+
+	ms := mongo.NewStorage(mongoURI)
+	if err := ms.Connect(); err != nil {
+		log.Fatalf("Unable to connect to backing store: %v", err)
+	}
+	s = ms
+
+	mps := mongostate.NewStateStore(mongoURI)
+	if err := mps.Connect(); err != nil {
+		log.Fatalf("Unable to connect to backing state store: %v", err)
+	}
+	ps = mps
+
+	go SyncLoop()
 }
 
 // App is where all routes and middleware for buffalo
@@ -45,12 +76,26 @@ func init() {
 // application.
 func App() *buffalo.App {
 	if app == nil {
+		redisPort := envy.Get("ATHENS_REDIS_QUEUE_PORT", ":6379")
+
 		app = buffalo.New(buffalo.Options{
 			Env: ENV,
 			PreWares: []buffalo.PreWare{
 				cors.Default().Handler,
 			},
 			SessionName: "_athens_session",
+			Worker: gwa.New(gwa.Options{
+				Pool: &redis.Pool{
+					MaxActive: 5,
+					MaxIdle:   5,
+					Wait:      true,
+					Dial: func() (redis.Conn, error) {
+						return redis.Dial("tcp", redisPort)
+					},
+				},
+				Name:           "olympuspuller",
+				MaxConcurrency: 25,
+			}),
 		})
 		// Automatically redirect to SSL
 		app.Use(ssl.ForceSSL(secure.Options{
