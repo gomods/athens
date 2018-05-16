@@ -13,6 +13,35 @@ import (
 	olympusStore "github.com/gomods/athens/pkg/storage/olympus"
 )
 
+// ProcessModuleJob porcesses job from a queue and downloads missing module
+func ProcessModuleJob(args worker.Args) error {
+	olympusEndpoint, ok := args["olympusEndpoint"].(string)
+	if !ok {
+		return errors.New("olympus endpoint not provided")
+	}
+	event, ok := args["event"].(eventlog.Event)
+	if !ok {
+		return errors.New("event to process not provided")
+	}
+
+	if s.Exists(event.Module, event.Version) {
+		return nil
+	}
+
+	os := olympusStore.NewStorage(olympusEndpoint)
+	version, err := os.Get(event.Module, event.Version)
+	if err != nil {
+		return err
+	}
+
+	zip, err := ioutil.ReadAll(version.Zip)
+	if err != nil {
+		return err
+	}
+
+	return s.Save(event.Module, event.Version, version.Mod, zip)
+}
+
 // SyncLoop is synchronization background job meant to run in a goroutine
 // pulling event log from olympus
 func SyncLoop() {
@@ -46,7 +75,7 @@ func SyncLoop() {
 
 // Process pushes pull job into the queue to be processed asynchonously
 func process(olympusEndpoint string, event eventlog.Event) error {
-	return w.Perform(worker.Job{
+	return app.Worker.Perform(worker.Job{
 		Queue:   "default",
 		Handler: "olympuspuller",
 		Args: worker.Args{
@@ -54,35 +83,6 @@ func process(olympusEndpoint string, event eventlog.Event) error {
 			"event":           event,
 		},
 	})
-}
-
-// processModuleJob porcesses job from a queue and downloads missing module
-func processModuleJob(args worker.Args) error {
-	olympusEndpoint, ok := args["olympusEndpoint"].(string)
-	if !ok {
-		return errors.New("olympus endpoint not provided")
-	}
-	event, ok := args["event"].(eventlog.Event)
-	if !ok {
-		return errors.New("event to process not provided")
-	}
-
-	if s.Exists(event.Module, event.Version) {
-		return nil
-	}
-
-	os := olympusStore.NewStorage(olympusEndpoint)
-	version, err := os.Get(event.Module, event.Version)
-	if err != nil {
-		return err
-	}
-
-	zip, err := ioutil.ReadAll(version.Zip)
-	if err != nil {
-		return err
-	}
-
-	return s.Save(event.Module, event.Version, version.Mod, zip)
 }
 
 func getEventLog(olympusEndpoint string, sequenceID string) ([]eventlog.Event, error) {

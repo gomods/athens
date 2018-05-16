@@ -10,7 +10,6 @@ import (
 	"github.com/gobuffalo/buffalo/middleware/csrf"
 	"github.com/gobuffalo/buffalo/middleware/i18n"
 	"github.com/gobuffalo/buffalo/middleware/ssl"
-	"github.com/gobuffalo/buffalo/worker"
 	"github.com/gobuffalo/envy"
 	"github.com/gobuffalo/gocraft-work-adapter"
 	"github.com/gobuffalo/packr"
@@ -38,7 +37,6 @@ var T *i18n.Translator
 
 var gopath string
 var userStore *user.Store
-var w worker.Worker
 var s storage.Backend
 var ps proxystate.Store
 
@@ -48,8 +46,6 @@ func init() {
 		log.Fatalf("GOPATH is not set!")
 	}
 	gopath = g
-	w = app.Worker
-	w.Register("process_module", processModuleJob)
 
 	mongoURI, err := envy.MustGet("NewStorage")
 	if err != nil {
@@ -67,8 +63,6 @@ func init() {
 		log.Fatalf("Unable to connect to backing state store: %v", err)
 	}
 	ps = mps
-
-	go SyncLoop()
 }
 
 // App is where all routes and middleware for buffalo
