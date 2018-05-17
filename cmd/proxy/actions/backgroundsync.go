@@ -17,11 +17,11 @@ import (
 // GetProcessModuleJob porcesses job from a queue and downloads missing module
 func GetProcessModuleJob(s storage.Backend, ps proxystate.Store) worker.Handler {
 	return func(args worker.Args) error {
-		olympusEndpoint, ok := args["olympusEndpoint"].(string)
+		olympusEndpoint, ok := args[workerEndpointKey].(string)
 		if !ok {
 			return errors.New("olympus endpoint not provided")
 		}
-		event, ok := args["event"].(eventlog.Event)
+		event, ok := args[workerEventKey].(eventlog.Event)
 		if !ok {
 			return errors.New("event to process not provided")
 		}
@@ -30,6 +30,7 @@ func GetProcessModuleJob(s storage.Backend, ps proxystate.Store) worker.Handler 
 			return nil
 		}
 
+		// get module info
 		os := olympusStore.NewStorage(olympusEndpoint)
 		version, err := os.Get(event.Module, event.Version)
 		if err != nil {
@@ -47,7 +48,7 @@ func GetProcessModuleJob(s storage.Backend, ps proxystate.Store) worker.Handler 
 
 // SyncLoop is synchronization background job meant to run in a goroutine
 // pulling event log from olympus
-func SyncLoop(s storage.Backend, ps proxystate.Store) {
+func SyncLoop(s storage.Backend, ps proxystate.Store, w worker.Worker) {
 	olympusEndpoint, sequenceID := getLoopState(ps)
 
 	for {
@@ -62,7 +63,7 @@ func SyncLoop(s storage.Backend, ps proxystate.Store) {
 			}
 
 			for _, e := range ee {
-				err = process(olympusEndpoint, e)
+				err = process(olympusEndpoint, e, w)
 				if err != nil {
 					break
 				}
@@ -77,13 +78,13 @@ func SyncLoop(s storage.Backend, ps proxystate.Store) {
 }
 
 // Process pushes pull job into the queue to be processed asynchonously
-func process(olympusEndpoint string, event eventlog.Event) error {
-	return app.Worker.Perform(worker.Job{
-		Queue:   "default",
-		Handler: "olympuspuller",
+func process(olympusEndpoint string, event eventlog.Event, w worker.Worker) error {
+	return w.Perform(worker.Job{
+		Queue:   workerQueue,
+		Handler: workerName,
 		Args: worker.Args{
-			"olympusEndpoint": olympusEndpoint,
-			"event":           event,
+			workerEndpointKey: olympusEndpoint,
+			workerEventKey:    event,
 		},
 	})
 }

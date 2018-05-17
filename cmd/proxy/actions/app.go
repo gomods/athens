@@ -3,6 +3,8 @@ package actions
 import (
 	"log"
 
+	"github.com/gobuffalo/buffalo/worker"
+
 	// "github.com/gomods/athens/models"
 	"github.com/garyburd/redigo/redis"
 	"github.com/gobuffalo/buffalo"
@@ -16,6 +18,13 @@ import (
 	"github.com/gomods/athens/pkg/user"
 	"github.com/rs/cors"
 	"github.com/unrolled/secure"
+)
+
+const (
+	workerName        = "olympuspuller"
+	workerQueue       = "default"
+	workerEndpointKey = "olympusEndpoint"
+	workerEventKey    = "event"
 )
 
 // ENV is used to help switch settings based on where the
@@ -55,18 +64,7 @@ func App() *buffalo.App {
 				cors.Default().Handler,
 			},
 			SessionName: "_athens_session",
-			Worker: gwa.New(gwa.Options{
-				Pool: &redis.Pool{
-					MaxActive: 5,
-					MaxIdle:   5,
-					Wait:      true,
-					Dial: func() (redis.Conn, error) {
-						return redis.Dial("tcp", redisPort)
-					},
-				},
-				Name:           "olympuspuller",
-				MaxConcurrency: 25,
-			}),
+			Worker:      getWorker(redisPort),
 		})
 		// Automatically redirect to SSL
 		app.Use(ssl.ForceSSL(secure.Options{
@@ -99,9 +97,13 @@ func App() *buffalo.App {
 
 		if MODE == "proxy" {
 			log.Printf("starting athens in proxy mode")
-			store, err := getStorage()
+			store, err := GetStorage()
 			if err != nil {
 				log.Fatalf("error getting storage configuration (%s)", err)
+				return nil
+			}
+			if err := store.Connect(); err != nil {
+				log.Fatalf("error connecting to storage (%s)", err)
 				return nil
 			}
 			if err := addProxyRoutes(app, store); err != nil {
@@ -126,4 +128,19 @@ func App() *buffalo.App {
 	}
 
 	return app
+}
+
+func getWorker(port string) worker.Worker {
+	return gwa.New(gwa.Options{
+		Pool: &redis.Pool{
+			MaxActive: 5,
+			MaxIdle:   5,
+			Wait:      true,
+			Dial: func() (redis.Conn, error) {
+				return redis.Dial("tcp", port)
+			},
+		},
+		Name:           workerName,
+		MaxConcurrency: 25,
+	})
 }
