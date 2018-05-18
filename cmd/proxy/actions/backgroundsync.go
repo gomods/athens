@@ -3,6 +3,7 @@ package actions
 import (
 	"errors"
 	"io/ioutil"
+	"sync"
 	"time"
 
 	"github.com/gobuffalo/buffalo/worker"
@@ -14,13 +15,30 @@ import (
 	olympusStore "github.com/gomods/athens/pkg/storage/olympus"
 )
 
+const (
+	// OlympusGlobalEndpoint is a default olympus DNS address
+	OlympusGlobalEndpoint = "olympus.gomods.io"
+)
+
+var (
+	currentOlympusEndpoint = ""
+	endpointLock           sync.Mutex
+)
+
 // GetProcessModuleJob porcesses job from a queue and downloads missing module
-func GetProcessModuleJob(s storage.Backend, ps proxystate.Store) worker.Handler {
-	return func(args worker.Args) error {
-		olympusEndpoint, ok := args[workerEndpointKey].(string)
+func GetProcessModuleJob(s storage.Backend, ps proxystate.Store, w worker.Worker) worker.Handler {
+	return func(args worker.Args) (err error) {
+		currentOlympusEndpoint := getCurrentOlympus()
+		jobOlympusEndpoint, ok := args[workerEndpointKey].(string)
 		if !ok {
 			return errors.New("olympus endpoint not provided")
 		}
+
+		// if processing job associated with older state, skip
+		if currentOlympusEndpoint != jobOlympusEndpoint {
+			return nil
+		}
+
 		event, ok := args[workerEventKey].(eventlog.Event)
 		if !ok {
 			return errors.New("event to process not provided")
@@ -31,18 +49,25 @@ func GetProcessModuleJob(s storage.Backend, ps proxystate.Store) worker.Handler 
 		}
 
 		// get module info
-		os := olympusStore.NewStorage(olympusEndpoint)
+		os := olympusStore.NewStorage(jobOlympusEndpoint)
 		version, err := os.Get(event.Module, event.Version)
 		if err != nil {
+			process(jobOlympusEndpoint, event, w)
 			return err
 		}
 
 		zip, err := ioutil.ReadAll(version.Zip)
 		if err != nil {
+			process(jobOlympusEndpoint, event, w)
 			return err
 		}
 
-		return s.Save(event.Module, event.Version, version.Mod, zip)
+		err = s.Save(event.Module, event.Version, version.Mod, zip)
+		if err != nil {
+			process(jobOlympusEndpoint, event, w)
+		}
+
+		return err
 	}
 }
 
@@ -57,6 +82,15 @@ func SyncLoop(s storage.Backend, ps proxystate.Store, w worker.Worker) {
 			ee, err := getEventLog(olympusEndpoint, sequenceID)
 
 			if err != nil {
+				// on redirect from global to deployment update state,
+				if redirectErr, ok := err.(*eventlog.ErrUseNewOlympus); ok {
+					olympusEndpoint = redirectErr.Endpoint
+					sequenceID = ""
+					ps.Set(olympusEndpoint, "")
+					updateCurrentOlympus(olympusEndpoint)
+					continue
+				}
+				// on another error reset state
 				ps.Clear()
 				olympusEndpoint, sequenceID = getLoopState(ps)
 				continue
@@ -106,8 +140,20 @@ func getLoopState(ps proxystate.Store) (olympusEndpoint string, sequenceID strin
 
 	state, err := ps.Get()
 	if err != nil {
-		return "olympus.gomods.io", ""
+		return OlympusGlobalEndpoint, ""
 	}
 
 	return state.OlympusEndpoint, state.SequenceID
+}
+
+func updateCurrentOlympus(o string) {
+	endpointLock.Lock()
+	defer endpointLock.Unlock()
+	currentOlympusEndpoint = o
+}
+
+func getCurrentOlympus() string {
+	endpointLock.Lock()
+	defer endpointLock.Unlock()
+	return currentOlympusEndpoint
 }

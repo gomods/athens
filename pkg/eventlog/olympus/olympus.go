@@ -31,7 +31,12 @@ func (o *Log) ReadFrom(id string) ([]eventlog.Event, error) {
 	eventlogURI := fmt.Sprintf("%s/eventlog/%s", o.uri, id)
 
 	// fetch mod file
-	client := http.Client{Timeout: 180 * time.Second}
+	client := http.Client{
+		Timeout: 180 * time.Second,
+		CheckRedirect: func(req *http.Request, via []*http.Request) error {
+			return &eventlog.ErrUseNewOlympus{Endpoint: req.URL.String()}
+		},
+	}
 	resp, err := client.Get(eventlogURI)
 	if err != nil {
 		return nil, err
