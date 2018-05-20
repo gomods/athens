@@ -70,7 +70,7 @@ A few environment variables are expected by the application and tests.
 |ATHENS_MONGO_STORAGE_URL |mongodb://127.0.0.1:27017  |
 
 To set in bash/zsh/osx: `export POP_PATH=$PWD/cmd/proxy`
-To set in fish: `set -x POP_PATH $PWD/cmd/proxy`
+To set in fish: `set -Ux POP_PATH $PWD/cmd/proxy`
 
 Lastly you will need to create and initialize the database.
 
