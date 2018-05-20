@@ -42,7 +42,7 @@ all of your modules will disappear** because the only storage driver is in-memor
 
 See [CLI](./CLI.md) for information on how to add modules back into the server.
 
-## Dependencies
+## Dependencies and Set-up
 
 To run the development server, or run tests (tip: run `make test` to easily run tests), you'll need a running MongoDB server. We plan to add more service dependencies in the future, so we are using [Docker](https://www.docker.com/) and [Docker Compose](https://docs.docker.com/compose/) to create and destroy
 development environments.
@@ -57,6 +57,26 @@ To destroy:
 
 ```console
 docker-compose down
+```
+
+A few environment variables are expected by the application and tests.
+
+|Variable |Value  |
+|---|---:|
+|POP_PATH |$PWD/cmd/proxy |
+|GO_ENV |test_postgres  |
+|MINIO_ACCESS_KEY |minio |
+|MINIO_SECRET_KEY |minio123 |
+|ATHENS_MONGO_STORAGE_URL |mongodb://127.0.0.1:27017  |
+
+To set in bash/zsh/osx: `export POP_PATH=$PWD/cmd/proxy`
+To set in fish: `set -x POP_PATH $PWD/cmd/proxy`
+
+Lastly you will need to create and initialize the database.
+
+```console
+buffalo db create
+buffalo db migrate up
 ```
 
 # Contributing
