@@ -3,7 +3,7 @@ package actions
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
+	"log"
 	"net/http"
 	"strings"
 	"time"
@@ -20,39 +20,31 @@ func cachemissHandler(next buffalo.Handler) buffalo.Handler {
 		if isModuleNotFoundErr(nextErr) {
 			// TODO: set workers and process it there to minimize latency
 			params, err := getAllPathParams(c)
-			fmt.Println("2")
 			if err != nil {
-				fmt.Println(err)
+				log.Println(err)
 				return nextErr
 			}
 
 			cm := payloads.Module{Name: params.module, Version: params.version}
 			content, err := json.Marshal(cm)
-			fmt.Println("3")
 			if err != nil {
-				fmt.Println(err)
+				log.Println(err)
 				return nextErr
 			}
 
 			olympusEndpoint := getCurrentOlympus()
-			fmt.Println("4")
 			if olympusEndpoint == "" || olympusEndpoint == OlympusGlobalEndpoint {
-				fmt.Println(err)
 				return nextErr
 			}
 
 			req, err := http.NewRequest("POST", olympusEndpoint+"/cachemiss", bytes.NewBuffer(content))
-
-			fmt.Println("5")
-			fmt.Println(olympusEndpoint)
 			if err != nil {
-				fmt.Println(err)
+				log.Println(err)
 				return nextErr
 			}
 
-			fmt.Println("6")
 			client := http.Client{Timeout: 30 * time.Second}
-			fmt.Println(client.Do(req))
+			client.Do(req)
 		}
 
 		return nextErr

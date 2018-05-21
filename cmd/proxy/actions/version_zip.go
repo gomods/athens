@@ -17,7 +17,6 @@ func versionZipHandler(getter storage.Getter) func(c buffalo.Context) error {
 		}
 		version, err := getter.Get(params.module, params.version)
 		if storage.IsNotFoundError(err) {
-
 			return c.Error(http.StatusNotFound, fmt.Errorf("%s@%s not found", params.module, params.version))
 		} else if err != nil {
 			return err
