@@ -75,6 +75,7 @@ func GetProcessModuleJob(s storage.Backend, ps proxystate.Store, w worker.Worker
 // pulling event log from olympus
 func SyncLoop(s storage.Backend, ps proxystate.Store, w worker.Worker) {
 	olympusEndpoint, sequenceID := getLoopState(ps)
+	updateCurrentOlympus(olympusEndpoint)
 
 	for {
 		select {
@@ -84,9 +85,8 @@ func SyncLoop(s storage.Backend, ps proxystate.Store, w worker.Worker) {
 			if err != nil {
 				// on redirect from global to deployment update state,
 				if redirectErr, ok := err.(*eventlog.ErrUseNewOlympus); ok {
-					olympusEndpoint = redirectErr.Endpoint
-					sequenceID = ""
-					ps.Set(olympusEndpoint, "")
+					olympusEndpoint, sequenceID = redirectErr.Endpoint, ""
+					ps.Set(olympusEndpoint, sequenceID)
 					updateCurrentOlympus(olympusEndpoint)
 					continue
 				}
