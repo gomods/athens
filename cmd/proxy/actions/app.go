@@ -19,7 +19,8 @@ import (
 )
 
 const (
-	workerName        = "olympuspuller"
+	// WorkerName is the name of the worker processing misses
+	WorkerName        = "olympuspuller"
 	workerQueue       = "default"
 	workerEndpointKey = "olympusEndpoint"
 	workerEventKey    = "event"
@@ -138,7 +139,7 @@ func getWorker(port string) worker.Worker {
 				return redis.Dial("tcp", port)
 			},
 		},
-		Name:           workerName,
+		Name:           WorkerName,
 		MaxConcurrency: 25,
 	})
 }

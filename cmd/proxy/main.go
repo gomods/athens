@@ -24,7 +24,7 @@ func main() {
 	}
 
 	w := app.Worker
-	if err := w.Register("process_module", actions.GetProcessModuleJob(s, ps, w)); err != nil {
+	if err := w.Register(actions.WorkerName, actions.GetProcessModuleJob(s, ps, w)); err != nil {
 		log.Fatal(err)
 	}
 

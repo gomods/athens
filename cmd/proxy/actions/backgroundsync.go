@@ -1,6 +1,7 @@
 package actions
 
 import (
+	"encoding/json"
 	"errors"
 	"io/ioutil"
 	"sync"
@@ -39,9 +40,15 @@ func GetProcessModuleJob(s storage.Backend, ps proxystate.Store, w worker.Worker
 			return nil
 		}
 
-		event, ok := args[workerEventKey].(eventlog.Event)
+		eventRaw, ok := args[workerEventKey].(string)
 		if !ok {
 			return errors.New("event to process not provided")
+		}
+
+		var event eventlog.Event
+		err = json.Unmarshal([]byte(eventRaw), &event)
+		if err != nil {
+			return errors.New("event to process not deserialized")
 		}
 
 		if s.Exists(event.Module, event.Version) {
@@ -104,8 +111,8 @@ func SyncLoop(s storage.Backend, ps proxystate.Store, w worker.Worker) {
 			}
 
 			if len(ee) > 0 {
-				lastID := ee[len(ee)-1].ID
-				ps.Set(olympusEndpoint, lastID)
+				sequenceID = ee[len(ee)-1].ID
+				ps.Set(olympusEndpoint, sequenceID)
 			}
 		}
 	}
@@ -113,12 +120,17 @@ func SyncLoop(s storage.Backend, ps proxystate.Store, w worker.Worker) {
 
 // Process pushes pull job into the queue to be processed asynchonously
 func process(olympusEndpoint string, event eventlog.Event, w worker.Worker) error {
+	e, err := json.Marshal(event)
+	if err != nil {
+		return err
+	}
+
 	return w.Perform(worker.Job{
 		Queue:   workerQueue,
-		Handler: workerName,
+		Handler: WorkerName,
 		Args: worker.Args{
 			workerEndpointKey: olympusEndpoint,
-			workerEventKey:    event,
+			workerEventKey:    string(e),
 		},
 	})
 }
@@ -137,6 +149,10 @@ func getLoopState(ps proxystate.Store) (olympusEndpoint string, sequenceID strin
 	// try env overrides
 	olympusEndpoint = envy.Get("PROXY_OLYMPUS_ENDPOINT", "")
 	sequenceID = envy.Get("PROXY_SEQUENCE_ID", "")
+
+	if olympusEndpoint != "" {
+		return olympusEndpoint, sequenceID
+	}
 
 	state, err := ps.Get()
 	if err != nil {
