@@ -16,6 +16,7 @@ func (s *ModuleStore) Get(module, vsn string) (*storage.Version, error) {
 
 	modURI := fmt.Sprintf("%s/%s/@v/%s.mod", s.url, module, vsn)
 	zipURI := fmt.Sprintf("%s/%s/@v/%s.zip", s.url, module, vsn)
+	infoURI := fmt.Sprintf("%s/%s/@v/%s.info", s.url, module, vsn)
 
 	// fetch mod file
 	var mod []byte
@@ -44,14 +45,22 @@ func (s *ModuleStore) Get(module, vsn string) (*storage.Version, error) {
 		return nil, err
 	}
 
+	// fetch info file
+	var info []byte
+	infoResp, err := client.Get(infoURI)
+	if err != nil {
+		return nil, err
+	}
+	defer infoResp.Body.Close()
+
+	info, err = ioutil.ReadAll(infoResp.Body)
+	if err != nil {
+		return nil, err
+	}
+
 	return &storage.Version{
-		RevInfo: storage.RevInfo{
-			Version: vsn,
-			Name:    module,
-			Short:   module,
-			Time:    time.Now(),
-		},
-		Mod: mod,
-		Zip: ioutil.NopCloser(bytes.NewReader(zip)),
+		Info: info,
+		Mod:  mod,
+		Zip:  ioutil.NopCloser(bytes.NewReader(zip)),
 	}, nil
 }

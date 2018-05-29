@@ -69,7 +69,7 @@ func GetProcessModuleJob(s storage.Backend, ps proxystate.Store, w worker.Worker
 			return err
 		}
 
-		err = s.Save(event.Module, event.Version, version.Mod, zip)
+		err = s.Save(event.Module, event.Version, version.Mod, zip, version.Info)
 		if err != nil {
 			process(jobOlympusEndpoint, event, w)
 		}
