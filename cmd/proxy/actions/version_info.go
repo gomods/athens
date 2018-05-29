@@ -23,7 +23,7 @@ func versionInfoHandler(getter storage.Getter) func(c buffalo.Context) error {
 		}
 
 		var revInfo storage.RevInfo
-		err = json.NewDecoder(version.Info).Decode(&revInfo)
+		err = json.Unmarshal(version.Info, &revInfo)
 		if err != nil {
 			return err
 		}

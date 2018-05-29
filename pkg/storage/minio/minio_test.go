@@ -15,13 +15,10 @@ func (d *MinioTests) TestGetSaveListRoundTrip() {
 	gotten, err := d.storage.Get(module, version)
 	r.NoError(err)
 	defer gotten.Zip.Close()
-	defer gotten.Info.Close()
 	// TODO: test the time
 	r.Equal(gotten.Mod, mod)
 	zipContent, err := ioutil.ReadAll(gotten.Zip)
 	r.NoError(err)
 	r.Equal(zipContent, zip)
-	infoContent, err := ioutil.ReadAll(gotten.Info)
-	r.NoError(err)
-	r.Equal(infoContent, info)
+	r.Equal(gotten.Info, info)
 }

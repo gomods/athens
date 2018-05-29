@@ -6,5 +6,5 @@ import "io"
 type Version struct {
 	Mod  []byte
 	Zip  io.ReadCloser
-	Info io.ReadCloser
+	Info []byte
 }

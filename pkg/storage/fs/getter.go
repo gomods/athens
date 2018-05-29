@@ -20,7 +20,7 @@ func (v *storageImpl) Get(module, version string) (*storage.Version, error) {
 		return nil, err
 	}
 
-	info, err := v.filesystem.OpenFile(filepath.Join(versionedPath, version+".info"), os.O_RDONLY, 0666)
+	info, err := afero.ReadFile(v.filesystem, filepath.Join(versionedPath, version+".info"))
 	if err != nil {
 		return nil, err
 	}

@@ -23,6 +23,6 @@ func (s *ModuleStore) Get(module, vsn string) (*storage.Version, error) {
 	return &storage.Version{
 		Mod:  result.Mod,
 		Zip:  ioutil.NopCloser(bytes.NewReader(result.Zip)),
-		Info: ioutil.NopCloser(bytes.NewReader(result.Info)),
+		Info: result.Info,
 	}, nil
 }
