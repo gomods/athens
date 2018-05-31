@@ -10,11 +10,13 @@ import (
 // - Appending the log entry into the event log
 // - Modifying the module database accordingly
 type Merger struct {
+	source    string
 	getter    cdn.Getter
 	deleter   cdn.Deleter
 	mdSaver   cdn.MetadataSaver
 	dataSaver cdn.DataSaver
 	appender  Appender
+	registry  PointerRegistry
 }
 
 // Merge will merge evt into the event log, ensuring that globally, all
@@ -27,6 +29,13 @@ type Merger struct {
 // - Store the module metadata & source code in its CDN
 // - Add the existence of the module metadata & source code in its module metadata storage
 func (m Merger) Merge(evt Event) error {
+	if evt.Op == "ADD" {
+		// first try to append to the log
+		if _, err := m.appender.Append(evt); err != nil {
+			return err
+		}
+		// now update the pointer
+	}
 	// TODO
 	return nil
 }
