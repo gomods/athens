@@ -36,18 +36,33 @@ func (r *Registry) Connect() error {
 	}
 	r.s = s
 
-	return nil
+	index := mgo.Index{
+		Key:    []string{"deployment"},
+		Unique: true,
+	}
+
+	c := r.s.DB(r.d).C(r.c)
+	return c.EnsureIndex(index)
 }
 
 // LookupPointer returns the pointer to the given deploymentID eventlog
 func (r *Registry) LookupPointer(deploymentID string) (string, error) {
-	var pointer string
+	var result eventlog.RegisteredEventlog
 
 	c := r.s.DB(r.d).C(r.c)
-	err := c.FindId(deploymentID).One(&pointer)
+	err := c.FindId(deploymentID).One(&result)
 	if err == mgo.ErrNotFound {
-		return pointer, eventlog.ErrDeploymentNotFound
+		return result.Pointer, eventlog.ErrDeploymentNotFound
 	}
 
-	return pointer, nil
+	return result.Pointer, nil
+}
+
+// SetPointer both sets and updates a pointer for a given deploymentID eventlog
+func (r *Registry) SetPointer(deploymentID, pointer string) error {
+	logPointer := eventlog.RegisteredEventlog{deploymentID, pointer}
+	c := r.s.DB(r.d).C(r.c)
+	_, err := c.UpsertId(deploymentID, logPointer)
+
+	return err
 }

@@ -6,6 +6,13 @@ import "errors"
 // in a PointerRegistry.
 var ErrDeploymentNotFound = errors.New("deployment ID not found")
 
+// RegisteredEventlog stores the relationship between a deploymentID and
+// the pointer to it's olympus server eventlog
+type RegisteredEventlog struct {
+	DeploymentID string `bson:"deployment"`
+	Pointer      string `bson:"ptr"`
+}
+
 // PointerRegistry is a key/value store that stores an event log pointer for one
 // or more Olympus deployments. It is used in proxies (Athens) and Olympus
 // deployments as part of the event log sync process
