@@ -13,4 +13,6 @@ type PointerRegistry interface {
 	// LookupPointer returns an event log pointer for the given deployment ID.
 	// Returns ErrDeploymentNotFound if the deploymentID is not present
 	LookupPointer(deploymentID string) (string, error)
+	// SetPointer records the current event log pointer for the given deployment ID.
+	SetPointer(deploymentID, pointer string) error
 }
