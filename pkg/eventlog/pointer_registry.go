@@ -12,4 +12,6 @@ var ErrDeploymentNotFound = errors.New("deployment ID not found")
 type PointerRegistry interface {
 	// LookupPointer returns an event log pointer for the given deployment ID.
 	LookupPointer(deploymentID string) (string, error)
+	// SetPointer records the current event log pointer for the given deployment ID.
+	SetPointer(deploymentID, pointer string) error
 }
