@@ -60,7 +60,10 @@ func (r *Registry) LookupPointer(deploymentID string) (string, error) {
 
 // SetPointer both sets and updates a pointer for a given deploymentID eventlog
 func (r *Registry) SetPointer(deploymentID, pointer string) error {
-	logPointer := eventlog.RegisteredEventlog{deploymentID, pointer}
+	logPointer := eventlog.RegisteredEventlog{
+		DeploymentID: deploymentID,
+		Pointer:      pointer,
+	}
 	c := r.s.DB(r.d).C(r.c)
 	_, err := c.UpsertId(deploymentID, logPointer)
 
