@@ -4,7 +4,7 @@ import "errors"
 
 // ErrDeploymentNotFound is returned when the deployment ID is not found
 // in a PointerRegistry.
-var ErrDeploymentNotFound error = errors.New("deployment ID not found")
+var ErrDeploymentNotFound = errors.New("deployment ID not found")
 
 // PointerRegistry is a key/value store that stores an event log pointer for one
 // or more Olympus deployments. It is used in proxies (Athens) and Olympus
