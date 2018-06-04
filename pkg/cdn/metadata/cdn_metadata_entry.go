@@ -1,4 +1,4 @@
-package models
+package metadata
 
 import (
 	"encoding/json"
