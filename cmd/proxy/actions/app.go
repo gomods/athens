@@ -19,11 +19,16 @@ import (
 )
 
 const (
-	// WorkerName is the name of the worker processing misses
-	WorkerName        = "olympuspuller"
-	workerQueue       = "default"
-	workerEndpointKey = "olympusEndpoint"
-	workerEventKey    = "event"
+	// FetcherWorkerName is the name of the worker fetching sources from experienced cache misses
+	FetcherWorkerName = "olympusfetcher"
+	// ReporterWorkerName is the name of the worker reporting cache misses
+	ReporterWorkerName = "olympusreporter"
+	workerQueue        = "default"
+	workerModuleKey    = "module"
+	workerVersionKey   = "version"
+	workerTryCountKey  = "trycount"
+
+	maxTryCount = 5
 )
 
 // ENV is used to help switch settings based on where the
@@ -139,7 +144,7 @@ func getWorker(port string) worker.Worker {
 				return redis.Dial("tcp", port)
 			},
 		},
-		Name:           WorkerName,
+		Name:           FetcherWorkerName,
 		MaxConcurrency: 25,
 	})
 }

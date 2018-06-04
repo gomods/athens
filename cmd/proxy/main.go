@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/gomods/athens/pkg/proxy/state"
-
 	"github.com/gomods/athens/cmd/proxy/actions"
 	"github.com/gomods/athens/pkg/storage"
 )
@@ -18,17 +16,13 @@ func main() {
 		log.Fatal(err)
 	}
 
-	ps, err := getStateStorage()
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	w := app.Worker
-	if err := w.Register(actions.WorkerName, actions.GetProcessModuleJob(s, ps, w)); err != nil {
+	if err := w.Register(actions.FetcherWorkerName, actions.GetProcessCacheMissJob(s, w)); err != nil {
 		log.Fatal(err)
 	}
-
-	go actions.SyncLoop(s, ps, w)
+	if err := w.Register(actions.ReporterWorkerName, actions.GetCacheMissReporterJob(w)); err != nil {
+		log.Fatal(err)
+	}
 
 	if err := app.Serve(); err != nil {
 		log.Fatal(err)
@@ -46,17 +40,4 @@ func getLocalStorage() (storage.Backend, error) {
 	}
 
 	return s, nil
-}
-
-func getStateStorage() (state.Store, error) {
-	ps, err := actions.GetStateStorage()
-	if err != nil {
-		return nil, fmt.Errorf("Unable to retrieve backing state store: %v", err)
-	}
-
-	if err := ps.Connect(); err != nil {
-		return nil, fmt.Errorf("Unable to connect to backing state store: %v", err)
-	}
-
-	return ps, nil
 }

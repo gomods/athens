@@ -5,8 +5,6 @@ import (
 	"strings"
 
 	"github.com/gobuffalo/envy"
-	"github.com/gomods/athens/pkg/proxy/state"
-	mongostore "github.com/gomods/athens/pkg/proxy/state/mongo"
 	"github.com/gomods/athens/pkg/storage"
 	"github.com/gomods/athens/pkg/storage/fs"
 	"github.com/gomods/athens/pkg/storage/minio"
@@ -69,24 +67,6 @@ func GetStorage() (storage.BackendConnector, error) {
 		}
 		s, err := minio.NewStorage(endpoint, accessKeyID, secretAccessKey, bucketName, useSSL)
 		return storage.NoOpBackendConnector(s), err
-	default:
-		return nil, fmt.Errorf("storage type %s is unknown", storageType)
-	}
-}
-
-// GetStateStorage returns state storage backend based on env configuration
-func GetStateStorage() (state.StoreConnector, error) {
-	storageType := envy.Get("ATHENS_STATE_STORAGE_TYPE", "mongo")
-	var storageRoot string
-	var err error
-
-	switch storageType {
-	case "mongo":
-		storageRoot, err = envy.MustGet("ATHENS_MONGO_STORAGE_URL")
-		if err != nil {
-			return nil, fmt.Errorf("missing mongo URL (%s)", err)
-		}
-		return mongostore.NewStateStore(storageRoot), nil
 	default:
 		return nil, fmt.Errorf("storage type %s is unknown", storageType)
 	}
