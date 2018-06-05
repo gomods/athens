@@ -12,11 +12,11 @@ import (
 
 // CdnMetadataEntry stores the module name and cdn URL.
 type CdnMetadataEntry struct {
-	ID          uuid.UUID `json:"id" db:"id"`
-	CreatedAt   time.Time `json:"created_at" db:"created_at"`
-	UpdatedAt   time.Time `json:"updated_at" db:"updated_at"`
-	Module      string    `json:"module" db:"module"`
-	RedirectURL string    `json:"redirect_url" db:"redirect_url"`
+	ID          uuid.UUID `json:"id" db:"id" bson:"id"`
+	CreatedAt   time.Time `json:"created_at" db:"created_at" bson:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at" db:"updated_at" bson:"updated_at"`
+	Module      string    `json:"module" db:"module" bson:"module"`
+	RedirectURL string    `json:"redirect_url" db:"redirect_url" bson:"redirect_url"`
 }
 
 // String is not required by pop and may be deleted

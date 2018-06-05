@@ -1,22 +1,15 @@
 package mongo
 
 import (
-	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
+	"github.com/gomods/athens/pkg/cdn/metadata"
 )
 
-type getter struct {
-	conn *mgo.Session
-	db   string
-	coll string
-}
-
-func (g *getter) Get(module string) (string, error) {
-	coll := g.conn.DB(g.db).C(g.coll)
+// Get retrieves the cdn base URL for a module
+func (s *MetadataStore) Get(module string) (string, error) {
+	coll := s.session.DB(s.db).C(s.col)
 	params := bson.M{"module": module}
-	entry := Entry{}
-	if err := coll.Find(params).One(&entry); err != nil {
-		return "", nil
-	}
-	return entry.RedirectURL, nil
+	entry := metadata.CdnMetadataEntry{}
+	err := coll.Find(params).One(&entry)
+	return entry.RedirectURL, err
 }
