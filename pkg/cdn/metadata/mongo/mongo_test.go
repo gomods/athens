@@ -24,7 +24,7 @@ func TestMongo(t *testing.T) {
 
 func (m *MongoTests) SetupTest() {
 	m.Mongo.SetupTest()
-	store := NewMongoStorage(fixtures.DefaultMongoURL, m.Mongo.DBName)
+	store := NewStorage(fixtures.DefaultMongoURL, m.Mongo.DBName)
 	store.Connect()
 	m.storage = store
 }
@@ -41,7 +41,7 @@ func (m *MongoTests) TestGetSaveListRoundTrip() {
 
 func (m *MongoTests) TestNewMongoStorage() {
 	r := m.Require()
-	getterSaver := NewMongoStorage(fixtures.DefaultMongoURL, m.Mongo.DBName)
+	getterSaver := NewStorage(fixtures.DefaultMongoURL, m.Mongo.DBName)
 	getterSaver.Connect()
 
 	r.NotNil(getterSaver.col)

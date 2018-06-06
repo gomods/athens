@@ -10,10 +10,10 @@ type MetadataStore struct {
 	url     string
 }
 
-// NewMongoStorage returns an unconnected Mongo backed storage
+// NewStorage returns an unconnected Mongo backed storage
 // that satisfies the Storage interface.  You must call
 // Connect() on the returned store before using it.
-func NewMongoStorage(url, dbName string) *MetadataStore {
+func NewStorage(url, dbName string) *MetadataStore {
 	return &MetadataStore{url: url, db: dbName}
 }
 
@@ -25,7 +25,6 @@ func (m *MetadataStore) Connect() error {
 	}
 	m.session = s
 
-	// TODO: collection as env var, or param to New()? together with user/mongo
 	m.col = "cdn_metadata"
 
 	index := mgo.Index{

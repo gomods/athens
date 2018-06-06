@@ -13,7 +13,7 @@ func (rd *RDBMSTestSuite) TestGetSaveRoundTrip() {
 func (rd *RDBMSTestSuite) TestNewRDBMSStorage() {
 	r := rd.Require()
 	e := "development"
-	getterSaver := NewRDBMSStorage(e)
+	getterSaver := NewStorage(e)
 	getterSaver.Connect()
 
 	r.NotNil(getterSaver.conn)

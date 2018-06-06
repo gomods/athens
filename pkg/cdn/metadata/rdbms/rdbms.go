@@ -10,11 +10,11 @@ type MetadataStore struct {
 	connectionName string // settings name from database.yml
 }
 
-// NewRDBMSStorage  returns an unconnected RDBMS Metadata Storage
+// NewStorage  returns an unconnected RDBMS Metadata Storage
 // that satisfies the Getter and Setter interfaces. You must call
 // Connect() on the returned store before using it.
 // connectionName
-func NewRDBMSStorage(connectionName string) *MetadataStore {
+func NewStorage(connectionName string) *MetadataStore {
 	return &MetadataStore{
 		connectionName: connectionName,
 	}

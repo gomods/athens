@@ -13,7 +13,7 @@ func (s *MetadataStore) Save(module, redirectURL string) error {
 	if err != nil {
 		return err
 	}
-	m := &metadata.CdnMetadataEntry{
+	m := &metadata.CDNMetadataEntry{
 		ID:          id,
 		Module:      module,
 		RedirectURL: redirectURL,

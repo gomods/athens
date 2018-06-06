@@ -9,7 +9,7 @@ import (
 func (s *MetadataStore) Get(module string) (string, error) {
 	coll := s.session.DB(s.db).C(s.col)
 	params := bson.M{"module": module}
-	entry := metadata.CdnMetadataEntry{}
+	entry := metadata.CDNMetadataEntry{}
 	err := coll.Find(params).One(&entry)
 	return entry.RedirectURL, err
 }
