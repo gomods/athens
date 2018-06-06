@@ -7,6 +7,7 @@ import (
 
 	"github.com/gobuffalo/buffalo"
 	"github.com/gomods/athens/pkg/cdn"
+	"github.com/gomods/athens/pkg/paths"
 )
 
 // GoGet is middleware that checks for the 'go-get=1' query string. If it exists,
@@ -23,15 +24,15 @@ func GoGet(getter cdn.Getter) buffalo.MiddlewareFunc {
 }
 
 func goGetMeta(c buffalo.Context, getter cdn.Getter) error {
-	params, err := getAllPathParams(c)
+	params, err := paths.GetAllParams(c)
 	if err != nil {
 		return err
 	}
-	loc, err := getter.Get(params.module)
+	loc, err := getter.Get(params.Module)
 	if err != nil {
-		return c.Error(http.StatusNotFound, fmt.Errorf("module %s does not exist", params.module))
+		return c.Error(http.StatusNotFound, fmt.Errorf("module %s does not exist", params.Module))
 	}
 	c.Set("redirectLoc", loc)
-	c.Set("module", params.module)
+	c.Set("module", params.Module)
 	return c.Render(http.StatusOK, renderEng.HTML("goget.html"))
 }
