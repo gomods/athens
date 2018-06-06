@@ -48,3 +48,8 @@ func (e *CDNMetadataEntry) ValidateCreate(tx *pop.Connection) (*validate.Errors,
 func (e *CDNMetadataEntry) ValidateUpdate(tx *pop.Connection) (*validate.Errors, error) {
 	return validate.NewErrors(), nil
 }
+
+// TableName changes the default name which would be c_d_n_metadata_entry
+func (e *CDNMetadataEntry) TableName() string {
+	return "cdn_metadata_entries"
+}
