@@ -5,16 +5,16 @@ import (
 	"time"
 )
 
-// Op holds an operation type on an event
-type Op string
+// EventOp holds an operation type on an event
+type EventOp string
 
 const (
 	// OpAdd represents an add event
-	OpAdd Op = "ADD"
+	OpAdd EventOp = "ADD"
 	// OpDel represents a delete event
-	OpDel Op = "DEL"
+	OpDel EventOp = "DEL"
 	// OpDep represents a deprecate event
-	OpDep Op = "DEP"
+	OpDep EventOp = "DEP"
 )
 
 // Event is entry of event log specifying demand for a module.
