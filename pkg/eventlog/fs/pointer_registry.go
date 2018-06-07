@@ -71,6 +71,12 @@ func (r *Registry) SetPointer(deploymentID, pointer string) error {
 		return err
 	}
 
+	// NOTE: temporary fix while bug exists in afero.MemMapFs
+	err = f.Truncate(0)
+	if err != nil {
+		return err
+	}
+
 	enc := gob.NewEncoder(f)
 	return enc.Encode(&data)
 }
