@@ -66,7 +66,11 @@ func (r *Registry) SetPointer(deploymentID, pointer string) error {
 
 	data[deploymentID] = pointer
 
+	_, err = f.Seek(0, os.SEEK_SET)
+	if err != nil {
+		return err
+	}
+
 	enc := gob.NewEncoder(f)
-	err = enc.Encode(&data)
-	return err
+	return enc.Encode(&data)
 }

@@ -18,7 +18,7 @@ func TestRegistry(t *testing.T) {
 }
 
 func (fs *FsRegistryTests) SetupTest() {
-	store := NewRegistry("/tmp", afero.NewMemMapFs())
+	store := NewRegistry("/tmp", afero.NewOsFs())
 
 	fs.registry = store
 }
