@@ -1,5 +1,9 @@
 package fs
 
+// NOTE: for encoding and decoding data from the file
+// encoding/json has to be used over encoding/gob due to a possible bug
+// in afero. see issue #172 for reference
+// https://github.com/spf13/afero/issues/172
 import (
 	"encoding/json"
 	"io"
