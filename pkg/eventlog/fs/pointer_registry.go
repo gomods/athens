@@ -1,7 +1,7 @@
 package fs
 
 import (
-	"encoding/gob"
+	"encoding/json"
 	"io"
 	"os"
 
@@ -35,7 +35,7 @@ func (r *Registry) LookupPointer(deploymentID string) (string, error) {
 
 	var data = make(registryData)
 
-	dec := gob.NewDecoder(f)
+	dec := json.NewDecoder(f)
 	err = dec.Decode(&data)
 	if err != nil {
 		return "", err
@@ -58,7 +58,7 @@ func (r *Registry) SetPointer(deploymentID, pointer string) error {
 
 	var data = make(registryData)
 
-	dec := gob.NewDecoder(f)
+	dec := json.NewDecoder(f)
 	err = dec.Decode(&data)
 	if err != nil && err != io.EOF {
 		return err
@@ -71,12 +71,6 @@ func (r *Registry) SetPointer(deploymentID, pointer string) error {
 		return err
 	}
 
-	// NOTE: temporary fix while bug exists in afero.MemMapFs
-	err = f.Truncate(0)
-	if err != nil {
-		return err
-	}
-
-	enc := gob.NewEncoder(f)
+	enc := json.NewEncoder(f)
 	return enc.Encode(&data)
 }
