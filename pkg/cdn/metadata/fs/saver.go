@@ -28,12 +28,13 @@ func (s *fsStore) Save(module, redirectURL string) error {
 	if err != nil {
 		return err
 	}
+	t := time.Now().UTC()
 	m := &metadata.CDNMetadataEntry{
 		ID:          id,
 		Module:      module,
 		RedirectURL: redirectURL,
-		CreatedAt:   time.Now().UTC(),
-		UpdatedAt:   time.Now().UTC(),
+		CreatedAt:   t,
+		UpdatedAt:   t,
 	}
 	enc := json.NewEncoder(f)
 	return enc.Encode(m)
