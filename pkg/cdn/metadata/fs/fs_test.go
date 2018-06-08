@@ -3,9 +3,8 @@ package fs
 import (
 	"testing"
 
-	"github.com/spf13/afero"
-
 	"github.com/gomods/athens/pkg/cdn/metadata"
+	"github.com/spf13/afero"
 	"github.com/stretchr/testify/suite"
 )
 
