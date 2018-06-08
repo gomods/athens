@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/gobuffalo/buffalo/worker"
-	"github.com/gomods/athens/pkg/eventlog"
 	"github.com/gomods/athens/pkg/payloads"
 )
 
@@ -34,22 +33,13 @@ func reportCacheMiss(module, version string) error {
 		return err
 	}
 
-	olympusEndpoint := getCurrentOlympus()
-	if olympusEndpoint == "" {
-		return nil
-	}
-
-	req, err := http.NewRequest("POST", olympusEndpoint+"/cachemiss", bytes.NewBuffer(content))
+	req, err := http.NewRequest("POST", OlympusGlobalEndpoint+"/cachemiss", bytes.NewBuffer(content))
 	if err != nil {
 		return err
 	}
 
 	client := http.Client{
 		Timeout: 30 * time.Second,
-		CheckRedirect: func(req *http.Request, via []*http.Request) error {
-			updateCurrentOlympus(req.URL.String())
-			return &eventlog.ErrUseNewOlympus{Endpoint: req.URL.String()}
-		},
 	}
 
 	_, err = client.Do(req)

@@ -3,6 +3,7 @@ package actions
 import (
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/gobuffalo/buffalo"
 	cdnmetadata "github.com/gomods/athens/pkg/cdn/metadata"
@@ -14,7 +15,7 @@ import (
 func GoGet(getter cdnmetadata.Getter) buffalo.MiddlewareFunc {
 	return func(next buffalo.Handler) buffalo.Handler {
 		return func(c buffalo.Context) error {
-			if paths.IsGoGet(c.Request().URL) {
+			if strings.Contains(c.Request().URL.Query().Get("go-get"), "1") {
 				return goGetMeta(c, getter)
 			}
 			return next(c)
@@ -33,5 +34,5 @@ func goGetMeta(c buffalo.Context, getter cdnmetadata.Getter) error {
 	}
 	c.Set("redirectLoc", loc)
 	c.Set("module", params.Module)
-	return c.Render(http.StatusOK, proxy.HTML("goget.html"))
+	return c.Render(http.StatusOK, renderEng.HTML("goget.html"))
 }

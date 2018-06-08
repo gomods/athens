@@ -6,6 +6,7 @@ import (
 
 	"github.com/gobuffalo/buffalo"
 	"github.com/gobuffalo/buffalo/worker"
+	"github.com/gomods/athens/pkg/paths"
 )
 
 func cacheMissHandler(next buffalo.Handler, w worker.Worker) buffalo.Handler {
@@ -13,14 +14,14 @@ func cacheMissHandler(next buffalo.Handler, w worker.Worker) buffalo.Handler {
 		nextErr := next(c)
 
 		if isModuleNotFoundErr(nextErr) {
-			params, err := getAllPathParams(c)
+			params, err := paths.GetAllParams(c)
 			if err != nil {
 				log.Println(err)
 				return nextErr
 			}
 
 			// TODO: add separate worker instead of inline reports
-			if err := queueCacheMissReportJob(params.module, params.version, app.Worker); err != nil {
+			if err := queueCacheMissReportJob(params.Module, params.Version, app.Worker); err != nil {
 				log.Println(err)
 				return nextErr
 			}
