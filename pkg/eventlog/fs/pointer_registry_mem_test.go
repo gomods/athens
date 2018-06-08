@@ -38,7 +38,7 @@ func (fs *FsRegistryTests) TestLookupPointer() {
 	r.Equal("location2", gotten)
 
 	gotten, err = fs.registry.LookupPointer("doesnt-exist")
-	r.Equal(err, eventlog.ErrDeploymentNotFound)
+	r.Equal(eventlog.ErrDeploymentNotFound, err)
 }
 
 func (fs *FsRegistryTests) TestNewRegistry() {

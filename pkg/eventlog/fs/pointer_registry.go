@@ -19,7 +19,7 @@ type Registry struct {
 	fs      afero.Fs
 }
 
-// registryData is a map[string]string used to gob encode the registry on disk
+// registryData is a map[string]string used to encode/decode the registry from disk
 type registryData map[string]string
 
 var registryFilename = "pointerRegistry"
@@ -40,16 +40,16 @@ func (r *Registry) LookupPointer(deploymentID string) (string, error) {
 	var data = make(registryData)
 
 	dec := json.NewDecoder(f)
-	err = dec.Decode(&data)
-	if err != nil {
+	if err := dec.Decode(&data); err != nil {
 		return "", err
 	}
 
-	if _, ok := data[deploymentID]; !ok {
+	result, ok := data[deploymentID]
+	if !ok {
 		return "", eventlog.ErrDeploymentNotFound
 	}
 
-	return data[deploymentID], nil
+	return result, nil
 }
 
 // SetPointer both sets and updates the deployment's event log pointer
@@ -63,15 +63,13 @@ func (r *Registry) SetPointer(deploymentID, pointer string) error {
 	var data = make(registryData)
 
 	dec := json.NewDecoder(f)
-	err = dec.Decode(&data)
-	if err != nil && err != io.EOF {
+	if err := dec.Decode(&data); err != nil && err != io.EOF {
 		return err
 	}
 
 	data[deploymentID] = pointer
 
-	_, err = f.Seek(0, os.SEEK_SET)
-	if err != nil {
+	if _, err := f.Seek(0, os.SEEK_SET); err != nil {
 		return err
 	}
 
