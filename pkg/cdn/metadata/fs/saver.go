@@ -19,7 +19,7 @@ func (s *fsStore) Save(module, redirectURL string) error {
 	}
 	p := filepath.Join(d, metadataFileName)
 	// os.O_CREATE|os.O_EXCL so we get an err if the file exists
-	f, err := s.filesystem.OpenFile(p, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0666)
+	f, err := s.filesystem.OpenFile(p, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0660)
 	if err != nil {
 		return err
 	}
