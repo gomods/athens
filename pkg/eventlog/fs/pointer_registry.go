@@ -32,7 +32,6 @@ func NewRegistry(rootDir string, filesystem afero.Fs) *Registry {
 // LookupPointer returns the pointer to the given deployment's event log
 func (r *Registry) LookupPointer(deploymentID string) (string, error) {
 	f, err := r.fs.OpenFile(registryFilename, os.O_RDONLY|os.O_CREATE, 0440)
-	defer f.Close()
 	if err != nil {
 		return "", err
 	}
@@ -49,13 +48,12 @@ func (r *Registry) LookupPointer(deploymentID string) (string, error) {
 		return "", eventlog.ErrDeploymentNotFound
 	}
 
-	return result, nil
+	return result, f.Close()
 }
 
 // SetPointer both sets and updates the deployment's event log pointer
 func (r *Registry) SetPointer(deploymentID, pointer string) error {
 	f, err := r.fs.OpenFile(registryFilename, os.O_RDWR|os.O_CREATE, 0660)
-	defer f.Close()
 	if err != nil {
 		return err
 	}
@@ -74,5 +72,9 @@ func (r *Registry) SetPointer(deploymentID, pointer string) error {
 	}
 
 	enc := json.NewEncoder(f)
-	return enc.Encode(&data)
+	if err := enc.Encode(&data); err != nil {
+		return err
+	}
+
+	return f.Close()
 }
