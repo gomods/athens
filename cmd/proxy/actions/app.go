@@ -1,6 +1,7 @@
 package actions
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/garyburd/redigo/redis"
@@ -58,7 +59,7 @@ func init() {
 // App is where all routes and middleware for buffalo
 // should be defined. This is the nerve center of your
 // application.
-func App() *buffalo.App {
+func App() (*buffalo.App, error) {
 	if app == nil {
 		redisPort := envy.Get("ATHENS_REDIS_QUEUE_PORT", ":6379")
 
@@ -103,26 +104,26 @@ func App() *buffalo.App {
 			log.Printf("starting athens in proxy mode")
 			store, err := GetStorage()
 			if err != nil {
-				log.Fatalf("error getting storage configuration (%s)", err)
-				return nil
+				err = fmt.Errorf("error getting storage configuration (%s)", err)
+				return nil, err
 			}
 			if err := store.Connect(); err != nil {
-				log.Fatalf("error connecting to storage (%s)", err)
-				return nil
+				err = fmt.Errorf("error connecting to storage (%s)", err)
+				return nil, err
 			}
 			if err := addProxyRoutes(app, store); err != nil {
-				log.Fatalf("error adding proxy routes (%s)", err)
-				return nil
+				err = fmt.Errorf("error adding proxy routes (%s)", err)
+				return nil, err
 			}
 		} else if MODE == "registry" {
 			log.Printf("starting athens in registry mode")
 			if err := addRegistryRoutes(app); err != nil {
-				log.Fatalf("error adding registry routes (%s)", err)
-				return nil
+				err = fmt.Errorf("error adding registry routes (%s)", err)
+				return nil, err
 			}
 		} else {
-			log.Fatalf("unsupported mode %s, exiting", MODE)
-			return nil
+			err = fmt.Errorf("unsupported mode %s, exiting", MODE)
+			return nil, err
 		}
 
 		// serve files from the public directory:
@@ -131,7 +132,7 @@ func App() *buffalo.App {
 
 	}
 
-	return app
+	return app, nil
 }
 
 func getWorker(port string) worker.Worker {

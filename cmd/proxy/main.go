@@ -9,7 +9,10 @@ import (
 )
 
 func main() {
-	app := actions.App()
+	app, err := actions.App()
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	s, err := getLocalStorage()
 	if err != nil {

@@ -8,7 +8,7 @@ import (
 	"github.com/gobuffalo/buffalo/worker"
 )
 
-func cachemissHandler(next buffalo.Handler, w worker.Worker) buffalo.Handler {
+func cacheMissHandler(next buffalo.Handler, w worker.Worker) buffalo.Handler {
 	return func(c buffalo.Context) error {
 		nextErr := next(c)
 

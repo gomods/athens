@@ -4,10 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"io/ioutil"
-	"net/http"
-	"time"
 
-	"github.com/gomods/athens/pkg/eventlog"
 	"github.com/gomods/athens/pkg/storage"
 )
 
@@ -21,14 +18,8 @@ func (s *ModuleStore) Get(module, vsn string) (*storage.Version, error) {
 
 	// fetch mod file
 	var mod []byte
-	client := http.Client{
-		Timeout: 180 * time.Second,
-		CheckRedirect: func(req *http.Request, via []*http.Request) error {
-			return &eventlog.ErrUseNewOlympus{Endpoint: req.URL.String()}
-		},
-	}
 
-	modResp, err := client.Get(modURI)
+	modResp, err := s.client.Get(modURI)
 	if err != nil {
 		return nil, err
 	}
@@ -41,7 +32,7 @@ func (s *ModuleStore) Get(module, vsn string) (*storage.Version, error) {
 
 	// fetch source file
 	var zip []byte
-	zipResp, err := client.Get(zipURI)
+	zipResp, err := s.client.Get(zipURI)
 	if err != nil {
 		return nil, err
 	}
@@ -54,7 +45,7 @@ func (s *ModuleStore) Get(module, vsn string) (*storage.Version, error) {
 
 	// fetch info file
 	var info []byte
-	infoResp, err := client.Get(infoURI)
+	infoResp, err := s.client.Get(infoURI)
 	if err != nil {
 		return nil, err
 	}

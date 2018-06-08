@@ -48,10 +48,10 @@ func (o *Log) ReadFrom(id string) ([]eventlog.Event, error) {
 		return nil, err
 	}
 
-	event := make([]eventlog.Event, 0)
-	err = json.Unmarshal(el, &event)
+	var events []eventlog.Event
+	err = json.Unmarshal(el, &events)
 
-	return event, err
+	return events, err
 }
 
 // Append appends Event to event log and returns its ID.
