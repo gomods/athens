@@ -60,9 +60,7 @@ func getCacheMissPath() (string, error) {
 	if err != nil {
 		return "", err
 	}
-
 	u.Path = path.Join(u.Path, cacheMissPath)
-
 	return u.String(), nil
 }
 
