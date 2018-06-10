@@ -2,6 +2,8 @@ package actions
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/gobuffalo/envy"
@@ -23,7 +25,7 @@ func GetStorage() (storage.BackendConnector, error) {
 	switch storageType {
 	case "memory":
 		memFs := afero.NewMemMapFs()
-		tmpDir, err := afero.TempDir(memFs, "inmem", "")
+		tmpDir, err := getTempDir(memFs)
 		if err != nil {
 			return nil, fmt.Errorf("could not create temp dir for 'In Memory' storage (%s)", err)
 		}
@@ -71,4 +73,11 @@ func GetStorage() (storage.BackendConnector, error) {
 	default:
 		return nil, fmt.Errorf("storage type %s is unknown", storageType)
 	}
+}
+
+func getTempDir(fs afero.Fs) (string, error) {
+	tmpDir := os.TempDir()
+	suffix := "athens-inmem"
+	fullDir := filepath.Join(tmpDir, suffix)
+	return fullDir, fs.MkdirAll(fullDir, os.ModeDir|os.ModePerm)
 }
