@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"encoding/json"
 	"net/http"
+	"net/url"
+	"path"
 	"time"
 
 	"github.com/gobuffalo/buffalo/worker"
@@ -33,7 +35,11 @@ func reportCacheMiss(module, version string) error {
 		return err
 	}
 
-	req, err := http.NewRequest("POST", OlympusGlobalEndpoint+"/cachemiss", bytes.NewBuffer(content))
+	p, err := getCacheMissPath()
+	if err != nil {
+		return err
+	}
+	req, err := http.NewRequest("POST", p, bytes.NewBuffer(content))
 	if err != nil {
 		return err
 	}
@@ -44,6 +50,20 @@ func reportCacheMiss(module, version string) error {
 
 	_, err = client.Do(req)
 	return err
+}
+
+func getCacheMissPath() (string, error) {
+	endpoint := GetOlympusEndpoint()
+	cacheMissPath := "cachemiss"
+
+	u, err := url.Parse(endpoint)
+	if err != nil {
+		return "", err
+	}
+
+	u.Path = path.Join(u.Path, cacheMissPath)
+
+	return u.String(), nil
 }
 
 func queueCacheMissFetch(module, version string, w worker.Worker) error {

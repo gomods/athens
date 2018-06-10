@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"io/ioutil"
 
+	"github.com/gobuffalo/envy"
+
 	"github.com/gobuffalo/buffalo/worker"
 	"github.com/gomods/athens/pkg/storage"
 	olympusStore "github.com/gomods/athens/pkg/storage/olympus"
@@ -13,6 +15,8 @@ import (
 const (
 	// OlympusGlobalEndpoint is a default olympus DNS address
 	OlympusGlobalEndpoint = "olympus.gomods.io"
+	// OlympusGlobalEndpointOverrideKey overrides default olympus settings
+	OlympusGlobalEndpointOverrideKey = "OLYMPUS_GLOBAL_ENDPOINT"
 )
 
 // GetProcessCacheMissJob porcesses queue of cache misses and downloads sources from active Olympus
@@ -63,7 +67,7 @@ func parseArgs(args worker.Args) (string, string, error) {
 }
 
 func getModuleInfo(module, version string) (*storage.Version, error) {
-	os := olympusStore.NewStorage(OlympusGlobalEndpoint)
+	os := olympusStore.NewStorage(GetOlympusEndpoint())
 	return os.Get(module, version)
 }
 
@@ -88,4 +92,9 @@ func process(module, version string, args worker.Args, w worker.Worker) error {
 			workerTryCountKey: trycount - 1,
 		},
 	})
+}
+
+// GetOlympusEndpoint returns global endpoint with override in mind
+func GetOlympusEndpoint() string {
+	return envy.Get(OlympusGlobalEndpointOverrideKey, OlympusGlobalEndpoint)
 }

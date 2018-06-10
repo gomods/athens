@@ -7,6 +7,7 @@ import (
 	"github.com/gobuffalo/buffalo"
 	"github.com/gobuffalo/buffalo/worker"
 	"github.com/gomods/athens/pkg/paths"
+	"github.com/gomods/athens/pkg/storage"
 )
 
 func cacheMissHandler(next buffalo.Handler, w worker.Worker) buffalo.Handler {
@@ -44,6 +45,10 @@ func queueCacheMissReportJob(module, version string, w worker.Worker) error {
 }
 
 func isModuleNotFoundErr(err error) bool {
+	if _, ok := err.(storage.ErrVersionNotFound); ok {
+		return ok
+	}
+
 	s := err.Error()
 	return strings.HasPrefix(s, "module ") && strings.HasSuffix(s, "not found")
 }
