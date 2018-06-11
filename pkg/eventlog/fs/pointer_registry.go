@@ -35,6 +35,7 @@ func (r *Registry) LookupPointer(deploymentID string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	defer f.Close()
 
 	var data = make(registryData)
 
@@ -48,7 +49,7 @@ func (r *Registry) LookupPointer(deploymentID string) (string, error) {
 		return "", eventlog.ErrDeploymentNotFound
 	}
 
-	return result, f.Close()
+	return result, nil
 }
 
 // SetPointer both sets and updates the deployment's event log pointer
@@ -57,6 +58,7 @@ func (r *Registry) SetPointer(deploymentID, pointer string) error {
 	if err != nil {
 		return err
 	}
+	defer f.Close()
 
 	var data = make(registryData)
 
@@ -76,5 +78,5 @@ func (r *Registry) SetPointer(deploymentID, pointer string) error {
 		return err
 	}
 
-	return f.Close()
+	return nil
 }
