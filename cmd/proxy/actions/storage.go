@@ -3,20 +3,15 @@ package actions
 import (
 	"fmt"
 	"strings"
-	"sync"
 
 	"github.com/gobuffalo/envy"
 	"github.com/gomods/athens/pkg/storage"
 	"github.com/gomods/athens/pkg/storage/fs"
+	"github.com/gomods/athens/pkg/storage/mem"
 	"github.com/gomods/athens/pkg/storage/minio"
 	"github.com/gomods/athens/pkg/storage/mongo"
 	"github.com/gomods/athens/pkg/storage/rdbms"
 	"github.com/spf13/afero"
-)
-
-var (
-	inMemStore     storage.BackendConnector
-	inMemStoreLock sync.Mutex
 )
 
 // GetStorage returns storage backend based on env configuration
@@ -28,7 +23,7 @@ func GetStorage() (storage.BackendConnector, error) {
 
 	switch storageType {
 	case "memory":
-		return getInMemStore()
+		return mem.NewStorage()
 	case "mongo":
 		storageRoot, err = envy.MustGet("ATHENS_MONGO_STORAGE_URL")
 		if err != nil {
@@ -71,21 +66,4 @@ func GetStorage() (storage.BackendConnector, error) {
 	default:
 		return nil, fmt.Errorf("storage type %s is unknown", storageType)
 	}
-}
-
-func getInMemStore() (storage.BackendConnector, error) {
-	inMemStoreLock.Lock()
-	defer inMemStoreLock.Unlock()
-	if inMemStore != nil {
-		return inMemStore, nil
-	}
-
-	memFs := afero.NewMemMapFs()
-	tmpDir, err := afero.TempDir(memFs, "", "athens-inmem")
-	if err != nil {
-		return nil, fmt.Errorf("could not create temp dir for 'In Memory' storage (%s)", err)
-	}
-	s := fs.NewStorage(tmpDir, memFs)
-	inMemStore = storage.NoOpBackendConnector(s)
-	return inMemStore, nil
 }
