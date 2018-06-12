@@ -16,7 +16,7 @@ env:
 script:
   - test -z $(gofmt -s -l $GO_FILES)                             # Fail if a .go file hasn't been formatted with gofmt
   - golint -set_exit_status $(go list ./...)                     # Linter
-  - go test -race -coverprofile cover.out -covermode count ./... # Run all the tests with the race detector and code coverage enabled
+  - go test -race -coverprofile cover.out -covermode atomic ./... # Run all the tests with the race detector and code coverage enabled
 before_script:
   - GO_FILES=$(find . -iname '*.go' -type f | grep -v /vendor/) # All the .go files, excluding vendor/
   - go get github.com/golang/lint/golint
