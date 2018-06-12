@@ -14,7 +14,6 @@ env:
   - CODE_COV=0
 script:
   - test -z $(gofmt -s -l $GO_FILES)                             # Fail if a .go file hasn't been formatted with gofmt
-  - go vet ./...                                                 # Go static analyzer
   - golint -set_exit_status $(go list ./...)                     # Linter
   - go test -race -coverprofile cover.out -covermode count ./... # Run all the tests with the race detector and code coverage enabled
 before_script:
