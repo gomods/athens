@@ -2,12 +2,16 @@ package minio
 
 import (
 	"bytes"
-	"context"
 
+	"github.com/bketelsen/buffet"
+	"github.com/gobuffalo/buffalo"
 	minio "github.com/minio/minio-go"
 )
 
-func (s *storageImpl) Save(_ context.Context, module, vsn string, mod, zip, info []byte) error {
+func (s *storageImpl) Save(c buffalo.Context, module, vsn string, mod, zip, info []byte) error {
+	sp := buffet.ChildSpan("storage.save", c)
+	defer sp.Finish()
+
 	dir := s.versionLocation(module, vsn)
 	modFileName := dir + "/" + "go.mod"
 	zipFileName := dir + "/" + "source.zip"

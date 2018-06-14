@@ -2,12 +2,20 @@ package azurecdn
 
 import (
 	"bytes"
-	"context"
 	"fmt"
 	"net/url"
 
+	"github.com/bketelsen/buffet"
+
+	"github.com/gobuffalo/buffalo"
+
+	"github.com/gomods/athens/pkg/storage"
+
 	"github.com/Azure/azure-storage-blob-go/2017-07-29/azblob"
 )
+
+// asserts that Storage implements storage.Saver
+var _ storage.Saver = &Storage{}
 
 // Storage implements (github.com/gomods/athens/pkg/storage).Saver and
 // also provides a function to fetch the location of a module
@@ -37,8 +45,9 @@ func (s Storage) BaseURL() *url.URL {
 }
 
 // Save implements the (github.com/gomods/athens/pkg/storage).Saver interface.
-func (s *Storage) Save(module, version string, mod, zip, info []byte) error {
-	ctx := context.Background()
+func (s *Storage) Save(c buffalo.Context, module, version string, mod, zip, info []byte) error {
+	sp := buffet.ChildSpan("storage.save", c)
+	defer sp.Finish()
 
 	pipe := azblob.NewPipeline(s.cred, azblob.PipelineOptions{})
 	serviceURL := azblob.NewServiceURL(*s.accountURL, pipe)
@@ -60,15 +69,15 @@ func (s *Storage) Save(module, version string, mod, zip, info []byte) error {
 	emptyMeta := map[string]string{}
 	emptyBlobAccessCond := azblob.BlobAccessConditions{}
 	// TODO: do these in parallel
-	if _, err := infoBlobURL.Upload(ctx, bytes.NewReader(info), httpHeaders("application/json"), emptyMeta, emptyBlobAccessCond); err != nil {
+	if _, err := infoBlobURL.Upload(c, bytes.NewReader(info), httpHeaders("application/json"), emptyMeta, emptyBlobAccessCond); err != nil {
 		// TODO: log
 		return err
 	}
-	if _, err := modBlobURL.Upload(ctx, bytes.NewReader(info), httpHeaders("text/plain"), emptyMeta, emptyBlobAccessCond); err != nil {
+	if _, err := modBlobURL.Upload(c, bytes.NewReader(info), httpHeaders("text/plain"), emptyMeta, emptyBlobAccessCond); err != nil {
 		// TODO: log
 		return err
 	}
-	if _, err := zipBlobURL.Upload(ctx, bytes.NewReader(zip), httpHeaders("application/octet-stream"), emptyMeta, emptyBlobAccessCond); err != nil {
+	if _, err := zipBlobURL.Upload(c, bytes.NewReader(zip), httpHeaders("application/octet-stream"), emptyMeta, emptyBlobAccessCond); err != nil {
 		// TODO: log
 		return err
 	}

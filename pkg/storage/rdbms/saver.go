@@ -1,13 +1,17 @@
 package rdbms
 
 import (
-	"context"
-
+	"github.com/gomods/athens/pkg/storage"
 	"github.com/gomods/athens/pkg/storage/rdbms/models"
+
+	"github.com/gobuffalo/buffalo"
 )
 
+// asserts that ModuleStore implements storage.Saver
+var _ storage.Saver = &ModuleStore{}
+
 // Save stores a module in rdbms storage.
-func (r *ModuleStore) Save(_ context.Context, module, version string, mod, zip, info []byte) error {
+func (r *ModuleStore) Save(_ buffalo.Context, module, version string, mod, zip, info []byte) error {
 	m := &models.Module{
 		Module:  module,
 		Version: version,
