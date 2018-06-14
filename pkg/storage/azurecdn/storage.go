@@ -1,21 +1,20 @@
 package azurecdn
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"net/url"
 	"strings"
 
 	"github.com/Azure/azure-storage-blob-go/2017-07-29/azblob"
-	"github.com/gomods/athens/pkg/storage"
-	"github.com/pkg/errors"
 )
 
 // Storage implements (github.com/gomods/athens/pkg/storage).Saver and
 // also provides a function to fetch the location of a module
 type Storage struct {
-	accountURL url.URL
-	cred       blob.Credential
+	accountURL *url.URL
+	cred       azblob.Credential
 }
 
 // New creates a new azure CDN saver
@@ -24,8 +23,8 @@ func New(accountName, accountKey string) (*Storage, error) {
 	if err != nil {
 		return nil, err
 	}
-	cred := blob.NewSharedKeyCredential(accountName, accoutnKey)
-	return &storage{accountURL: u, cred: cred}
+	cred := azblob.NewSharedKeyCredential(accountName, accountKey)
+	return &Storage{accountURL: u, cred: cred}, nil
 }
 
 // BaseURL returns the base URL that stores all modules. It can be used
@@ -34,7 +33,7 @@ func New(accountName, accountKey string) (*Storage, error) {
 // For example:
 //
 //	<meta name="go-import" content="gomods.com/athens mod BaseURL()">
-func (s *Storage) BaseURL() url.URL {
+func (s Storage) BaseURL() *url.URL {
 	return s.accountURL
 }
 
@@ -43,7 +42,7 @@ func (s *Storage) Save(module, version string, mod, zip, info []byte) error {
 	ctx := context.Background()
 
 	pipe := azblob.NewPipeline(s.cred, azblob.PipelineOptions{})
-	serviceURL := azblob.NewServiceURL(s.accountURL, pipe)
+	serviceURL := azblob.NewServiceURL(*s.accountURL, pipe)
 	// according to the first example in:
 	// https://godoc.org/github.com/Azure/azure-storage-blob-go/2017-07-29/azblob
 	// ... container names need to be lower case
@@ -63,22 +62,26 @@ func (s *Storage) Save(module, version string, mod, zip, info []byte) error {
 
 	httpHeaders := func(contentType string) azblob.BlobHTTPHeaders {
 		return azblob.BlobHTTPHeaders{
-			ContentType: contentType
+			ContentType: contentType,
 		}
-	)
+	}
+	emptyMeta := map[string]string{}
+	emptyBlobAccessCond := azblob.BlobAccessConditions{}
 	// TODO: check errors
-	if _, err := infoBlobURL.Upload(ctx, bytes.NewBuffer(info), httpHeaders("application/json")); err != nil {
+	if _, err := infoBlobURL.Upload(ctx, bytes.NewReader(info), httpHeaders("application/json"), emptyMeta, emptyBlobAccessCond); err != nil {
 		// TODO: log
 		return err
 	}
-	if _, err := modBlobURL.Upload(ctx, bytes.NewBuffer(info), httpHeaders("text/plain")); err != nil {
+	if _, err := modBlobURL.Upload(ctx, bytes.NewReader(info), httpHeaders("text/plain"), emptyMeta, emptyBlobAccessCond); err != nil {
 		// TODO: log
 		return err
 	}
-	if _, err := zipBlobURL.Upload(ctx, bytes.NewBuffer(zip), httpHeaders("application/octet-stream")); err != nil {
+	if _, err := zipBlobURL.Upload(ctx, bytes.NewReader(zip), httpHeaders("application/octet-stream"), emptyMeta, emptyBlobAccessCond); err != nil {
 		// TODO: log
 		return err
 	}
 
 	// TODO: take out lease on the /list file and add the version to it
+
+	return nil
 }

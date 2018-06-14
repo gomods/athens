@@ -9,7 +9,7 @@ import (
 //
 // for Azure CDN
 type Metadata struct {
-	*azurecdn.Storage
+	azurecdn.Storage
 }
 
 // Get implements the Getter interface
