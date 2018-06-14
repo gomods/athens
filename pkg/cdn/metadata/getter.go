@@ -1,9 +1,5 @@
 package metadata
 
-import (
-	"github.com/gomods/athens/pkg/eventlog"
-)
-
 // Getter gets the details about a given module and returns the base
 // URL of the module metadata and content. For example, if
 // gomods.io/my/module is requested by the 'vgo get' command, this might return
@@ -27,7 +23,4 @@ type Getter interface {
 	// If something went wrong getting the module metadata, returns a non-nil
 	// error.
 	Get(module string) (string, error)
-	// GetForVersion gets the module metadata about the given module/version.
-	// If something went wrong doing the get operation, returns a non-nil error.
-	GetForVersion(module, version string) (eventlog.Event, error)
 }
