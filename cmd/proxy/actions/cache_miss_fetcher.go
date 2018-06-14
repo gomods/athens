@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"io/ioutil"
 
-	"github.com/gobuffalo/buffalo"
-
-	"github.com/gobuffalo/buffalo/worker"
-	"github.com/gobuffalo/envy"
 	"github.com/gomods/athens/pkg/storage"
 	olympusStore "github.com/gomods/athens/pkg/storage/olympus"
+
+	"github.com/gobuffalo/buffalo"
+	"github.com/gobuffalo/buffalo/worker"
+	"github.com/gobuffalo/envy"
 )
 
 const (

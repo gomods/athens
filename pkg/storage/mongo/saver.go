@@ -1,8 +1,9 @@
 package mongo
 
 import (
-	"github.com/gobuffalo/buffalo"
 	"github.com/gomods/athens/pkg/storage"
+
+	"github.com/gobuffalo/buffalo"
 )
 
 // asserts that a ModuleStore is a storage.Saver

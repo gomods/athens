@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"github.com/gobuffalo/buffalo"
-
 	"github.com/stretchr/testify/suite"
 )
 
