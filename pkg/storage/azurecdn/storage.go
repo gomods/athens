@@ -43,22 +43,15 @@ func (s *Storage) Save(module, version string, mod, zip, info []byte) error {
 
 	pipe := azblob.NewPipeline(s.cred, azblob.PipelineOptions{})
 	serviceURL := azblob.NewServiceURL(*s.accountURL, pipe)
-	// according to the first example in:
-	// https://godoc.org/github.com/Azure/azure-storage-blob-go/2017-07-29/azblob
-	// ... container names need to be lower case
-	containerName := strings.ToLower(fmt.Sprintf("%s/@v", module))
-	containerURL := serviceURL.NewContainerURL(containerName)
+	// rules on container names:
+	// https://docs.microsoft.com/en-us/rest/api/storageservices/naming-and-referencing-containers--blobs--and-metadata#container-names
+	//
+	// This container must exist
+	containerURL := serviceURL.NewContainerURL("gomodules")
 
-	// if the module already exists, the container will already exist.
-	// this will be the case most of the time
-	_, err := containerURL.Create(ctx, azblob.Metadata{}, azblob.PublicAccessNone)
-	if err != nil {
-		// TODO: log that the container already exists
-	}
-
-	infoBlobURL := containerURL.NewBlockBlobURL(fmt.Sprintf("%s.info", version))
-	modBlobURL := containerURL.NewBlockBlobURL(fmt.Sprintf("%s.mod", version))
-	zipBlobURL := containerURL.NewBlockBlobURL(fmt.Sprintf("%s.zip", version))
+	infoBlobURL := containerURL.NewBlockBlobURL(fmt.Sprintf("%s/@v/%s.info", module, version))
+	modBlobURL := containerURL.NewBlockBlobURL(fmt.Sprintf("%s/@v/%s.mod", module, version))
+	zipBlobURL := containerURL.NewBlockBlobURL(fmt.Sprintf("%s/@v/%s.zip", module, version))
 
 	httpHeaders := func(contentType string) azblob.BlobHTTPHeaders {
 		return azblob.BlobHTTPHeaders{
@@ -67,7 +60,7 @@ func (s *Storage) Save(module, version string, mod, zip, info []byte) error {
 	}
 	emptyMeta := map[string]string{}
 	emptyBlobAccessCond := azblob.BlobAccessConditions{}
-	// TODO: check errors
+	// TODO: do these in parallel
 	if _, err := infoBlobURL.Upload(ctx, bytes.NewReader(info), httpHeaders("application/json"), emptyMeta, emptyBlobAccessCond); err != nil {
 		// TODO: log
 		return err
@@ -82,6 +75,8 @@ func (s *Storage) Save(module, version string, mod, zip, info []byte) error {
 	}
 
 	// TODO: take out lease on the /list file and add the version to it
+	//
+	// Do that only after module source+metadata is uploaded
 
 	return nil
 }
