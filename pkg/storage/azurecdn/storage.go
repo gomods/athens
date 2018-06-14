@@ -5,13 +5,11 @@ import (
 	"fmt"
 	"net/url"
 
-	"github.com/bketelsen/buffet"
-
-	"github.com/gobuffalo/buffalo"
-
 	"github.com/gomods/athens/pkg/storage"
 
 	"github.com/Azure/azure-storage-blob-go/2017-07-29/azblob"
+	"github.com/bketelsen/buffet"
+	"github.com/gobuffalo/buffalo"
 )
 
 // asserts that Storage implements storage.Saver
@@ -68,18 +66,65 @@ func (s *Storage) Save(c buffalo.Context, module, version string, mod, zip, info
 	}
 	emptyMeta := map[string]string{}
 	emptyBlobAccessCond := azblob.BlobAccessConditions{}
-	// TODO: do these in parallel
-	if _, err := infoBlobURL.Upload(c, bytes.NewReader(info), httpHeaders("application/json"), emptyMeta, emptyBlobAccessCond); err != nil {
+
+	infoErr := make(chan error)
+	go func(errOut chan<- error) {
+		defer close(errOut)
+		sp := buffet.ChildSpan("storage.save.info", c)
+		defer sp.Finish()
+
+		_, err := infoBlobURL.Upload(c, bytes.NewReader(info), httpHeaders("application/json"), emptyMeta, emptyBlobAccessCond)
+		errOut <- err
+	}(infoErr)
+
+	modErr := make(chan error)
+	go func(errOut chan<- error) {
+		defer close(errOut)
+		sp := buffet.ChildSpan("storage.save.module", c)
+		defer sp.Finish()
+
+		_, err := modBlobURL.Upload(c, bytes.NewReader(info), httpHeaders("text/plain"), emptyMeta, emptyBlobAccessCond)
+		errOut <- err
+	}(modErr)
+
+	zipErr := make(chan error)
+	go func(errOut chan<- error) {
+		defer close(errOut)
+		sp := buffet.ChildSpan("storage.save.zip", c)
+		defer sp.Finish()
+
+		_, err := zipBlobURL.Upload(c, bytes.NewReader(zip), httpHeaders("application/octet-stream"), emptyMeta, emptyBlobAccessCond)
+		errOut <- err
+	}(zipErr)
+
+	select {
+	case err := <-infoErr:
+		if err != nil {
+			return err
+		}
 		// TODO: log
-		return err
+	case <-c.Done():
+		return c.Err()
 	}
-	if _, err := modBlobURL.Upload(c, bytes.NewReader(info), httpHeaders("text/plain"), emptyMeta, emptyBlobAccessCond); err != nil {
+
+	select {
+	case err := <-modErr:
+		if err != nil {
+			return err
+		}
 		// TODO: log
-		return err
+	case <-c.Done():
+		return c.Err()
 	}
-	if _, err := zipBlobURL.Upload(c, bytes.NewReader(zip), httpHeaders("application/octet-stream"), emptyMeta, emptyBlobAccessCond); err != nil {
+
+	select {
+	case err := <-zipErr:
+		if err != nil {
+			return err
+		}
 		// TODO: log
-		return err
+	case <-c.Done():
+		return c.Err()
 	}
 
 	// TODO: take out lease on the /list file and add the version to it
