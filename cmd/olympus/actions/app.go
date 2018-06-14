@@ -69,7 +69,7 @@ func App() *buffalo.App {
 		//
 		// Defaulting to Azure for now
 		app.Use(GoGet(azurecdn.Metadata{
-			// TODO: initialize the azurecdn.Storage struct here
+		// TODO: initialize the azurecdn.Storage struct here
 		}))
 
 		// Wraps each request in a transaction.
