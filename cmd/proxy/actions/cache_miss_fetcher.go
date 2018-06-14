@@ -1,6 +1,7 @@
 package actions
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"io/ioutil"
@@ -43,7 +44,7 @@ func GetProcessCacheMissJob(s storage.Backend, w worker.Worker) worker.Handler {
 			return err
 		}
 
-		if err = s.Save(module, version, v.Mod, zip, v.Info); err != nil {
+		if err = s.Save(context.Background(), module, version, v.Mod, zip, v.Info); err != nil {
 			process(module, version, args, w)
 		}
 
