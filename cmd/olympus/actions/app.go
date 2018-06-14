@@ -13,7 +13,6 @@ import (
 	"github.com/gobuffalo/buffalo/middleware/csrf"
 	"github.com/gobuffalo/buffalo/middleware/i18n"
 	"github.com/gobuffalo/packr"
-
 	"github.com/gomods/athens/pkg/cdn/metadata/azurecdn"
 )
 
