@@ -1,6 +1,7 @@
 package actions
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"io/ioutil"
@@ -22,6 +23,10 @@ const (
 
 // GetProcessCacheMissJob porcesses queue of cache misses and downloads sources from active Olympus
 func GetProcessCacheMissJob(s storage.Backend, w worker.Worker) worker.Handler {
+	c := &buffalo.DefaultContext{
+		Context: context.Background(),
+	}
+
 	return func(args worker.Args) (err error) {
 		module, version, err := parseArgs(args)
 		if err != nil {
@@ -45,7 +50,7 @@ func GetProcessCacheMissJob(s storage.Backend, w worker.Worker) worker.Handler {
 			return err
 		}
 
-		if err = s.Save(&buffalo.DefaultContext{}, module, version, v.Mod, zip, v.Info); err != nil {
+		if err = s.Save(c, module, version, v.Mod, zip, v.Info); err != nil {
 			process(module, version, args, w)
 		}
 

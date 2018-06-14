@@ -1,6 +1,7 @@
 package fs
 
 import (
+	"context"
 	"io/ioutil"
 	"path/filepath"
 
@@ -17,8 +18,12 @@ func (d *FsTests) TestLocationFuncs() {
 }
 
 func (d *FsTests) TestGetSaveListRoundTrip() {
+	c := &buffalo.DefaultContext{
+		Context: context.Background(),
+	}
+
 	r := d.Require()
-	r.NoError(d.storage.Save(&buffalo.DefaultContext{}, module, version, mod, zip, info))
+	r.NoError(d.storage.Save(c, module, version, mod, zip, info))
 	listedVersions, err := d.storage.List(module)
 	r.NoError(err)
 	r.Equal(1, len(listedVersions))

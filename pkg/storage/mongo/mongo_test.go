@@ -1,14 +1,19 @@
 package mongo
 
 import (
+	"context"
 	"io/ioutil"
 
 	"github.com/gobuffalo/buffalo"
 )
 
 func (m *MongoTests) TestGetSaveListRoundTrip() {
+	c := &buffalo.DefaultContext{
+		Context: context.Background(),
+	}
+
 	r := m.Require()
-	m.storage.Save(&buffalo.DefaultContext{}, module, version, mod, zip, info)
+	m.storage.Save(c, module, version, mod, zip, info)
 	listedVersions, err := m.storage.List(module)
 	r.NoError(err)
 	r.Equal(1, len(listedVersions))

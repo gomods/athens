@@ -1,6 +1,7 @@
 package mem
 
 import (
+	"context"
 	"io/ioutil"
 	"testing"
 
@@ -35,13 +36,17 @@ func TestMemStorage(t *testing.T) {
 }
 
 func (d *MemTests) TestGetSaveListRoundTrip() {
+	c := &buffalo.DefaultContext{
+		Context: context.Background(),
+	}
+
 	r := d.Require()
 	// create new in mem storage
 	storage, err := NewStorage()
 	d.Require().NoError(err)
 
 	// save and list modules
-	r.NoError(storage.Save(&buffalo.DefaultContext{}, module, version, mod, zip, info))
+	r.NoError(storage.Save(c, module, version, mod, zip, info))
 	listedVersions, err := storage.List(module)
 	r.NoError(err)
 	r.Equal(1, len(listedVersions))

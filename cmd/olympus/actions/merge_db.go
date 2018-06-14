@@ -1,16 +1,16 @@
 package actions
 
 import (
+	"context"
 	"io/ioutil"
 	"log"
 	"time"
 
-	"github.com/gobuffalo/buffalo"
-
-	"github.com/gomods/athens/pkg/storage"
-
 	"github.com/gomods/athens/pkg/cdn"
 	"github.com/gomods/athens/pkg/eventlog"
+	"github.com/gomods/athens/pkg/storage"
+
+	"github.com/gobuffalo/buffalo"
 )
 
 // mergeDB merges diff into the module database.
@@ -25,6 +25,9 @@ import (
 //
 // Both could be fixed by putting each 'for' loop into a (global) critical section
 func mergeDB(originURL string, diff dbDiff, eLog eventlog.Eventlog, storage storage.Backend) error {
+	c := &buffalo.DefaultContext{
+		Context: context.Background(),
+	}
 
 	for _, added := range diff.Added {
 		if _, err := eLog.ReadSingle(added.Module, added.Version); err != nil {
@@ -49,7 +52,7 @@ func mergeDB(originURL string, diff dbDiff, eLog eventlog.Eventlog, storage stor
 			continue
 		}
 
-		if err := storage.Save(&buffalo.DefaultContext{}, added.Module, added.Version, data.Mod, zipBytes, data.Info); err != nil {
+		if err := storage.Save(c, added.Module, added.Version, data.Mod, zipBytes, data.Info); err != nil {
 			log.Printf("error saving new module %s/%s to CDN (%s)", added.Module, added.Version, err)
 			continue
 		}
