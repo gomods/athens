@@ -56,7 +56,7 @@ func (s *Storage) Save(module, version string, mod, zip, info []byte) error {
 		// TODO: log that the container already exists
 	}
 
-	infoBlobURL := containerURL.NewBlockBlobURL(fmt.Sprintf("%s.info"))
+	infoBlobURL := containerURL.NewBlockBlobURL(fmt.Sprintf("%s.info", version))
 	modBlobURL := containerURL.NewBlockBlobURL(fmt.Sprintf("%s.mod", version))
 	zipBlobURL := containerURL.NewBlockBlobURL(fmt.Sprintf("%s.zip", version))
 
