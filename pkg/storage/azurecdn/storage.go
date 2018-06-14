@@ -5,7 +5,6 @@ import (
 	"context"
 	"fmt"
 	"net/url"
-	"strings"
 
 	"github.com/Azure/azure-storage-blob-go/2017-07-29/azblob"
 )
