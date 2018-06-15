@@ -15,6 +15,7 @@ type Module struct {
 	Version string `json:"version"`
 }
 
+// PushNotification is used to notify other Olympus instances about a new event
 type PushNotification struct {
 	Events    []eventlog.Event `json:"events"`
 	OriginURL string           `json:"originURL"`
