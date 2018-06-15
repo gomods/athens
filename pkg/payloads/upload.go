@@ -1,5 +1,7 @@
 package payloads
 
+import "github.com/gomods/athens/pkg/eventlog"
+
 // Upload is used to send a module (zip and mod file) via POST request to the storage backend and save it there.
 type Upload struct {
 	Module []byte `json:"module"`
@@ -14,6 +16,6 @@ type Module struct {
 }
 
 type PushNotification struct {
-	Module
-	OlympusEndpoint string
+	Events    []eventlog.Event `json:"events"`
+	OriginURL string           `json:"originURL"`
 }

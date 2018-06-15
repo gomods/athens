@@ -1,12 +1,10 @@
 package actions
 
 import (
-	"encoding/json"
 	"net/http"
 	"time"
 
 	"github.com/gobuffalo/buffalo"
-	"github.com/gobuffalo/buffalo/worker"
 	"github.com/gomods/athens/pkg/eventlog"
 	"github.com/gomods/athens/pkg/payloads"
 )
@@ -43,29 +41,4 @@ func cachemissHandler(l eventlog.Appender) func(c buffalo.Context) error {
 		e.ID = id
 		return c.Render(http.StatusOK, renderEng.JSON(e))
 	}
-}
-
-func pushNotificationHandler(w worker.Worker) func(c buffalo.Context) error {
-	return func(c buffalo.Context) error {
-		p := &payloads.PushNotification{}
-		if err := c.Bind(p); err != nil {
-			return err
-		}
-		process(p, w)
-	}
-}
-
-func process(pn payloads.PushNotification, w worker.Worker) error {
-	p, err := json.Marshal(pn)
-	if err != nil {
-		return err
-	}
-
-	return w.Perform(worker.Job{
-		Queue:   workerQueue,
-		Handler: WorkerName,
-		Args: worker.Args{
-			workerPushNotificationKey: string(p),
-		},
-	})
 }

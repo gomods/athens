@@ -8,10 +8,19 @@ import (
 
 func main() {
 	app := actions.App()
-	if err := app.Serve(); err != nil {
+
+	eLog, err := actions.GetEventlog()
+	if err != nil {
 		log.Fatal(err)
 	}
-	if err := app.Worker.Register(actions.WorkerName, actions.GetProcessPushNotificationJob(app.Worker)); err != nil {
+	storage, err := actions.GetStorage()
+	if err != nil {
+		log.Fatal(err)
+	}
+	if err := app.Worker.Register(actions.WorkerName, actions.GetProcessPushNotificationJob(app.Worker, eLog, storage)); err != nil {
+		log.Fatal(err)
+	}
+	if err := app.Serve(); err != nil {
 		log.Fatal(err)
 	}
 }

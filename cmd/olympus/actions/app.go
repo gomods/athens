@@ -3,6 +3,7 @@ package actions
 import (
 	"log"
 
+	"github.com/garyburd/redigo/redis"
 	"github.com/gobuffalo/buffalo"
 	"github.com/gobuffalo/buffalo/middleware"
 	"github.com/gobuffalo/buffalo/middleware/ssl"
@@ -13,13 +14,14 @@ import (
 
 	"github.com/gobuffalo/buffalo/middleware/csrf"
 	"github.com/gobuffalo/buffalo/middleware/i18n"
+	"github.com/gobuffalo/gocraft-work-adapter"
 	"github.com/gobuffalo/packr"
 	"github.com/gomods/athens/pkg/cdn/metadata/azurecdn"
 )
 
 const (
-	// WorkerName is the name of the worker processing misses
-	WorkerName                = "pushProcessor"
+	// PushWorkerName is the name of the worker processing pushes
+	PushWorkerName            = "pushProcessor"
 	workerQueue               = "default"
 	workerPushNotificationKey = "pushNotification"
 )
@@ -80,12 +82,12 @@ func App() *buffalo.App {
 		}
 		app.Use(T.Middleware())
 
-		storage, err := newStorage()
+		storage, err := GetStorage()
 		if err != nil {
 			log.Fatalf("error creating storage (%s)", err)
 			return nil
 		}
-		eventlogReader, err := newEventlog()
+		eventlogReader, err := GetEventlog()
 		if err != nil {
 			log.Fatalf("error creating eventlog (%s)", err)
 			return nil
@@ -102,6 +104,7 @@ func App() *buffalo.App {
 		app.GET("/feed/{lastID}", feedHandler(storage))
 		app.GET("/eventlog/{sequence_id}", eventlogHandler(eventlogReader))
 		app.POST("/cachemiss", cachemissHandler(cacheMissesLog))
+		app.POST("/push", pushNotificationHandler(app.Worker))
 		app.ServeFiles("/", assetsBox) // serve files from the public directory
 	}
 
@@ -118,7 +121,7 @@ func getWorker(port string) worker.Worker {
 				return redis.Dial("tcp", port)
 			},
 		},
-		Name:           WorkerName,
+		Name:           PushWorkerName,
 		MaxConcurrency: 25,
 	})
 }
