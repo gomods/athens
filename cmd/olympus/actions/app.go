@@ -6,6 +6,7 @@ import (
 	"github.com/gobuffalo/buffalo"
 	"github.com/gobuffalo/buffalo/middleware"
 	"github.com/gobuffalo/buffalo/middleware/ssl"
+	"github.com/gobuffalo/buffalo/worker"
 	"github.com/gobuffalo/envy"
 	"github.com/rs/cors"
 	"github.com/unrolled/secure"
@@ -13,6 +14,13 @@ import (
 	"github.com/gobuffalo/buffalo/middleware/csrf"
 	"github.com/gobuffalo/buffalo/middleware/i18n"
 	"github.com/gobuffalo/packr"
+)
+
+const (
+	// WorkerName is the name of the worker processing misses
+	WorkerName                = "pushProcessor"
+	workerQueue               = "default"
+	workerPushNotificationKey = "pushNotification"
 )
 
 // ENV is used to help switch settings based on where the
@@ -28,12 +36,14 @@ var T *i18n.Translator
 // application.
 func App() *buffalo.App {
 	if app == nil {
+		redisPort := envy.Get("ATHENS_REDIS_QUEUE_PORT", ":6379")
 		app = buffalo.New(buffalo.Options{
 			Env: ENV,
 			PreWares: []buffalo.PreWare{
 				cors.Default().Handler,
 			},
 			SessionName: "_olympus_session",
+			Worker:      getWorker(redisPort),
 		})
 		// Automatically redirect to SSL
 		app.Use(ssl.ForceSSL(secure.Options{
@@ -87,4 +97,19 @@ func App() *buffalo.App {
 	}
 
 	return app
+}
+
+func getWorker(port string) worker.Worker {
+	return gwa.New(gwa.Options{
+		Pool: &redis.Pool{
+			MaxActive: 5,
+			MaxIdle:   5,
+			Wait:      true,
+			Dial: func() (redis.Conn, error) {
+				return redis.Dial("tcp", port)
+			},
+		},
+		Name:           WorkerName,
+		MaxConcurrency: 25,
+	})
 }

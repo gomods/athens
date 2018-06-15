@@ -12,3 +12,8 @@ type Module struct {
 	Name    string `json:"name"`
 	Version string `json:"version"`
 }
+
+type PushNotification struct {
+	Module
+	OlympusEndpoint string
+}

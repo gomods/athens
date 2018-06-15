@@ -11,4 +11,7 @@ func main() {
 	if err := app.Serve(); err != nil {
 		log.Fatal(err)
 	}
+	if err := app.Worker.Register(actions.WorkerName, actions.GetProcessPushNotificationJob(app.Worker)); err != nil {
+		log.Fatal(err)
+	}
 }
