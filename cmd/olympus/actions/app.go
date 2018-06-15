@@ -14,6 +14,7 @@ import (
 	"github.com/gobuffalo/buffalo/middleware/csrf"
 	"github.com/gobuffalo/buffalo/middleware/i18n"
 	"github.com/gobuffalo/packr"
+	"github.com/gomods/athens/pkg/cdn/metadata/azurecdn"
 )
 
 const (
@@ -60,6 +61,13 @@ func App() *buffalo.App {
 		csrfMiddleware := csrf.New
 		app.Use(csrfMiddleware)
 
+		// TODO: parameterize the GoGet getter here.
+		//
+		// Defaulting to Azure for now
+		app.Use(GoGet(azurecdn.Metadata{
+			// TODO: initialize the azurecdn.Storage struct here
+		}))
+
 		// Wraps each request in a transaction.
 		//  c.Value("tx").(*pop.PopTransaction)
 		// Remove to disable this.
@@ -90,7 +98,8 @@ func App() *buffalo.App {
 		}
 
 		app.GET("/", homeHandler)
-		app.GET("/feed/{syncpoint:.*}", feedHandler(storage))
+		app.GET("/diff/{lastID}", diffHandler(storage, eventlogReader))
+		app.GET("/feed/{lastID}", feedHandler(storage))
 		app.GET("/eventlog/{sequence_id}", eventlogHandler(eventlogReader))
 		app.POST("/cachemiss", cachemissHandler(cacheMissesLog))
 		app.ServeFiles("/", assetsBox) // serve files from the public directory

@@ -1,29 +1,41 @@
 package actions
 
 import (
+	"fmt"
 	"log"
 
-	// "github.com/gomods/athens/models"
+	"github.com/garyburd/redigo/redis"
 	"github.com/gobuffalo/buffalo"
 	"github.com/gobuffalo/buffalo/middleware"
 	"github.com/gobuffalo/buffalo/middleware/csrf"
 	"github.com/gobuffalo/buffalo/middleware/i18n"
 	"github.com/gobuffalo/buffalo/middleware/ssl"
+	"github.com/gobuffalo/buffalo/worker"
 	"github.com/gobuffalo/envy"
+	"github.com/gobuffalo/gocraft-work-adapter"
 	"github.com/gobuffalo/packr"
 	"github.com/gomods/athens/pkg/user"
 	"github.com/rs/cors"
 	"github.com/unrolled/secure"
 )
 
+const (
+	// FetcherWorkerName is the name of the worker fetching sources from experienced cache misses
+	FetcherWorkerName = "olympusfetcher"
+	// ReporterWorkerName is the name of the worker reporting cache misses
+	ReporterWorkerName = "olympusreporter"
+	workerQueue        = "default"
+	workerModuleKey    = "module"
+	workerVersionKey   = "version"
+	workerTryCountKey  = "trycount"
+
+	maxTryCount = 5
+)
+
 // ENV is used to help switch settings based on where the
 // application is being run. Default is "development".
 var ENV = envy.Get("GO_ENV", "development")
 
-// MODE identifies whether athens is running in proxy or registry mode.
-//
-// valid values are "proxy" or "registry"
-var MODE = envy.Get("ATHENS_MODE", "proxy")
 var app *buffalo.App
 
 // T is the translator to use
@@ -43,14 +55,17 @@ func init() {
 // App is where all routes and middleware for buffalo
 // should be defined. This is the nerve center of your
 // application.
-func App() *buffalo.App {
+func App() (*buffalo.App, error) {
 	if app == nil {
+		redisPort := envy.Get("ATHENS_REDIS_QUEUE_PORT", ":6379")
+
 		app = buffalo.New(buffalo.Options{
 			Env: ENV,
 			PreWares: []buffalo.PreWare{
 				cors.Default().Handler,
 			},
 			SessionName: "_athens_session",
+			Worker:      getWorker(redisPort),
 		})
 		// Automatically redirect to SSL
 		app.Use(ssl.ForceSSL(secure.Options{
@@ -81,26 +96,18 @@ func App() *buffalo.App {
 
 		app.GET("/", homeHandler)
 
-		if MODE == "proxy" {
-			log.Printf("starting athens in proxy mode")
-			store, err := getStorage()
-			if err != nil {
-				log.Fatalf("error getting storage configuration (%s)", err)
-				return nil
-			}
-			if err := addProxyRoutes(app, store); err != nil {
-				log.Fatalf("error adding proxy routes (%s)", err)
-				return nil
-			}
-		} else if MODE == "registry" {
-			log.Printf("starting athens in registry mode")
-			if err := addRegistryRoutes(app); err != nil {
-				log.Fatalf("error adding registry routes (%s)", err)
-				return nil
-			}
-		} else {
-			log.Fatalf("unsupported mode %s, exiting", MODE)
-			return nil
+		store, err := GetStorage()
+		if err != nil {
+			err = fmt.Errorf("error getting storage configuration (%s)", err)
+			return nil, err
+		}
+		if err := store.Connect(); err != nil {
+			err = fmt.Errorf("error connecting to storage (%s)", err)
+			return nil, err
+		}
+		if err := addProxyRoutes(app, store); err != nil {
+			err = fmt.Errorf("error adding proxy routes (%s)", err)
+			return nil, err
 		}
 
 		// serve files from the public directory:
@@ -109,5 +116,20 @@ func App() *buffalo.App {
 
 	}
 
-	return app
+	return app, nil
+}
+
+func getWorker(port string) worker.Worker {
+	return gwa.New(gwa.Options{
+		Pool: &redis.Pool{
+			MaxActive: 5,
+			MaxIdle:   5,
+			Wait:      true,
+			Dial: func() (redis.Conn, error) {
+				return redis.Dial("tcp", port)
+			},
+		},
+		Name:           FetcherWorkerName,
+		MaxConcurrency: 25,
+	})
 }
