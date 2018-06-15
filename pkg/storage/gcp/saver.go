@@ -17,16 +17,13 @@ type Storage struct {
 
 // New returns a new Storage instance
 // authenticated using the provided ClientOptions
-func New(ctx buffalo.Context, projectID, bucket string, cred option.ClientOption) (*Storage, error) {
+func New(ctx buffalo.Context, cred option.ClientOption) (*Storage, error) {
 	client, err := storage.NewClient(ctx, cred)
 	if err != nil {
 		return nil, fmt.Errorf("could not create new client: %s", err)
 	}
-	// TODO: client should be closed on any error or when done
-	// should this be done after save is complete?
-
 	// The bucket MUST already exist
-	bkt := client.Bucket(bucket)
+	bkt := client.Bucket("gomodules")
 	return &Storage{bucket: bkt}, nil
 }
 
@@ -71,9 +68,8 @@ func (s *Storage) Save(ctx buffalo.Context, module, version string, mod, zip, in
 
 	errsOut := make([]string, 3)
 	// wait for each routine above to send a value
-	for count := 0; count < 3; {
+	for count := 0; count < 3; count++ {
 		err := <-errs
-		count++
 		if err != nil {
 			errsOut = append(errsOut, err.Error())
 		}
@@ -88,6 +84,9 @@ func (s *Storage) Save(ctx buffalo.Context, module, version string, mod, zip, in
 
 // save performs the actual write to a gcp storage bucket
 func save(ctx buffalo.Context, bkt *storage.BucketHandle, filename string, file []byte) error {
+	sp := buffet.ChildSpan("storage.save.writer", ctx)
+	defer sp.Finish()
+
 	wc := bkt.Object(filename).NewWriter(ctx)
 	wc.ContentType = "application/octet-stream"
 	// TODO: set better access control?
