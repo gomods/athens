@@ -4,9 +4,6 @@ import (
 	"github.com/gobuffalo/buffalo"
 )
 
-// asserts that
-var _ Saver = &noOpConnectedBackend{}
-
 // BackendConnector is a regular storage backend with Connect functionality
 type BackendConnector interface {
 	Backend

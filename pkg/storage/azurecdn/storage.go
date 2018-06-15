@@ -5,15 +5,10 @@ import (
 	"fmt"
 	"net/url"
 
-	"github.com/gomods/athens/pkg/storage"
-
 	"github.com/Azure/azure-storage-blob-go/2017-07-29/azblob"
 	"github.com/bketelsen/buffet"
 	"github.com/gobuffalo/buffalo"
 )
-
-// asserts that Storage implements storage.Saver
-var _ storage.Saver = &Storage{}
 
 // Storage implements (github.com/gomods/athens/pkg/storage).Saver and
 // also provides a function to fetch the location of a module

@@ -4,6 +4,8 @@ import (
 	"context"
 	"io/ioutil"
 
+	"github.com/bketelsen/buffet"
+
 	"github.com/gobuffalo/buffalo"
 )
 
@@ -11,6 +13,10 @@ func (d *MinioTests) TestGetSaveListRoundTrip() {
 	c := &buffalo.DefaultContext{
 		Context: context.Background(),
 	}
+	sp := buffet.SpanFromContext(c)
+	sp.SetOperationName("test.storage.minio.GetSaveListRoundTrip")
+	defer sp.Finish()
+
 	r := d.Require()
 	r.NoError(d.storage.Save(c, module, version, mod, zip, info))
 	listedVersions, err := d.storage.List(module)

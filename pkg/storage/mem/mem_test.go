@@ -5,6 +5,8 @@ import (
 	"io/ioutil"
 	"testing"
 
+	"github.com/bketelsen/buffet"
+
 	"github.com/gobuffalo/buffalo"
 	"github.com/stretchr/testify/suite"
 )
@@ -39,6 +41,9 @@ func (d *MemTests) TestGetSaveListRoundTrip() {
 	c := &buffalo.DefaultContext{
 		Context: context.Background(),
 	}
+	sp := buffet.SpanFromContext(c)
+	sp.SetOperationName("test.storage.mem.GetSaveListRoundTrip")
+	defer sp.Finish()
 
 	r := d.Require()
 	// create new in mem storage

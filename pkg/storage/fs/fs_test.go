@@ -5,6 +5,8 @@ import (
 	"io/ioutil"
 	"path/filepath"
 
+	"github.com/bketelsen/buffet"
+
 	"github.com/gobuffalo/buffalo"
 )
 
@@ -21,6 +23,9 @@ func (d *FsTests) TestGetSaveListRoundTrip() {
 	c := &buffalo.DefaultContext{
 		Context: context.Background(),
 	}
+	sp := buffet.SpanFromContext(c)
+	sp.SetOperationName("test.storage.fs.GetSaveListRoundTrip")
+	defer sp.Finish()
 
 	r := d.Require()
 	r.NoError(d.storage.Save(c, module, version, mod, zip, info))

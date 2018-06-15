@@ -1,13 +1,9 @@
 package mongo
 
 import (
-	"github.com/gomods/athens/pkg/storage"
-
 	"github.com/gobuffalo/buffalo"
+	"github.com/gomods/athens/pkg/storage"
 )
-
-// asserts that a ModuleStore is a storage.Saver
-var _ storage.Saver = &ModuleStore{}
 
 // Save stores a module in mongo storage.
 func (s *ModuleStore) Save(_ buffalo.Context, module, version string, mod, zip, info []byte) error {

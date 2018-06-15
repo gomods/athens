@@ -3,6 +3,8 @@ package minio
 import (
 	"context"
 
+	"github.com/bketelsen/buffet"
+
 	"github.com/gobuffalo/buffalo"
 )
 
@@ -10,6 +12,9 @@ func (d *MinioTests) TestList() {
 	c := &buffalo.DefaultContext{
 		Context: context.Background(),
 	}
+	sp := buffet.SpanFromContext(c)
+	sp.SetOperationName("test.storage.minio.List")
+	defer sp.Finish()
 
 	r := d.Require()
 	versions := []string{"v1.0.0", "v1.1.0", "v1.2.0"}
