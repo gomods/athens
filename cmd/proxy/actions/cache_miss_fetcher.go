@@ -1,11 +1,11 @@
 package actions
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"io/ioutil"
 
-	"github.com/gobuffalo/buffalo"
 	"github.com/gobuffalo/buffalo/worker"
 	"github.com/gobuffalo/envy"
 	"github.com/gomods/athens/pkg/storage"
@@ -22,7 +22,6 @@ const (
 // GetProcessCacheMissJob processes queue of cache misses and downloads sources from active Olympus
 func GetProcessCacheMissJob(s storage.Backend, w worker.Worker) worker.Handler {
 	return func(args worker.Args) (err error) {
-
 		module, version, err := parseArgs(args)
 		if err != nil {
 			return err
@@ -45,7 +44,7 @@ func GetProcessCacheMissJob(s storage.Backend, w worker.Worker) worker.Handler {
 			return err
 		}
 
-		if err = s.Save(&buffalo.DefaultContext{}, module, version, v.Mod, zip, v.Info); err != nil {
+		if err = s.Save(context.Background(), module, version, v.Mod, zip, v.Info); err != nil {
 			process(module, version, args, w)
 		}
 

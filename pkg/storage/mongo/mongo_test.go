@@ -3,22 +3,11 @@ package mongo
 import (
 	"context"
 	"io/ioutil"
-
-	"github.com/bketelsen/buffet"
-
-	"github.com/gobuffalo/buffalo"
 )
 
 func (m *MongoTests) TestGetSaveListRoundTrip() {
-	c := &buffalo.DefaultContext{
-		Context: context.Background(),
-	}
-	sp := buffet.SpanFromContext(c)
-	sp.SetOperationName("test.storage.mongo.GetSaveListRoundTrip")
-	defer sp.Finish()
-
 	r := m.Require()
-	m.storage.Save(c, module, version, mod, zip, info)
+	m.storage.Save(context.Background(), module, version, mod, zip, info)
 	listedVersions, err := m.storage.List(module)
 	r.NoError(err)
 	r.Equal(1, len(listedVersions))

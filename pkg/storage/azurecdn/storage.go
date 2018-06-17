@@ -2,14 +2,13 @@ package azurecdn
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"fmt"
 	"io"
 	"net/url"
 
 	"github.com/Azure/azure-storage-blob-go/2017-07-29/azblob"
-	"github.com/bketelsen/buffet"
-	"github.com/gobuffalo/buffalo"
 )
 
 // Storage implements (github.com/gomods/athens/pkg/storage).Saver and
@@ -40,10 +39,7 @@ func (s Storage) BaseURL() *url.URL {
 }
 
 // Save implements the (github.com/gomods/athens/pkg/storage).Saver interface.
-func (s *Storage) Save(c buffalo.Context, module, version string, mod, zip, info []byte) error {
-	sp := buffet.ChildSpan("storage.save", c)
-	defer sp.Finish()
-
+func (s *Storage) Save(ctx context.Context, module, version string, mod, zip, info []byte) error {
 	pipe := azblob.NewPipeline(s.cred, azblob.PipelineOptions{})
 	serviceURL := azblob.NewServiceURL(*s.accountURL, pipe)
 	// rules on container names:
@@ -68,7 +64,7 @@ func (s *Storage) Save(c buffalo.Context, module, version string, mod, zip, info
 	uploadErrs := make(chan error, numUpload)
 
 	upload := func(url azblob.BlockBlobURL, content io.ReadSeeker, contentType string) {
-		_, err := url.Upload(c, content, httpHeaders(contentType), emptyMeta, emptyBlobAccessCond)
+		_, err := url.Upload(ctx, content, httpHeaders(contentType), emptyMeta, emptyBlobAccessCond)
 		uploadErrs <- err
 	}
 
@@ -83,8 +79,8 @@ func (s *Storage) Save(c buffalo.Context, module, version string, mod, zip, info
 			if err != nil {
 				encountered = append(encountered, err)
 			}
-		case <-c.Done():
-			return c.Err()
+		case <-ctx.Done():
+			return ctx.Err()
 		}
 	}
 

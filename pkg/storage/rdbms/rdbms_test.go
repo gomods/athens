@@ -3,22 +3,11 @@ package rdbms
 import (
 	"context"
 	"io/ioutil"
-
-	"github.com/bketelsen/buffet"
-
-	"github.com/gobuffalo/buffalo"
 )
 
 func (rd *RDBMSTestSuite) TestGetSaveListRoundTrip() {
-	c := &buffalo.DefaultContext{
-		Context: context.Background(),
-	}
-	sp := buffet.SpanFromContext(c)
-	sp.SetOperationName("test.storage.rdbms.GetSaveListRoundTrip")
-	defer sp.Finish()
-
 	r := rd.Require()
-	err := rd.storage.Save(c, module, version, mod, zip, info)
+	err := rd.storage.Save(context.Background(), module, version, mod, zip, info)
 	r.NoError(err)
 	listedVersions, err := rd.storage.List(module)
 	r.NoError(err)

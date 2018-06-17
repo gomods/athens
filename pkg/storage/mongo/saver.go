@@ -1,12 +1,13 @@
 package mongo
 
 import (
-	"github.com/gobuffalo/buffalo"
+	"context"
+
 	"github.com/gomods/athens/pkg/storage"
 )
 
 // Save stores a module in mongo storage.
-func (s *ModuleStore) Save(_ buffalo.Context, module, version string, mod, zip, info []byte) error {
+func (s *ModuleStore) Save(_ context.Context, module, version string, mod, zip, info []byte) error {
 	m := &storage.Module{
 		Module:  module,
 		Version: version,
