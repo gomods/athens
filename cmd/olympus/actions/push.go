@@ -4,12 +4,11 @@ import (
 	"encoding/json"
 	"errors"
 
-	"github.com/gomods/athens/pkg/eventlog"
-	"github.com/gomods/athens/pkg/storage"
-
 	"github.com/gobuffalo/buffalo"
 	"github.com/gobuffalo/buffalo/worker"
+	"github.com/gomods/athens/pkg/eventlog"
 	"github.com/gomods/athens/pkg/payloads"
+	"github.com/gomods/athens/pkg/storage"
 )
 
 func pushNotificationHandler(w worker.Worker) func(c buffalo.Context) error {
@@ -34,9 +33,9 @@ func pushNotificationHandler(w worker.Worker) func(c buffalo.Context) error {
 }
 
 // GetProcessPushNotificationJob processes queue of push notifications
-func GetProcessPushNotificationJob(w worker.Worker, eLog eventlog.Eventlog, storage storage.Backend) worker.Handler {
+func GetProcessPushNotificationJob(storage storage.Backend, eLog eventlog.Eventlog, w worker.Worker) worker.Handler {
 	return func(args worker.Args) (err error) {
-		pn, err := parseArgs(args)
+		pn, err := parsePushNotificationJobArgs(args)
 		diff, err := buildDiff(pn.Events)
 		if err != nil {
 			return err
@@ -45,7 +44,7 @@ func GetProcessPushNotificationJob(w worker.Worker, eLog eventlog.Eventlog, stor
 	}
 }
 
-func parseArgs(args worker.Args) (*payloads.PushNotification, error) {
+func parsePushNotificationJobArgs(args worker.Args) (*payloads.PushNotification, error) {
 	pn, ok := args[workerPushNotificationKey].(string)
 	if !ok {
 		return nil, errors.New("push notification not found")

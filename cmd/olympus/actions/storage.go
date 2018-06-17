@@ -12,7 +12,7 @@ import (
 	"github.com/spf13/afero"
 )
 
-// GetStorage returns storage backend based on env configuration
+// GetStorage returns storage.BackendConnector implementation
 func GetStorage() (storage.BackendConnector, error) {
 	storageType := envy.Get("ATHENS_STORAGE_TYPE", "memory")
 	switch storageType {

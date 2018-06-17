@@ -6,40 +6,45 @@ import (
 	"github.com/garyburd/redigo/redis"
 	"github.com/gobuffalo/buffalo"
 	"github.com/gobuffalo/buffalo/middleware"
+	"github.com/gobuffalo/buffalo/middleware/csrf"
+	"github.com/gobuffalo/buffalo/middleware/i18n"
 	"github.com/gobuffalo/buffalo/middleware/ssl"
 	"github.com/gobuffalo/buffalo/worker"
 	"github.com/gobuffalo/envy"
-	"github.com/rs/cors"
-	"github.com/unrolled/secure"
-
-	"github.com/gobuffalo/buffalo/middleware/csrf"
-	"github.com/gobuffalo/buffalo/middleware/i18n"
 	"github.com/gobuffalo/gocraft-work-adapter"
 	"github.com/gobuffalo/packr"
 	"github.com/gomods/athens/pkg/cdn/metadata/azurecdn"
+	"github.com/rs/cors"
+	"github.com/unrolled/secure"
 )
 
 const (
-	// PushWorkerName is the name of the worker processing pushes
-	PushWorkerName            = "pushProcessor"
-	workerQueue               = "default"
-	workerPushNotificationKey = "pushNotification"
+	// DownloadWorkerName is name of the worker downloading packages from VCS
+	DownloadWorkerName = "download-worker"
+	// PushWorkerName is the name of the worker processing push notifications
+	PushWorkerName = "push-notification-worker"
 )
 
-// ENV is used to help switch settings based on where the
-// application is being run. Default is "development".
-var ENV = envy.Get("GO_ENV", "development")
-var app *buffalo.App
-
-// T is buffalo Translator
-var T *i18n.Translator
+var (
+	workerQueue               = "default"
+	workerModuleKey           = "module"
+	workerVersionKey          = "version"
+	workerPushNotificationKey = "push-notification"
+	// ENV is used to help switch settings based on where the
+	// application is being run. Default is "development".
+	ENV = envy.Get("GO_ENV", "development")
+	app *buffalo.App
+	// T is buffalo Translator
+	T *i18n.Translator
+)
 
 // App is where all routes and middleware for buffalo
 // should be defined. This is the nerve center of your
 // application.
 func App() *buffalo.App {
 	if app == nil {
-		redisPort := envy.Get("ATHENS_REDIS_QUEUE_PORT", ":6379")
+		redisPort := envy.Get("OLYMPUS_REDIS_QUEUE_PORT", ":6379")
+
 		app = buffalo.New(buffalo.Options{
 			Env: ENV,
 			PreWares: []buffalo.PreWare{
@@ -87,7 +92,7 @@ func App() *buffalo.App {
 			log.Fatalf("error creating storage (%s)", err)
 			return nil
 		}
-		eventlogReader, err := GetEventlog()
+		eventlogReader, err := GetEventLog()
 		if err != nil {
 			log.Fatalf("error creating eventlog (%s)", err)
 			return nil
@@ -103,7 +108,7 @@ func App() *buffalo.App {
 		app.GET("/diff/{lastID}", diffHandler(storage, eventlogReader))
 		app.GET("/feed/{lastID}", feedHandler(storage))
 		app.GET("/eventlog/{sequence_id}", eventlogHandler(eventlogReader))
-		app.POST("/cachemiss", cachemissHandler(cacheMissesLog))
+		app.POST("/cachemiss", cachemissHandler(cacheMissesLog, app.Worker))
 		app.POST("/push", pushNotificationHandler(app.Worker))
 		app.ServeFiles("/", assetsBox) // serve files from the public directory
 	}
@@ -121,7 +126,7 @@ func getWorker(port string) worker.Worker {
 				return redis.Dial("tcp", port)
 			},
 		},
-		Name:           PushWorkerName,
+		Name:           DownloadWorkerName,
 		MaxConcurrency: 25,
 	})
 }
