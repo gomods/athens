@@ -2,7 +2,9 @@ package azurecdn
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
+	"io"
 	"net/url"
 
 	"github.com/Azure/azure-storage-blob-go/2017-07-29/azblob"
@@ -62,64 +64,36 @@ func (s *Storage) Save(c buffalo.Context, module, version string, mod, zip, info
 	emptyMeta := map[string]string{}
 	emptyBlobAccessCond := azblob.BlobAccessConditions{}
 
-	infoErr := make(chan error)
-	go func(errOut chan<- error) {
-		defer close(errOut)
-		sp := buffet.ChildSpan("storage.save.info", c)
-		defer sp.Finish()
+	const numUpload = 3
+	uploadErrs := make(chan error, numUpload)
 
-		_, err := infoBlobURL.Upload(c, bytes.NewReader(info), httpHeaders("application/json"), emptyMeta, emptyBlobAccessCond)
-		errOut <- err
-	}(infoErr)
-
-	modErr := make(chan error)
-	go func(errOut chan<- error) {
-		defer close(errOut)
-		sp := buffet.ChildSpan("storage.save.module", c)
-		defer sp.Finish()
-
-		_, err := modBlobURL.Upload(c, bytes.NewReader(info), httpHeaders("text/plain"), emptyMeta, emptyBlobAccessCond)
-		errOut <- err
-	}(modErr)
-
-	zipErr := make(chan error)
-	go func(errOut chan<- error) {
-		defer close(errOut)
-		sp := buffet.ChildSpan("storage.save.zip", c)
-		defer sp.Finish()
-
-		_, err := zipBlobURL.Upload(c, bytes.NewReader(zip), httpHeaders("application/octet-stream"), emptyMeta, emptyBlobAccessCond)
-		errOut <- err
-	}(zipErr)
-
-	select {
-	case err := <-infoErr:
-		if err != nil {
-			return err
-		}
-		// TODO: log
-	case <-c.Done():
-		return c.Err()
+	upload := func(url azblob.BlockBlobURL, content io.ReadSeeker, contentType string) {
+		_, err := url.Upload(c, content, httpHeaders(contentType), emptyMeta, emptyBlobAccessCond)
+		uploadErrs <- err
 	}
 
-	select {
-	case err := <-modErr:
-		if err != nil {
-			return err
+	go upload(infoBlobURL, bytes.NewReader(info), "application/json")
+	go upload(modBlobURL, bytes.NewReader(mod), "text/plain")
+	go upload(zipBlobURL, bytes.NewReader(zip), "application/octet-stream")
+
+	encountered := make([]error, 0, numUpload)
+	for i := 0; i < numUpload; i++ {
+		select {
+		case err := <-uploadErrs:
+			if err != nil {
+				encountered = append(encountered, err)
+			}
+		case <-c.Done():
+			return c.Err()
 		}
-		// TODO: log
-	case <-c.Done():
-		return c.Err()
 	}
 
-	select {
-	case err := <-zipErr:
-		if err != nil {
-			return err
+	if len(encountered) > 0 {
+		message := bytes.NewBufferString("encountered multiple errors during save:\n")
+		for _, err := range encountered {
+			fmt.Fprintln(message, err.Error())
 		}
-		// TODO: log
-	case <-c.Done():
-		return c.Err()
+		return errors.New(message.String())
 	}
 
 	// TODO: take out lease on the /list file and add the version to it
