@@ -15,7 +15,4 @@ func (g *GcpTests) TestNewStorage() {
 	store, err := New(c, g.options)
 	r.NoError(err)
 	r.NotNil(store.bucket)
-	attrs, err := store.bucket.Attrs(c)
-	r.NoError(err)
-	r.Equal("gomodules", attrs.Name)
 }

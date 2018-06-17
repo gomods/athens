@@ -13,6 +13,8 @@ type GcpTests struct {
 }
 
 func (g *GcpTests) SetupTest() {
+	// use something related to the staging bucket for tests
+	// praxis-cab-207400.appspot.com
 	g.options = option.WithoutAuthentication()
 }
 

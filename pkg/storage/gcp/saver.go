@@ -34,36 +34,22 @@ func (s *Storage) Save(ctx buffalo.Context, module, version string, mod, zip, in
 
 	errs := make(chan error, 3)
 	// dispatch go routine for each file to upload
-	// TODO: make this compact
 	go func(errs chan<- error) {
 		sp := buffet.ChildSpan("storage.save.module", ctx)
 		defer sp.Finish()
-
-		if err := save(ctx, s.bucket, fmt.Sprintf("%s/@v/%s.mod", module, version), mod); err != nil {
-			errs <- err
-		} else {
-			errs <- nil
-		}
+		errs <- save(ctx, s.bucket, fmt.Sprintf("%s/@v/%s.mod", module, version), mod)
 	}(errs)
+
 	go func(errs chan<- error) {
 		sp := buffet.ChildSpan("storage.save.zip", ctx)
 		defer sp.Finish()
-
-		if err := save(ctx, s.bucket, fmt.Sprintf("%s/@v/%s.zip", module, version), zip); err != nil {
-			errs <- err
-		} else {
-			errs <- nil
-		}
+		errs <- save(ctx, s.bucket, fmt.Sprintf("%s/@v/%s.zip", module, version), zip)
 	}(errs)
+
 	go func(errs chan<- error) {
 		sp := buffet.ChildSpan("storage.save.info", ctx)
 		defer sp.Finish()
-
-		if err := save(ctx, s.bucket, fmt.Sprintf("%s/@v/%s.info", module, version), info); err != nil {
-			errs <- err
-		} else {
-			errs <- nil
-		}
+		errs <- save(ctx, s.bucket, fmt.Sprintf("%s/@v/%s.info", module, version), info)
 	}(errs)
 
 	errsOut := make([]string, 3)
@@ -94,8 +80,5 @@ func save(ctx buffalo.Context, bkt *storage.BucketHandle, filename string, file 
 	if _, err := wc.Write(file); err != nil {
 		return err
 	}
-	if err := wc.Close(); err != nil {
-		return err
-	}
-	return nil
+	return wc.Close()
 }
