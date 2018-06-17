@@ -19,9 +19,10 @@ const (
 	OlympusGlobalEndpointOverrideKey = "OLYMPUS_GLOBAL_ENDPOINT"
 )
 
-// GetProcessCacheMissJob porcesses queue of cache misses and downloads sources from active Olympus
-func GetProcessCacheMissJob(c buffalo.Context, s storage.Backend, w worker.Worker) worker.Handler {
+// GetProcessCacheMissJob processes queue of cache misses and downloads sources from active Olympus
+func GetProcessCacheMissJob(s storage.Backend, w worker.Worker) worker.Handler {
 	return func(args worker.Args) (err error) {
+
 		module, version, err := parseArgs(args)
 		if err != nil {
 			return err
@@ -44,7 +45,7 @@ func GetProcessCacheMissJob(c buffalo.Context, s storage.Backend, w worker.Worke
 			return err
 		}
 
-		if err = s.Save(c, module, version, v.Mod, zip, v.Info); err != nil {
+		if err = s.Save(&buffalo.DefaultContext{}, module, version, v.Mod, zip, v.Info); err != nil {
 			process(module, version, args, w)
 		}
 
