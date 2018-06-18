@@ -22,12 +22,13 @@ func main() {
 	}
 
 	w := app.Worker
-	if err := w.Register(actions.DownloadWorkerName, actions.GetPackageDownloaderJob(s, e, w)); err != nil {
+	if err := w.Register(actions.DownloadHandlerName, actions.GetPackageDownloaderJob(s, e, w)); err != nil {
 		log.Fatal(err)
 	}
-	if err := w.Register(actions.PushWorkerName, actions.GetProcessPushNotificationJob(s, e, w)); err != nil {
+	if err := w.Register(actions.PushNotificationHandlerName, actions.GetProcessPushNotificationJob(s, e, w)); err != nil {
 		log.Fatal(err)
 	}
+
 	if err := app.Serve(); err != nil {
 		log.Fatal(err)
 	}

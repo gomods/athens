@@ -24,7 +24,7 @@ func pushNotificationHandler(w worker.Worker) func(c buffalo.Context) error {
 
 		return w.Perform(worker.Job{
 			Queue:   workerQueue,
-			Handler: PushWorkerName,
+			Handler: PushNotificationHandlerName,
 			Args: worker.Args{
 				workerPushNotificationKey: string(pj),
 			},
@@ -36,6 +36,9 @@ func pushNotificationHandler(w worker.Worker) func(c buffalo.Context) error {
 func GetProcessPushNotificationJob(storage storage.Backend, eLog eventlog.Eventlog, w worker.Worker) worker.Handler {
 	return func(args worker.Args) (err error) {
 		pn, err := parsePushNotificationJobArgs(args)
+		if err != nil {
+			return err
+		}
 		diff, err := buildDiff(pn.Events)
 		if err != nil {
 			return err

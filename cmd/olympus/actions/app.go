@@ -19,10 +19,12 @@ import (
 )
 
 const (
-	// DownloadWorkerName is name of the worker downloading packages from VCS
-	DownloadWorkerName = "download-worker"
-	// PushWorkerName is the name of the worker processing push notifications
-	PushWorkerName = "push-notification-worker"
+	// OlympusWorkerName is the name of the Olympus worker
+	OlympusWorkerName = "olympus-worker"
+	// DownloadHandlerName is name of the handler downloading packages from VCS
+	DownloadHandlerName = "download-handler"
+	// PushNotificationHandlerName is the name of the handler processing push notifications
+	PushNotificationHandlerName = "push-notification-worker"
 )
 
 var (
@@ -126,7 +128,7 @@ func getWorker(port string) worker.Worker {
 				return redis.Dial("tcp", port)
 			},
 		},
-		Name:           DownloadWorkerName,
+		Name:           OlympusWorkerName,
 		MaxConcurrency: 25,
 	})
 }
