@@ -1,7 +1,6 @@
 package gcp
 
 import (
-	"github.com/gobuffalo/buffalo"
 	"google.golang.org/appengine/aetest"
 )
 
@@ -10,9 +9,18 @@ func (g *GcpTests) TestNewStorage() {
 	ctx, done, err := aetest.NewContext()
 	defer done()
 	r.NoError(err)
-	c := &buffalo.DefaultContext{}
-	c.Context = ctx
-	store, err := New(c, g.options)
+	store, err := New(ctx, "staging.praxis-cab-207400.appspot.com", g.options)
 	r.NoError(err)
 	r.NotNil(store.bucket)
+}
+
+func (g *GcpTests) TestSave() {
+	r := g.Require()
+	ctx, done, err := aetest.NewContext()
+	defer done()
+	r.NoError(err)
+	store, err := New(ctx, "staging.praxis-cab-207400.appspot.com", g.options)
+	r.NoError(err)
+	err = store.Save(ctx, "testface", "v1.2.3", mod, info, zip)
+	r.NoError(err)
 }

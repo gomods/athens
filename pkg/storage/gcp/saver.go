@@ -1,12 +1,12 @@
 package gcp
 
 import (
+	"context"
 	"fmt"
 	"strings"
+	"time"
 
 	"cloud.google.com/go/storage"
-	"github.com/bketelsen/buffet"
-	"github.com/gobuffalo/buffalo"
 	"google.golang.org/api/option"
 )
 
@@ -16,41 +16,25 @@ type Storage struct {
 }
 
 // New returns a new Storage instance
-// authenticated using the provided ClientOptions
-func New(ctx buffalo.Context, cred option.ClientOption) (*Storage, error) {
+// authenticated using the provided ClientOptions for the associated bucket
+func New(bucketname string, cred option.ClientOption) (*Storage, error) {
+	ctx := context.Background()
 	client, err := storage.NewClient(ctx, cred)
 	if err != nil {
 		return nil, fmt.Errorf("could not create new client: %s", err)
 	}
-	// The bucket MUST already exist
-	bkt := client.Bucket("gomodules")
+	bkt := client.Bucket(bucketname)
 	return &Storage{bucket: bkt}, nil
 }
 
 // Save uploads the modules .mod, .zip and .info files for a given version
-func (s *Storage) Save(ctx buffalo.Context, module, version string, mod, zip, info []byte) error {
-	sp := buffet.ChildSpan("storage.save", ctx)
-	defer sp.Finish()
-
+func (s *Storage) Save(module, version string, mod, zip, info []byte) error {
+	ctx := context.Background()
 	errs := make(chan error, 3)
 	// dispatch go routine for each file to upload
-	go func(errs chan<- error) {
-		sp := buffet.ChildSpan("storage.save.module", ctx)
-		defer sp.Finish()
-		errs <- save(ctx, s.bucket, fmt.Sprintf("%s/@v/%s.mod", module, version), mod)
-	}(errs)
-
-	go func(errs chan<- error) {
-		sp := buffet.ChildSpan("storage.save.zip", ctx)
-		defer sp.Finish()
-		errs <- save(ctx, s.bucket, fmt.Sprintf("%s/@v/%s.zip", module, version), zip)
-	}(errs)
-
-	go func(errs chan<- error) {
-		sp := buffet.ChildSpan("storage.save.info", ctx)
-		defer sp.Finish()
-		errs <- save(ctx, s.bucket, fmt.Sprintf("%s/@v/%s.info", module, version), info)
-	}(errs)
+	go save(ctx, errs, s.bucket, module, version, "mod", mod)
+	go save(ctx, errs, s.bucket, module, version, "zip", zip)
+	go save(ctx, errs, s.bucket, module, version, "info", info)
 
 	errsOut := make([]string, 3)
 	// wait for each routine above to send a value
@@ -68,11 +52,18 @@ func (s *Storage) Save(ctx buffalo.Context, module, version string, mod, zip, in
 	return nil
 }
 
-// save performs the actual write to a gcp storage bucket
-func save(ctx buffalo.Context, bkt *storage.BucketHandle, filename string, file []byte) error {
-	sp := buffet.ChildSpan("storage.save.writer", ctx)
-	defer sp.Finish()
+// save waits for writeToBucket to complete or times out after five minutes
+func save(ctx context.Context, errs chan<- error, bkt *storage.BucketHandle, module, version, ext string, content []byte) {
+	select {
+	case errs <- writeToBucket(ctx, bkt, fmt.Sprintf("%s/@v/%s.%s", module, version, ext), content):
+		return
+	case <-time.After(5 * time.Minute):
+		errs <- fmt.Errorf("WARNING: write of %s version %s timed out", module, version)
+	}
+}
 
+// writeToBucket performs the actual write to a gcp storage bucket
+func writeToBucket(ctx context.Context, bkt *storage.BucketHandle, filename string, file []byte) error {
 	wc := bkt.Object(filename).NewWriter(ctx)
 	wc.ContentType = "application/octet-stream"
 	// TODO: set better access control?
