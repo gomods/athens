@@ -9,7 +9,7 @@ import (
 )
 
 // GetEventLog returns implementation of eventlog.EventLog
-func GetEventLog() (eventlog.Eventlog, error) {
+func GetEventLog(mongoURL) (eventlog.Eventlog, error) {
 	mongoURI, err := envy.MustGet("ATHENS_MONGO_STORAGE_URL")
 	if err != nil {
 		return nil, fmt.Errorf("missing mongo URL (%s)", err)

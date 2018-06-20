@@ -2,6 +2,9 @@ package mongo
 
 import (
 	"fmt"
+	"time"
+	"net"
+	"crypto/tls"
 
 	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
@@ -17,8 +20,28 @@ type Log struct {
 }
 
 // NewLog creates event log from backing mongo database
-func NewLog(url string) (*Log, error) {
-	return NewLogWithCollection(url, "eventlog")
+func NewLog(host string, port int, user, pass string) (*Log, error) {
+	dialInfo := &mgo.DialInfo{
+		Addrs:    []string{m.url},
+		Timeout:  10 * time.Second,
+		Database:db,
+		Username: user,
+		Password: pass,
+		DialServer: func(addr *mgo.ServerAddr) (net.Conn, error) {
+			return tls.Dial("tcp", addr.String(), &tls.Config{})
+		},
+	}
+	sess, err := mgo.DialWithInfo(dialInfo)
+	if err != nil {
+		return nil, err
+	}
+	l := &Log{
+		s: sess,
+		db:  "athens",
+		col: "eventlog",
+		url: fmt.Sprintf("mongodb://%s:%d", host, port),
+	}
+	return &l, nil
 }
 
 // NewLogWithCollection creates event log from backing mongo database
@@ -33,6 +56,17 @@ func NewLogWithCollection(url, collection string) (*Log, error) {
 
 // Connect establishes a session to the mongo cluster.
 func (m *Log) Connect() error {
+	dialInfo := &mgo.DialInfo{
+		Addrs:    []string{m.url},
+		Timeout:  10 * time.Second,
+		Database: m.db,
+		Username: m.user
+		Password: password, // PASSWORD
+		DialServer: func(addr *mgo.ServerAddr) (net.Conn, error) {
+			return tls.Dial("tcp", addr.String(), &tls.Config{})
+		},
+	}
+
 	s, err := mgo.Dial(m.url)
 	if err != nil {
 		return err
