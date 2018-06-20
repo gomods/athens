@@ -1,18 +1,15 @@
 # This is a multi-stage Dockerfile and requires >= Docker 17.05
 # https://docs.docker.com/engine/userguide/eng-image/multistage-build/
+#
+# use 'make olympus-docker' from the root of the athens repo to build
+# the olympus docker image
 FROM gobuffalo/buffalo:v0.11.0 as builder
 
-RUN mkdir -p $GOPATH/src/github.com/gomods/athens/cmd/olympus
+RUN mkdir -p $GOPATH/src/github.com/gomods/athens
+WORKDIR $GOPATH/src/github.com/gomods/athens
+ADD . .
 WORKDIR $GOPATH/src/github.com/gomods/athens/cmd/olympus
 
-# this will cache the npm install step, unless package.json changes
-ADD package.json .
-ADD yarn.lock .
-RUN yarn install --no-progress
-
-WORKDIR $GOPATH/src/github.com/gomods/athens
-
-ADD . .
 RUN buffalo build -s -o /bin/app
 
 FROM alpine
