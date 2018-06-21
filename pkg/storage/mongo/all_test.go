@@ -27,12 +27,11 @@ var (
 
 type MongoTests struct {
 	suite.Suite
-	storage storage.BackendConnector
+	storage storage.Backend
 }
 
 func (d *MongoTests) SetupTest() {
 	store := NewStorage("mongodb://127.0.0.1:27017")
-	store.Connect()
 
 	store.s.DB(store.d).C(store.c).RemoveAll(nil)
 	d.storage = store

@@ -4,32 +4,29 @@ import (
 	"github.com/globalsign/mgo"
 )
 
+const (
+	coll = "modules"
+	db   = "athens"
+)
+
 // ModuleStore represents a mongo backed storage backend.
 type ModuleStore struct {
-	s   *mgo.Session
-	d   string // database
-	c   string // collection
-	url string
+	s     *mgo.Session
+	deets *ConnDetails
+	d     string // database
+	c     string // collection
+	url   string
 }
 
 // NewStorage returns an unconnected Mongo backed storage
 // that satisfies the Backend interface.  You must call
 // Connect() on the returned store before using it.
-func NewStorage(url string) *ModuleStore {
-	return &ModuleStore{url: url}
-}
-
-// Connect conntect the the newly created mongo backend.
-func (m *ModuleStore) Connect() error {
-	s, err := mgo.Dial(m.url)
+func NewStorage(deets *ConnDetails) (*ModuleStore, error) {
+	sess, err := GetSession(deets, db)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	m.s = s
-
-	// TODO: database and collection as env vars, or params to New()? together with user/mongo
-	m.d = "athens"
-	m.c = "modules"
+	ms := &ModuleStore{s: sess, deets: deets}
 
 	index := mgo.Index{
 		Key:        []string{"base_url", "module", "version"},
@@ -38,6 +35,9 @@ func (m *ModuleStore) Connect() error {
 		Background: true,
 		Sparse:     true,
 	}
-	c := m.s.DB(m.d).C(m.c)
-	return c.EnsureIndex(index)
+	c := sess.DB(db).C(coll)
+	if err := c.EnsureIndex(index); err != nil {
+		return nil, err
+	}
+	return ms, nil
 }

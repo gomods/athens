@@ -23,8 +23,6 @@ func (m *MongoTests) SetupTest() {
 		panic(err)
 	}
 
-	store.Connect()
-
 	store.s.DB(store.db).C(store.col).RemoveAll(nil)
 	m.log = store
 }

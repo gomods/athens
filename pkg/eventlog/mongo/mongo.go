@@ -6,40 +6,37 @@ import (
 	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
 	"github.com/gomods/athens/pkg/eventlog"
+	mgostorage "github.com/gomods/athens/pkg/storage/mongo"
+)
+
+const (
+	dbName = "athens_event_logs"
+	// EventLogCollection is the name of the mongo collection for storing the
+	// event log
+	EventLogCollection = "eventlog"
+	// CacheMissLogCollection is the name of the mongo collection for
+	// storing the log of cache misses
+	CacheMissLogCollection = "cachemisseslog"
 )
 
 // Log is event log fetched from backing mongo database
 type Log struct {
 	s   *mgo.Session
-	db  string // database
-	col string // collection
-	url string
+	db  string
+	col string
 }
 
 // NewLog creates event log from backing mongo database
-func NewLog(url string) (*Log, error) {
-	return NewLogWithCollection(url, "eventlog")
-}
-
-// NewLogWithCollection creates event log from backing mongo database
-func NewLogWithCollection(url, collection string) (*Log, error) {
-	m := &Log{
-		url: url,
-		col: collection,
-		db:  "athens",
-	}
-	return m, m.Connect()
-}
-
-// Connect establishes a session to the mongo cluster.
-func (m *Log) Connect() error {
-	s, err := mgo.Dial(m.url)
+func NewLog(deets *mgostorage.ConnDetails, collection string) (*Log, error) {
+	sess, err := mgostorage.GetSession(deets, dbName)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	m.s = s
-
-	return nil
+	return &Log{
+		s:   sess,
+		db:  dbName,
+		col: collection,
+	}, nil
 }
 
 // Read reads all events in event log.

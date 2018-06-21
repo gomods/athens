@@ -17,12 +17,9 @@ func TestRegistry(t *testing.T) {
 }
 
 func (m *MongoRegistryTests) SetupTest() {
+	r := m.Require()
 	store, err := NewRegistry("mongodb://127.0.0.1:27017")
-	if err != nil {
-		panic(err)
-	}
-
-	store.Connect()
+	r.NoError(err)
 
 	store.s.DB(store.d).C(store.c).RemoveAll(nil)
 	m.registry = store
@@ -50,8 +47,6 @@ func (m *MongoRegistryTests) TestNewRegistry() {
 	r := m.Require()
 	url := "mongodb://127.0.0.1:27017"
 	registry, err := NewRegistry(url)
-	r.NoError(err)
-	err = registry.Connect()
 	r.NoError(err)
 
 	r.NotNil(registry.c)
