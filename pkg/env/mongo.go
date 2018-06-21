@@ -2,7 +2,6 @@ package env
 
 import (
 	"fmt"
-	"log"
 	"strconv"
 	"time"
 
@@ -34,13 +33,17 @@ func ForMongo() (*mongo.ConnDetails, error) {
 	if err != nil {
 		return nil, fmt.Errorf("invalid MONGO_CONN_TIMEOUT_SEC (%s)", err)
 	}
+	sslBool, err := strconv.ParseBool(envy.Get("MONGO_SSL", "true"))
+	if err != nil {
+		return nil, fmt.Errorf("invalid MONGO_SSL (%s)", err)
+	}
 	details := &mongo.ConnDetails{
 		Host:     host,
 		Port:     port,
 		User:     user,
 		Password: pass,
 		Timeout:  time.Duration(timeoutSec) * time.Second,
+		SSL:      sslBool,
 	}
-	log.Printf("mongo connection details: %s", details)
 	return details, nil
 }

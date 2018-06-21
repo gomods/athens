@@ -17,6 +17,7 @@ type ConnDetails struct {
 	User     string
 	Password string
 	Timeout  time.Duration
+	SSL      bool
 }
 
 func (c ConnDetails) String() string {
@@ -30,14 +31,16 @@ func (c ConnDetails) String() string {
 // This function always establishes connections via TLS
 func GetSession(deets *ConnDetails, db string) (*mgo.Session, error) {
 	dialInfo := &mgo.DialInfo{
-		Addrs:    []string{fmt.Sprintf("mongo://%s:%d", deets.Host, deets.Port)},
+		Addrs:    []string{fmt.Sprintf("%s:%d", deets.Host, deets.Port)},
 		Timeout:  deets.Timeout,
 		Database: db,
 		Username: deets.User,
 		Password: deets.Password,
-		DialServer: func(addr *mgo.ServerAddr) (net.Conn, error) {
+	}
+	if deets.SSL {
+		dialInfo.DialServer = func(addr *mgo.ServerAddr) (net.Conn, error) {
 			return tls.Dial("tcp", addr.String(), &tls.Config{})
-		},
+		}
 	}
 
 	return mgo.DialWithInfo(dialInfo)
