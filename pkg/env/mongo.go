@@ -2,6 +2,7 @@ package env
 
 import (
 	"fmt"
+	"log"
 	"strconv"
 	"time"
 
@@ -29,15 +30,17 @@ func ForMongo() (*mongo.ConnDetails, error) {
 	if err != nil {
 		return nil, err
 	}
-	timeoutSec, err := strconv.Atoi(envy.Get("MONGO_CONN_TIMEOUT_SEC", "10"))
+	timeoutSec, err := strconv.Atoi(envy.Get("MONGO_CONN_TIMEOUT_SEC", "5"))
 	if err != nil {
 		return nil, fmt.Errorf("invalid MONGO_CONN_TIMEOUT_SEC (%s)", err)
 	}
-	return &mongo.ConnDetails{
+	details := &mongo.ConnDetails{
 		Host:     host,
 		Port:     port,
 		User:     user,
 		Password: pass,
 		Timeout:  time.Duration(timeoutSec) * time.Second,
-	}, nil
+	}
+	log.Printf("mongo connection details: %s", details)
+	return details, nil
 }

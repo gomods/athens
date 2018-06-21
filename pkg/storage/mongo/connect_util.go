@@ -19,6 +19,10 @@ type ConnDetails struct {
 	Timeout  time.Duration
 }
 
+func (c ConnDetails) String() string {
+	return fmt.Sprintf(`Host: %s, Port: %d, User: %s, Password: <redacted>, Timeout: %s`, c.Host, c.Port, c.User, c.Timeout)
+}
+
 // GetSession is a utility to create a session from a DB connection string
 // and credentials. The caller is responsible for calling Close on the returned
 // session.
