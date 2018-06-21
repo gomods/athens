@@ -15,7 +15,7 @@ import (
 )
 
 // GetStorage returns storage backend based on env configuration
-func GetStorage() (storage.BackendConnector, error) {
+func GetStorage() (storage.Backend, error) {
 	// changing to mongo storage, memory seems buggy
 	storageType := envy.Get("ATHENS_STORAGE_TYPE", "mongo")
 	var storageRoot string

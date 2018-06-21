@@ -34,11 +34,7 @@ func main() {
 func getLocalStorage() (storage.Backend, error) {
 	s, err := actions.GetStorage()
 	if err != nil {
-		return nil, fmt.Errorf("Unable to retrieve backing store: %v", err)
-	}
-
-	if err := s.Connect(); err != nil {
-		return nil, fmt.Errorf("Unable to connect to backing store: %v", err)
+		return nil, fmt.Errorf("Unable to retrieve or connect to backing store: %v", err)
 	}
 
 	return s, nil

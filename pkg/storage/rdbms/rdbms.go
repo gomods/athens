@@ -6,26 +6,22 @@ import (
 
 // ModuleStore represents a rdbms(postgres, mysql, sqlite, cockroachdb) backed storage backend.
 type ModuleStore struct {
-	conn           *pop.Connection
-	connectionName string // settings name from database.yml
+	conn *pop.Connection
+	// connectionName string // settings name from database.yml
 }
 
 // NewRDBMSStorage  returns an unconnected RDBMS Module Storage
 // that satisfies the Storage interface. You must call
 // Connect() on the returned store before using it.
 // connectionName
-func NewRDBMSStorage(connectionName string) *ModuleStore {
-	return &ModuleStore{
-		connectionName: connectionName,
-	}
-}
-
-// Connect creates connection to rdmbs backend.
-func (r *ModuleStore) Connect() error {
-	c, err := pop.Connect(r.connectionName)
+func NewRDBMSStorage(connectionName string) (*ModuleStore, error) {
+	c, err := pop.Connect(connectionName)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	r.conn = c
-	return nil
+	return &ModuleStore{
+		// connectionName: connectionName,
+		conn: c,
+	}, nil
+
 }

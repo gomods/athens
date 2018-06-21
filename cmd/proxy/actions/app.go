@@ -98,11 +98,7 @@ func App() (*buffalo.App, error) {
 
 		store, err := GetStorage()
 		if err != nil {
-			err = fmt.Errorf("error getting storage configuration (%s)", err)
-			return nil, err
-		}
-		if err := store.Connect(); err != nil {
-			err = fmt.Errorf("error connecting to storage (%s)", err)
+			err = fmt.Errorf("error getting or connecting to storage configuration (%s)", err)
 			return nil, err
 		}
 		if err := addProxyRoutes(app, store); err != nil {

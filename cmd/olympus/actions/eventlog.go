@@ -1,28 +1,25 @@
 package actions
 
 import (
-	"fmt"
-
-	"github.com/gobuffalo/envy"
+	"github.com/gomods/athens/pkg/env"
 	"github.com/gomods/athens/pkg/eventlog"
 	"github.com/gomods/athens/pkg/eventlog/mongo"
 )
 
 // GetEventLog returns implementation of eventlog.EventLog
-func GetEventLog(mongoURL) (eventlog.Eventlog, error) {
-	mongoURI, err := envy.MustGet("ATHENS_MONGO_STORAGE_URL")
+func GetEventLog() (eventlog.Eventlog, error) {
+	deets, err := env.ForMongo()
 	if err != nil {
-		return nil, fmt.Errorf("missing mongo URL (%s)", err)
+		return nil, err
 	}
-	l, err := mongo.NewLog(mongoURI)
+	l, err := mongo.NewLog(deets, mongo.EventLogCollection)
 	return l, err
 }
 
 func newCacheMissesLog() (eventlog.Appender, error) {
-	mongoURI, err := envy.MustGet("ATHENS_MONGO_STORAGE_URL")
+	deets, err := env.ForMongo()
 	if err != nil {
-		return nil, fmt.Errorf("missing mongo URL (%s)", err)
+		return nil, err
 	}
-	l, err := mongo.NewLogWithCollection(mongoURI, "cachemisseslog")
-	return l, err
+	return mongo.NewLog(deets, mongo.CacheMissLogCollection)
 }
