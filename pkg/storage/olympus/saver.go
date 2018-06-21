@@ -2,12 +2,7 @@ package olympus
 
 import (
 	"context"
-
-	"github.com/gomods/athens/pkg/storage"
 )
-
-// asserts that a ModuleStore is a storage.Saver
-var _ storage.Saver = &ModuleStore{}
 
 // Save stores a module in olympus.
 // This actually does not store anything just reports cache miss
