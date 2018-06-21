@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "praxis-cab-207400",
+  "private_key_id": "37d2ed236e820da563cec6c72ee659e70c79eb22",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQC47ZUHEe6jUCxn\nB/KbKGMhLn0XYIfPgvorKx+/8yK/Xhni5Q2b0BNxr2AnfH7rTBt6NYON+PTB11jb\nxsF0RMRJzrAgVrabofLbpCqlEFxagaM5qXNAOKSq9SZbwvia/7c9GA37VHaSAOrM\nW83ZqgzWpwIj+loMii3UJRVF75t9HEFGvTcOZuauYtZl9je3YkXuKBCGEAB3yNbc\n2HpcoofN9aA13gVUPquH6fPifnvpV6OWp9j4yq96gf/rWiXqX/RaQeHEjXQZSqQF\n92eKmLbkzJMvxR+XkoiGijIJ+HaSX2dxRsPPX2XGRRS9BXzT8L9/cBDXVTBPRxOY\npZyJ2pWJAgMBAAECggEACU0XzQh7nHa0mQUHEIM+QyW7sHCQPCFuFDxBx02DDqV8\nv1L+dXsIc1QbDblfB9Ym3qVw5bPjGZnLdBhh1Ad+aOjupl2+JwNE/AOcintRbdLt\n4wFRFOaUb63PXVen2eHpNTcvwtebdBn8NUWby6oYJba2LpmRrGZJyk0ILiGQTEFI\n0uxUh8UwO0E6z0iq0HVbJqiC8NGOqYfdYtmDyn2044pL9efXahGT17xMUMVZFbk4\nes7ue1N1NOq+JH1+K3NXEJuscRfZjLB3l5PHV2DhuJ3GhdxtW+Laaa7eMrGFmDIS\n2KIhb0NrHB6mWTPF2Vo4HAUBOXfrrV2rkpbZbi5FtQKBgQDuvbJ9m68B5o+tgPUs\ndcW1SuwZ5OIw5FrIRaIOYU29W3mlVo++6bCbIFAUQt7J8R13PUvrIslMyez0LwkZ\n9edhNCl72LNyyd7zeVFlO9+GEHS0JAhoHXjSLl3cLBS6UXmS+IHFVRsYG+koKs8v\ndZ7PukC5+8eQEX8mkWgCWDytxQKBgQDGS/xrHbymhJIhaxfAyUIKAYZvfO3vBeKZ\nKlrQ3eqJTofmvdkTG1GhApuFGcvH3YajGFd/xBvJ6jt0rjDNwB/rjcwM77tHJYUG\nbEXKJOw/QXYhSFuZpiiF3B84LMd2dJvj/Q1zBUv7iGZVY+VBftsiDv7lljUY2cfu\nQDGfAbOo9QKBgH5IZWO/uAC/XnyeXBGacmwFJ4JC6cqG3+ZTvvbwTVi+TEhC02Je\n5oYHv5QYExSqr7Vk/QVxrx0pKme3gY7z3eIy30adR76OPZp4L6/mzcNybOjkrnW0\nMTasRAW0Y3pyomY1gR9Kdzx3dwtCKbmm88xZbudx4Qu51ZInE+c5mU8pAoGAZ9iJ\nU0tabVYF9SxRXyvGwtizn5UsQb2yQoYU00c0OT4AG82WbdQjto9YBKdSudOAW882\nm3mHGAHrqxpCAq43yTMUBj5RtFuow4lWLxuRATt18s4i8l8634c8bj29I4LD1OzD\n61V9yjdPaC6Nc/RMLBTwVimImwAKHPJPSjco8DUCgYBP6ax2I0nRxI1XOVzIepEv\nO2vYl0LhHhzhQ0BxJUQsj9bTED5NBFOX8wVr7VbsHxMtPUXNiBtRoIRdZumPsPxs\nUfMJ7StMDyRWkqoWPlsm2m/f8vMeDE0jGP639jMd8pjcteGxrKyheAN/uRiVtN8T\nlnGSd8MP6sogiWxh5WwIOw==\n-----END PRIVATE KEY-----\n",
+  "client_email": "athens-tests@praxis-cab-207400.iam.gserviceaccount.com",
+  "client_id": "107393655039043670758",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://accounts.google.com/o/oauth2/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/athens-tests%40praxis-cab-207400.iam.gserviceaccount.com"
+}
