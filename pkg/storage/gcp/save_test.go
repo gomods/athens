@@ -6,30 +6,23 @@ import (
 
 	"cloud.google.com/go/storage"
 	"google.golang.org/api/option"
-	"google.golang.org/appengine/aetest"
 )
 
 func (g *GcpTests) TestNewStorage() {
 	r := g.Require()
-	ctx, done, err := aetest.NewContext()
-	defer done()
-	r.NoError(err)
-	store, err := New(ctx, g.bucket, g.options)
+	store, err := New(g.context, g.bucket, g.options)
 	r.NoError(err)
 	r.NotNil(store.bucket)
 }
 
 func (g *GcpTests) TestSave() {
 	r := g.Require()
-	ctx, done, err := aetest.NewContext()
-	defer done()
+	store, err := New(g.context, g.bucket, g.options)
 	r.NoError(err)
-	store, err := New(ctx, g.bucket, g.options)
-	r.NoError(err)
-	err = store.Save(ctx, g.module, g.version, mod, info, zip)
+	err = store.Save(g.context, g.module, g.version, mod, info, zip)
 	r.NoError(err)
 
-	err = exists(ctx, g.options, g.bucket, g.module, g.version)
+	err = exists(g.context, g.options, g.bucket, g.module, g.version)
 	r.NoError(err)
 }
 

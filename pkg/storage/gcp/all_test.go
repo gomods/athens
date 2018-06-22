@@ -20,6 +20,7 @@ var (
 
 type GcpTests struct {
 	suite.Suite
+	context context.Context
 	options option.ClientOption
 	bucket  string
 	module  string
@@ -36,6 +37,13 @@ func (g *GcpTests) SetupTest() {
 		g.T().Skip()
 	}
 	g.options = option.WithCredentialsFile(creds)
+	ctx, done, err := aetest.NewContext()
+	defer done()
+	if err != nil {
+		// TODO: don't panic
+		panic(err)
+	}
+	g.context = ctx
 	// time stamped test module names will prevent concurrent test interference
 	g.bucket = "staging.praxis-cab-207400.appspot.com"
 	g.module = "gcp-test" + time.Now().String()
@@ -43,13 +51,7 @@ func (g *GcpTests) SetupTest() {
 }
 
 func (g *GcpTests) TearDownTest() {
-	ctx, done, err := aetest.NewContext()
-	defer done()
-	if err != nil {
-		// TODO: don't panic
-		panic(err)
-	}
-	client, err := storage.NewClient(ctx, g.options)
+	client, err := storage.NewClient(g.context, g.options)
 	if err != nil {
 		panic(err)
 	}
@@ -57,7 +59,7 @@ func (g *GcpTests) TearDownTest() {
 	bkt := client.Bucket(g.bucket)
 
 	// remove all files and directories from this test
-	err = cleanBucket(ctx, bkt, g.module, g.version)
+	err = cleanBucket(g.context, bkt, g.module, g.version)
 	if err != nil {
 		// TODO: don't panic
 		panic(err)
