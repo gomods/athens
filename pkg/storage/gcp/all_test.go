@@ -33,7 +33,7 @@ func (g *GcpTests) SetupTest() {
 	// and must be set for this test which otherwise will be skipped
 	creds := os.Getenv("ATHENS_GCP_TEST_KEY")
 	if len(creds) == 0 {
-		// TODO: skip/exit
+		g.T().Skip()
 	}
 	g.options = option.WithCredentialsFile(creds)
 	// time stamped test module names will prevent concurrent test interference
