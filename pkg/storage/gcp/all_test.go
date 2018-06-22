@@ -2,6 +2,7 @@ package gcp
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"testing"
 	"time"
@@ -50,7 +51,7 @@ func (g *GcpTests) SetupTest() {
 	g.version = "v1.2.3"
 }
 
-func (g *GcpTests) TearDownTest() {
+func (g *GcpTests) TearDownSuite() {
 	client, err := storage.NewClient(g.context, g.options)
 	if err != nil {
 		panic(err)
@@ -69,7 +70,16 @@ func (g *GcpTests) TearDownTest() {
 // cleanBucket iterates over the bucket contents and deletes everything
 // matching the module name. folders do not exist so deleting the
 // full object 'path' is sufficient
-func cleanBucket(ctx context.Context, bkt *storage.BucketHandle, module, version string) error {
+func cleanBucket(ctx context.Context, bkt *storage.BucketHandle, mod, ver string) error {
+	if err := bkt.Object(fmt.Sprintf("%s/@v/%s.%s", mod, ver, "mod")).Delete(ctx); err != nil {
+		return err
+	}
+	if err := bkt.Object(fmt.Sprintf("%s/@v/%s.%s", mod, ver, "info")).Delete(ctx); err != nil {
+		return err
+	}
+	if err := bkt.Object(fmt.Sprintf("%s/@v/%s.%s", mod, ver, "zip")).Delete(ctx); err != nil {
+		return err
+	}
 	return nil
 }
 
