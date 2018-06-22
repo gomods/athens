@@ -17,8 +17,7 @@ type Storage struct {
 
 // New returns a new Storage instance
 // authenticated using the provided ClientOptions for the associated bucket
-func New(bucketname string, cred option.ClientOption) (*Storage, error) {
-	ctx := context.Background()
+func New(ctx context.Context, bucketname string, cred option.ClientOption) (*Storage, error) {
 	client, err := storage.NewClient(ctx, cred)
 	if err != nil {
 		return nil, fmt.Errorf("could not create new client: %s", err)
@@ -28,8 +27,7 @@ func New(bucketname string, cred option.ClientOption) (*Storage, error) {
 }
 
 // Save uploads the modules .mod, .zip and .info files for a given version
-func (s *Storage) Save(module, version string, mod, zip, info []byte) error {
-	ctx := context.Background()
+func (s *Storage) Save(ctx context.Context, module, version string, mod, zip, info []byte) error {
 	errs := make(chan error, 3)
 	// dispatch go routine for each file to upload
 	go save(ctx, errs, s.bucket, module, version, "mod", mod)
@@ -54,11 +52,13 @@ func (s *Storage) Save(module, version string, mod, zip, info []byte) error {
 
 // save waits for writeToBucket to complete or times out after five minutes
 func save(ctx context.Context, errs chan<- error, bkt *storage.BucketHandle, module, version, ext string, content []byte) {
+	ctxWT, cancel := context.WithTimeout(ctx, 5*time.Minute)
+
 	select {
-	case errs <- writeToBucket(ctx, bkt, fmt.Sprintf("%s/@v/%s.%s", module, version, ext), content):
-		return
-	case <-time.After(5 * time.Minute):
-		errs <- fmt.Errorf("WARNING: write of %s version %s timed out", module, version)
+	case errs <- writeToBucket(ctxWT, bkt, fmt.Sprintf("%s/@v/%s.%s", module, version, ext), content):
+		cancel()
+	case <-ctxWT.Done():
+		errs <- fmt.Errorf("WARNING: context deadline exceeded during write of %s version %s", module, version)
 	}
 }
 
@@ -72,7 +72,7 @@ func writeToBucket(ctx context.Context, bkt *storage.BucketHandle, filename stri
 	}(wc)
 	wc.ContentType = "application/octet-stream"
 	// TODO: set better access control?
-	wc.ACL = []storage.ACLRule{{storage.AllUsers, storage.RoleReader}}
+	wc.ACL = []storage.ACLRule{{Entity: storage.AllUsers, Role: storage.RoleReader}}
 	if _, err := wc.Write(file); err != nil {
 		return err
 	}
