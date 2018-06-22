@@ -28,7 +28,7 @@ type GcpTests struct {
 	version string
 }
 
-func (g *GcpTests) SetupTest() {
+func (g *GcpTests) SetupSuite() {
 	// this is the test project praxis-cab-207400.appspot.com
 	// administered by robbie <robjloranger@protonmail.com>
 	// the variable ATHENS_GCP_TEST_KEY should point to the test key json file
