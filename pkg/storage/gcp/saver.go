@@ -3,6 +3,7 @@ package gcp
 import (
 	"context"
 	"fmt"
+	"log"
 	"strings"
 	"time"
 
@@ -42,6 +43,7 @@ func (s *Storage) Save(ctx context.Context, module, version string, mod, zip, in
 			errsOut = append(errsOut, err.Error())
 		}
 	}
+	close(errs)
 
 	// return concatenated error string if there is anything to report
 	if len(errsOut) > 0 {
@@ -67,7 +69,7 @@ func writeToBucket(ctx context.Context, bkt *storage.BucketHandle, filename stri
 	wc := bkt.Object(filename).NewWriter(ctx)
 	defer func(w *storage.Writer) {
 		if err := w.Close(); err != nil {
-			// TODO: what kind of logging? the app's logger
+			log.Printf("WARNING: failed to close storage object writer: %v", err)
 		}
 	}(wc)
 	wc.ContentType = "application/octet-stream"
