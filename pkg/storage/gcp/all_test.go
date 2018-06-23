@@ -33,8 +33,8 @@ func (g *GcpTests) SetupSuite() {
 	// administered by robbie <robjloranger@protonmail.com>
 	// the variable ATHENS_GCP_TEST_KEY should point to the test key json file
 	// and must be set for this test which otherwise will be skipped
-	creds := os.Getenv("ATHENS_GCP_TEST_KEY")
-	if len(creds) == 0 {
+	creds, ok := os.LookupEnv("ATHENS_GCP_TEST_KEY")
+	if !ok {
 		g.T().Skip()
 	}
 	g.options = option.WithCredentialsFile(creds)
