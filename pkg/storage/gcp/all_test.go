@@ -3,7 +3,6 @@ package gcp
 import (
 	"context"
 	"fmt"
-	"os"
 	"testing"
 	"time"
 
@@ -34,15 +33,14 @@ func (g *GcpTests) SetupSuite() {
 	// administered by robbie <robjloranger@protonmail.com>
 	// the variable ATHENS_GCP_TEST_KEY should point to the test key json file
 	// and must be set for this test which otherwise will be skipped
-	creds, ok := os.LookupEnv("ATHENS_GCP_TEST_KEY")
-	if !ok {
+	creds, err := envy.MustGet("ATHENS_GCP_TEST_KEY")
+	if err != nil {
 		g.T().Skip()
 	}
 	g.options = option.WithCredentialsFile(creds)
 	ctx, done, err := aetest.NewContext()
 	defer done()
 	if err != nil {
-		// TODO: don't panic
 		panic(err)
 	}
 	g.context = ctx
