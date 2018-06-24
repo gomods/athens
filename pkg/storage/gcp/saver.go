@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"cloud.google.com/go/storage"
+	"github.com/gobuffalo/envy"
 	"google.golang.org/api/option"
 )
 
@@ -16,12 +17,20 @@ type Storage struct {
 	bucket *storage.BucketHandle
 }
 
-// New returns a new Storage instance
-// authenticated using the provided ClientOptions for the associated bucket
-func New(ctx context.Context, bucketname string, cred option.ClientOption) (*Storage, error) {
+// New returns a new Storage instance authenticated using the provided
+// ClientOptions. The bucket name to be used will be loaded from the
+// environment variable ATHENS_GCP_BUCKET_NAME.
+//
+// The ClientOptions should provide permissions sufficient to read, write and
+// delete objects in google cloud storage for your project.
+func New(ctx context.Context, cred option.ClientOption) (*Storage, error) {
 	client, err := storage.NewClient(ctx, cred)
 	if err != nil {
 		return nil, fmt.Errorf("could not create new client: %s", err)
+	}
+	bucketname, err := envy.MustGet("ATHENS_GCP_BUCKET_NAME")
+	if err != nil {
+		return nil, fmt.Errorf("could not load 'ATHENS_GCP_BUCKET_NAME': %s", err)
 	}
 	bkt := client.Bucket(bucketname)
 	return &Storage{bucket: bkt}, nil

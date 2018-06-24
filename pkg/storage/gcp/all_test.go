@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"cloud.google.com/go/storage"
+	"github.com/gobuffalo/envy"
 	"github.com/stretchr/testify/suite"
 	"google.golang.org/api/option"
 	"google.golang.org/appengine/aetest"
@@ -45,10 +46,11 @@ func (g *GcpTests) SetupSuite() {
 		panic(err)
 	}
 	g.context = ctx
-	// time stamped test module names will prevent concurrent test interference
 	g.bucket = "staging.praxis-cab-207400.appspot.com"
+	// time stamped test module names will prevent concurrent test interference
 	g.module = "gcp-test" + time.Now().String()
 	g.version = "v1.2.3"
+	envy.Set("ATHENS_GCP_BUCKET_NAME", "staging.praxis-cab-207400.appspot.com")
 }
 
 func (g *GcpTests) TearDownSuite() {

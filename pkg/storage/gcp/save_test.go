@@ -10,14 +10,14 @@ import (
 
 func (g *GcpTests) TestNewStorage() {
 	r := g.Require()
-	store, err := New(g.context, g.bucket, g.options)
+	store, err := New(g.context, g.options)
 	r.NoError(err)
 	r.NotNil(store.bucket)
 }
 
 func (g *GcpTests) TestSave() {
 	r := g.Require()
-	store, err := New(g.context, g.bucket, g.options)
+	store, err := New(g.context, g.options)
 	r.NoError(err)
 	err = store.Save(g.context, g.module, g.version, mod, info, zip)
 	r.NoError(err)
