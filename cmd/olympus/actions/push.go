@@ -1,6 +1,7 @@
 package actions
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 
@@ -35,6 +36,8 @@ func pushNotificationHandler(w worker.Worker) func(c buffalo.Context) error {
 // GetProcessPushNotificationJob processes queue of push notifications
 func GetProcessPushNotificationJob(storage storage.Backend, eLog eventlog.Eventlog, w worker.Worker) worker.Handler {
 	return func(args worker.Args) (err error) {
+		// TODO: background for now
+		ctx := context.Background()
 		pn, err := parsePushNotificationJobArgs(args)
 		if err != nil {
 			return err
@@ -43,7 +46,7 @@ func GetProcessPushNotificationJob(storage storage.Backend, eLog eventlog.Eventl
 		if err != nil {
 			return err
 		}
-		return mergeDB(pn.OriginURL, *diff, eLog, storage)
+		return mergeDB(ctx, pn.OriginURL, *diff, eLog, storage)
 	}
 }
 
