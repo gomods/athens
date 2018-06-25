@@ -1,29 +1,32 @@
 package mongo
 
-import "github.com/globalsign/mgo"
+import (
+	"github.com/globalsign/mgo"
+	"github.com/gomods/athens/pkg/storage/mongoutil"
+)
 
 // MetadataStore represents a Mongo backed metadata store.
 type MetadataStore struct {
-	session *mgo.Session
-	db      string
-	col     string
-	url     string
+	session     *mgo.Session
+	connDetails *mongoutil.ConnDetails
+	db          string
+	col         string
 }
 
 // NewStorage returns an unconnected Mongo backed storage
 // that satisfies the Storage interface.  You must call
 // Connect() on the returned store before using it.
-func NewStorage(url, dbName string) *MetadataStore {
-	return &MetadataStore{url: url, db: dbName}
+func NewStorage(connDetails *mongoutil.ConnDetails, dbName string) *MetadataStore {
+	return &MetadataStore{connDetails: connDetails, db: dbName}
 }
 
 // Connect conntect the the newly created mongo backend.
 func (m *MetadataStore) Connect() error {
-	s, err := mgo.Dial(m.url)
+	conn, err := mongoutil.GetSession(m.connDetails, m.db)
 	if err != nil {
 		return err
 	}
-	m.session = s
+	m.session = conn
 
 	m.col = "cdn_metadata"
 

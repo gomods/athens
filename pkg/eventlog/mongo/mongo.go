@@ -6,34 +6,38 @@ import (
 	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
 	"github.com/gomods/athens/pkg/eventlog"
+	"github.com/gomods/athens/pkg/storage/mongoutil"
 )
 
 // Log is event log fetched from backing mongo database
 type Log struct {
-	s   *mgo.Session
-	db  string // database
-	col string // collection
-	url string
+	s           *mgo.Session
+	db          string // database
+	col         string // collection
+	connDetails *mongoutil.ConnDetails
 }
 
 // NewLog creates event log from backing mongo database
-func NewLog(url string) (*Log, error) {
-	return NewLogWithCollection(url, "eventlog")
+func NewLog(connDetails *mongoutil.ConnDetails) (*Log, error) {
+	return NewLogWithCollection(connDetails, "eventlog")
 }
 
 // NewLogWithCollection creates event log from backing mongo database
-func NewLogWithCollection(url, collection string) (*Log, error) {
+func NewLogWithCollection(
+	connDetails *mongoutil.ConnDetails,
+	collection string,
+) (*Log, error) {
 	m := &Log{
-		url: url,
-		col: collection,
-		db:  "athens",
+		connDetails: connDetails,
+		col:         collection,
+		db:          "athens",
 	}
 	return m, m.Connect()
 }
 
 // Connect establishes a session to the mongo cluster.
 func (m *Log) Connect() error {
-	s, err := mgo.Dial(m.url)
+	s, err := mongoutil.GetSession(m.connDetails, m.db)
 	if err != nil {
 		return err
 	}
