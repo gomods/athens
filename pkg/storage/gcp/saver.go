@@ -44,9 +44,9 @@ func (s *Storage) Save(ctx context.Context, module, version string, mod, zip, in
 	defer cancelCTX()
 
 	// dispatch go routine for each file to upload
-	go save(ctxWT, errs, s.bucket, module, version, "mod", mod)
-	go save(ctxWT, errs, s.bucket, module, version, "zip", zip)
-	go save(ctxWT, errs, s.bucket, module, version, "info", info)
+	go upload(ctxWT, errs, s.bucket, module, version, "mod", mod)
+	go upload(ctxWT, errs, s.bucket, module, version, "zip", zip)
+	go upload(ctxWT, errs, s.bucket, module, version, "info", info)
 
 	errsOut := make([]string, 0, 3)
 	// wait for each routine above to send a value
@@ -65,8 +65,8 @@ func (s *Storage) Save(ctx context.Context, module, version string, mod, zip, in
 	return nil
 }
 
-// save waits for writeToBucket to complete or times out after five minutes
-func save(ctx context.Context, errs chan<- error, bkt *storage.BucketHandle, module, version, ext string, file []byte) {
+// upload waits for either writeToBucket to complete or the context expires
+func upload(ctx context.Context, errs chan<- error, bkt *storage.BucketHandle, module, version, ext string, file []byte) {
 	select {
 	case errs <- writeToBucket(ctx, bkt, fmt.Sprintf("%s/@v/%s.%s", module, version, ext), file):
 		return
