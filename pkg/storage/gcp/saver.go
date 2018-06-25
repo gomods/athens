@@ -40,7 +40,8 @@ func New(ctx context.Context, cred option.ClientOption) (*Storage, error) {
 func (s *Storage) Save(ctx context.Context, module, version string, mod, zip, info []byte) error {
 	errs := make(chan error, 3)
 	// create a context that will time out after 300 seconds / 5 minutes
-	ctxWT, _ := context.WithTimeout(ctx, 300*time.Second)
+	ctxWT, cancelCTX := context.WithTimeout(ctx, 300*time.Second)
+	defer cancelCTX()
 
 	// dispatch go routine for each file to upload
 	go save(ctxWT, errs, s.bucket, module, version, "mod", mod)
