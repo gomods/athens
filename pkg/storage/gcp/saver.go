@@ -40,12 +40,12 @@ func New(ctx context.Context, cred option.ClientOption) (*Storage, error) {
 func (s *Storage) Save(ctx context.Context, module, version string, mod, zip, info []byte) error {
 	errs := make(chan error, 3)
 	// create a context that will time out after 300 seconds / 5 minutes
-	ctxWT, cancel := context.WithTimeout(ctx, 300*time.Second)
+	ctxWT, _ := context.WithTimeout(ctx, 300*time.Second)
 
 	// dispatch go routine for each file to upload
-	go save(ctxWT, cancel, errs, s.bucket, module, version, "mod", mod)
-	go save(ctxWT, cancel, errs, s.bucket, module, version, "zip", zip)
-	go save(ctxWT, cancel, errs, s.bucket, module, version, "info", info)
+	go save(ctxWT, errs, s.bucket, module, version, "mod", mod)
+	go save(ctxWT, errs, s.bucket, module, version, "zip", zip)
+	go save(ctxWT, errs, s.bucket, module, version, "info", info)
 
 	errsOut := make([]string, 0, 3)
 	// wait for each routine above to send a value
@@ -65,9 +65,9 @@ func (s *Storage) Save(ctx context.Context, module, version string, mod, zip, in
 }
 
 // save waits for writeToBucket to complete or times out after five minutes
-func save(ctx context.Context, cancel func(), errs chan<- error, bkt *storage.BucketHandle, module, version, ext string, content []byte) {
+func save(ctx context.Context, errs chan<- error, bkt *storage.BucketHandle, module, version, ext string, file []byte) {
 	select {
-	case errs <- writeToBucket(ctx, bkt, fmt.Sprintf("%s/@v/%s.%s", module, version, ext), content):
+	case errs <- writeToBucket(ctx, bkt, fmt.Sprintf("%s/@v/%s.%s", module, version, ext), file):
 		return
 	case <-ctx.Done():
 		errs <- fmt.Errorf("WARNING: context deadline exceeded during write of %s version %s", module, version)
