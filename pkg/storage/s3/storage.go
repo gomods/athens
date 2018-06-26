@@ -9,6 +9,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/aws/aws-sdk-go/service/s3/s3iface"
 	"github.com/gomods/athens/pkg/config"
 )
 
@@ -22,7 +23,7 @@ import (
 // For information how to get your keyId and access key turn to official aws docs: https://docs.aws.amazon.com/sdk-for-go/v1/developer-guide/setting-up.html
 type Storage struct {
 	bucket  string
-	client  *s3.S3
+	client  s3iface.S3API
 	baseURI *url.URL
 }
 
@@ -34,10 +35,27 @@ func New(bucketName string) (*Storage, error) {
 	}
 
 	// create a session
-	sess := session.Must(session.NewSession())
+	sess, err := session.NewSession()
+	if err != nil {
+		return nil, err
+	}
 
 	// client with session
 	client := s3.New(sess)
+	return &Storage{
+		bucket:  bucketName,
+		client:  client,
+		baseURI: u,
+	}, nil
+}
+
+// NewWithClient creates a new azure CDN saver with provided client
+func NewWithClient(bucketName string, client s3iface.S3API) (*Storage, error) {
+	u, err := url.Parse(fmt.Sprintf("http://%s.s3.amazonaws.com", bucketName))
+	if err != nil {
+		return nil, err
+	}
+
 	return &Storage{
 		bucket:  bucketName,
 		client:  client,
