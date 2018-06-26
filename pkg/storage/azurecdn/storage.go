@@ -39,7 +39,7 @@ func (s Storage) BaseURL() *url.URL {
 }
 
 // Save implements the (github.com/gomods/athens/pkg/storage).Saver interface.
-func (s *Storage) Save(ctx context.Context, module, version string, mod, zip, info []byte) error {
+func (s *Storage) Save(ctx context.Context, module, version string, mod []byte, zip io.ReadSeeker, info []byte) error {
 	pipe := azblob.NewPipeline(s.cred, azblob.PipelineOptions{})
 	serviceURL := azblob.NewServiceURL(*s.accountURL, pipe)
 	// rules on container names:
@@ -70,7 +70,7 @@ func (s *Storage) Save(ctx context.Context, module, version string, mod, zip, in
 
 	go upload(infoBlobURL, bytes.NewReader(info), "application/json")
 	go upload(modBlobURL, bytes.NewReader(mod), "text/plain")
-	go upload(zipBlobURL, bytes.NewReader(zip), "application/octet-stream")
+	go upload(zipBlobURL, zip, "application/octet-stream")
 
 	encountered := make([]error, 0, numUpload)
 	for i := 0; i < numUpload; i++ {
