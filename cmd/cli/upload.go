@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"path"
@@ -57,7 +58,7 @@ func upload(c *uploadCmd) func(*cobra.Command, []string) error {
 			return fmt.Errorf("couldn't parse go.mod file (%s)", err)
 		}
 
-		zipBytes, err := module.MakeZip(fs, fullDirectory, c.moduleName, c.version)
+		zipReader, err := module.MakeZip(fs, fullDirectory, c.moduleName, c.version)
 		if err != nil {
 			return fmt.Errorf("couldn't make zip (%s)", err)
 		}
@@ -74,6 +75,10 @@ func upload(c *uploadCmd) func(*cobra.Command, []string) error {
 		}
 
 		u.Path = path.Join(u.Path, c.moduleName, c.version)
+		zipBytes, err := ioutil.ReadAll(zipReader)
+		if err != nil {
+			return err
+		}
 		postBody := &payloads.Upload{
 			Module: modBytes,
 			Zip:    zipBytes,

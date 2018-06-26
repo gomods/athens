@@ -2,7 +2,6 @@ package actions
 
 import (
 	"context"
-	"io/ioutil"
 	"log"
 	"time"
 
@@ -24,36 +23,34 @@ import (
 // Both could be fixed by putting each 'for' loop into a (global) critical section
 func mergeDB(ctx context.Context, originURL string, diff dbDiff, eLog eventlog.Eventlog, storage storage.Backend) error {
 	for _, added := range diff.Added {
-		if _, err := eLog.ReadSingle(added.Module, added.Version); err != nil {
-			// the module/version already exists, is deprecated, or is
-			// tombstoned, so nothing to do
-			continue
-		}
+		err := func(ae eventlog.Event) error {
+			if _, err := eLog.ReadSingle(ae.Module, ae.Version); err != nil {
+				// the module/version already exists, is deprecated, or is
+				// tombstoned, so nothing to do
+				return err
+			}
 
-		// download code from the origin
-		data, err := cdn.Download(originURL, added.Module, added.Version)
+			// download code from the origin
+			data, err := cdn.Download(originURL, ae.Module, ae.Version)
+			if err != nil {
+				log.Printf("error downloading new module %s/%s from %s (%s)", ae.Module, ae.Version, originURL, err)
+				return err
+			}
+			defer data.Zip.Close()
+			// save module data to the CDN
+			if err := storage.Save(ctx, ae.Module, ae.Version, data.Mod, data.Zip, data.Info); err != nil {
+				log.Printf("error saving new module %s/%s to CDN (%s)", ae.Module, ae.Version, err)
+				return err
+			}
+
+			// save module metadata to the key/value store
+			if _, err := eLog.Append(eventlog.Event{Module: ae.Module, Version: ae.Version, Time: time.Now(), Op: eventlog.OpAdd}); err != nil {
+				log.Printf("error saving metadata for new module %s/%s (%s)", ae.Module, ae.Version, err)
+				return err
+			}
+			return nil
+		}(added)
 		if err != nil {
-			log.Printf("error downloading new module %s/%s from %s (%s)", added.Module, added.Version, originURL, err)
-			continue
-		}
-
-		// save module data to the CDN
-		zipBytes, err := ioutil.ReadAll(data.Zip)
-		if err != nil {
-			continue
-		}
-		if err := data.Zip.Close(); err != nil {
-			continue
-		}
-
-		if err := storage.Save(ctx, added.Module, added.Version, data.Mod, zipBytes, data.Info); err != nil {
-			log.Printf("error saving new module %s/%s to CDN (%s)", added.Module, added.Version, err)
-			continue
-		}
-
-		// save module metadata to the key/value store
-		if _, err := eLog.Append(eventlog.Event{Module: added.Module, Version: added.Version, Time: time.Now(), Op: eventlog.OpAdd}); err != nil {
-			log.Printf("error saving metadata for new module %s/%s (%s)", added.Module, added.Version, err)
 			continue
 		}
 	}
