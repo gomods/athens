@@ -27,7 +27,7 @@ type Storage struct {
 	baseURI *url.URL
 }
 
-// New creates a new azure CDN saver
+// New creates a new AWS S3 CDN saver
 func New(bucketName string) (*Storage, error) {
 	u, err := url.Parse(fmt.Sprintf("http://%s.s3.amazonaws.com", bucketName))
 	if err != nil {
@@ -49,7 +49,7 @@ func New(bucketName string) (*Storage, error) {
 	}, nil
 }
 
-// NewWithClient creates a new azure CDN saver with provided client
+// NewWithClient creates a new AWS S3 CDN saver with provided client
 func NewWithClient(bucketName string, client s3iface.S3API) (*Storage, error) {
 	u, err := url.Parse(fmt.Sprintf("http://%s.s3.amazonaws.com", bucketName))
 	if err != nil {
