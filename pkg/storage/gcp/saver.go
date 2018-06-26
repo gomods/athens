@@ -1,8 +1,10 @@
 package gcp
 
 import (
+	"bytes"
 	"context"
 	"fmt"
+	"io"
 	"log"
 	"strings"
 	"time"
@@ -37,16 +39,16 @@ func New(ctx context.Context, cred option.ClientOption) (*Storage, error) {
 }
 
 // Save uploads the modules .mod, .zip and .info files for a given version
-func (s *Storage) Save(ctx context.Context, module, version string, mod, zip, info []byte) error {
+func (s *Storage) Save(ctx context.Context, module, version string, mod []byte, zip io.Reader, info []byte) error {
 	errs := make(chan error, 3)
 	// create a context that will time out after 300 seconds / 5 minutes
 	ctxWT, cancelCTX := context.WithTimeout(ctx, 300*time.Second)
 	defer cancelCTX()
 
 	// dispatch go routine for each file to upload
-	go upload(ctxWT, errs, s.bucket, module, version, "mod", mod)
+	go upload(ctxWT, errs, s.bucket, module, version, "mod", bytes.NewReader(mod))
 	go upload(ctxWT, errs, s.bucket, module, version, "zip", zip)
-	go upload(ctxWT, errs, s.bucket, module, version, "info", info)
+	go upload(ctxWT, errs, s.bucket, module, version, "info", bytes.NewReader(info))
 
 	errsOut := make([]string, 0, 3)
 	// wait for each routine above to send a value
@@ -66,7 +68,7 @@ func (s *Storage) Save(ctx context.Context, module, version string, mod, zip, in
 }
 
 // upload waits for either writeToBucket to complete or the context expires
-func upload(ctx context.Context, errs chan<- error, bkt *storage.BucketHandle, module, version, ext string, file []byte) {
+func upload(ctx context.Context, errs chan<- error, bkt *storage.BucketHandle, module, version, ext string, file io.Reader) {
 	select {
 	case errs <- writeToBucket(ctx, bkt, fmt.Sprintf("%s/@v/%s.%s", module, version, ext), file):
 		return
@@ -76,7 +78,7 @@ func upload(ctx context.Context, errs chan<- error, bkt *storage.BucketHandle, m
 }
 
 // writeToBucket performs the actual write to a gcp storage bucket
-func writeToBucket(ctx context.Context, bkt *storage.BucketHandle, filename string, file []byte) error {
+func writeToBucket(ctx context.Context, bkt *storage.BucketHandle, filename string, file io.Reader) error {
 	wc := bkt.Object(filename).NewWriter(ctx)
 	defer func(w *storage.Writer) {
 		if err := w.Close(); err != nil {
@@ -86,7 +88,7 @@ func writeToBucket(ctx context.Context, bkt *storage.BucketHandle, filename stri
 	wc.ContentType = "application/octet-stream"
 	// TODO: set better access control?
 	wc.ACL = []storage.ACLRule{{Entity: storage.AllUsers, Role: storage.RoleReader}}
-	if _, err := wc.Write(file); err != nil {
+	if _, err := io.Copy(wc, file); err != nil {
 		return err
 	}
 	return nil
