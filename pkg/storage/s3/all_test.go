@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"sync"
 	"testing"
 
 	aws "github.com/aws/aws-sdk-go/aws"
@@ -16,7 +17,8 @@ import (
 
 type TestMock struct {
 	mocks.APIMock
-	db map[string][]byte
+	db   map[string][]byte
+	lock sync.Mutex
 }
 
 type S3Tests struct {
@@ -46,7 +48,10 @@ func getS3Mock() *TestMock {
 				log.Fatal(e)
 			}
 
+			svc.lock.Lock()
 			svc.db[*input.Key] = b
+			svc.lock.Unlock()
+
 			return nil
 		}, nil)
 
@@ -55,6 +60,9 @@ func getS3Mock() *TestMock {
 
 // Verify returns error if S3 state differs from expected one
 func Verify(t *TestMock, value map[string][]byte) error {
+	t.lock.Lock()
+	defer t.lock.Unlock()
+
 	expectedLength := len(value)
 	actualLength := len(t.db)
 	if len(value) != len(t.db) {
