@@ -116,10 +116,7 @@ func (g *gitFetcher) Clear() error {
 }
 
 func (g *gitFetcher) generateZip(moduleName string) error {
-	zipReader, err := module.MakeZip(g.fs, g.dirName, moduleName, g.tag)
-	if err != nil {
-		return err
-	}
+	zipReader := module.MakeZip(g.fs, g.dirName, moduleName, g.tag)
 
 	zipPath := filepath.Join(g.dirName, g.tag+".zip")
 	f, err := g.fs.OpenFile(zipPath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, os.ModePerm)

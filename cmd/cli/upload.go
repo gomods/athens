@@ -58,10 +58,7 @@ func upload(c *uploadCmd) func(*cobra.Command, []string) error {
 			return fmt.Errorf("couldn't parse go.mod file (%s)", err)
 		}
 
-		zipReader, err := module.MakeZip(fs, fullDirectory, c.moduleName, c.version)
-		if err != nil {
-			return fmt.Errorf("couldn't make zip (%s)", err)
-		}
+		zipReader := module.MakeZip(fs, fullDirectory, c.moduleName, c.version)
 
 		infoFilePath := filepath.Join(fullDirectory, c.version+".info")
 		infoBytes, err := afero.ReadFile(fs, infoFilePath)

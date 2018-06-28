@@ -2,7 +2,6 @@ package module
 
 import (
 	"archive/zip"
-	"bytes"
 	"fmt"
 	"io"
 	"os"
@@ -24,40 +23,43 @@ type file struct {
 
 // MakeZip takes dir and module info and generates vgo valid zip
 // the dir must end with a "/"
-func MakeZip(fs afero.Fs, dir, module, version string) (io.Reader, error) {
+func MakeZip(fs afero.Fs, dir, module, version string) io.Reader {
 	ignoreParser := getIgnoreParser(fs, dir)
-	buf := new(bytes.Buffer)
-	w := zip.NewWriter(buf)
+	pr, pw := io.Pipe()
 
-	walkFunc := func(path string, info os.FileInfo, err error) error {
-		if err != nil || info == nil || info.IsDir() {
+	go func() {
+		zw := zip.NewWriter(pw)
+		defer zw.Close()
+
+		walkFunc := func(path string, info os.FileInfo, err error) error {
+			if err != nil || info == nil || info.IsDir() {
+				return err
+			}
+
+			fileName := getFileName(path, dir, module, version)
+
+			if ignoreParser.MatchesPath(fileName) {
+				return nil
+			}
+
+			fileContent, err := afero.ReadFile(fs, path)
+			if err != nil {
+				return err
+			}
+
+			f, err := zw.Create(fileName)
+			if err != nil {
+				return err
+			}
+
+			_, err = f.Write(fileContent)
 			return err
 		}
 
-		fileName := getFileName(path, dir, module, version)
-
-		if ignoreParser.MatchesPath(fileName) {
-			return nil
-		}
-
-		fileContent, err := afero.ReadFile(fs, path)
-		if err != nil {
-			return err
-		}
-
-		f, err := w.Create(fileName)
-		if err != nil {
-			return err
-		}
-
-		_, err = f.Write(fileContent)
-		return err
-	}
-
-	err := afero.Walk(fs, dir, walkFunc)
-	w.Close()
-
-	return buf, err
+		err := afero.Walk(fs, dir, walkFunc)
+		pw.CloseWithError(err)
+	}()
+	return pr
 }
 
 func getIgnoreParser(fs afero.Fs, dir string) ignore.IgnoreParser {
