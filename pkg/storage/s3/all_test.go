@@ -4,7 +4,10 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"testing"
 
+	aws "github.com/aws/aws-sdk-go/aws"
+	request "github.com/aws/aws-sdk-go/aws/request"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
@@ -17,30 +20,40 @@ type TestMock struct {
 
 type S3Tests struct {
 	suite.Suite
-	client *TestMock
+	client  *TestMock
+	storage *Storage
 }
 
-func (d *S3Tests) SetupTest() {
-	d.client = getS3Mock()
+func Test_ActionSuite(t *testing.T) {
+	clientMock := getS3Mock()
+	storage, err := NewWithClient("test", clientMock)
+	if err != nil {
+		t.Error(err)
+	}
+
+	suite.Run(t, &S3Tests{client: clientMock, storage: storage})
 }
 
 func getS3Mock() *TestMock {
 	svc := new(TestMock)
+	svc.db = make(map[string][]byte)
 
-	svc.On("PutObjectWithContext", mock.AnythingOfType("*s3.PutObjectInput")).Return(func(input *s3.PutObjectInput) {
-		b, e := ioutil.ReadAll(input.Body)
-		if e != nil {
-			log.Fatal(e)
-		}
+	svc.On("PutObjectWithContext", mock.AnythingOfType("*context.timerCtx"), mock.AnythingOfType("*s3.PutObjectInput")).Return(
+		func(_ aws.Context, input *s3.PutObjectInput, _ ...request.Option) *s3.PutObjectOutput {
+			b, e := ioutil.ReadAll(input.Body)
+			if e != nil {
+				log.Fatal(e)
+			}
 
-		svc.db[*input.Key] = b
-	})
+			svc.db[*input.Key] = b
+			return nil
+		}, nil)
 
 	return svc
 }
 
 // Verify returns error if S3 state differs from expected one
-func (t *TestMock) Verify(value map[string][]byte) error {
+func Verify(t *TestMock, value map[string][]byte) error {
 	expectedLength := len(value)
 	actualLength := len(t.db)
 	if len(value) != len(t.db) {
