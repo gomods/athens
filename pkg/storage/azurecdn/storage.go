@@ -79,7 +79,6 @@ func (s *Storage) Save(ctx context.Context, module, version string, mod []byte, 
 
 	go upload(infoBlobURL, bytes.NewReader(info), "application/json")
 	go upload(modBlobURL, bytes.NewReader(mod), "text/plain")
-
 	go upload(zipBlobURL, zipRs, "application/octet-stream")
 
 	encountered := make([]error, 0, numUpload)
