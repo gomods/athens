@@ -1,4 +1,4 @@
-package s3
+package mocks
 
 import aws "github.com/aws/aws-sdk-go/aws"
 import mock "github.com/stretchr/testify/mock"

@@ -9,12 +9,13 @@ import (
 	aws "github.com/aws/aws-sdk-go/aws"
 	request "github.com/aws/aws-sdk-go/aws/request"
 	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/gomods/athens/pkg/storage/s3/mocks"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 )
 
 type TestMock struct {
-	APIMock
+	mocks.APIMock
 	db map[string][]byte
 }
 
