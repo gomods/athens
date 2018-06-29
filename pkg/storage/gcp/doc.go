@@ -6,14 +6,14 @@ Configuration
 
 Environment variables:
 
-	ATHENS_GCP_BUCKET_NAME // required
+	ATHENS_STORAGE_GCP_BUCKET // required
 
 Example:
 
 	Bash:
-		export ATHENS_GCP_BUCKET_NAME="fancy-pony-33928.appspot.com"
+		export ATHENS_STORAGE_GCP_BUCKET="fancy-pony-33928.appspot.com"
 	Fish:
-		set -x ATHENS_GCP_BUCKET_NAME fancy-pony-339288.appspot.com
+		set -x ATHENS_STORAGE_GCP_BUCKET fancy-pony-339288.appspot.com
 
 */
 package gcp
