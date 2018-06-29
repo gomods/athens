@@ -10,7 +10,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3iface"
-	"github.com/gomods/athens/pkg/config"
+	"github.com/gomods/athens/pkg/config/env"
 )
 
 // Storage implements (github.com/gomods/athens/pkg/storage).Saver and
@@ -77,7 +77,7 @@ func (s Storage) BaseURL() *url.URL {
 func (s *Storage) Save(ctx context.Context, module, version string, mod, zip, info []byte) error {
 	errChan := make(chan error, 3)
 
-	tctx, cancel := context.WithTimeout(ctx, config.Timeout())
+	tctx, cancel := context.WithTimeout(ctx, env.Timeout())
 	defer cancel()
 
 	go s.upload(tctx, errChan, module, version, "mod", mod)
