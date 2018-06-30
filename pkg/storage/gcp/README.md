@@ -1,25 +1,26 @@
 # Google Cloud Storage Driver
 
 This driver provides support for storing module files in Google Cloud storage.
-You may host as little as the storage only on GCP, the entire project does not need to run there.
 
 # Configuration
 
-> NOTE: The GCP storage driver currently only supports saving files and so can not be used as a storage back end.
+> NOTE: The GCP storage driver currently only supports the _uploading_ of modules and so can not be used at this time as a storage back end.
 
 Minimal configuration is needed, just the name of a storage bucket and an authentication method for that project, and then tell Athens you want to use that as your storage medium.
 
 ## Driver Configuration
 
-The only configuration for this driver other than authentication is an environment variable for the bucket name.
-`ATHENS_STORAGE_GCP_BUCKET` should be set to something like `fancy-pony-339288.appspot.com`.
+You will need to set an environment variable for the bucket name.
+`ATHENS_STORAGE_GCP_BUCKET` should be set to the name of the bucket you wish to use. It should be something like `fancy-pony-339288.appspot.com`.
 
-The only currently supported authentication type is a service account json key file.
-For instructions on creating a new service account see [here](###)
-This file is referenced via an environment variable `ATHENS_STORAGE_GCP_SA`, which should point to the json file.
+The only currently supported authentication type is a service account key file in json format.
+For more information on appengine service accounts see [here](https://cloud.google.com/iam/docs/service-accounts)
+The service account requires a minimum of `Storage Object Creator` level of permission for the project on GCP.
+This path to this file must be set in the environment variable `ATHENS_STORAGE_GCP_SA`.
 
 ## Athens Configuration
 
+> NOTE: Again, this is not yet implemented.
 In order to tell Olympus to use GCP storage set `ATHENS_STORAGE_TYPE` to `gcp`.
 
 # Contributing

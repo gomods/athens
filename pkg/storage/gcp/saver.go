@@ -13,7 +13,7 @@ import (
 )
 
 // Storage implements the Saver interface
-// https://github.com/gomods/athens/blob/master/pkg/storage/saver.go
+// (./pkg/storage).Saver
 type Storage struct {
 	bucket *storage.BucketHandle
 }

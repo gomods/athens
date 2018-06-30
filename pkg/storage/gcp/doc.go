@@ -6,7 +6,8 @@ Configuration
 
 Environment variables:
 
-	ATHENS_STORAGE_GCP_BUCKET // required
+	ATHENS_STORAGE_GCP_BUCKET	// full name of storage bucket
+	ATHENS_STORAGE_GCP_SA		// path to json keyfile of a service account
 
 Example:
 
