@@ -28,4 +28,4 @@ In order to tell Olympus to use GCP storage set `ATHENS_STORAGE_TYPE` to `gcp`.
 
 If you would like to contribute to this driver you will need a service account for the test project in order to run tests.
 
-Please contact @robjloranger for access.
+Please contact [robbie](https://github.com/robjloranger) for access.
