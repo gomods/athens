@@ -8,6 +8,7 @@ import (
 	"github.com/gomods/athens/pkg/cdn"
 	"github.com/gomods/athens/pkg/eventlog"
 	"github.com/gomods/athens/pkg/storage"
+	multierror "github.com/hashicorp/go-multierror"
 )
 
 // mergeDB merges diff into the module database.
@@ -22,23 +23,23 @@ import (
 //
 // Both could be fixed by putting each 'for' loop into a (global) critical section
 func mergeDB(ctx context.Context, originURL string, diff dbDiff, eLog eventlog.Eventlog, storage storage.Backend) error {
+	var errors error
 	for _, added := range diff.Added {
 		if err := add(ctx, added, originURL, eLog, storage); err != nil {
-			// TODO: aggregate errors so we can notify the callers of mergedb - use hashicorp/go-multierror ?
+			errors = multierror.Append(errors, err)
 		}
 	}
 	for _, deprecated := range diff.Deprecated {
 		if err := deprecate(ctx, deprecated, originURL, eLog, storage); err != nil {
-			// TODO: aggregate errors so we can notify the callers of mergedb - use hashicorp/go-multierror ?
+			errors = multierror.Append(errors, err)
 		}
 	}
 	for _, deleted := range diff.Deleted {
 		if err := delete(deleted, eLog, storage); err != nil {
-			// TODO: aggregate errors so we can notify the callers of mergedb - use hashicorp/go-multierror ?
+			errors = multierror.Append(errors, err)
 		}
 	}
-
-	return nil
+	return errors
 }
 
 func add(ctx context.Context, event eventlog.Event, originURL string, eLog eventlog.Eventlog, storage storage.Backend) error {
