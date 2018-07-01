@@ -38,7 +38,7 @@ func GetProcessCacheMissJob(s storage.Backend, w worker.Worker) worker.Handler {
 		}
 		defer v.Zip.Close()
 
-		if err = s.Save(context.Background(), module, version, v.Mod, v.Zip, v.Info); err != nil {
+		if err := s.Save(context.Background(), module, version, v.Mod, v.Zip, v.Info); err != nil {
 			process(module, version, args, w)
 		}
 
