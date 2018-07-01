@@ -23,7 +23,7 @@ type file struct {
 
 // MakeZip takes dir and module info and generates vgo valid zip
 // the dir must end with a "/"
-func MakeZip(fs afero.Fs, dir, module, version string) io.Reader {
+func MakeZip(fs afero.Fs, dir, module, version string) *io.PipeReader {
 	ignoreParser := getIgnoreParser(fs, dir)
 	pr, pw := io.Pipe()
 
