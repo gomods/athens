@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"io"
+	"io/ioutil"
 	"net/url"
 	"strings"
 
@@ -74,14 +76,19 @@ func (s Storage) BaseURL() *url.URL {
 }
 
 // Save implements the (github.com/gomods/athens/pkg/storage).Saver interface.
-func (s *Storage) Save(ctx context.Context, module, version string, mod, zip, info []byte) error {
+func (s *Storage) Save(ctx context.Context, module, version string, mod []byte, zip io.Reader, info []byte) error {
 	errChan := make(chan error, 3)
 
 	tctx, cancel := context.WithTimeout(ctx, env.Timeout())
 	defer cancel()
 
+	zipBytes, err := ioutil.ReadAll(zip)
+	if err != nil {
+		return err
+	}
+
 	go s.upload(tctx, errChan, module, version, "mod", mod)
-	go s.upload(tctx, errChan, module, version, "zip", zip)
+	go s.upload(tctx, errChan, module, version, "zip", zipBytes)
 	go s.upload(tctx, errChan, module, version, "info", info)
 
 	errs := make([]string, 0, 3)

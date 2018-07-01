@@ -68,18 +68,14 @@ func (s *Storage) Save(ctx context.Context, module, version string, mod []byte, 
 		_, err := url.Upload(ctx, content, httpHeaders(contentType), emptyMeta, emptyBlobAccessCond)
 		uploadErrs <- err
 	}
-	zipRs, ok := zip.(io.ReadSeeker)
-	if !ok {
-		zipBytes, err := ioutil.ReadAll(zip)
-		if err != nil {
-			return err
-		}
-		zipRs = bytes.NewReader(zipBytes)
+	zipBytes, err := ioutil.ReadAll(zip)
+	if err != nil {
+		return err
 	}
 
 	go upload(infoBlobURL, bytes.NewReader(info), "application/json")
 	go upload(modBlobURL, bytes.NewReader(mod), "text/plain")
-	go upload(zipBlobURL, zipRs, "application/octet-stream")
+	go upload(zipBlobURL, bytes.NewReader(zipBytes), "application/octet-stream")
 
 	encountered := make([]error, 0, numUpload)
 	for i := 0; i < numUpload; i++ {
