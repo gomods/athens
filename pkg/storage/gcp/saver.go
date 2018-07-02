@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"cloud.google.com/go/storage"
+	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/config/env"
 	"google.golang.org/api/option"
 )
@@ -68,7 +69,7 @@ func (s *Storage) Save(ctx context.Context, module, version string, mod, zip, in
 // upload waits for either writeToBucket to complete or the context expires
 func upload(ctx context.Context, errs chan<- error, bkt *storage.BucketHandle, module, version, ext string, file []byte) {
 	select {
-	case errs <- writeToBucket(ctx, bkt, fmt.Sprintf("%s/@v/%s.%s", module, version, ext), file):
+	case errs <- writeToBucket(ctx, bkt, config.PackageVersionedName(module, version, ext), file):
 		return
 	case <-ctx.Done():
 		errs <- fmt.Errorf("WARNING: context deadline exceeded during write of %s version %s", module, version)
