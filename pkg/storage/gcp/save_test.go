@@ -8,16 +8,20 @@ import (
 	"google.golang.org/api/option"
 )
 
-func (g *GcpTests) TestNewStorage() {
+func (g *GcpTests) TestNewWithCredentials() {
 	r := g.Require()
-	store, err := New(g.context, g.options)
+	store, err := NewWithCredentials(g.context, g.options)
 	r.NoError(err)
 	r.NotNil(store.bucket)
 }
 
+func (g *GcpTests) TestNew() {
+	// TODO
+}
+
 func (g *GcpTests) TestSave() {
 	r := g.Require()
-	store, err := New(g.context, g.options)
+	store, err := NewWithCredentials(g.context, g.options)
 	r.NoError(err)
 	err = store.Save(g.context, g.module, g.version, mod, info, zip)
 	r.NoError(err)
