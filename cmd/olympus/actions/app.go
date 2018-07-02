@@ -3,8 +3,6 @@ package actions
 import (
 	"log"
 
-	"github.com/gomods/athens/pkg/config/env"
-
 	"github.com/garyburd/redigo/redis"
 	"github.com/gobuffalo/buffalo"
 	"github.com/gobuffalo/buffalo/middleware"
@@ -15,6 +13,7 @@ import (
 	"github.com/gobuffalo/gocraft-work-adapter"
 	"github.com/gobuffalo/packr"
 	"github.com/gomods/athens/pkg/cdn/metadata/azurecdn"
+	"github.com/gomods/athens/pkg/config/env"
 	"github.com/rs/cors"
 	"github.com/unrolled/secure"
 )
