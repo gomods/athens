@@ -3,13 +3,13 @@ package azurecdn
 import (
 	"bytes"
 	"context"
-	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"net/url"
 
 	"github.com/Azure/azure-storage-blob-go/2017-07-29/azblob"
+	multierror "github.com/hashicorp/go-multierror"
 )
 
 // Storage implements (github.com/gomods/athens/pkg/storage).Saver and
@@ -77,29 +77,21 @@ func (s *Storage) Save(ctx context.Context, module, version string, mod []byte, 
 	go upload(modBlobURL, bytes.NewReader(mod), "text/plain")
 	go upload(zipBlobURL, bytes.NewReader(zipBytes), "application/octet-stream")
 
-	encountered := make([]error, 0, numUpload)
+	var errors error
 	for i := 0; i < numUpload; i++ {
 		select {
 		case err := <-uploadErrs:
 			if err != nil {
-				encountered = append(encountered, err)
+				errors = multierror.Append(errors, err)
 			}
 		case <-ctx.Done():
 			return ctx.Err()
 		}
 	}
 
-	if len(encountered) > 0 {
-		message := bytes.NewBufferString("encountered multiple errors during save:\n")
-		for _, err := range encountered {
-			fmt.Fprintln(message, err.Error())
-		}
-		return errors.New(message.String())
-	}
-
 	// TODO: take out lease on the /list file and add the version to it
 	//
 	// Do that only after module source+metadata is uploaded
 
-	return nil
+	return errors
 }

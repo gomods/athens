@@ -6,11 +6,11 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"strings"
 	"time"
 
 	"cloud.google.com/go/storage"
 	"github.com/gobuffalo/envy"
+	multierror "github.com/hashicorp/go-multierror"
 	"google.golang.org/api/option"
 )
 
@@ -50,21 +50,17 @@ func (s *Storage) Save(ctx context.Context, module, version string, mod []byte, 
 	go upload(ctxWT, errs, s.bucket, module, version, "zip", zip)
 	go upload(ctxWT, errs, s.bucket, module, version, "info", bytes.NewReader(info))
 
-	errsOut := make([]string, 0, 3)
+	var errors error
 	// wait for each routine above to send a value
 	for count := 0; count < 3; count++ {
 		err := <-errs
 		if err != nil {
-			errsOut = append(errsOut, err.Error())
+			errors = multierror.Append(errors, err)
 		}
 	}
 	close(errs)
 
-	// return concatenated error string if there is anything to report
-	if len(errsOut) > 0 {
-		return fmt.Errorf("one or more errors occured saving %s/@v/%s: %s", module, version, strings.Join(errsOut, ", "))
-	}
-	return nil
+	return errors
 }
 
 // upload waits for either writeToBucket to complete or the context expires

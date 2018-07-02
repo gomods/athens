@@ -7,12 +7,12 @@ import (
 	"io"
 	"io/ioutil"
 	"net/url"
-	"strings"
 
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3iface"
 	"github.com/gomods/athens/pkg/config/env"
+	multierror "github.com/hashicorp/go-multierror"
 )
 
 // Storage implements (github.com/gomods/athens/pkg/storage).Saver and
@@ -91,20 +91,16 @@ func (s *Storage) Save(ctx context.Context, module, version string, mod []byte, 
 	go s.upload(tctx, errChan, module, version, "zip", zipBytes)
 	go s.upload(tctx, errChan, module, version, "info", info)
 
-	errs := make([]string, 0, 3)
+	var errors error
 	for i := 0; i < 3; i++ {
 		err := <-errChan
 		if err != nil {
-			errs = append(errs, err.Error())
+			errors = multierror.Append(errors, err)
 		}
 	}
 	close(errChan)
 
-	if len(errs) > 0 {
-		return fmt.Errorf("One or more errors occured saving %s %s: %s", module, version, strings.Join(errs, ", "))
-	}
-
-	return nil
+	return errors
 }
 
 func (s *Storage) upload(ctx context.Context, errChan chan<- error, module, version, name string, content []byte) {
