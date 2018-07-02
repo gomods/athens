@@ -3,6 +3,8 @@ package actions
 import (
 	"log"
 
+	"github.com/gomods/athens/pkg/config/env"
+
 	"github.com/garyburd/redigo/redis"
 	"github.com/gobuffalo/buffalo"
 	"github.com/gobuffalo/buffalo/middleware"
@@ -10,7 +12,6 @@ import (
 	"github.com/gobuffalo/buffalo/middleware/i18n"
 	"github.com/gobuffalo/buffalo/middleware/ssl"
 	"github.com/gobuffalo/buffalo/worker"
-	"github.com/gobuffalo/envy"
 	"github.com/gobuffalo/gocraft-work-adapter"
 	"github.com/gobuffalo/packr"
 	"github.com/gomods/athens/pkg/cdn/metadata/azurecdn"
@@ -34,7 +35,7 @@ var (
 	workerPushNotificationKey = "push-notification"
 	// ENV is used to help switch settings based on where the
 	// application is being run. Default is "development".
-	ENV = envy.Get("GO_ENV", "development")
+	ENV = env.GoEnvironmentWithDefault("development")
 	app *buffalo.App
 	// T is buffalo Translator
 	T *i18n.Translator
@@ -45,7 +46,7 @@ var (
 // application.
 func App() *buffalo.App {
 	if app == nil {
-		redisPort := envy.Get("OLYMPUS_REDIS_QUEUE_PORT", ":6379")
+		redisPort := env.OlympusRedisQueuePortWithDefault(":6379")
 
 		app = buffalo.New(buffalo.Options{
 			Env: ENV,

@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"cloud.google.com/go/storage"
-	"github.com/gobuffalo/envy"
+	"github.com/gomods/athens/pkg/config/env"
 	"google.golang.org/api/option"
 )
 
@@ -28,9 +28,9 @@ func New(ctx context.Context, cred option.ClientOption) (*Storage, error) {
 	if err != nil {
 		return nil, fmt.Errorf("could not create new client: %s", err)
 	}
-	bucketname, err := envy.MustGet("ATHENS_STORAGE_GCP_BUCKET")
+	bucketname, err := env.GcpBucketName()
 	if err != nil {
-		return nil, fmt.Errorf("could not load 'ATHENS_STORAGE_GCP_BUCKET': %s", err)
+		return nil, err
 	}
 	bkt := client.Bucket(bucketname)
 	return &Storage{bucket: bkt}, nil
