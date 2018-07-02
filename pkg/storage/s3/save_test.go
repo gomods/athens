@@ -1,6 +1,7 @@
 package s3
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 )
@@ -22,7 +23,7 @@ func (d *S3Tests) TestSave() {
 		vinfo := append(info, []byte(version)...)
 		vzip := append(zip, []byte(version)...)
 
-		r.NoError(d.storage.Save(context.Background(), module, version, vmod, vzip, vinfo))
+		r.NoError(d.storage.Save(context.Background(), module, version, vmod, bytes.NewReader(vzip), vinfo))
 		expectedValues[key(module, version, "info")] = vinfo
 		expectedValues[key(module, version, "mod")] = vmod
 		expectedValues[key(module, version, "zip")] = vzip
