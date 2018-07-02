@@ -866,6 +866,7 @@
   packages = [
     ".",
     "aetest",
+    "file",
     "internal",
     "internal/app_identity",
     "internal/base",
@@ -932,6 +933,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "aa4ebb21d2f66618b1b1405408c30435de00ce8d88e2a07206ec56c2edd0a716"
+  inputs-digest = "8be409fe30d678c6945ea0376a518ded66552da62b4689d9f873b75d387d5399"
   solver-name = "gps-cdcl"
   solver-version = 1

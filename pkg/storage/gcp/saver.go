@@ -116,7 +116,7 @@ func (s *Storage) Save(ctx context.Context, module, version string, mod, zip, in
 // upload waits for either writeToBucket to complete or the context to expire
 func upload(ctx context.Context, errs chan<- error, bkt *storage.BucketHandle, module, version, ext string, file []byte) {
 	select {
-	case errs <- writeToBucket(ctx, bkt, key(module, version, ext), file):
+	case errs <- writeToBucket(ctx, bkt, fmt.Sprintf("%s/@v/%s.%s", module, version, ext), file):
 		return
 	case <-ctx.Done():
 		errs <- fmt.Errorf("WARNING: context deadline exceeded during write of %s version %s", module, version)
@@ -138,11 +138,4 @@ func writeToBucket(ctx context.Context, bkt *storage.BucketHandle, filename stri
 		return err
 	}
 	return nil
-}
-
-// key returns the fully formatted module string
-// eg:
-//		gomods/athens/@v/v1.2.3.info
-func key(module, version, filetype string) string {
-	return fmt.Sprintf("%s/@v/%s.%s", module, version, filetype)
 }
