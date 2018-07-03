@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/gomods/athens/pkg/modfilter"
+
 	"github.com/garyburd/redigo/redis"
 	"github.com/gobuffalo/buffalo"
 	"github.com/gobuffalo/buffalo/middleware"
@@ -105,7 +107,9 @@ func App() (*buffalo.App, error) {
 			err = fmt.Errorf("error connecting to storage (%s)", err)
 			return nil, err
 		}
-		if err := addProxyRoutes(app, store); err != nil {
+
+		mf := modfilter.NewModFilter()
+		if err := addProxyRoutes(app, store, mf); err != nil {
 			err = fmt.Errorf("error adding proxy routes (%s)", err)
 			return nil, err
 		}

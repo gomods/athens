@@ -8,16 +8,22 @@ import (
 	"path"
 	"time"
 
+	"github.com/gomods/athens/pkg/modfilter"
+
 	"github.com/gobuffalo/buffalo/worker"
 	"github.com/gomods/athens/pkg/payloads"
 )
 
 // GetCacheMissReporterJob porcesses queue of cache misses and reports them to Olympus
-func GetCacheMissReporterJob(w worker.Worker) worker.Handler {
+func GetCacheMissReporterJob(w worker.Worker, mf *modfilter.ModFilter) worker.Handler {
 	return func(args worker.Args) (err error) {
 		module, version, err := parseArgs(args)
 		if err != nil {
 			return err
+		}
+
+		if !mf.ShouldProcess(module) {
+			return nil
 		}
 
 		if err := reportCacheMiss(module, version); err != nil {

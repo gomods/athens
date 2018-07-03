@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/gomods/athens/pkg/modfilter"
+
 	"github.com/gomods/athens/cmd/proxy/actions"
 	"github.com/gomods/athens/pkg/storage"
 )
@@ -23,7 +25,9 @@ func main() {
 	if err := w.Register(actions.FetcherWorkerName, actions.GetProcessCacheMissJob(s, w)); err != nil {
 		log.Fatal(err)
 	}
-	if err := w.Register(actions.ReporterWorkerName, actions.GetCacheMissReporterJob(w)); err != nil {
+
+	mf := modfilter.NewModFilter()
+	if err := w.Register(actions.ReporterWorkerName, actions.GetCacheMissReporterJob(w, mf)); err != nil {
 		log.Fatal(err)
 	}
 

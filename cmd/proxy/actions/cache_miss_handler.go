@@ -4,13 +4,15 @@ import (
 	"log"
 	"strings"
 
+	"github.com/gomods/athens/pkg/modfilter"
+
 	"github.com/gobuffalo/buffalo"
 	"github.com/gobuffalo/buffalo/worker"
 	"github.com/gomods/athens/pkg/paths"
 	"github.com/gomods/athens/pkg/storage"
 )
 
-func cacheMissHandler(next buffalo.Handler, w worker.Worker) buffalo.Handler {
+func cacheMissHandler(next buffalo.Handler, w worker.Worker, mf *modfilter.ModFilter) buffalo.Handler {
 	return func(c buffalo.Context) error {
 		nextErr := next(c)
 		if isModuleNotFoundErr(nextErr) {
@@ -18,6 +20,10 @@ func cacheMissHandler(next buffalo.Handler, w worker.Worker) buffalo.Handler {
 			if err != nil {
 				log.Println(err)
 				return nextErr
+			}
+
+			if !mf.ShouldProcess(params.Module) {
+				return nil
 			}
 
 			// TODO: add separate worker instead of inline reports
