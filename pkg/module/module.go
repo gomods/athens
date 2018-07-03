@@ -31,35 +31,38 @@ func MakeZip(fs afero.Fs, dir, module, version string) *io.PipeReader {
 		zw := zip.NewWriter(pw)
 		defer zw.Close()
 
-		walkFunc := func(path string, info os.FileInfo, err error) error {
-			if err != nil || info == nil || info.IsDir() {
-				return err
-			}
-
-			fileName := getFileName(path, dir, module, version)
-
-			if ignoreParser.MatchesPath(fileName) {
-				return nil
-			}
-
-			fileContent, err := afero.ReadFile(fs, path)
-			if err != nil {
-				return err
-			}
-
-			f, err := zw.Create(fileName)
-			if err != nil {
-				return err
-			}
-
-			_, err = f.Write(fileContent)
-			return err
-		}
-
-		err := afero.Walk(fs, dir, walkFunc)
+		walkFn := walkFunc(fs, zw, dir, module, version, ignoreParser)
+		err := afero.Walk(fs, dir, walkFn)
 		pw.CloseWithError(err)
 	}()
 	return pr
+}
+
+func walkFunc(fs afero.Fs, zw *zip.Writer, dir, module, version string, ignoreParser ignore.IgnoreParser) filepath.WalkFunc {
+	return func(path string, info os.FileInfo, err error) error {
+		if err != nil || info == nil || info.IsDir() {
+			return err
+		}
+
+		fileName := getFileName(path, dir, module, version)
+
+		if ignoreParser.MatchesPath(fileName) {
+			return nil
+		}
+
+		fileContent, err := afero.ReadFile(fs, path)
+		if err != nil {
+			return err
+		}
+
+		f, err := zw.Create(fileName)
+		if err != nil {
+			return err
+		}
+
+		_, err = f.Write(fileContent)
+		return err
+	}
 }
 
 func getIgnoreParser(fs afero.Fs, dir string) ignore.IgnoreParser {

@@ -10,7 +10,7 @@ import (
 
 // Save stores a module in rdbms storage.
 func (r *ModuleStore) Save(_ context.Context, module, version string, mod []byte, zip io.Reader, info []byte) error {
-	z, err := ioutil.ReadAll(zip)
+	zipBytes, err := ioutil.ReadAll(zip)
 	if err != nil {
 		return err
 	}
@@ -18,7 +18,7 @@ func (r *ModuleStore) Save(_ context.Context, module, version string, mod []byte
 		Module:  module,
 		Version: version,
 		Mod:     mod,
-		Zip:     z,
+		Zip:     zipBytes,
 		Info:    info,
 	}
 
