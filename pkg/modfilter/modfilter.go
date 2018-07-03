@@ -1,11 +1,14 @@
 package modfilter
 
 import (
+	"bufio"
+	"os"
 	"strings"
 )
 
 var (
-	pathSeparator = "/"
+	pathSeparator         = "/"
+	configurationFileName = "filter.conf"
 )
 
 // ModFilter is a filter of modules
@@ -27,6 +30,8 @@ func NewModFilter() *ModFilter {
 	rn := newRule(Default)
 	modFilter := ModFilter{}
 	modFilter.root = rn
+
+	modFilter.initFromConfig()
 
 	return &modFilter
 }
@@ -104,9 +109,46 @@ func (f *ModFilter) shouldProcess(path ...string) Rule {
 	return f.root.rule
 }
 
+func (f *ModFilter) initFromConfig() {
+	lines, err := getConfigLines()
+
+	if err != nil || len(lines) == 0 {
+		return
+	}
+
+	for _, line := range lines {
+		split := strings.Split(line, " ")
+		if len(split) > 2 {
+			continue
+		}
+		ruleSign := strings.TrimSpace(split[0])
+		rule := Default
+		switch ruleSign {
+		case "+":
+			rule = Include
+		case "-":
+			rule = Exclude
+		default:
+			continue
+		}
+
+		// is root config
+		if len(split) == 1 {
+			f.AddRule("", rule)
+		}
+
+		path := strings.TrimSpace(split[1])
+		f.AddRule(path, rule)
+	}
+}
+
 func getPathSegments(path string) []string {
 	path = strings.TrimSpace(path)
 	path = strings.Trim(path, pathSeparator)
+
+	if path == "" {
+		return []string{}
+	}
 
 	return strings.Split(path, pathSeparator)
 }
@@ -117,4 +159,29 @@ func newRule(r Rule) ruleNode {
 	rn.rule = r
 
 	return rn
+}
+
+func getConfigLines() ([]string, error) {
+	configName := configurationFileName
+
+	f, err := os.Open(configName)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+
+	scanner := bufio.NewScanner(f)
+
+	var lines []string
+	for scanner.Scan() {
+		line := scanner.Text()
+		line = strings.TrimSpace(line)
+		if len(line) == 0 {
+			continue
+		}
+
+		lines = append(lines, line)
+	}
+
+	return lines, nil
 }
