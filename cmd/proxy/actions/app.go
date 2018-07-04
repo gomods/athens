@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/gomods/athens/pkg/modfilter"
-
 	"github.com/garyburd/redigo/redis"
 	"github.com/gobuffalo/buffalo"
 	"github.com/gobuffalo/buffalo/middleware"
@@ -16,6 +14,7 @@ import (
 	"github.com/gobuffalo/envy"
 	"github.com/gobuffalo/gocraft-work-adapter"
 	"github.com/gobuffalo/packr"
+	"github.com/gomods/athens/pkg/modfilter"
 	"github.com/gomods/athens/pkg/user"
 	"github.com/rs/cors"
 	"github.com/unrolled/secure"

@@ -9,9 +9,8 @@ import (
 	"path"
 	"time"
 
-	"github.com/gomods/athens/pkg/modfilter"
-
 	"github.com/gobuffalo/buffalo/worker"
+	"github.com/gomods/athens/pkg/modfilter"
 	"github.com/gomods/athens/pkg/payloads"
 )
 

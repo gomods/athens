@@ -4,9 +4,8 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/gomods/athens/pkg/modfilter"
-
 	"github.com/gomods/athens/cmd/proxy/actions"
+	"github.com/gomods/athens/pkg/modfilter"
 	"github.com/gomods/athens/pkg/storage"
 )
 

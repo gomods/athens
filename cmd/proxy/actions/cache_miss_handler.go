@@ -1,14 +1,12 @@
 package actions
 
 import (
-	"fmt"
 	"log"
 	"strings"
 
-	"github.com/gomods/athens/pkg/modfilter"
-
 	"github.com/gobuffalo/buffalo"
 	"github.com/gobuffalo/buffalo/worker"
+	"github.com/gomods/athens/pkg/modfilter"
 	"github.com/gomods/athens/pkg/paths"
 	"github.com/gomods/athens/pkg/storage"
 )
@@ -24,10 +22,9 @@ func cacheMissHandler(next buffalo.Handler, w worker.Worker, mf *modfilter.ModFi
 			}
 
 			if !mf.ShouldProcess(params.Module) {
-				fmt.Println("Skipping module ", params.Module)
 				return nextErr
 			}
-			fmt.Println("Processing module", params.Module)
+
 			// TODO: add separate worker instead of inline reports
 			if err := queueCacheMissReportJob(params.Module, params.Version, app.Worker); err != nil {
 				log.Println(err)
