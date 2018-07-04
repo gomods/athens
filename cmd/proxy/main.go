@@ -22,11 +22,11 @@ func main() {
 	}
 
 	w := app.Worker
-	if err := w.Register(actions.FetcherWorkerName, actions.GetProcessCacheMissJob(s, w)); err != nil {
+	mf := modfilter.NewModFilter()
+	if err := w.Register(actions.FetcherWorkerName, actions.GetProcessCacheMissJob(s, w, mf)); err != nil {
 		log.Fatal(err)
 	}
 
-	mf := modfilter.NewModFilter()
 	if err := w.Register(actions.ReporterWorkerName, actions.GetCacheMissReporterJob(w, mf)); err != nil {
 		log.Fatal(err)
 	}

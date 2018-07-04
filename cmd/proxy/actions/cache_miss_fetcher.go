@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"io/ioutil"
 
+	"github.com/gomods/athens/pkg/modfilter"
+
 	"github.com/gobuffalo/buffalo/worker"
 	"github.com/gobuffalo/envy"
 	"github.com/gomods/athens/pkg/storage"
@@ -20,11 +22,15 @@ const (
 )
 
 // GetProcessCacheMissJob processes queue of cache misses and downloads sources from active Olympus
-func GetProcessCacheMissJob(s storage.Backend, w worker.Worker) worker.Handler {
+func GetProcessCacheMissJob(s storage.Backend, w worker.Worker, mf *modfilter.ModFilter) worker.Handler {
 	return func(args worker.Args) (err error) {
 		module, version, err := parseArgs(args)
 		if err != nil {
 			return err
+		}
+
+		if !mf.ShouldProcess(module) {
+			return fmt.Errorf("Module %s is excluded", module)
 		}
 
 		if s.Exists(module, version) {

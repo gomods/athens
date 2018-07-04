@@ -2,6 +2,7 @@ package modfilter
 
 import (
 	"bufio"
+	"fmt"
 	"os"
 	"strings"
 )
@@ -117,10 +118,12 @@ func (f *ModFilter) initFromConfig() {
 	}
 
 	for _, line := range lines {
-		split := strings.Split(line, " ")
+		split := strings.Split(strings.TrimSpace(line), " ")
 		if len(split) > 2 {
 			continue
 		}
+
+		fmt.Printf("SPLIT %v %#v\n", len(split), split)
 		ruleSign := strings.TrimSpace(split[0])
 		rule := Default
 		switch ruleSign {
@@ -135,6 +138,7 @@ func (f *ModFilter) initFromConfig() {
 		// is root config
 		if len(split) == 1 {
 			f.AddRule("", rule)
+			continue
 		}
 
 		path := strings.TrimSpace(split[1])

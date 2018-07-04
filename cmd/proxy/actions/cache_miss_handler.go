@@ -1,6 +1,7 @@
 package actions
 
 import (
+	"fmt"
 	"log"
 	"strings"
 
@@ -23,9 +24,10 @@ func cacheMissHandler(next buffalo.Handler, w worker.Worker, mf *modfilter.ModFi
 			}
 
 			if !mf.ShouldProcess(params.Module) {
-				return nil
+				fmt.Println("Skipping module ", params.Module)
+				return nextErr
 			}
-
+			fmt.Println("Processing module", params.Module)
 			// TODO: add separate worker instead of inline reports
 			if err := queueCacheMissReportJob(params.Module, params.Version, app.Worker); err != nil {
 				log.Println(err)

@@ -3,6 +3,7 @@ package actions
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/url"
 	"path"
@@ -23,7 +24,7 @@ func GetCacheMissReporterJob(w worker.Worker, mf *modfilter.ModFilter) worker.Ha
 		}
 
 		if !mf.ShouldProcess(module) {
-			return nil
+			return fmt.Errorf("Module %s is excluded", module)
 		}
 
 		if err := reportCacheMiss(module, version); err != nil {
