@@ -15,10 +15,6 @@ func (g *GcpTests) TestNewWithCredentials() {
 	r.NotNil(store.bucket)
 }
 
-func (g *GcpTests) TestNew() {
-	// TODO
-}
-
 func (g *GcpTests) TestSave() {
 	r := g.Require()
 	store, err := NewWithCredentials(g.context, g.options)
