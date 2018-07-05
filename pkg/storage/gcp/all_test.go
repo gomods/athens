@@ -85,10 +85,3 @@ func cleanBucket(ctx context.Context, bkt *storage.BucketHandle, mod, ver string
 func TestGcpStorage(t *testing.T) {
 	suite.Run(t, new(GcpTests))
 }
-
-func (g *GcpTests) TestNewWithCredentials() {
-	r := g.Require()
-	store, err := NewWithCredentials(g.context, g.options)
-	r.NoError(err)
-	r.NotNil(store.bucket)
-}
