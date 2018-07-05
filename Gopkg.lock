@@ -5,8 +5,11 @@
   name = "cloud.google.com/go"
   packages = [
     "compute/metadata",
+    "datastore",
     "iam",
     "internal",
+    "internal/atomiccache",
+    "internal/fields",
     "internal/optional",
     "internal/trace",
     "internal/version",
@@ -288,7 +291,9 @@
     "ptypes",
     "ptypes/any",
     "ptypes/duration",
-    "ptypes/timestamp"
+    "ptypes/struct",
+    "ptypes/timestamp",
+    "ptypes/wrappers"
   ]
   revision = "b4deda0973fb4c70b50d226b1af49f3da59f5265"
   version = "v1.1.0"
@@ -328,6 +333,18 @@
   packages = ["."]
   revision = "ea4d1f681babbce9545c9c5f3d5194a789c89f5b"
   version = "v1.2.0"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/hashicorp/errwrap"
+  packages = ["."]
+  revision = "7554cd9344cec97297fa6649b055a8c98c2a1e55"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/hashicorp/go-multierror"
+  packages = ["."]
+  revision = "b7773ae218740a7be65057fc60b366a49b538a44"
 
 [[projects]]
   name = "github.com/inconshreveable/mousetrap"
@@ -755,6 +772,7 @@
     "exporter/stackdriver/propagation",
     "internal",
     "internal/tagencoding",
+    "plugin/ocgrpc",
     "plugin/ochttp",
     "plugin/ochttp/propagation/b3",
     "stats",
@@ -857,6 +875,7 @@
     "iterator",
     "option",
     "storage/v1",
+    "transport/grpc",
     "transport/http"
   ]
   revision = "2eea9ba0a3d94f6ab46508083e299a00bbbc65f6"
@@ -866,7 +885,6 @@
   packages = [
     ".",
     "aetest",
-    "file",
     "internal",
     "internal/app_identity",
     "internal/base",
@@ -874,8 +892,10 @@
     "internal/log",
     "internal/modules",
     "internal/remote_api",
+    "internal/socket",
     "internal/urlfetch",
     "internal/user",
+    "socket",
     "urlfetch",
     "user"
   ]
@@ -887,9 +907,11 @@
   name = "google.golang.org/genproto"
   packages = [
     "googleapis/api/annotations",
+    "googleapis/datastore/v1",
     "googleapis/iam/v1",
     "googleapis/rpc/code",
-    "googleapis/rpc/status"
+    "googleapis/rpc/status",
+    "googleapis/type/latlng"
   ]
   revision = "32ee49c4dd805befd833990acba36cb75042378c"
 
@@ -904,6 +926,7 @@
     "codes",
     "connectivity",
     "credentials",
+    "credentials/oauth",
     "encoding",
     "encoding/proto",
     "grpclb/grpc_lb_v1/messages",
@@ -933,6 +956,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "8be409fe30d678c6945ea0376a518ded66552da62b4689d9f873b75d387d5399"
+  inputs-digest = "ad44c2185a2803481d4654250180d2cb7c0eb875f3346ee34e5e32779d0cddc9"
   solver-name = "gps-cdcl"
   solver-version = 1
