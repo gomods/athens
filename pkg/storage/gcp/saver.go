@@ -7,10 +7,16 @@ import (
 	"strings"
 
 	"cloud.google.com/go/storage"
+	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/config/env"
 )
 
 // Save uploads the modules .mod, .zip and .info files for a given version
+// It expects a context, which can be provided using context.Background
+// from the standard library.
+//
+// Uploaded files are publicly accessable in the storage bucket as per
+// an ACL rule which may eventually be configurable.
 func (s *Storage) Save(ctx context.Context, module, version string, mod, zip, info []byte) error {
 	errs := make(chan error, 3)
 	// create a context that will time out after the value found in
@@ -43,7 +49,7 @@ func (s *Storage) Save(ctx context.Context, module, version string, mod, zip, in
 // upload waits for either writeToBucket to complete or the context to expire
 func upload(ctx context.Context, errs chan<- error, bkt *storage.BucketHandle, module, version, ext string, file []byte) {
 	select {
-	case errs <- writeToBucket(ctx, bkt, fmt.Sprintf("%s/@v/%s.%s", module, version, ext), file):
+	case errs <- writeToBucket(ctx, bkt, config.PackageVersionedName(module, version, ext), file):
 		return
 	case <-ctx.Done():
 		errs <- fmt.Errorf("WARNING: context deadline exceeded during write of %s version %s", module, version)
@@ -59,7 +65,7 @@ func writeToBucket(ctx context.Context, bkt *storage.BucketHandle, filename stri
 		}
 	}(wc)
 	wc.ContentType = "application/octet-stream"
-	// TODO: set better access control?
+	// TODO: have this configurable to allow for mixed public/private modules
 	wc.ACL = []storage.ACLRule{{Entity: storage.AllUsers, Role: storage.RoleReader}}
 	if _, err := wc.Write(file); err != nil {
 		return err
