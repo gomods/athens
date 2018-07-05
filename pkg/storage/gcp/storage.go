@@ -43,13 +43,13 @@ func NewWithCredentials(ctx context.Context, cred option.ClientOption) (*Storage
 	}
 	bkt := storage.Bucket(bucketname)
 
-	datastore, err := datastore.NewClient(ctx, "", cred)
-	if err != nil {
-		return nil, fmt.Errorf("could not create new datastore client: %s", err)
-	}
+	// datastore, err := datastore.NewClient(ctx, "", cred)
+	// if err != nil {
+	// 	return nil, fmt.Errorf("could not create new datastore client: %s", err)
+	// }
 	return &Storage{
-		bucket:       bkt,
-		dsClient:     datastore,
+		bucket: bkt,
+		// dsClient:     datastore,
 		baseURI:      u,
 		closeStorage: storage.Close,
 	}, nil
