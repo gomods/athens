@@ -8,6 +8,9 @@ import (
 	"github.com/gomods/athens/pkg/storage"
 )
 
+// Get retrieves a module from storage as a (./pkg/storage).Version
+//
+// The caller is responsible for calling close on the Zip ReadCloser
 func (s *Storage) Get(ctx context.Context, module, version string) (*storage.Version, error) {
 	modName := fmt.Sprintf("%s/@v/%s.%s", module, version, "mod")
 	modReader, err := s.bucket.Object(modName).NewReader(ctx)
