@@ -71,7 +71,7 @@ func (s *Storage) Close() error {
 	if err := s.closeStorage(); err != nil {
 		errors = multierror.Append(errors, err)
 	}
-	if err := s.dsClient.Close(); err != nil {
+	if err := s.dsClient.Close(); s.dsClient != nil && err != nil {
 		errors = multierror.Append(errors, err)
 	}
 	return errors
