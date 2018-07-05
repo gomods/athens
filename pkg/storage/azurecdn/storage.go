@@ -71,7 +71,7 @@ func (s *Storage) Save(ctx context.Context, module, version string, mod []byte, 
 	go uploadStream(ctx, errChan, containerURL, module, version, "zip", zip, uploadOpts("application/octet-stream"))
 
 	var errors error
-	for i := 0; i < 3; i++ {
+	for i := 0; i < numUpload; i++ {
 		err := <-errChan
 		if err != nil {
 			errors = multierror.Append(errors, err)
