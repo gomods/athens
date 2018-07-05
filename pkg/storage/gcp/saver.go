@@ -11,7 +11,6 @@ import (
 	"github.com/gobuffalo/envy"
 	"github.com/gomods/athens/pkg/config/env"
 	"google.golang.org/api/option"
-	"google.golang.org/appengine/file"
 )
 
 // Storage implements the (github.com/gomods/pkg/storage).Saver interface
@@ -35,28 +34,6 @@ func NewWithCredentials(ctx context.Context, cred option.ClientOption) (*Storage
 	bucketname, err := envy.MustGet("ATHENS_STORAGE_GCP_BUCKET")
 	if err != nil {
 		return nil, fmt.Errorf("could not load 'ATHENS_STORAGE_GCP_BUCKET': %s", err)
-	}
-	u, err := url.Parse(fmt.Sprintf("https://storage.googleapis.com/%s", bucketname))
-	if err != nil {
-		return nil, err
-	}
-	bkt := client.Bucket(bucketname)
-	return &Storage{bucket: bkt, baseURI: u, close: client.Close}, nil
-}
-
-// New returns a new Storage instance for use with appengine hosts.
-//
-// This requires the application to be running on appengine, but does not require
-// any special configuration.
-// If running on any other platform please use NewWithCredentials
-func New(ctx context.Context) (*Storage, error) {
-	client, err := storage.NewClient(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("could not create new client: %s", err)
-	}
-	bucketname, err := file.DefaultBucketName(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("could not get default bucket name: %s", err)
 	}
 	u, err := url.Parse(fmt.Sprintf("https://storage.googleapis.com/%s", bucketname))
 	if err != nil {
