@@ -8,6 +8,7 @@ import (
 	"net/url"
 
 	"github.com/Azure/azure-storage-blob-go/2017-07-29/azblob"
+	"github.com/gomods/athens/pkg/config/env"
 	multierror "github.com/hashicorp/go-multierror"
 )
 
@@ -40,6 +41,9 @@ func (s Storage) BaseURL() *url.URL {
 
 // Save implements the (github.com/gomods/athens/pkg/storage).Saver interface.
 func (s *Storage) Save(ctx context.Context, module, version string, mod []byte, zip io.Reader, info []byte) error {
+	tctx, cancel := context.WithTimeout(ctx, env.Timeout())
+	defer cancel()
+
 	pipe := azblob.NewPipeline(s.cred, azblob.PipelineOptions{})
 	serviceURL := azblob.NewServiceURL(*s.accountURL, pipe)
 	// rules on container names:
@@ -66,9 +70,9 @@ func (s *Storage) Save(ctx context.Context, module, version string, mod []byte, 
 	const numUpload = 3
 	errChan := make(chan error, numUpload)
 
-	go uploadBlob(ctx, errChan, containerURL, module, version, "info", bytes.NewReader(info), uploadOpts("application/json"))
-	go uploadBlob(ctx, errChan, containerURL, module, version, "mod", bytes.NewReader(mod), uploadOpts("text/plain"))
-	go uploadStream(ctx, errChan, containerURL, module, version, "zip", zip, uploadOpts("application/octet-stream"))
+	go uploadBlob(tctx, errChan, containerURL, module, version, "info", bytes.NewReader(info), uploadOpts("application/json"))
+	go uploadBlob(tctx, errChan, containerURL, module, version, "mod", bytes.NewReader(mod), uploadOpts("text/plain"))
+	go uploadStream(tctx, errChan, containerURL, module, version, "zip", zip, uploadOpts("application/octet-stream"))
 
 	var errors error
 	for i := 0; i < numUpload; i++ {
