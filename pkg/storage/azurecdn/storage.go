@@ -5,7 +5,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/url"
 
 	"github.com/Azure/azure-storage-blob-go/2017-07-29/azblob"
@@ -49,49 +48,88 @@ func (s *Storage) Save(ctx context.Context, module, version string, mod []byte, 
 	// This container must exist
 	containerURL := serviceURL.NewContainerURL("gomodules")
 
-	infoBlobURL := containerURL.NewBlockBlobURL(fmt.Sprintf("%s/@v/%s.info", module, version))
-	modBlobURL := containerURL.NewBlockBlobURL(fmt.Sprintf("%s/@v/%s.mod", module, version))
-	zipBlobURL := containerURL.NewBlockBlobURL(fmt.Sprintf("%s/@v/%s.zip", module, version))
-
+	emptyMeta := map[string]string{}
+	emptyBlobAccessCond := azblob.BlobAccessConditions{}
 	httpHeaders := func(contentType string) azblob.BlobHTTPHeaders {
 		return azblob.BlobHTTPHeaders{
 			ContentType: contentType,
 		}
 	}
-	emptyMeta := map[string]string{}
-	emptyBlobAccessCond := azblob.BlobAccessConditions{}
-
-	const numUpload = 3
-	uploadErrs := make(chan error, numUpload)
-
-	upload := func(url azblob.BlockBlobURL, content io.ReadSeeker, contentType string) {
-		_, err := url.Upload(ctx, content, httpHeaders(contentType), emptyMeta, emptyBlobAccessCond)
-		uploadErrs <- err
-	}
-	zipBytes, err := ioutil.ReadAll(zip)
-	if err != nil {
-		return err
-	}
-
-	go upload(infoBlobURL, bytes.NewReader(info), "application/json")
-	go upload(modBlobURL, bytes.NewReader(mod), "text/plain")
-	go upload(zipBlobURL, bytes.NewReader(zipBytes), "application/octet-stream")
-
-	var errors error
-	for i := 0; i < numUpload; i++ {
-		select {
-		case err := <-uploadErrs:
-			if err != nil {
-				errors = multierror.Append(errors, err)
-			}
-		case <-ctx.Done():
-			return ctx.Err()
+	uploadOpts := func(contentType string) uploadOptions {
+		return uploadOptions{
+			accessConditions: emptyBlobAccessCond,
+			metadata:         emptyMeta,
+			blobHTTPHeaders:  httpHeaders(contentType),
 		}
 	}
+
+	const numUpload = 3
+	errChan := make(chan error, numUpload)
+
+	go uploadBlob(ctx, errChan, containerURL, module, version, "info", bytes.NewReader(info), uploadOpts("application/json"))
+	go uploadBlob(ctx, errChan, containerURL, module, version, "mod", bytes.NewReader(mod), uploadOpts("text/plain"))
+	go uploadStream(ctx, errChan, containerURL, module, version, "zip", zip, uploadOpts("application/octet-stream"))
+
+	var errors error
+	for i := 0; i < 3; i++ {
+		err := <-errChan
+		if err != nil {
+			errors = multierror.Append(errors, err)
+		}
+	}
+	close(errChan)
 
 	// TODO: take out lease on the /list file and add the version to it
 	//
 	// Do that only after module source+metadata is uploaded
 
 	return errors
+}
+
+func blockBlobURL(containerURL azblob.ContainerURL, module, version, name string) azblob.BlockBlobURL {
+	return containerURL.NewBlockBlobURL(fmt.Sprintf("%s/@v/%s.%s", module, version, name))
+}
+
+func uploadBlob(ctx context.Context, errChan chan<- error, containerURL azblob.ContainerURL, module, version, name string, content io.ReadSeeker, opts uploadOptions) {
+	url := blockBlobURL(containerURL, module, version, name)
+	save := func() error {
+		_, err := url.Upload(ctx, content, opts.blobHTTPHeaders, opts.metadata, opts.accessConditions)
+		return err
+	}
+
+	select {
+	case errChan <- save():
+	case <-ctx.Done():
+		errChan <- fmt.Errorf("uploading %s/%s.%s timed out", module, version, name)
+	}
+}
+
+func uploadStream(ctx context.Context, errChan chan<- error, containerURL azblob.ContainerURL, module, version, name string, stream io.Reader, opts uploadOptions) {
+	bufferSize := 1 * 1024 * 1024 // Size of the rotating buffers that are used when uploading
+	maxBuffers := 3               // Number of rotating buffers that are used when uploading
+
+	uploadStreamOpts := azblob.UploadStreamToBlockBlobOptions{
+		BufferSize:       bufferSize,
+		MaxBuffers:       maxBuffers,
+		BlobHTTPHeaders:  opts.blobHTTPHeaders,
+		Metadata:         opts.metadata,
+		AccessConditions: opts.accessConditions,
+	}
+	url := blockBlobURL(containerURL, module, version, name)
+	save := func() error {
+		_, err := azblob.UploadStreamToBlockBlob(ctx, stream, url, uploadStreamOpts)
+		return err
+	}
+
+	select {
+	case errChan <- save():
+	case <-ctx.Done():
+		errChan <- fmt.Errorf("uploading %s/%s.%s timed out", module, version, name)
+	}
+}
+
+type uploadOptions struct {
+	blobHTTPHeaders  azblob.BlobHTTPHeaders
+	metadata         map[string]string
+	accessConditions azblob.BlobAccessConditions
 }
