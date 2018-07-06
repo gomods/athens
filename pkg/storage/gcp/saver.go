@@ -61,7 +61,7 @@ func writeToBucket(ctx context.Context, bkt *storage.BucketHandle, filename stri
 	wc := bkt.Object(filename).NewWriter(ctx)
 	defer func(w *storage.Writer) {
 		if err := w.Close(); err != nil {
-			log.Printf("WARNING: failed to close storage object writer: %v", err)
+			log.Printf("WARNING: failed to close storage object writer: %s", err)
 		}
 	}(wc)
 	wc.ContentType = "application/octet-stream"

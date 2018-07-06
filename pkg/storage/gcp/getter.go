@@ -12,6 +12,7 @@ import (
 //
 // The caller is responsible for calling close on the Zip ReadCloser
 func (s *Storage) Get(ctx context.Context, module, version string) (*storage.Version, error) {
+	// TODO: check if module exists at version, if no - return not found
 	modName := fmt.Sprintf("%s/@v/%s.%s", module, version, "mod")
 	modReader, err := s.bucket.Object(modName).NewReader(ctx)
 	if err != nil {
