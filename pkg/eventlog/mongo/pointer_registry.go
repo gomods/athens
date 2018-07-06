@@ -3,34 +3,35 @@ package mongo
 import (
 	"github.com/globalsign/mgo"
 	"github.com/gomods/athens/pkg/eventlog"
+	"github.com/gomods/athens/pkg/storage/mongoutil"
 )
 
 // Registry is a pointer registry for olypus server event logs
 type Registry struct {
-	s   *mgo.Session
-	d   string // database
-	c   string // collection
-	url string
+	s           *mgo.Session
+	d           string // database
+	c           string // collection
+	connDetails *mongoutil.ConnDetails
 }
 
 // NewRegistry creates a pointer registry from backing mongo database
-func NewRegistry(url string) (*Registry, error) {
-	return NewRegistryWithCollection(url, "pointer-registry")
+func NewRegistry(connDetails *mongoutil.ConnDetails) (*Registry, error) {
+	return NewRegistryWithCollection(connDetails, "pointer-registry")
 }
 
 // NewRegistryWithCollection creates a registry using the collection provided
-func NewRegistryWithCollection(url, collection string) (*Registry, error) {
+func NewRegistryWithCollection(connDetails *mongoutil.ConnDetails, collection string) (*Registry, error) {
 	r := Registry{
-		url: url,
-		c:   collection,
-		d:   "athens",
+		connDetails: connDetails,
+		c:           collection,
+		d:           "athens",
 	}
 	return &r, r.Connect()
 }
 
 // Connect establishes a session with the mongo cluster
 func (r *Registry) Connect() error {
-	s, err := mgo.Dial(r.url)
+	s, err := mongoutil.GetSession(r.connDetails, r.d)
 	if err != nil {
 		return err
 	}
