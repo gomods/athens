@@ -5,11 +5,12 @@ import (
 	"fmt"
 	"os"
 	"strings"
+
+	"github.com/gomods/athens/pkg/config/env"
 )
 
 var (
-	pathSeparator         = "/"
-	configurationFileName = "filter.conf"
+	pathSeparator = "/"
 )
 
 // ModFilter is a filter of modules
@@ -166,7 +167,7 @@ func newRule(r Rule) ruleNode {
 }
 
 func getConfigLines() ([]string, error) {
-	configName := configurationFileName
+	configName := env.IncludeExcludeFileName()
 
 	f, err := os.Open(configName)
 	if err != nil {
