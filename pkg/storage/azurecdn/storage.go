@@ -8,10 +8,9 @@ import (
 	"io"
 	"net/url"
 
-	"github.com/gomods/athens/pkg/config/env"
-
 	"github.com/Azure/azure-storage-blob-go/2017-07-29/azblob"
 	"github.com/gomods/athens/pkg/config"
+	"github.com/gomods/athens/pkg/config/env"
 )
 
 // Storage implements (github.com/gomods/athens/pkg/storage).Saver and
