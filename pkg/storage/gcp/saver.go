@@ -25,9 +25,9 @@ func (s *Storage) Save(ctx context.Context, module, version string, mod, zip, in
 	defer cancelCTX()
 
 	// dispatch go routine for each file to upload
-	go upload(ctxWT, errs, s.bucket, module, version, "mod", mod)
-	go upload(ctxWT, errs, s.bucket, module, version, "zip", zip)
-	go upload(ctxWT, errs, s.bucket, module, version, "info", info)
+	go upload(ctxWT, errs, s.bucket, module, version, "mod", "text/plain", mod)
+	go upload(ctxWT, errs, s.bucket, module, version, "zip", "application/octet-stream", zip)
+	go upload(ctxWT, errs, s.bucket, module, version, "info", "application/json", info)
 
 	errsOut := make([]string, 0, 3)
 	// wait for each routine above to send a value
@@ -47,7 +47,7 @@ func (s *Storage) Save(ctx context.Context, module, version string, mod, zip, in
 }
 
 // upload waits for either writeToBucket to complete or the context to expire
-func upload(ctx context.Context, errs chan<- error, bkt *storage.BucketHandle, module, version, ext string, file []byte) {
+func upload(ctx context.Context, errs chan<- error, bkt *storage.BucketHandle, module, version, ext, contentType string, file []byte) {
 	select {
 	case errs <- writeToBucket(ctx, bkt, config.PackageVersionedName(module, version, ext), file):
 		return
@@ -57,14 +57,14 @@ func upload(ctx context.Context, errs chan<- error, bkt *storage.BucketHandle, m
 }
 
 // writeToBucket performs the actual write to a gcp storage bucket
-func writeToBucket(ctx context.Context, bkt *storage.BucketHandle, filename string, file []byte) error {
+func writeToBucket(ctx context.Context, bkt *storage.BucketHandle, filename, contentType string, file []byte) error {
 	wc := bkt.Object(filename).NewWriter(ctx)
 	defer func(w *storage.Writer) {
 		if err := w.Close(); err != nil {
 			log.Printf("WARNING: failed to close storage object writer: %s", err)
 		}
 	}(wc)
-	wc.ContentType = "application/octet-stream"
+	wc.ContentType = contentType
 	// TODO: have this configurable to allow for mixed public/private modules
 	wc.ACL = []storage.ACLRule{{Entity: storage.AllUsers, Role: storage.RoleReader}}
 	if _, err := wc.Write(file); err != nil {
