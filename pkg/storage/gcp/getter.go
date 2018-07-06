@@ -5,16 +5,25 @@ import (
 	"fmt"
 	"io/ioutil"
 
+	gcStorage "cloud.google.com/go/storage"
 	"github.com/gomods/athens/pkg/storage"
 )
 
-// Get retrieves a module from storage as a (./pkg/storage).Version
+// Get retrieves a module at a specific version from storage as a (./pkg/storage).Version
 //
 // The caller is responsible for calling close on the Zip ReadCloser
 func (s *Storage) Get(ctx context.Context, module, version string) (*storage.Version, error) {
-	// TODO: check if module exists at version, if no - return not found
 	modName := fmt.Sprintf("%s/@v/%s.%s", module, version, "mod")
-	modReader, err := s.bucket.Object(modName).NewReader(ctx)
+	modHandle := s.bucket.Object(modName)
+	_, err := modHandle.Attrs(ctx)
+	if err == gcStorage.ErrObjectNotExist {
+		return nil, storage.ErrVersionNotFound{Module: module, Version: version}
+	}
+	if err != nil {
+		return nil, fmt.Errorf("could not stat mod file: %s", err)
+	}
+
+	modReader, err := modHandle.NewReader(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("could not get new reader for mod file: %s", err)
 	}

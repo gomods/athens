@@ -49,7 +49,7 @@ func (s *Storage) Save(ctx context.Context, module, version string, mod, zip, in
 // upload waits for either writeToBucket to complete or the context to expire
 func upload(ctx context.Context, errs chan<- error, bkt *storage.BucketHandle, module, version, ext, contentType string, file []byte) {
 	select {
-	case errs <- writeToBucket(ctx, bkt, config.PackageVersionedName(module, version, ext), file):
+	case errs <- writeToBucket(ctx, bkt, config.PackageVersionedName(module, version, ext), contentType, file):
 		return
 	case <-ctx.Done():
 		errs <- fmt.Errorf("WARNING: context deadline exceeded during write of %s version %s", module, version)
