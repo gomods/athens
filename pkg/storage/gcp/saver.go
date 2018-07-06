@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net/url"
 	"strings"
 	"time"
 
@@ -16,7 +17,8 @@ import (
 // Storage implements the Saver interface
 // (./pkg/storage).Saver
 type Storage struct {
-	bucket *storage.BucketHandle
+	bucket  *storage.BucketHandle
+	baseURI *url.URL
 }
 
 // New returns a new Storage instance authenticated using the provided
@@ -35,7 +37,23 @@ func New(ctx context.Context, cred option.ClientOption) (*Storage, error) {
 		return nil, err
 	}
 	bkt := client.Bucket(bucketname)
-	return &Storage{bucket: bkt}, nil
+
+	u, err := url.Parse(fmt.Sprintf("https://storage.googleapis.com/%s", bucketname))
+	if err != nil {
+		return nil, err
+	}
+
+	return &Storage{bucket: bkt, baseURI: u}, nil
+}
+
+// BaseURL returns the base URL that stores all modules. It can be used
+// in the "meta" tag redirect response to vgo.
+//
+// For example:
+//
+//	<meta name="go-import" content="gomods.com/athens mod BaseURL()">
+func (s *Storage) BaseURL() *url.URL {
+	return env.CdnEndpointWithDefault(s.baseURI)
 }
 
 // Save uploads the module .mod, .zip and .info files for a given version.

@@ -8,6 +8,8 @@ import (
 	"io"
 	"net/url"
 
+	"github.com/gomods/athens/pkg/config/env"
+
 	"github.com/Azure/azure-storage-blob-go/2017-07-29/azblob"
 	"github.com/gomods/athens/pkg/config"
 )
@@ -36,7 +38,7 @@ func New(accountName, accountKey string) (*Storage, error) {
 //
 //	<meta name="go-import" content="gomods.com/athens mod BaseURL()">
 func (s Storage) BaseURL() *url.URL {
-	return s.accountURL
+	return env.CdnEndpointWithDefault(s.accountURL)
 }
 
 // Save implements the (github.com/gomods/athens/pkg/storage).Saver interface.
