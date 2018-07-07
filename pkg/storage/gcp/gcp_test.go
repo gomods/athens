@@ -48,10 +48,10 @@ func (g *GcpTests) TestSaveGetListRoundTrip() {
 	r.EqualError(notFoundErr, err.Error())
 
 	// test listing modules
-	// versionList, err := store.List(g.module)
-	// r.NoError(err)
-	// r.Equal(1, len(versionList))
-	// r.Equal(g.version, versionList[0])
+	versionList, err := store.List(g.context, g.module)
+	r.NoError(err)
+	r.Equal(1, len(versionList))
+	r.Equal(g.version, versionList[0])
 }
 
 func exists(ctx context.Context, cred option.ClientOption, bucket, mod, ver string) error {

@@ -14,6 +14,7 @@ import (
 // Storage implements the following interfaces:
 // (./pkg/storage).Saver
 // (./pkg/storage).Getter
+// (./pkg/storage).Lister
 type Storage struct {
 	bucket       *storage.BucketHandle
 	dsClient     *datastore.Client
