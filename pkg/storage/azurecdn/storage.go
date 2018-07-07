@@ -8,6 +8,7 @@ import (
 	"net/url"
 
 	"github.com/Azure/azure-storage-blob-go/2017-07-29/azblob"
+	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/config/env"
 	multierror "github.com/hashicorp/go-multierror"
 )
@@ -90,12 +91,12 @@ func (s *Storage) Save(ctx context.Context, module, version string, mod []byte, 
 	return errors
 }
 
-func blockBlobURL(containerURL azblob.ContainerURL, module, version, name string) azblob.BlockBlobURL {
-	return containerURL.NewBlockBlobURL(fmt.Sprintf("%s/@v/%s.%s", module, version, name))
+func blockBlobURL(containerURL azblob.ContainerURL, module, version, ext string) azblob.BlockBlobURL {
+	return containerURL.NewBlockBlobURL(config.PackageVersionedName(module, version, ext))
 }
 
-func uploadBlob(ctx context.Context, errChan chan<- error, containerURL azblob.ContainerURL, module, version, name string, content io.ReadSeeker, opts uploadOptions) {
-	url := blockBlobURL(containerURL, module, version, name)
+func uploadBlob(ctx context.Context, errChan chan<- error, containerURL azblob.ContainerURL, module, version, ext string, content io.ReadSeeker, opts uploadOptions) {
+	url := blockBlobURL(containerURL, module, version, ext)
 	save := func() error {
 		_, err := url.Upload(ctx, content, opts.blobHTTPHeaders, opts.metadata, opts.accessConditions)
 		return err
@@ -104,11 +105,11 @@ func uploadBlob(ctx context.Context, errChan chan<- error, containerURL azblob.C
 	select {
 	case errChan <- save():
 	case <-ctx.Done():
-		errChan <- fmt.Errorf("uploading %s/%s.%s timed out", module, version, name)
+		errChan <- fmt.Errorf("uploading %s/%s.%s timed out", module, version, ext)
 	}
 }
 
-func uploadStream(ctx context.Context, errChan chan<- error, containerURL azblob.ContainerURL, module, version, name string, stream io.Reader, opts uploadOptions) {
+func uploadStream(ctx context.Context, errChan chan<- error, containerURL azblob.ContainerURL, module, version, ext string, stream io.Reader, opts uploadOptions) {
 	bufferSize := 1 * 1024 * 1024 // Size of the rotating buffers that are used when uploading
 	maxBuffers := 3               // Number of rotating buffers that are used when uploading
 
@@ -119,7 +120,7 @@ func uploadStream(ctx context.Context, errChan chan<- error, containerURL azblob
 		Metadata:         opts.metadata,
 		AccessConditions: opts.accessConditions,
 	}
-	url := blockBlobURL(containerURL, module, version, name)
+	url := blockBlobURL(containerURL, module, version, ext)
 	save := func() error {
 		_, err := azblob.UploadStreamToBlockBlob(ctx, stream, url, uploadStreamOpts)
 		return err
@@ -128,7 +129,7 @@ func uploadStream(ctx context.Context, errChan chan<- error, containerURL azblob
 	select {
 	case errChan <- save():
 	case <-ctx.Done():
-		errChan <- fmt.Errorf("uploading %s/%s.%s timed out", module, version, name)
+		errChan <- fmt.Errorf("uploading %s/%s.%s timed out", module, version, ext)
 	}
 }
 

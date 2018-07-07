@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+
+	"github.com/gomods/athens/pkg/config"
 )
 
 var (
@@ -24,9 +26,9 @@ func (d *S3Tests) TestSave() {
 		vzip := append(zip, []byte(version)...)
 
 		r.NoError(d.storage.Save(context.Background(), module, version, vmod, bytes.NewReader(vzip), vinfo))
-		expectedValues[key(module, version, "info")] = vinfo
-		expectedValues[key(module, version, "mod")] = vmod
-		expectedValues[key(module, version, "zip")] = vzip
+		expectedValues[config.PackageVersionedName(module, version, "info")] = vinfo
+		expectedValues[config.PackageVersionedName(module, version, "mod")] = vmod
+		expectedValues[config.PackageVersionedName(module, version, "zip")] = vzip
 	}
 
 	r.NoError(Verify(d.client, expectedValues))
