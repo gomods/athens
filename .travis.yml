@@ -14,6 +14,7 @@ env:
   - MINIO_SECRET_KEY=minio123
   - ATHENS_MONGO_STORAGE_URL=mongodb://127.0.0.1:27017
   - CODE_COV=1
+  - ATHENS_STORAGE_GCP_SA=test-keys.json
 script:
 - test -z $(gofmt -s -l $GO_FILES | tee /dev/stderr)
 - golint -set_exit_status $(go list ./... | grep -v '/mocks')
@@ -33,3 +34,8 @@ after_success:
 before_install:
 - openssl aes-256-cbc -K $encrypted_827b58724b7f_key -iv $encrypted_827b58724b7f_iv
   -in credentials.tar.gz.enc -out credentials.tar.gz -d
+  # If the SDK is not already cached, download it and unpack it
+- if [ ! -d ${HOME}/google-cloud-sdk ]; then
+  curl https://sdk.cloud.google.com | bash;
+fi
+- tar -xzf credentials.tar.gz
