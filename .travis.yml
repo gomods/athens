@@ -1,35 +1,35 @@
 services:
-  - mongodb
-  - postgresql
-  - redis-server
+- mongodb
+- postgresql
+- redis-server
 language: go
 install: false
 go:
-  - "1.10.x"
+- 1.10.x
 env:
   global:
-    - POP_PATH=$PWD/cmd/proxy
-    - GO_ENV=test_postgres
-    - MINIO_ACCESS_KEY=minio
-    - MINIO_SECRET_KEY=minio123
-    - ATHENS_MONGO_STORAGE_URL=mongodb://127.0.0.1:27017
-    - CODE_COV=1
+  - POP_PATH=$PWD/cmd/proxy
+  - GO_ENV=test_postgres
+  - MINIO_ACCESS_KEY=minio
+  - MINIO_SECRET_KEY=minio123
+  - ATHENS_MONGO_STORAGE_URL=mongodb://127.0.0.1:27017
+  - CODE_COV=1
 script:
-  - test -z $(gofmt -s -l $GO_FILES | tee /dev/stderr)            # Fail if a .go file hasn't been formatted with gofmt
-  - golint -set_exit_status $(go list ./... | grep -v '/mocks')   # Linter
-  - go test -race -coverprofile cover.out -covermode atomic ./... # Run all the tests with the race detector and code coverage enabled
+- test -z $(gofmt -s -l $GO_FILES | tee /dev/stderr)
+- golint -set_exit_status $(go list ./... | grep -v '/mocks')
+- go test -race -coverprofile cover.out -covermode atomic ./...
 before_script:
-  - GO_FILES=$(find . -iname '*.go' -type f | grep -v /vendor/)   # All the .go files, excluding vendor/
-  - go get github.com/golang/lint/golint
-  - wget "https://dl.minio.io/server/minio/release/linux-amd64/minio"
-  - chmod +x minio && nohup ./minio server . &
-  - go get -u -v github.com/gobuffalo/buffalo/buffalo
-  - go get -u -v golang.org/x/vgo
-  - buffalo db create
-  - buffalo db migrate up
+- GO_FILES=$(find . -iname '*.go' -type f | grep -v /vendor/)
+- go get github.com/golang/lint/golint
+- wget "https://dl.minio.io/server/minio/release/linux-amd64/minio"
+- chmod +x minio && nohup ./minio server . &
+- go get -u -v github.com/gobuffalo/buffalo/buffalo
+- go get -u -v golang.org/x/vgo
+- buffalo db create
+- buffalo db migrate up
 after_success:
-  - if [ "${CODE_COV}" == "1" ]; then
-      curl -s https://codecov.io/bash -o codecov && bash codecov -X fix;
-    else
-      echo codecov not enabled;
-    fi
+- if [ "${CODE_COV}" == "1" ]; then curl -s https://codecov.io/bash -o codecov &&
+  bash codecov -X fix; else echo codecov not enabled; fi
+before_install:
+- openssl aes-256-cbc -K $encrypted_827b58724b7f_key -iv $encrypted_827b58724b7f_iv
+  -in credentials.tar.gz.enc -out credentials.tar.gz -d
