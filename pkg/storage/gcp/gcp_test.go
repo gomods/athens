@@ -42,16 +42,26 @@ func (g *GcpTests) TestSaveGetListRoundTrip() {
 	r.NoError(err)
 	r.Equal(zip, gotZip)
 
-	// test not found
-	_, err = store.Get(g.context, "never", "there")
-	notFoundErr := athensStorage.ErrVersionNotFound{Module: "never", Version: "there"}
-	r.EqualError(notFoundErr, err.Error())
-
 	// test listing modules
 	versionList, err := store.List(g.context, g.module)
 	r.NoError(err)
 	r.Equal(1, len(versionList))
 	r.Equal(g.version, versionList[0])
+}
+
+func (g *GcpTests) TestNotFounds() {
+	r := g.Require()
+	store, err := NewWithCredentials(g.context, g.options)
+	r.NoError(err)
+
+	// test get not found
+	_, err = store.Get(g.context, "never", "there")
+	versionNotFoundErr := athensStorage.ErrVersionNotFound{Module: "never", Version: "there"}
+	r.EqualError(versionNotFoundErr, err.Error())
+
+	_, err = store.List(g.context, "nothing/to/see/here")
+	modNotFoundErr := athensStorage.ErrNotFound{Module: "nothing/to/see/here"}
+	r.EqualError(modNotFoundErr, err.Error())
 }
 
 func exists(ctx context.Context, cred option.ClientOption, bucket, mod, ver string) error {
