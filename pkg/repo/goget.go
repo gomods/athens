@@ -123,7 +123,7 @@ func getSources(fs afero.Fs, gopath, repoRoot, repoURI, version string) (string,
 	disableCgo := "CGO_ENABLED=0"
 
 	cmd := exec.Command("vgo", "get", fullURI)
-	cmd.Env = []string{gopathEnv, disableCgo}
+	cmd.Env = []string{os.Getenv("PATH"), gopathEnv, disableCgo} // breaks windows.
 	cmd.Dir = repoRoot
 
 	packagePath := filepath.Join(gopath, "src", "mod", "cache", "download", repoURI, "@v")
