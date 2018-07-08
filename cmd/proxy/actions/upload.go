@@ -22,14 +22,14 @@ func uploadHandler(store storage.Saver) func(c buffalo.Context) error {
 		}
 		version := c.Param("version")
 		payload := new(payloads.Upload)
-		if c.Bind(payload); err != nil {
+		if err = c.Bind(payload); err != nil {
 			return errors.WithStack(err)
 		}
 		saveErr := store.Save(c, mod, version, payload.Module, bytes.NewReader(payload.Zip), payload.Info)
 		if storage.IsVersionAlreadyExistsErr(saveErr) {
 			return c.Error(http.StatusConflict, saveErr)
-		} else if err != nil {
-			return errors.WithStack(err)
+		} else if saveErr != nil {
+			return errors.WithStack(saveErr)
 		}
 		return c.Render(http.StatusOK, proxy.JSON(nil))
 	}
