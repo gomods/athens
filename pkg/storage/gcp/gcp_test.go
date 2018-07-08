@@ -1,6 +1,7 @@
 package gcp
 
 import (
+	"bytes"
 	"context"
 	"io/ioutil"
 
@@ -23,7 +24,7 @@ func (g *GcpTests) TestSaveGetListRoundTrip() {
 	r.NoError(err)
 
 	// test saving to storage
-	err = store.Save(g.context, g.module, g.version, mod, zip, info)
+	err = store.Save(g.context, g.module, g.version, mod, bytes.NewReader(zip), info)
 	r.NoError(err)
 	// check save was successful
 	err = exists(g.context, g.options, g.bucket, g.module, g.version)
