@@ -17,7 +17,11 @@ docs:
 
 .PHONY: test
 test:
+	@echo "Testing the Proxy"
+	@echo "---"
 	cd cmd/proxy && buffalo test
+	@echo "Testing the registry"
+	@echo "---"
 	cd cmd/olympus && buffalo test
 
 .PHONY: olympus-docker
