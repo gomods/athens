@@ -1,4 +1,4 @@
-package modfilter
+package module
 
 import (
 	"bufio"
@@ -13,12 +13,13 @@ var (
 	pathSeparator = "/"
 )
 
-// ModFilter is a filter of modules
-type ModFilter struct {
+// Filter is a filter of modules
+type Filter struct {
 	root ruleNode
 }
 
-// NewModFilter creates new filter based on rules defined in a configuration file
+// NewFilter creates new filter based on rules defined in a configuration file
+// WARNING: this is not concurrency safe
 // Configuration consists of two operations + for include and - for exclude
 // e.g.
 //    - github.com/a
@@ -28,9 +29,9 @@ type ModFilter struct {
 //   -
 //   + github.com/a
 // will exclude all items from communication except github.com/a
-func NewModFilter() *ModFilter {
+func NewFilter() *Filter {
 	rn := newRule(Default)
-	modFilter := ModFilter{}
+	modFilter := Filter{}
 	modFilter.root = rn
 
 	modFilter.initFromConfig()
@@ -39,7 +40,7 @@ func NewModFilter() *ModFilter {
 }
 
 // AddRule adds rule for specified path
-func (f *ModFilter) AddRule(path string, rule Rule) {
+func (f *Filter) AddRule(path string, rule FilterRule) {
 	f.ensurePath(path)
 
 	segments := getPathSegments(path)
@@ -63,7 +64,7 @@ func (f *ModFilter) AddRule(path string, rule Rule) {
 }
 
 // ShouldProcess evaluates path and determines if module should be communicated or not
-func (f *ModFilter) ShouldProcess(path string) bool {
+func (f *Filter) ShouldProcess(path string) bool {
 	segs := getPathSegments(path)
 	rule := f.shouldProcess(segs...)
 
@@ -71,7 +72,7 @@ func (f *ModFilter) ShouldProcess(path string) bool {
 	return rule != Exclude
 }
 
-func (f *ModFilter) ensurePath(path string) {
+func (f *Filter) ensurePath(path string) {
 	latest := f.root.next
 	pathSegments := getPathSegments(path)
 
@@ -83,12 +84,12 @@ func (f *ModFilter) ensurePath(path string) {
 	}
 }
 
-func (f *ModFilter) shouldProcess(path ...string) Rule {
+func (f *Filter) shouldProcess(path ...string) FilterRule {
 	if len(path) == 0 {
 		return f.root.rule
 	}
 
-	rules := make([]Rule, 0, len(path))
+	rules := make([]FilterRule, 0, len(path))
 	rn := f.root
 	for _, p := range path {
 		if _, ok := rn.next[p]; !ok {
@@ -111,7 +112,7 @@ func (f *ModFilter) shouldProcess(path ...string) Rule {
 	return f.root.rule
 }
 
-func (f *ModFilter) initFromConfig() {
+func (f *Filter) initFromConfig() {
 	lines, err := getConfigLines()
 
 	if err != nil || len(lines) == 0 {
@@ -158,7 +159,7 @@ func getPathSegments(path string) []string {
 	return strings.Split(path, pathSeparator)
 }
 
-func newRule(r Rule) ruleNode {
+func newRule(r FilterRule) ruleNode {
 	rn := ruleNode{}
 	rn.next = make(map[string]ruleNode)
 	rn.rule = r

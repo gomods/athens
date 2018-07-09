@@ -1,4 +1,4 @@
-package modfilter
+package module
 
 import (
 	"testing"
@@ -6,18 +6,18 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
-type ModFilterTests struct {
+type FilterTests struct {
 	suite.Suite
 }
 
-func Test_ModFilter(t *testing.T) {
-	suite.Run(t, new(ModFilterTests))
+func Test_Filter(t *testing.T) {
+	suite.Run(t, new(FilterTests))
 }
 
-func (t *ModFilterTests) Test_IgnoreSimple() {
+func (t *FilterTests) Test_IgnoreSimple() {
 	r := t.Require()
 
-	f := NewModFilter()
+	f := NewFilter()
 	f.AddRule("github.com/a/b", Exclude)
 
 	r.Equal(true, f.ShouldProcess("github.com/a"))
@@ -27,10 +27,10 @@ func (t *ModFilterTests) Test_IgnoreSimple() {
 	r.Equal(true, f.ShouldProcess("bitbucket.com/a/b"))
 }
 
-func (t *ModFilterTests) Test_IgnoreParentAllowChildren() {
+func (t *FilterTests) Test_IgnoreParentAllowChildren() {
 	r := t.Require()
 
-	f := NewModFilter()
+	f := NewFilter()
 	f.AddRule("github.com/a/b", Exclude)
 	f.AddRule("github.com/a/b/c", Include)
 
@@ -41,10 +41,10 @@ func (t *ModFilterTests) Test_IgnoreParentAllowChildren() {
 	r.Equal(true, f.ShouldProcess("bitbucket.com/a/b"))
 }
 
-func (t *ModFilterTests) Test_OnlyAllowed() {
+func (t *FilterTests) Test_OnlyAllowed() {
 	r := t.Require()
 
-	f := NewModFilter()
+	f := NewFilter()
 	f.AddRule("github.com/a/b", Include)
 	f.AddRule("", Exclude)
 

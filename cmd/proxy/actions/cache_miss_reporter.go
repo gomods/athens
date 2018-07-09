@@ -3,34 +3,33 @@ package actions
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"net/url"
 	"path"
 	"time"
 
 	"github.com/gobuffalo/buffalo/worker"
-	"github.com/gomods/athens/pkg/modfilter"
+	"github.com/gomods/athens/pkg/module"
 	"github.com/gomods/athens/pkg/payloads"
 )
 
 // GetCacheMissReporterJob porcesses queue of cache misses and reports them to Olympus
-func GetCacheMissReporterJob(w worker.Worker, mf *modfilter.ModFilter) worker.Handler {
+func GetCacheMissReporterJob(w worker.Worker, mf *module.Filter) worker.Handler {
 	return func(args worker.Args) (err error) {
-		module, version, err := parseArgs(args)
+		mod, version, err := parseArgs(args)
 		if err != nil {
 			return err
 		}
 
-		if !mf.ShouldProcess(module) {
-			return fmt.Errorf("Module %s is excluded", module)
+		if !mf.ShouldProcess(mod) {
+			return module.NewErrModuleExcluded(mod)
 		}
 
-		if err := reportCacheMiss(module, version); err != nil {
+		if err := reportCacheMiss(mod, version); err != nil {
 			return err
 		}
 
-		return queueCacheMissFetch(module, version, w)
+		return queueCacheMissFetch(mod, version, w)
 	}
 }
 

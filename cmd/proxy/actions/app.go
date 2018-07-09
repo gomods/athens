@@ -14,7 +14,7 @@ import (
 	"github.com/gobuffalo/gocraft-work-adapter"
 	"github.com/gobuffalo/packr"
 	"github.com/gomods/athens/pkg/config/env"
-	"github.com/gomods/athens/pkg/modfilter"
+	"github.com/gomods/athens/pkg/module"
 	"github.com/gomods/athens/pkg/user"
 	"github.com/rs/cors"
 	"github.com/unrolled/secure"
@@ -107,7 +107,7 @@ func App() (*buffalo.App, error) {
 			return nil, err
 		}
 
-		mf := modfilter.NewModFilter()
+		mf := module.NewFilter()
 		if err := addProxyRoutes(app, store, mf); err != nil {
 			err = fmt.Errorf("error adding proxy routes (%s)", err)
 			return nil, err

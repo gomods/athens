@@ -2,11 +2,11 @@ package actions
 
 import (
 	"github.com/gobuffalo/buffalo"
-	"github.com/gomods/athens/pkg/modfilter"
+	"github.com/gomods/athens/pkg/module"
 	"github.com/gomods/athens/pkg/storage"
 )
 
-func addProxyRoutes(app *buffalo.App, storage storage.Backend, mf *modfilter.ModFilter) error {
+func addProxyRoutes(app *buffalo.App, storage storage.Backend, mf *module.Filter) error {
 	app.GET("/", proxyHomeHandler)
 	app.GET("/{module:.+}/@v/list", listHandler(storage))
 	app.GET("/{module:.+}/@v/{version}.info", cacheMissHandler(versionInfoHandler(storage), app.Worker, mf))
