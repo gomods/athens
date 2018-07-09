@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"io/ioutil"
 
 	"github.com/gobuffalo/buffalo/worker"
 	"github.com/gomods/athens/pkg/config/env"
@@ -42,14 +41,9 @@ func GetProcessCacheMissJob(s storage.Backend, w worker.Worker, mf *modfilter.Mo
 			process(module, version, args, w)
 			return err
 		}
+		defer v.Zip.Close()
 
-		zip, err := ioutil.ReadAll(v.Zip)
-		if err != nil {
-			process(module, version, args, w)
-			return err
-		}
-
-		if err = s.Save(context.Background(), module, version, v.Mod, zip, v.Info); err != nil {
+		if err := s.Save(context.Background(), module, version, v.Mod, v.Zip, v.Info); err != nil {
 			process(module, version, args, w)
 		}
 
