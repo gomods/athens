@@ -1,4 +1,4 @@
-package mongoutil
+package mongo
 
 import (
 	"crypto/tls"

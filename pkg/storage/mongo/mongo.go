@@ -2,7 +2,6 @@ package mongo
 
 import (
 	"github.com/globalsign/mgo"
-	"github.com/gomods/athens/pkg/storage/mongoutil"
 )
 
 const (
@@ -15,7 +14,7 @@ type ModuleStore struct {
 	s           *mgo.Session
 	d           string // database
 	c           string // collection
-	connDetails *mongoutil.ConnDetails
+	connDetails *ConnDetails
 }
 
 // NewStorage returns an unconnected Mongo backed storage
@@ -23,13 +22,13 @@ type ModuleStore struct {
 // Connect() on the returned store before using it.
 //
 // TODO: take the database and collection names as parameters
-func NewStorage(connDetails *mongoutil.ConnDetails) *ModuleStore {
+func NewStorage(connDetails *ConnDetails) *ModuleStore {
 	return &ModuleStore{connDetails: connDetails}
 }
 
 // Connect connects the the newly created mongo backend.
 func (m *ModuleStore) Connect() error {
-	s, err := mongoutil.GetSession(m.connDetails, athensDBName)
+	s, err := GetSession(m.connDetails, athensDBName)
 	if err != nil {
 		return err
 	}
