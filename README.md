@@ -48,6 +48,11 @@ in the [queue](https://github.com/gomods/athens/issues) that you'd like to work 
 * ["Go and Versioning"](https://research.swtch.com/vgo) papers
 * [vgo wiki](https://github.com/golang/go/wiki/vgo)
 
+# Built on the Shoulders of Giants
+
+The Athens project would not be possible without the amazing projects it builds on. Please see 
+[SHOULDERS.md](./SHOULDERS.md) to see a list of them.
+
 # Code of Conduct
 
 This project follows the [Contributor Covenant](https://www.contributor-covenant.org/) (English version [here](https://www.contributor-covenant.org/version/1/4/code-of-conduct)) code of conduct.
