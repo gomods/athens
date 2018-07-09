@@ -1,6 +1,7 @@
 .PHONY: build
 build:
 	cd cmd/proxy && buffalo build
+	cd cmd/olympus && buffalo build
 
 .PHONY: run
 run: build
