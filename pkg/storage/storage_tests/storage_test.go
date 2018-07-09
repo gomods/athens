@@ -12,46 +12,48 @@ import (
 	"github.com/gomods/athens/pkg/storage/rdbms"
 )
 
-type StorageTests struct {
+type TestSuites struct {
 	*suite.Model
-	storages []storage.StorageTest
+	storages []storage.TestSuite
 }
 
-func (d *StorageTests) SetupTest() {
+func (d *TestSuites) SetupTest() {
 	ra := d.Require()
 
 	//
-	fsTests, err := fs.NewStorageTest(d.Model)
+	fsTests, err := fs.NewTestSuite(d.Model)
 	ra.NoError(err)
 	d.storages = append(d.storages, fsTests)
 
 	// mem
-	memStore, err := mem.NewStorageTest(d.Model)
+	memStore, err := mem.NewTestSuite(d.Model)
 	ra.NoError(err)
 	d.storages = append(d.storages, memStore)
 
 	// minio
-	minioStorage, err := minio.NewStorageTest(d.Model)
+	minioStorage, err := minio.NewTestSuite(d.Model)
 	ra.NoError(err)
 	d.storages = append(d.storages, minioStorage)
 
 	// mongo
-	mongoStore, err := mongo.NewStorageTest(d.Model)
+	mongoStore, err := mongo.NewTestSuite(d.Model)
 	ra.NoError(err)
 	d.storages = append(d.storages, mongoStore)
 
 	// rdbms
-	rdbmsStore, err := rdbms.NewStorageTest(d.Model)
+	rdbmsStore, err := rdbms.NewTestSuite(d.Model)
 	d.Model.SetupTest()
 	d.storages = append(d.storages, rdbmsStore)
 }
 
 func TestDiskStorage(t *testing.T) {
-	suite.Run(t, &StorageTests{Model: suite.NewModel()})
+	suite.Run(t, &TestSuites{Model: suite.NewModel()})
 }
 
-func (d *StorageTests) TestNotFound() {
+func (d *TestSuites) TestStorages() {
 	for _, store := range d.storages {
 		store.TestNotFound()
+
+		// TODO: more tests to come
 	}
 }

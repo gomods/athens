@@ -11,8 +11,8 @@ type StorageTest struct {
 	storage storage.Backend
 }
 
-// NewStorageTest creates a common test suite
-func NewStorageTest(model *suite.Model) (storage.StorageTest, error) {
+// NewTestSuite creates a common test suite
+func NewTestSuite(model *suite.Model) (storage.TestSuite, error) {
 	conn := model.DB
 	rdbmsStore := NewRDBMSStorageWithConn(conn)
 

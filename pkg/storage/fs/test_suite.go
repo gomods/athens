@@ -6,14 +6,14 @@ import (
 	"github.com/spf13/afero"
 )
 
-// StorageTest implements StorageTest interface
-type StorageTest struct {
+// TestSuite implements storage.TestSuite interface
+type TestSuite struct {
 	*suite.Model
 	storage storage.Backend
 }
 
-// NewStorageTest creates a common test suite
-func NewStorageTest(model *suite.Model) (storage.StorageTest, error) {
+// NewTestSuite creates a common test suite
+func NewTestSuite(model *suite.Model) (storage.TestSuite, error) {
 	memFs := afero.NewOsFs()
 	r, err := afero.TempDir(memFs, "", "athens-fs-storage-tests")
 	if err != nil {
@@ -25,14 +25,14 @@ func NewStorageTest(model *suite.Model) (storage.StorageTest, error) {
 		return nil, err
 	}
 
-	return &StorageTest{
+	return &TestSuite{
 		storage: fsStore,
 		Model:   model,
 	}, nil
 }
 
 // TestNotFound tests whether storage returns ErrNotFound error on unknown package
-func (st *StorageTest) TestNotFound() {
+func (st *TestSuite) TestNotFound() {
 	_, err := st.storage.Get("some", "unknown")
 	st.Require().Equal(true, storage.IsNotFoundError(err), "Invalid error type for %s: %#v", "FileSystem", err)
 }
