@@ -5,6 +5,11 @@ import (
 	"github.com/gomods/athens/pkg/storage/mongoutil"
 )
 
+const (
+	athensDBName    = "athens"
+	modulesCollName = "modules"
+)
+
 // ModuleStore represents a mongo backed storage backend.
 type ModuleStore struct {
 	s           *mgo.Session
@@ -19,16 +24,12 @@ type ModuleStore struct {
 //
 // TODO: take the database and collection names as parameters
 func NewStorage(connDetails *mongoutil.ConnDetails) *ModuleStore {
-	return &ModuleStore{
-		connDetails: connDetails,
-		d:           "athens",
-		c:           "modules",
-	}
+	return &ModuleStore{connDetails: connDetails}
 }
 
 // Connect connects the the newly created mongo backend.
 func (m *ModuleStore) Connect() error {
-	s, err := mongoutil.GetSession(m.connDetails, "athens")
+	s, err := mongoutil.GetSession(m.connDetails, athensDBName)
 	if err != nil {
 		return err
 	}
@@ -41,6 +42,6 @@ func (m *ModuleStore) Connect() error {
 		Background: true,
 		Sparse:     true,
 	}
-	c := m.s.DB(m.d).C(m.c)
+	c := m.s.DB(athensDBName).C(modulesCollName)
 	return c.EnsureIndex(index)
 }
