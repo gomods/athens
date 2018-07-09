@@ -10,5 +10,5 @@ func OlympusGlobalEndpointWithDefault(value string) string {
 // OlympusHTTPPort returns the port that the olympus server is running on;
 // should default to 3001.
 func OlympusHTTPPort(value string) string {
-	return envy.Get("OLYMPUS_HTTP_PORT", value)
+	return envy.Get("PORT", value)
 }
