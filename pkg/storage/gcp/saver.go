@@ -53,7 +53,7 @@ func New(ctx context.Context, cred option.ClientOption) (*Storage, error) {
 //
 //	<meta name="go-import" content="gomods.com/athens mod BaseURL()">
 func (s *Storage) BaseURL() *url.URL {
-	return env.CdnEndpointWithDefault(s.baseURI)
+	return env.CDNEndpointWithDefault(s.baseURI)
 }
 
 // Save uploads the module .mod, .zip and .info files for a given version.
