@@ -6,6 +6,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/gomods/athens/pkg/config/env"
+
 	"github.com/gobuffalo/buffalo/worker"
 	"github.com/gobuffalo/suite"
 	"github.com/gomods/athens/pkg/eventlog"
@@ -48,7 +50,11 @@ func Test_ActionSuite(t *testing.T) {
 	if err != nil {
 		t.Fatalf("error creating storage (%s)", err)
 	}
-	eLog, err := mongo.NewLog("mongodb://127.0.0.1:27017")
+	mURI, err := env.MongoURI()
+	if err != nil {
+		t.Fatalf("error getting mongo uri (%s)", err)
+	}
+	eLog, err := mongo.NewLog(mURI)
 	if err != nil {
 		t.Fatalf("error creating event log (%s)", err)
 	}
