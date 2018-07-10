@@ -6,10 +6,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/gomods/athens/pkg/config/env"
-
 	"github.com/gobuffalo/buffalo/worker"
 	"github.com/gobuffalo/suite"
+	"github.com/gomods/athens/pkg/config/env"
 	"github.com/gomods/athens/pkg/eventlog"
 	"github.com/gomods/athens/pkg/eventlog/mongo"
 	"github.com/gomods/athens/pkg/payloads"
@@ -58,7 +57,13 @@ func Test_ActionSuite(t *testing.T) {
 	if err != nil {
 		t.Fatalf("error creating event log (%s)", err)
 	}
-	app := App(worker, stg, eLog, eLog)
+	config := AppConfig{
+		Storage:        stg,
+		EventLog:       eLog,
+		CacheMissesLog: eLog,
+		Worker:         worker,
+	}
+	app := App(&config)
 	as := &ActionSuite{suite.NewAction(app)}
 	suite.Run(t, as)
 }

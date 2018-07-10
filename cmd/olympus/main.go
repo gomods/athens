@@ -26,8 +26,13 @@ func setupApp() *buffalo.App {
 	storage := getStorage()
 	eLog := getEventLog()
 	cacheMissesLog := getCacheMissesEventLog()
-
-	app := actions.App(w, storage, eLog, cacheMissesLog)
+	config := actions.AppConfig{
+		Storage:        storage,
+		EventLog:       eLog,
+		CacheMissesLog: cacheMissesLog,
+		Worker:         w,
+	}
+	app := actions.App(&config)
 
 	if err := w.Register(actions.DownloadHandlerName, actions.GetPackageDownloaderJob(storage, eLog, app.Worker)); err != nil {
 		log.Fatal(err)

@@ -16,6 +16,14 @@ import (
 	"github.com/unrolled/secure"
 )
 
+// AppConfig contains dependencies used in App
+type AppConfig struct {
+	Worker         worker.Worker
+	Storage        storage.Backend
+	EventLog       eventlog.Eventlog
+	CacheMissesLog eventlog.Appender
+}
+
 const (
 	// OlympusWorkerName is the name of the Olympus worker
 	OlympusWorkerName = "olympus-worker"
@@ -41,7 +49,7 @@ var (
 // App is where all routes and middleware for buffalo
 // should be defined. This is the nerve center of your
 // application.
-func App(worker worker.Worker, storage storage.Backend, eLog eventlog.Eventlog, cacheMissesLog eventlog.Appender) *buffalo.App {
+func App(config *AppConfig) *buffalo.App {
 	if app == nil {
 		port := env.Port(":3001")
 
@@ -52,7 +60,7 @@ func App(worker worker.Worker, storage storage.Backend, eLog eventlog.Eventlog, 
 				cors.Default().Handler,
 			},
 			SessionName: "_olympus_session",
-			Worker:      worker,
+			Worker:      config.Worker,
 		})
 		// Automatically redirect to SSL
 		app.Use(ssl.ForceSSL(secure.Options{
@@ -89,11 +97,11 @@ func App(worker worker.Worker, storage storage.Backend, eLog eventlog.Eventlog, 
 		app.Use(T.Middleware())
 
 		app.GET("/", homeHandler)
-		app.GET("/diff/{lastID}", diffHandler(storage, eLog))
-		app.GET("/feed/{lastID}", feedHandler(storage))
-		app.GET("/eventlog/{sequence_id}", eventlogHandler(eLog))
-		app.POST("/cachemiss", cachemissHandler(app.Worker))
-		app.POST("/push", pushNotificationHandler(app.Worker))
+		app.GET("/diff/{lastID}", diffHandler(config.Storage, config.EventLog))
+		app.GET("/feed/{lastID}", feedHandler(config.Storage))
+		app.GET("/eventlog/{sequence_id}", eventlogHandler(config.EventLog))
+		app.POST("/cachemiss", cachemissHandler(config.Worker))
+		app.POST("/push", pushNotificationHandler(config.Worker))
 		app.ServeFiles("/", assetsBox) // serve files from the public directory
 	}
 
