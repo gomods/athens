@@ -12,8 +12,8 @@ import (
 	errs "github.com/pkg/errors"
 )
 
-// ListPath URL.
-const ListPath = "/{module:.+}/@v/list"
+// PathList URL.
+const PathList = "/{module:.+}/@v/list"
 
 // ListHandler implements GET baseURL/module/@v/list
 func ListHandler(lister storage.Lister, eng *render.Engine) func(c buffalo.Context) error {

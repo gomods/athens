@@ -11,8 +11,8 @@ import (
 	"github.com/gomods/athens/pkg/storage"
 )
 
-// VersionZipPath URL.
-const VersionZipPath = "/{module:.+}/@v/{version}.zip"
+// PathVersionZip URL.
+const PathVersionZip = "/{module:.+}/@v/{version}.zip"
 
 // VersionZipHandler implements GET baseURL/module/@v/version.zip
 func VersionZipHandler(getter storage.Getter) func(c buffalo.Context) error {

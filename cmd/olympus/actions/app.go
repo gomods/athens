@@ -112,10 +112,10 @@ func App() *buffalo.App {
 		app.GET("/", homeHandler)
 
 		// Download Protocol
-		app.GET(download.ListPath, download.ListHandler(storage, renderEng))
-		app.GET(download.VersionInfoPath, download.VersionInfoHandler(storage, renderEng))
-		app.GET(download.VersionModulePath, download.VersionModuleHandler(storage))
-		app.GET(download.VersionZipPath, download.VersionZipHandler(storage))
+		app.GET(download.PathList, download.ListHandler(storage, renderEng))
+		app.GET(download.PathVersionInfo, download.VersionInfoHandler(storage, renderEng))
+		app.GET(download.PathVersionModule, download.VersionModuleHandler(storage))
+		app.GET(download.PathVersionZip, download.VersionZipHandler(storage))
 
 		app.GET("/diff/{lastID}", diffHandler(storage, eventlogReader))
 		app.GET("/feed/{lastID}", feedHandler(storage))

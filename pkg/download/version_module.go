@@ -10,8 +10,8 @@ import (
 	"github.com/gomods/athens/pkg/storage"
 )
 
-// VersionModulePath URL.
-const VersionModulePath = "/{module:.+}/@v/{version}.mod"
+// PathVersionModule URL.
+const PathVersionModule = "/{module:.+}/@v/{version}.mod"
 
 // VersionModuleHandler implements GET baseURL/module/@v/version.mod
 func VersionModuleHandler(getter storage.Getter) func(c buffalo.Context) error {
