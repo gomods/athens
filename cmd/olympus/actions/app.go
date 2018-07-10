@@ -92,7 +92,7 @@ func App(worker worker.Worker, storage storage.Backend, eLog eventlog.Eventlog, 
 		app.GET("/diff/{lastID}", diffHandler(storage, eLog))
 		app.GET("/feed/{lastID}", feedHandler(storage))
 		app.GET("/eventlog/{sequence_id}", eventlogHandler(eLog))
-		app.POST("/cachemiss", cachemissHandler(cacheMissesLog, app.Worker))
+		app.POST("/cachemiss", cachemissHandler(app.Worker))
 		app.POST("/push", pushNotificationHandler(app.Worker))
 		app.ServeFiles("/", assetsBox) // serve files from the public directory
 	}
