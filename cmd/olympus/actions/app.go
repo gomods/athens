@@ -14,6 +14,7 @@ import (
 	"github.com/gobuffalo/packr"
 	"github.com/gomods/athens/pkg/cdn/metadata/azurecdn"
 	"github.com/gomods/athens/pkg/config/env"
+	"github.com/gomods/athens/pkg/download"
 	"github.com/rs/cors"
 	"github.com/unrolled/secure"
 )
@@ -109,6 +110,13 @@ func App() *buffalo.App {
 		}
 
 		app.GET("/", homeHandler)
+
+		// Download Protocol
+		app.GET(download.ListPath, download.ListHandler(storage, renderEng))
+		app.GET(download.VersionInfoPath, download.VersionInfoHandler(storage, renderEng))
+		app.GET(download.VersionModulePath, download.VersionModuleHandler(storage))
+		app.GET(download.VersionZipPath, download.VersionZipHandler(storage))
+
 		app.GET("/diff/{lastID}", diffHandler(storage, eventlogReader))
 		app.GET("/feed/{lastID}", feedHandler(storage))
 		app.GET("/eventlog/{sequence_id}", eventlogHandler(eventlogReader))
