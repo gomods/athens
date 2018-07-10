@@ -105,7 +105,7 @@ func (as *ActionSuite) Test_Push_Notification_Route() {
 	as.Equal(p.Events[0].Version, pn.Events[0].Version)
 }
 
-// TODO: something like this to test Push_Notification_Job handler after mergeDB is compleated
+// TODO: something like this to test Push_Notification_Job handler after mergeDB is completed
 
 //func (as *ActionSuite) Test_Push_Notification_Job() {
 //	storage, err := mem.NewStorage()
