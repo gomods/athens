@@ -10,6 +10,7 @@ import (
 	"github.com/gobuffalo/packr"
 	"github.com/gomods/athens/pkg/cdn/metadata/azurecdn"
 	"github.com/gomods/athens/pkg/config/env"
+	"github.com/gomods/athens/pkg/download"
 	"github.com/gomods/athens/pkg/eventlog"
 	"github.com/gomods/athens/pkg/storage"
 	"github.com/rs/cors"
@@ -102,6 +103,13 @@ func App(config *AppConfig) *buffalo.App {
 		app.GET("/eventlog/{sequence_id}", eventlogHandler(config.EventLog))
 		app.POST("/cachemiss", cachemissHandler(config.Worker))
 		app.POST("/push", pushNotificationHandler(config.Worker))
+
+		// Download Protocol
+		app.GET(download.PathList, download.ListHandler(config.Storage, renderEng))
+		app.GET(download.PathVersionInfo, download.VersionInfoHandler(config.Storage, renderEng))
+		app.GET(download.PathVersionModule, download.VersionModuleHandler(config.Storage))
+		app.GET(download.PathVersionZip, download.VersionZipHandler(config.Storage))
+
 		app.ServeFiles("/", assetsBox) // serve files from the public directory
 	}
 
