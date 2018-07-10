@@ -16,6 +16,7 @@ func GetEventLog() (eventlog.Eventlog, error) {
 	return l, err
 }
 
+// NewCacheMissesLog returns impl. of eventlog.Appender
 func NewCacheMissesLog() (eventlog.Appender, error) {
 	mongoURI, err := env.MongoURI()
 	if err != nil {
