@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/garyburd/redigo/redis"
@@ -9,7 +10,6 @@ import (
 	"github.com/gobuffalo/gocraft-work-adapter"
 	"github.com/gomods/athens/cmd/olympus/actions"
 	"github.com/gomods/athens/pkg/config/env"
-	"github.com/gomods/athens/pkg/eventlog"
 	"github.com/gomods/athens/pkg/storage"
 )
 
@@ -23,9 +23,19 @@ func main() {
 
 func setupApp() *buffalo.App {
 	w := getWorker()
-	storage := getStorage()
-	eLog := getEventLog()
-	cacheMissesLog := getCacheMissesEventLog()
+	storage, err := getStorage()
+	if err != nil {
+		log.Fatalf("error creating storage (%s)", err)
+	}
+	eLog, err := actions.GetEventLog()
+	if err != nil {
+		log.Fatalf("error creating eventlog (%s)", err)
+	}
+	cacheMissesLog, err := actions.NewCacheMissesLog()
+	if err != nil {
+		log.Fatalf("error creating cachemisses log (%s)", err)
+	}
+
 	config := actions.AppConfig{
 		Storage:        storage,
 		EventLog:       eLog,
@@ -43,31 +53,15 @@ func setupApp() *buffalo.App {
 	return app
 }
 
-func getCacheMissesEventLog() eventlog.Appender {
-	cacheMissesLog, err := actions.NewCacheMissesLog()
-	if err != nil {
-		log.Fatalf("error creating cachemisses log (%s)", err)
-	}
-	return cacheMissesLog
-}
-
-func getEventLog() eventlog.Eventlog {
-	eLog, err := actions.GetEventLog()
-	if err != nil {
-		log.Fatalf("error creating eventlog (%s)", err)
-	}
-	return eLog
-}
-
-func getStorage() storage.Backend {
+func getStorage() (storage.Backend, error) {
 	storage, err := actions.GetStorage()
 	if err != nil {
-		log.Fatalf("error creating storage (%s)", err)
+		return nil, fmt.Errorf("error creating storage (%s)", err)
 	}
 	if err := storage.Connect(); err != nil {
-		log.Fatalf("unable to connect to backing store: %v", err)
+		return nil, fmt.Errorf("unable to connect to backing store: %v", err)
 	}
-	return storage
+	return storage, nil
 }
 
 func getWorker() worker.Worker {

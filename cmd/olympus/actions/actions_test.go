@@ -73,16 +73,17 @@ func (as *ActionSuite) Test_Cache_Miss_Route() {
 	mod.Name = "moduleName"
 	mod.Version = "1.0.0"
 	res := as.JSON("/cachemiss").Post(mod)
-	as.Equal(200, res.Code)
 
 	fakeWorker, ok := as.App.Worker.(*FakeWorker)
 	as.True(ok)
 	module, ok := fakeWorker.job.Args[workerModuleKey].(string)
+	as.True(ok)
 	version, ok := fakeWorker.job.Args[workerVersionKey].(string)
 	as.True(ok)
 
 	as.Equal("moduleName", module)
 	as.Equal("1.0.0", version)
+	as.Equal(200, res.Code)
 }
 
 func (as *ActionSuite) Test_Push_Notification_Route() {
