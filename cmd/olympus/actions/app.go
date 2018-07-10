@@ -43,7 +43,7 @@ var (
 // application.
 func App(worker worker.Worker, storage storage.Backend, eLog eventlog.Eventlog, cacheMissesLog eventlog.Appender) *buffalo.App {
 	if app == nil {
-		port := env.OlympusHTTPPort(":3001")
+		port := env.Port(":3001")
 
 		app = buffalo.New(buffalo.Options{
 			Addr: port,
