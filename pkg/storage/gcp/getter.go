@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 
-	gcStorage "cloud.google.com/go/storage"
+	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/storage"
 )
 
@@ -13,17 +13,11 @@ import (
 //
 // The caller is responsible for calling close on the Zip ReadCloser
 func (s *Storage) Get(ctx context.Context, module, version string) (*storage.Version, error) {
-	modName := fmt.Sprintf("%s/@v/%s.%s", module, version, "mod")
-	modHandle := s.bucket.Object(modName)
-	_, err := modHandle.Attrs(ctx)
-	if err == gcStorage.ErrObjectNotExist {
+	if exists := s.Exists(ctx, module, version); !exists {
 		return nil, storage.ErrVersionNotFound{Module: module, Version: version}
 	}
-	if err != nil {
-		return nil, fmt.Errorf("could not stat mod file: %s", err)
-	}
 
-	modReader, err := modHandle.NewReader(ctx)
+	modReader, err := s.bucket.Object(config.PackageVersionedName(module, version, "mod")).NewReader(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("could not get new reader for mod file: %s", err)
 	}
@@ -33,16 +27,14 @@ func (s *Storage) Get(ctx context.Context, module, version string) (*storage.Ver
 		return nil, fmt.Errorf("could not read bytes of mod file: %s", err)
 	}
 
-	zipName := fmt.Sprintf("%s/@v/%s.%s", module, version, "zip")
-	zipReader, err := s.bucket.Object(zipName).NewReader(ctx)
+	zipReader, err := s.bucket.Object(config.PackageVersionedName(module, version, "zip")).NewReader(ctx)
 	// It is up to the caller to call Close on this reader.
 	// The storage.Version contains a ReadCloser for the zip.
 	if err != nil {
 		return nil, fmt.Errorf("could not get new reader for zip file: %s", err)
 	}
 
-	infoName := fmt.Sprintf("%s/@v/%s.%s", module, version, "info")
-	infoReader, err := s.bucket.Object(infoName).NewReader(ctx)
+	infoReader, err := s.bucket.Object(config.PackageVersionedName(module, version, "info")).NewReader(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("could not get new reader for info file: %s", err)
 	}

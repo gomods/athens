@@ -10,6 +10,7 @@ import (
 	"cloud.google.com/go/storage"
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/config/env"
+	stg "github.com/gomods/athens/pkg/storage"
 	multierror "github.com/hashicorp/go-multierror"
 )
 
@@ -20,6 +21,10 @@ import (
 // Uploaded files are publicly accessable in the storage bucket as per
 // an ACL rule.
 func (s *Storage) Save(ctx context.Context, module, version string, mod []byte, zip io.Reader, info []byte) error {
+	if exists := s.Exists(ctx, module, version); exists {
+		return stg.ErrVersionAlreadyExists{Module: module, Version: version}
+	}
+
 	errs := make(chan error, 3)
 	// create a context that will time out after the value found in
 	// the ATHENS_TIMEOUT env variable
