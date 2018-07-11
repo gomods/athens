@@ -35,11 +35,15 @@ func NewTestSuite(model *suite.Model) (storage.TestSuite, error) {
 }
 
 // Storage retrieves initialized storage backend
-func (st *TestSuite) Storage() storage.Backend {
-	return st.storage
+func (ts *TestSuite) Storage() storage.Backend {
+	return ts.storage
 }
 
 // StorageHumanReadableName retrieves readable identifier of the storage
-func (st *TestSuite) StorageHumanReadableName() string {
+func (ts *TestSuite) StorageHumanReadableName() string {
 	return "Mongo"
+}
+
+// Cleanup tears down test
+func (ts *TestSuite) Cleanup() {
 }

@@ -10,6 +10,8 @@ import (
 type TestSuite struct {
 	*suite.Model
 	storage storage.Backend
+	fs      afero.Fs
+	rootDir string
 }
 
 // NewTestSuite creates a common test suite
@@ -26,17 +28,24 @@ func NewTestSuite(model *suite.Model) (storage.TestSuite, error) {
 	}
 
 	return &TestSuite{
-		storage: fsStore,
 		Model:   model,
+		fs:      memFs,
+		rootDir: r,
+		storage: fsStore,
 	}, nil
 }
 
 // Storage retrieves initialized storage backend
-func (st *TestSuite) Storage() storage.Backend {
-	return st.storage
+func (ts *TestSuite) Storage() storage.Backend {
+	return ts.storage
 }
 
 // StorageHumanReadableName retrieves readable identifier of the storage
-func (st *TestSuite) StorageHumanReadableName() string {
+func (ts *TestSuite) StorageHumanReadableName() string {
 	return "FileSystem"
+}
+
+// Cleanup tears down test
+func (ts *TestSuite) Cleanup() {
+	ts.Require().NoError(ts.fs.RemoveAll(ts.rootDir))
 }
