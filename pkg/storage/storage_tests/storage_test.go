@@ -1,5 +1,12 @@
 package storagetest
 
+// The goal of this package is to provide common testing ground for all
+// storage tests which can be extracted to achieve more DRY code.
+// This package should contain black box tests such as Save-Get roundtrip,
+// Error checking, etc.
+// More detailed tests verifying internal behavior should be still implemented
+// as part of specific storage packages.
+
 import (
 	"bytes"
 	"context"
