@@ -52,13 +52,13 @@ func TestDiskStorage(t *testing.T) {
 
 func (d *TestSuites) TestStorages() {
 	for _, store := range d.storages {
-		d.TestNotFound(store)
+		d.testNotFound(store)
 
 		// TODO: more tests to come
 	}
 }
 
-func (d *TestSuites) TestNotFound(ts storage.TestSuite) {
+func (d *TestSuites) testNotFound(ts storage.TestSuite) {
 	_, err := ts.Storage().Get("some", "unknown")
 	d.Require().Equal(true, storage.IsNotFoundError(err), "Invalid error type for %s: %#v", ts.StorageHumanReadableName(), err)
 }
