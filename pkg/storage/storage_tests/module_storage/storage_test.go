@@ -1,4 +1,4 @@
-package storagetest
+package modulestorage
 
 // The goal of this package is to provide common testing ground for all
 // storage tests which can be extracted to achieve more DRY code.
@@ -68,7 +68,7 @@ func (d *TestSuites) SetupTest() {
 
 }
 
-func TestDiskStorage(t *testing.T) {
+func TestModuleStorages(t *testing.T) {
 	suite.Run(t, &TestSuites{Model: suite.NewModel()})
 }
 
@@ -116,9 +116,9 @@ func (d *TestSuites) testGetSaveListRoundTrip(ts storage.TestSuite) {
 	r.NoError(err, hrn)
 	defer gotten.Zip.Close()
 	// TODO: test the time
-	r.Equal(gotten.Mod, d.mod)
+	r.Equal(d.mod, gotten.Mod, hrn)
 	zipContent, err := ioutil.ReadAll(gotten.Zip)
 	r.NoError(err, hrn)
-	r.Equal(zipContent, d.zip, hrn)
-	r.Equal(gotten.Info, d.info, hrn)
+	r.Equal(d.zip, zipContent, hrn)
+	r.Equal(d.info, gotten.Info, hrn)
 }
