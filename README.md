@@ -45,7 +45,7 @@ in the [queue](https://github.com/gomods/athens/issues) that you'd like to work 
 
 If you decide to contribute (we hope you do :smile:), the process is familiar and easy if you've used Github before. There are no long documents to read or complex setup.
 
-Before you do start contributing or otherwise getting involved, we want to let you know that we follow a general [philosophy](./PHILOSOPHY.md) in how we work together, and we'd really appreciate you to get familiar with it before you start.
+Before you do start contributing or otherwise getting involved, we want to let you know that we follow a general [philosophy](./PHILOSOPHY.md) in how we work together, and we'd really appreciate you getting familiar with it before you start.
 
 It's not too long and it's ok for you to "skim" it (or even just read the first two sections :smile:), just as long as you understand the spirit of who we are and how we work.
 
