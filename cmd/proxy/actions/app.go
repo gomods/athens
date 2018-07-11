@@ -80,7 +80,7 @@ func App() (*buffalo.App, error) {
 		initializeTracing(app)
 		// Protect against CSRF attacks. https://www.owasp.org/index.php/Cross-Site_Request_Forgery_(CSRF)
 		// Remove to disable this.
-		if env.EnableCSRFMiddleware() {
+		if env.EnableCSRFProtection() {
 			csrfMiddleware := csrf.New
 			app.Use(csrfMiddleware)
 		}
