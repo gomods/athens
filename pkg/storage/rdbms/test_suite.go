@@ -5,8 +5,8 @@ import (
 	"github.com/gomods/athens/pkg/storage"
 )
 
-// StorageTest implements StorageTest interface
-type StorageTest struct {
+// TestSuite implements TestSuite interface
+type TestSuite struct {
 	*suite.Model
 	storage storage.Backend
 }
@@ -16,14 +16,18 @@ func NewTestSuite(model *suite.Model) (storage.TestSuite, error) {
 	conn := model.DB
 	rdbmsStore := NewRDBMSStorageWithConn(conn)
 
-	return &StorageTest{
+	return &TestSuite{
 		storage: rdbmsStore,
 		Model:   model,
 	}, nil
 }
 
-// TestNotFound tests whether storage returns ErrNotFound error on unknown package
-func (st *StorageTest) TestNotFound() {
-	_, err := st.storage.Get("some", "unknown")
-	st.Require().Equal(true, storage.IsNotFoundError(err), "Invalid error type for %s: %#v", "Minio", err)
+// Storage retrieves initialized storage backend
+func (st *TestSuite) Storage() storage.Backend {
+	return st.storage
+}
+
+// StorageHumanReadableName retrieves readable identifier of the storage
+func (st *TestSuite) StorageHumanReadableName() string {
+	return "Rdbms"
 }

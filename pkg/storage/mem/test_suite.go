@@ -21,8 +21,12 @@ func NewTestSuite(model *suite.Model) (storage.TestSuite, error) {
 	}, err
 }
 
-// TestNotFound tests whether storage returns ErrNotFound error on unknown package
-func (st *TestSuite) TestNotFound() {
-	_, err := st.storage.Get("some", "unknown")
-	st.Require().Equal(true, storage.IsNotFoundError(err), "Invalid error type for %s: %#v", "In-Memory", err)
+// Storage retrieves initialized storage backend
+func (st *TestSuite) Storage() storage.Backend {
+	return st.storage
+}
+
+// StorageHumanReadableName retrieves readable identifier of the storage
+func (st *TestSuite) StorageHumanReadableName() string {
+	return "In-memory"
 }
