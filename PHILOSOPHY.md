@@ -6,7 +6,7 @@ We do of course set some boundaries like the [code of conduct](README#Code-Of-Co
 
 # Guiding Principles
 
-This is the TL;DR of the whole document! The Athens project has guiding principles:
+This is the TL;DR of the whole document! The Athens project has a few guiding principles:
 
 - Be nice to each other
 - Make development & testing easy
