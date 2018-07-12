@@ -15,7 +15,6 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"time"
 
 	"github.com/gomods/athens/pkg/config/env"
 	"github.com/gomods/athens/pkg/gomod/file"
@@ -56,7 +55,7 @@ func NewGitFetcher(fs afero.Fs, owner string, repoName string, tag string) (repo
 func (g gitFetcher) Fetch() (string, error) {
 	uri := fmt.Sprintf(fetchRepoURI, g.owner, g.repoName, g.tag)
 
-	client := http.Client{Timeout: env.Timeout() * time.Second}
+	client := http.Client{Timeout: env.Timeout()}
 	resp, err := client.Get(uri)
 
 	if err != nil {
