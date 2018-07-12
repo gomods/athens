@@ -6,8 +6,8 @@ import (
 
 	"github.com/garyburd/redigo/redis"
 	"github.com/gobuffalo/buffalo"
-	"github.com/gobuffalo/buffalo/worker"
 	"github.com/gobuffalo/gocraft-work-adapter"
+	"github.com/gocraft/work"
 	"github.com/gomods/athens/cmd/olympus/actions"
 	"github.com/gomods/athens/pkg/config/env"
 	"github.com/gomods/athens/pkg/storage"
@@ -44,10 +44,15 @@ func setupApp() *buffalo.App {
 	}
 	app := actions.App(&config)
 
-	if err := w.Register(actions.DownloadHandlerName, actions.GetPackageDownloaderJob(storage, eLog, app.Worker)); err != nil {
+	opts := work.JobOptions{
+		SkipDead: true,
+		MaxFails: 5,
+	}
+
+	if err := w.RegisterWithOptions(actions.DownloadHandlerName, opts, actions.GetPackageDownloaderJob(storage, eLog, app.Worker)); err != nil {
 		log.Fatal(err)
 	}
-	if err := w.Register(actions.PushNotificationHandlerName, actions.GetProcessPushNotificationJob(storage, eLog)); err != nil {
+	if err := w.RegisterWithOptions(actions.PushNotificationHandlerName, opts, actions.GetProcessPushNotificationJob(storage, eLog)); err != nil {
 		log.Fatal(err)
 	}
 	return app
@@ -64,7 +69,7 @@ func getStorage() (storage.Backend, error) {
 	return storage, nil
 }
 
-func getWorker() worker.Worker {
+func getWorker() *gwa.Adapter {
 	port := env.OlympusRedisQueuePortWithDefault(":6379")
 	return gwa.New(gwa.Options{
 		Pool: &redis.Pool{
@@ -76,6 +81,6 @@ func getWorker() worker.Worker {
 			},
 		},
 		Name:           actions.OlympusWorkerName,
-		MaxConcurrency: 25,
+		MaxConcurrency: 5,
 	})
 }

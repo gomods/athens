@@ -10,7 +10,6 @@ import (
 	"github.com/gobuffalo/buffalo/middleware/csrf"
 	"github.com/gobuffalo/buffalo/middleware/i18n"
 	"github.com/gobuffalo/buffalo/middleware/ssl"
-	"github.com/gobuffalo/buffalo/worker"
 	"github.com/gobuffalo/gocraft-work-adapter"
 	"github.com/gobuffalo/packr"
 	"github.com/gomods/athens/pkg/config/env"
@@ -123,7 +122,7 @@ func App() (*buffalo.App, error) {
 	return app, nil
 }
 
-func getWorker(port string) worker.Worker {
+func getWorker(port string) *gwa.Adapter {
 	return gwa.New(gwa.Options{
 		Pool: &redis.Pool{
 			MaxActive: 5,
