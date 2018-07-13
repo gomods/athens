@@ -44,7 +44,6 @@ func (f *FakeWorker) Register(n string, h worker.Handler) error {
 }
 
 func Test_ActionSuite(t *testing.T) {
-	worker := &FakeWorker{}
 	stg, err := mem.NewStorage()
 	if err != nil {
 		t.Fatalf("error creating storage (%s)", err)
@@ -61,9 +60,8 @@ func Test_ActionSuite(t *testing.T) {
 		Storage:        stg,
 		EventLog:       eLog,
 		CacheMissesLog: eLog,
-		Worker:         worker,
 	}
-	app := App(&config)
+	app, err := App(&config)
 	as := &ActionSuite{suite.NewAction(app)}
 	suite.Run(t, as)
 }
