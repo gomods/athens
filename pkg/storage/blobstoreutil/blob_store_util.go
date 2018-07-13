@@ -13,7 +13,7 @@ import (
 type Uploader func(ctx context.Context, path, contentType string, stream io.Reader) error
 
 // UploadModule saves .info, .mod and .zip files to the blob storage in parallel.
-// Returns an aggregated containing errors from all uploads and timeouts
+// Returns multierror containing errors from all uploads and timeouts
 func UploadModule(ctx context.Context, module, version string, info, mod, zip io.Reader, uploader Uploader) error {
 	const numUpload = 3
 	errChan := make(chan error, numUpload)
@@ -29,7 +29,7 @@ func UploadModule(ctx context.Context, module, version string, info, mod, zip io
 
 	go save("info", "application/json", info)
 	go save("mod", "text/plain", mod)
-	go save("info", "application/octet-stream", zip)
+	go save("zip", "application/octet-stream", zip)
 
 	var errors error
 	for i := 0; i < numUpload; i++ {
