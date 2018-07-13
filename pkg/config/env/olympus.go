@@ -28,3 +28,20 @@ func AthensMaxConcurrency() int {
 
 	return mc
 }
+
+// WorkerMaxFails retrieves maximal level of concurrency based on ATHENS_WORKER_MAX_FAILS.
+// Defaults to 5.
+func WorkerMaxFails() uint {
+	defaultMaxFails := uint(5)
+	maxFailsEnv, err := envy.MustGet("ATHENS_WORKER_MAX_FAILS")
+	if err != nil {
+		return defaultMaxFails
+	}
+
+	mc, err := strconv.Atoi(maxFailsEnv)
+	if err != nil {
+		return defaultMaxFails
+	}
+
+	return uint(mc)
+}

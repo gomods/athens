@@ -141,7 +141,7 @@ func getWorker(store storage.Backend, eLog eventlog.Eventlog) (worker.Worker, er
 
 	opts := work.JobOptions{
 		SkipDead: true,
-		MaxFails: 5,
+		MaxFails: env.WorkerMaxFails(),
 	}
 
 	if err := w.RegisterWithOptions(DownloadHandlerName, opts, GetPackageDownloaderJob(store, eLog, w)); err != nil {

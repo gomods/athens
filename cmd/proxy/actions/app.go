@@ -141,7 +141,7 @@ func getWorker(s storage.Backend, mf *module.Filter) (worker.Worker, error) {
 
 	opts := work.JobOptions{
 		SkipDead: true,
-		MaxFails: 5,
+		MaxFails: env.WorkerMaxFails(),
 	}
 
 	if err := w.RegisterWithOptions(FetcherWorkerName, opts, GetProcessCacheMissJob(s, w, mf)); err != nil {
