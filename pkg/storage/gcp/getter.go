@@ -12,8 +12,9 @@ import (
 // Get retrieves a module at a specific version from storage as a (./pkg/storage).Version
 //
 // The caller is responsible for calling close on the Zip ReadCloser
-func (s *Storage) Get(ctx context.Context, module, version string) (*storage.Version, error) {
-	if exists := s.Exists(ctx, module, version); !exists {
+func (s *Storage) Get(module, version string) (*storage.Version, error) {
+	ctx := context.Background()
+	if exists := s.Exists(module, version); !exists {
 		return nil, storage.ErrVersionNotFound{Module: module, Version: version}
 	}
 

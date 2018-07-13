@@ -33,7 +33,7 @@ func (g *GcpTests) TestSaveGetListExistsRoundTrip() {
 	})
 
 	g.T().Run("Get from storage", func(t *testing.T) {
-		version, err := store.Get(g.context, g.module, g.version)
+		version, err := store.Get(g.module, g.version)
 		defer version.Zip.Close()
 		r.NoError(err)
 
@@ -47,14 +47,14 @@ func (g *GcpTests) TestSaveGetListExistsRoundTrip() {
 	})
 
 	g.T().Run("List module versions", func(t *testing.T) {
-		versionList, err := store.List(g.context, g.module)
+		versionList, err := store.List(g.module)
 		r.NoError(err)
 		r.Equal(1, len(versionList))
 		r.Equal(g.version, versionList[0])
 	})
 
 	g.T().Run("Module exists", func(t *testing.T) {
-		r.Equal(true, store.Exists(g.context, g.module, g.version))
+		r.Equal(true, store.Exists(g.module, g.version))
 	})
 }
 
@@ -64,17 +64,17 @@ func (g *GcpTests) TestNotFounds() {
 	r.NoError(err)
 
 	g.T().Run("Get module version not found", func(t *testing.T) {
-		_, err = store.Get(g.context, "never", "there")
+		_, err = store.Get("never", "there")
 		versionNotFoundErr := athensStorage.ErrVersionNotFound{Module: "never", Version: "there"}
 		r.EqualError(versionNotFoundErr, err.Error())
 	})
 
 	g.T().Run("Exists module version not found", func(t *testing.T) {
-		r.Equal(false, store.Exists(g.context, "never", "there"))
+		r.Equal(false, store.Exists("never", "there"))
 	})
 
 	g.T().Run("List not found", func(t *testing.T) {
-		_, err = store.List(g.context, "nothing/to/see/here")
+		_, err = store.List("nothing/to/see/here")
 		modNotFoundErr := athensStorage.ErrNotFound{Module: "nothing/to/see/here"}
 		r.EqualError(modNotFoundErr, err.Error())
 	})

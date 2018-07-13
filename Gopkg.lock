@@ -347,12 +347,6 @@
   revision = "b7773ae218740a7be65057fc60b366a49b538a44"
 
 [[projects]]
-  name = "github.com/inconshreveable/mousetrap"
-  packages = ["."]
-  revision = "76626ae9c91c4f2a10f34cad8ce83ea42c93bb75"
-  version = "v1.0"
-
-[[projects]]
   name = "github.com/jmespath/go-jmespath"
   packages = ["."]
   revision = "0b12d6b5"
@@ -695,18 +689,6 @@
   version = "v1.0.2"
 
 [[projects]]
-  name = "github.com/spf13/cobra"
-  packages = ["."]
-  revision = "7b2c5ac9fc04fc5efafb60700713d4fa609b777b"
-  version = "v0.0.1"
-
-[[projects]]
-  name = "github.com/spf13/pflag"
-  packages = ["."]
-  revision = "e57e3eeb33f795204c1ca35f56c44f83227c6e66"
-  version = "v1.0.0"
-
-[[projects]]
   name = "github.com/stretchr/objx"
   packages = ["."]
   revision = "477a77ecc69700c7cdeb1fa9e129548e1c1c393c"
@@ -884,7 +866,6 @@
   name = "google.golang.org/appengine"
   packages = [
     ".",
-    "aetest",
     "internal",
     "internal/app_identity",
     "internal/base",
@@ -894,10 +875,8 @@
     "internal/remote_api",
     "internal/socket",
     "internal/urlfetch",
-    "internal/user",
     "socket",
-    "urlfetch",
-    "user"
+    "urlfetch"
   ]
   revision = "150dc57a1b433e64154302bdc40b6bb8aefa313a"
   version = "v1.0.0"
@@ -956,6 +935,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "f97f7787279ab52f2bb4d057552e115109606229dd6b424bd1b54aada52d94ba"
+  inputs-digest = "cd339460674e114b41cecd0d5ff7b9ed51c219b0de14c657c0730d6501c0d36b"
   solver-name = "gps-cdcl"
   solver-version = 1

@@ -7,7 +7,8 @@ import (
 
 // Exists implements the (./pkg/storage).Checker interface
 // returning true if the module at version exists in storage
-func (s *Storage) Exists(ctx context.Context, module, version string) bool {
+func (s *Storage) Exists(module, version string) bool {
+	ctx := context.Background()
 	modName := fmt.Sprintf("%s/@v/%s.%s", module, version, "mod")
 	modHandle := s.bucket.Object(modName)
 	_, err := modHandle.Attrs(ctx)

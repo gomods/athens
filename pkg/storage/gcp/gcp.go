@@ -15,6 +15,8 @@ import (
 // (./pkg/storage).Saver
 // (./pkg/storage).Getter
 // (./pkg/storage).Lister
+// (./pkg/storage).Checker
+// (./pkg/storage).Deleter
 type Storage struct {
 	bucket       *storage.BucketHandle
 	dsClient     *datastore.Client
