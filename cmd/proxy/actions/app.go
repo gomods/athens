@@ -14,6 +14,7 @@ import (
 	"github.com/gobuffalo/gocraft-work-adapter"
 	"github.com/gobuffalo/packr"
 	"github.com/gomods/athens/pkg/config/env"
+	"github.com/gomods/athens/pkg/module"
 	"github.com/gomods/athens/pkg/user"
 	"github.com/rs/cors"
 	"github.com/unrolled/secure"
@@ -27,7 +28,6 @@ const (
 	workerQueue        = "default"
 	workerModuleKey    = "module"
 	workerVersionKey   = "version"
-	workerTryCountKey  = "trycount"
 
 	maxTryCount = 5
 )
@@ -79,8 +79,10 @@ func App() (*buffalo.App, error) {
 		initializeTracing(app)
 		// Protect against CSRF attacks. https://www.owasp.org/index.php/Cross-Site_Request_Forgery_(CSRF)
 		// Remove to disable this.
-		csrfMiddleware := csrf.New
-		app.Use(csrfMiddleware)
+		if env.EnableCSRFProtection() {
+			csrfMiddleware := csrf.New
+			app.Use(csrfMiddleware)
+		}
 
 		// Wraps each request in a transaction.
 		//  c.Value("tx").(*pop.PopTransaction)
@@ -105,7 +107,9 @@ func App() (*buffalo.App, error) {
 			err = fmt.Errorf("error connecting to storage (%s)", err)
 			return nil, err
 		}
-		if err := addProxyRoutes(app, store); err != nil {
+
+		mf := module.NewFilter()
+		if err := addProxyRoutes(app, store, mf); err != nil {
 			err = fmt.Errorf("error adding proxy routes (%s)", err)
 			return nil, err
 		}
