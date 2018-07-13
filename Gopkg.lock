@@ -84,6 +84,8 @@
     "private/protocol/xml/xmlutil",
     "service/s3",
     "service/s3/s3iface",
+    "service/s3/s3manager",
+    "service/s3/s3manager/s3manageriface",
     "service/sts"
   ]
   revision = "fde4ded7becdeae4d26bf1212916aabba79349b4"
@@ -926,6 +928,10 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
+<<<<<<< HEAD
   inputs-digest = "4eeaed6464886b68a6e06cb065f6b899402953022ab81440da60c1547cc5f4b8"
+=======
+  inputs-digest = "9cc84a3946a26681be6d073c345488ca0f421c564e0f24e6adedf25755b62ed0"
+>>>>>>> master
   solver-name = "gps-cdcl"
   solver-version = 1
