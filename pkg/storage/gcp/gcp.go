@@ -57,10 +57,10 @@ func NewWithCredentials(ctx context.Context, cred option.ClientOption) (*Storage
 //
 //	<meta name="go-import" content="gomods.com/athens mod BaseURL()">
 func (s *Storage) BaseURL() *url.URL {
-	return s.baseURI
+	return env.CDNEndpointWithDefault(s.baseURI)
 }
 
-// Close calls the underlying storage client's close methods
+// Close calls the underlying storage client's close method
 func (s *Storage) Close() error {
 	return s.closeStorage()
 }
