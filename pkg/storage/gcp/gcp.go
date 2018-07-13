@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net/url"
 
-	"cloud.google.com/go/datastore"
 	"cloud.google.com/go/storage"
 	"github.com/gomods/athens/pkg/config/env"
 	"google.golang.org/api/option"
@@ -19,7 +18,6 @@ import (
 // (./pkg/storage).Deleter
 type Storage struct {
 	bucket       *storage.BucketHandle
-	dsClient     *datastore.Client
 	baseURI      *url.URL
 	closeStorage func() error
 }

@@ -34,8 +34,8 @@ func (g *GcpTests) TestSaveGetListExistsRoundTrip() {
 
 	g.T().Run("Get from storage", func(t *testing.T) {
 		version, err := store.Get(g.module, g.version)
-		defer version.Zip.Close()
 		r.NoError(err)
+		defer version.Zip.Close()
 
 		r.Equal(mod, version.Mod)
 		r.Equal(info, version.Info)
