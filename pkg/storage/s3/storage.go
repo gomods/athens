@@ -81,9 +81,10 @@ func (s *Storage) Save(ctx context.Context, module, version string, mod []byte, 
 
 func (s *Storage) upload(ctx context.Context, path, contentType string, stream io.Reader) error {
 	upParams := &s3manager.UploadInput{
-		Bucket: &s.bucket,
-		Key:    &path,
-		Body:   stream,
+		Bucket:      &s.bucket,
+		Key:         &path,
+		Body:        stream,
+		ContentType: &contentType,
 	}
 	_, err := s.uploader.UploadWithContext(ctx, upParams)
 	return err
