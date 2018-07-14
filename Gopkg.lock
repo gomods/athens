@@ -181,7 +181,7 @@
 
 [[projects]]
   digest = "1:f26133af0db0007ccbd4830a033f7124c38cbab8afecd06452f17c6b7fd4c3a9"
-  name = "github.com/garyburd/redigo"
+  name = "github.com/gomodule/redigo"
   packages = [
     "internal",
     "redis",
@@ -1192,7 +1192,7 @@
     "github.com/aws/aws-sdk-go/service/s3/s3manager",
     "github.com/aws/aws-sdk-go/service/s3/s3manager/s3manageriface",
     "github.com/bketelsen/buffet",
-    "github.com/garyburd/redigo/redis",
+    "github.com/gomodule/redigo/redis",
     "github.com/globalsign/mgo",
     "github.com/globalsign/mgo/bson",
     "github.com/gobuffalo/buffalo",

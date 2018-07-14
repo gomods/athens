@@ -94,7 +94,7 @@
   name = "github.com/gobuffalo/gocraft-work-adapter"
 
 [[constraint]]
-  name = "github.com/garyburd/redigo"
+  name = "github.com/gomodule/redigo"
   version = "1.6.0"
 
 [[constraint]]

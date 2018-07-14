@@ -4,9 +4,9 @@ import (
 	"context"
 	"time"
 
-	"github.com/garyburd/redigo/redis"
 	"github.com/gobuffalo/buffalo/worker"
 	"github.com/gocraft/work"
+	"github.com/gomodule/redigo/redis"
 	"github.com/markbates/going/defaults"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
