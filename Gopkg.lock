@@ -691,15 +691,6 @@
   version = "v1.0.2"
 
 [[projects]]
-<<<<<<< HEAD
-  name = "github.com/stretchr/objx"
-  packages = ["."]
-  revision = "477a77ecc69700c7cdeb1fa9e129548e1c1c393c"
-  version = "v0.1.1"
-
-[[projects]]
-=======
->>>>>>> master
   name = "github.com/stretchr/testify"
   packages = [
     "assert",
