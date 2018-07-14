@@ -10,12 +10,7 @@ import (
 	"google.golang.org/api/option"
 )
 
-// Storage implements the following interfaces:
-// (./pkg/storage).Saver
-// (./pkg/storage).Getter
-// (./pkg/storage).Lister
-// (./pkg/storage).Checker
-// (./pkg/storage).Deleter
+// Storage implements the (./pkg/storage).Backend interface
 type Storage struct {
 	bucket       *storage.BucketHandle
 	baseURI      *url.URL
@@ -61,6 +56,8 @@ func (s *Storage) BaseURL() *url.URL {
 }
 
 // Close calls the underlying storage client's close method
+// It is not required to be called on program exit but provided here
+// for completness.
 func (s *Storage) Close() error {
 	return s.closeStorage()
 }

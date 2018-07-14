@@ -14,9 +14,10 @@ import (
 	multierror "github.com/hashicorp/go-multierror"
 )
 
-// Save uploads the modules .mod, .zip and .info files for a given version
+// Save uploads the module's .mod, .zip and .info files for a given version
 // It expects a context, which can be provided using context.Background
-// from the standard library.
+// from the standard library until context has been threaded down the stack.
+// see issue: https://github.com/gomods/athens/issues/174
 //
 // Uploaded files are publicly accessable in the storage bucket as per
 // an ACL rule.
@@ -68,7 +69,6 @@ func writeToBucket(ctx context.Context, bkt *storage.BucketHandle, filename, con
 		}
 	}(wc)
 	wc.ContentType = contentType
-	// TODO: have this configurable to allow for mixed public/private modules
 	wc.ACL = []storage.ACLRule{{Entity: storage.AllUsers, Role: storage.RoleReader}}
 	if _, err := io.Copy(wc, file); err != nil {
 		return err

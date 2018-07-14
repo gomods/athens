@@ -5,6 +5,7 @@ import (
 	"context"
 	"io/ioutil"
 	"testing"
+	"time"
 
 	"cloud.google.com/go/storage"
 	"github.com/gomods/athens/pkg/config"
@@ -56,6 +57,22 @@ func (g *GcpTests) TestSaveGetListExistsRoundTrip() {
 	g.T().Run("Module exists", func(t *testing.T) {
 		r.Equal(true, store.Exists(g.module, g.version))
 	})
+}
+
+func (g *GcpTests) TestDeleter() {
+	r := g.Require()
+	store, err := NewWithCredentials(g.context, g.options)
+	r.NoError(err)
+
+	version := "delete" + time.Now().String()
+	err = store.Save(g.context, g.module, version, mod, bytes.NewReader(zip), info)
+	r.NoError(err)
+
+	err = store.Delete(g.module, version)
+	r.NoError(err)
+
+	exists := store.Exists(g.module, version)
+	r.Equal(false, exists)
 }
 
 func (g *GcpTests) TestNotFounds() {
