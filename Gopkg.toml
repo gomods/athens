@@ -95,7 +95,6 @@
 
 [[constraint]]
   name = "github.com/gomodule/redigo"
-  version = "1.6.0"
 
 [[constraint]]
   name = "cloud.google.com/go"
