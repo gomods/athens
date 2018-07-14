@@ -5,11 +5,8 @@
   name = "cloud.google.com/go"
   packages = [
     "compute/metadata",
-    "datastore",
     "iam",
     "internal",
-    "internal/atomiccache",
-    "internal/fields",
     "internal/optional",
     "internal/trace",
     "internal/version",
@@ -293,9 +290,7 @@
     "ptypes",
     "ptypes/any",
     "ptypes/duration",
-    "ptypes/struct",
-    "ptypes/timestamp",
-    "ptypes/wrappers"
+    "ptypes/timestamp"
   ]
   revision = "b4deda0973fb4c70b50d226b1af49f3da59f5265"
   version = "v1.1.0"
@@ -749,7 +744,6 @@
     "exporter/stackdriver/propagation",
     "internal",
     "internal/tagencoding",
-    "plugin/ocgrpc",
     "plugin/ochttp",
     "plugin/ochttp/propagation/b3",
     "stats",
@@ -852,7 +846,6 @@
     "iterator",
     "option",
     "storage/v1",
-    "transport/grpc",
     "transport/http"
   ]
   revision = "2eea9ba0a3d94f6ab46508083e299a00bbbc65f6"
@@ -868,9 +861,7 @@
     "internal/log",
     "internal/modules",
     "internal/remote_api",
-    "internal/socket",
     "internal/urlfetch",
-    "socket",
     "urlfetch"
   ]
   revision = "150dc57a1b433e64154302bdc40b6bb8aefa313a"
@@ -881,11 +872,9 @@
   name = "google.golang.org/genproto"
   packages = [
     "googleapis/api/annotations",
-    "googleapis/datastore/v1",
     "googleapis/iam/v1",
     "googleapis/rpc/code",
-    "googleapis/rpc/status",
-    "googleapis/type/latlng"
+    "googleapis/rpc/status"
   ]
   revision = "32ee49c4dd805befd833990acba36cb75042378c"
 
@@ -900,7 +889,6 @@
     "codes",
     "connectivity",
     "credentials",
-    "credentials/oauth",
     "encoding",
     "encoding/proto",
     "grpclb/grpc_lb_v1/messages",
@@ -930,6 +918,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "fe918885f6004831f4bb289dbce9d5ed847c4530a4f82dd04ef1003de1bb7229"
+  inputs-digest = "3217b954676b35e59bfff3731388a73131fd276464634bd50ca9d881641055c2"
   solver-name = "gps-cdcl"
   solver-version = 1
