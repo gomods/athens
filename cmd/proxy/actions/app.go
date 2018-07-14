@@ -109,8 +109,6 @@ func App() (*buffalo.App, error) {
 		}
 		app.Use(T.Middleware())
 
-		app.GET("/", homeHandler)
-
 		if err := addProxyRoutes(app, store, mf); err != nil {
 			err = fmt.Errorf("error adding proxy routes (%s)", err)
 			return nil, err
