@@ -10,13 +10,12 @@
 # with the -dry-run option to check for any conflicts in versions or digests
 # which on any exit code > 0 would suggest that action should be taken
 # before a pull request can be merged.
-set -e
 
-CHANGED_FILES=`git diff --name-only master`
+ChangedFiles=`git diff --name-only master`
 
-for FILE in $CHANGED_FILES; do
-  if [[ "$FILE" =~ ^Gopkg.* ]]; then
+# in the casse that ChangedFiles contains Gopkg run dep ensure
+case "$ChangedFiles" in
+  *Gopkg*)
     dep ensure -dry-run
-    break
-  fi
-done
+  ;;
+esac
