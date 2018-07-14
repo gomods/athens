@@ -17,7 +17,6 @@ import (
 	"github.com/gomods/athens/pkg/config/env"
 	"github.com/gomods/athens/pkg/module"
 	"github.com/gomods/athens/pkg/storage"
-	"github.com/gomods/athens/pkg/user"
 	"github.com/rs/cors"
 	"github.com/unrolled/secure"
 )
@@ -42,7 +41,6 @@ var app *buffalo.App
 var T *i18n.Translator
 
 var gopath string
-var userStore *user.Store
 
 func init() {
 	g, err := env.GoPath()
