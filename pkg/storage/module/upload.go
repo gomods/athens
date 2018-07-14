@@ -1,4 +1,4 @@
-package blobstoreutil
+package module
 
 import (
 	"context"
@@ -9,13 +9,14 @@ import (
 	multierror "github.com/hashicorp/go-multierror"
 )
 
-// Uploader takes a stream and saves it to the block storage under a given path
+const numUpload = 3
+
+// Uploader takes a stream and saves it to the blob store under a given path
 type Uploader func(ctx context.Context, path, contentType string, stream io.Reader) error
 
-// UploadModule saves .info, .mod and .zip files to the blob storage in parallel.
+// Upload saves .info, .mod and .zip files to the blob store in parallel.
 // Returns multierror containing errors from all uploads and timeouts
-func UploadModule(ctx context.Context, module, version string, info, mod, zip io.Reader, uploader Uploader) error {
-	const numUpload = 3
+func Upload(ctx context.Context, module, version string, info, mod, zip io.Reader, uploader Uploader) error {
 	errChan := make(chan error, numUpload)
 
 	save := func(ext, contentType string, stream io.Reader) {

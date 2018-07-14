@@ -9,24 +9,25 @@ import (
 
 	"github.com/Azure/azure-storage-blob-go/2017-07-29/azblob"
 	"github.com/gomods/athens/pkg/config/env"
-	"github.com/gomods/athens/pkg/storage/blobstoreutil"
+	m "github.com/gomods/athens/pkg/storage/module"
 )
 
 // Storage implements (github.com/gomods/athens/pkg/storage).Saver and
 // also provides a function to fetch the location of a module
 type Storage struct {
-	accountURL *url.URL
-	cred       azblob.Credential
+	accountURL    *url.URL
+	cred          azblob.Credential
+	containerName string
 }
 
 // New creates a new azure CDN saver
-func New(accountName, accountKey string) (*Storage, error) {
+func New(accountName, accountKey, containerName string) (*Storage, error) {
 	u, err := url.Parse(fmt.Sprintf("https://%s.blob.core.windows.net", accountName))
 	if err != nil {
 		return nil, err
 	}
 	cred := azblob.NewSharedKeyCredential(accountName, accountKey)
-	return &Storage{accountURL: u, cred: cred}, nil
+	return &Storage{accountURL: u, cred: cred, containerName: containerName}, nil
 }
 
 // BaseURL returns the base URL that stores all modules. It can be used
@@ -47,15 +48,15 @@ func (s *Storage) Save(ctx context.Context, module, version string, mod []byte, 
 	// https://docs.microsoft.com/en-us/rest/api/storageservices/naming-and-referencing-containers--blobs--and-metadata#container-names
 	//
 	// This container must exist
-	containerURL := serviceURL.NewContainerURL("gomodules")
-	err := blobstoreutil.UploadModule(ctx, module, version, bytes.NewReader(info), bytes.NewReader(mod), zip, getUploader(containerURL))
+	containerURL := serviceURL.NewContainerURL(s.containerName)
+	err := m.Upload(ctx, module, version, bytes.NewReader(info), bytes.NewReader(mod), zip, getUploader(containerURL))
 	// TODO: take out lease on the /list file and add the version to it
 	//
 	// Do that only after module source+metadata is uploaded
 	return err
 }
 
-func getUploader(containerURL azblob.ContainerURL) blobstoreutil.Uploader {
+func getUploader(containerURL azblob.ContainerURL) m.Uploader {
 	emptyMeta := map[string]string{}
 	emptyBlobAccessCond := azblob.BlobAccessConditions{}
 	httpHeaders := func(contentType string) azblob.BlobHTTPHeaders {
