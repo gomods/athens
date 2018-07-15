@@ -19,7 +19,7 @@ func New(cloudProvider, level string) *Logger {
 	switch cloudProvider {
 	case "GCP":
 		l.Formatter = getGCPFormatter()
-	case "development":
+	case "none":
 		l.Formatter = getDevFormatter()
 	default:
 		l.Formatter = getDefaultFormatter()
