@@ -51,7 +51,7 @@ func (s *Storage) Save(ctx context.Context, module, version string, mod []byte, 
 }
 
 // upload waits for either writeToBucket to complete or the context expires
-func upload(ctx context.Context, errs chan<- error, bkt *storage.BucketHandle, module, version, ext, contentType string, file io.Reader) {
+func upload(ctx context.Context, errs chan<- error, bkt Bucket, module, version, ext, contentType string, file io.Reader) {
 	select {
 	case errs <- writeToBucket(ctx, bkt, config.PackageVersionedName(module, version, ext), contentType, file):
 		return
@@ -61,7 +61,7 @@ func upload(ctx context.Context, errs chan<- error, bkt *storage.BucketHandle, m
 }
 
 // writeToBucket performs the actual write to a gcp storage bucket
-func writeToBucket(ctx context.Context, bkt *storage.BucketHandle, filename, contentType string, file io.Reader) error {
+func writeToBucket(ctx context.Context, bkt Bucket, filename, contentType string, file io.Reader) error {
 	wc := bkt.Object(filename).NewWriter(ctx)
 	defer func(w *storage.Writer) {
 		if err := w.Close(); err != nil {

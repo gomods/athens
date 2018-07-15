@@ -10,9 +10,16 @@ import (
 	"google.golang.org/api/option"
 )
 
+// Bucket defines the subset of functionality provided by the
+// cloud.google.com/go/storage.BucketHandle required by this package
+type Bucket interface {
+	Object(name string) *storage.ObjectHandle
+	Objects(ctx context.Context, q *storage.Query) *storage.ObjectIterator
+}
+
 // Storage implements the (./pkg/storage).Backend interface
 type Storage struct {
-	bucket       *storage.BucketHandle
+	bucket       Bucket
 	baseURI      *url.URL
 	closeStorage func() error
 }
