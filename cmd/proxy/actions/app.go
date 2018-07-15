@@ -2,7 +2,6 @@ package actions
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/gobuffalo/buffalo"
 	"github.com/gobuffalo/buffalo/middleware"
@@ -14,6 +13,7 @@ import (
 	"github.com/gobuffalo/packr"
 	"github.com/gocraft/work"
 	"github.com/gomods/athens/pkg/config/env"
+	"github.com/gomods/athens/pkg/log"
 	"github.com/gomods/athens/pkg/module"
 	"github.com/gomods/athens/pkg/storage"
 	"github.com/gomods/athens/pkg/user"
@@ -47,7 +47,7 @@ var userStore *user.Store
 func init() {
 	g, err := env.GoPath()
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 	gopath = g
 }
@@ -73,6 +73,8 @@ func App() (*buffalo.App, error) {
 			return nil, err
 		}
 
+		lggr := log.New(env.CloudRuntime(), env.LogLevel())
+
 		app = buffalo.New(buffalo.Options{
 			Env: ENV,
 			PreWares: []buffalo.PreWare{
@@ -80,7 +82,9 @@ func App() (*buffalo.App, error) {
 			},
 			SessionName: "_athens_session",
 			Worker:      worker,
+			Logger:      log.Buffalo(),
 		})
+
 		// Automatically redirect to SSL
 		app.Use(ssl.ForceSSL(secure.Options{
 			SSLRedirect:     ENV == "production",
@@ -109,9 +113,7 @@ func App() (*buffalo.App, error) {
 		}
 		app.Use(T.Middleware())
 
-		app.GET("/", homeHandler)
-
-		if err := addProxyRoutes(app, store, mf); err != nil {
+		if err := addProxyRoutes(app, store, mf, lggr); err != nil {
 			err = fmt.Errorf("error adding proxy routes (%s)", err)
 			return nil, err
 		}
