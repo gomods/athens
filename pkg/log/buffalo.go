@@ -28,7 +28,7 @@ func (buffaloFormatter) Format(entry *logrus.Entry) ([]byte, error) {
 	if entry.Level == logrus.ErrorLevel {
 		// buffalo does not pass request params when an error occurs: pass params
 		// when https://github.com/gobuffalo/buffalo/issues/1171 is resolved.
-		return fmtBuffaloErr(entry.Message)
+		return fmtBuffaloErr(entry.Message), nil
 	}
 
 	statusCode, _ := entry.Data["status"].(int)
@@ -65,7 +65,6 @@ func (bf *buffaloLogger) WithFields(fields map[string]interface{}) buffalo.Logge
 	return &buffaloLogger{e}
 }
 
-func fmtBuffaloErr(msg string) ([]byte, error) {
-	str := fmt.Sprintf("%s %s\n", color.HiRedString("buffalo:"), msg)
-	return []byte(str), nil
+func fmtBuffaloErr(msg string) []byte {
+	return []byte(fmt.Sprintf("%s %s\n", color.HiRedString("buffalo:"), msg))
 }
