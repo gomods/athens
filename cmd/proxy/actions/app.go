@@ -73,7 +73,7 @@ func App() (*buffalo.App, error) {
 			return nil, err
 		}
 
-		lggr := log.New()
+		lggr := log.New(env.CloudRuntime())
 
 		app = buffalo.New(buffalo.Options{
 			Env: ENV,

@@ -14,8 +14,18 @@ type Logger struct {
 // environment and the cloud platform it is
 // running on. TODO: take cloud arg and env
 // to construct the correct JSON formatter.
-func New() *Logger {
-	return &Logger{Logger: logrus.New()}
+func New(cloudProvider string) *Logger {
+	l := logrus.New()
+	switch cloudProvider {
+	case "GCP":
+		l.Formatter = getGCPFormatter()
+	case "development":
+		l.Formatter = getDevFormatter()
+	default:
+		l.Formatter = getDefaultFormatter()
+	}
+
+	return &Logger{Logger: l}
 }
 
 // Entry is an abstraction to the
