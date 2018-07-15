@@ -10,13 +10,6 @@ import (
 	"google.golang.org/api/option"
 )
 
-// Bucket defines the subset of functionality provided by the
-// cloud.google.com/go/storage.BucketHandle required by this package
-type Bucket interface {
-	Object(name string) *storage.ObjectHandle
-	Objects(ctx context.Context, q *storage.Query) *storage.ObjectIterator
-}
-
 // Storage implements the (./pkg/storage).Backend interface
 type Storage struct {
 	bucket       Bucket
@@ -43,10 +36,10 @@ func NewWithCredentials(ctx context.Context, cred option.ClientOption) (*Storage
 	if err != nil {
 		return nil, err
 	}
-	bkt := storage.Bucket(bucketname)
+	bkt := gcpBucket{storage.Bucket(bucketname)}
 
 	return &Storage{
-		bucket:       bkt,
+		bucket:       &bkt,
 		baseURI:      u,
 		closeStorage: storage.Close,
 	}, nil

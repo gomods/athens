@@ -7,7 +7,6 @@ import (
 	"io"
 	"log"
 
-	"cloud.google.com/go/storage"
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/config/env"
 	stg "github.com/gomods/athens/pkg/storage"
@@ -62,14 +61,15 @@ func upload(ctx context.Context, errs chan<- error, bkt Bucket, module, version,
 
 // writeToBucket performs the actual write to a gcp storage bucket
 func writeToBucket(ctx context.Context, bkt Bucket, filename, contentType string, file io.Reader) error {
-	wc := bkt.Object(filename).NewWriter(ctx)
-	defer func(w *storage.Writer) {
-		if err := w.Close(); err != nil {
+	wc := bkt.GetWriter(ctx, filename)
+	defer func(wc io.WriteCloser) {
+		if err := wc.Close(); err != nil {
 			log.Printf("WARNING: failed to close storage object writer: %s", err)
 		}
 	}(wc)
-	wc.ContentType = contentType
-	wc.ACL = []storage.ACLRule{{Entity: storage.AllUsers, Role: storage.RoleReader}}
+	// NOTE: content type is auto detected on GCP side and ACL defaults to public
+	// Once we support private storage buckets this may need refactoring
+	// unless there is a way to set the default perms in the project.
 	if _, err := io.Copy(wc, file); err != nil {
 		return err
 	}
