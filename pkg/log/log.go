@@ -14,7 +14,7 @@ type Logger struct {
 // environment and the cloud platform it is
 // running on. TODO: take cloud arg and env
 // to construct the correct JSON formatter.
-func New(cloudProvider string) *Logger {
+func New(cloudProvider, level string) *Logger {
 	l := logrus.New()
 	switch cloudProvider {
 	case "GCP":
@@ -24,6 +24,11 @@ func New(cloudProvider string) *Logger {
 	default:
 		l.Formatter = getDefaultFormatter()
 	}
+	logLevel, err := logrus.ParseLevel(level)
+	if err != nil {
+		panic(err)
+	}
+	l.Level = logLevel
 
 	return &Logger{Logger: l}
 }
