@@ -33,11 +33,13 @@ func (buffaloFormatter) Format(entry *logrus.Entry) ([]byte, error) {
 
 	statusCode, _ := entry.Data["status"].(int)
 	status := fmt.Sprint(statusCode)
-	if statusCode < 400 {
+
+	switch {
+	case statusCode < 400:
 		status = color.GreenString("%v", status)
-	} else if statusCode >= 400 && statusCode < 500 {
+	case statusCode >= 400 && statusCode < 500:
 		status = color.HiYellowString("%v", status)
-	} else {
+	default:
 		status = color.HiRedString("%v", status)
 	}
 
