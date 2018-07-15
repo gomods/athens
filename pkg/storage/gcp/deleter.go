@@ -3,9 +3,8 @@ package gcp
 import (
 	"context"
 
-	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/storage"
-	multierror "github.com/hashicorp/go-multierror"
+	m "github.com/gomods/athens/pkg/storage/module"
 )
 
 // Delete implements the (./pkg/storage).Deleter interface and
@@ -17,15 +16,9 @@ func (s *Storage) Delete(module, version string) error {
 		return storage.ErrVersionNotFound{Module: module, Version: version}
 	}
 
-	var errs error
-	if err := s.bucket.Object(config.PackageVersionedName(module, version, "mod")).Delete(ctx); err != nil {
-		errs = multierror.Append(errs, err)
-	}
-	if err := s.bucket.Object(config.PackageVersionedName(module, version, "info")).Delete(ctx); err != nil {
-		errs = multierror.Append(errs, err)
-	}
-	if err := s.bucket.Object(config.PackageVersionedName(module, version, "zip")).Delete(ctx); err != nil {
-		errs = multierror.Append(errs, err)
-	}
-	return errs
+	return m.Delete(ctx, module, version, s.delete)
+}
+
+func (s *Storage) delete(ctx context.Context, path string) error {
+	return s.bucket.Object(path).Delete(ctx)
 }
