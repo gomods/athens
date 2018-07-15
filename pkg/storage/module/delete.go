@@ -21,7 +21,7 @@ func Delete(ctx context.Context, module, version string, delete Deleter) error {
 		select {
 		case errChan <- delete(ctx, p):
 		case <-ctx.Done():
-			errChan <- fmt.Errorf("deleting %s timed out", p)
+			errChan <- fmt.Errorf("deleting %s failed: %s", p, ctx.Err())
 		}
 	}
 

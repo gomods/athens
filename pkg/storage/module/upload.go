@@ -24,7 +24,7 @@ func Upload(ctx context.Context, module, version string, info, mod, zip io.Reade
 		select {
 		case errChan <- uploader(ctx, p, contentType, stream):
 		case <-ctx.Done():
-			errChan <- fmt.Errorf("uploading %s timed out", p)
+			errChan <- fmt.Errorf("uploading %s failed: %s", p, ctx.Err())
 		}
 	}
 
