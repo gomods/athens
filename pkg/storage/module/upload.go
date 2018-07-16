@@ -6,6 +6,7 @@ import (
 	"io"
 
 	"github.com/gomods/athens/pkg/config"
+	"github.com/gomods/athens/pkg/config/env"
 	multierror "github.com/hashicorp/go-multierror"
 )
 
@@ -17,20 +18,32 @@ type Uploader func(ctx context.Context, path, contentType string, stream io.Read
 // Upload saves .info, .mod and .zip files to the blob store in parallel.
 // Returns multierror containing errors from all uploads and timeouts
 func Upload(ctx context.Context, module, version string, info, mod, zip io.Reader, uploader Uploader) error {
-	errChan := make(chan error, numFiles)
+	tctx, cancel := context.WithTimeout(ctx, env.Timeout())
+	defer cancel()
 
-	save := func(ext, contentType string, stream io.Reader) {
-		p := config.PackageVersionedName(module, version, ext)
-		select {
-		case errChan <- uploader(ctx, p, contentType, stream):
-		case <-ctx.Done():
-			errChan <- fmt.Errorf("uploading %s failed: %s", p, ctx.Err())
-		}
+	save := func(ext, contentType string, stream io.Reader) <-chan error {
+		ec := make(chan error)
+
+		go func() {
+			defer close(ec)
+			p := config.PackageVersionedName(module, version, ext)
+			ec <- uploader(tctx, p, contentType, stream)
+		}()
+		return ec
 	}
 
-	go save("info", "application/json", info)
-	go save("mod", "text/plain", mod)
-	go save("zip", "application/octet-stream", zip)
+	errChan := make(chan error, numFiles)
+	saveOrAbort := func(ext, contentType string, stream io.Reader) {
+		select {
+		case err := <-save(ext, contentType, stream):
+			errChan <- err
+		case <-tctx.Done():
+			errChan <- fmt.Errorf("uploading %s.%s.%s failed: %s", module, version, ext, tctx.Err())
+		}
+	}
+	go saveOrAbort("info", "application/json", info)
+	go saveOrAbort("mod", "text/plain", mod)
+	go saveOrAbort("zip", "application/octet-stream", zip)
 
 	var errors error
 	for i := 0; i < numFiles; i++ {
