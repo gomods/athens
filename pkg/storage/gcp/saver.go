@@ -7,7 +7,6 @@ import (
 	"io"
 	"log"
 
-	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/config/env"
 	stg "github.com/gomods/athens/pkg/storage"
 	multierror "github.com/hashicorp/go-multierror"
@@ -21,7 +20,7 @@ import (
 // Uploaded files are publicly accessable in the storage bucket as per
 // an ACL rule.
 func (s *Storage) Save(ctx context.Context, module, version string, mod []byte, zip io.Reader, info []byte) error {
-	if exists := s.Exists(module, version); exists {
+	if exists := s.bucket.Exists(ctx, module, version); exists {
 		return stg.ErrVersionAlreadyExists{Module: module, Version: version}
 	}
 
@@ -52,7 +51,7 @@ func (s *Storage) Save(ctx context.Context, module, version string, mod []byte, 
 // upload waits for either writeToBucket to complete or the context expires
 func upload(ctx context.Context, errs chan<- error, bkt Bucket, module, version, ext, contentType string, file io.Reader) {
 	select {
-	case errs <- writeToBucket(ctx, bkt, config.PackageVersionedName(module, version, ext), contentType, file):
+	case errs <- writeToBucket(ctx, bkt, module, version, ext, contentType, file):
 		return
 	case <-ctx.Done():
 		errs <- fmt.Errorf("WARNING: context deadline exceeded during write of %s version %s", module, version)
@@ -60,8 +59,8 @@ func upload(ctx context.Context, errs chan<- error, bkt Bucket, module, version,
 }
 
 // writeToBucket performs the actual write to a gcp storage bucket
-func writeToBucket(ctx context.Context, bkt Bucket, filename, contentType string, file io.Reader) error {
-	wc := bkt.GetWriter(ctx, filename)
+func writeToBucket(ctx context.Context, bkt Bucket, module, version, extension, contentType string, file io.Reader) error {
+	wc := bkt.Write(ctx, module, version, extension)
 	defer func(wc io.WriteCloser) {
 		if err := wc.Close(); err != nil {
 			log.Printf("WARNING: failed to close storage object writer: %s", err)

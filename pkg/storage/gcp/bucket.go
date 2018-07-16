@@ -5,17 +5,17 @@ import (
 	"io"
 )
 
-// Bucket defines the storage bucket TODO
+// Bucket provides file operations for a Google Cloud Storage resource.
 type Bucket interface {
-	// DeleteModule removes a module @ version from the bucket
-	DeleteModule(ctx context.Context, module, version string) error
-	// GetReader returns a reader for the module filename and an error if any
-	GetReader(ctx context.Context, filename string) (io.ReadCloser, error)
-	// GetWriter returns a new writer for the module filename
-	// This will overwrite any exists file stored under the same module, version
-	GetWriter(ctx context.Context, filename string) io.WriteCloser
-	// ListVersions returns a slice of version strings for a module
+	// Delete removes the file module/@v/version.extension
+	Delete(ctx context.Context, module, version string) error
+	// Open returns a reader for module/@v/version.extension and any error
+	Open(ctx context.Context, module, version, extension string) (io.ReadCloser, error)
+	// Write returns a new writer for module/@v/version.extension
+	// This writer will overwrite any existing file stored at the same path
+	Write(ctx context.Context, module, version, extension string) io.WriteCloser
+	// ListVersions returns a slice of versions for a module and any error
 	ListVersions(ctx context.Context, module string) ([]string, error)
-	// ObjectExists returns true if the module @ version exists in the bucket
-	ObjectExists(ctx context.Context, module, version string) bool
+	// Exists returns true if the module @ version exists
+	Exists(ctx context.Context, module, version string) bool
 }

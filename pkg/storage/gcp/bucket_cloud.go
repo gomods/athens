@@ -13,12 +13,13 @@ import (
 	"google.golang.org/api/iterator"
 )
 
+// gcpBucket implements the (./pkg/storage/gcp).Bucket interface
 type gcpBucket struct {
 	*storage.BucketHandle
 }
 
-func (b *gcpBucket) DeleteModule(ctx context.Context, module, version string) error {
-	if !b.ObjectExists(ctx, module, version) {
+func (b *gcpBucket) Delete(ctx context.Context, module, version string) error {
+	if exists := b.Exists(ctx, module, version); !exists {
 		return s.ErrVersionNotFound{Module: module, Version: version}
 	}
 	var errs error
@@ -34,12 +35,12 @@ func (b *gcpBucket) DeleteModule(ctx context.Context, module, version string) er
 	return errs
 }
 
-func (b *gcpBucket) GetReader(ctx context.Context, filename string) (io.ReadCloser, error) {
-	return b.Object(filename).NewReader(ctx)
+func (b *gcpBucket) Open(ctx context.Context, module, version, extension string) (io.ReadCloser, error) {
+	return b.Object(config.PackageVersionedName(module, version, extension)).NewReader(ctx)
 }
 
-func (b *gcpBucket) GetWriter(ctx context.Context, filename string) io.WriteCloser {
-	return b.Object(filename).NewWriter(ctx)
+func (b *gcpBucket) Write(ctx context.Context, module, version, extension string) io.WriteCloser {
+	return b.Object(config.PackageVersionedName(module, version, extension)).NewWriter(ctx)
 }
 
 func (b *gcpBucket) ListVersions(ctx context.Context, module string) ([]string, error) {
@@ -65,14 +66,14 @@ func (b *gcpBucket) ListVersions(ctx context.Context, module string) ([]string, 
 		}
 	}
 
-	if len(versions) == 0 {
+	if len(versions) < 1 {
 		return nil, s.ErrNotFound{Module: module}
 	}
 
 	return versions, nil
 }
 
-func (b *gcpBucket) ObjectExists(ctx context.Context, module, version string) bool {
+func (b *gcpBucket) Exists(ctx context.Context, module, version string) bool {
 	_, err := b.Object(config.PackageVersionedName(module, version, "mod")).Attrs(ctx)
 	return err == nil
 }

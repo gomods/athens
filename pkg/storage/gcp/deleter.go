@@ -2,8 +2,6 @@ package gcp
 
 import (
 	"context"
-
-	"github.com/gomods/athens/pkg/storage"
 )
 
 // Delete implements the (./pkg/storage).Deleter interface and
@@ -11,9 +9,5 @@ import (
 // if the version does not exist.
 func (s *Storage) Delete(module, version string) error {
 	ctx := context.Background()
-	if exists := s.bucket.ObjectExists(ctx, module, version); !exists {
-		return storage.ErrVersionNotFound{Module: module, Version: version}
-	}
-
-	return s.bucket.DeleteModule(ctx, module, version)
+	return s.bucket.Delete(ctx, module, version)
 }
