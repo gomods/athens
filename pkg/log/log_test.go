@@ -7,6 +7,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/require"
+
 	"github.com/sirupsen/logrus"
 )
 
@@ -84,9 +86,7 @@ func TestCloudLogger(t *testing.T) {
 				expected = fmt.Sprintf(expected, time.Now().Format(time.RFC3339))
 			}
 
-			if expected != out {
-				t.Fatalf("expected to log %q but got %q", expected, out)
-			}
+			require.Equal(t, expected, out, "expected the logged entry to match the testCase output")
 		})
 	}
 }
