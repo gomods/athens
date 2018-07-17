@@ -18,8 +18,7 @@ import (
 type ModVerDownloader func(ctx context.Context, baseURL, module, version string) (*storage.Version, error)
 
 // Download downloads the module/version from url. Returns a storage.Version
-// representing the downloaded module/version or a non-nil error if something
-// went wrong
+// representing the downloaded module/version or a non-nil error if something went wrong
 func Download(ctx context.Context, baseURL, module, version string) (*storage.Version, error) {
 	tctx, cancel := context.WithTimeout(ctx, env.Timeout())
 	defer cancel()
