@@ -21,52 +21,52 @@ type input struct {
 
 var testCases = []input{
 	{
-		"gcp_debug",
-		"GCP",
-		"debug",
-		logrus.Fields{},
-		func(e Entry) { e.Infof("info message") },
-		`{"message":"info message","severity":"info","timestamp":"%v"}` + "\n",
+		name:          "gcp_debug",
+		cloudProvider: "GCP",
+		level:         "debug",
+		fields:        logrus.Fields{},
+		logFunc:       func(e Entry) { e.Infof("info message") },
+		output:        `{"message":"info message","severity":"info","timestamp":"%v"}` + "\n",
 	},
 	{
-		"gcp_error",
-		"GCP",
-		"debug",
-		logrus.Fields{},
-		func(e Entry) { e.Errorf("err message") },
-		`{"message":"err message","severity":"error","timestamp":"%v"}` + "\n",
+		name:          "gcp_error",
+		cloudProvider: "GCP",
+		level:         "debug",
+		fields:        logrus.Fields{},
+		logFunc:       func(e Entry) { e.Errorf("err message") },
+		output:        `{"message":"err message","severity":"error","timestamp":"%v"}` + "\n",
 	},
 	{
-		"gcp_empty",
-		"GCP",
-		"error",
-		logrus.Fields{},
-		func(e Entry) { e.Infof("info message") },
-		``,
+		name:          "gcp_empty",
+		cloudProvider: "GCP",
+		level:         "error",
+		fields:        logrus.Fields{},
+		logFunc:       func(e Entry) { e.Infof("info message") },
+		output:        ``,
 	},
 	{
-		"gcp_fields",
-		"GCP",
-		"debug",
-		logrus.Fields{"field1": "value1", "field2": 2},
-		func(e Entry) { e.Debugf("debug message") },
-		`{"field1":"value1","field2":2,"message":"debug message","severity":"debug","timestamp":"%v"}` + "\n",
+		name:          "gcp_fields",
+		cloudProvider: "GCP",
+		level:         "debug",
+		fields:        logrus.Fields{"field1": "value1", "field2": 2},
+		logFunc:       func(e Entry) { e.Debugf("debug message") },
+		output:        `{"field1":"value1","field2":2,"message":"debug message","severity":"debug","timestamp":"%v"}` + "\n",
 	},
 	{
-		"gcp_logs",
-		"GCP",
-		"debug",
-		logrus.Fields{},
-		func(e Entry) { e.Warnf("warn message") },
-		`{"message":"warn message","severity":"warning","timestamp":"%v"}` + "\n",
+		name:          "gcp_logs",
+		cloudProvider: "GCP",
+		level:         "debug",
+		fields:        logrus.Fields{},
+		logFunc:       func(e Entry) { e.Warnf("warn message") },
+		output:        `{"message":"warn message","severity":"warning","timestamp":"%v"}` + "\n",
 	},
 	{
-		"default",
-		"default",
-		"debug",
-		logrus.Fields{"xyz": "abc", "abc": "xyz"},
-		func(e Entry) { e.Warnf("warn message") },
-		`{"abc":"xyz","level":"warning","msg":"warn message","time":"%v","xyz":"abc"}` + "\n",
+		name:          "default",
+		cloudProvider: "default",
+		level:         "debug",
+		fields:        logrus.Fields{"xyz": "abc", "abc": "xyz"},
+		logFunc:       func(e Entry) { e.Warnf("warn message") },
+		output:        `{"abc":"xyz","level":"warning","msg":"warn message","time":"%v","xyz":"abc"}` + "\n",
 	},
 }
 
@@ -81,7 +81,7 @@ func TestCloudLogger(t *testing.T) {
 			out := buf.String()
 			expected := tc.output
 			if strings.Contains(expected, "%v") {
-				expected = fmt.Sprintf(tc.output, time.Now().Format(time.RFC3339))
+				expected = fmt.Sprintf(expected, time.Now().Format(time.RFC3339))
 			}
 
 			if expected != out {
