@@ -22,7 +22,7 @@ import (
 //		- Delete operation adds tombstone to module metadata k/v store
 //
 // Both could be fixed by putting each 'for' loop into a (global) critical section
-func mergeDB(ctx context.Context, originURL string, diff dbDiff, eLog eventlog.Eventlog, storage storage.Backend, downloader cdn.ModuleDownloader) error {
+func mergeDB(ctx context.Context, originURL string, diff dbDiff, eLog eventlog.Eventlog, storage storage.Backend, downloader cdn.ModVerDownloader) error {
 	var errors error
 	for _, added := range diff.Added {
 		if err := add(ctx, added, originURL, eLog, storage, downloader); err != nil {
@@ -42,7 +42,7 @@ func mergeDB(ctx context.Context, originURL string, diff dbDiff, eLog eventlog.E
 	return errors
 }
 
-func add(ctx context.Context, event eventlog.Event, originURL string, eLog eventlog.Eventlog, storage storage.Backend, downloader cdn.ModuleDownloader) error {
+func add(ctx context.Context, event eventlog.Event, originURL string, eLog eventlog.Eventlog, storage storage.Backend, downloader cdn.ModVerDownloader) error {
 	if _, err := eLog.ReadSingle(event.Module, event.Version); err != nil {
 		// the module/version already exists, is deprecated, or is
 		// tombstoned, so nothing to do
