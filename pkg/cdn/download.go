@@ -2,11 +2,12 @@ package cdn
 
 import (
 	"context"
-	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"path"
+	"sync"
 
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/config/env"
@@ -22,51 +23,89 @@ type ModVerDownloader func(ctx context.Context, baseURL, module, version string)
 func Download(ctx context.Context, baseURL, module, version string) (*storage.Version, error) {
 	tctx, cancel := context.WithTimeout(ctx, env.Timeout())
 	defer cancel()
-	getReq := func(ext string) (*http.Request, error) {
-		return getRequest(tctx, baseURL, module, version, ext)
-	}
 
-	infoReq, err := getReq(".info")
-	if err != nil {
-		return nil, err
-	}
-	modReq, err := getReq(".mod")
-	if err != nil {
-		return nil, err
-	}
-	zipReq, err := getReq(".zip")
-	if err != nil {
-		return nil, err
-	}
+	var info []byte
+	var infoErr error
 
-	info, err := getResBytes(infoReq)
-	if err != nil {
-		return nil, err
-	}
-	mod, err := getResBytes(modReq)
-	if err != nil {
-		return nil, err
-	}
-	zipRes, err := http.DefaultClient.Do(zipReq)
-	if err != nil {
-		return nil, err
-	}
+	var mod []byte
+	var modErr error
 
+	var zip io.ReadCloser
+	var zipErr error
+
+	var wg sync.WaitGroup
+	wg.Add(3)
+
+	go func() {
+		defer wg.Done()
+		infoReq, err := getRequest(tctx, baseURL, module, version, ".info")
+		if err != nil {
+			info, infoErr = nil, err
+			return
+		}
+		infoStream, err := getResBody(infoReq)
+		if err != nil {
+			info, infoErr = nil, err
+			return
+		}
+		info, infoErr = getBytes(infoStream)
+	}()
+
+	go func() {
+		defer wg.Done()
+		modReq, err := getRequest(tctx, baseURL, module, version, ".mod")
+		if err != nil {
+			mod, modErr = nil, err
+			return
+		}
+		modStream, err := getResBody(modReq)
+		if err != nil {
+			mod, modErr = nil, err
+			return
+		}
+		mod, modErr = getBytes(modStream)
+	}()
+
+	go func() {
+		defer wg.Done()
+		zipReq, err := getRequest(tctx, baseURL, module, version, ".zip")
+		if err != nil {
+			zip, zipErr = nil, err
+			return
+		}
+		zip, zipErr = getResBody(zipReq)
+	}()
+	wg.Wait()
+
+	if infoErr != nil {
+		return nil, infoErr
+	}
+	if modErr != nil {
+		return nil, modErr
+	}
+	if zipErr != nil {
+		return nil, zipErr
+	}
 	ver := storage.Version{
 		Info: info,
 		Mod:  mod,
-		Zip:  zipRes.Body,
+		Zip:  zip,
 	}
 	return &ver, nil
 }
 
-func getResBytes(req *http.Request) ([]byte, error) {
-	res, err := http.DefaultClient.Do(req)
+func getBytes(rb io.ReadCloser) ([]byte, error) {
+	defer rb.Close()
+	return ioutil.ReadAll(rb)
+}
+
+func getResBody(req *http.Request) (io.ReadCloser, error) {
+	client := http.Client{Timeout: env.Timeout()}
+	res, err := client.Do(req)
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
-	return ioutil.ReadAll(res.Body)
+	return res.Body, nil
 }
 
 func getRequest(ctx context.Context, baseURL, module, version, ext string) (*http.Request, error) {
@@ -89,5 +128,5 @@ func join(baseURL string, module, version, ext string) (string, error) {
 	}
 	packageVersionedName := config.PackageVersionedName(module, version, ext)
 	u.Path = path.Join(u.Path, packageVersionedName)
-	return fmt.Sprint(u), nil
+	return u.String(), nil
 }

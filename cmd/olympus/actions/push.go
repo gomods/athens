@@ -5,10 +5,9 @@ import (
 	"encoding/json"
 	"errors"
 
-	"github.com/gomods/athens/pkg/cdn"
-
 	"github.com/gobuffalo/buffalo"
 	"github.com/gobuffalo/buffalo/worker"
+	"github.com/gomods/athens/pkg/cdn"
 	"github.com/gomods/athens/pkg/eventlog"
 	"github.com/gomods/athens/pkg/payloads"
 	"github.com/gomods/athens/pkg/storage"
