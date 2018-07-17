@@ -22,10 +22,10 @@ import (
 //		- Delete operation adds tombstone to module metadata k/v store
 //
 // Both could be fixed by putting each 'for' loop into a (global) critical section
-func mergeDB(ctx context.Context, originURL string, diff dbDiff, eLog eventlog.Eventlog, storage storage.Backend) error {
+func mergeDB(ctx context.Context, originURL string, diff dbDiff, eLog eventlog.Eventlog, storage storage.Backend, downloader cdn.ModuleDownloader) error {
 	var errors error
 	for _, added := range diff.Added {
-		if err := add(ctx, added, originURL, eLog, storage); err != nil {
+		if err := add(ctx, added, originURL, eLog, storage, downloader); err != nil {
 			errors = multierror.Append(errors, err)
 		}
 	}
@@ -42,7 +42,7 @@ func mergeDB(ctx context.Context, originURL string, diff dbDiff, eLog eventlog.E
 	return errors
 }
 
-func add(ctx context.Context, event eventlog.Event, originURL string, eLog eventlog.Eventlog, storage storage.Backend) error {
+func add(ctx context.Context, event eventlog.Event, originURL string, eLog eventlog.Eventlog, storage storage.Backend, downloader cdn.ModuleDownloader) error {
 	if _, err := eLog.ReadSingle(event.Module, event.Version); err != nil {
 		// the module/version already exists, is deprecated, or is
 		// tombstoned, so nothing to do
@@ -50,7 +50,7 @@ func add(ctx context.Context, event eventlog.Event, originURL string, eLog event
 	}
 
 	// download code from the origin
-	data, err := cdn.Download(originURL, event.Module, event.Version)
+	data, err := downloader(ctx, originURL, event.Module, event.Version)
 	if err != nil {
 		log.Printf("error downloading new module %s/%s from %s (%s)", event.Module, event.Version, originURL, err)
 		return err
