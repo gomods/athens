@@ -5,8 +5,10 @@ import (
 	"log"
 	"time"
 
-	"github.com/gomods/athens/pkg/cdn"
+	"github.com/gomods/athens/pkg/config/env"
+
 	"github.com/gomods/athens/pkg/eventlog"
+	"github.com/gomods/athens/pkg/module"
 	"github.com/gomods/athens/pkg/storage"
 	multierror "github.com/hashicorp/go-multierror"
 )
@@ -22,7 +24,7 @@ import (
 //		- Delete operation adds tombstone to module metadata k/v store
 //
 // Both could be fixed by putting each 'for' loop into a (global) critical section
-func mergeDB(ctx context.Context, originURL string, diff dbDiff, eLog eventlog.Eventlog, storage storage.Backend, downloader cdn.ModVerDownloader) error {
+func mergeDB(ctx context.Context, originURL string, diff dbDiff, eLog eventlog.Eventlog, storage storage.Backend, downloader module.Downloader) error {
 	var errors error
 	for _, added := range diff.Added {
 		if err := add(ctx, added, originURL, eLog, storage, downloader); err != nil {
@@ -42,7 +44,7 @@ func mergeDB(ctx context.Context, originURL string, diff dbDiff, eLog eventlog.E
 	return errors
 }
 
-func add(ctx context.Context, event eventlog.Event, originURL string, eLog eventlog.Eventlog, storage storage.Backend, downloader cdn.ModVerDownloader) error {
+func add(ctx context.Context, event eventlog.Event, originURL string, eLog eventlog.Eventlog, storage storage.Backend, downloader module.Downloader) error {
 	if _, err := eLog.ReadSingle(event.Module, event.Version); err != nil {
 		// the module/version already exists, is deprecated, or is
 		// tombstoned, so nothing to do
@@ -50,7 +52,7 @@ func add(ctx context.Context, event eventlog.Event, originURL string, eLog event
 	}
 
 	// download code from the origin
-	data, err := downloader(ctx, originURL, event.Module, event.Version)
+	data, err := downloader(ctx, env.Timeout(), originURL, event.Module, event.Version)
 	if err != nil {
 		log.Printf("error downloading new module %s/%s from %s (%s)", event.Module, event.Version, originURL, err)
 		return err

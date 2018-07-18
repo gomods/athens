@@ -7,8 +7,8 @@ import (
 
 	"github.com/gobuffalo/buffalo"
 	"github.com/gobuffalo/buffalo/worker"
-	"github.com/gomods/athens/pkg/cdn"
 	"github.com/gomods/athens/pkg/eventlog"
+	"github.com/gomods/athens/pkg/module"
 	"github.com/gomods/athens/pkg/payloads"
 	"github.com/gomods/athens/pkg/storage"
 )
@@ -47,7 +47,7 @@ func GetProcessPushNotificationJob(storage storage.Backend, eLog eventlog.Eventl
 		if err != nil {
 			return err
 		}
-		return mergeDB(ctx, pn.OriginURL, *diff, eLog, storage, cdn.Download)
+		return mergeDB(ctx, pn.OriginURL, *diff, eLog, storage, module.Download)
 	}
 }
 

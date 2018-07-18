@@ -1,4 +1,4 @@
-package cdn
+package module
 
 import (
 	"context"
@@ -8,19 +8,19 @@ import (
 	"net/url"
 	"path"
 	"sync"
+	"time"
 
 	"github.com/gomods/athens/pkg/config"
-	"github.com/gomods/athens/pkg/config/env"
 	"github.com/gomods/athens/pkg/storage"
 )
 
-// ModVerDownloader downloads a module version from a URL
-type ModVerDownloader func(ctx context.Context, baseURL, module, version string) (*storage.Version, error)
+// Downloader downloads a module version from a URL exposing Download Protocol endpoints
+type Downloader func(ctx context.Context, timeout time.Duration, baseURL, module, version string) (*storage.Version, error)
 
 // Download downloads the module/version from url. Returns a storage.Version
 // representing the downloaded module/version or a non-nil error if something went wrong
-func Download(ctx context.Context, baseURL, module, version string) (*storage.Version, error) {
-	tctx, cancel := context.WithTimeout(ctx, env.Timeout())
+func Download(ctx context.Context, timeout time.Duration, baseURL, module, version string) (*storage.Version, error) {
+	tctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
 	var info []byte
@@ -42,7 +42,7 @@ func Download(ctx context.Context, baseURL, module, version string) (*storage.Ve
 			info, infoErr = nil, err
 			return
 		}
-		infoStream, err := getResBody(infoReq)
+		infoStream, err := getResBody(infoReq, timeout)
 		if err != nil {
 			info, infoErr = nil, err
 			return
@@ -57,7 +57,7 @@ func Download(ctx context.Context, baseURL, module, version string) (*storage.Ve
 			mod, modErr = nil, err
 			return
 		}
-		modStream, err := getResBody(modReq)
+		modStream, err := getResBody(modReq, timeout)
 		if err != nil {
 			mod, modErr = nil, err
 			return
@@ -72,7 +72,7 @@ func Download(ctx context.Context, baseURL, module, version string) (*storage.Ve
 			zip, zipErr = nil, err
 			return
 		}
-		zip, zipErr = getResBody(zipReq)
+		zip, zipErr = getResBody(zipReq, timeout)
 	}()
 	wg.Wait()
 
@@ -98,8 +98,8 @@ func getBytes(rb io.ReadCloser) ([]byte, error) {
 	return ioutil.ReadAll(rb)
 }
 
-func getResBody(req *http.Request) (io.ReadCloser, error) {
-	client := http.Client{Timeout: env.Timeout()}
+func getResBody(req *http.Request, timeout time.Duration) (io.ReadCloser, error) {
+	client := http.Client{Timeout: timeout}
 	res, err := client.Do(req)
 	if err != nil {
 		return nil, err
