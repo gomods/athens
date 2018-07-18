@@ -50,8 +50,6 @@ func (g *genericFetcher) Fetch(mod, ver string) (Ref, error) {
 	escapedURI := strings.Replace(g.repoURI, "/", "-", -1)
 	repoDirName := fmt.Sprintf(tmpRepoDir, escapedURI, g.version)
 
-	diskRef := newDiskRef(repoDirName)
-
 	gopath, repoRoot, err := setupTmp(g.fs, repoDirName)
 	if err != nil {
 		return nil, err
@@ -61,8 +59,9 @@ func (g *genericFetcher) Fetch(mod, ver string) (Ref, error) {
 	prepareStructure(g.fs, repoRoot)
 
 	dirName, err := getSources(g.fs, gopath, repoRoot, g.repoURI, g.version)
+	diskRef := newDiskRef(g.fs, dirName)
 
-	return dirName, err
+	return diskRef, err
 }
 
 // Clear removes all downloaded data
