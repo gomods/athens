@@ -36,8 +36,8 @@ func New(accountName, accountKey, containerName string) (*Storage, error) {
 	return &Storage{cl: cl, baseURI: u}, nil
 }
 
-// NewWithClient creates a new azure CDN saver
-func NewWithClient(accountName, cl client) (*Storage, error) {
+// newWithClient creates a new azure CDN saver
+func newWithClient(accountName, cl client) (*Storage, error) {
 	u, err := url.Parse(fmt.Sprintf("https://%s.blob.core.windows.net", accountName))
 	if err != nil {
 		return nil, err
