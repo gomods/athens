@@ -12,6 +12,7 @@ import (
 
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/storage"
+	multierror "github.com/hashicorp/go-multierror"
 )
 
 // Downloader downloads a module version from a URL exposing Download Protocol endpoints
@@ -76,15 +77,20 @@ func Download(ctx context.Context, timeout time.Duration, baseURL, module, versi
 	}()
 	wg.Wait()
 
+	var errors error
 	if infoErr != nil {
-		return nil, infoErr
+		errors = multierror.Append(errors, infoErr)
 	}
 	if modErr != nil {
-		return nil, modErr
+		errors = multierror.Append(errors, modErr)
 	}
 	if zipErr != nil {
-		return nil, zipErr
+		errors = multierror.Append(errors, zipErr)
 	}
+	if errors != nil {
+		return nil, errors
+	}
+
 	ver := storage.Version{
 		Info: info,
 		Mod:  mod,
