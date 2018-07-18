@@ -11,7 +11,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager/s3manageriface"
 	"github.com/gomods/athens/pkg/config/env"
-	m "github.com/gomods/athens/pkg/storage/module"
+	modupl "github.com/gomods/athens/pkg/storage/module"
 )
 
 // Storage implements (github.com/gomods/athens/pkg/storage).Saver and
@@ -75,7 +75,7 @@ func (s Storage) BaseURL() *url.URL {
 
 // Save implements the (github.com/gomods/athens/pkg/storage).Saver interface.
 func (s *Storage) Save(ctx context.Context, module, version string, mod []byte, zip io.Reader, info []byte) error {
-	err := m.Upload(ctx, module, version, bytes.NewReader(info), bytes.NewReader(mod), zip, s.upload)
+	err := modupl.Upload(ctx, module, version, bytes.NewReader(info), bytes.NewReader(mod), zip, s.upload)
 	return err
 }
 
