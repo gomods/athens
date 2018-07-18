@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/gomods/athens/pkg/config/env"
-
 	"github.com/gomods/athens/pkg/eventlog"
 	"github.com/gomods/athens/pkg/module"
 	"github.com/gomods/athens/pkg/storage"
