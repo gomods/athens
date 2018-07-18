@@ -21,13 +21,17 @@ olympus-docker:
 
 .PHONY: dev
 dev:
-	docker-compose -p athensdev up -d mysql
-	docker-compose -p athensdev up -d postgres
+	# docker-compose -p athensdev up -d mysql
+	# docker-compose -p athensdev up -d postgres
 	docker-compose -p athensdev up -d mongo
 	docker-compose -p athensdev up -d redis
-	docker-compose -p athensdev up -d minio
-	echo "sleeping for a bit to wait for the DB to come up"
-	sleep 5
+	# docker-compose -p athensdev up -d minio
+	# echo "sleeping for a bit to wait for the DB to come up"
+	# sleep 5
+
+down:
+	docker-compose -p athensdev down
+	docker volume prune
 
 .PHONY: dev-teardown
 dev-teardown:

@@ -17,7 +17,7 @@ func addProxyRoutes(
 	app.GET("/", proxyHomeHandler)
 
 	// Download Protocol
-	app.GET(download.PathList, download.ListHandler(storage, proxy))
+	app.GET(download.PathList, download.ListHandler(storage, proxy, true, lggr))
 	app.GET(download.PathVersionInfo, cacheMissHandler(download.VersionInfoHandler(storage, proxy), app.Worker, mf, lggr))
 	app.GET(download.PathVersionModule, cacheMissHandler(download.VersionModuleHandler(storage, proxy), app.Worker, mf, lggr))
 	app.GET(download.PathVersionZip, cacheMissHandler(download.VersionZipHandler(storage), app.Worker, mf, lggr))
