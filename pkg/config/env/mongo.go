@@ -2,8 +2,15 @@ package env
 
 import (
 	"fmt"
+	"strconv"
+	"time"
 
 	"github.com/gobuffalo/envy"
+	"github.com/gomods/athens/pkg/storage/mongo"
+)
+
+const (
+	defaultMongoTimeoutSec = "10"
 )
 
 // MongoURI returns Athens Mongo Storage URI defined by ATHENS_MONGO_STORAGE_URL
@@ -66,4 +73,53 @@ func MongoConnectionTimeoutWithDefault(value string) string {
 // Defines whether or not SSL should be used.
 func MongoSSLWithDefault(value string) string {
 	return envy.Get("MONGO_SSL", value)
+}
+
+// MongoConnDetails fetches appropriate environment variables from other
+// Mongo* functions and returns a mongo.ConnDetails according to their
+// values. Otherwise, returns nil and a non-nil error
+func MongoConnDetails() (*mongo.ConnDetails, error) {
+	host, err := MongoHost()
+	if err != nil {
+		return nil, err
+	}
+	portStr, err := MongoPort()
+	if err != nil {
+		return nil, err
+	}
+	port, err := strconv.Atoi(portStr)
+	if err != nil {
+		return nil, err
+	}
+
+	user, err := MongoUser()
+	if err != nil {
+		return nil, err
+	}
+
+	password, err := MongoPassword()
+	if err != nil {
+		return nil, err
+	}
+
+	timeoutSecStr := MongoConnectionTimeoutWithDefault(defaultMongoTimeoutSec)
+	timeoutSec, err := strconv.Atoi(timeoutSecStr)
+	if err != nil {
+		return nil, err
+	}
+
+	sslStr := MongoSSLWithDefault("true")
+	ssl, err := strconv.ParseBool(sslStr)
+	if err != nil {
+		return nil, err
+	}
+
+	return &mongo.ConnDetails{
+		Host:     host,
+		Port:     port,
+		User:     user,
+		Password: password,
+		Timeout:  time.Duration(timeoutSec) * time.Second,
+		SSL:      ssl,
+	}, nil
 }

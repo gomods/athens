@@ -4,6 +4,7 @@ import (
 	"errors"
 	"strings"
 
+	"github.com/gomods/athens/pkg/storage/mongoutil"
 	"github.com/gomods/athens/pkg/user"
 
 	"github.com/globalsign/mgo"
@@ -12,30 +13,32 @@ import (
 
 // UserStore represents a UserStore implementation backed by mongo.
 type UserStore struct {
-	s   *mgo.Session
-	d   string // database
-	c   string // collection
-	url string
+	s           *mgo.Session
+	d           string // database
+	c           string // collection
+	connDetails *mongoutil.ConnDetails
 }
 
 // NewUserStore returns an unconnected UserStore
 // that satisfies the UserStore interface.  You must call
 // Connect() on the returned store before using it.
-func NewUserStore(url string) *UserStore {
-	return &UserStore{url: url}
+//
+// TODO: take in database and coll names as params
+func NewUserStore(connDetails *mongoutil.ConnDetails) *UserStore {
+	return &UserStore{
+		connDetails: connDetails,
+		d:           "athens",
+		c:           "users",
+	}
 }
 
 // Connect establishes a session to the mongo cluster.
 func (m *UserStore) Connect() error {
-	s, err := mgo.Dial(m.url)
+	s, err := mongoutil.GetSession(m.connDetails, m.d)
 	if err != nil {
 		panic(err)
 	}
 	m.s = s
-
-	// TODO(BJK) database and collection as env vars, or params to New()?
-	m.d = "athens"
-	m.c = "users"
 
 	index := mgo.Index{
 		Key:        []string{"provider", "userid"},

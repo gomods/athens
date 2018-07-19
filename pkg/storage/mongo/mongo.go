@@ -4,32 +4,35 @@ import (
 	"github.com/globalsign/mgo"
 )
 
+const (
+	athensDBName    = "athens"
+	modulesCollName = "modules"
+)
+
 // ModuleStore represents a mongo backed storage backend.
 type ModuleStore struct {
-	s   *mgo.Session
-	d   string // database
-	c   string // collection
-	url string
+	s           *mgo.Session
+	d           string // database
+	c           string // collection
+	connDetails *ConnDetails
 }
 
 // NewStorage returns an unconnected Mongo backed storage
 // that satisfies the Backend interface.  You must call
 // Connect() on the returned store before using it.
-func NewStorage(url string) *ModuleStore {
-	return &ModuleStore{url: url}
+//
+// TODO: take the database and collection names as parameters
+func NewStorage(connDetails *ConnDetails) *ModuleStore {
+	return &ModuleStore{connDetails: connDetails}
 }
 
-// Connect conntect the the newly created mongo backend.
+// Connect connects the the newly created mongo backend.
 func (m *ModuleStore) Connect() error {
-	s, err := mgo.Dial(m.url)
+	s, err := GetSession(m.connDetails, athensDBName)
 	if err != nil {
 		return err
 	}
 	m.s = s
-
-	// TODO: database and collection as env vars, or params to New()? together with user/mongo
-	m.d = "athens"
-	m.c = "modules"
 
 	index := mgo.Index{
 		Key:        []string{"base_url", "module", "version"},
@@ -38,6 +41,6 @@ func (m *ModuleStore) Connect() error {
 		Background: true,
 		Sparse:     true,
 	}
-	c := m.s.DB(m.d).C(m.c)
+	c := m.s.DB(athensDBName).C(modulesCollName)
 	return c.EnsureIndex(index)
 }

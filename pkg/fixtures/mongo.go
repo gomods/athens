@@ -2,6 +2,7 @@ package fixtures
 
 import (
 	"github.com/globalsign/mgo"
+	"github.com/gomods/athens/pkg/storage/mongoutil"
 	"github.com/stretchr/testify/suite"
 	"github.com/technosophos/moniker"
 )
@@ -24,9 +25,9 @@ const DefaultMongoURL = "127.0.0.1:27017"
 //	}
 type Mongo struct {
 	suite.Suite
-	url    string
-	DBName string
-	DB     *mgo.Database
+	ConnDetails *mongoutil.ConnDetails
+	DBName      string
+	DB          *mgo.Database
 }
 
 // SetupTest creates a new mongo connection and DB, and attaches it to a
@@ -34,7 +35,7 @@ type Mongo struct {
 //
 // This implements the SetupTestSuite interface
 func (m *Mongo) SetupTest() {
-	sess, err := mgo.Dial(m.url)
+	sess, err := mongoutil.GetSession(m.ConnDetails, m.DBName)
 	m.Require().NoError(err)
 	m.DB = sess.DB(m.DBName)
 }
@@ -47,9 +48,9 @@ func (m *Mongo) TearDownTest() {
 }
 
 // NewMongo creates a new Mongo test fixture
-func NewMongo(url string) *Mongo {
+func NewMongo(connDetails *mongoutil.ConnDetails) *Mongo {
 	return &Mongo{
-		url:    url,
-		DBName: names.NameSep("-") + "-athens-testing",
+		ConnDetails: connDetails,
+		DBName:      names.NameSep("-") + "-athens-testing",
 	}
 }

@@ -1,6 +1,7 @@
 .PHONY: build
 build:
 	cd cmd/proxy && buffalo build
+	cd cmd/olympus && buffalo build
 
 .PHONY: run
 run: build
@@ -12,7 +13,11 @@ docs:
 
 .PHONY: test
 test:
+	@echo "Testing the Proxy"
+	@echo "---"
 	cd cmd/proxy && buffalo test
+	@echo "Testing the registry"
+	@echo "---"
 	cd cmd/olympus && buffalo test
 
 .PHONY: olympus-docker
