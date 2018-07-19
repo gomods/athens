@@ -7,7 +7,7 @@ import (
 	"log"
 
 	stg "github.com/gomods/athens/pkg/storage"
-	modupl "github.com/gomods/athens/pkg/storage/module"
+	moduploader "github.com/gomods/athens/pkg/storage/module"
 )
 
 // Save uploads the module's .mod, .zip and .info files for a given version
@@ -22,7 +22,7 @@ func (s *Storage) Save(ctx context.Context, module, version string, mod []byte, 
 		return stg.ErrVersionAlreadyExists{Module: module, Version: version}
 	}
 
-	err := modupl.Upload(ctx, module, version, bytes.NewReader(info), bytes.NewReader(mod), zip, s.upload)
+	err := moduploader.Upload(ctx, module, version, bytes.NewReader(info), bytes.NewReader(mod), zip, s.upload)
 	// TODO: take out lease on the /list file and add the version to it
 	//
 	// Do that only after module source+metadata is uploaded
