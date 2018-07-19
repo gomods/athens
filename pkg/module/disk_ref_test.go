@@ -15,7 +15,7 @@ func (m *ModuleSuite) TestDiskRefReadAndClear() {
 	r := m.Require()
 
 	// create a new disk ref using the filesystem
-	diskRef := newDiskRef(m.fs, root)
+	diskRef := newDiskRef(m.fs, root, version)
 
 	// ensure that reading fails, because there are no files
 	ver, err := diskRef.Read()

@@ -19,8 +19,13 @@ type diskRef struct {
 	closer  func()
 }
 
-func newDiskRef(fs afero.Fs, root string) *diskRef {
-	return &diskRef{fs: fs, root: root, closer: func() {}}
+func newDiskRef(fs afero.Fs, root, version string) *diskRef {
+	return &diskRef{
+		fs:      fs,
+		root:    root,
+		version: version,
+		closer:  func() {},
+	}
 }
 
 // Clear is the Ref interface implementation. It deletes all module data from disk
