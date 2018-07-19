@@ -42,7 +42,10 @@ func ListHandler(
 		versions, err := lister.List(mod)
 		if storage.IsNotFoundError(err) || len(versions) == 0 {
 			if isProxy {
-				return c.Redirect(http.StatusMovedPermanently, env.OlympusGlobalEndpointWithDefault(""))
+				// Go uses the http.DefaultClient which implicitly handles up to 10 reqdirects.
+				// therefore, it's safe to redirect to whatever server/endpoint we like as long
+				// as that server returns an answer that Go expects.
+				return c.Redirect(http.StatusMovedPermanently, env.GetOlympusEndpoint())
 			} else if !isGithubPath(mod) {
 				c.Response().WriteHeader(http.StatusNotFound)
 				return nil
