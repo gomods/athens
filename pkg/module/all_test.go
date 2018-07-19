@@ -12,7 +12,7 @@ type ModuleSuite struct {
 	fs afero.Fs
 }
 
-func (m *ModuleSuite) BeforeTest() {
+func (m *ModuleSuite) SetupTest() {
 	m.fs = afero.NewMemMapFs()
 }
 
