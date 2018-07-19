@@ -19,10 +19,17 @@ func TestDelete(t *testing.T) {
 	suite.Run(t, new(DeleteTests))
 }
 
-func (m *DeleteTests) TestDeleteTimeout() {
-	r := m.Require()
+func (d *DeleteTests) SetupTest() {
 	envy.Set("ATHENS_TIMEOUT", "1")
-	defer envy.Set("ATHENS_TIMEOUT", "300")
+}
+
+func (d *DeleteTests) TearDownTest() {
+	envy.Set("ATHENS_TIMEOUT", "300")
+}
+
+func (d *DeleteTests) TestDeleteTimeout() {
+	r := d.Require()
+
 	err := Delete(context.Background(), "mx", "1.1.1", delWithTimeout)
 
 	me := err.(*multierror.Error)
@@ -32,10 +39,9 @@ func (m *DeleteTests) TestDeleteTimeout() {
 	r.Contains(me.Error(), "deleting mx.1.1.1.mod failed: context deadline exceeded")
 }
 
-func (m *DeleteTests) TestDeleteError() {
-	r := m.Require()
-	envy.Set("ATHENS_TIMEOUT", "1")
-	defer envy.Set("ATHENS_TIMEOUT", "300")
+func (d *DeleteTests) TestDeleteError() {
+	r := d.Require()
+
 	err := Delete(context.Background(), "mx", "1.1.1", delWithErr)
 
 	me := err.(*multierror.Error)

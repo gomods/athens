@@ -76,6 +76,9 @@ func (s Storage) BaseURL() *url.URL {
 // Save implements the (github.com/gomods/athens/pkg/storage).Saver interface.
 func (s *Storage) Save(ctx context.Context, module, version string, mod []byte, zip io.Reader, info []byte) error {
 	err := modupl.Upload(ctx, module, version, bytes.NewReader(info), bytes.NewReader(mod), zip, s.upload)
+	// TODO: take out lease on the /list file and add the version to it
+	//
+	// Do that only after module source+metadata is uploaded
 	return err
 }
 

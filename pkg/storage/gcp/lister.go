@@ -11,24 +11,27 @@ import (
 // It returns a list of versions, if any, for a given module
 func (s *Storage) List(module string) ([]string, error) {
 	ctx := context.Background()
-	unfiltered, err := s.bucket.List(ctx, module)
+	paths, err := s.bucket.List(ctx, module)
 	if err != nil {
 		return nil, err
 	}
-	versions := make([]string, 0, 10)
-	for _, n := range unfiltered {
-		// kinda hacky looking at this time
-		if strings.HasSuffix(n, ".info") {
-			segments := strings.Split(n, "/")
+	versions := extractVersions(paths)
+	if len(versions) < 1 {
+		return nil, storage.ErrNotFound{Module: module}
+	}
+	return versions, nil
+}
+
+func extractVersions(paths []string) []string {
+	versions := []string{}
+	for _, p := range paths {
+		if strings.HasSuffix(p, ".info") {
+			segments := strings.Split(p, "/")
 			// version should be last segment w/ .info suffix
 			last := segments[len(segments)-1]
 			version := strings.TrimSuffix(last, ".info")
 			versions = append(versions, version)
 		}
 	}
-
-	if len(versions) < 1 {
-		return nil, storage.ErrNotFound{Module: module}
-	}
-	return versions, nil
+	return versions
 }

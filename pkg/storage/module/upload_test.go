@@ -21,10 +21,16 @@ func TestUpload(t *testing.T) {
 	suite.Run(t, new(UploadTests))
 }
 
-func (m *UploadTests) TestUploadTimeout() {
-	r := m.Require()
+func (u *UploadTests) SetupTest() {
 	envy.Set("ATHENS_TIMEOUT", "1")
-	defer envy.Set("ATHENS_TIMEOUT", "300")
+}
+
+func (u *UploadTests) TearDownTest() {
+	envy.Set("ATHENS_TIMEOUT", "300")
+}
+
+func (u *UploadTests) TestUploadTimeout() {
+	r := u.Require()
 	rd := bytes.NewReader([]byte("123"))
 	err := Upload(context.Background(), "mx", "1.1.1", rd, rd, rd, uplWithTimeout)
 
@@ -35,10 +41,8 @@ func (m *UploadTests) TestUploadTimeout() {
 	r.Contains(me.Error(), "uploading mx.1.1.1.mod failed: context deadline exceeded")
 }
 
-func (m *UploadTests) TestUploadError() {
-	r := m.Require()
-	envy.Set("ATHENS_TIMEOUT", "1")
-	defer envy.Set("ATHENS_TIMEOUT", "300")
+func (u *UploadTests) TestUploadError() {
+	r := u.Require()
 	rd := bytes.NewReader([]byte("123"))
 	err := Upload(context.Background(), "mx", "1.1.1", rd, rd, rd, uplWithErr)
 
