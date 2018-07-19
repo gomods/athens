@@ -59,7 +59,7 @@ func (g *genericFetcher) Fetch(mod, ver string) (Ref, error) {
 	prepareStructure(g.fs, repoRoot)
 
 	dirName, err := getSources(g.fs, gopath, repoRoot, g.repoURI, g.version)
-	diskRef := newDiskRef(g.fs, dirName)
+	diskRef := newDiskRef(g.fs, dirName, ver)
 
 	return diskRef, err
 }
