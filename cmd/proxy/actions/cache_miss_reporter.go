@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/gobuffalo/buffalo/worker"
+	"github.com/gomods/athens/pkg/config/env"
 	"github.com/gomods/athens/pkg/module"
 	"github.com/gomods/athens/pkg/payloads"
 )
@@ -59,7 +60,7 @@ func reportCacheMiss(module, version string) error {
 }
 
 func getCacheMissPath() (string, error) {
-	endpoint := GetOlympusEndpoint()
+	endpoint := env.GetOlympusEndpoint()
 	cacheMissPath := "cachemiss"
 
 	u, err := url.Parse(endpoint)
