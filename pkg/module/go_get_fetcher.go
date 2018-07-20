@@ -149,11 +149,11 @@ func checkFiles(fs afero.Fs, path, version string) error {
 	}
 
 	if _, err := fs.Stat(filepath.Join(path, version+".zip")); err != nil {
-		return fmt.Errorf("%s.zip not found")
+		return fmt.Errorf("%s.zip not found", version)
 	}
 
 	if _, err := fs.Stat(filepath.Join(path, version+".info")); err != nil {
-		return fmt.Errorf("%s.info not found")
+		return fmt.Errorf("%s.info not found", version)
 	}
 
 	return nil
