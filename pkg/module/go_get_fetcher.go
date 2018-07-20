@@ -18,21 +18,13 @@ var (
 )
 
 type goGetFetcher struct {
-	fs      afero.Fs
-	repoURI string
-	version string
+	fs afero.Fs
 }
 
 // NewGoGetFetcher creates fetcher which uses go get tool to fetch modules
-func NewGoGetFetcher(fs afero.Fs, repoURI, version string) (Fetcher, error) {
-	if repoURI == "" {
-		return nil, errors.New("invalid repository identifier")
-	}
-
+func NewGoGetFetcher(fs afero.Fs) (Fetcher, error) {
 	return &goGetFetcher{
-		fs:      fs,
-		repoURI: repoURI,
-		version: version,
+		fs: fs,
 	}, nil
 }
 
@@ -42,6 +34,12 @@ func NewGoGetFetcher(fs afero.Fs, repoURI, version string) (Fetcher, error) {
 // TODO: If an error is returned, the Fetch method will likely fail, but you should always call
 // Close on the returned
 func (g *goGetFetcher) Fetch(mod, ver string) (Ref, error) {
+	if mod == "" {
+		return nil, errors.New("invalid repository identifier")
+	}
+	if ver == "" {
+		return nil, errors.New("invalid version string")
+	}
 	// setup the GOPATH
 	goPathRoot, err := afero.TempDir(g.fs, "", "athens")
 	if err != nil {
@@ -49,7 +47,7 @@ func (g *goGetFetcher) Fetch(mod, ver string) (Ref, error) {
 		return nil, err
 	}
 	sourcePath := filepath.Join(goPathRoot, "src", goPathRoot)
-	modPath := filepath.Join(sourcePath, getRepoDirName(g.repoURI, g.version))
+	modPath := filepath.Join(sourcePath, getRepoDirName(mod, ver))
 	if err := g.fs.MkdirAll(modPath, os.ModeDir|os.ModePerm); err != nil {
 		// TODO: return a ref for cleaning up the goPathRoot
 		return nil, err

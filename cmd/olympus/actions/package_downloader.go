@@ -3,13 +3,11 @@ package actions
 import (
 	"context"
 	"errors"
-	"io/ioutil"
-	"path/filepath"
 	"time"
 
 	"github.com/gobuffalo/buffalo/worker"
 	"github.com/gomods/athens/pkg/eventlog"
-	"github.com/gomods/athens/pkg/repo"
+	"github.com/gomods/athens/pkg/module"
 	"github.com/gomods/athens/pkg/storage"
 	"github.com/spf13/afero"
 )
@@ -17,49 +15,46 @@ import (
 // GetPackageDownloaderJob porcesses queue of cache misses and downloads sources from VCS
 func GetPackageDownloaderJob(s storage.Backend, e eventlog.Eventlog, w worker.Worker) worker.Handler {
 	return func(args worker.Args) error {
-		module, version, err := parsePackageDownloaderJobArgs(args)
+		modName, version, err := parsePackageDownloaderJobArgs(args)
 		if err != nil {
 			return err
 		}
 
 		// download package
 		fs := afero.NewOsFs()
-		f, err := repo.NewGenericFetcher(fs, module, version)
+		f, err := module.NewGoGetFetcher(fs)
 		if err != nil {
 			return err
 		}
 
-		dirName, err := f.Fetch()
+		ref, err := f.Fetch(modName, version)
 		if err != nil {
 			return err
 		}
+		defer ref.Clear()
 
-		modPath := filepath.Join(dirName, version+".mod")
-		modBytes, err := ioutil.ReadFile(modPath)
-		if err != nil {
-			return err
-		}
-
-		zipPath := filepath.Join(dirName, version+".zip")
-		zipFile, err := fs.Open(zipPath)
-		if err != nil {
-			return err
-		}
-		defer zipFile.Close()
-
-		infoPath := filepath.Join(dirName, version+".info")
-		infoBytes, err := ioutil.ReadFile(infoPath)
-		if err != nil {
-			return err
-		}
+		ret, err := ref.Read()
+		modBytes, infoBytes, zipFile := ret.Mod, ret.Info, ret.Zip
 
 		// save it
-		if err := s.Save(context.Background(), module, version, modBytes, zipFile, infoBytes); err != nil {
+		if err := s.Save(
+			context.Background(),
+			modName,
+			version,
+			modBytes,
+			zipFile,
+			infoBytes,
+		); err != nil {
 			return err
 		}
 
 		// update log
-		_, err = e.Append(eventlog.Event{Module: module, Version: version, Time: time.Now(), Op: eventlog.OpAdd})
+		_, err = e.Append(eventlog.Event{
+			Module:  modName,
+			Version: version,
+			Time:    time.Now(),
+			Op:      eventlog.OpAdd,
+		})
 		return err
 	}
 }
