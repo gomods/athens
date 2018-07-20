@@ -26,10 +26,6 @@ type goGetFetcher struct {
 
 // NewGoGetFetcher creates fetcher which uses go get tool to fetch modules
 func NewGoGetFetcher(fs afero.Fs, repoURI, version string) (Fetcher, error) {
-	if !isVgoInstalled() {
-		return nil, errors.New("vgo not installed")
-	}
-
 	if repoURI == "" {
 		return nil, errors.New("invalid repository identifier")
 	}
