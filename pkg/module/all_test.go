@@ -7,6 +7,12 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
+const (
+	// these values need to point to a real repository that has a tag
+	repoURI = "github.com/arschles/assert"
+	version = "v1.0.0"
+)
+
 type ModuleSuite struct {
 	suite.Suite
 	fs afero.Fs
