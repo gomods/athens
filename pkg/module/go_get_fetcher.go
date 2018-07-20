@@ -59,27 +59,6 @@ func (g *goGetFetcher) Fetch(mod, ver string) (Ref, error) {
 	return diskRef, err
 }
 
-// Clear removes all downloaded data
-func (g *goGetFetcher) Clear() error {
-	if g.dirName == "" {
-		return nil
-	}
-
-	return g.fs.RemoveAll(g.dirName)
-}
-
-func isVgoInstalled() bool {
-	cmd := exec.Command("vgo")
-	err := cmd.Run() // this will fail even if vgo is installed
-
-	if err != nil {
-		_, ok := err.(*exec.ExitError) // if vgo is installed it will return ExitError, otherwise normal error
-		return ok == true
-	}
-
-	return false
-}
-
 func setupTmp(fs afero.Fs, repoDirName string) (string, string, error) {
 	gopathDir, err := afero.TempDir(fs, "", "")
 	if err != nil {
