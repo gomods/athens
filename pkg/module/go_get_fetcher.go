@@ -36,32 +36,40 @@ func NewGoGetFetcher(fs afero.Fs, repoURI, version string) (Fetcher, error) {
 	}, nil
 }
 
-// Fetch downloads the sources and returns path where it can be found
+// Fetch downloads the sources and returns path where it can be found. Fetch will always
+// return a non-nil Ref.
+//
+// TODO: If an error is returned, the Fetch method will likely fail, but you should always call
+// Close on the returned
 func (g *goGetFetcher) Fetch(mod, ver string) (Ref, error) {
-	repoDirName := getRepoDirName(g.repoURI, g.version)
-
-	gopath, repoRoot, err := setupTmp(g.fs, repoDirName)
+	// setup the GOPATH
+	goPathRoot, err := afero.TempDir(g.fs, "", "athens")
 	if err != nil {
+		// TODO: return a ref for cleaning up the goPathRoot
+		return nil, err
+	}
+	sourcePath := filepath.Join(goPathRoot, "src", goPathRoot)
+	modPath := filepath.Join(sourcePath, getRepoDirName(g.repoURI, g.version))
+	if err := g.fs.MkdirAll(modPath, os.ModeDir|os.ModePerm); err != nil {
+		// TODO: return a ref for cleaning up the goPathRoot
 		return nil, err
 	}
 
-	prepareStructure(g.fs, repoRoot)
-
-	dirName, err := getSources(g.fs, gopath, repoRoot, g.repoURI, g.version)
-	diskRef := newDiskRef(g.fs, dirName, ver)
-
-	return diskRef, err
-}
-
-func setupTmp(fs afero.Fs, repoDirName string) (string, string, error) {
-	gopathDir, err := afero.TempDir(fs, "", "")
-	if err != nil {
-		return "", "", err
+	// setup the module with barebones stuff
+	if err := prepareStructure(g.fs, modPath); err != nil {
+		// TODO: return a ref for cleaning up the goPathRoot
+		return nil, err
 	}
 
-	path := filepath.Join(gopathDir, "src", repoDirName)
+	cachePath, err := getSources(g.fs, goPathRoot, modPath, mod, ver)
+	if err != nil {
+		// TODO: return a ref that cleans up the goPathRoot
+		return newDiskRef(g.fs, cachePath, ver), err
+	}
+	// TODO: make sure this ref also cleans up the goPathRoot
+	diskRef := newDiskRef(g.fs, cachePath, ver)
 
-	return gopathDir, path, fs.MkdirAll(path, os.ModeDir|os.ModePerm)
+	return diskRef, err
 }
 
 // Hacky thing makes vgo not to complain
@@ -78,12 +86,16 @@ func prepareStructure(fs afero.Fs, repoRoot string) error {
 	return afero.WriteFile(fs, sourcePath, sourceContent, 0666)
 }
 
-func getSources(fs afero.Fs, gopath, repoRoot, repoURI, version string) (string, error) {
+// given a filesystem, gopath, repository root, module and version, runs 'vgo get'
+// on module@version from the repoRoot with GOPATH=gopath, and returns the location
+// of the module cache. returns a non-nil error if anything went wrong. always returns
+// the location of the module cache so you can delete it if necessary
+func getSources(fs afero.Fs, gopath, repoRoot, module, version string) (string, error) {
 	version = strings.TrimPrefix(version, "@")
 	if !strings.HasPrefix(version, "v") {
 		version = "v" + version
 	}
-	uri := strings.TrimSuffix(repoURI, "/")
+	uri := strings.TrimSuffix(module, "/")
 
 	fullURI := fmt.Sprintf("%s@%s", uri, version)
 
@@ -97,20 +109,20 @@ func getSources(fs afero.Fs, gopath, repoRoot, repoURI, version string) (string,
 	cmd.Env = []string{"PATH=" + os.Getenv("PATH"), gopathEnv, cacheEnv, disableCgo}
 	cmd.Dir = repoRoot
 
-	packagePath := filepath.Join(gopath, "src", "mod", "cache", "download", repoURI, "@v")
+	packagePath := filepath.Join(gopath, "src", "mod", "cache", "download", module, "@v")
 
 	o, err := cmd.CombinedOutput()
 	if err != nil {
 		// github quota exceeded
 		if isLimitHit(o) {
-			return "", errors.New("github API limit hit")
+			return packagePath, errors.New("github API limit hit")
 		}
 		// one or more of the expected files doesn't exist
 		if err := checkFiles(fs, packagePath, version); err != nil {
-			return "", err
+			return packagePath, err
 		}
 		// another error in the output
-		return "", err
+		return packagePath, err
 	}
 
 	return packagePath, nil
@@ -118,15 +130,15 @@ func getSources(fs afero.Fs, gopath, repoRoot, repoURI, version string) (string,
 
 func checkFiles(fs afero.Fs, path, version string) error {
 	if _, err := fs.Stat(filepath.Join(path, version+".mod")); err != nil {
-		return fmt.Errorf("%s.mod not found", version)
+		return fmt.Errorf("%s.mod not found in %s", version, path)
 	}
 
 	if _, err := fs.Stat(filepath.Join(path, version+".zip")); err != nil {
-		return fmt.Errorf("%s.zip not found", version)
+		return fmt.Errorf("%s.zip not found in %s", version, path)
 	}
 
 	if _, err := fs.Stat(filepath.Join(path, version+".info")); err != nil {
-		return fmt.Errorf("%s.info not found", version)
+		return fmt.Errorf("%s.info not found in %s", version, path)
 	}
 
 	return nil
