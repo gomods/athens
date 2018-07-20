@@ -34,3 +34,4 @@ dev:
 .PHONY: dev-teardown
 dev-teardown:
 	docker-compose -p athensdev down
+	docker volume prune
