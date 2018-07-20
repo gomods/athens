@@ -2,6 +2,7 @@ package module
 
 import (
 	"io/ioutil"
+	"path/filepath"
 )
 
 func (m *ModuleSuite) TestDiskRefReadAndClear() {
@@ -23,19 +24,19 @@ func (m *ModuleSuite) TestDiskRefReadAndClear() {
 	r.NotNil(err)
 
 	// create all the files the disk ref expects
-	infoFile, err := m.fs.Create(version + ".info")
+	infoFile, err := m.fs.Create(filepath.Join(root, version+".info"))
 	r.NoError(err)
 	defer infoFile.Close()
 	_, err = infoFile.Write([]byte(info))
 	r.NoError(err)
 
-	modFile, err := m.fs.Create(version + ".mod")
+	modFile, err := m.fs.Create(filepath.Join(root, version+".mod"))
 	r.NoError(err)
 	defer modFile.Close()
 	_, err = modFile.Write([]byte(mod))
 	r.NoError(err)
 
-	srcFile, err := m.fs.Create(version + ".zip")
+	srcFile, err := m.fs.Create(filepath.Join(root, version+".zip"))
 	r.NoError(err)
 	defer srcFile.Close()
 	_, err = srcFile.Write([]byte(zip))

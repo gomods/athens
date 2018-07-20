@@ -3,6 +3,7 @@ package module
 import (
 	"fmt"
 	"io/ioutil"
+	"path/filepath"
 
 	"github.com/gomods/athens/pkg/storage"
 	multierror "github.com/hashicorp/go-multierror"
@@ -48,7 +49,7 @@ func (d *diskRef) Clear() error {
 func (d *diskRef) Read() (*storage.Version, error) {
 	ver := &storage.Version{}
 
-	infoFile, err := d.fs.Open(fmt.Sprintf("%s.info", d.version))
+	infoFile, err := d.fs.Open(filepath.Join(d.root, fmt.Sprintf("%s.info", d.version)))
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
@@ -60,7 +61,7 @@ func (d *diskRef) Read() (*storage.Version, error) {
 	}
 	ver.Info = info
 
-	modFile, err := d.fs.Open(fmt.Sprintf("%s.mod", d.version))
+	modFile, err := d.fs.Open(filepath.Join(d.root, fmt.Sprintf("%s.mod", d.version)))
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
@@ -71,7 +72,7 @@ func (d *diskRef) Read() (*storage.Version, error) {
 	}
 	ver.Mod = mod
 
-	sourceFile, err := d.fs.Open(fmt.Sprintf("%s.zip", d.version))
+	sourceFile, err := d.fs.Open(filepath.Join(d.root, fmt.Sprintf("%s.zip", d.version)))
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
