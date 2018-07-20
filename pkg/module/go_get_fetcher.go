@@ -12,10 +12,6 @@ import (
 	"github.com/spf13/afero"
 )
 
-const (
-	tmpRepoDir = "%s-%s" // owner-repo-ref
-)
-
 var (
 	// ErrLimitExceeded signals that github.com refused to serve the request due to exceeded quota
 	ErrLimitExceeded = errors.New("github limit exceeded")
@@ -47,8 +43,7 @@ func NewGoGetFetcher(fs afero.Fs, repoURI, version string) (Fetcher, error) {
 
 // Fetch downloads the sources and returns path where it can be found
 func (g *genericFetcher) Fetch(mod, ver string) (Ref, error) {
-	escapedURI := strings.Replace(g.repoURI, "/", "-", -1)
-	repoDirName := fmt.Sprintf(tmpRepoDir, escapedURI, g.version)
+	repoDirName := getRepoDirName(g.repoURI, g.version)
 
 	gopath, repoRoot, err := setupTmp(g.fs, repoDirName)
 	if err != nil {
@@ -166,4 +161,11 @@ func checkFiles(fs afero.Fs, path, version string) error {
 
 func isLimitHit(o []byte) bool {
 	return bytes.Contains(o, []byte("403 response from api.github.com"))
+}
+
+// getRepoDirName takes a raw repository URI and a version and creates a directory name that the
+// repository contents can be put into
+func getRepoDirName(repoURI, version string) string {
+	escapedURI := strings.Replace(repoURI, "/", "-", -1)
+	return fmt.Sprintf("%s-%s", escapedURI, version)
 }
