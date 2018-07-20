@@ -128,32 +128,32 @@ func getSources(fs afero.Fs, gopath, repoRoot, repoURI, version string) (string,
 
 	o, err := cmd.CombinedOutput()
 	if err != nil {
-		switch {
-		case isLimitHit(o):
-			// github quota exceeded
-			return packagePath, ErrLimitExceeded
-		case checkFiles(fs, packagePath, version) == nil:
-			// some compilation error
-			return packagePath, nil
-		default:
-			return packagePath, err
+		// github quota exceeded
+		if isLimitHit(o) {
+			return "", errors.New("github API limit hit")
 		}
+		// one or more of the expected files doesn't exist
+		if err := checkFiles(fs, packagePath, version); err != nil {
+			return "", err
+		}
+		// another error in the output
+		return "", err
 	}
 
-	return packagePath, err
+	return packagePath, nil
 }
 
 func checkFiles(fs afero.Fs, path, version string) error {
 	if _, err := fs.Stat(filepath.Join(path, version+".mod")); err != nil {
-		return errors.New("go.mod not found")
+		return fmt.Errorf("%s.mod not found", version)
 	}
 
 	if _, err := fs.Stat(filepath.Join(path, version+".zip")); err != nil {
-		return errors.New("zip package not found")
+		return fmt.Errorf("%s.zip not found")
 	}
 
 	if _, err := fs.Stat(filepath.Join(path, version+".info")); err != nil {
-		return errors.New("info file not found")
+		return fmt.Errorf("%s.info not found")
 	}
 
 	return nil
