@@ -24,5 +24,6 @@ cmd/proxy/proxy
 cmd/olympus/olympus
 test-keys.json
 tmp
-cmd/proxy/bin
+.vs
 cmd/olympus/bin
+cmd/proxy/bin
