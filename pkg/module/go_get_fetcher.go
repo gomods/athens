@@ -17,7 +17,7 @@ var (
 	ErrLimitExceeded = errors.New("github limit exceeded")
 )
 
-type genericFetcher struct {
+type goGetFetcher struct {
 	fs      afero.Fs
 	repoURI string
 	version string
@@ -34,7 +34,7 @@ func NewGoGetFetcher(fs afero.Fs, repoURI, version string) (Fetcher, error) {
 		return nil, errors.New("invalid repository identifier")
 	}
 
-	return &genericFetcher{
+	return &goGetFetcher{
 		fs:      fs,
 		repoURI: repoURI,
 		version: version,
@@ -42,7 +42,7 @@ func NewGoGetFetcher(fs afero.Fs, repoURI, version string) (Fetcher, error) {
 }
 
 // Fetch downloads the sources and returns path where it can be found
-func (g *genericFetcher) Fetch(mod, ver string) (Ref, error) {
+func (g *goGetFetcher) Fetch(mod, ver string) (Ref, error) {
 	repoDirName := getRepoDirName(g.repoURI, g.version)
 
 	gopath, repoRoot, err := setupTmp(g.fs, repoDirName)
@@ -60,7 +60,7 @@ func (g *genericFetcher) Fetch(mod, ver string) (Ref, error) {
 }
 
 // Clear removes all downloaded data
-func (g *genericFetcher) Clear() error {
+func (g *goGetFetcher) Clear() error {
 	if g.dirName == "" {
 		return nil
 	}
