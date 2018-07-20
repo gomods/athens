@@ -62,6 +62,7 @@ func App(config *AppConfig) (*buffalo.App, error) {
 			return nil, err
 		}
 
+		lggr := log.New(env.CloudRuntime(), env.LogLevel())
 		app = buffalo.New(buffalo.Options{
 			Addr: port,
 			Env:  ENV,
@@ -114,7 +115,7 @@ func App(config *AppConfig) (*buffalo.App, error) {
 		app.POST("/push", pushNotificationHandler(w))
 
 		// Download Protocol
-		app.GET(download.PathList, download.ListHandler(config.Storage, renderEng))
+		app.GET(download.PathList, download.ListHandler(config.Storage, renderEng, false, lggr))
 		app.GET(download.PathVersionInfo, download.VersionInfoHandler(config.Storage, renderEng))
 		app.GET(download.PathVersionModule, download.VersionModuleHandler(config.Storage, renderEng))
 		app.GET(download.PathVersionZip, download.VersionZipHandler(config.Storage))
