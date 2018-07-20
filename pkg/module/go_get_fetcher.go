@@ -21,7 +21,6 @@ type goGetFetcher struct {
 	fs      afero.Fs
 	repoURI string
 	version string
-	dirName string
 }
 
 // NewGoGetFetcher creates fetcher which uses go get tool to fetch modules
@@ -45,7 +44,6 @@ func (g *goGetFetcher) Fetch(mod, ver string) (Ref, error) {
 	if err != nil {
 		return nil, err
 	}
-	g.dirName = repoRoot
 
 	prepareStructure(g.fs, repoRoot)
 
