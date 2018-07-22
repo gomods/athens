@@ -143,6 +143,7 @@ func Ops(err Error) []Op {
 		}
 
 		ops = append(ops, embeddedErr.Op)
+		err = embeddedErr
 	}
 
 	return ops
