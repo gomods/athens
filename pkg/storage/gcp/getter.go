@@ -14,7 +14,7 @@ import (
 // The caller is responsible for calling close on the Zip ReadCloser
 func (s *Storage) Get(module, version string) (*storage.Version, error) {
 	ctx := context.Background()
-	if exists := s.Exists(module, version); !exists {
+	if exists := s.Exists(context.TODO(), module, version); !exists {
 		return nil, storage.ErrVersionNotFound{Module: module, Version: version}
 	}
 
