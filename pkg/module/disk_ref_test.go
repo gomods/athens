@@ -3,6 +3,8 @@ package module
 import (
 	"io/ioutil"
 	"path/filepath"
+
+	"github.com/spf13/afero"
 )
 
 func (m *ModuleSuite) TestDiskRefReadAndClear() {
@@ -24,23 +26,9 @@ func (m *ModuleSuite) TestDiskRefReadAndClear() {
 	r.NotNil(err)
 
 	// create all the files the disk ref expects
-	infoFile, err := m.fs.Create(filepath.Join(root, version+".info"))
-	r.NoError(err)
-	defer infoFile.Close()
-	_, err = infoFile.Write([]byte(info))
-	r.NoError(err)
-
-	modFile, err := m.fs.Create(filepath.Join(root, version+".mod"))
-	r.NoError(err)
-	defer modFile.Close()
-	_, err = modFile.Write([]byte(mod))
-	r.NoError(err)
-
-	srcFile, err := m.fs.Create(filepath.Join(root, version+".zip"))
-	r.NoError(err)
-	defer srcFile.Close()
-	_, err = srcFile.Write([]byte(zip))
-	r.NoError(err)
+	r.NoError(createAndWriteFile(m.fs, filepath.Join(root, version+".info"), info))
+	r.NoError(createAndWriteFile(m.fs, filepath.Join(root, version+".mod"), mod))
+	r.NoError(createAndWriteFile(m.fs, filepath.Join(root, version+".zip"), zip))
 
 	// read from the disk ref - this time it should succeed
 	ver, err = diskRef.Read()
@@ -56,4 +44,20 @@ func (m *ModuleSuite) TestDiskRefReadAndClear() {
 	ver, err = diskRef.Read()
 	r.Nil(ver)
 	r.NotNil(err)
+}
+
+// creates filename with fs, writes data to the file, and closes the file,
+//
+// returns a non-nil error if anything went wrong. the file will be closed
+// regardless of what this function returns
+func createAndWriteFile(fs afero.Fs, filename, data string) error {
+	fileHandle, err := fs.Create(filename)
+	if err != nil {
+		return err
+	}
+	defer fileHandle.Close()
+	if _, err := fileHandle.Write([]byte(data)); err != nil {
+		return err
+	}
+	return nil
 }
