@@ -47,7 +47,7 @@ func (d *diskRef) Clear() error {
 
 // read is the Ref interface implementation.
 func (d *diskRef) Read() (*storage.Version, error) {
-	ver := &storage.Version{}
+	var ver storage.Version
 
 	infoFile, err := d.fs.Open(filepath.Join(d.root, fmt.Sprintf("%s.info", d.version)))
 	if err != nil {
@@ -79,5 +79,5 @@ func (d *diskRef) Read() (*storage.Version, error) {
 	d.filesToClose = append(d.filesToClose, sourceFile)
 	ver.Zip = sourceFile
 
-	return ver, nil
+	return &ver, nil
 }
