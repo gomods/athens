@@ -70,7 +70,10 @@ func (d *diskRef) Read() (*storage.Version, error) {
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
-	defer sourceFile.Close()
+	// note: don't close sourceFile here so that the caller can read directly from disk.
+	//
+	// if we close, then the caller will panic, and the alternative to make this work is
+	// that we read into memory and return an io.ReadCloser that reads out of memory
 	ver.Zip = sourceFile
 
 	return &ver, nil
