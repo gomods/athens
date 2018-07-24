@@ -24,19 +24,19 @@ func (n noOpConnectedBackend) Connect() error {
 	return nil
 }
 
-func (n noOpConnectedBackend) Exists(module, version string) bool {
-	return n.backend.Exists(module, version)
+func (n noOpConnectedBackend) Exists(ctx context.Context, module, version string) bool {
+	return n.backend.Exists(ctx, module, version)
 }
 
 func (n noOpConnectedBackend) Get(module, vsn string) (*Version, error) {
 	return n.backend.Get(module, vsn)
 }
-func (n noOpConnectedBackend) List(module string) ([]string, error) {
-	return n.backend.List(module)
+func (n noOpConnectedBackend) List(ctx context.Context, module string) ([]string, error) {
+	return n.backend.List(ctx, module)
 }
 func (n noOpConnectedBackend) Save(ctx context.Context, module, version string, mod []byte, zip io.Reader, info []byte) error {
 	return n.backend.Save(ctx, module, version, mod, zip, info)
 }
-func (n noOpConnectedBackend) Delete(module, version string) error {
-	return n.backend.Delete(module, version)
+func (n noOpConnectedBackend) Delete(ctx context.Context, module, version string) error {
+	return n.backend.Delete(ctx, module, version)
 }
