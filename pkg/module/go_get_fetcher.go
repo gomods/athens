@@ -120,11 +120,11 @@ func getSources(goBinaryName string, fs afero.Fs, gopath, repoRoot, module, vers
 		if isLimitHit(o) {
 			return packagePath, pkgerrors.WithMessage("github API limit hit", err)
 		}
-		// one or more of the expected files doesn't exist
-		if err := checkFiles(fs, packagePath, version); err != nil {
-			return packagePath, err
-		}
 		// another error in the output
+		return packagePath, err
+	}
+	// make sure the expected files exist
+	if err := checkFiles(fs, packagePath, version); err != nil {
 		return packagePath, err
 	}
 
