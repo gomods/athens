@@ -11,14 +11,13 @@ import (
 	"github.com/spf13/afero"
 )
 
-// DiskRef is a Ref implementation for modules on disk. It is not safe to use concurrently.
+// diskRef is a Ref implementation for modules on disk. It is not safe to use concurrently.
 //
 // Do not create this struct directly. use newDiskRef
 type diskRef struct {
-	root         string
-	fs           afero.Fs
-	version      string
-	filesToClose []afero.File
+	root    string
+	fs      afero.Fs
+	version string
 }
 
 func newDiskRef(fs afero.Fs, root, version string) *diskRef {
@@ -34,11 +33,6 @@ func newDiskRef(fs afero.Fs, root, version string) *diskRef {
 // You should always call this function after you fetch a module into a DiskRef
 func (d *diskRef) Clear() error {
 	var errors error
-	for _, file := range d.filesToClose {
-		if err := file.Close(); err != nil {
-			multierror.Append(errors, err)
-		}
-	}
 	if err := d.fs.RemoveAll(d.root); err != nil {
 		multierror.Append(errors, err)
 	}
@@ -53,7 +47,7 @@ func (d *diskRef) Read() (*storage.Version, error) {
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
-	d.filesToClose = append(d.filesToClose, infoFile)
+	defer infoFile.Close()
 
 	info, err := ioutil.ReadAll(infoFile)
 	if err != nil {
@@ -65,7 +59,7 @@ func (d *diskRef) Read() (*storage.Version, error) {
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
-	d.filesToClose = append(d.filesToClose, modFile)
+	defer modFile.Close()
 	mod, err := ioutil.ReadAll(modFile)
 	if err != nil {
 		return nil, errors.WithStack(err)
@@ -76,7 +70,7 @@ func (d *diskRef) Read() (*storage.Version, error) {
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
-	d.filesToClose = append(d.filesToClose, sourceFile)
+	defer sourceFile.Close()
 	ver.Zip = sourceFile
 
 	return &ver, nil
