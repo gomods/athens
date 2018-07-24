@@ -120,5 +120,5 @@ func exists(event Event, log []Event, checker storage.Checker) bool {
 		}
 	}
 
-	return checker.Exists(context.Background(), event.Module, event.Version)
+	return checker.Exists(context.TODO(), event.Module, event.Version)
 }
