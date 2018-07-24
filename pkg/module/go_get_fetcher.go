@@ -48,7 +48,7 @@ func (g *goGetFetcher) Fetch(mod, ver string) (Ref, error) {
 		// TODO: return a ref for cleaning up the goPathRoot
 		return nil, err
 	}
-	sourcePath := filepath.Join(goPathRoot, "src", goPathRoot)
+	sourcePath := filepath.Join(goPathRoot, "src")
 	modPath := filepath.Join(sourcePath, getRepoDirName(g.repoURI, g.version))
 	if err := g.fs.MkdirAll(modPath, os.ModeDir|os.ModePerm); err != nil {
 		// TODO: return a ref for cleaning up the goPathRoot
