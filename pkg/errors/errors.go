@@ -3,9 +3,7 @@ package errors
 import (
 	"errors"
 	"net/http"
-	"strings"
 
-	"github.com/marwan-at-work/vgop/semver"
 	"github.com/sirupsen/logrus"
 )
 
@@ -29,8 +27,8 @@ type Error struct {
 	// imported into this package.
 	Kind     int
 	Op       Op
-	Module   string
-	Version  string
+	Module   M
+	Version  V
 	Err      error
 	Severity logrus.Level
 }
@@ -48,6 +46,14 @@ func (e Error) Error() string {
 // forms a more readable stack trace.
 type Op string
 
+// M represents a module in an error
+// this is so that we can distinguish
+// a module from a regular error string or version.
+type M string
+
+// V represents a module version in an error
+type V string
+
 // E is a helper function to construct an Error type
 // Operation always comes first, module path and version
 // come second, they are optional. Args must have at least
@@ -64,14 +70,11 @@ func E(op Op, args ...interface{}) error {
 		case error:
 			e.Err = a
 		case string:
-			switch {
-			case isModule(a):
-				e.Module = a
-			case isVersion(a):
-				e.Version = a
-			default:
-				e.Err = errors.New(a)
-			}
+			e.Err = errors.New(a)
+		case M:
+			e.Module = a
+		case V:
+			e.Version = a
 		case logrus.Level:
 			e.Severity = a
 		case int:
@@ -147,13 +150,4 @@ func Ops(err Error) []Op {
 	}
 
 	return ops
-}
-
-func isModule(s string) bool {
-	ss := strings.Split(s, "/")
-	return len(ss) > 1 && strings.Contains(ss[0], ".")
-}
-
-func isVersion(s string) bool {
-	return semver.IsValid(s)
 }

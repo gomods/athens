@@ -45,7 +45,7 @@ func VersionZipHandler(getter storage.Getter, eng *render.Engine, lggr *log.Logg
 				status = http.StatusNotFound
 			}
 
-			lggr.SystemErr(errors.E(op, mod, ver, lvl, err))
+			lggr.SystemErr(errors.E(op, errors.M(mod), errors.V(ver), lvl, err))
 			return c.Render(status, eng.JSON(msg))
 		}
 		defer version.Zip.Close()
@@ -56,7 +56,7 @@ func VersionZipHandler(getter storage.Getter, eng *render.Engine, lggr *log.Logg
 
 		_, err = io.Copy(c.Response(), version.Zip)
 		if err != nil {
-			lggr.SystemErr(errors.E(op, mod, ver, err))
+			lggr.SystemErr(errors.E(op, errors.M(mod), errors.V(ver), err))
 		}
 
 		return nil
