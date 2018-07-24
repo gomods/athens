@@ -76,7 +76,7 @@ func (g *goGetFetcher) Fetch(mod, ver string) (Ref, error) {
 func prepareStructure(fs afero.Fs, repoRoot string) error {
 	// vgo expects go.mod file present with module statement or .go file with import comment
 	gomodPath := filepath.Join(repoRoot, "go.mod")
-	gomodContent := []byte("module \"mod\"")
+	gomodContent := []byte("module mod")
 	if err := afero.WriteFile(fs, gomodPath, gomodContent, 0666); err != nil {
 		return err
 	}
