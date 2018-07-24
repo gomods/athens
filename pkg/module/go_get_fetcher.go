@@ -118,7 +118,7 @@ func getSources(goBinaryName string, fs afero.Fs, gopath, repoRoot, module, vers
 	if err != nil {
 		// github quota exceeded
 		if isLimitHit(o) {
-			return packagePath, pkgerrors.WithMessage("github API limit hit", err)
+			return packagePath, pkgerrors.WithMessage(err, "github API limit hit")
 		}
 		// another error in the output
 		return packagePath, err
@@ -133,15 +133,15 @@ func getSources(goBinaryName string, fs afero.Fs, gopath, repoRoot, module, vers
 
 func checkFiles(fs afero.Fs, path, version string) error {
 	if _, err := fs.Stat(filepath.Join(path, version+".mod")); err != nil {
-		return fmt.Errorf("%s.mod not found in %s", version, path)
+		return pkgerrors.WithMessage(err, fmt.Sprintf("%s.mod not found in %s", version, path))
 	}
 
 	if _, err := fs.Stat(filepath.Join(path, version+".zip")); err != nil {
-		return fmt.Errorf("%s.zip not found in %s", version, path)
+		return pkgerrors.WithMessage(err, fmt.Sprintf("%s.zip not found in %s", version, path))
 	}
 
 	if _, err := fs.Stat(filepath.Join(path, version+".info")); err != nil {
-		return fmt.Errorf("%s.info not found in %s", version, path)
+		return pkgerrors.WithMessage(err, fmt.Sprintf("%s.info not found in %s", version, path))
 	}
 
 	return nil
