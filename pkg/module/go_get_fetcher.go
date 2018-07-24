@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	pkgerrors "github.com/pkg/errors"
 	"github.com/spf13/afero"
 )
 
@@ -117,7 +118,7 @@ func getSources(goBinaryName string, fs afero.Fs, gopath, repoRoot, module, vers
 	if err != nil {
 		// github quota exceeded
 		if isLimitHit(o) {
-			return packagePath, errors.New("github API limit hit")
+			return packagePath, pkgerrors.WithMessage("github API limit hit", err)
 		}
 		// one or more of the expected files doesn't exist
 		if err := checkFiles(fs, packagePath, version); err != nil {
