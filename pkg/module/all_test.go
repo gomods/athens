@@ -3,6 +3,7 @@ package module
 import (
 	"testing"
 
+	"github.com/gobuffalo/envy"
 	"github.com/spf13/afero"
 	"github.com/stretchr/testify/suite"
 )
@@ -15,7 +16,8 @@ const (
 
 type ModuleSuite struct {
 	suite.Suite
-	fs afero.Fs
+	fs           afero.Fs
+	goBinaryName string
 }
 
 func (m *ModuleSuite) SetupTest() {
@@ -23,5 +25,6 @@ func (m *ModuleSuite) SetupTest() {
 }
 
 func TestModules(t *testing.T) {
-	suite.Run(t, &ModuleSuite{})
+	goBinaryName := envy.Get("GO_BINARY_NAME", "go")
+	suite.Run(t, &ModuleSuite{goBinaryName: goBinaryName})
 }

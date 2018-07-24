@@ -18,21 +18,23 @@ var (
 )
 
 type goGetFetcher struct {
-	fs      afero.Fs
-	repoURI string
-	version string
+	fs           afero.Fs
+	repoURI      string
+	version      string
+	goBinaryName string
 }
 
 // NewGoGetFetcher creates fetcher which uses go get tool to fetch modules
-func NewGoGetFetcher(fs afero.Fs, repoURI, version string) (Fetcher, error) {
+func NewGoGetFetcher(goBinaryName string, fs afero.Fs, repoURI, version string) (Fetcher, error) {
 	if repoURI == "" {
 		return nil, errors.New("invalid repository identifier")
 	}
 
 	return &goGetFetcher{
-		fs:      fs,
-		repoURI: repoURI,
-		version: version,
+		fs:           fs,
+		repoURI:      repoURI,
+		version:      version,
+		goBinaryName: goBinaryName,
 	}, nil
 }
 
@@ -61,7 +63,7 @@ func (g *goGetFetcher) Fetch(mod, ver string) (Ref, error) {
 		return nil, err
 	}
 
-	cachePath, err := getSources(g.fs, goPathRoot, modPath, mod, ver)
+	cachePath, err := getSources(g.goBinaryName, g.fs, goPathRoot, modPath, mod, ver)
 	if err != nil {
 		// TODO: return a ref that cleans up the goPathRoot
 		return newDiskRef(g.fs, cachePath, ver), err
@@ -90,7 +92,7 @@ func prepareStructure(fs afero.Fs, repoRoot string) error {
 // on module@version from the repoRoot with GOPATH=gopath, and returns the location
 // of the module cache. returns a non-nil error if anything went wrong. always returns
 // the location of the module cache so you can delete it if necessary
-func getSources(fs afero.Fs, gopath, repoRoot, module, version string) (string, error) {
+func getSources(goBinaryName string, fs afero.Fs, gopath, repoRoot, module, version string) (string, error) {
 	version = strings.TrimPrefix(version, "@")
 	if !strings.HasPrefix(version, "v") {
 		version = "v" + version
@@ -103,7 +105,7 @@ func getSources(fs afero.Fs, gopath, repoRoot, module, version string) (string, 
 	cacheEnv := fmt.Sprintf("GOCACHE=%s", filepath.Join(gopath, "cache"))
 	disableCgo := "CGO_ENABLED=0"
 
-	cmd := exec.Command("vgo", "get", fullURI)
+	cmd := exec.Command(goBinaryName, "vgo", "get", fullURI)
 	// PATH is needed for vgo to recognize vcs binaries
 	// this breaks windows.
 	cmd.Env = []string{"PATH=" + os.Getenv("PATH"), gopathEnv, cacheEnv, disableCgo}
