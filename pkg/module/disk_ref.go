@@ -32,11 +32,7 @@ func newDiskRef(fs afero.Fs, root, version string) *diskRef {
 //
 // You should always call this function after you fetch a module into a DiskRef
 func (d *diskRef) Clear() error {
-	var errors error
-	if err := d.fs.RemoveAll(d.root); err != nil {
-		multierror.Append(errors, err)
-	}
-	return errors
+	return d.fs.RemoveAll(d.root)
 }
 
 // read is the Ref interface implementation.
