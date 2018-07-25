@@ -27,6 +27,7 @@ func Fetch(ctx context.Context, s storage.Backend, fetcher Fetcher, mod, version
 	if err != nil {
 		return err
 	}
+	defer module.Zip.Close()
 
 	return s.Save(context.Background(), mod, version, module.Mod, module.Zip, module.Info)
 }
