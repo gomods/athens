@@ -63,15 +63,15 @@ type V string
 // You can optionally pass a Logrus severity to indicate
 // the log level of an error based on the context it was constructed in.
 func E(op Op, args ...interface{}) error {
+	e := Error{Op: op}
 	if len(args) == 0 {
 		msg := "errors.E called with 0 args"
 		_, file, line, ok := runtime.Caller(1)
 		if ok {
 			msg = fmt.Sprintf("%v - %v:%v", msg, file, line)
 		}
-		return errors.New(msg)
+		e.Err = errors.New(msg)
 	}
-	e := Error{Op: op}
 	for _, a := range args {
 		switch a := a.(type) {
 		case error:
@@ -88,11 +88,9 @@ func E(op Op, args ...interface{}) error {
 			e.Kind = a
 		}
 	}
-
 	if e.Err == nil {
 		e.Err = errors.New("no error message provided")
 	}
-
 	return e
 }
 
