@@ -39,29 +39,32 @@ func NewGoGetFetcher(goBinaryName string, fs afero.Fs, repoURI, version string) 
 	}, nil
 }
 
-// Fetch downloads the sources and returns path where it can be found. Fetch will always
-// return a non-nil Ref.
+// Fetch downloads the sources and returns path where it can be found. This function will
+// always return a ref, even if it returns a non-nil error.
 //
-// TODO: If an error is returned, the Fetch method will likely fail, but you should always call
-// Close on the returned
+// If an error was returned, the returned ref's Read method will return an error, but you
+// should always call ref.Clear() on the returned ref
 func (g *goGetFetcher) Fetch(mod, ver string) (Ref, error) {
+	var ref Ref
+	ref = noopRef{}
+
 	// setup the GOPATH
 	goPathRoot, err := afero.TempDir(g.fs, "", "athens")
 	if err != nil {
 		// TODO: return a ref for cleaning up the goPathRoot
-		return nil, err
+		return ref, err
 	}
 	sourcePath := filepath.Join(goPathRoot, "src")
 	modPath := filepath.Join(sourcePath, getRepoDirName(g.repoURI, g.version))
 	if err := g.fs.MkdirAll(modPath, os.ModeDir|os.ModePerm); err != nil {
 		// TODO: return a ref for cleaning up the goPathRoot
-		return nil, err
+		return ref, err
 	}
 
 	// setup the module with barebones stuff
 	if err := prepareStructure(g.fs, modPath); err != nil {
 		// TODO: return a ref for cleaning up the goPathRoot
-		return nil, err
+		return ref, err
 	}
 
 	cachePath, err := getSources(g.goBinaryName, g.fs, goPathRoot, modPath, mod, ver)
@@ -70,9 +73,9 @@ func (g *goGetFetcher) Fetch(mod, ver string) (Ref, error) {
 		return newDiskRef(g.fs, cachePath, ver), err
 	}
 	// TODO: make sure this ref also cleans up the goPathRoot
-	diskRef := newDiskRef(g.fs, cachePath, ver)
+	ref = newDiskRef(g.fs, cachePath, ver)
 
-	return diskRef, err
+	return ref, err
 }
 
 // Hacky thing makes vgo not to complain
