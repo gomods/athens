@@ -12,7 +12,7 @@ import (
 )
 
 func (v *storageImpl) Get(module, version string) (*storage.Version, error) {
-	sp, _ := opentracing.StartSpanFromContext(context.TODO(), "fs.Get")
+	sp, _ := opentracing.StartSpanFromContext(context.TODO(), "storage.fs.Get")
 	defer sp.Finish()
 	versionedPath := v.versionLocation(module, version)
 	mod, err := afero.ReadFile(v.filesystem, filepath.Join(versionedPath, "go.mod"))
