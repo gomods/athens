@@ -1,6 +1,10 @@
 package module
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/gomods/athens/pkg/config"
+)
 
 // ErrModuleExcluded is error returned when processing of error is skipped
 // due to filtering rules
@@ -26,7 +30,7 @@ type ErrModuleAlreadyFetched struct {
 
 // Error is the error interface implementation
 func (e *ErrModuleAlreadyFetched) Error() string {
-	return fmt.Sprintf("%s@%s was already fetched", e.module, e.version)
+	return fmt.Sprintf("%s was already fetched", config.FmtModVer(e.module, e.version))
 }
 
 // NewErrModuleAlreadyFetched returns a new ErrModuleAlreadyFetched
