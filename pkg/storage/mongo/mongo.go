@@ -3,6 +3,7 @@ package mongo
 import (
 	"github.com/globalsign/mgo"
 	"github.com/gomods/athens/pkg/storage/mongo/conn"
+	"github.com/pkg/errors"
 )
 
 const (
@@ -28,7 +29,7 @@ func NewStorage(connDetails *conn.Details) *ModuleStore {
 func (m *ModuleStore) Connect() error {
 	s, err := conn.NewSession(m.connDetails, athensDB)
 	if err != nil {
-		return err
+		return errors.WithMessage(err, "can't connect to mongo")
 	}
 	m.sess = s
 
