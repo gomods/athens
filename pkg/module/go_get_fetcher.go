@@ -52,27 +52,32 @@ func (g *goGetFetcher) Fetch(mod, ver string) (Ref, error) {
 	goPathRoot, err := afero.TempDir(g.fs, "", "athens")
 	if err != nil {
 		// TODO: return a ref for cleaning up the goPathRoot
+		// https://github.com/gomods/athens/issues/329
 		return ref, err
 	}
 	sourcePath := filepath.Join(goPathRoot, "src")
 	modPath := filepath.Join(sourcePath, getRepoDirName(g.repoURI, g.version))
 	if err := g.fs.MkdirAll(modPath, os.ModeDir|os.ModePerm); err != nil {
 		// TODO: return a ref for cleaning up the goPathRoot
+		// https://github.com/gomods/athens/issues/329
 		return ref, err
 	}
 
 	// setup the module with barebones stuff
 	if err := prepareStructure(g.fs, modPath); err != nil {
 		// TODO: return a ref for cleaning up the goPathRoot
+		// https://github.com/gomods/athens/issues/329
 		return ref, err
 	}
 
 	cachePath, err := getSources(g.goBinaryName, g.fs, goPathRoot, modPath, mod, ver)
 	if err != nil {
 		// TODO: return a ref that cleans up the goPathRoot
+		// https://github.com/gomods/athens/issues/329
 		return newDiskRef(g.fs, cachePath, ver), err
 	}
 	// TODO: make sure this ref also cleans up the goPathRoot
+	// https://github.com/gomods/athens/issues/329
 	ref = newDiskRef(g.fs, cachePath, ver)
 
 	return ref, err
