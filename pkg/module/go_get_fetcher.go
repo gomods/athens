@@ -132,11 +132,7 @@ func getSources(goBinaryName string, fs afero.Fs, gopath, repoRoot, module, vers
 		return packagePath, err
 	}
 	// make sure the expected files exist
-	if err := checkFiles(fs, packagePath, version); err != nil {
-		return packagePath, err
-	}
-
-	return packagePath, nil
+	return packagePath, checkFiles(fs, packagePath, version)
 }
 
 func checkFiles(fs afero.Fs, path, version string) error {
