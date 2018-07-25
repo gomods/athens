@@ -16,3 +16,20 @@ func (e *ErrModuleExcluded) Error() string {
 func NewErrModuleExcluded(module string) error {
 	return &ErrModuleExcluded{module: module}
 }
+
+// ErrModuleAlreadyFetched is an error returned when you try to fetch the same module@version
+// more than once
+type ErrModuleAlreadyFetched struct {
+	module  string
+	version string
+}
+
+// Error is the error interface implementation
+func (e *ErrModuleAlreadyFetched) Error() string {
+	return fmt.Sprintf("%s@%s was already fetched", e.module, e.version)
+}
+
+// NewErrModuleAlreadyFetched returns a new ErrModuleAlreadyFetched
+func NewErrModuleAlreadyFetched(mod, ver string) error {
+	return &ErrModuleAlreadyFetched{module: mod, version: ver}
+}
