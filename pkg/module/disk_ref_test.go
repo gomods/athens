@@ -56,8 +56,6 @@ func createAndWriteFile(fs afero.Fs, filename, data string) error {
 		return err
 	}
 	defer fileHandle.Close()
-	if _, err := fileHandle.Write([]byte(data)); err != nil {
-		return err
-	}
-	return nil
+	_, err = fileHandle.Write([]byte(data))
+	return err
 }
