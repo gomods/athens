@@ -7,8 +7,7 @@ import (
 
 func (s *ModuleSuite) TestNewGoGetFetcher() {
 	r := s.Require()
-	fs := s.fs
-	fetcher, err := NewGoGetFetcher(s.goBinaryName, fs, repoURI, version)
+	fetcher, err := NewGoGetFetcher(s.goBinaryName, s.fs, repoURI, version)
 	r.NoError(err)
 	goGetFetcher, ok := fetcher.(*goGetFetcher)
 	r.True(ok)
