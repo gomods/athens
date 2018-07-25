@@ -29,11 +29,11 @@ func GetStorage() (storage.BackendConnector, error) {
 		}
 		return storage.NoOpBackendConnector(s), nil
 	case "mongo":
-		mongoURI, err := env.MongoURI()
+		connDetails, err := env.MongoConnDetails()
 		if err != nil {
 			return nil, err
 		}
-		return mongo.NewStorage(mongoURI), nil
+		return mongo.NewStorage(connDetails), nil
 	case "postgres", "sqlite", "cockroach", "mysql":
 		connectionName, err := env.RdbmsName()
 		if err != nil {
