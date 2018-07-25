@@ -16,12 +16,12 @@ type TestSuite struct {
 
 // NewTestSuite creates a common test suite
 func NewTestSuite(model *suite.Model) (storage.TestSuite, error) {
-	muri, err := env.MongoURI()
+	connDetails, err := env.MongoConnDetails()
 	if err != nil {
 		return nil, err
 	}
 
-	mongoStore := NewStorage(muri)
+	mongoStore := NewStorage(connDetails)
 	if mongoStore == nil {
 		return nil, fmt.Errorf("Mongo storage is nil")
 	}

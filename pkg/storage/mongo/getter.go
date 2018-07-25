@@ -11,7 +11,7 @@ import (
 
 // Get a specific version of a module
 func (s *ModuleStore) Get(module, vsn string) (*storage.Version, error) {
-	c := s.s.DB(s.d).C(s.c)
+	c := s.sess.DB(athensDB).C(modulesCollection)
 	result := &storage.Module{}
 	err := c.Find(bson.M{"module": module, "version": vsn}).One(result)
 	if err != nil {

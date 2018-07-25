@@ -22,6 +22,6 @@ func (s *ModuleStore) Save(_ context.Context, module, version string, mod []byte
 		Info:    info,
 	}
 
-	c := s.s.DB(s.d).C(s.c)
+	c := s.sess.DB(athensDB).C(modulesCollection)
 	return c.Insert(m)
 }
