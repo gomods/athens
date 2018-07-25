@@ -2,8 +2,13 @@ package env
 
 import (
 	"fmt"
+	"strconv"
+	"time"
 
 	"github.com/gobuffalo/envy"
+	"github.com/gomods/athens/pkg/storage/mongo/conn"
+	multierror "github.com/hashicorp/go-multierror"
+	"github.com/pkg/errors"
 )
 
 // MongoURI returns Athens Mongo Storage URI defined by ATHENS_MONGO_STORAGE_URL
@@ -66,4 +71,53 @@ func MongoConnectionTimeoutWithDefault(value string) string {
 // Defines whether or not SSL should be used.
 func MongoSSLWithDefault(value string) string {
 	return envy.Get("MONGO_SSL", value)
+}
+
+// MongoConnDetails returns mongo connection details defined by all the Mongo
+// environment variables
+func MongoConnDetails() (*conn.Details, error) {
+	var errs error
+	host, err := MongoHost()
+	if err != nil {
+		multierror.Append(errs, err)
+	}
+	portStr, err := MongoPort()
+	if err != nil {
+		multierror.Append(errs, err)
+	}
+	port, err := strconv.Atoi(portStr)
+	if err != nil {
+		multierror.Append(errs, err)
+	}
+	user, err := MongoUser()
+	if err != nil {
+		multierror.Append(errs, err)
+	}
+	pass, err := MongoPassword()
+	if err != nil {
+		multierror.Append(errs, err)
+	}
+	timeoutStr := MongoConnectionTimeoutWithDefault("1")
+	timeoutSec, err := strconv.Atoi(timeoutStr)
+	if err != nil {
+		multierror.Append(errs, errors.WithMessage(err, "invalid value for timeout"))
+	}
+	timeout := time.Duration(timeoutSec) * time.Second
+	sslStr := MongoSSLWithDefault("true")
+	ssl, err := strconv.ParseBool(sslStr)
+	if err != nil {
+		multierror.Append(errs, errors.WithMessage(err, "invalid value for mongo SSL"))
+	}
+
+	if errs != nil {
+		return nil, errs
+	}
+	return &conn.Details{
+		Host:     host,
+		Port:     port,
+		User:     user,
+		Password: pass,
+		Timeout:  timeout,
+		SSL:      ssl,
+	}, nil
 }
