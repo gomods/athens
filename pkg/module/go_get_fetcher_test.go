@@ -25,6 +25,7 @@ func (s *ModuleSuite) TestGoGetFetcherFetch() {
 	r.NoError(err)
 	ver, err := ref.Read()
 	r.NoError(err)
+	defer ver.Zip.Close()
 
 	r.True(len(ver.Info) > 0)
 
