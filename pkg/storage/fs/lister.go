@@ -8,7 +8,7 @@ import (
 )
 
 func (l *storageImpl) List(ctx context.Context, module string) ([]string, error) {
-	sp, ctx := opentracing.StartSpanFromContext(ctx, "fs.List")
+	sp, ctx := opentracing.StartSpanFromContext(ctx, "storage.fs.List")
 	defer sp.Finish()
 	loc := l.moduleLocation(module)
 	fileInfos, err := afero.ReadDir(l.filesystem, loc)

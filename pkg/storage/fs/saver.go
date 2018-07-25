@@ -11,7 +11,7 @@ import (
 )
 
 func (s *storageImpl) Save(ctx context.Context, module, vsn string, mod []byte, zip io.Reader, info []byte) error {
-	sp, ctx := opentracing.StartSpanFromContext(ctx, "fs.Save")
+	sp, ctx := opentracing.StartSpanFromContext(ctx, "storage.fs.Save")
 	defer sp.Finish()
 	dir := s.versionLocation(module, vsn)
 	// TODO: 777 is not the best filemode, use something better
