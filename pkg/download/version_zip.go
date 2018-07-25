@@ -8,6 +8,7 @@ import (
 	"github.com/bketelsen/buffet"
 	"github.com/gobuffalo/buffalo"
 	"github.com/gobuffalo/buffalo/render"
+	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/log"
 	"github.com/gomods/athens/pkg/paths"
@@ -28,12 +29,11 @@ func VersionZipHandler(getter storage.Getter, eng *render.Engine, lggr *log.Logg
 		params, err := paths.GetAllParams(c)
 		if err != nil {
 			lggr.SystemErr(errors.E(op, err))
-			c.Response().WriteHeader(http.StatusInternalServerError) // 500 because handler should not be called in the first place.
+			c.Render(http.StatusInternalServerError, nil) // 500 because handler should not be called in the first place.
 			return nil
 		}
 
-		mod, ver := params.Module, params.Version
-		version, err := getter.Get(mod, ver)
+		version, err := getter.Get(params.Module, params.Version)
 		if err != nil {
 			lvl := logrus.ErrorLevel
 			status := http.StatusInternalServerError
@@ -41,23 +41,24 @@ func VersionZipHandler(getter storage.Getter, eng *render.Engine, lggr *log.Logg
 			// TODO: move this function to pkg/errors
 			if storage.IsNotFoundError(err) {
 				lvl = logrus.DebugLevel
-				msg = fmt.Sprintf("%s@%s not found", mod, ver)
+				msg = fmt.Sprintf("%v not found", config.FmtModVer(params.Module, params.Version))
 				status = http.StatusNotFound
 			}
 
-			lggr.SystemErr(errors.E(op, errors.M(mod), errors.V(ver), lvl, err))
+			lggr.SystemErr(errors.E(op, errors.M(params.Module), errors.V(params.Version), lvl, err))
 			return c.Render(status, eng.JSON(msg))
 		}
 		defer version.Zip.Close()
 
-		// should we write the status file *after* we ensure io.Copy is
-		// successful or not?
-		c.Response().WriteHeader(http.StatusOK)
+		status := http.StatusOK
 
 		_, err = io.Copy(c.Response(), version.Zip)
 		if err != nil {
-			lggr.SystemErr(errors.E(op, errors.M(mod), errors.V(ver), err))
+			status = http.StatusInternalServerError
+			lggr.SystemErr(errors.E(op, errors.M(params.Module), errors.V(params.Version), err))
 		}
+
+		c.Response().WriteHeader(status)
 
 		return nil
 	}

@@ -2,7 +2,9 @@ package errors
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
+	"runtime"
 
 	"github.com/sirupsen/logrus"
 )
@@ -62,7 +64,12 @@ type V string
 // the log level of an error based on the context it was constructed in.
 func E(op Op, args ...interface{}) error {
 	if len(args) == 0 {
-		panic("errors.E called with 0 args")
+		msg := "errors.E called with 0 args"
+		_, file, line, ok := runtime.Caller(1)
+		if ok {
+			msg = fmt.Sprintf("%v - %v:%v", msg, file, line)
+		}
+		return errors.New(msg)
 	}
 	e := Error{Op: op}
 	for _, a := range args {
@@ -90,7 +97,7 @@ func E(op Op, args ...interface{}) error {
 }
 
 // Severity returns the log level of an error
-// if non exists, then it's an Error level because
+// if none exists, then the level is Error because
 // it is an unexpected.
 func Severity(err error) logrus.Level {
 	e, ok := err.(Error)
@@ -102,8 +109,8 @@ func Severity(err error) logrus.Level {
 	// which we should not use since cloud providers only have
 	// debug, info, warn, and error) then look for the
 	// child's severity.
-	if childE, ok := e.Err.(Error); ok && e.Severity == 0 {
-		return Severity(childE)
+	if e.Severity < logrus.ErrorLevel {
+		return Severity(e.Err)
 	}
 
 	return e.Severity
