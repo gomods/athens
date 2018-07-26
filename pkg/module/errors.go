@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/gomods/athens/pkg/config"
+	"github.com/gomods/athens/pkg/errors"
 )
 
 // ErrModuleExcluded is error returned when processing of error is skipped
@@ -33,7 +34,8 @@ func (e *ErrModuleAlreadyFetched) Error() string {
 	return fmt.Sprintf("%s was already fetched", config.FmtModVer(e.module, e.version))
 }
 
-// NewErrModuleAlreadyFetched returns a new ErrModuleAlreadyFetched
-func NewErrModuleAlreadyFetched(mod, ver string) error {
-	return &ErrModuleAlreadyFetched{module: mod, version: ver}
+// NewErrModuleAlreadyFetched returns an error indicating that a module has already been
+// fetched
+func NewErrModuleAlreadyFetched(op errors.Op, mod, ver string) error {
+	return errors.E(op, errors.M(mod), errors.V(ver), errors.KindAlreadyExists)
 }

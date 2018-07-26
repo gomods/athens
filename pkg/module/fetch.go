@@ -13,7 +13,7 @@ func Fetch(ctx context.Context, s storage.Backend, fetcher Fetcher, mod, version
 	}
 
 	if s.Exists(ctx, mod, version) {
-		return NewErrModuleAlreadyFetched(mod, version)
+		return NewErrModuleAlreadyFetched("module.Fetch", mod, version)
 	}
 
 	moduleRef, err := fetcher.Fetch(mod, version)
