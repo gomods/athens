@@ -83,7 +83,7 @@ func prepareStructure(fs afero.Fs, repoRoot string) error {
 	}
 
 	sourcePath := filepath.Join(repoRoot, "mod.go")
-	sourceContent := []byte(`package mod // import "mod"`)
+	sourceContent := []byte("package mod")
 	return afero.WriteFile(fs, sourcePath, sourceContent, 0666)
 }
 
