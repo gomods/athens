@@ -87,7 +87,7 @@ func (s *Storage) Save(ctx context.Context, module, version string, mod []byte, 
 }
 
 func (s *Storage) upload(ctx context.Context, path, contentType string, stream io.Reader) error {
-	sp, ctx := opentracing.StartSpanFromContext(ctx, "storage.upload")
+	sp, ctx := opentracing.StartSpanFromContext(ctx, "storage.s3.upload")
 	defer sp.Finish()
 	upParams := &s3manager.UploadInput{
 		Bucket:      &s.bucket,
