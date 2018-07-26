@@ -3,7 +3,6 @@ package module
 import (
 	"fmt"
 
-	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/errors"
 )
 
@@ -20,18 +19,6 @@ func (e *ErrModuleExcluded) Error() string {
 // NewErrModuleExcluded creates new ErrModuleExcluded
 func NewErrModuleExcluded(module string) error {
 	return &ErrModuleExcluded{module: module}
-}
-
-// ErrModuleAlreadyFetched is an error returned when you try to fetch the same module@version
-// more than once
-type ErrModuleAlreadyFetched struct {
-	module  string
-	version string
-}
-
-// Error is the error interface implementation
-func (e *ErrModuleAlreadyFetched) Error() string {
-	return fmt.Sprintf("%s was already fetched", config.FmtModVer(e.module, e.version))
 }
 
 // NewErrModuleAlreadyFetched returns an error indicating that a module has already been
