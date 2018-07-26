@@ -10,7 +10,7 @@ import (
 
 // List lists all versions of a module
 func (s *ModuleStore) List(ctx context.Context, module string) ([]string, error) {
-	c := s.s.DB(s.d).C(s.c)
+	c := s.sess.DB(athensDB).C(modulesCollection)
 	result := make([]storage.Module, 0)
 	err := c.Find(bson.M{"module": module}).All(&result)
 	if err != nil {

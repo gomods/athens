@@ -15,6 +15,6 @@ func (s *ModuleStore) Delete(ctx context.Context, module, version string) error 
 			Version: version,
 		}
 	}
-	c := s.s.DB(s.d).C(s.c)
+	c := s.sess.DB(athensDB).C(modulesCollection)
 	return c.Remove(bson.M{"module": module, "version": version})
 }
