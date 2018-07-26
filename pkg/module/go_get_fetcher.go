@@ -25,10 +25,6 @@ type goGetFetcher struct {
 
 // NewGoGetFetcher creates fetcher which uses go get tool to fetch modules
 func NewGoGetFetcher(goBinaryName string, fs afero.Fs) (Fetcher, error) {
-	if repoURI == "" {
-		return nil, errors.New("invalid repository identifier")
-	}
-
 	return &goGetFetcher{
 		fs:           fs,
 		goBinaryName: goBinaryName,
