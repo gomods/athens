@@ -20,21 +20,17 @@ var (
 
 type goGetFetcher struct {
 	fs           afero.Fs
-	repoURI      string
-	version      string
 	goBinaryName string
 }
 
 // NewGoGetFetcher creates fetcher which uses go get tool to fetch modules
-func NewGoGetFetcher(goBinaryName string, fs afero.Fs, repoURI, version string) (Fetcher, error) {
+func NewGoGetFetcher(goBinaryName string, fs afero.Fs) (Fetcher, error) {
 	if repoURI == "" {
 		return nil, errors.New("invalid repository identifier")
 	}
 
 	return &goGetFetcher{
 		fs:           fs,
-		repoURI:      repoURI,
-		version:      version,
 		goBinaryName: goBinaryName,
 	}, nil
 }
@@ -56,7 +52,7 @@ func (g *goGetFetcher) Fetch(mod, ver string) (Ref, error) {
 		return ref, err
 	}
 	sourcePath := filepath.Join(goPathRoot, "src")
-	modPath := filepath.Join(sourcePath, getRepoDirName(g.repoURI, g.version))
+	modPath := filepath.Join(sourcePath, getRepoDirName(mod, ver))
 	if err := g.fs.MkdirAll(modPath, os.ModeDir|os.ModePerm); err != nil {
 		// TODO: return a ref for cleaning up the goPathRoot
 		// https://github.com/gomods/athens/issues/329

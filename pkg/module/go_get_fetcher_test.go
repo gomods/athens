@@ -7,19 +7,17 @@ import (
 
 func (s *ModuleSuite) TestNewGoGetFetcher() {
 	r := s.Require()
-	fetcher, err := NewGoGetFetcher(s.goBinaryName, s.fs, repoURI, version)
+	fetcher, err := NewGoGetFetcher(s.goBinaryName, s.fs)
 	r.NoError(err)
-	goGetFetcher, ok := fetcher.(*goGetFetcher)
+	_, ok := fetcher.(*goGetFetcher)
 	r.True(ok)
-	r.Equal(repoURI, goGetFetcher.repoURI)
-	r.Equal(version, goGetFetcher.version)
 }
 
 func (s *ModuleSuite) TestGoGetFetcherFetch() {
 	r := s.Require()
 	// we need to use an OS filesystem because fetch executes vgo on the command line, which
 	// always writes to the filesystem
-	fetcher, err := NewGoGetFetcher(s.goBinaryName, afero.NewOsFs(), repoURI, version)
+	fetcher, err := NewGoGetFetcher(s.goBinaryName, afero.NewOsFs())
 	r.NoError(err)
 	ref, err := fetcher.Fetch(repoURI, version)
 	r.NoError(err)
