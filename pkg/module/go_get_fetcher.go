@@ -35,20 +35,17 @@ func NewGoGetFetcher(goBinaryName string, fs afero.Fs) (Fetcher, error) {
 	}, nil
 }
 
-// Fetch downloads the sources and returns path where it can be found. This function will
-// always return a ref, even if it returns a non-nil error.
-//
-// If an error was returned, the returned ref's Read method will return an error, but you
-// should always call ref.Clear() on the returned ref
+// Fetch downloads the sources and returns path where it can be found. Make sure to call Clear
+// on the returned Ref when you are done with it
 func (g *goGetFetcher) Fetch(mod, ver string) (Ref, error) {
-	var ref Ref
-	ref = noopRef{}
+	ref := noopRef{}
 
 	// setup the GOPATH
 	goPathRoot, err := afero.TempDir(g.fs, "", "athens")
 	if err != nil {
 		// TODO: return a ref for cleaning up the goPathRoot
 		// https://github.com/gomods/athens/issues/329
+		ref.Clear()
 		return ref, err
 	}
 	sourcePath := filepath.Join(goPathRoot, "src")
@@ -56,6 +53,7 @@ func (g *goGetFetcher) Fetch(mod, ver string) (Ref, error) {
 	if err := g.fs.MkdirAll(modPath, os.ModeDir|os.ModePerm); err != nil {
 		// TODO: return a ref for cleaning up the goPathRoot
 		// https://github.com/gomods/athens/issues/329
+		ref.Clear()
 		return ref, err
 	}
 
@@ -63,6 +61,7 @@ func (g *goGetFetcher) Fetch(mod, ver string) (Ref, error) {
 	if err := prepareStructure(g.fs, modPath); err != nil {
 		// TODO: return a ref for cleaning up the goPathRoot
 		// https://github.com/gomods/athens/issues/329
+		ref.Clear()
 		return ref, err
 	}
 
@@ -70,13 +69,12 @@ func (g *goGetFetcher) Fetch(mod, ver string) (Ref, error) {
 	if err != nil {
 		// TODO: return a ref that cleans up the goPathRoot
 		// https://github.com/gomods/athens/issues/329
-		return newDiskRef(g.fs, cachePath, ver), err
+		ref.Clear()
+		return nil, err
 	}
 	// TODO: make sure this ref also cleans up the goPathRoot
 	// https://github.com/gomods/athens/issues/329
-	ref = newDiskRef(g.fs, cachePath, ver)
-
-	return ref, err
+	return newDiskRef(g.fs, cachePath, ver), err
 }
 
 // Hacky thing makes vgo not to complain
