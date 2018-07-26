@@ -1,6 +1,7 @@
 package goget
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -10,12 +11,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gomods/athens/pkg/module"
-
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/config/env"
 	"github.com/gomods/athens/pkg/download"
 	"github.com/gomods/athens/pkg/errors"
+	"github.com/gomods/athens/pkg/module"
 	"github.com/gomods/athens/pkg/storage"
 	"github.com/spf13/afero"
 )
@@ -48,7 +48,7 @@ func (gg *goget) List(ctx context.Context, mod string) ([]string, error) {
 type listResp struct {
 	Path     string
 	Version  string
-	Versions []string
+	Versions []string `json:"omitempty"`
 	Time     time.Time
 }
 
@@ -129,6 +129,12 @@ func (gg *goget) list(op errors.Op, mod string) (*listResp, error) {
 	if err != nil {
 		errFmt := fmt.Errorf("%v: %s", err, bts)
 		return nil, errors.E(op, errFmt)
+	}
+
+	// ugly hack until go cli implements -quiet flag.
+	// https://github.com/golang/go/issues/26628
+	if bytes.HasPrefix(bts, []byte("go: finding")) {
+		bts = bts[bytes.Index(bts, []byte{'\n'}):]
 	}
 
 	var lr listResp
