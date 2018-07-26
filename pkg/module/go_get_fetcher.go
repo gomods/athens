@@ -9,7 +9,6 @@ import (
 	"strings"
 
 	"github.com/gomods/athens/pkg/errors"
-	"github.com/masterminds/semver"
 	pkgerrors "github.com/pkg/errors"
 	"github.com/spf13/afero"
 )
@@ -88,9 +87,6 @@ func prepareStructure(fs afero.Fs, repoRoot string) error {
 // of the module cache. returns a non-nil error if anything went wrong. always returns
 // the location of the module cache so you can delete it if necessary
 func getSources(goBinaryName string, fs afero.Fs, gopath, repoRoot, module, version string) (string, error) {
-	if _, err := semver.NewVersion(version); err != nil {
-		return "", fmt.Errorf("version '%s' is invalid", version)
-	}
 	uri := strings.TrimSuffix(module, "/")
 
 	fullURI := fmt.Sprintf("%s@%s", uri, version)
