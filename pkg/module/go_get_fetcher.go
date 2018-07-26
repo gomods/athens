@@ -2,20 +2,16 @@ package module
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
 
+	"github.com/gomods/athens/pkg/errors"
+	"github.com/masterminds/semver"
 	pkgerrors "github.com/pkg/errors"
 	"github.com/spf13/afero"
-)
-
-var (
-	// ErrLimitExceeded signals that github.com refused to serve the request due to exceeded quota
-	ErrLimitExceeded = errors.New("github limit exceeded")
 )
 
 type goGetFetcher struct {
@@ -92,9 +88,8 @@ func prepareStructure(fs afero.Fs, repoRoot string) error {
 // of the module cache. returns a non-nil error if anything went wrong. always returns
 // the location of the module cache so you can delete it if necessary
 func getSources(goBinaryName string, fs afero.Fs, gopath, repoRoot, module, version string) (string, error) {
-	version = strings.TrimPrefix(version, "@")
-	if !strings.HasPrefix(version, "v") {
-		version = "v" + version
+	if !semver.IsValid(version) {
+		return "", fmt.Errorf("version '%s' is invalid", version)
 	}
 	uri := strings.TrimSuffix(module, "/")
 
@@ -116,7 +111,7 @@ func getSources(goBinaryName string, fs afero.Fs, gopath, repoRoot, module, vers
 	if err != nil {
 		// github quota exceeded
 		if isLimitHit(o) {
-			return packagePath, pkgerrors.WithMessage(err, "github API limit hit")
+			return packagePath, errors.E("module.getSources", err, errors.KindRateLimit)
 		}
 		// another error in the output
 		return packagePath, err

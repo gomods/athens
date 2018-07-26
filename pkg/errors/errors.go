@@ -15,6 +15,7 @@ const (
 	KindBadRequest    = http.StatusBadRequest
 	KindUnexpected    = http.StatusInternalServerError
 	KindAlreadyExists = http.StatusConflict
+	KindRateLimit     = http.StatusTooManyRequests
 )
 
 // Error is an Athens system error.
