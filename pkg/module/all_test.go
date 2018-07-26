@@ -26,5 +26,5 @@ func (m *ModuleSuite) SetupTest() {
 
 func TestModules(t *testing.T) {
 	goBinaryPath := envy.Get("GO_BINARY_PATH", "go")
-	suite.Run(t, &ModuleSuite{goBinaryName: goBinaryName})
+	suite.Run(t, &ModuleSuite{goBinaryName: goBinaryPath})
 }
