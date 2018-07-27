@@ -61,7 +61,7 @@ func parseArgs(args worker.Args) (string, string, error) {
 
 func getModuleInfo(module, version string) (*storage.Version, error) {
 	os := olympusStore.NewStorage(GetOlympusEndpoint())
-	return os.Get(module, version)
+	return os.Get(context.TODO(), module, version)
 }
 
 // GetOlympusEndpoint returns global endpoint with override in mind
