@@ -47,7 +47,7 @@ func (gg *goget) List(ctx context.Context, mod string) ([]string, error) {
 type listResp struct {
 	Path     string
 	Version  string
-	Versions []string `json:"omitempty"`
+	Versions []string `json:",omitempty"`
 	Time     time.Time
 }
 
@@ -55,7 +55,7 @@ func (gg *goget) Info(ctx context.Context, mod string, ver string) ([]byte, erro
 	const op errors.Op = "goget.Info"
 	v, err := gg.Version(ctx, mod, ver)
 	if err != nil {
-		return nil, errors.E(op)
+		return nil, errors.E(op, err)
 	}
 	v.Zip.Close()
 
