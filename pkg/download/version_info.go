@@ -8,18 +8,30 @@ import (
 	"github.com/gobuffalo/buffalo"
 	"github.com/gobuffalo/buffalo/render"
 	"github.com/gomods/athens/pkg/storage"
+	"github.com/gomods/athens/pkg/log"
+	"github.com/gomods/athens/pkg/errors"
 )
 
 // PathVersionInfo URL.
 const PathVersionInfo = "/{module:.+}/@v/{version}.info"
 
 // VersionInfoHandler implements GET baseURL/module/@v/version.info
-func VersionInfoHandler(dp download.Protocol, lggr *log.Logger, eng *render.Engine) buffalo.Handler {
+func VersionInfoHandler(dp Protocol, lggr *log.Logger, eng *render.Engine) buffalo.Handler {
 	return func(c buffalo.Context) error {
+		const op errors.Op = "download.versionInfoHandler"
+
 		sp := buffet.SpanFromContext(c)
 		sp.SetOperationName("versionInfoHandler")
+
+		mod, ver, verInfo, err := getModuleVersion(c, lggr, dp)
+		if err != nil {
+			err := errors.E(op, errors.M(mod), errors.V(ver), err)
+			lggr.SystemErr(err)
+			c.Render(http.StatusInternalServerError, nil)
+		}
+
 		var revInfo storage.RevInfo
-		if err := json.Unmarshal(versionInfo.Info, &revInfo); err != nil {
+		if err := json.Unmarshal(verInfo.Info, &revInfo); err != nil {
 			return err
 		}
 		return c.Render(http.StatusOK, eng.JSON(revInfo))

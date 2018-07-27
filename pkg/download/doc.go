@@ -7,12 +7,13 @@ package download
 
 import (
 	"github.com/gobuffalo/buffalo"
+	"github.com/gomods/athens/pkg/log"
 	"github.com/gomods/athens/pkg/paths"
 	"github.com/gomods/athens/pkg/storage"
 	"github.com/pkg/errors"
 )
 
-func getModuleVersion(c buffalo.Context, dp Protocol) (string, string, *storage.Version, error) {
+func getModuleVersion(c buffalo.Context, lggr *log.Logger, dp Protocol) (string, string, *storage.Version, error) {
 	params, err := paths.GetAllParams(c)
 	if err != nil {
 		lggr.SystemErr(err)
@@ -23,5 +24,5 @@ func getModuleVersion(c buffalo.Context, dp Protocol) (string, string, *storage.
 	if err != nil {
 		return "", "", nil, errors.WithStack(err)
 	}
-	return mod.Module, mod.Version, versionInfo, nil
+	return params.Module, params.Version, versionInfo, nil
 }
