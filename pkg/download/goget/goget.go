@@ -139,7 +139,7 @@ func (gg *goget) Zip(ctx context.Context, mod, ver string) (io.ReadCloser, error
 
 func (gg *goget) Version(ctx context.Context, mod, ver string) (*storage.Version, error) {
 	const op errors.Op = "goget.Version"
-	fetcher, _ := module.NewGoGetFetcher(gg.goBinPath, gg.fs) // TODO: remove err from func call
+	fetcher := module.NewGoGetFetcher(gg.goBinPath, gg.fs)
 	ref, err := fetcher.Fetch(mod, ver)
 	if err != nil {
 		return nil, errors.E(op, err)
