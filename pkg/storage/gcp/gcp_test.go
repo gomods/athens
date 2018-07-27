@@ -3,7 +3,7 @@ package gcp
 import (
 	"bytes"
 	"context"
-	"fmt"
+
 	"io/ioutil"
 	"testing"
 	"time"
@@ -16,7 +16,6 @@ func (g *GcpTests) TestSaveGetListExistsRoundTrip() {
 
 	g.T().Run("Save to storage", func(t *testing.T) {
 		err := g.store.Save(g.context, g.module, g.version, mod, bytes.NewReader(zip), info)
-		fmt.Println("Storage \n", g.store.bucket.(*bucketMock).db)
 		r.NoError(err)
 	})
 
