@@ -6,8 +6,8 @@ import (
 	"github.com/bketelsen/buffet"
 	"github.com/gobuffalo/buffalo"
 	"github.com/gobuffalo/buffalo/render"
-	"github.com/gomods/athens/pkg/log"
 	"github.com/gomods/athens/pkg/errors"
+	"github.com/gomods/athens/pkg/log"
 )
 
 // PathVersionModule URL.
