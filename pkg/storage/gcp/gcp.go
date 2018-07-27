@@ -45,6 +45,14 @@ func NewWithCredentials(ctx context.Context, cred option.ClientOption) (*Storage
 	}, nil
 }
 
+func newWithBucket(bkt Bucket) *Storage {
+	return &Storage{
+		bucket:       bkt,
+		baseURI:      nil, // TODO,
+		closeStorage: func() error { return nil },
+	}
+}
+
 // BaseURL returns the base URL that stores all modules. It can be used
 // in the "meta" tag redirect response to vgo.
 //
