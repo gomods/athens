@@ -21,6 +21,7 @@ func addProxyRoutes(
 	dp := download.New(goget.New(), storage)
 	// Download Protocol
 	app.GET(download.PathList, download.ListHandler(dp, lggr, proxy))
+	app.GET(download.PathLatest, download.LatestHandler(dp, lggr, proxy))
 	app.GET(download.PathVersionInfo, download.VersionInfoHandler(dp, lggr, proxy))
 	app.GET(download.PathVersionModule, download.VersionModuleHandler(dp, lggr, proxy))
 	app.GET(download.PathVersionZip, download.VersionZipHandler(dp, lggr, proxy))
