@@ -81,7 +81,7 @@ func App() (*buffalo.App, error) {
 			return nil, err
 		}
 
-		fetcher := module.NewGoGetFetcher(env.GoBinaryPath(), afero.NewOsFs())
+		fetcher := module.NewGoGetFetcher(env.GoBinPath(), afero.NewOsFs())
 
 		worker, err := getWorker(store, mf)
 		if err != nil {
