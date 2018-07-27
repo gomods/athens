@@ -25,5 +25,5 @@ func GoPath() (string, error) {
 // GoBinPath returns the path to the go binary to use, defined by
 // GO_BINARY_PATH. This value can be a name on the PATH, or the full path
 func GoBinPath() string {
-	return envy.Get("GO_BINARY_NAME", "go")
+	return envy.Get("GO_BINARY_PATH", "go")
 }
