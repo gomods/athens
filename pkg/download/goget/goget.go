@@ -51,27 +51,15 @@ type listResp struct {
 	Time     time.Time
 }
 
-func (gg *goget) Info(ctx context.Context, mod string, ver string) (*storage.RevInfo, error) {
+func (gg *goget) Info(ctx context.Context, mod string, ver string) ([]byte, error) {
 	const op errors.Op = "goget.Info"
-	fetcher, _ := module.NewGoGetFetcher(gg.goBinPath, gg.fs) // TODO: remove err from func call
-	ref, err := fetcher.Fetch(mod, ver)
+	v, err := gg.Version(ctx, mod, ver)
 	if err != nil {
-		return nil, errors.E(op, err)
+		return nil, errors.E(op)
 	}
-	defer ref.Clear()
-	v, err := ref.Read()
-	if err != nil {
-		return nil, errors.E(op, err)
-	}
-	defer v.Zip.Close()
+	v.Zip.Close()
 
-	var ri storage.RevInfo
-	err = json.Unmarshal(v.Info, &ri)
-	if err != nil {
-		return nil, errors.E(op, err)
-	}
-
-	return &ri, nil
+	return v.Info, nil
 }
 
 func (gg *goget) Latest(ctx context.Context, mod string) (*storage.RevInfo, error) {
@@ -130,23 +118,27 @@ func (gg *goget) list(op errors.Op, mod string) (*listResp, error) {
 
 func (gg *goget) GoMod(ctx context.Context, mod string, ver string) ([]byte, error) {
 	const op errors.Op = "goget.Info"
-	fetcher, _ := module.NewGoGetFetcher(gg.goBinPath, gg.fs) // TODO: remove err from func call
-	ref, err := fetcher.Fetch(mod, ver)
+	v, err := gg.Version(ctx, mod, ver)
 	if err != nil {
-		return nil, errors.E(op, err)
+		return nil, errors.E(op)
 	}
-	defer ref.Clear()
-	v, err := ref.Read()
-	if err != nil {
-		return nil, errors.E(op, err)
-	}
-	defer v.Zip.Close()
+	v.Zip.Close()
 
 	return v.Mod, nil
 }
 
-func (gg *goget) Zip(ctx context.Context, mod string, ver string) (io.ReadCloser, error) {
+func (gg *goget) Zip(ctx context.Context, mod, ver string) (io.ReadCloser, error) {
 	const op errors.Op = "goget.Info"
+	v, err := gg.Version(ctx, mod, ver)
+	if err != nil {
+		return nil, errors.E(op)
+	}
+
+	return v.Zip, nil
+}
+
+func (gg *goget) Version(ctx context.Context, mod, ver string) (*storage.Version, error) {
+	const op errors.Op = "goget.Version"
 	fetcher, _ := module.NewGoGetFetcher(gg.goBinPath, gg.fs) // TODO: remove err from func call
 	ref, err := fetcher.Fetch(mod, ver)
 	if err != nil {
@@ -157,5 +149,5 @@ func (gg *goget) Zip(ctx context.Context, mod string, ver string) (io.ReadCloser
 		return nil, errors.E(op, err)
 	}
 
-	return v.Zip, nil
+	return v, nil
 }

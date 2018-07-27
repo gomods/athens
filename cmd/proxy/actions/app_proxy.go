@@ -17,7 +17,7 @@ func addProxyRoutes(
 ) error {
 	app.GET("/", proxyHomeHandler)
 
-	dp := goget.New()
+	dp := download.New(goget.New(), storage)
 	// Download Protocol
 	app.GET(download.PathList, download.ListHandler(dp, lggr, proxy))
 	app.GET(download.PathVersionInfo, cacheMissHandler(download.VersionInfoHandler(storage, proxy), app.Worker, mf, lggr))
