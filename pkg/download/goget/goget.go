@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"io"
 	"os/exec"
-	"path/filepath"
 	"strings"
 	"time"
 
@@ -50,23 +49,6 @@ type listResp struct {
 	Version  string
 	Versions []string `json:"omitempty"`
 	Time     time.Time
-}
-
-// dummyMod creates a random go module so that listing
-// a depdencny's upstream versions can run from the go cli.
-func dummyMod(fs afero.Fs, repoRoot string) error {
-	const op errors.Op = "goget.dummyMod"
-	gomodPath := filepath.Join(repoRoot, "go.mod")
-	gomodContent := []byte("module mod")
-	if err := afero.WriteFile(fs, gomodPath, gomodContent, 0666); err != nil {
-		return errors.E(op, err)
-	}
-	sourcePath := filepath.Join(repoRoot, "mod.go")
-	sourceContent := []byte(`package mod`)
-	if err := afero.WriteFile(fs, sourcePath, sourceContent, 0666); err != nil {
-		return errors.E(op, err)
-	}
-	return nil
 }
 
 func (gg *goget) Info(ctx context.Context, mod string, ver string) (*storage.RevInfo, error) {
@@ -117,7 +99,7 @@ func (gg *goget) list(op errors.Op, mod string) (*listResp, error) {
 		return nil, errors.E(op, err)
 	}
 	defer gg.fs.RemoveAll(hackyPath)
-	err = dummyMod(gg.fs, hackyPath)
+	err = module.Dummy(gg.fs, hackyPath)
 	cmd := exec.Command(
 		gg.goBinPath,
 		"list", "-m", "-versions", "-json",
