@@ -25,7 +25,7 @@ func (g *GcpTests) SetupSuite() {
 	g.context = context.Background()
 	g.module = "gcp-test"
 	g.version = "v1.2.3"
-	g.store = newWithBucket(&bucketMock{db: make(map[string][]byte)})
+	g.store = newWithBucket(newBucketMock())
 }
 
 func TestGcpStorage(t *testing.T) {
