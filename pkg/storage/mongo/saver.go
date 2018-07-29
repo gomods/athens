@@ -3,25 +3,34 @@ package mongo
 import (
 	"context"
 	"io"
-	"io/ioutil"
 
+	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/storage"
 	opentracing "github.com/opentracing/opentracing-go"
 )
 
 // Save stores a module in mongo storage.
 func (s *ModuleStore) Save(ctx context.Context, module, version string, mod []byte, zip io.Reader, info []byte) error {
+	const op errors.Op = "mongo.Save"
 	sp, ctx := opentracing.StartSpanFromContext(ctx, "storage.mongo.Save")
 	defer sp.Finish()
-	zipBytes, err := ioutil.ReadAll(zip)
+
+	zipName := s.gridFileName(module, version)
+	fs := s.s.DB(s.d).GridFS("fs")
+	f, err := fs.Create(zipName)
 	if err != nil {
-		return err
+		return errors.E(op, err)
 	}
+
+	_, err = io.Copy(f, zip) // check number of bytes written?
+	if err != nil {
+		return errors.E(op, err)
+	}
+
 	m := &storage.Module{
 		Module:  module,
 		Version: version,
 		Mod:     mod,
-		Zip:     zipBytes,
 		Info:    info,
 	}
 

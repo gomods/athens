@@ -27,15 +27,16 @@ func VersionZipHandler(dp Protocol, lggr *log.Logger, eng *render.Engine) buffal
 			lggr.SystemErr(err)
 			return c.Render(http.StatusInternalServerError, nil)
 		}
+		defer verInfo.Zip.Close()
 
-		status := http.StatusOK
+		// Calling c.Response().Write will write the header directly
+		// and we would get a 0 status in the buffalo logs.
+		c.Render(200, nil)
 		_, err = io.Copy(c.Response(), verInfo.Zip)
 		if err != nil {
-			status = http.StatusInternalServerError
 			lggr.SystemErr(errors.E(op, errors.M(mod), errors.V(ver), err))
 		}
 
-		c.Response().WriteHeader(status)
 		return nil
 	}
 }
