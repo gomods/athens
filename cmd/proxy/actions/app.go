@@ -139,29 +139,42 @@ func App() (*buffalo.App, error) {
 	return app, nil
 }
 
+// TODO: enable redis or in-memory with a switch
 func getWorker(s storage.Backend, mf *module.Filter) (worker.Worker, error) {
-	port := env.RedisQueuePortWithDefault(":6379")
-	w := gwa.New(gwa.Options{
-		Pool: &redis.Pool{
-			MaxActive: 5,
-			MaxIdle:   5,
-			Wait:      true,
-			Dial: func() (redis.Conn, error) {
-				return redis.Dial("tcp", port)
+	if false {
+		port := env.RedisQueuePortWithDefault(":6379")
+		w := gwa.New(gwa.Options{
+			Pool: &redis.Pool{
+				MaxActive: 5,
+				MaxIdle:   5,
+				Wait:      true,
+				Dial: func() (redis.Conn, error) {
+					return redis.Dial("tcp", port)
+				},
 			},
-		},
-		Name:           FetcherWorkerName,
-		MaxConcurrency: env.AthensMaxConcurrency(),
-	})
+			Name:           FetcherWorkerName,
+			MaxConcurrency: env.AthensMaxConcurrency(),
+		})
 
-	opts := work.JobOptions{
-		SkipDead: true,
-		MaxFails: env.WorkerMaxFails(),
+		opts := work.JobOptions{
+			SkipDead: true,
+			MaxFails: env.WorkerMaxFails(),
+		}
+
+		if err := w.RegisterWithOptions(FetcherWorkerName, opts, GetProcessCacheMissJob(s, w, mf)); err != nil {
+			return nil, err
+		}
+
+		return w, w.RegisterWithOptions(ReporterWorkerName, opts, GetCacheMissReporterJob(w, mf))
 	}
 
-	if err := w.RegisterWithOptions(FetcherWorkerName, opts, GetProcessCacheMissJob(s, w, mf)); err != nil {
+	w := worker.NewSimple()
+
+	if err := w.Register(FetcherWorkerName, GetProcessCacheMissJob(s, w, mf)); err != nil {
 		return nil, err
 	}
-
-	return w, w.RegisterWithOptions(ReporterWorkerName, opts, GetCacheMissReporterJob(w, mf))
+	if err := w.Register(ReporterWorkerName, GetCacheMissReporterJob(w, mf)); err != nil {
+		return nil, err
+	}
+	return w, nil
 }
