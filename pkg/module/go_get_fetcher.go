@@ -33,22 +33,28 @@ func (g *goGetFetcher) Fetch(mod, ver string) (Ref, error) {
 	// setup the GOPATH
 	goPathRoot, err := afero.TempDir(g.fs, "", "athens")
 	if err != nil {
-		return newDiskRef(g.fs, goPathRoot, "", ""), err
+		return nil, err
 	}
 	sourcePath := filepath.Join(goPathRoot, "src")
 	modPath := filepath.Join(sourcePath, getRepoDirName(mod, ver))
 	if err := g.fs.MkdirAll(modPath, os.ModeDir|os.ModePerm); err != nil {
-		return newDiskRef(g.fs, goPathRoot, "", ""), err
+		diskRef := newDiskRef(g.fs, goPathRoot, "", "")
+		diskRef.Clear()
+		return nil, err
 	}
 
 	// setup the module with barebones stuff
 	if err := Dummy(g.fs, modPath); err != nil {
-		return newDiskRef(g.fs, goPathRoot, "", ""), err
+		diskRef := newDiskRef(g.fs, goPathRoot, "", "")
+		diskRef.Clear()
+		return nil, err
 	}
 
 	err = getSources(g.goBinaryName, g.fs, goPathRoot, modPath, mod, ver)
 	if err != nil {
-		return newDiskRef(g.fs, goPathRoot, "", ""), err
+		diskRef := newDiskRef(g.fs, goPathRoot, "", "")
+		diskRef.Clear()
+		return nil, err
 	}
 
 	return newDiskRef(g.fs, goPathRoot, mod, ver), nil
