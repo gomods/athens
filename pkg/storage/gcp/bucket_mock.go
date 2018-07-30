@@ -45,13 +45,7 @@ func (r *bucketWriter) Close() error {
 }
 
 func (r *bucketWriter) Write(p []byte) (int, error) {
-	_, ok := r.bucketMock.db[r.path]
-	if !ok {
-		r.bucketMock.db[r.path] = make([]byte, 0)
-	}
-
 	r.bucketMock.db[r.path] = append(r.bucketMock.db[r.path], p...)
-
 	return len(p), nil
 }
 
@@ -74,6 +68,7 @@ func (m *bucketMock) Open(ctx context.Context, path string) (io.ReadCloser, erro
 }
 
 func (m *bucketMock) Write(ctx context.Context, path string) io.WriteCloser {
+	m.db[path] = make([]byte, 0)
 	m.writeLockCount++
 	m.lock.Lock()
 	return &bucketWriter{m, path}
