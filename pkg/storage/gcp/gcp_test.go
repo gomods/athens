@@ -41,6 +41,11 @@ func (g *GcpTests) TestSaveGetListExistsRoundTrip() {
 	g.T().Run("Module exists", func(t *testing.T) {
 		r.Equal(true, g.store.Exists(g.context, g.module, g.version))
 	})
+
+	g.T().Run("Resources closed", func(t *testing.T) {
+		r.Equal(true, g.bucket.ReadClosed())
+		r.Equal(true, g.bucket.WriteClosed())
+	})
 }
 
 func (g *GcpTests) TestDeleter() {

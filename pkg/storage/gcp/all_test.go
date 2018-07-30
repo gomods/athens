@@ -22,6 +22,7 @@ type GcpTests struct {
 	version string
 	store   *Storage
 	url     *url.URL
+	bucket  *bucketMock
 }
 
 func (g *GcpTests) SetupSuite() {
@@ -29,8 +30,8 @@ func (g *GcpTests) SetupSuite() {
 	g.module = "gcp-test"
 	g.version = "v1.2.3"
 	g.url, _ = url.Parse(fmt.Sprintf("https://storage.googleapis.com/testbucket"))
-
-	g.store = newWithBucket(newBucketMock(), g.url)
+	g.bucket = newBucketMock()
+	g.store = newWithBucket(g.bucket, g.url)
 }
 
 func TestGcpStorage(t *testing.T) {

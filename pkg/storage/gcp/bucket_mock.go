@@ -10,11 +10,13 @@ import (
 )
 
 type bucketMock struct {
-	db   map[string][]byte
-	lock sync.RWMutex
+	db             map[string][]byte
+	lock           sync.RWMutex
+	readLockCount  int
+	writeLockCount int
 }
 
-func newBucketMock() Bucket {
+func newBucketMock() *bucketMock {
 	b := &bucketMock{}
 	b.db = make(map[string][]byte)
 	return b
@@ -32,11 +34,13 @@ type bucketWriter struct {
 
 func (r *bucketReader) Close() error {
 	r.bucketMock.lock.RUnlock()
+	r.bucketMock.readLockCount--
 	return nil
 }
 
 func (r *bucketWriter) Close() error {
 	r.bucketMock.lock.Unlock()
+	r.bucketMock.writeLockCount--
 	return nil
 }
 
@@ -63,13 +67,14 @@ func (m *bucketMock) Open(ctx context.Context, path string) (io.ReadCloser, erro
 	if !ok {
 		return nil, fmt.Errorf("path %s not found", path)
 	}
-
+	m.readLockCount++
 	m.lock.RLock()
 	r := bytes.NewReader(data)
 	return &bucketReader{r, m}, nil
 }
 
 func (m *bucketMock) Write(ctx context.Context, path string) io.WriteCloser {
+	m.writeLockCount++
 	m.lock.Lock()
 	return &bucketWriter{m, path}
 }
@@ -92,4 +97,12 @@ func (m *bucketMock) Exists(ctx context.Context, path string) bool {
 	defer m.lock.RUnlock()
 	_, found := m.db[path]
 	return found
+}
+
+func (m *bucketMock) ReadClosed() bool {
+	return (m.readLockCount == 0)
+}
+
+func (m *bucketMock) WriteClosed() bool {
+	return (m.writeLockCount == 0)
 }
