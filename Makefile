@@ -30,6 +30,10 @@ test:
 test-unit:
 	./scripts/test_unit.sh
 
+.PHONY: test-e2e
+test-e2e:
+	./scripts/test_e2e.sh
+
 .PHONY: olympus-docker
 olympus-docker:
 	docker build -t gopackages/olympus -f cmd/olympus/Dockerfile .
