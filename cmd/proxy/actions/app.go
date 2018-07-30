@@ -1,6 +1,7 @@
 package actions
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/gobuffalo/buffalo"
@@ -36,8 +37,6 @@ const (
 // application is being run. Default is "development".
 var ENV = env.GoEnvironmentWithDefault("development")
 
-var app *buffalo.App
-
 // T is the translator to use
 var T *i18n.Translator
 
@@ -68,78 +67,77 @@ func init() {
 // should be defined. This is the nerve center of your
 // application.
 func App() (*buffalo.App, error) {
-	if app == nil {
-		store, err := GetStorage()
-		mf := module.NewFilter()
-		if err != nil {
-			err = fmt.Errorf("error getting storage configuration (%s)", err)
-			return nil, err
-		}
-		if err := store.Connect(); err != nil {
-			err = fmt.Errorf("error connecting to storage (%s)", err)
-			return nil, err
-		}
-
-		worker, err := getWorker(store, mf)
-		if err != nil {
-			return nil, err
-		}
-
-		lggr := log.New(env.CloudRuntime(), env.LogLevel())
-
-		app = buffalo.New(buffalo.Options{
-			Env: ENV,
-			PreWares: []buffalo.PreWare{
-				cors.Default().Handler,
-			},
-			SessionName: "_athens_session",
-			Worker:      worker,
-			Logger:      log.Buffalo(),
-		})
-
-		// Automatically redirect to SSL
-		app.Use(ssl.ForceSSL(secure.Options{
-			SSLRedirect:     ENV == "production",
-			SSLProxyHeaders: map[string]string{"X-Forwarded-Proto": "https"},
-		}))
-
-		if ENV == "development" {
-			app.Use(middleware.ParameterLogger)
-		}
-		initializeTracing(app)
-		initializeAuth(app)
-		// Protect against CSRF attacks. https://www.owasp.org/index.php/Cross-Site_Request_Forgery_(CSRF)
-		// Remove to disable this.
-		if env.EnableCSRFProtection() {
-			csrfMiddleware := csrf.New
-			app.Use(csrfMiddleware)
-		}
-
-		// Wraps each request in a transaction.
-		//  c.Value("tx").(*pop.PopTransaction)
-		// Remove to disable this.
-		// app.Use(middleware.PopTransaction(models.DB))
-
-		// Setup and use translations:
-		if T, err = i18n.New(packr.NewBox("../locales"), "en-US"); err != nil {
-			app.Stop(err)
-		}
-		app.Use(T.Middleware())
-
-		if err := addProxyRoutes(app, store, mf, lggr); err != nil {
-			err = fmt.Errorf("error adding proxy routes (%s)", err)
-			return nil, err
-		}
-
-		// serve files from the public directory:
-		// has to be last
-		app.ServeFiles("/", assetsBox)
+	ctx := context.Background()
+	store, err := GetStorage()
+	mf := module.NewFilter()
+	if err != nil {
+		err = fmt.Errorf("error getting storage configuration (%s)", err)
+		return nil, err
 	}
+	if err := store.Connect(); err != nil {
+		err = fmt.Errorf("error connecting to storage (%s)", err)
+		return nil, err
+	}
+
+	worker, err := getWorker(ctx, store, mf)
+	if err != nil {
+		return nil, err
+	}
+
+	lggr := log.New(env.CloudRuntime(), env.LogLevel())
+
+	app := buffalo.New(buffalo.Options{
+		Env: ENV,
+		PreWares: []buffalo.PreWare{
+			cors.Default().Handler,
+		},
+		SessionName: "_athens_session",
+		Worker:      worker,
+		Logger:      log.Buffalo(),
+	})
+
+	// Automatically redirect to SSL
+	app.Use(ssl.ForceSSL(secure.Options{
+		SSLRedirect:     ENV == "production",
+		SSLProxyHeaders: map[string]string{"X-Forwarded-Proto": "https"},
+	}))
+
+	if ENV == "development" {
+		app.Use(middleware.ParameterLogger)
+	}
+	initializeTracing(app)
+	initializeAuth(app)
+	// Protect against CSRF attacks. https://www.owasp.org/index.php/Cross-Site_Request_Forgery_(CSRF)
+	// Remove to disable this.
+	if env.EnableCSRFProtection() {
+		csrfMiddleware := csrf.New
+		app.Use(csrfMiddleware)
+	}
+
+	// Wraps each request in a transaction.
+	//  c.Value("tx").(*pop.PopTransaction)
+	// Remove to disable this.
+	// app.Use(middleware.PopTransaction(models.DB))
+
+	// Setup and use translations:
+	if T, err = i18n.New(packr.NewBox("../locales"), "en-US"); err != nil {
+		app.Stop(err)
+	}
+	app.Use(T.Middleware())
+
+	if err := addProxyRoutes(app, store, mf, lggr); err != nil {
+		err = fmt.Errorf("error adding proxy routes (%s)", err)
+		return nil, err
+	}
+
+	// serve files from the public directory:
+	// has to be last
+	app.ServeFiles("/", assetsBox)
 
 	return app, nil
 }
 
-func getWorker(s storage.Backend, mf *module.Filter) (worker.Worker, error) {
+func getWorker(ctx context.Context, s storage.Backend, mf *module.Filter) (worker.Worker, error) {
 	port := env.RedisQueuePortWithDefault(":6379")
 	w := gwa.New(gwa.Options{
 		Pool: &redis.Pool{
@@ -159,7 +157,7 @@ func getWorker(s storage.Backend, mf *module.Filter) (worker.Worker, error) {
 		MaxFails: env.WorkerMaxFails(),
 	}
 
-	if err := w.RegisterWithOptions(FetcherWorkerName, opts, GetProcessCacheMissJob(s, w, mf)); err != nil {
+	if err := w.RegisterWithOptions(FetcherWorkerName, opts, GetProcessCacheMissJob(ctx, s, w, mf)); err != nil {
 		return nil, err
 	}
 
