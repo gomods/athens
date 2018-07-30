@@ -2,7 +2,6 @@ package module
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 
@@ -56,24 +55,16 @@ func (d *diskRef) Read() (*storage.Version, error) {
 	var ver storage.Version
 
 	packagePath := getPackagePath(d.root, d.module)
-	infoFile, err := d.fs.Open(filepath.Join(packagePath, fmt.Sprintf("%s.info", d.version)))
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-	defer infoFile.Close()
 
-	info, err := ioutil.ReadAll(infoFile)
+	infoFile := filepath.Join(packagePath, fmt.Sprintf("%s.info", d.version))
+	info, err := afero.ReadFile(d.fs, infoFile)
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
 	ver.Info = info
 
-	modFile, err := d.fs.Open(filepath.Join(packagePath, fmt.Sprintf("%s.mod", d.version)))
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-	defer modFile.Close()
-	mod, err := ioutil.ReadAll(modFile)
+	modFile := filepath.Join(packagePath, fmt.Sprintf("%s.mod", d.version))
+	mod, err := afero.ReadFile(d.fs, modFile)
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}

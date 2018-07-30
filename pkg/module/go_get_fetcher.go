@@ -56,7 +56,7 @@ func (g *goGetFetcher) Fetch(mod, ver string) (Ref, error) {
 		return newDiskRef(g.fs, goPathRoot, "", ""), err
 	}
 
-	return newDiskRef(g.fs, goPathRoot, mod, ver), err
+	return newDiskRef(g.fs, goPathRoot, mod, ver), nil
 }
 
 // Dummy Hacky thing makes vgo not to complain
