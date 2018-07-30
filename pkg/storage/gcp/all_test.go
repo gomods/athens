@@ -2,6 +2,8 @@ package gcp
 
 import (
 	"context"
+	"fmt"
+	"net/url"
 	"testing"
 
 	"github.com/stretchr/testify/suite"
@@ -19,13 +21,16 @@ type GcpTests struct {
 	module  string
 	version string
 	store   *Storage
+	url     *url.URL
 }
 
 func (g *GcpTests) SetupSuite() {
 	g.context = context.Background()
 	g.module = "gcp-test"
 	g.version = "v1.2.3"
-	g.store = newWithBucket(newBucketMock())
+	g.url, _ = url.Parse(fmt.Sprintf("https://storage.googleapis.com/testbucket"))
+
+	g.store = newWithBucket(newBucketMock(), g.url)
 }
 
 func TestGcpStorage(t *testing.T) {

@@ -45,10 +45,10 @@ func NewWithCredentials(ctx context.Context, cred option.ClientOption) (*Storage
 	}, nil
 }
 
-func newWithBucket(bkt Bucket) *Storage {
+func newWithBucket(bkt Bucket, uri *url.URL) *Storage {
 	return &Storage{
 		bucket:       bkt,
-		baseURI:      nil,
+		baseURI:      uri,
 		closeStorage: func() error { return nil },
 	}
 }
