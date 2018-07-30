@@ -29,30 +29,25 @@ func NewGoGetFetcher(goBinaryName string, fs afero.Fs) Fetcher {
 // Fetch downloads the sources and returns path where it can be found. Make sure to call Clear
 // on the returned Ref when you are done with it
 func (g *goGetFetcher) Fetch(mod, ver string) (Ref, error) {
-	ref := noopRef{}
 
 	// setup the GOPATH
 	goPathRoot, err := afero.TempDir(g.fs, "", "athens")
 	if err != nil {
-		ref.Clear()
 		return newDiskRef(g.fs, goPathRoot, "", ""), err
 	}
 	sourcePath := filepath.Join(goPathRoot, "src")
 	modPath := filepath.Join(sourcePath, getRepoDirName(mod, ver))
 	if err := g.fs.MkdirAll(modPath, os.ModeDir|os.ModePerm); err != nil {
-		ref.Clear()
 		return newDiskRef(g.fs, goPathRoot, "", ""), err
 	}
 
 	// setup the module with barebones stuff
 	if err := Dummy(g.fs, modPath); err != nil {
-		ref.Clear()
 		return newDiskRef(g.fs, goPathRoot, "", ""), err
 	}
 
 	err = getSources(g.goBinaryName, g.fs, goPathRoot, modPath, mod, ver)
 	if err != nil {
-		ref.Clear()
 		return newDiskRef(g.fs, goPathRoot, "", ""), err
 	}
 
