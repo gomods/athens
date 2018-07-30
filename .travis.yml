@@ -17,13 +17,9 @@ env:
     - CODE_COV=1
     - GO_BINARY_PATH=vgo
 before_script:
-  - mkdir bin
-  - go get github.com/golang/lint/golint
-  - go get github.com/golang/dep/cmd/dep
+  - make setup-dev-env
   - wget "https://dl.minio.io/server/minio/release/linux-amd64/minio"
   - chmod +x minio && nohup ./minio server . &
-  - ./scripts/get_buffalo.sh
-  - go get -u -v golang.org/x/vgo
   - buffalo db create
   - buffalo db migrate up
 script:

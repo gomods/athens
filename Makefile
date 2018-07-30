@@ -11,6 +11,10 @@ run: build
 docs:
 	cd docs && hugo
 
+.PHONY: setup-dev-env
+setup-dev-env:
+	./scripts/get_dev_tools.sh
+
 .PHONY: verify
 verify:
 	./scripts/check_gofmt.sh
