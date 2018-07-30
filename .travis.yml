@@ -15,8 +15,9 @@ env:
     - MINIO_SECRET_KEY=minio123
     - ATHENS_MONGO_STORAGE_URL=mongodb://127.0.0.1:27017
     - CODE_COV=1
-    - GO_BINARY_PATH=vgo
     - TMPDIR=/tmp/
+    - GO_SOURCE=${TMPDIR}go
+    - GO_BINARY_PATH=${TMPDIR}go/bin/go
 before_script:
   - make setup-dev-env
   - wget "https://dl.minio.io/server/minio/release/linux-amd64/minio"
