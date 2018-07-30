@@ -11,10 +11,20 @@ run: build
 docs:
 	cd docs && hugo
 
+.PHONY: verify
+verify:
+	./scripts/check_gofmt.sh
+	./scripts/check_golint.sh
+	./scripts/check_deps.sh
+
 .PHONY: test
 test:
 	cd cmd/proxy && buffalo test
 	cd cmd/olympus && buffalo test
+
+.PHONY: test-unit
+test-unit:
+	./scripts/test_unit.sh
 
 .PHONY: olympus-docker
 olympus-docker:
