@@ -57,20 +57,21 @@ func (m *bucketMock) Delete(ctx context.Context, path string) error {
 }
 
 func (m *bucketMock) Open(ctx context.Context, path string) (io.ReadCloser, error) {
+	m.lock.RLock()
 	data, ok := m.db[path]
 	if !ok {
+		m.lock.RUnlock()
 		return nil, fmt.Errorf("path %s not found", path)
 	}
 	m.readLockCount++
-	m.lock.RLock()
 	r := bytes.NewReader(data)
 	return &bucketReader{r, m}, nil
 }
 
 func (m *bucketMock) Write(ctx context.Context, path string) io.WriteCloser {
+	m.lock.Lock()
 	m.db[path] = make([]byte, 0)
 	m.writeLockCount++
-	m.lock.Lock()
 	return &bucketWriter{m, path}
 }
 
