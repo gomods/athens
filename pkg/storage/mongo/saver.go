@@ -21,6 +21,7 @@ func (s *ModuleStore) Save(ctx context.Context, module, version string, mod []by
 	if err != nil {
 		return errors.E(op, err)
 	}
+	defer f.Close()
 
 	_, err = io.Copy(f, zip) // check number of bytes written?
 	if err != nil {
@@ -35,5 +36,10 @@ func (s *ModuleStore) Save(ctx context.Context, module, version string, mod []by
 	}
 
 	c := s.s.DB(s.d).C(s.c)
-	return c.Insert(m)
+	err = c.Insert(m)
+	if err != nil {
+		return errors.E(op, err)
+	}
+
+	return nil
 }
