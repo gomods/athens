@@ -1,7 +1,9 @@
 package module
 
 import (
+	"fmt"
 	"io/ioutil"
+	"os"
 
 	"github.com/spf13/afero"
 )
@@ -32,8 +34,34 @@ func (s *ModuleSuite) TestGoGetFetcherFetch() {
 	r.NoError(err)
 	r.True(len(zipBytes) > 0)
 
-	r.NoError(ref.Clear())
+	// close the version's zip file (which also cleans up the underlying diskref's GOPATH) and expect it to fail again
+	r.NoError(ver.Zip.Close())
 	ver, err = ref.Read()
 	r.NotNil(err)
 	r.Nil(ver)
+}
+
+func ExampleFetch() {
+	repoURI := "github.com/arschles/assert"
+	version := "v1.0.0"
+	goBinaryName := os.Getenv("GO_BINARY_PATH")
+	if goBinaryName == "" {
+		goBinaryName = "go"
+	}
+	fetcher := NewGoGetFetcher(goBinaryName, afero.NewOsFs())
+	ref, err := fetcher.Fetch(repoURI, version)
+	// handle errors if any
+	if err != nil {
+		return
+	}
+	versionData, err := ref.Read()
+	// Close the handle to versionData.Zip once done
+	// This will also handle cleanup so it's important to call Close
+	defer versionData.Zip.Close()
+	if err != nil {
+		return
+	}
+	// Do something with versionData
+	fmt.Println(string(versionData.Mod))
+	// Output: module github.com/arschles/assert
 }
