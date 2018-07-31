@@ -145,6 +145,7 @@ func (d *TestSuites) testDelete(ts storage.TestSuite) {
 		{
 			module:  d.module,
 			version: version,
+			want:    errors.KindUnexpected,
 		},
 	}
 	ctx := context.Background()
