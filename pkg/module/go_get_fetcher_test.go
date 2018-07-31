@@ -3,7 +3,8 @@ package module
 import (
 	"fmt"
 	"io/ioutil"
-	"os"
+
+	"github.com/gomods/athens/pkg/config/env"
 
 	"github.com/spf13/afero"
 )
@@ -44,10 +45,7 @@ func (s *ModuleSuite) TestGoGetFetcherFetch() {
 func ExampleFetch() {
 	repoURI := "github.com/arschles/assert"
 	version := "v1.0.0"
-	goBinaryName := os.Getenv("GO_BINARY_PATH")
-	if goBinaryName == "" {
-		goBinaryName = "go"
-	}
+	goBinaryName := env.GoBinPath()
 	fetcher := NewGoGetFetcher(goBinaryName, afero.NewOsFs())
 	ref, err := fetcher.Fetch(repoURI, version)
 	// handle errors if any
