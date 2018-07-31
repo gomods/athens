@@ -2,7 +2,6 @@ package gcp
 
 import (
 	"context"
-	"fmt"
 	"net/url"
 	"testing"
 
@@ -29,7 +28,7 @@ func (g *GcpTests) SetupSuite() {
 	g.context = context.Background()
 	g.module = "gcp-test"
 	g.version = "v1.2.3"
-	g.url, _ = url.Parse(fmt.Sprintf("https://storage.googleapis.com/testbucket"))
+	g.url, _ = url.Parse("https://storage.googleapis.com/testbucket")
 	g.bucket = newBucketMock()
 	g.store = newWithBucket(g.bucket, g.url)
 }
