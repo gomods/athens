@@ -33,14 +33,14 @@ type bucketWriter struct {
 }
 
 func (r *bucketReader) Close() error {
-	r.bucketMock.lock.RUnlock()
 	r.bucketMock.readLockCount--
+	r.bucketMock.lock.RUnlock()
 	return nil
 }
 
 func (r *bucketWriter) Close() error {
-	r.bucketMock.lock.Unlock()
 	r.bucketMock.writeLockCount--
+	r.bucketMock.lock.Unlock()
 	return nil
 }
 
