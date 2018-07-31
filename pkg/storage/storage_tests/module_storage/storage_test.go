@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"github.com/gobuffalo/suite"
+	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/storage"
 	"github.com/gomods/athens/pkg/storage/fs"
 	"github.com/gomods/athens/pkg/storage/mem"
@@ -88,7 +89,7 @@ func (d *TestSuites) TestStorages() {
 
 func (d *TestSuites) testNotFound(ts storage.TestSuite) {
 	_, err := ts.Storage().Get(context.Background(), "some", "unknown")
-	d.Require().Equal(true, storage.IsNotFoundError(err), "Invalid error type for %s: %#v", ts.StorageHumanReadableName(), err)
+	d.Require().Equal(true, errors.ErrNotFound(err), "Invalid error type for %s: %#v", ts.StorageHumanReadableName(), err)
 }
 
 func (d *TestSuites) testList(ts storage.TestSuite) {
@@ -134,15 +135,12 @@ func (d *TestSuites) testDelete(ts storage.TestSuite) {
 	tests := []struct {
 		module  string
 		version string
-		want    error
+		want    int
 	}{
 		{
 			module:  "does/not/exist",
 			version: "v1.0.0",
-			want: storage.ErrVersionNotFound{
-				Module:  "does/not/exist",
-				Version: "v1.0.0",
-			},
+			want:    errors.KindNotFound,
 		},
 		{
 			module:  d.module,
@@ -152,7 +150,7 @@ func (d *TestSuites) testDelete(ts storage.TestSuite) {
 	ctx := context.Background()
 	for _, test := range tests {
 		err := ts.Storage().Delete(ctx, test.module, test.version)
-		r.Equal(test.want, err)
+		r.Equal(test.want, errors.Kind(err))
 		exists := ts.Storage().Exists(ctx, test.module, test.version)
 		r.Equal(false, exists)
 	}

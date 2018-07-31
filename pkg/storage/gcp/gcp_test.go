@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	athensStorage "github.com/gomods/athens/pkg/storage"
+	"github.com/gomods/athens/pkg/errors"
 )
 
 func (g *GcpTests) TestSaveGetListExistsRoundTrip() {
@@ -66,9 +66,8 @@ func (g *GcpTests) TestNotFounds() {
 	r := g.Require()
 
 	g.T().Run("Get module version not found", func(t *testing.T) {
-		_, err := g.store.Get(context.Background(), "never", "there")
-		versionNotFoundErr := athensStorage.ErrVersionNotFound{Module: "never", Version: "there"}
-		r.EqualError(versionNotFoundErr, err.Error())
+		_, err = store.Get(context.Background(), "never", "there")
+		r.True(errors.ErrNotFound(err))
 	})
 
 	g.T().Run("Exists module version not found", func(t *testing.T) {
@@ -76,8 +75,7 @@ func (g *GcpTests) TestNotFounds() {
 	})
 
 	g.T().Run("List not found", func(t *testing.T) {
-		_, err := g.store.List(g.context, "nothing/to/see/here")
-		modNotFoundErr := athensStorage.ErrNotFound{Module: "nothing/to/see/here"}
-		r.EqualError(modNotFoundErr, err.Error())
+		_, err = store.List(g.context, "nothing/to/see/here")
+		r.True(errors.ErrNotFound(err))
 	})
 }
