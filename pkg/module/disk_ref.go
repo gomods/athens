@@ -38,13 +38,6 @@ func (rc *zipReadCloser) Read(p []byte) (n int, err error) {
 	return rc.zip.Read(p)
 }
 
-func newZipReadCloser(zip io.ReadCloser, ref *diskRef) io.ReadCloser {
-	return &zipReadCloser{
-		zip: zip,
-		ref: ref,
-	}
-}
-
 func newDiskRef(fs afero.Fs, root, module, version string) *diskRef {
 	return &diskRef{
 		fs:      fs,
@@ -111,7 +104,7 @@ func (d *diskRef) Read() (*storage.Version, error) {
 	//
 	// if we close, then the caller will panic, and the alternative to make this work is
 	// that we read into memory and return an io.ReadCloser that reads out of memory
-	ver.Zip = newZipReadCloser(sourceFile, d)
+	ver.Zip = &zipReadCloser{sourceFile, d}
 
 	return &ver, nil
 }
