@@ -89,7 +89,7 @@ func (d *TestSuites) TestStorages() {
 
 func (d *TestSuites) testNotFound(ts storage.TestSuite) {
 	_, err := ts.Storage().Get(context.Background(), "some", "unknown")
-	d.Require().Equal(true, errors.ErrNotFound(err), "Invalid error type for %s: %#v", ts.StorageHumanReadableName(), err)
+	d.Require().Equal(true, errors.IsNotFoundErr(err), "Invalid error type for %s: %#v", ts.StorageHumanReadableName(), err)
 }
 
 func (d *TestSuites) testList(ts storage.TestSuite) {
