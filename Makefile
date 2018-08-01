@@ -35,15 +35,24 @@ olympus-docker:
 	docker build -t gopackages/olympus -f cmd/olympus/Dockerfile .
 
 .PHONY: dev
+
+alldeps:
+	docker-compose -p athensdeps up -d mysql
+	docker-compose -p athensdeps up -d postgres
+	docker-compose -p athensdeps up -d mongo
+	docker-compose -p athensdeps up -d redis
+	docker-compose -p athensdeps up -d minio
+	docker-compose -p athensdeps up -d jaeger
+	echo "sleeping for a bit to wait for the DB to come up"
+	sleep 5	
+
 dev:
-	docker-compose -p athensdev up -d mysql
-	docker-compose -p athensdev up -d postgres
 	docker-compose -p athensdev up -d mongo
 	docker-compose -p athensdev up -d redis
-	docker-compose -p athensdev up -d minio
-	docker-compose -p athensdev up -d jaeger
-	echo "sleeping for a bit to wait for the DB to come up"
-	sleep 5
+
+down:
+	docker-compose -p athensdev down
+	docker volume prune
 
 .PHONY: dev-teardown
 dev-teardown:
