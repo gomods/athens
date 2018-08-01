@@ -7,8 +7,8 @@ import (
 
 	"github.com/gobuffalo/envy"
 	"github.com/gomods/athens/pkg/config/env"
-	cerrors "github.com/gomods/athens/pkg/errors"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 type testCase struct {
@@ -29,7 +29,8 @@ var tt = []testCase{
 }
 
 func TestList(t *testing.T) {
-	dp := New()
+	dp, err := New()
+	require.NoError(t, err, "failed to create protocol")
 	ctx := context.Background()
 
 	for _, tc := range tt {
@@ -42,20 +43,15 @@ func TestList(t *testing.T) {
 	}
 }
 
-func TestVersionBinPathError(t *testing.T) {
+func TestInvalidGoBinError(t *testing.T) {
 	goPath := env.GoBinPath()
 	os.Setenv("GO_BINARY_PATH", "some_invalid_path")
 	defer os.Setenv("GO_BINARY_PATH", goPath)
 	envy.Reload()
 	defer envy.Reload()
-	const vop cerrors.Op = "module.getSources"
 
-	dp := New()
+	dp, err := New()
 
-	v, err := dp.Version(context.Background(), "mod", "version")
-
-	assert.Nil(t, v)
-	cerr, ok := err.(cerrors.Error)
-	assert.True(t, ok)
-	assert.EqualError(t, cerr.Err, "Invalid go binary: exit status 1")
+	assert.Nil(t, dp)
+	assert.EqualError(t, err, "go get fetcher can't be initialised with gobinpath: some_invalid_path")
 }
