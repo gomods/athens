@@ -22,7 +22,7 @@ func (s *ModuleSuite) TestGoGetFetcherError() {
 	fetcher, err := NewGoGetFetcher("invalidpath", afero.NewOsFs())
 
 	assert.Nil(s.T(), fetcher)
-	assert.Equal(s.T(), "Invalid go binary: exit status 1", err.Error())
+	assert.EqualError(s.T(), err, "exec: \"invalidpath\": executable file not found in $PATH")
 }
 
 func (s *ModuleSuite) TestGoGetFetcherFetch() {

@@ -2,12 +2,8 @@ package goget
 
 import (
 	"context"
-	"os"
 	"testing"
 
-	"github.com/gobuffalo/envy"
-	"github.com/gomods/athens/pkg/config/env"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -41,17 +37,4 @@ func TestList(t *testing.T) {
 			}
 		})
 	}
-}
-
-func TestInvalidGoBinError(t *testing.T) {
-	goPath := env.GoBinPath()
-	os.Setenv("GO_BINARY_PATH", "some_invalid_path")
-	defer os.Setenv("GO_BINARY_PATH", goPath)
-	envy.Reload()
-	defer envy.Reload()
-
-	dp, err := New()
-
-	assert.Nil(t, dp)
-	assert.EqualError(t, err, "go get fetcher can't be initialised with gobinpath: some_invalid_path")
 }

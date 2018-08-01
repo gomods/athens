@@ -23,11 +23,12 @@ import (
 // go get. You must have a modules supported
 // go binary for this to work.
 func New() (download.Protocol, error) {
+	const op errors.Op = "goget.New"
 	goBin := env.GoBinPath()
 	fs := afero.NewOsFs()
 	mf, err := module.NewGoGetFetcher(goBin, fs)
 	if err != nil {
-		return nil, fmt.Errorf("go get fetcher can't be initialised with gobinpath: %s", goBin)
+		return nil, errors.E(op, err)
 	}
 	return &goget{
 		goBinPath: goBin,
