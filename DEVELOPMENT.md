@@ -6,6 +6,8 @@ this framework to make it as straightforward as possible to get your development
 You'll need Buffalo [v0.12.4](https://github.com/gobuffalo/buffalo/releases/tag/v0.12.4) or later to get started on Athens,
 so be sure to download the CLI and put it into your `PATH`.
 
+Athens uses [Go Modules](https://golang.org/cmd/go/#hdr-Modules__module_versions__and_more) for dependency management. You will need Go [v1.11](https://golang.org/dl) or later to get started on Athens.
+
 See our [Contributing Guide](CONTRIBUTING.md) for tips on how to submit a pull request when you are ready.
 
 # Initial Development Environment Setup
