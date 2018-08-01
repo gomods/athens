@@ -66,7 +66,7 @@ func (g *GcpTests) TestNotFounds() {
 	r := g.Require()
 
 	g.T().Run("Get module version not found", func(t *testing.T) {
-		_, err = store.Get(context.Background(), "never", "there")
+		_, err := g.store.Get(context.Background(), "never", "there")
 		r.True(errors.ErrNotFound(err))
 	})
 
@@ -75,7 +75,7 @@ func (g *GcpTests) TestNotFounds() {
 	})
 
 	g.T().Run("List not found", func(t *testing.T) {
-		_, err = store.List(g.context, "nothing/to/see/here")
+		_, err := g.store.List(g.context, "nothing/to/see/here")
 		r.True(errors.ErrNotFound(err))
 	})
 }
