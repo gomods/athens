@@ -3,6 +3,7 @@ package module
 import (
 	"fmt"
 	"io/ioutil"
+	"log"
 
 	"github.com/gomods/athens/pkg/config/env"
 	"github.com/stretchr/testify/assert"
@@ -57,6 +58,9 @@ func ExampleFetch() {
 	version := "v1.0.0"
 	goBinaryName := env.GoBinPath()
 	fetcher, err := NewGoGetFetcher(goBinaryName, afero.NewOsFs())
+	if err != nil {
+		log.Fatal(err)
+	}
 	ref, err := fetcher.Fetch(repoURI, version)
 	// handle errors if any
 	if err != nil {
