@@ -6,20 +6,18 @@ import (
 
 	"github.com/gomods/athens/pkg/config/env"
 	"github.com/stretchr/testify/assert"
-
-	"github.com/spf13/afero"
 )
 
 func (s *ModuleSuite) TestNewGoGetFetcher() {
 	r := s.Require()
-	fetcher, err := NewGoGetFetcher(s.goBinaryName, s.fs)
+	fetcher, err := NewGoGetFetcher(s.goBinaryName)
 	r.NoError(err)
 	_, ok := fetcher.(*goGetFetcher)
 	r.True(ok)
 }
 
 func (s *ModuleSuite) TestGoGetFetcherError() {
-	fetcher, err := NewGoGetFetcher("invalidpath", afero.NewOsFs())
+	fetcher, err := NewGoGetFetcher("invalidpath")
 
 	assert.Nil(s.T(), fetcher)
 	assert.EqualError(s.T(), err, "exec: \"invalidpath\": executable file not found in $PATH")
@@ -29,7 +27,7 @@ func (s *ModuleSuite) TestGoGetFetcherFetch() {
 	r := s.Require()
 	// we need to use an OS filesystem because fetch executes vgo on the command line, which
 	// always writes to the filesystem
-	fetcher, err := NewGoGetFetcher(s.goBinaryName, afero.NewOsFs())
+	fetcher, err := NewGoGetFetcher(s.goBinaryName)
 	r.NoError(err)
 	ref, err := fetcher.Fetch(repoURI, version)
 	r.NoError(err, "fetch shouldn't error")
@@ -56,7 +54,7 @@ func ExampleFetch() {
 	repoURI := "github.com/arschles/assert"
 	version := "v1.0.0"
 	goBinaryName := env.GoBinPath()
-	fetcher, err := NewGoGetFetcher(goBinaryName, afero.NewOsFs())
+	fetcher, err := NewGoGetFetcher(goBinaryName)
 	ref, err := fetcher.Fetch(repoURI, version)
 	// handle errors if any
 	if err != nil {

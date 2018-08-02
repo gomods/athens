@@ -25,22 +25,19 @@ import (
 func New() (download.Protocol, error) {
 	const op errors.Op = "goget.New"
 	goBin := env.GoBinPath()
-	fs := afero.NewOsFs()
-	mf, err := module.NewGoGetFetcher(goBin, fs)
+	mf, err := module.NewGoGetFetcher(goBin)
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
 	return &goget{
 		goBinPath: goBin,
 		fetcher:   mf,
-		fs:        fs,
 	}, nil
 }
 
 type goget struct {
 	goBinPath string
 	fetcher   module.Fetcher
-	fs        afero.Fs
 }
 
 func (gg *goget) List(ctx context.Context, mod string) ([]string, error) {
@@ -91,12 +88,13 @@ func (gg *goget) Latest(ctx context.Context, mod string) (*storage.RevInfo, erro
 }
 
 func (gg *goget) list(op errors.Op, mod string) (*listResp, error) {
-	hackyPath, err := afero.TempDir(gg.fs, "", "hackymod")
+	fs := afero.NewOsFs()
+	hackyPath, err := afero.TempDir(fs, "", "hackymod")
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
-	defer gg.fs.RemoveAll(hackyPath)
-	err = module.Dummy(gg.fs, hackyPath)
+	defer fs.RemoveAll(hackyPath)
+	err = module.Dummy(fs, hackyPath)
 	cmd := exec.Command(
 		gg.goBinPath,
 		"list", "-m", "-versions", "-json",
