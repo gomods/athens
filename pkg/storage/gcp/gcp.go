@@ -43,7 +43,7 @@ func New(ctx context.Context) (*Storage, error) {
 		return nil, errors.E(op, err)
 	}
 	bkt := gcpBucket{storage.Bucket(bucketname)}
-	err = bkt.Create(ctx, env.GCPPRojectID(), nil)
+	err = bkt.Create(ctx, env.GCPProjectID(), nil)
 	if err != nil && !bucketExistsErr(err) {
 		return nil, errors.E(op, err)
 	}

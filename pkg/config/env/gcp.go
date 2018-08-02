@@ -16,8 +16,8 @@ func GCPBucketName() (string, error) {
 	return env, nil
 }
 
-// GCPPRojectID returns the project id on which the project
+// GCPProjectID returns the project id on which the project
 // is running or the cloud storage is using.
-func GCPPRojectID() string {
+func GCPProjectID() string {
 	return envy.Get("GOOGLE_CLOUD_PROJECT", "")
 }
