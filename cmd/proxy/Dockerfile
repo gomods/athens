@@ -19,8 +19,8 @@ RUN curl -o go1.11beta2.linux-amd64.tar.gz https://dl.google.com/go/go1.11beta2.
 RUN tar -C /usr/local -xzf go1.11beta2.linux-amd64.tar.gz
 
 FROM ubuntu:14.04
-RUN apk add --no-cache bash
-RUN apk add --no-cache ca-certificates
+RUN apt-get update
+RUN apt-get install ca-certificates
 
 WORKDIR /bin/
 
