@@ -1,7 +1,5 @@
 services:
-  - mongodb
-  - postgresql
-  - redis-server
+  - docker
 language: go
 install: false
 go:
