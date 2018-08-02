@@ -20,7 +20,7 @@ RUN tar -C /usr/local -xzf go1.11beta2.linux-amd64.tar.gz
 
 FROM ubuntu:14.04
 RUN apt-get update
-RUN apt-get install ca-certificates
+RUN apt-get install -y ca-certificates
 
 WORKDIR /bin/
 
