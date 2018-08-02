@@ -19,13 +19,13 @@ type goGetFetcher struct {
 }
 
 // NewGoGetFetcher creates fetcher which uses go get tool to fetch modules
-func NewGoGetFetcher(goBinaryName string) (Fetcher, error) {
+func NewGoGetFetcher(goBinaryName string, fs afero.Fs) (Fetcher, error) {
 	const op errors.Op = "module.NewGoGetFetcher"
 	if err := validGoBinary(goBinaryName); err != nil {
 		return nil, errors.E(op, err)
 	}
 	return &goGetFetcher{
-		fs:           afero.NewOsFs(),
+		fs:           fs,
 		goBinaryName: goBinaryName,
 	}, nil
 }
