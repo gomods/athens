@@ -34,6 +34,10 @@ test-unit:
 olympus-docker:
 	docker build -t gopackages/olympus -f cmd/olympus/Dockerfile .
 
+.PHONY: proxy-docker
+proxy-docker:
+	docker build -t gopackages/proxy -f cmd/proxy/Dockerfile .
+
 
 .PHONY: alldeps
 alldeps:

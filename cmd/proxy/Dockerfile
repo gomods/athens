@@ -15,13 +15,19 @@ WORKDIR $GOPATH/src/github.com/gomods/athens
 ADD . .
 RUN cd cmd/proxy && buffalo build -s -o /bin/app
 
-FROM alpine
+RUN curl -o go1.11beta2.linux-amd64.tar.gz https://dl.google.com/go/go1.11beta2.linux-amd64.tar.gz
+RUN tar -C /usr/local -xzf go1.11beta2.linux-amd64.tar.gz
+
+FROM ubuntu:14.04
 RUN apk add --no-cache bash
 RUN apk add --no-cache ca-certificates
 
 WORKDIR /bin/
 
 COPY --from=builder /bin/app .
+COPY --from=builder /usr/local/go /usr/local/go
+
+ENV GO_BINARY_PATH=/usr/local/go/bin/go
 
 # Comment out to run the binary in "production" mode:
 # ENV GO_ENV=production
