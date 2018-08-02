@@ -12,7 +12,7 @@ export GO111MODULES=on
 GOMOD_CACHE=$(go env GOPATH)/src/mod
 GO_SOURCE=${GO_SOURCE:=$(go env GOPATH)/src/golang.org/x/go}
 export GOROOT=${GO_SOURCE}
-export PATH=${GO_SOURCE}/bin:${PATH}
+export PATH=${GO_SOURCE}/bin:${REPO_DIR}/bin:${PATH}
 go version
 
 clearGoModCache () {
