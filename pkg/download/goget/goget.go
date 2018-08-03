@@ -22,15 +22,24 @@ import (
 // New returns a download protocol by using
 // go get. You must have a modules supported
 // go binary for this to work.
-func New() download.Protocol {
-	return &goget{
-		goBinPath: env.GoBinPath(),
-		fs:        afero.NewOsFs(),
+func New() (download.Protocol, error) {
+	const op errors.Op = "goget.New"
+	goBin := env.GoBinPath()
+	fs := afero.NewOsFs()
+	mf, err := module.NewGoGetFetcher(goBin, fs)
+	if err != nil {
+		return nil, errors.E(op, err)
 	}
+	return &goget{
+		goBinPath: goBin,
+		fetcher:   mf,
+		fs:        fs,
+	}, nil
 }
 
 type goget struct {
 	goBinPath string
+	fetcher   module.Fetcher
 	fs        afero.Fs
 }
 
@@ -88,27 +97,26 @@ func (gg *goget) list(op errors.Op, mod string) (*listResp, error) {
 	}
 	defer gg.fs.RemoveAll(hackyPath)
 	err = module.Dummy(gg.fs, hackyPath)
+
 	cmd := exec.Command(
 		gg.goBinPath,
 		"list", "-m", "-versions", "-json",
 		config.FmtModVer(mod, "latest"),
 	)
 	cmd.Dir = hackyPath
+	stdout := &bytes.Buffer{}
+	stderr := &bytes.Buffer{}
+	cmd.Stdout = stdout
+	cmd.Stderr = stderr
 
-	bts, err := cmd.CombinedOutput()
+	err = cmd.Run()
 	if err != nil {
-		errFmt := fmt.Errorf("%v: %s", err, bts)
-		return nil, errors.E(op, errFmt)
-	}
-
-	// ugly hack until go cli implements -quiet flag.
-	// https://github.com/golang/go/issues/26628
-	if bytes.HasPrefix(bts, []byte("go: finding")) {
-		bts = bts[bytes.Index(bts, []byte{'\n'}):]
+		err = fmt.Errorf("%v: %s", err, stderr)
+		return nil, errors.E(op, err)
 	}
 
 	var lr listResp
-	err = json.Unmarshal(bts, &lr)
+	err = json.NewDecoder(stdout).Decode(&lr)
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
@@ -139,8 +147,7 @@ func (gg *goget) Zip(ctx context.Context, mod, ver string) (io.ReadCloser, error
 
 func (gg *goget) Version(ctx context.Context, mod, ver string) (*storage.Version, error) {
 	const op errors.Op = "goget.Version"
-	fetcher := module.NewGoGetFetcher(gg.goBinPath, gg.fs)
-	ref, err := fetcher.Fetch(mod, ver)
+	ref, err := gg.fetcher.Fetch(mod, ver)
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
