@@ -27,3 +27,13 @@ func RedisMockInMem() bool {
 func OlympusRedisQueuePortWithDefault(value string) string {
 	return envy.Get("OLYMPUS_REDIS_QUEUE_PORT", value)
 }
+
+// OlympusRedisMockInMem determines whether an in-memory worker is used to mock Redis for Registry (Olympus)
+func OlympusRedisMockInMem() bool {
+	boolStr := envy.Get("OLYMPUS_REDIS_MOCK_IN_MEM", "false")
+	enable, err := strconv.ParseBool(boolStr)
+	if err != nil {
+		return false
+	}
+	return enable
+}
