@@ -8,7 +8,7 @@ set -xeuo pipefail
 REPO_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )/.."
 
 # Use a version of Go that supports Go Modules
-export GO111MODULES=on
+export GO111MODULE=on
 GOMOD_CACHE=$(go env GOPATH)/pkg/mod
 GO_SOURCE=${GO_SOURCE:=$(go env GOPATH)/src/golang.org/x/go}
 export GOROOT=${GO_SOURCE}
@@ -35,7 +35,7 @@ buffalo dev &
 while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' localhost:3000)" != "200" ]]; do sleep 5; done
 
 # Clone our test repo
-TEST_SOURCE=${TMPDIR}go-depmgmt-testrepo
+TEST_SOURCE=${TMPDIR}happy-path
 rm -fr ${TEST_SOURCE} 2> /dev/null || true
 git clone https://github.com/athens-artifacts/happy-path.git ${TEST_SOURCE}
 pushd ${TEST_SOURCE}
