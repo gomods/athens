@@ -37,7 +37,7 @@ while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' localhost:3000)" != "200" ]
 # Clone our test repo
 TEST_SOURCE=${TMPDIR}go-depmgmt-testrepo
 rm -fr ${TEST_SOURCE} 2> /dev/null || true
-git clone https://github.com/carolynvs/go-depmgmt-testrepo.git ${TEST_SOURCE}
+git clone https://github.com/athens-artifacts/happy-path.git ${TEST_SOURCE}
 pushd ${TEST_SOURCE}
 
 clearGoModCache
