@@ -8,7 +8,7 @@ set -xeuo pipefail
 REPO_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )/.."
 
 # Use a version of Go that supports Go Modules
-export GO111MODULE=on
+#export GO111MODULE=on
 GOMOD_CACHE=$(go env GOPATH)/pkg/mod
 GO_SOURCE=${GO_SOURCE:=$(go env GOPATH)/src/golang.org/x/go}
 export GOROOT=${GO_SOURCE}
