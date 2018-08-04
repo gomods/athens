@@ -3,7 +3,7 @@ services:
 language: go
 install: false
 go:
-  - "1.11beta3"
+  - "1.11-rc"
 env:
   global:
     - PATH=${PATH}:./bin
