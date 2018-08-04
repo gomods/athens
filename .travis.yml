@@ -14,8 +14,6 @@ env:
     - ATHENS_MONGO_STORAGE_URL=mongodb://127.0.0.1:27017
     - CODE_COV=1
     - TMPDIR=/tmp/
-    - GO_SOURCE=${TMPDIR}go
-    - GO_BINARY_PATH=${TMPDIR}go/bin/go
     - GO111MODULES=on
 before_script:
   - make setup-dev-env

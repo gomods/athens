@@ -25,7 +25,6 @@ teardown () {
 trap teardown EXIT
 
 # Start the proxy in the background and wait for it to be ready
-export GO_BINARY_PATH=${GO_SOURCE}/bin/go
 cd $REPO_DIR/cmd/proxy
 pkill buffalo || true # cleanup old buffalos
 buffalo dev &
