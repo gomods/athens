@@ -130,6 +130,24 @@ func App() (*buffalo.App, error) {
 }
 
 func getWorker(ctx context.Context, s storage.Backend, mf *module.Filter) (worker.Worker, error) {
+	if env.RedisMockInMem() {
+		return registerInMem(ctx, s, mf)
+	}
+	return registerRedis(ctx, s, mf)
+}
+
+func registerInMem(ctx context.Context, s storage.Backend, mf *module.Filter) (worker.Worker, error) {
+	w := worker.NewSimple()
+	if err := w.Register(FetcherWorkerName, GetProcessCacheMissJob(ctx, s, w, mf)); err != nil {
+		return nil, err
+	}
+	if err := w.Register(ReporterWorkerName, GetCacheMissReporterJob(w, mf)); err != nil {
+		return nil, err
+	}
+	return w, nil
+}
+
+func registerRedis(ctx context.Context, s storage.Backend, mf *module.Filter) (worker.Worker, error) {
 	port := env.RedisQueuePortWithDefault(":6379")
 	w := gwa.New(gwa.Options{
 		Pool: &redis.Pool{
