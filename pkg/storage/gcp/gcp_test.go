@@ -75,9 +75,8 @@ func (g *GcpTests) TestNotFounds() {
 		r.True(errors.IsNotFoundErr(err))
 		_, err = g.store.GoMod(context.Background(), "never", "there")
 		r.True(errors.IsNotFoundErr(err))
-		zip, err := g.store.Zip(context.Background(), "never", "there")
+		_, err = g.store.Zip(context.Background(), "never", "there")
 		r.True(errors.IsNotFoundErr(err))
-		r.NoError(zip.Close())
 	})
 
 	g.T().Run("Exists module version not found", func(t *testing.T) {
