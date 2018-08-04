@@ -21,7 +21,7 @@ import (
 	"github.com/gomods/athens/pkg/storage/mem"
 	"github.com/gomods/athens/pkg/storage/minio"
 	"github.com/gomods/athens/pkg/storage/mongo"
-	"github.com/gomods/athens/pkg/storage/rdbms"
+	// "github.com/gomods/athens/pkg/storage/rdbms"
 )
 
 type TestSuites struct {
@@ -58,9 +58,9 @@ func (d *TestSuites) SetupTest() {
 	d.storages = append(d.storages, mongoStore)
 
 	// rdbms
-	rdbmsStore, err := rdbms.NewTestSuite(d.Model)
-	d.Model.SetupTest()
-	d.storages = append(d.storages, rdbmsStore)
+	// rdbmsStore, err := rdbms.NewTestSuite(d.Model)
+	// d.Model.SetupTest()
+	// d.storages = append(d.storages, rdbmsStore)
 
 	d.module = "testmodule"
 	d.version = "v1.0.0"
