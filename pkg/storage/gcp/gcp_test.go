@@ -29,9 +29,9 @@ func (g *GcpTests) TestSaveGetListExistsRoundTrip() {
 		r.NoError(err)
 		r.Equal(info, infoBts)
 
-		zip, err := g.store.Zip(ctx, g.module, g.version)
-		gotZip, err := ioutil.ReadAll(zip)
-		r.NoError(zip.Close())
+		ziprc, err := g.store.Zip(ctx, g.module, g.version)
+		gotZip, err := ioutil.ReadAll(ziprc)
+		r.NoError(ziprc.Close())
 		r.NoError(err)
 		r.Equal(zip, gotZip)
 	})
