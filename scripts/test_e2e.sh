@@ -44,10 +44,10 @@ clearGoModCache
 
 # Make sure that our test repo works without the GOPROXY first
 unset GOPROXY
-go run main.go
+go run .
 
 clearGoModCache
 
 # Verify that the test works against the proxy
 export GOPROXY=http://localhost:3000
-go run main.go
+go run .
