@@ -9,10 +9,10 @@ REPO_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )/.."
 
 # Use a version of Go that supports Go Modules
 export GO111MODULES=on
-GOMOD_CACHE=$(go env GOPATH)/src/mod
-GO_SOURCE=${GO_SOURCE:=$(go env GOPATH)/src/golang.org/x/go}
-export GOROOT=${GO_SOURCE}
-export PATH=${GO_SOURCE}/bin:${REPO_DIR}/bin:${PATH}
+GOMOD_CACHE=$(go env GOPATH)/pkg/mod
+# GO_SOURCE=${GO_SOURCE:=$(go env GOPATH)/src/golang.org/x/go}
+# export GOROOT=${GO_SOURCE}
+# export PATH=${GO_SOURCE}/bin:${REPO_DIR}/bin:${PATH}
 go version
 
 clearGoModCache () {
@@ -28,7 +28,7 @@ teardown () {
 trap teardown EXIT
 
 # Start the proxy in the background and wait for it to be ready
-export GO_BINARY_PATH=${GO_SOURCE}/bin/go
+# export GO_BINARY_PATH=${GO_SOURCE}/bin/go
 cd $REPO_DIR/cmd/proxy
 pkill buffalo || true # cleanup old buffalos
 buffalo dev &
