@@ -34,14 +34,17 @@ func (r *ModuleStore) Get(ctx context.Context, module, vsn string) (*storage.Ver
 	}, nil
 }
 
+// Info will panic.
 func (r *ModuleStore) Info(ctx context.Context, module, vsn string) ([]byte, error) {
 	panic("")
 }
 
+// GoMod will panic.
 func (r *ModuleStore) GoMod(ctx context.Context, module, vsn string) ([]byte, error) {
 	panic("")
 }
 
+// Zip will panic.
 func (r *ModuleStore) Zip(ctx context.Context, module, vsn string) (io.ReadCloser, error) {
 	panic("")
 }
