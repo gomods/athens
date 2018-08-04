@@ -129,6 +129,21 @@ func App(config *AppConfig) (*buffalo.App, error) {
 }
 
 func getWorker(store storage.Backend, eLog eventlog.Eventlog) (worker.Worker, error) {
+	if env.OlympusRedisMockInMem() {
+		return registerInMem(store, eLog)
+	}
+	return registerRedis(store, eLog)
+}
+
+func registerInMem(store storage.Backend, eLog eventlog.Eventlog) (worker.Worker, error) {
+	w := worker.NewSimple()
+	if err := w.Register(PushNotificationHandlerName, GetProcessPushNotificationJob(store, eLog)); err != nil {
+		return nil, err
+	}
+	return w, nil
+}
+
+func registerRedis(store storage.Backend, eLog eventlog.Eventlog) (worker.Worker, error) {
 	port := env.OlympusRedisQueuePortWithDefault(":6379")
 	w := gwa.New(gwa.Options{
 		Pool: &redis.Pool{
