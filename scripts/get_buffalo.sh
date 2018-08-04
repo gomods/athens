@@ -2,6 +2,9 @@
 
 set -xeuo pipefail
 
+mkdir /dummy
+cd /dummy 
+echo "module github.com/pkg/dummy" > go.mod
 go get github.com/gobuffalo/buffalo/buffalo@v0.12.3
 
 # TAR_GZ="buffalo_0.12.3_linux_amd64.tar.gz"
