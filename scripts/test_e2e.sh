@@ -7,7 +7,6 @@ set -xeuo pipefail
 
 REPO_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )/.."
 
-export GO111MODULE=on
 GOMOD_CACHE=$(go env GOPATH)/pkg/mod
 export PATH=${REPO_DIR}/bin:${PATH}
 
@@ -37,6 +36,9 @@ pushd ${TEST_SOURCE}
 
 clearGoModCache
 
+# set modules on after running buffalo dev, not sure why
+# issue https://github.com/gomods/athens/issues/412
+export GO111MODULE=on
 # Make sure that our test repo works without the GOPROXY first
 unset GOPROXY
 go run .
