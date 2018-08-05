@@ -7,12 +7,8 @@ set -xeuo pipefail
 
 REPO_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )/.."
 
-# Use a version of Go that supports Go Modules
 GOMOD_CACHE=$(go env GOPATH)/pkg/mod
-GO_SOURCE=${GO_SOURCE:=$(go env GOPATH)/src/golang.org/x/go}
-export GOROOT=${GO_SOURCE}
-export PATH=${GO_SOURCE}/bin:${REPO_DIR}/bin:${PATH}
-go version
+export PATH=${REPO_DIR}/bin:${PATH}
 
 clearGoModCache () {
   # The sudo is a necessary workaround until go is fixed
@@ -27,7 +23,6 @@ teardown () {
 trap teardown EXIT
 
 # Start the proxy in the background and wait for it to be ready
-export GO_BINARY_PATH=${GO_SOURCE}/bin/go
 cd $REPO_DIR/cmd/proxy
 pkill buffalo || true # cleanup old buffalos
 buffalo dev &
@@ -41,6 +36,8 @@ pushd ${TEST_SOURCE}
 
 clearGoModCache
 
+# set modules to enabled after running buffalo dev, see issue
+#...todo(robjloranger)
 export GO111MODULE=on
 # Make sure that our test repo works without the GOPROXY first
 unset GOPROXY
