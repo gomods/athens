@@ -1,7 +1,7 @@
 package actions
 
 import (
-	"fmt"
+	stdlog "log"
 
 	"github.com/gobuffalo/buffalo"
 	"github.com/gobuffalo/buffalo/middleware"
@@ -136,7 +136,8 @@ func getWorker(store storage.Backend, eLog eventlog.Eventlog) (worker.Worker, er
 	case "memory":
 		return registerInMem(store, eLog)
 	default:
-		return nil, fmt.Errorf("Provided worker type %s not one of redis|memory", workerType)
+		stdlog.Printf("Provided background worker type %s. Expected redis|memory. Defaulting to memory", workerType)
+		return registerInMem(store, eLog)
 	}
 }
 
