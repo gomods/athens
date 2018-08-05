@@ -1,6 +1,8 @@
 package actions
 
 import (
+	"fmt"
+
 	"github.com/gobuffalo/buffalo"
 	"github.com/gobuffalo/buffalo/middleware"
 	"github.com/gobuffalo/buffalo/middleware/csrf"
@@ -127,10 +129,15 @@ func App(config *AppConfig) (*buffalo.App, error) {
 }
 
 func getWorker(store storage.Backend, eLog eventlog.Eventlog) (worker.Worker, error) {
-	if env.OlympusRedisMockInMem() {
+	workerType := env.OlympusBackgroundWorkerType()
+	switch workerType {
+	case "redis":
+		return registerRedis(store, eLog)
+	case "memory":
 		return registerInMem(store, eLog)
+	default:
+		return nil, fmt.Errorf("Provided worker type %s not one of redis|memory", workerType)
 	}
-	return registerRedis(store, eLog)
 }
 
 func registerInMem(store storage.Backend, eLog eventlog.Eventlog) (worker.Worker, error) {
