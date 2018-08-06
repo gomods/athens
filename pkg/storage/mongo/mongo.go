@@ -1,9 +1,11 @@
 package mongo
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/globalsign/mgo"
+	"github.com/gomods/athens/pkg/config/env"
 )
 
 // ModuleStore represents a mongo backed storage backend.
@@ -23,9 +25,10 @@ func NewStorage(url string) *ModuleStore {
 
 // Connect conntect the the newly created mongo backend.
 func (m *ModuleStore) Connect() error {
-	s, err := mgo.Dial(m.url)
+	timeout := env.MongoConnectionTimeoutSecWithDefault(1)
+	s, err := mgo.DialWithTimeout(m.url, timeout)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to connect with %s, error: %v", m.url, err)
 	}
 	m.s = s
 
