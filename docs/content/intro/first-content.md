@@ -5,7 +5,7 @@ date: 2018-02-11T16:59:56-05:00
 
 ## What is Athens?
 
-Shortly: Athens is a project building on top of vgo (or go1.11+) trying to bring dependencies closer to you so you can count with repeatable builds even at the time when VCS is down.
+Shortly: Athens is a project building on top of vgo (or go1.11+) trying to bring dependencies closer to you so you can count on repeatable builds even at a time when VCS is down.
 
 The big goal of Athens is to provide a new place where dependencies — not code — live. Dependencies are immutable blobs of code and associated metadata that come from Github. They live in storage that Athens controls.
 

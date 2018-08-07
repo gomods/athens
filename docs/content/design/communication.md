@@ -14,14 +14,14 @@ At the beginning, there's theoretical state when a cache of proxy and registry i
 
 When User makes a request at this ancient time, it works as described on the flow below.
 
-- User contacts Athens asking for module M in version v1.0
-- Athens checks whether or not it has this module in its storage. It has not.
+- User contacts proxy asking for module M in version v1.0
+- Proxy checks whether or not it has this module in its storage. It has not.
 -So it responds with a redirect to Olympus and schedules its own job to check with Olympus in few units of time, giving Olympus space to fill its cache.
 - User receives redirect to Olympus and asks it for module M in version v1.0
 - Olympus is cache free as well, so it asks the underlying VCS (e.g github.com) for a module.
 - After it receives all the bits, it stores it into its own cache and serves it to the User.
 - User receives module and is happy.
-- Sometimes around this time Athens asks Olympus for module M in version v1.0 as well. Olympus, now aware of this module, serves it so Athens can fill its own cache.
+- Sometimes around this time proxy asks Olympus for module M in version v1.0 as well. Olympus, now aware of this module, serves it so proxy can fill its own cache.
 
 ![Communication flow for clear state](/athens-clear-scenario.png)
 
@@ -49,14 +49,14 @@ Now we have all proxies and Olympus aware of module M. So when a new user asks f
 
 ### Asking about private things
 
-There are times when you do not want to know the mighty gods of Olympus about your desires. E.g:
+There are times when you do not want the mighty gods of Olympus to know about your desires. E.g:
 - You are requesting private module,
 - Communication is just disabled.
 
 In this case
-- User contacts Athens asking for a private module.
-- Athens detects this repo is private and checks its storage. It does not find it there.
-- Athens contacts VCS directly.
+- User contacts proxy asking for a private module.
+- Proxy detects this repo is private and checks its storage. It does not find it there.
+- Proxy contacts VCS directly.
 - VCS responds with a module which is then stored in a cache Synchronously.
 - The module is served to the User.
 

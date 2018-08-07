@@ -3,7 +3,7 @@ title: "Download protocol"
 date: 2018-02-11T16:58:56-05:00
 ---
 
-Athens builds on top of Go CLI which specifies a set of endpoints using which it communicates with external proxies providing modules. This set of endpoints we call _Download protocol_
+Athens builds on top of Go CLI which specifies a set of endpoints with which it communicates with external proxies providing modules. This set of endpoints we call _Download Protocol_
 
 The original vgo research paper on Download protocol can be found here: https://research.swtch.com/vgo-module
 
@@ -43,7 +43,7 @@ This returns JSON with information about v1.0.0. It looks like this:
 }
 ```
 
-## GO.mod file
+## Go.mod file
 
 ```HTTP
 GET athens.io/acidburn/htp/@v/v1.0.0.mod
