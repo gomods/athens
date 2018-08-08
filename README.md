@@ -79,7 +79,7 @@ The Athens project would not be possible without the amazing projects it builds 
 
 # Coding Guidlines
 
-We all thrive to write nice and readable code which can be understood by every person of the team. To achive that we follow principles described in Brians talk `Code like a Go team`.
+We all thrive to write nice and readable code which can be understood by every person of the team. To achive that we follow principles described in Brians talk `Code like the Go team`.
 
 - [Printed version]("https://learn-golang.com/en/goteam/")
 - [Gophercon RU talk]("https://www.youtube.com/watch?v=MzTcsI6tn-0")
