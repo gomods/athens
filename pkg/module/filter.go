@@ -178,7 +178,7 @@ func newRule(r FilterRule) ruleNode {
 }
 
 func getConfigLines() ([]string, error) {
-	configName := env.IncludeExcludeFileName()
+	configName := env.FilterConfigurationFileName()
 
 	f, err := os.Open(configName)
 	if err != nil {
