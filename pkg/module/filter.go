@@ -65,11 +65,19 @@ func (f *Filter) AddRule(path string, rule FilterRule) {
 
 // ShouldProcess evaluates path and determines if module should be communicated or not
 func (f *Filter) ShouldProcess(path string) bool {
-	segs := getPathSegments(path)
-	rule := f.shouldProcess(segs...)
-
+	rule := f.Rule(path)
 	// process everything unless it's excluded
 	return rule != Exclude
+}
+
+// Rule returns the filter rule to be applied to the given path
+func (f *Filter) Rule(path string) FilterRule {
+	segs := getPathSegments(path)
+	return f.shouldProcess(segs...)
+}
+
+func (f *Filter) IsPrivate(path string) bool {
+	return true
 }
 
 func (f *Filter) ensurePath(path string) {
@@ -133,6 +141,8 @@ func (f *Filter) initFromConfig() {
 			rule = Include
 		case "-":
 			rule = Exclude
+		case "P":
+			rule = Private
 		default:
 			continue
 		}
