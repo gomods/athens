@@ -40,9 +40,6 @@ olympus-docker:
 	docker build -t gopackages/olympus -f cmd/olympus/Dockerfile .
 
 
-bench:
-	./scripts/benchmark.sh
-
 .PHONY: alldeps
 alldeps:
 	docker-compose -p athensdev up -d mysql

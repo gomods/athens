@@ -22,16 +22,8 @@ before_script:
   - chmod +x minio && nohup ./minio server . &
   - buffalo db create
   - buffalo db migrate up
-
-jobs:
-  include:
-    - stage: verify
-      script: make verify
-    - stage: test
-      script: make test-unit
-      script: make test-e2e
-      script: make bench
-
+script:
+  - make verify test-unit test-e2e
 after_success:
   - if [ "${CODE_COV}" == "1" ]; then
       curl -s https://codecov.io/bash -o codecov && bash codecov -X fix;
