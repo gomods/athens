@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/gobuffalo/suite"
+	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/storage"
 	"github.com/gomods/athens/pkg/storage/fs"
 	"github.com/gomods/athens/pkg/storage/mem"
@@ -26,6 +27,7 @@ func BenchmarkStorageList(b *testing.B) {
 
 		require.NoError(b, backend.Save(context.Background(), module, version, mod, bytes.NewReader(zip), info), "Save for storage %s failed", backend)
 
+		b.ResetTimer()
 		b.Run(store.StorageHumanReadableName(), func(b *testing.B) {
 			for i := 0; i < b.N; i++ {
 				_, err := backend.List(context.Background(), module)
@@ -45,10 +47,13 @@ func BenchmarkStorageSave(b *testing.B) {
 
 		backend := store.Storage()
 
+		b.ResetTimer()
+		mi := 0
 		b.Run(store.StorageHumanReadableName(), func(b *testing.B) {
 			for i := 0; i < b.N; i++ {
-				err := backend.Save(context.Background(), fmt.Sprintf("%s-%d", module, i), version, mod, bytes.NewReader(zip), info)
+				err := backend.Save(context.Background(), fmt.Sprintf("save-%s-%d", module, mi), version, mod, bytes.NewReader(zip), info)
 				require.NoError(b, err)
+				mi++
 			}
 		})
 
@@ -56,22 +61,22 @@ func BenchmarkStorageSave(b *testing.B) {
 	}
 }
 
-func BenchmarkStorageDelete(b *testing.B) {
+func BenchmarkStorageSaveAndDelete(b *testing.B) {
 	module, version := "athens_module", "1.0.1"
 	zip, info, mod := []byte("zip_data"), []byte("info"), []byte("mod_info")
 
 	for _, store := range getStores(b) {
 
 		backend := store.Storage()
-		modules := b.N
-		for i := 0; i < modules; i++ {
-			err := backend.Save(context.Background(), fmt.Sprintf("del-%s-%d", module, i), version, mod, bytes.NewReader(zip), info)
-			require.NoError(b, err, "save for storage %s module: %s failed", backend, i)
-		}
 
+		b.ResetTimer()
 		b.Run(store.StorageHumanReadableName(), func(b *testing.B) {
 			for i := 0; i < b.N; i++ {
-				backend.Delete(context.Background(), fmt.Sprintf("del-%s-%d", module, i%modules), version)
+				name := fmt.Sprintf("del-%s-%d", module, i)
+				err := backend.Save(context.Background(), name, version, mod, bytes.NewReader(zip), info)
+				require.NoError(b, err, "save for storage %s module: %s failed", backend, name)
+				err = backend.Delete(context.Background(), name, version)
+				require.NoError(b, err, "delete failed: %s", name)
 			}
 		})
 
@@ -84,9 +89,11 @@ func BenchmarkStorageDeleteNonExistingModules(b *testing.B) {
 	for _, store := range getStores(b) {
 		backend := store.Storage()
 
+		b.ResetTimer()
 		b.Run(store.StorageHumanReadableName(), func(b *testing.B) {
 			for i := 0; i < b.N; i++ {
-				backend.Delete(context.Background(), fmt.Sprintf("del-%s-%d", module, i), version)
+				err := backend.Delete(context.Background(), fmt.Sprintf("del-%s-%d", module, i), version)
+				require.Equal(b, errors.KindNotFound, errors.Kind(err))
 			}
 		})
 	}
@@ -95,19 +102,17 @@ func BenchmarkStorageDeleteNonExistingModules(b *testing.B) {
 func BenchmarkStorageExists(b *testing.B) {
 	module, version := "athens_module", "1.0.1"
 	zip, info, mod := []byte("zip_data"), []byte("info"), []byte("mod_info")
+	moduleName := fmt.Sprintf("existing-%s", module)
 
 	for _, store := range getStores(b) {
-
 		backend := store.Storage()
-		modules := b.N
-		for i := 0; i < modules; i++ {
-			err := backend.Save(context.Background(), fmt.Sprintf("%s-%d", module, i), version, mod, bytes.NewReader(zip), info)
-			require.NoError(b, err, "exists for storage %s failed", backend)
-		}
+		err := backend.Save(context.Background(), moduleName, version, mod, bytes.NewReader(zip), info)
+		require.NoError(b, err, "exists for storage %s failed", backend)
 
+		b.ResetTimer()
 		b.Run(store.StorageHumanReadableName(), func(b *testing.B) {
 			for i := 0; i < b.N; i++ {
-				require.True(b, backend.Exists(context.Background(), fmt.Sprintf("%s-%d", module, i%modules), version))
+				require.True(b, backend.Exists(context.Background(), moduleName, version))
 			}
 		})
 
