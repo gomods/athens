@@ -6,7 +6,7 @@ import (
 	"github.com/gomods/athens/pkg/paths"
 )
 
-func getModuleParams(op errors.Op, c buffalo.Context) (string, string, error) {
+func getModuleParams(op errors.Op, c buffalo.Context) (mod string, vers string, err error) {
 	params, err := paths.GetAllParams(c)
 	if err != nil {
 		return "", "", errors.E(op, err, errors.KindBadRequest)

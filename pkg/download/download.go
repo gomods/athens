@@ -110,6 +110,9 @@ func (p *protocol) Zip(ctx context.Context, mod, ver string) (io.ReadCloser, err
 	zip, err := p.s.Zip(ctx, mod, ver)
 	if errors.IsNotFoundErr(err) {
 		err = p.fillCache(ctx, mod, ver)
+		if err != nil {
+			return nil, errors.E(op, err)
+		}
 		zip, err = p.s.Zip(ctx, mod, ver)
 	}
 	if err != nil {
