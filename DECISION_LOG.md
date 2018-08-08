@@ -1,3 +1,0 @@
-# Decision log
-
-TODO
