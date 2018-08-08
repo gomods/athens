@@ -65,10 +65,10 @@ func BenchmarkStorageDelete(b *testing.B) {
 
 		for i := 0; i < b.N; i++ {
 			err := backend.Save(context.Background(), fmt.Sprintf("%s-%d", module, i), version, mod, bytes.NewReader(zip), info)
-			require.NoError(b, err, "Save for storage %s failed", backend)
+			require.NoError(b, err, "delete for storage %s failed", backend)
 		}
 
-		b.Run(fmt.Sprintf("save module backend %s", store.StorageHumanReadableName()), func(b *testing.B) {
+		b.Run(fmt.Sprintf("delete module backend %s", store.StorageHumanReadableName()), func(b *testing.B) {
 			for i := 0; i < b.N; i++ {
 				err := backend.Save(context.Background(), fmt.Sprintf("%s-%d", module, i), version, mod, bytes.NewReader(zip), info)
 				require.NoError(b, err)
@@ -89,15 +89,20 @@ func BenchmarkStorageExists(b *testing.B) {
 
 		for i := 0; i < b.N; i++ {
 			err := backend.Save(context.Background(), fmt.Sprintf("%s-%d", module, i), version, mod, bytes.NewReader(zip), info)
-			require.NoError(b, err, "Save for storage %s failed", backend)
+			require.NoError(b, err, "exists for storage %s failed", backend)
 		}
 
-		b.Run(fmt.Sprintf("save module backend %s", store.StorageHumanReadableName()), func(b *testing.B) {
+		b.Run(fmt.Sprintf("exists module backend %s", store.StorageHumanReadableName()), func(b *testing.B) {
 			for i := 0; i < b.N; i++ {
 				backend.Exists(context.Background(), fmt.Sprintf("%s-%d", module, i), version)
 			}
 		})
 
+		b.Run(fmt.Sprintf("non existent module backend %s", store.StorageHumanReadableName()), func(b *testing.B) {
+			for i := 0; i < b.N; i++ {
+				backend.Exists(context.Background(), fmt.Sprintf("invaid-%s-%d", module, i), version)
+			}
+		})
 		require.NoError(b, store.Cleanup())
 	}
 }

@@ -72,6 +72,5 @@ func MongoConnectionTimeoutSecWithDefault(defTimeout int) time.Duration {
 // MongoSSLWithDefault returns Athens Mongo Storage SSL flag defined by MONGO_SSL.
 // Defines whether or not SSL should be used.
 func MongoSSLWithDefault(value string) string {
-	//TODO: could return time.Duration
 	return envy.Get("MONGO_SSL", value)
 }
