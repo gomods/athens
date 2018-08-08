@@ -1,3 +1,4 @@
+replicaCount: 3
 image:
   registry: docker.io
   repository: gomods/athens
@@ -7,3 +8,12 @@ image:
   ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
   ##
   pullPolicy: Always
+
+storageType: disk
+redisPort: 6379
+goEnv: development
+goBinaryPath: go
+# you must set this on the command line when you run 'helm install'
+# 
+# for example, you need to run 'helm install --set mongoStorageURL=myurl ...'
+mongoStorageURL: "SET THIS ON THE COMMAND LINE"
