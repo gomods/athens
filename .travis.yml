@@ -24,7 +24,7 @@ before_script:
   - buffalo db migrate up
 
 script:
-  - make verify test-unit test-e2e bench
+  - make verify test-unit test-e2e
 
 after_success:
   - if [ "${CODE_COV}" == "1" ]; then
