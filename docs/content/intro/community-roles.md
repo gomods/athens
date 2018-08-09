@@ -72,6 +72,7 @@ extras:
 - Promote the project and build community (e.g. present on it where possible, write about it, ...) when possible<sup>2</sup>
 - Triage issues (e.g. adding labels, promoting discussions, finalizing decisions)
 - Organize and promote PR reviews (e.g. prompting community members, contributors, and other maintainers to review)
+- Handle code of conduct issues
 
 ## How to Become a Maintainer
 
