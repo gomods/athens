@@ -35,9 +35,16 @@ test-unit:
 test-e2e:
 	./scripts/test_e2e.sh
 
+.PHONY: docker
+docker: olympus-docker proxy-docker
+
 .PHONY: olympus-docker
 olympus-docker:
-	docker build -t gopackages/olympus -f cmd/olympus/Dockerfile .
+	docker build -t gomods/olympus -f cmd/olympus/Dockerfile .
+
+.PHONY: proxy-docker
+proxy-docker:
+	docker build -t gomods/proxy -f cmd/proxy/Dockerfile .
 
 bench:
 	./scripts/benchmark.sh

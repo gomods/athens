@@ -8,9 +8,8 @@ FROM gobuffalo/buffalo:v0.11.0 as builder
 RUN mkdir -p $GOPATH/src/github.com/gomods/athens
 WORKDIR $GOPATH/src/github.com/gomods/athens
 ADD . .
-WORKDIR $GOPATH/src/github.com/gomods/athens/cmd/olympus
 
-RUN buffalo build -s -o /bin/app
+RUN cd cmd/olympus && npm install && buffalo build -s -o /bin/app
 
 FROM alpine
 RUN apk add --no-cache bash

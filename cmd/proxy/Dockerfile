@@ -13,7 +13,7 @@ RUN yarn install --no-progress
 WORKDIR $GOPATH/src/github.com/gomods/athens
 
 ADD . .
-RUN cd cmd/proxy && buffalo build -s -o /bin/app
+RUN cd cmd/proxy && npm install && buffalo build -s -o /bin/app
 
 FROM alpine
 RUN apk add --no-cache bash
