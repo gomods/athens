@@ -4,9 +4,9 @@ import (
 	"strings"
 
 	"github.com/bketelsen/buffet"
-	"github.com/fedepaol/athens/pkg/errors"
-	"github.com/fedepaol/athens/pkg/log"
 	"github.com/gobuffalo/buffalo"
+	"github.com/gomods/athens/pkg/errors"
+	"github.com/gomods/athens/pkg/log"
 	"github.com/gomods/athens/pkg/module"
 	"github.com/gomods/athens/pkg/paths"
 )

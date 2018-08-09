@@ -69,5 +69,4 @@ func (t *FilterTests) Test_Private() {
 	r.Equal(Include, f.Rule("github.com/a"))
 	r.Equal(Private, f.Rule("github.com/a/b"))
 	r.Equal(Exclude, f.Rule("github.com/a/b/c/d"))
-
 }
