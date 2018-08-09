@@ -15,13 +15,16 @@ env:
     - CODE_COV=1
     - TMPDIR=/tmp/
 before_script:
+  - mkdir -p $ATHENS_DIR && rsync -azr . $ATHENS_DIR && cd $ATHENS_DIR
   - make setup-dev-env
   - wget "https://dl.minio.io/server/minio/release/linux-amd64/minio"
   - chmod +x minio && nohup ./minio server . &
   - buffalo db create
   - buffalo db migrate up
+
 script:
   - make verify test-unit test-e2e
+
 after_success:
   - if [ "${CODE_COV}" == "1" ]; then
       curl -s https://codecov.io/bash -o codecov && bash codecov -X fix;
