@@ -22,3 +22,8 @@ athens
 yarn-error.log
 cmd/proxy/proxy
 cmd/olympus/olympus
+test-keys.json
+tmp
+.vs
+cmd/olympus/bin
+cmd/proxy/bin

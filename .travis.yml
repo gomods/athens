@@ -1,30 +1,34 @@
 services:
-  - mongodb
-  - postgresql
+  - docker
 language: go
 install: false
 go:
   - "1.10.x"
 env:
   global:
+    - PATH=${PATH}:./bin
     - POP_PATH=$PWD/cmd/proxy
     - GO_ENV=test_postgres
     - MINIO_ACCESS_KEY=minio
     - MINIO_SECRET_KEY=minio123
     - ATHENS_MONGO_STORAGE_URL=mongodb://127.0.0.1:27017
     - CODE_COV=1
-script:
-  - test -z $(gofmt -s -l $GO_FILES)                              # Fail if a .go file hasn't been formatted with gofmt
-  - golint -set_exit_status $(go list ./...)                      # Linter
-  - go test -race -coverprofile cover.out -covermode atomic ./... # Run all the tests with the race detector and code coverage enabled
+    - TMPDIR=/tmp/
+    - GO_SOURCE=${TMPDIR}go
+    - GO_BINARY_PATH=${TMPDIR}go/bin/go
+    - ATHENS_DIR=${GOPATH}/src/github.com/gomods/athens
+
 before_script:
-  - GO_FILES=$(find . -iname '*.go' -type f | grep -v /vendor/)   # All the .go files, excluding vendor/
-  - go get github.com/golang/lint/golint
-  - wget https://dl.minio.io/server/minio/release/linux-amd64/minio && chmod +x minio && nohup ./minio server . &
-  - go get -u -v github.com/gobuffalo/buffalo/buffalo
-  - go get -u -v golang.org/x/vgo
+  - mkdir -p $ATHENS_DIR && rsync -azr . $ATHENS_DIR && cd $ATHENS_DIR
+  - make setup-dev-env
+  - wget "https://dl.minio.io/server/minio/release/linux-amd64/minio"
+  - chmod +x minio && nohup ./minio server . &
   - buffalo db create
   - buffalo db migrate up
+
+script:
+  - make verify test-unit test-e2e
+
 after_success:
   - if [ "${CODE_COV}" == "1" ]; then
       curl -s https://codecov.io/bash -o codecov && bash codecov -X fix;

@@ -1,13 +1,18 @@
 package fs
 
 import (
+	"context"
+	"io"
 	"os"
 	"path/filepath"
 
+	opentracing "github.com/opentracing/opentracing-go"
 	"github.com/spf13/afero"
 )
 
-func (s *storageImpl) Save(module, vsn string, mod, zip, info []byte) error {
+func (s *storageImpl) Save(ctx context.Context, module, vsn string, mod []byte, zip io.Reader, info []byte) error {
+	sp, ctx := opentracing.StartSpanFromContext(ctx, "storage.fs.Save")
+	defer sp.Finish()
 	dir := s.versionLocation(module, vsn)
 	// TODO: 777 is not the best filemode, use something better
 
@@ -22,7 +27,13 @@ func (s *storageImpl) Save(module, vsn string, mod, zip, info []byte) error {
 	}
 
 	// write the zipfile
-	if err := afero.WriteFile(s.filesystem, filepath.Join(dir, "source.zip"), zip, os.ModePerm); err != nil {
+	f, err := s.filesystem.OpenFile(filepath.Join(dir, "source.zip"), os.O_WRONLY|os.O_CREATE|os.O_TRUNC, os.ModePerm)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	_, err = io.Copy(f, zip)
+	if err != nil {
 		return err
 	}
 

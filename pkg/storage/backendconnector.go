@@ -1,5 +1,10 @@
 package storage
 
+import (
+	"context"
+	"io"
+)
+
 // BackendConnector is a regular storage backend with Connect functionality
 type BackendConnector interface {
 	Backend
@@ -19,19 +24,25 @@ func (n noOpConnectedBackend) Connect() error {
 	return nil
 }
 
-func (n noOpConnectedBackend) Exists(module, version string) bool {
-	return n.backend.Exists(module, version)
+func (n noOpConnectedBackend) Exists(ctx context.Context, module, version string) bool {
+	return n.backend.Exists(ctx, module, version)
 }
 
-func (n noOpConnectedBackend) Get(module, vsn string) (*Version, error) {
-	return n.backend.Get(module, vsn)
+func (n noOpConnectedBackend) Info(ctx context.Context, module, vsn string) ([]byte, error) {
+	return n.backend.Info(ctx, module, vsn)
 }
-func (n noOpConnectedBackend) List(module string) ([]string, error) {
-	return n.backend.List(module)
+func (n noOpConnectedBackend) GoMod(ctx context.Context, module, vsn string) ([]byte, error) {
+	return n.backend.GoMod(ctx, module, vsn)
 }
-func (n noOpConnectedBackend) Save(module, version string, mod, zip, info []byte) error {
-	return n.backend.Save(module, version, mod, zip, info)
+func (n noOpConnectedBackend) Zip(ctx context.Context, module, vsn string) (io.ReadCloser, error) {
+	return n.backend.Zip(ctx, module, vsn)
 }
-func (n noOpConnectedBackend) Delete(module, version string) error {
-	return n.backend.Delete(module, version)
+func (n noOpConnectedBackend) List(ctx context.Context, module string) ([]string, error) {
+	return n.backend.List(ctx, module)
+}
+func (n noOpConnectedBackend) Save(ctx context.Context, module, version string, mod []byte, zip io.Reader, info []byte) error {
+	return n.backend.Save(ctx, module, version, mod, zip, info)
+}
+func (n noOpConnectedBackend) Delete(ctx context.Context, module, version string) error {
+	return n.backend.Delete(ctx, module, version)
 }

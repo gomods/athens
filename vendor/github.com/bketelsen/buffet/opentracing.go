@@ -1,10 +1,11 @@
 package buffet
 
 import (
+	"context"
 	"strings"
 
 	"github.com/gobuffalo/buffalo"
-	opentracing "github.com/opentracing/opentracing-go"
+	"github.com/opentracing/opentracing-go"
 	"github.com/opentracing/opentracing-go/ext"
 	olog "github.com/opentracing/opentracing-go/log"
 )
@@ -27,7 +28,17 @@ func OpenTracing(tr opentracing.Tracer) buffalo.MiddlewareFunc {
 					opName = operation(route.HandlerName)
 				}
 			}
-			sp := tr.StartSpan(opName)
+
+			wireContext, _ := tr.Extract(
+				opentracing.HTTPHeaders,
+				opentracing.HTTPHeadersCarrier(c.Request().Header))
+
+			// Create the span referring to the RPC client if available.
+			// If wireContext == nil, a root span will be created.
+			sp := tr.StartSpan(
+				opName,
+				ext.RPCServerOption(wireContext))
+
 			ext.HTTPMethod.Set(sp, c.Request().Method)
 			ext.HTTPUrl.Set(sp, c.Request().URL.String())
 
@@ -93,4 +104,14 @@ func ChildSpan(opname string, c buffalo.Context) opentracing.Span {
 func operation(s string) string {
 	chunks := strings.Split(s, ".")
 	return chunks[len(chunks)-1]
+}
+
+// ChildSpanFromContext takes an opname and context.Context and returns a span
+// NB: Using this function will not mean that buffalo metadata won't be attached to the traces in the new Span
+func ChildSpanFromContext(opname string, ctx context.Context) opentracing.Span {
+	psp := opentracing.SpanFromContext(ctx)
+	sp := tracer.StartSpan(
+		opname,
+		opentracing.ChildOf(psp.Context()))
+	return sp
 }

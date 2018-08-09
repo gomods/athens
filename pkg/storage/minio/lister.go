@@ -1,11 +1,16 @@
 package minio
 
 import (
+	"context"
 	"sort"
 	"strings"
+
+	opentracing "github.com/opentracing/opentracing-go"
 )
 
-func (l *storageImpl) List(module string) ([]string, error) {
+func (l *storageImpl) List(ctx context.Context, module string) ([]string, error) {
+	sp, ctx := opentracing.StartSpanFromContext(ctx, "storage.minio.List")
+	defer sp.Finish()
 	dict := make(map[string]struct{})
 
 	doneCh := make(chan struct{})

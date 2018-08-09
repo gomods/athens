@@ -2,11 +2,16 @@ package minio
 
 import (
 	"bytes"
+	"context"
+	"io"
 
 	minio "github.com/minio/minio-go"
+	opentracing "github.com/opentracing/opentracing-go"
 )
 
-func (s *storageImpl) Save(module, vsn string, mod, zip, info []byte) error {
+func (s *storageImpl) Save(ctx context.Context, module, vsn string, mod []byte, zip io.Reader, info []byte) error {
+	sp, ctx := opentracing.StartSpanFromContext(ctx, "storage.minio.Save")
+	defer sp.Finish()
 	dir := s.versionLocation(module, vsn)
 	modFileName := dir + "/" + "go.mod"
 	zipFileName := dir + "/" + "source.zip"
@@ -15,7 +20,7 @@ func (s *storageImpl) Save(module, vsn string, mod, zip, info []byte) error {
 	if err != nil {
 		return err
 	}
-	_, err = s.minioClient.PutObject(s.bucketName, zipFileName, bytes.NewReader(zip), int64(len(zip)), minio.PutObjectOptions{})
+	_, err = s.minioClient.PutObject(s.bucketName, zipFileName, zip, -1, minio.PutObjectOptions{})
 	if err != nil {
 		return err
 	}

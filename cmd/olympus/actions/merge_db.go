@@ -1,14 +1,15 @@
 package actions
 
 import (
-	"io/ioutil"
+	"context"
 	"log"
 	"time"
 
-	"github.com/gomods/athens/pkg/storage"
-
-	"github.com/gomods/athens/pkg/cdn"
+	"github.com/gomods/athens/pkg/config/env"
 	"github.com/gomods/athens/pkg/eventlog"
+	"github.com/gomods/athens/pkg/module"
+	"github.com/gomods/athens/pkg/storage"
+	multierror "github.com/hashicorp/go-multierror"
 )
 
 // mergeDB merges diff into the module database.
@@ -22,75 +23,87 @@ import (
 //		- Delete operation adds tombstone to module metadata k/v store
 //
 // Both could be fixed by putting each 'for' loop into a (global) critical section
-func mergeDB(originURL string, diff dbDiff, eLog eventlog.Eventlog, storage storage.Backend) error {
+func mergeDB(ctx context.Context, originURL string, diff dbDiff, eLog eventlog.Eventlog, storage storage.Backend, downloader module.Downloader) error {
+	var errors error
 	for _, added := range diff.Added {
-		if _, err := eLog.ReadSingle(added.Module, added.Version); err != nil {
-			// the module/version already exists, is deprecated, or is
-			// tombstoned, so nothing to do
-			continue
-		}
-
-		// download code from the origin
-		data, err := cdn.Download(originURL, added.Module, added.Version)
-		if err != nil {
-			log.Printf("error downloading new module %s/%s from %s (%s)", added.Module, added.Version, originURL, err)
-			continue
-		}
-
-		// save module data to the CDN
-		zipBytes, err := ioutil.ReadAll(data.Zip)
-		if err != nil {
-			continue
-		}
-		if err := data.Zip.Close(); err != nil {
-			continue
-		}
-
-		if err := storage.Save(added.Module, added.Version, data.Mod, zipBytes, data.Info); err != nil {
-			log.Printf("error saving new module %s/%s to CDN (%s)", added.Module, added.Version, err)
-			continue
-		}
-
-		// save module metadata to the key/value store
-		if _, err := eLog.Append(eventlog.Event{Module: added.Module, Version: added.Version, Time: time.Now(), Op: eventlog.OpAdd}); err != nil {
-			log.Printf("error saving metadata for new module %s/%s (%s)", added.Module, added.Version, err)
-			continue
+		if err := add(ctx, added, originURL, eLog, storage, downloader); err != nil {
+			errors = multierror.Append(errors, err)
 		}
 	}
 	for _, deprecated := range diff.Deprecated {
-		fromDB, err := eLog.ReadSingle(deprecated.Module, deprecated.Version)
-		if err != nil {
-			log.Printf("error getting deprecated module %s/%s (%s)", deprecated.Module, deprecated.Version, err)
-			continue
-		}
-		if fromDB.Op == eventlog.OpDel {
-			continue // can't deprecate something that's already deleted
-		}
-		// delete from the CDN
-		if err := storage.Delete(deprecated.Module, deprecated.Version); err != nil {
-			log.Printf("error deleting deprecated module %s/%s from CDN (%s)", deprecated.Module, deprecated.Version, err)
-			continue
-		}
-
-		// add the tombstone to module metadata
-		if _, err := eLog.Append(eventlog.Event{Module: deprecated.Module, Version: deprecated.Version, Time: time.Now(), Op: eventlog.OpDel}); err != nil {
-			log.Printf("error saving metadata for deprecated module %s/%s from CDN (%s)", deprecated.Module, deprecated.Version, err)
-			continue
+		if err := deprecate(ctx, deprecated, originURL, eLog, storage); err != nil {
+			errors = multierror.Append(errors, err)
 		}
 	}
 	for _, deleted := range diff.Deleted {
-		// delete in the CDN
-		if err := storage.Delete(deleted.Module, deleted.Version); err != nil {
-			log.Printf("error deleting deleted module %s/%s from CDN (%s)", deleted.Module, deleted.Version, err)
-			continue
-		}
-		// add tombstone to module metadata
-		if _, err := eLog.Append(eventlog.Event{Module: deleted.Module, Version: deleted.Version, Time: time.Now(), Op: eventlog.OpDel}); err != nil {
-			log.Printf("error inserting tombstone for deleted module %s/%s (%s)", deleted.Module, deleted.Version, err)
-			return err
+		if err := delete(ctx, deleted, eLog, storage); err != nil {
+			errors = multierror.Append(errors, err)
 		}
 	}
+	return errors
+}
 
+func add(ctx context.Context, event eventlog.Event, originURL string, eLog eventlog.Eventlog, storage storage.Backend, downloader module.Downloader) error {
+	if _, err := eLog.ReadSingle(event.Module, event.Version); err != nil {
+		// the module/version already exists, is deprecated, or is
+		// tombstoned, so nothing to do
+		return err
+	}
+
+	// download code from the origin
+	data, err := downloader(ctx, env.Timeout(), originURL, event.Module, event.Version)
+	if err != nil {
+		log.Printf("error downloading new module %s/%s from %s (%s)", event.Module, event.Version, originURL, err)
+		return err
+	}
+	defer data.Zip.Close()
+	// save module data to the CDN
+	if err := storage.Save(ctx, event.Module, event.Version, data.Mod, data.Zip, data.Info); err != nil {
+		log.Printf("error saving new module %s/%s to CDN (%s)", event.Module, event.Version, err)
+		return err
+	}
+
+	// save module metadata to the key/value store
+	if _, err := eLog.Append(eventlog.Event{Module: event.Module, Version: event.Version, Time: time.Now(), Op: eventlog.OpAdd}); err != nil {
+		log.Printf("error saving metadata for new module %s/%s (%s)", event.Module, event.Version, err)
+		return err
+	}
 	return nil
+}
 
+func deprecate(ctx context.Context, event eventlog.Event, originURL string, eLog eventlog.Eventlog, storage storage.Backend) error {
+	fromDB, err := eLog.ReadSingle(event.Module, event.Version)
+	if err != nil {
+		log.Printf("error getting event module %s/%s (%s)", event.Module, event.Version, err)
+		return err
+	}
+	if fromDB.Op == eventlog.OpDel {
+		return err // can't deprecate something that's already deleted
+	}
+	// delete from the CDN
+	if err := storage.Delete(ctx, event.Module, event.Version); err != nil {
+		log.Printf("error deleting event module %s/%s from CDN (%s)", event.Module, event.Version, err)
+		return err
+	}
+
+	// add the tombstone to module metadata
+	if _, err := eLog.Append(eventlog.Event{Module: event.Module, Version: event.Version, Time: time.Now(), Op: eventlog.OpDel}); err != nil {
+		log.Printf("error saving metadata for deprecated module %s/%s from CDN (%s)", event.Module, event.Version, err)
+		return err
+	}
+	return nil
+}
+
+func delete(ctx context.Context, event eventlog.Event, eLog eventlog.Eventlog, storage storage.Backend) error {
+	// delete in the CDN
+	if err := storage.Delete(ctx, event.Module, event.Version); err != nil {
+		log.Printf("error deleting event module %s/%s from CDN (%s)", event.Module, event.Version, err)
+		return err
+	}
+	// add tombstone to module metadata
+	if _, err := eLog.Append(eventlog.Event{Module: event.Module, Version: event.Version, Time: time.Now(), Op: eventlog.OpDel}); err != nil {
+		log.Printf("error inserting tombstone for deleted module %s/%s (%s)", event.Module, event.Version, err)
+		return err
+	}
+	return nil
 }

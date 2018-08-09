@@ -1,12 +1,12 @@
 package actions
 
 import (
+	"context"
 	"errors"
-	"fmt"
-	"io/ioutil"
 
 	"github.com/gobuffalo/buffalo/worker"
-	"github.com/gobuffalo/envy"
+	"github.com/gomods/athens/pkg/config/env"
+	"github.com/gomods/athens/pkg/module"
 	"github.com/gomods/athens/pkg/storage"
 	olympusStore "github.com/gomods/athens/pkg/storage/olympus"
 )
@@ -18,36 +18,30 @@ const (
 	OlympusGlobalEndpointOverrideKey = "OLYMPUS_GLOBAL_ENDPOINT"
 )
 
-// GetProcessCacheMissJob porcesses queue of cache misses and downloads sources from active Olympus
-func GetProcessCacheMissJob(s storage.Backend, w worker.Worker) worker.Handler {
+// GetProcessCacheMissJob processes queue of cache misses and downloads sources from active Olympus
+func GetProcessCacheMissJob(ctx context.Context, s storage.Backend, w worker.Worker, mf *module.Filter) worker.Handler {
 	return func(args worker.Args) (err error) {
-		module, version, err := parseArgs(args)
+		mod, version, err := parseArgs(args)
 		if err != nil {
 			return err
 		}
 
-		if s.Exists(module, version) {
+		if !mf.ShouldProcess(mod) {
+			return module.NewErrModuleExcluded(mod)
+		}
+
+		if s.Exists(ctx, mod, version) {
 			return nil
 		}
 
 		// get module info
-		v, err := getModuleInfo(module, version)
+		v, err := getModuleInfo(ctx, mod, version)
 		if err != nil {
-			process(module, version, args, w)
 			return err
 		}
+		defer v.Zip.Close()
 
-		zip, err := ioutil.ReadAll(v.Zip)
-		if err != nil {
-			process(module, version, args, w)
-			return err
-		}
-
-		if err = s.Save(module, version, v.Mod, zip, v.Info); err != nil {
-			process(module, version, args, w)
-		}
-
-		return err
+		return s.Save(ctx, mod, version, v.Mod, v.Zip, v.Info)
 	}
 }
 
@@ -65,35 +59,26 @@ func parseArgs(args worker.Args) (string, string, error) {
 	return module, version, nil
 }
 
-func getModuleInfo(module, version string) (*storage.Version, error) {
+func getModuleInfo(ctx context.Context, module, version string) (*storage.Version, error) {
 	os := olympusStore.NewStorage(GetOlympusEndpoint())
-	return os.Get(module, version)
-}
-
-// process pushes pull job into the queue to be processed asynchonously
-func process(module, version string, args worker.Args, w worker.Worker) error {
-	// decrementing avoids endless loop of entries with missing trycount
-	trycount, ok := args[workerTryCountKey].(int)
-	if !ok {
-		return fmt.Errorf("Trycount missing or invalid")
+	var v storage.Version
+	var err error
+	v.Info, err = os.Info(ctx, module, version)
+	if err != nil {
+		return nil, err
 	}
-
-	if trycount <= 0 {
-		return fmt.Errorf("Max trycount for %s %s reached", module, version)
+	v.Mod, err = os.GoMod(ctx, module, version)
+	if err != nil {
+		return nil, err
 	}
-
-	return w.Perform(worker.Job{
-		Queue:   workerQueue,
-		Handler: FetcherWorkerName,
-		Args: worker.Args{
-			workerModuleKey:   module,
-			workerVersionKey:  version,
-			workerTryCountKey: trycount - 1,
-		},
-	})
+	v.Zip, err = os.Zip(ctx, module, version)
+	if err != nil {
+		return nil, err
+	}
+	return &v, nil
 }
 
 // GetOlympusEndpoint returns global endpoint with override in mind
 func GetOlympusEndpoint() string {
-	return envy.Get(OlympusGlobalEndpointOverrideKey, OlympusGlobalEndpoint)
+	return env.OlympusGlobalEndpointWithDefault(OlympusGlobalEndpoint)
 }

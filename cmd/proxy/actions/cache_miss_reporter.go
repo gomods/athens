@@ -9,22 +9,27 @@ import (
 	"time"
 
 	"github.com/gobuffalo/buffalo/worker"
+	"github.com/gomods/athens/pkg/module"
 	"github.com/gomods/athens/pkg/payloads"
 )
 
 // GetCacheMissReporterJob porcesses queue of cache misses and reports them to Olympus
-func GetCacheMissReporterJob(w worker.Worker) worker.Handler {
+func GetCacheMissReporterJob(w worker.Worker, mf *module.Filter) worker.Handler {
 	return func(args worker.Args) (err error) {
-		module, version, err := parseArgs(args)
+		mod, version, err := parseArgs(args)
 		if err != nil {
 			return err
 		}
 
-		if err := reportCacheMiss(module, version); err != nil {
+		if !mf.ShouldProcess(mod) {
+			return module.NewErrModuleExcluded(mod)
+		}
+
+		if err := reportCacheMiss(mod, version); err != nil {
 			return err
 		}
 
-		return queueCacheMissFetch(module, version, w)
+		return queueCacheMissFetch(mod, version, w)
 	}
 }
 
@@ -43,6 +48,7 @@ func reportCacheMiss(module, version string) error {
 	if err != nil {
 		return err
 	}
+	req.Header.Set("Content-Type", "application/json")
 
 	client := http.Client{
 		Timeout: 30 * time.Second,
@@ -69,9 +75,8 @@ func queueCacheMissFetch(module, version string, w worker.Worker) error {
 		Queue:   workerQueue,
 		Handler: FetcherWorkerName,
 		Args: worker.Args{
-			workerModuleKey:   module,
-			workerVersionKey:  version,
-			workerTryCountKey: maxTryCount,
+			workerModuleKey:  module,
+			workerVersionKey: version,
 		},
 	})
 }

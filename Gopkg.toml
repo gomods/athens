@@ -74,10 +74,6 @@
   version = "1.0.2"
 
 [[constraint]]
-  name = "github.com/spf13/cobra"
-  version = "0.0.1"
-
-[[constraint]]
   name = "github.com/stretchr/testify"
   version = "1.2.1"
 
@@ -98,5 +94,29 @@
   name = "github.com/gobuffalo/gocraft-work-adapter"
 
 [[constraint]]
-  name = "github.com/garyburd/redigo"
-  version = "1.6.0"
+  name = "github.com/gomodule/redigo"
+  version = "2.0.0"
+
+[[constraint]]
+  name = "cloud.google.com/go"
+  version = "0.23.0"
+
+[[constraint]]
+  branch = "master"
+  name = "google.golang.org/api"
+
+[[override]]
+  name = "github.com/golang/protobuf"
+  version = "1.1.0"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/hashicorp/go-multierror"
+
+[[constraint]]
+  name = "github.com/aws/aws-sdk-go"
+  version = "1.14.12"
+
+[[constraint]]
+  name = "github.com/bketelsen/buffet"
+  branch = "master"
