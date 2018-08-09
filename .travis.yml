@@ -15,6 +15,7 @@ env:
     - CODE_COV=1
     - TMPDIR=/tmp/
     - ATHENS_DIR=${GOPATH}/src/github.com/gomods/athens
+
 before_script:
   - mkdir -p $ATHENS_DIR && rsync -azr . $ATHENS_DIR && cd $ATHENS_DIR
   - make setup-dev-env
