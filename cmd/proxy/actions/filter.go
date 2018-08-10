@@ -9,12 +9,11 @@ import (
 	"github.com/bketelsen/buffet"
 	"github.com/gobuffalo/buffalo"
 	"github.com/gomods/athens/pkg/errors"
-	"github.com/gomods/athens/pkg/log"
 	"github.com/gomods/athens/pkg/module"
 	"github.com/gomods/athens/pkg/paths"
 )
 
-func newFilterMiddleware(mf *module.Filter, lggr *log.Logger) buffalo.MiddlewareFunc {
+func newFilterMiddleware(mf *module.Filter) buffalo.MiddlewareFunc {
 	const op errors.Op = "actions.FilterMiddleware"
 
 	return func(next buffalo.Handler) buffalo.Handler {
