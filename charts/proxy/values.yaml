@@ -17,3 +17,4 @@ goBinaryPath: go
 # 
 # for example, you need to run 'helm install --set mongoStorageURL=myurl ...'
 mongoStorageURL: "SET THIS ON THE COMMAND LINE"
+diskStorageRoot: "/"
