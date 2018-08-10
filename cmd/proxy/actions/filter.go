@@ -1,6 +1,10 @@
 package actions
 
 import (
+	"fmt"
+	"net/http"
+	"net/url"
+
 	"strings"
 
 	"github.com/bketelsen/buffet"
@@ -19,24 +23,30 @@ func newFilterMiddleware(mf *module.Filter, lggr *log.Logger) buffalo.Middleware
 			sp := buffet.SpanFromContext(c).SetOperationName("filterMiddleware")
 			defer sp.Finish()
 
-			params, err := paths.GetAllParams(c)
-			if err != nil {
-				lggr.SystemErr(errors.E(op, err))
-				return err
-			}
+			mod, err := paths.GetModule(c)
 
-			if isPseudoVersion(params.Version) {
+			if err != nil {
+				// if there is no module the path we are hitting is not one related to modules, like /
 				return next(c)
 			}
 
-			rule := mf.Rule(params.Module)
+			// not checking the error. Not all requests include a version (i.e. list requests)
+			version, _ := paths.GetVersion(c)
+
+			if isPseudoVersion(version) {
+				return next(c)
+			}
+
+			rule := mf.Rule(mod)
 			switch rule {
 			case module.Exclude:
-				return module.NewErrModuleExcluded(params.Module)
+				return c.Render(http.StatusNotFound, nil)
 			case module.Private:
+				fmt.Printf("next for " + mod)
 				return next(c)
 			case module.Include:
-				return c.Redirect(303, GetOlympusEndpoint())
+				newURL := redirectToOlympusURL(c.Request().URL)
+				return c.Redirect(http.StatusSeeOther, newURL)
 			}
 
 			return next(c)
@@ -46,4 +56,8 @@ func newFilterMiddleware(mf *module.Filter, lggr *log.Logger) buffalo.Middleware
 
 func isPseudoVersion(version string) bool {
 	return strings.HasPrefix(version, "v0.0.0-")
+}
+
+func redirectToOlympusURL(u *url.URL) string {
+	return GetOlympusEndpoint() + u.Path
 }
