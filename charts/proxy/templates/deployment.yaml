@@ -23,6 +23,8 @@ spec:
         env:
         - name: ATHENS_MONGO_STORAGE_URL
           value: {{ .Values.mongoStorageURL | quote }}
+        - name: ATHENS_DISK_STORAGE_ROOT
+          value: {{ .Values.diskStorageRoot | quote }}
         - name: ATHENS_STORAGE_TYPE
           value: {{ .Values.storageType | quote }}
         - name: ATHENS_REDIS_QUEUE_PORT
