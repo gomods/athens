@@ -2,7 +2,6 @@ package module
 
 import (
 	"bufio"
-	"fmt"
 	"os"
 	"strings"
 
@@ -133,7 +132,6 @@ func (f *Filter) initFromConfig() {
 			continue
 		}
 
-		fmt.Printf("SPLIT %v %#v\n", len(split), split)
 		ruleSign := strings.TrimSpace(split[0])
 		rule := Default
 		switch ruleSign {
