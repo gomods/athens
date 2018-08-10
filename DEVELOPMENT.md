@@ -83,9 +83,28 @@ re-compile and restart the server.
 
 # Run unit tests
 
-In order to run unit tests dependencies need to be run first:
+In order to run unit tests, services they depend on must be running first:
 
 ```console
 make alldeps
+```
+
+and env vars exported:
+```console
+export GO_ENV=test_postgres
+export POP_PATH=$PWD/cmd/proxy
+export ATHENS_MONGO_STORAGE_URL=mongodb://127.0.0.1:27017
+export TMPDIR=/tmp/
+```
+
+and database created:
+```console
+buffalo db create
+buffalo db migrate up
+```
+
+Then you can run the unit tests:
+
+```console
 make test-unit
 ```
