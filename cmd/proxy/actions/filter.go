@@ -1,7 +1,6 @@
 package actions
 
 import (
-	"fmt"
 	"net/http"
 	"net/url"
 
@@ -42,7 +41,6 @@ func newFilterMiddleware(mf *module.Filter, lggr *log.Logger) buffalo.Middleware
 			case module.Exclude:
 				return c.Render(http.StatusNotFound, nil)
 			case module.Private:
-				fmt.Printf("next for " + mod)
 				return next(c)
 			case module.Include:
 				newURL := redirectToOlympusURL(c.Request().URL)
