@@ -75,10 +75,6 @@ func (f *Filter) Rule(path string) FilterRule {
 	return f.shouldProcess(segs...)
 }
 
-func (f *Filter) IsPrivate(path string) bool {
-	return true
-}
-
 func (f *Filter) ensurePath(path string) {
 	latest := f.root.next
 	pathSegments := getPathSegments(path)
