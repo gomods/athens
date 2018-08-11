@@ -14,12 +14,12 @@ type TestSuite struct {
 // NewTestSuite creates a common test suite
 func NewTestSuite(model *suite.Model) (storage.TestSuite, error) {
 	conn := model.DB
-	rdbmsStore := NewRDBMSStorageWithConn(conn)
+	rdbmsStore, err := NewRDBMSStorageWithConn(conn)
 
 	return &TestSuite{
 		storage: rdbmsStore,
 		Model:   model,
-	}, nil
+	}, err
 }
 
 // Storage retrieves initialized storage backend
