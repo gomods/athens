@@ -56,5 +56,5 @@ func isPseudoVersion(version string) bool {
 }
 
 func redirectToOlympusURL(u *url.URL) string {
-	return GetOlympusEndpoint() + u.Path
+	return strings.TrimSuffix(GetOlympusEndpoint(), "/") + u.Path
 }

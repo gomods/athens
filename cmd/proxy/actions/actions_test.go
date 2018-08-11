@@ -14,7 +14,7 @@ type ActionSuite struct {
 func newTestFilter() *module.Filter {
 	f := module.NewFilter()
 	f.AddRule("github.com/gomods/athens/", module.Include)
-	f.AddRule("github.com/gobuffalo", module.Exclude)
+	f.AddRule("github.com/athens-artifacts/no-tags", module.Exclude)
 	f.AddRule("github.com/athens-artifacts", module.Private)
 	return f
 }
@@ -39,7 +39,7 @@ func (a *ActionSuite) Test_Filter() {
 	r.Equal(GetOlympusEndpoint()+"/github.com/gomods/athens/@v/list", res.HeaderMap.Get("Location"))
 
 	// Excluded, expects a 403
-	req = a.JSON("/github.com/gobuffalo")
+	req = a.JSON("/github.com/athens-artifacts/no-tags/@v/list")
 	res = req.Get()
 	r.Equal(403, res.Code)
 
