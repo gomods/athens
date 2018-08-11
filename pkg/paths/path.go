@@ -1,8 +1,6 @@
 package paths
 
 import (
-	goerrors "errors"
-
 	"github.com/gobuffalo/buffalo"
 	"github.com/gomods/athens/pkg/errors"
 )
@@ -21,9 +19,11 @@ func GetModule(c buffalo.Context) (string, error) {
 
 // GetVersion gets the version from the path of a ?go-get=1 request
 func GetVersion(c buffalo.Context) (string, error) {
+	const op errors.Op = "paths.GetVersion"
+
 	version := c.Param("version")
 	if version == "" {
-		return "", goerrors.New("missing version paramater")
+		return "", errors.E(op, "missing version paramater")
 	}
 	return version, nil
 }
