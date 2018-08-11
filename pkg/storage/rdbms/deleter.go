@@ -13,9 +13,14 @@ func (r *ModuleStore) Delete(ctx context.Context, module, version string) error 
 	const op errors.Op = "rdbms.Delete"
 	sp, ctx := opentracing.StartSpanFromContext(ctx, "storage.rdbms.Delete")
 	defer sp.Finish()
-	if !r.Exists(ctx, module, version) {
+	exists, err := r.Exists(ctx, module, version)
+	if err != nil {
+		return err
+	}
+	if !exists {
 		return errors.E(op, errors.M(module), errors.V(version), errors.KindNotFound)
 	}
+
 	result := &models.Module{}
 	query := r.conn.Where("module = ?", module).Where("version = ?", version)
 	if err := query.First(result); err != nil {

@@ -56,14 +56,11 @@ func (b *gcpBucket) List(ctx context.Context, prefix string) ([]string, error) {
 	return res, nil
 }
 
-func (b *gcpBucket) Exists(ctx context.Context, path string) bool {
+func (b *gcpBucket) Exists(ctx context.Context, path string) (bool, error) {
 	_, err := b.Object(path).Attrs(ctx)
-	if err == nil {
-		return true
-	} else if err == storage.ErrObjectNotExist {
-		return false
+	if err != nil {
+		return false, err
 	}
 
-	// TODO: this means that something errored out and we should return false, err
-	return false
+	return true, nil
 }

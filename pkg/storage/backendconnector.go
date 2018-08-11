@@ -24,7 +24,7 @@ func (n noOpConnectedBackend) Connect() error {
 	return nil
 }
 
-func (n noOpConnectedBackend) Exists(ctx context.Context, module, version string) bool {
+func (n noOpConnectedBackend) Exists(ctx context.Context, module, version string) (bool, error) {
 	return n.backend.Exists(ctx, module, version)
 }
 

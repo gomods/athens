@@ -154,7 +154,7 @@ func (d *TestSuites) testDelete(ts storage.TestSuite) {
 	for _, test := range tests {
 		err := ts.Storage().Delete(ctx, test.module, test.version)
 		r.Equal(test.want, errors.Kind(err), ts.StorageHumanReadableName())
-		exists := ts.Storage().Exists(ctx, test.module, test.version)
+		exists, _ := ts.Storage().Exists(ctx, test.module, test.version)
 		r.Equal(false, exists, ts.StorageHumanReadableName())
 	}
 }

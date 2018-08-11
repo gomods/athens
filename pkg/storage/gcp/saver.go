@@ -23,11 +23,15 @@ func (s *Storage) Save(ctx context.Context, module, version string, mod []byte, 
 	const op errors.Op = "gcp.Save"
 	sp, ctx := opentracing.StartSpanFromContext(ctx, "storage.gcp.Save")
 	defer sp.Finish()
-	if exists := s.Exists(ctx, module, version); exists {
+	exists, err := s.Exists(ctx, module, version)
+	if err != nil {
+		return err
+	}
+	if exists {
 		return errors.E(op, "already exists", errors.M(module), errors.V(version), errors.KindAlreadyExists)
 	}
 
-	err := moduploader.Upload(ctx, module, version, bytes.NewReader(info), bytes.NewReader(mod), zip, s.upload)
+	err = moduploader.Upload(ctx, module, version, bytes.NewReader(info), bytes.NewReader(mod), zip, s.upload)
 	// TODO: take out lease on the /list file and add the version to it
 	//
 	// Do that only after module source+metadata is uploaded
