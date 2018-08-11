@@ -38,10 +38,10 @@ func (a *ActionSuite) Test_Filter() {
 	r.Equal(303, res.Code)
 	r.Equal(GetOlympusEndpoint()+"/github.com/gomods/athens/@v/list", res.HeaderMap.Get("Location"))
 
-	// Excluded, expects a 404
+	// Excluded, expects a 403
 	req = a.JSON("/github.com/gobuffalo")
 	res = req.Get()
-	r.Equal(404, res.Code)
+	r.Equal(403, res.Code)
 
 	// Private, the proxy is working and returns a 200
 	req = a.JSON("/github.com/athens-artifacts/happy-path/@v/list")

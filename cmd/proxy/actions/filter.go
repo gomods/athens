@@ -38,7 +38,7 @@ func newFilterMiddleware(mf *module.Filter) buffalo.MiddlewareFunc {
 			rule := mf.Rule(mod)
 			switch rule {
 			case module.Exclude:
-				return c.Render(http.StatusNotFound, nil)
+				return c.Render(http.StatusForbidden, nil)
 			case module.Private:
 				return next(c)
 			case module.Include:
