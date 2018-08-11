@@ -11,27 +11,26 @@ type ModuleStore struct {
 }
 
 // NewRDBMSStorage  returns an unconnected RDBMS Module Storage
-// that satisfies the Storage interface. You must call
-// Connect() on the returned store before using it.
-// connectionName
-func NewRDBMSStorage(connectionName string) *ModuleStore {
-	return &ModuleStore{
+// that satisfies the Storage interface.
+func NewRDBMSStorage(connectionName string) (*ModuleStore, error) {
+	ms := &ModuleStore{
 		connectionName: connectionName,
 	}
+	err := ms.connect()
+	return ms, err
 }
 
 // NewRDBMSStorageWithConn  returns a connected RDBMS Module Storage
-// that satisfies the Storage interface. You must call
-// Connect() on the returned store before using it.
-// connectionName
-func NewRDBMSStorageWithConn(connection *pop.Connection) *ModuleStore {
-	return &ModuleStore{
+// that satisfies the Storage interface.
+func NewRDBMSStorageWithConn(connection *pop.Connection) (*ModuleStore, error) {
+	ms := &ModuleStore{
 		conn: connection,
 	}
+	err := ms.connect()
+	return ms, err
 }
 
-// Connect creates connection to rdmbs backend.
-func (r *ModuleStore) Connect() error {
+func (r *ModuleStore) connect() error {
 	c, err := pop.Connect(r.connectionName)
 	if err != nil {
 		return err
