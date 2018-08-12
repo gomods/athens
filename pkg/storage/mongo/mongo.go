@@ -26,6 +26,7 @@ func NewStorage(url string) (*ModuleStore, error) {
 		return nil, err
 	}
 	return ms, nil
+
 }
 
 func (m *ModuleStore) connect() error {
