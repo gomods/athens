@@ -3,21 +3,22 @@ package config
 import (
 	"runtime"
 
-	"github.com/spf13/viper"
+	"github.com/BurntSushi/toml"
+	"github.com/kelseyhightower/envconfig"
 	validator "gopkg.in/go-playground/validator.v9"
 )
 
 // Config provides configuration values for all components
 type Config struct {
-	EnableCSRFProtection bool
-	GoEnv                string         `validate:"required"`
-	GoBinary             string         `validate:"required"`
-	LogLevel             string         `validate:"required"`
-	MaxConcurrency       int            `validate:"required"`
-	MaxWorkerFails       uint           `validate:"required"`
-	CloudRuntime         string         `validate:"required"`
-	FilterFile           string         `validate:"required"`
-	TimeoutSeconds       int            `validate:"required"`
+	EnableCSRFProtection bool           `split_words:"true" default:"false"`
+	GoEnv                string         `validate:"required" envconfig:"GO_ENV" default:"development"`
+	GoBinary             string         `validate:"required" envconfig:"GO_BINARY_PATH" default:"go"`
+	LogLevel             string         `validate:"required" split_words:"true" default:"debug"`
+	MaxConcurrency       int            `validate:"required" split_words:"true"`
+	MaxWorkerFails       uint           `validate:"required" split_words:"true" default:"5"`
+	CloudRuntime         string         `validate:"required" split_words:"true" default:"none"`
+	FilterFile           string         `validate:"required" split_words:"true" default:"filter.conf"`
+	Timeout              int            `validate:"required" default:"300"`
 	Proxy                *ProxyConfig   `validate:""`
 	Olympus              *OlympusConfig `validate:""`
 	Storage              *StorageConfig `validate:""`
@@ -26,19 +27,24 @@ type Config struct {
 // ParseConfig parses the given file into an athens config struct
 func ParseConfig(configFile string) (*Config, error) {
 
-	viper.SetConfigFile(configFile)
-
-	// attempt to parse the given config file
-	if err := viper.ReadInConfig(); err != nil {
-		return nil, err
-	}
-
-	// set default values and environment variable bindings
-	setDefaultsAndEnvBindings()
 	var config Config
-	if err := viper.Unmarshal(&config); err != nil {
+	// attempt to parse the given config file
+	if _, err := toml.DecodeFile(configFile, &config); err != nil {
 		return nil, err
 	}
+
+	// override values with environment variables if specified
+	err := envconfig.Process("athens", &config)
+	if err != nil {
+		return nil, err
+	}
+
+	// set default values that are dependent on the runtime
+	setRuntimeDefaults(&config)
+
+	// set default timeouts for storage backends if not already set
+	setDefaultTimeouts(config.Storage, config.Timeout)
+
 	// validate all required fields have been populated
 	validate := validator.New()
 	if err := validate.Struct(config); err != nil {
@@ -47,60 +53,8 @@ func ParseConfig(configFile string) (*Config, error) {
 	return &config, nil
 }
 
-func setDefaultsAndEnvBindings() {
-	viper.BindEnv("GoBinary", "GO_BINARY_PATH")
-	viper.SetDefault("GoBinary", "go")
-
-	viper.BindEnv("GoEnv", "GO_ENV")
-	viper.SetDefault("GoEnv", "development")
-
-	viper.BindEnv("LogLevel", "ATHENS_LOG_LEVEL")
-	viper.SetDefault("LogLevel", "debug")
-
-	viper.BindEnv("CloudRuntime", "ATHENS_CLOUD_RUNTIME")
-	viper.SetDefault("CloudRuntime", "none")
-
-	viper.BindEnv("MaxConcurrency", "ATHENS_MAX_CONCURRENCY")
-	viper.SetDefault("MaxConcurrency", runtime.NumCPU())
-
-	viper.BindEnv("MaxWorkerFails", "ATHENS_WORKER_MAX_FAILS")
-	viper.SetDefault("MaxWorkerFails", 5)
-
-	viper.BindEnv("FilterFile", "ATHENS_FILTER_FILENAME")
-	viper.SetDefault("FilterFile", "filter.conf")
-
-	viper.BindEnv("TimeoutSeconds", "ATHENS_TIMEOUT")
-	viper.SetDefault("TimeoutSeconds", 300)
-
-	viper.BindEnv("EnableCSRFProtection", "ATHENS_ENABLE_CSRF_PROTECTION")
-	viper.SetDefault("EnableCSRFProtection", false)
-
-	// Proxy Defaults
-	viper.BindEnv("Proxy.StorageType", "ATHENS_STORAGE_TYPE")
-	viper.SetDefault("Proxy.StorageType", "mongo")
-
-	viper.BindEnv("Proxy.Port", "PORT")
-	viper.SetDefault("Proxy.Port", ":3000")
-
-	viper.BindEnv("Proxy.OlympusGlobalEndpoint", "OLYMPUS_GLOBAL_ENDPOINT")
-	viper.SetDefault("Proxy.OlympusGlobalEndpoint", "olympus.gomods.io")
-
-	viper.BindEnv("Proxy.RedisQueueAddress", "ATHENS_REDIS_QUEUE_PORT")
-	viper.SetDefault("Proxy.RedisQueueAddress", ":6379")
-
-	// Olympus Defaults
-	viper.BindEnv("Olympus.Port", "PORT")
-	viper.SetDefault("Olympus.Port", ":3001")
-
-	viper.BindEnv("Olympus.StorageType", "ATHENS_STORAGE_TYPE")
-	viper.SetDefault("Olympus.StorageType", "memory")
-
-	viper.BindEnv("Olympus.WorkerType", "OLYMPUS_BACKGROUND_WORKER_TYPE")
-	viper.SetDefault("Olympus.WorkerType", "redis")
-
-	viper.BindEnv("Olympus.RedisQueueAddress", "OLYMPUS_REDIS_QUEUE_PORT")
-	viper.SetDefault("Olympus.RedisQueueAddress", ":6379")
-
-	// Storage defaults
-	setStorageDefaults(viper.GetViper())
+func setRuntimeDefaults(config *Config) {
+	if config.MaxConcurrency == 0 {
+		config.MaxConcurrency = runtime.NumCPU()
+	}
 }
