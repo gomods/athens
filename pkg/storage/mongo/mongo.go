@@ -20,8 +20,12 @@ type ModuleStore struct {
 // that satisfies the Backend interface.
 func NewStorage(url string) (*ModuleStore, error) {
 	ms := &ModuleStore{url: url}
+
 	err := ms.connect()
-	return ms, err
+	if err != nil {
+		return nil, err
+	}
+	return ms, nil
 }
 
 func (m *ModuleStore) connect() error {
