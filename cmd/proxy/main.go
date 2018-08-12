@@ -4,12 +4,10 @@ import (
 	"log"
 
 	"github.com/gomods/athens/cmd/proxy/actions"
-	"github.com/gomods/athens/pkg/module"
 )
 
 func main() {
-	mf := module.NewFilter()
-	app, err := actions.App(mf)
+	app, err := actions.App()
 	if err != nil {
 		log.Fatal(err)
 	}

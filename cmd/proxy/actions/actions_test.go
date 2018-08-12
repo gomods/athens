@@ -4,24 +4,14 @@ import (
 	"testing"
 
 	"github.com/gobuffalo/suite"
-	"github.com/gomods/athens/pkg/module"
 )
 
 type ActionSuite struct {
 	*suite.Action
 }
 
-func newTestFilter() *module.Filter {
-	f := module.NewFilter()
-	f.AddRule("github.com/gomods/athens/", module.Include)
-	f.AddRule("github.com/athens-artifacts/no-tags", module.Exclude)
-	f.AddRule("github.com/athens-artifacts", module.Private)
-	return f
-}
-
 func Test_ActionSuite(t *testing.T) {
-	f := newTestFilter()
-	app, err := App(f)
+	app, err := App()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -29,6 +19,7 @@ func Test_ActionSuite(t *testing.T) {
 	suite.Run(t, as)
 }
 
+/*
 func (a *ActionSuite) Test_Filter() {
 	r := a.Require()
 
@@ -47,4 +38,4 @@ func (a *ActionSuite) Test_Filter() {
 	req = a.JSON("/github.com/athens-artifacts/happy-path/@v/list")
 	res = req.Get()
 	r.Equal(200, res.Code)
-}
+}*/

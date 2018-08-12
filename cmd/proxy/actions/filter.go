@@ -20,7 +20,6 @@ func newFilterMiddleware(mf *module.Filter) buffalo.MiddlewareFunc {
 		return func(c buffalo.Context) error {
 			sp := buffet.SpanFromContext(c).SetOperationName("filterMiddleware")
 			defer sp.Finish()
-
 			mod, err := paths.GetModule(c)
 
 			if err != nil {
