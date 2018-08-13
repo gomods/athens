@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/gomods/athens/pkg/config/env"
+	"github.com/gomods/athens/pkg/errors"
 )
 
 var (
@@ -171,12 +172,14 @@ func newRule(r FilterRule) ruleNode {
 	return rn
 }
 
+const op errors.Op = "module.getConfigLines"
+
 func getConfigLines() ([]string, error) {
 	configName := env.FilterConfigurationFileName()
 
 	f, err := os.Open(configName)
 	if err != nil {
-		return nil, err
+		return nil, errors.E(op, err)
 	}
 	defer f.Close()
 
