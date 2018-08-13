@@ -3,7 +3,6 @@ package actions
 import (
 	"net/http"
 	"net/url"
-
 	"strings"
 
 	"github.com/bketelsen/buffet"
