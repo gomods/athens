@@ -158,7 +158,6 @@ func TestParseDefaultsSuccess(t *testing.T) {
 }
 
 func TestParseExampleConfig(t *testing.T) {
-
 	globalTimeout := 300
 
 	expProxy := &ProxyConfig{
