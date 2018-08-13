@@ -7,15 +7,13 @@ import (
 	"io"
 	"net/url"
 
-	"github.com/gomods/athens/pkg/errors"
-
-	"github.com/opentracing/opentracing-go"
-
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager/s3manageriface"
 	"github.com/gomods/athens/pkg/config/env"
+	"github.com/gomods/athens/pkg/errors"
 	moduploader "github.com/gomods/athens/pkg/storage/module"
+	"github.com/opentracing/opentracing-go"
 )
 
 // Storage implements (github.com/gomods/athens/pkg/storage).Saver and
