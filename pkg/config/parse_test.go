@@ -157,7 +157,47 @@ func TestParseDefaultsSuccess(t *testing.T) {
 	}
 }
 
+// TestParseExampleConfig validates that all the properties in the example configuration file
+// can be parsed and validated without any environment variables
 func TestParseExampleConfig(t *testing.T) {
+
+	// unset all applicable environment variables
+	envVars := []string{
+		"GO_ENV",
+		"GO_BINARY_PATH",
+		"ATHENS_LOG_LEVEL",
+		"ATHENS_CLOUD_RUNTIME",
+		"ATHENS_MAX_CONCURRENCY",
+		"ATHENS_MAX_WORKER_FAILS",
+		"ATHENS_FILTER_FILE",
+		"ATHENS_TIMEOUT",
+		"ATHENS_ENABLE_CSRF_PROTECTION",
+		"ATHENS_STORAGE_TYPE",
+		"OLYMPUS_GLOBAL_ENDPOINT",
+		"PORT",
+		"ATHENS_REDIS_QUEUE_PORT",
+		"OLYMPUS_BACKGROUND_WORKER_TYPE",
+		"OLYMPUS_REDIS_QUEUE_PORT",
+		"CDN_ENDPOINT",
+		"ATHENS_DISK_STORAGE_ROOT",
+		"GOOGLE_CLOUD_PROJECT",
+		"ATHENS_STORAGE_GCP_BUCKET",
+		"ATHENS_MINIO_ENDPOINT",
+		"ATHENS_MINIO_ACCESS_KEY_ID",
+		"ATHENS_MINIO_SECRET_ACCESS_KEY",
+		"ATHENS_MINIO_USE_SSL",
+		"ATHENS_MINIO_BUCKET_NAME",
+		"ATHENS_MONGO_STORAGE_URL",
+		"MONGO_CONN_TIMEOUT_SEC",
+		"ATHENS_RDBMS_STORAGE_NAME",
+	}
+	envVarBackup := map[string]string{}
+	for _, k := range envVars {
+		oldVal := os.Getenv(k)
+		envVarBackup[k] = oldVal
+		os.Unsetenv(k)
+	}
+
 	globalTimeout := 300
 
 	expProxy := &ProxyConfig{
@@ -233,6 +273,7 @@ func TestParseExampleConfig(t *testing.T) {
 	if !eq {
 		t.Errorf("Parsed Example configuration did not match expected values. Expected: %+v. Actual: %+v", expConf, parsedConf)
 	}
+	cleanupEnv(envVarBackup)
 }
 
 func cleanupEnv(envVars map[string]string) {
