@@ -41,6 +41,7 @@ func newFilterMiddleware(mf *module.Filter) buffalo.MiddlewareFunc {
 			case module.Private:
 				return next(c)
 			case module.Include:
+				// TODO : spin up cache filling worker and serve the request using the cache
 				newURL := redirectToOlympusURL(c.Request().URL)
 				return c.Redirect(http.StatusSeeOther, newURL)
 			}
