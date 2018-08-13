@@ -30,3 +30,45 @@ func setDefaultTimeouts(s *StorageConfig, defaultTimeout int) {
 		s.RDBMS.Timeout = defaultTimeout
 	}
 }
+
+// envconfig initializes *all* struct pointers, even if there are no corresponding defaults or env variables
+// deleteInvalidStorageConfigs prunes all such invalid configurations
+func deleteInvalidStorageConfigs(s *StorageConfig) {
+	validate := getValidator()
+
+	if s.CDN != nil {
+		if err := validate.Struct(s.CDN); err != nil {
+			s.CDN = nil
+		}
+	}
+
+	if s.Disk != nil {
+		if err := validate.Struct(s.Disk); err != nil {
+			s.Disk = nil
+		}
+	}
+
+	if s.GCP != nil {
+		if err := validate.Struct(s.GCP); err != nil {
+			s.GCP = nil
+		}
+	}
+
+	if s.Minio != nil {
+		if err := validate.Struct(s.Minio); err != nil {
+			s.Minio = nil
+		}
+	}
+
+	if s.Mongo != nil {
+		if err := validate.Struct(s.Mongo); err != nil {
+			s.Mongo = nil
+		}
+	}
+
+	if s.RDBMS != nil {
+		if err := validate.Struct(s.RDBMS); err != nil {
+			s.RDBMS = nil
+		}
+	}
+}

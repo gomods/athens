@@ -7,5 +7,5 @@ type MinioConfig struct {
 	Secret    string `validate:"required" envconfig:"ATHENS_MINIO_SECRET_ACCESS_KEY"`
 	Timeout   int    `validate:"required"`
 	Bucket    string `validate:"required" envconfig:"ATHENS_MINIO_BUCKET_NAME" default:"gomods"`
-	EnableSSL bool   `validate:"required" envconfig:"ATHENS_MINIO_USE_SSL" default:"true"`
+	EnableSSL bool   `envconfig:"ATHENS_MINIO_USE_SSL" default:"true"`
 }

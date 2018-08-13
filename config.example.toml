@@ -74,7 +74,8 @@ EnableCSRFProtection = false
     # Port sets the port olympus listens on
     # Env override: PORT
 	Port = ":3001"
-    # Background worker type. Defaults to redis
+    # Background worker type. Possible values are memory and redis
+    # Defaults to redis
     # Env override: OLYMPUS_BACKGROUND_WORKER_TYPE
     WorkerType = "redis"
     # Redis queue for buffalo workers

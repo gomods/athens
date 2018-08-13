@@ -394,6 +394,19 @@
   version = "v2.0.0"
 
 [[projects]]
+  digest = "1:2e3c336fc7fde5c984d2841455a658a6d626450b1754a854b3b32e7a8f49a07a"
+  name = "github.com/google/go-cmp"
+  packages = [
+    "cmp",
+    "cmp/internal/diff",
+    "cmp/internal/function",
+    "cmp/internal/value",
+  ]
+  pruneopts = "UT"
+  revision = "3af367b6b30c263d47e8895973edcca9a49cf029"
+  version = "v0.2.0"
+
+[[projects]]
   digest = "1:e145e9710a10bc114a6d3e2738aadf8de146adaa031854ffdf7bbfe15da85e63"
   name = "github.com/googleapis/gax-go"
   packages = ["."]
@@ -1199,6 +1212,7 @@
     "github.com/gobuffalo/validate/validators",
     "github.com/gocraft/work",
     "github.com/gomodule/redigo/redis",
+    "github.com/google/go-cmp/cmp",
     "github.com/hashicorp/go-multierror",
     "github.com/kelseyhightower/envconfig",
     "github.com/markbates/goth",
