@@ -8,17 +8,17 @@ true)
 	TAR_GZ="buffalo_${VERSION}_linux_amd64.tar.gz"
 	URL="https://github.com/gobuffalo/buffalo/releases/download/v${VERSION}/${TAR_GZ}"
 	TARGET_BIN="$(pwd)/bin/buffalo"
-	DIR=$(mktemp -d)
+	TMPDIR=$(mktemp -d)
 
 	(
-		cd $DIR
+		cd $TMPDIR
 		curl -L -o ${TAR_GZ} ${URL}
 		tar -xzf ${TAR_GZ}
 		mkdir -p $(dirname ${TARGET_BIN})
 		cp buffalo-no-sqlite ${TARGET_BIN}
 		chmod +x ${TARGET_BIN}
 	)
-	rm -r $DIR
+	rm -r $TMPDIR
 	;;
 *)
 	go get github.com/gobuffalo/buffalo/buffalo
