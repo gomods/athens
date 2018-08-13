@@ -61,7 +61,7 @@ func TestEnvOverrides(t *testing.T) {
 	if !eq {
 		t.Errorf("Environment variables did not correctly override config values. Expected: %+v. Actual: %+v", expConf, conf)
 	}
-	cleanupEnv(envVarBackup)
+	restoreEnv(envVarBackup)
 }
 
 func TestStorageEnvOverrides(t *testing.T) {
@@ -118,7 +118,7 @@ func TestStorageEnvOverrides(t *testing.T) {
 	if !eq {
 		t.Error("Environment variables did not correctly override storage config values")
 	}
-	cleanupEnv(envVarBackup)
+	restoreEnv(envVarBackup)
 }
 
 func TestParseDefaultsSuccess(t *testing.T) {
@@ -229,7 +229,7 @@ func TestParseExampleConfig(t *testing.T) {
 	if !eq {
 		t.Errorf("Parsed Example configuration did not match expected values. Expected: %+v. Actual: %+v", expConf, parsedConf)
 	}
-	cleanupEnv(envVarBackup)
+	restoreEnv(envVarBackup)
 }
 
 func getEnvMap(config *Config) map[string]string {
@@ -290,7 +290,7 @@ func getEnvMap(config *Config) map[string]string {
 	return envVars
 }
 
-func cleanupEnv(envVars map[string]string) {
+func restoreEnv(envVars map[string]string) {
 	for k, v := range envVars {
 		if v != "" {
 			os.Setenv(k, v)
