@@ -132,8 +132,21 @@ func TestParseDefaultsSuccess(t *testing.T) {
 // can be parsed and validated without any environment variables
 func TestParseExampleConfig(t *testing.T) {
 
-	// unset all applicable environment variables
-	envVars := getEnvMap(&Config{})
+	// initialize all struct pointers so we get all applicable env variables
+	emptyConf := &Config{
+		Proxy:   &ProxyConfig{},
+		Olympus: &OlympusConfig{},
+		Storage: &StorageConfig{
+			CDN:   &CDNConfig{},
+			Disk:  &DiskConfig{},
+			GCP:   &GCPConfig{},
+			Minio: &MinioConfig{},
+			Mongo: &MongoConfig{},
+			RDBMS: &RDBMSConfig{},
+		},
+	}
+	// unset all environment variables
+	envVars := getEnvMap(emptyConf)
 	envVarBackup := map[string]string{}
 	for k := range envVars {
 		oldVal := os.Getenv(k)
