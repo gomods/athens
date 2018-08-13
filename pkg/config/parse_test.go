@@ -43,23 +43,7 @@ func TestEnvOverrides(t *testing.T) {
 		Storage:              &StorageConfig{},
 	}
 
-	envVars := map[string]string{
-		"GO_ENV":                        expConf.GoEnv,
-		"GO_BINARY_PATH":                expConf.GoBinary,
-		"ATHENS_LOG_LEVEL":              expConf.LogLevel,
-		"ATHENS_CLOUD_RUNTIME":          expConf.CloudRuntime,
-		"ATHENS_MAX_CONCURRENCY":        strconv.Itoa(expConf.MaxConcurrency),
-		"ATHENS_MAX_WORKER_FAILS":       strconv.FormatUint(uint64(expConf.MaxWorkerFails), 10),
-		"ATHENS_FILTER_FILE":            expConf.FilterFile,
-		"ATHENS_TIMEOUT":                strconv.Itoa(expConf.Timeout),
-		"ATHENS_ENABLE_CSRF_PROTECTION": strconv.FormatBool(expConf.EnableCSRFProtection),
-		"ATHENS_STORAGE_TYPE":           expConf.Proxy.StorageType,
-		"OLYMPUS_GLOBAL_ENDPOINT":       expProxy.OlympusGlobalEndpoint,
-		"PORT": expProxy.Port,
-		"ATHENS_REDIS_QUEUE_PORT":        expProxy.RedisQueueAddress,
-		"OLYMPUS_BACKGROUND_WORKER_TYPE": expOlympus.WorkerType,
-		"OLYMPUS_REDIS_QUEUE_PORT":       expOlympus.RedisQueueAddress,
-	}
+	envVars := getEnvMap(expConf)
 	envVarBackup := map[string]string{}
 	for k, v := range envVars {
 		oldVal := os.Getenv(k)
@@ -115,20 +99,7 @@ func TestStorageEnvOverrides(t *testing.T) {
 			Timeout: globalTimeout,
 		},
 	}
-	envVars := map[string]string{
-		"CDN_ENDPOINT":                   expStorage.CDN.Endpoint,
-		"ATHENS_DISK_STORAGE_ROOT":       expStorage.Disk.RootPath,
-		"GOOGLE_CLOUD_PROJECT":           expStorage.GCP.ProjectID,
-		"ATHENS_STORAGE_GCP_BUCKET":      expStorage.GCP.Bucket,
-		"ATHENS_MINIO_ENDPOINT":          expStorage.Minio.Endpoint,
-		"ATHENS_MINIO_ACCESS_KEY_ID":     expStorage.Minio.Key,
-		"ATHENS_MINIO_SECRET_ACCESS_KEY": expStorage.Minio.Secret,
-		"ATHENS_MINIO_USE_SSL":           strconv.FormatBool(expStorage.Minio.EnableSSL),
-		"ATHENS_MINIO_BUCKET_NAME":       expStorage.Minio.Bucket,
-		"ATHENS_MONGO_STORAGE_URL":       expStorage.Mongo.URL,
-		"MONGO_CONN_TIMEOUT_SEC":         strconv.Itoa(expStorage.Mongo.Timeout),
-		"ATHENS_RDBMS_STORAGE_NAME":      expStorage.RDBMS.Name,
-	}
+	envVars := getEnvMap(&Config{Storage: expStorage})
 	envVarBackup := map[string]string{}
 	for k, v := range envVars {
 		oldVal := os.Getenv(k)
@@ -162,37 +133,9 @@ func TestParseDefaultsSuccess(t *testing.T) {
 func TestParseExampleConfig(t *testing.T) {
 
 	// unset all applicable environment variables
-	envVars := []string{
-		"GO_ENV",
-		"GO_BINARY_PATH",
-		"ATHENS_LOG_LEVEL",
-		"ATHENS_CLOUD_RUNTIME",
-		"ATHENS_MAX_CONCURRENCY",
-		"ATHENS_MAX_WORKER_FAILS",
-		"ATHENS_FILTER_FILE",
-		"ATHENS_TIMEOUT",
-		"ATHENS_ENABLE_CSRF_PROTECTION",
-		"ATHENS_STORAGE_TYPE",
-		"OLYMPUS_GLOBAL_ENDPOINT",
-		"PORT",
-		"ATHENS_REDIS_QUEUE_PORT",
-		"OLYMPUS_BACKGROUND_WORKER_TYPE",
-		"OLYMPUS_REDIS_QUEUE_PORT",
-		"CDN_ENDPOINT",
-		"ATHENS_DISK_STORAGE_ROOT",
-		"GOOGLE_CLOUD_PROJECT",
-		"ATHENS_STORAGE_GCP_BUCKET",
-		"ATHENS_MINIO_ENDPOINT",
-		"ATHENS_MINIO_ACCESS_KEY_ID",
-		"ATHENS_MINIO_SECRET_ACCESS_KEY",
-		"ATHENS_MINIO_USE_SSL",
-		"ATHENS_MINIO_BUCKET_NAME",
-		"ATHENS_MONGO_STORAGE_URL",
-		"MONGO_CONN_TIMEOUT_SEC",
-		"ATHENS_RDBMS_STORAGE_NAME",
-	}
+	envVars := getEnvMap(&Config{})
 	envVarBackup := map[string]string{}
-	for _, k := range envVars {
+	for k := range envVars {
 		oldVal := os.Getenv(k)
 		envVarBackup[k] = oldVal
 		os.Unsetenv(k)
@@ -274,6 +217,64 @@ func TestParseExampleConfig(t *testing.T) {
 		t.Errorf("Parsed Example configuration did not match expected values. Expected: %+v. Actual: %+v", expConf, parsedConf)
 	}
 	cleanupEnv(envVarBackup)
+}
+
+func getEnvMap(config *Config) map[string]string {
+
+	envVars := map[string]string{
+		"GO_ENV":                        config.GoEnv,
+		"GO_BINARY_PATH":                config.GoBinary,
+		"ATHENS_LOG_LEVEL":              config.LogLevel,
+		"ATHENS_CLOUD_RUNTIME":          config.CloudRuntime,
+		"ATHENS_MAX_CONCURRENCY":        strconv.Itoa(config.MaxConcurrency),
+		"ATHENS_MAX_WORKER_FAILS":       strconv.FormatUint(uint64(config.MaxWorkerFails), 10),
+		"ATHENS_FILTER_FILE":            config.FilterFile,
+		"ATHENS_TIMEOUT":                strconv.Itoa(config.Timeout),
+		"ATHENS_ENABLE_CSRF_PROTECTION": strconv.FormatBool(config.EnableCSRFProtection),
+	}
+
+	proxy := config.Proxy
+	if proxy != nil {
+		envVars["ATHENS_STORAGE_TYPE"] = proxy.StorageType
+		envVars["OLYMPUS_GLOBAL_ENDPOINT"] = proxy.OlympusGlobalEndpoint
+		envVars["PORT"] = proxy.Port
+		envVars["ATHENS_REDIS_QUEUE_PORT"] = proxy.RedisQueueAddress
+	}
+
+	olympus := config.Olympus
+	if olympus != nil {
+		envVars["OLYMPUS_BACKGROUND_WORKER_TYPE"] = olympus.WorkerType
+		envVars["OLYMPUS_REDIS_QUEUE_PORT"] = olympus.RedisQueueAddress
+	}
+
+	storage := config.Storage
+	if storage != nil {
+		if storage.CDN != nil {
+			envVars["CDN_ENDPOINT"] = storage.CDN.Endpoint
+		}
+		if storage.Disk != nil {
+			envVars["ATHENS_DISK_STORAGE_ROOT"] = storage.Disk.RootPath
+		}
+		if storage.GCP != nil {
+			envVars["GOOGLE_CLOUD_PROJECT"] = storage.GCP.ProjectID
+			envVars["ATHENS_STORAGE_GCP_BUCKET"] = storage.GCP.Bucket
+		}
+		if storage.Minio != nil {
+			envVars["ATHENS_MINIO_ENDPOINT"] = storage.Minio.Endpoint
+			envVars["ATHENS_MINIO_ACCESS_KEY_ID"] = storage.Minio.Key
+			envVars["ATHENS_MINIO_SECRET_ACCESS_KEY"] = storage.Minio.Secret
+			envVars["ATHENS_MINIO_USE_SSL"] = strconv.FormatBool(storage.Minio.EnableSSL)
+			envVars["ATHENS_MINIO_BUCKET_NAME"] = storage.Minio.Bucket
+		}
+		if storage.Mongo != nil {
+			envVars["ATHENS_MONGO_STORAGE_URL"] = storage.Mongo.URL
+			envVars["MONGO_CONN_TIMEOUT_SEC"] = strconv.Itoa(storage.Mongo.Timeout)
+		}
+		if storage.RDBMS != nil {
+			envVars["ATHENS_RDBMS_STORAGE_NAME"] = storage.RDBMS.Name
+		}
+	}
+	return envVars
 }
 
 func cleanupEnv(envVars map[string]string) {
