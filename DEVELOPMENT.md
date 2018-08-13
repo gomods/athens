@@ -55,8 +55,8 @@ Note that `make dev` only runs the minimum amount of dependencies needed for thi
 As you know from reading the [README](./README.md) (if you didn't read the whole thing, that's ok. Just read the
 introduction), the Athens project is made up of two components:
 
-1. [Package Registry](./REGISTRY.md)
-2. [Edge Proxy](./PROXY.md)
+1. [Package Registry](https://docs.gomods.io/design/registry/)
+2. [Edge Proxy](https://docs.gomods.io/design/proxy/)
 
 To run the registry:
 
@@ -80,3 +80,24 @@ Starting application at 127.0.0.1:3000
 
 And you'll be up and running. As you edit and save code, the `buffalo dev` command will notice and automatically
 re-compile and restart the server.
+
+# Run unit tests
+
+In order to run unit tests, services they depend on must be running first:
+
+```console
+make alldeps
+```
+
+and database created:
+
+```console
+buffalo db create
+buffalo db migrate up
+```
+
+then you can run the unit tests:
+
+```console
+make test-unit
+```
