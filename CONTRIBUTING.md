@@ -26,3 +26,11 @@ you must run `make setup-dev-env` first, otherwise you will see errors like the 
 ```
 error connecting to storage (no reachable servers)
 ```
+
+## Next Steps
+
+After you get your code working, submit a Pull Request (PR) following 
+[Github's PR model](https://help.github.com/articles/about-pull-requests/).
+
+If you're interested, take a look at [REVIEWS.md](REVIEWS.md) to learn how
+your PR will be reviewed and how you can help get it merged.
