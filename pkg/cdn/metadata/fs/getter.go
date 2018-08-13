@@ -10,7 +10,7 @@ import (
 
 // Get retrieves the cdn base URL for a module
 func (s *fsStore) Get(module string) (string, error) {
-	const op errors.Op = "fsStore.Get"
+	const op errors.Op = "fsCDN.Get"
 	p := filepath.Join(s.rootDir, module, metadataFileName)
 	f, err := s.filesystem.Open(p)
 	if err != nil {

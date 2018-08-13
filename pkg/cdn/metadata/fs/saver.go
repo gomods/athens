@@ -14,7 +14,7 @@ import (
 // Save saves the module and it's cdn base URL as a json file.
 // it returns ErrExist if the metadata file already exists
 func (s *fsStore) Save(module, redirectURL string) error {
-	const op errors.Op = "fsStore.Save"
+	const op errors.Op = "fsCDN.Save"
 	d := filepath.Join(s.rootDir, module)
 	if err := s.filesystem.MkdirAll(d, os.ModePerm); err != nil {
 		return errors.E(op, err)
