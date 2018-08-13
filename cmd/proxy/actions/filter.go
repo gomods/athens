@@ -26,7 +26,8 @@ func newFilterMiddleware(mf *module.Filter) buffalo.MiddlewareFunc {
 				return next(c)
 			}
 
-			// not checking the error. Not all requests include a version (i.e. list requests)
+			// not checking the error. Not all requests include a version
+			// i.e. list requests path is like /{module:.+}/@v/list with no version parameter
 			version, _ := paths.GetVersion(c)
 
 			if isPseudoVersion(version) {
