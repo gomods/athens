@@ -66,7 +66,12 @@ func (f *Filter) AddRule(path string, rule FilterRule) {
 // Rule returns the filter rule to be applied to the given path
 func (f *Filter) Rule(path string) FilterRule {
 	segs := getPathSegments(path)
-	return f.shouldProcess(segs...)
+	rule := f.shouldProcess(segs...)
+	if rule == Default {
+		rule = Include
+	}
+
+	return rule
 }
 
 func (f *Filter) ensurePath(path string) {
