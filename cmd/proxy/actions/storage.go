@@ -18,7 +18,6 @@ import (
 
 // GetStorage returns storage backend based on env configuration
 func GetStorage() (storage.BackendConnector, error) {
-	// changing to mongo storage, memory seems buggy
 	storageType := env.StorageTypeWithDefault("memory")
 	var storageRoot string
 	var err error
