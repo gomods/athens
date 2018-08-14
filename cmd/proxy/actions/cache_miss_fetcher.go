@@ -13,7 +13,7 @@ import (
 
 const (
 	// OlympusGlobalEndpoint is a default olympus DNS address
-	OlympusGlobalEndpoint = "olympus.gomods.io"
+	OlympusGlobalEndpoint = "http://localhost:3001"
 	// OlympusGlobalEndpointOverrideKey overrides default olympus settings
 	OlympusGlobalEndpointOverrideKey = "OLYMPUS_GLOBAL_ENDPOINT"
 )
@@ -24,10 +24,6 @@ func GetProcessCacheMissJob(ctx context.Context, s storage.Backend, w worker.Wor
 		mod, version, err := parseArgs(args)
 		if err != nil {
 			return err
-		}
-
-		if !mf.ShouldProcess(mod) {
-			return module.NewErrModuleExcluded(mod)
 		}
 
 		if s.Exists(ctx, mod, version) {

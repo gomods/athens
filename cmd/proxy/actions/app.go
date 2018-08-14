@@ -112,6 +112,7 @@ func App() (*buffalo.App, error) {
 		app.Stop(err)
 	}
 	app.Use(T.Middleware())
+	app.Use(newFilterMiddleware(mf))
 
 	if err := addProxyRoutes(app, store, mf, lggr); err != nil {
 		err = fmt.Errorf("error adding proxy routes (%s)", err)
@@ -145,9 +146,6 @@ func getWorker(ctx context.Context, s storage.Backend, mf *module.Filter) (worke
 		MaxFails: env.WorkerMaxFails(),
 	}
 
-	if err := w.RegisterWithOptions(FetcherWorkerName, opts, GetProcessCacheMissJob(ctx, s, w, mf)); err != nil {
-		return nil, err
-	}
+	return nil, w.RegisterWithOptions(FetcherWorkerName, opts, GetProcessCacheMissJob(ctx, s, w, mf))
 
-	return w, w.RegisterWithOptions(ReporterWorkerName, opts, GetCacheMissReporterJob(w, mf))
 }
