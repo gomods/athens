@@ -9,6 +9,7 @@ env:
     - PATH=${PATH}:./bin
     - POP_PATH=$PWD/cmd/proxy
     - GO_ENV=test_postgres
+    - GO_BINARY_PATH=go
     - MINIO_ACCESS_KEY=minio
     - MINIO_SECRET_KEY=minio123
     - ATHENS_MONGO_STORAGE_URL=mongodb://127.0.0.1:27017
