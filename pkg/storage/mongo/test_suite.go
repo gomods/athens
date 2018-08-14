@@ -34,7 +34,7 @@ func newTestStore() (*ModuleStore, error) {
 	}
 
 	mongoStore, err := NewStorage(muri)
-	if mongoStore == nil {
+	if err != nil {
 		return nil, fmt.Errorf("Mongo storage is nil")
 	}
 
