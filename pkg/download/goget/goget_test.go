@@ -65,7 +65,10 @@ var latestTests = []latestTest{
 	{
 		name: "tagged latest",
 		path: "github.com/athens-artifacts/happy-path",
-		err:  true,
+		info: &storage.RevInfo{
+			Version: "v0.0.3",
+			Time:    time.Date(2018, 8, 3, 17, 16, 00, 0, time.UTC),
+		},
 	},
 }
 
