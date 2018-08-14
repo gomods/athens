@@ -58,8 +58,6 @@ var latestTests = []latestTest{
 		name: "happy path",
 		path: "github.com/athens-artifacts/no-tags",
 		info: &storage.RevInfo{
-			Name:    "1a540c5d67ab",
-			Short:   "1a540c5d67ab",
 			Version: "v0.0.0-20180803171426-1a540c5d67ab",
 			Time:    time.Date(2018, 8, 3, 17, 14, 26, 0, time.UTC),
 		},
@@ -103,9 +101,7 @@ var infoTests = []infoTest{
 		path:    "github.com/athens-artifacts/happy-path",
 		version: "v0.0.2",
 		info: &storage.RevInfo{
-			Name:    "3017822275edeb343d2d2a56345f9a58090514d8",
 			Version: "v0.0.2",
-			Short:   "3017822275ed",
 			Time:    time.Date(2018, 8, 3, 3, 45, 19, 0, time.UTC),
 		},
 	},
@@ -114,9 +110,7 @@ var infoTests = []infoTest{
 		path:    "github.com/athens-artifacts/no-tags",
 		version: "v0.0.0-20180803035119-e4e0177efdb5",
 		info: &storage.RevInfo{
-			Name:    "e4e0177efdb573c110217ccb01f2069f961154f3",
 			Version: "v0.0.0-20180803035119-e4e0177efdb5",
-			Short:   "e4e0177efdb5",
 			Time:    time.Date(2018, 8, 3, 3, 51, 19, 0, time.UTC),
 		},
 	},
