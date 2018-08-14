@@ -6,7 +6,7 @@
 set -xeuo pipefail
 
 REPO_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )/.."
-
+export GO_BINARY_PATH=${GO_BINARY_PATH:-go}
 TMPDIR=$(mktemp -d)
 GOMOD_CACHE=$TMPDIR/pkg/mod
 export PATH=${REPO_DIR}/bin:${PATH}
