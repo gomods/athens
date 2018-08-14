@@ -14,7 +14,7 @@ type ModuleStore struct {
 // NewRDBMSStorage  returns a connected RDBMS Module Storage
 // that satisfies the Storage interface.
 func NewRDBMSStorage(connectionName string) (*ModuleStore, error) {
-	const op errors.Op = "rdbms.NewRDBMSStorageWithConn"
+	const op errors.Op = "rdbms.NewRDBMSStorage"
 
 	ms := &ModuleStore{
 		connectionName: connectionName,
