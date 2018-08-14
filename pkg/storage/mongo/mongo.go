@@ -19,18 +19,19 @@ type ModuleStore struct {
 // NewStorage returns a connected Mongo backed storage
 // that satisfies the Backend interface.
 func NewStorage(url string) (*ModuleStore, error) {
+	const op errors.Op = "fs.NewStorage"
 	ms := &ModuleStore{url: url}
 
 	err := ms.connect()
 	if err != nil {
-		return nil, err
+		return nil, errors.E(op, err)
 	}
 	return ms, nil
 
 }
 
 func (m *ModuleStore) connect() error {
-	const op errors.Op = "mongo.Connect"
+	const op errors.Op = "mongo.connect"
 	timeout := env.MongoConnectionTimeoutSecWithDefault(1)
 	s, err := mgo.DialWithTimeout(m.url, timeout)
 
