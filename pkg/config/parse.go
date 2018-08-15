@@ -9,15 +9,6 @@ import (
 	validator "gopkg.in/go-playground/validator.v9"
 )
 
-var validate *validator.Validate
-
-func getValidator() *validator.Validate {
-	if validate == nil {
-		return validator.New()
-	}
-	return validate
-}
-
 // Config provides configuration values for all components
 type Config struct {
 	GoEnv                string         `validate:"required" envconfig:"GO_ENV" default:"development"`
@@ -90,7 +81,7 @@ func envOverride(config *Config) error {
 }
 
 func validateConfig(c Config) error {
-	validate := getValidator()
+	validate := validator.New()
 	err := validate.Struct(c)
 	if err != nil {
 		return err

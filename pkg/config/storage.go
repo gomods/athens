@@ -1,5 +1,7 @@
 package config
 
+import validator "gopkg.in/go-playground/validator.v9"
+
 // StorageConfig provides configs for various storage backends
 type StorageConfig struct {
 	CDN   *CDNConfig   `validate:""`
@@ -34,7 +36,7 @@ func setDefaultTimeouts(s *StorageConfig, defaultTimeout int) {
 // envconfig initializes *all* struct pointers, even if there are no corresponding defaults or env variables
 // deleteInvalidStorageConfigs prunes all such invalid configurations
 func deleteInvalidStorageConfigs(s *StorageConfig) {
-	validate := getValidator()
+	validate := validator.New()
 
 	if s.CDN != nil {
 		if err := validate.Struct(s.CDN); err != nil {

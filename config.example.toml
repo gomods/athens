@@ -56,14 +56,14 @@ EnableCSRFProtection = false
     StorageType = "mongo"
     # Port sets the port the proxy listens on
     # Env override: PORT
-	Port = ":3000"
+    Port = ":3000"
     # The endpoint for Olympus in case of a proxy cache miss
     # Env override: OLYMPUS_GLOBAL_ENDPOINT
-    OlympusGlobalEndpoint = "olympus.gomods.io"
+    OlympusGlobalEndpoint = "http://localhost:3001"
     # Redis queue for buffalo workers
     # Defaults to ":6379"
     # Env override: ATHENS_REDIS_QUEUE_PORT
-	RedisQueueAddress     = ":6379"
+    RedisQueueAddress     = ":6379"
 
 [Olympus]
     # StorageType sets the type of storage backend Olympus will use.
@@ -73,7 +73,7 @@ EnableCSRFProtection = false
     StorageType = "memory"
     # Port sets the port olympus listens on
     # Env override: PORT
-	Port = ":3001"
+    Port = ":3001"
     # Background worker type. Possible values are memory and redis
     # Defaults to redis
     # Env override: OLYMPUS_BACKGROUND_WORKER_TYPE
@@ -102,7 +102,7 @@ EnableCSRFProtection = false
         ProjectID = "MY_GCP_PROJECT_ID"
         # Bucket to use for GCP Storage
         # Env override: ATHENS_STORAGE_GCP_BUCKET
-	    Bucket = "MY_GCP_BUCKET"
+        Bucket = "MY_GCP_BUCKET"
         # Timeout for networks calls made to GCP in seconds
         # Defaults to Global Timeout
         Timeout = 300
