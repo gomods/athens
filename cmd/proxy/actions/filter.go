@@ -90,12 +90,12 @@ func validate(hook, mod, ver string) (bool, error) {
 	toVal := &validationParams{mod, ver}
 	jsonVal, err := json.Marshal(toVal)
 	if err != nil {
-		return false, err
+		return false, errors.E(op, err)
 	}
 
 	resp, err := http.Post(hook, "application/json", bytes.NewBuffer(jsonVal))
 	if err != nil {
-		return false, err
+		return false, errors.E(op, err)
 	}
 
 	switch {
