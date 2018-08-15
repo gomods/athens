@@ -19,8 +19,8 @@ type Filter struct {
 }
 
 // NewFilter creates new filter based on rules defined in a configuration file
-// WARNING: this is not concurrency safe
-// Configuration consists of two operations + for include and - for exclude
+// WARNING: this is not concurrently safe
+// Configuration consists of two operations: + for include and - for exclude
 // e.g.
 //    - github.com/a
 //    + github.com/a/b
@@ -63,17 +63,15 @@ func (f *Filter) AddRule(path string, rule FilterRule) {
 	latest.next[last] = rn
 }
 
-// ShouldProcess evaluates path and determines if module should be communicated or not
-func (f *Filter) ShouldProcess(path string) bool {
-	rule := f.Rule(path)
-	// process everything unless it's excluded
-	return rule != Exclude
-}
-
 // Rule returns the filter rule to be applied to the given path
 func (f *Filter) Rule(path string) FilterRule {
 	segs := getPathSegments(path)
-	return f.shouldProcess(segs...)
+	rule := f.getAssociatedRule(segs...)
+	if rule == Default {
+		rule = Include
+	}
+
+	return rule
 }
 
 func (f *Filter) ensurePath(path string) {
@@ -88,7 +86,7 @@ func (f *Filter) ensurePath(path string) {
 	}
 }
 
-func (f *Filter) shouldProcess(path ...string) FilterRule {
+func (f *Filter) getAssociatedRule(path ...string) FilterRule {
 	if len(path) == 0 {
 		return f.root.rule
 	}
@@ -136,8 +134,8 @@ func (f *Filter) initFromConfig() {
 			rule = Include
 		case "-":
 			rule = Exclude
-		case "P":
-			rule = Private
+		case "D":
+			rule = Direct
 		default:
 			continue
 		}
@@ -172,9 +170,8 @@ func newRule(r FilterRule) ruleNode {
 	return rn
 }
 
-const op errors.Op = "module.getConfigLines"
-
 func getConfigLines() ([]string, error) {
+	const op errors.Op = "module.getConfigLines"
 	configName := env.FilterConfigurationFileName()
 
 	f, err := os.Open(configName)
