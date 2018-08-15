@@ -13,9 +13,6 @@ func (v *storageImpl) Delete(ctx context.Context, module, version string) error 
 	sp, ctx := opentracing.StartSpanFromContext(ctx, "storage.minio.Delete")
 	defer sp.Finish()
 	exists, err := v.Exists(ctx, module, version)
-	if err != nil {
-		return err
-	}
 	if !exists {
 		return errors.E(op, errors.M(module), errors.V(version), errors.KindNotFound)
 	}

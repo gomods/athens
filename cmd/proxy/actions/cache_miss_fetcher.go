@@ -2,12 +2,12 @@ package actions
 
 import (
 	"context"
-	"errors"
 
 	"github.com/gobuffalo/buffalo/worker"
 	"github.com/gomods/athens/pkg/config/env"
 	"github.com/gomods/athens/pkg/module"
 	"github.com/gomods/athens/pkg/storage"
+	"github.com/gomods/athens/pkg/errors"
 	olympusStore "github.com/gomods/athens/pkg/storage/olympus"
 )
 
@@ -16,6 +16,7 @@ const (
 	OlympusGlobalEndpoint = "olympus.gomods.io"
 	// OlympusGlobalEndpointOverrideKey overrides default olympus settings
 	OlympusGlobalEndpointOverrideKey = "OLYMPUS_GLOBAL_ENDPOINT"
+	op errors.Op = "GetProcessCacheMissJob"
 )
 
 // GetProcessCacheMissJob processes queue of cache misses and downloads sources from active Olympus
@@ -32,7 +33,7 @@ func GetProcessCacheMissJob(ctx context.Context, s storage.Backend, w worker.Wor
 
 		moduleExists, err := s.Exists(ctx, mod, version)
 		if err != nil {
-			return err
+			return errors.E(op, err)
 		}
 		if moduleExists {
 			return nil
@@ -41,7 +42,7 @@ func GetProcessCacheMissJob(ctx context.Context, s storage.Backend, w worker.Wor
 		// get module info
 		v, err := getModuleInfo(ctx, mod, version)
 		if err != nil {
-			return err
+			return errors.E(op, err)
 		}
 		defer v.Zip.Close()
 
@@ -52,12 +53,12 @@ func GetProcessCacheMissJob(ctx context.Context, s storage.Backend, w worker.Wor
 func parseArgs(args worker.Args) (string, string, error) {
 	module, ok := args[workerModuleKey].(string)
 	if !ok {
-		return "", "", errors.New("module name not specified")
+		return "", "", errors.E(op, "module name not specified")
 	}
 
 	version, ok := args[workerVersionKey].(string)
 	if !ok {
-		return "", "", errors.New("version not specified")
+		return "", "", errors.E(op, "module name not specified")
 	}
 
 	return module, version, nil

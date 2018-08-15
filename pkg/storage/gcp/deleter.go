@@ -18,7 +18,7 @@ func (s *Storage) Delete(ctx context.Context, module, version string) error {
 	defer sp.Finish()
 	exists, err := s.bucket.Exists(ctx, config.PackageVersionedName(module, version, "mod"))
 	if err != nil {
-		return err
+		return errors.E(op, err)
 	}
 	if !exists {
 		return errors.E(op, errors.M(module), errors.V(version), errors.KindNotFound)

@@ -18,7 +18,7 @@ func (s *Storage) Info(ctx context.Context, module, version string) ([]byte, err
 	defer sp.Finish()
 	exists, err := s.Exists(ctx, module, version)
 	if err != nil {
-		return nil, err
+		return nil, errors.E(op, err)
 	}
 	if !exists {
 		return nil, errors.E(op, errors.M(module), errors.V(version), errors.KindNotFound)
@@ -43,7 +43,7 @@ func (s *Storage) GoMod(ctx context.Context, module, version string) ([]byte, er
 	defer sp.Finish()
 	exists, err := s.Exists(ctx, module, version)
 	if err != nil {
-		return nil, err
+		return nil, errors.E(op, err)
 	}
 	if !exists {
 		return nil, errors.E(op, errors.M(module), errors.V(version), errors.KindNotFound)
@@ -69,7 +69,7 @@ func (s *Storage) Zip(ctx context.Context, module, version string) (io.ReadClose
 	defer sp.Finish()
 	exists, err := s.Exists(ctx, module, version)
 	if err != nil {
-		return nil, err
+		return nil, errors.E(op, err)
 	}
 	if !exists {
 		return nil, errors.E(op, errors.M(module), errors.V(version), errors.KindNotFound)

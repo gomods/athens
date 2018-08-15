@@ -15,7 +15,7 @@ func (r *ModuleStore) Delete(ctx context.Context, module, version string) error 
 	defer sp.Finish()
 	exists, err := r.Exists(ctx, module, version)
 	if err != nil {
-		return err
+		return errors.E(op, err)
 	}
 	if !exists {
 		return errors.E(op, errors.M(module), errors.V(version), errors.KindNotFound)

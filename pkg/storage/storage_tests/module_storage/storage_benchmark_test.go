@@ -112,7 +112,8 @@ func BenchmarkStorageExists(b *testing.B) {
 		b.ResetTimer()
 		b.Run(store.StorageHumanReadableName(), func(b *testing.B) {
 			for i := 0; i < b.N; i++ {
-				exists, _ := backend.Exists(context.Background(), moduleName, version)
+				exists, err := backend.Exists(context.Background(), moduleName, version)
+				require.NoError(b, err)
 				require.True(b, exists)
 			}
 		})

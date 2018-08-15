@@ -15,7 +15,7 @@ func (v *storageImpl) Delete(ctx context.Context, module, version string) error 
 	versionedPath := v.versionLocation(module, version)
 	exists, err := v.Exists(ctx, module, version)
 	if err != nil {
-		return err
+		return errors.E(op, err)
 	}
 	if !exists {
 		return errors.E(op, errors.M(module), errors.V(version), errors.KindNotFound)
