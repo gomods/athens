@@ -6,6 +6,4 @@ func (a *ActionSuite) TestList() {
 	req := a.JSON("/github.com/gomods/athens/@v/list")
 	res := req.Get()
 	r.Equal(200, res.Code)
-	res.Body
-	res.Body
 }
