@@ -19,19 +19,24 @@ type HandlerOpts struct {
 	Engine   *render.Engine
 }
 
+// ContextLogEntry returns a log entry with the fields populated using the
+// http request embedded in the context
+func ContextLogEntry(c buffalo.Context, lggr *log.Logger) log.Entry {
+	req := c.Request()
+	return lggr.WithFields(logrus.Fields{
+		"http-method": req.Method,
+		"http-path":   req.URL.Path,
+		"http-url":    req.URL.String(),
+	})
+}
+
 // LogEntryHandler constructs a log.Entry out of the given
 // *log.Logger so that it applies default fields to every single
 // incoming request without having to do those in every single handler.
 // This is like a middleware minus the context magic.
 func LogEntryHandler(ph ProtocolHandler, opts *HandlerOpts) buffalo.Handler {
 	return func(c buffalo.Context) error {
-		req := c.Request()
-		ent := opts.Logger.WithFields(logrus.Fields{
-			"http-method": req.Method,
-			"http-path":   req.URL.Path,
-			"http-url":    req.URL.String(),
-		})
-
+		ent := ContextLogEntry(c, opts.Logger)
 		handler := ph(opts.Protocol, ent, opts.Engine)
 
 		return handler(c)

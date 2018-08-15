@@ -1,24 +1,32 @@
 package actions
 
 import (
+	"bytes"
+	"encoding/json"
 	"net/http"
 	"net/url"
 	"strings"
 
 	"github.com/bketelsen/buffet"
 	"github.com/gobuffalo/buffalo"
+	"github.com/gomods/athens/pkg/config/env"
+	"github.com/gomods/athens/pkg/download"
 	"github.com/gomods/athens/pkg/errors"
+	"github.com/gomods/athens/pkg/log"
 	"github.com/gomods/athens/pkg/module"
 	"github.com/gomods/athens/pkg/paths"
 )
 
-func newFilterMiddleware(mf *module.Filter) buffalo.MiddlewareFunc {
+func newFilterMiddleware(mf *module.Filter, lggr *log.Logger) buffalo.MiddlewareFunc {
 	const op errors.Op = "actions.FilterMiddleware"
 
 	return func(next buffalo.Handler) buffalo.Handler {
 		return func(c buffalo.Context) error {
 			sp := buffet.SpanFromContext(c).SetOperationName("filterMiddleware")
 			defer sp.Finish()
+
+			entry := download.ContextLogEntry(c, lggr)
+
 			mod, err := paths.GetModule(c)
 
 			if err != nil {
@@ -29,6 +37,18 @@ func newFilterMiddleware(mf *module.Filter) buffalo.MiddlewareFunc {
 			// not checking the error. Not all requests include a version
 			// i.e. list requests path is like /{module:.+}/@v/list with no version parameter
 			version, _ := paths.GetVersion(c)
+
+			if validatorHook, ok := env.ValidatorHook(); ok && version != "" {
+				valid, err := validate(validatorHook, mod, version)
+				if err != nil {
+					entry.SystemErr(err)
+					return c.Render(http.StatusInternalServerError, nil)
+				}
+
+				if !valid {
+					return c.Render(http.StatusForbidden, nil)
+				}
+			}
 
 			if isPseudoVersion(version) {
 				return next(c)
@@ -57,4 +77,33 @@ func isPseudoVersion(version string) bool {
 
 func redirectToOlympusURL(u *url.URL) string {
 	return strings.TrimSuffix(GetOlympusEndpoint(), "/") + u.Path
+}
+
+type validationParams struct {
+	Module  string
+	Version string
+}
+
+func validate(hook, mod, ver string) (bool, error) {
+	const op errors.Op = "actions.validate"
+
+	toVal := &validationParams{mod, ver}
+	jsonVal, err := json.Marshal(toVal)
+	if err != nil {
+		return false, err
+	}
+
+	resp, err := http.Post(hook, "application/json", bytes.NewBuffer(jsonVal))
+	if err != nil {
+		return false, err
+	}
+
+	switch {
+	case resp.StatusCode == http.StatusOK:
+		return true, nil
+	case resp.StatusCode == http.StatusForbidden:
+		return false, nil
+	default:
+		return false, errors.E(op, "Unexpected status code ", resp.StatusCode)
+	}
 }
