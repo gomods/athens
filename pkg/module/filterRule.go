@@ -10,4 +10,6 @@ const (
 	Include
 	// Exclude filter rule excludes package and its children from communication
 	Exclude
+	// Direct filter rule forces the package to be fetched directly from the vcs
+	Direct
 )
