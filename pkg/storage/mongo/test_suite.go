@@ -35,7 +35,7 @@ func newTestStore() (*ModuleStore, error) {
 
 	mongoStore, err := NewStorage(muri)
 	if err != nil {
-		return nil, fmt.Errorf("Mongo storage is nil")
+		return nil, fmt.Errorf("Not able to connect to mongo storage")
 	}
 
 	return mongoStore, nil
