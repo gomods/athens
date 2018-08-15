@@ -58,8 +58,6 @@ var latestTests = []latestTest{
 		name: "happy path",
 		path: "github.com/athens-artifacts/no-tags",
 		info: &storage.RevInfo{
-			Name:    "1a540c5d67ab",
-			Short:   "1a540c5d67ab",
 			Version: "v0.0.0-20180803171426-1a540c5d67ab",
 			Time:    time.Date(2018, 8, 3, 17, 14, 26, 0, time.UTC),
 		},
@@ -67,7 +65,10 @@ var latestTests = []latestTest{
 	{
 		name: "tagged latest",
 		path: "github.com/athens-artifacts/happy-path",
-		err:  true,
+		info: &storage.RevInfo{
+			Version: "v0.0.3",
+			Time:    time.Date(2018, 8, 3, 17, 16, 00, 0, time.UTC),
+		},
 	},
 }
 
