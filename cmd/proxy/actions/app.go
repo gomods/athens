@@ -66,10 +66,6 @@ func App() (*buffalo.App, error) {
 		err = fmt.Errorf("error getting storage configuration (%s)", err)
 		return nil, err
 	}
-	if err := store.Connect(); err != nil {
-		err = fmt.Errorf("error connecting to storage (%s)", err)
-		return nil, err
-	}
 
 	worker, err := getWorker(ctx, store, mf)
 	if err != nil {
@@ -85,6 +81,7 @@ func App() (*buffalo.App, error) {
 		},
 		SessionName: "_athens_session",
 		Worker:      worker,
+		WorkerOff:   true, // TODO(marwan): turned off until worker is being used.
 		Logger:      log.Buffalo(),
 	})
 
@@ -150,6 +147,5 @@ func getWorker(ctx context.Context, s storage.Backend, mf *module.Filter) (worke
 		MaxFails: env.WorkerMaxFails(),
 	}
 
-	return nil, w.RegisterWithOptions(FetcherWorkerName, opts, GetProcessCacheMissJob(ctx, s, w, mf))
-
+	return w, w.RegisterWithOptions(FetcherWorkerName, opts, GetProcessCacheMissJob(ctx, s, w, mf))
 }
