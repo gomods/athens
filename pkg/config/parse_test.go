@@ -158,7 +158,7 @@ func TestParseExampleConfig(t *testing.T) {
 
 	expProxy := &ProxyConfig{
 		StorageType:           "mongo",
-		OlympusGlobalEndpoint: "olympus.gomods.io",
+		OlympusGlobalEndpoint: "http://localhost:3001",
 		RedisQueueAddress:     ":6379",
 		Port:                  ":3000",
 	}
