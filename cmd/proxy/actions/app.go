@@ -58,15 +58,16 @@ func init() {
 // App is where all routes and middleware for buffalo
 // should be defined. This is the nerve center of your
 // application.
-func App() (*buffalo.App, error) {
+func App(store storage.Backend) (*buffalo.App, error) {
 	ctx := context.Background()
-	store, err := GetStorage()
+	// store, err := GetStorage()
 	mf := module.NewFilter()
-	if err != nil {
-		err = fmt.Errorf("error getting storage configuration (%s)", err)
-		return nil, err
-	}
+	// if err != nil {
+	// 	err = fmt.Errorf("error getting storage configuration (%s)", err)
+	// 	return nil, err
+	// }
 
+	var err error
 	worker, err := getWorker(ctx, store, mf)
 	if err != nil {
 		return nil, err

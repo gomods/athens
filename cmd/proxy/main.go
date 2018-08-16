@@ -1,13 +1,19 @@
 package main
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/gomods/athens/cmd/proxy/actions"
 )
 
 func main() {
-	app, err := actions.App()
+	store, err := actions.GetStorage()
+	if err != nil {
+		err = fmt.Errorf("error getting storage configuration (%s)", err)
+		log.Fatal(err)
+	}
+	app, err := actions.App(store)
 	if err != nil {
 		log.Fatal(err)
 	}
