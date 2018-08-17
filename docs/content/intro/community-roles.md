@@ -31,6 +31,7 @@ an issue, or to improve something that doesn't have an issue
 - Review a PR that you're interested in
 - Join us at a weekly [development meeting](https://docs.google.com/document/d/1xpvgmR1Fq4iy1j975Tb4H_XjeXUQUOAvn0FximUzvIk/edit#)
 (or more than one!)
+    - See [here](https://www.youtube.com/playlist?list=PLAk08AWjk5sekD-FRjU4VVe97nltUyZ4W) for recordings of all our past meetings
 - Come chat with us in the [gophers slack](https://invite.slack.golangbridge.org/) in the `#athens` channel
 - ... and anything else that's appropriate for you!
 
