@@ -8,7 +8,7 @@ are a friendly and inclusive group and we'd love to have you. We have three role
 
 - Community member
 - Contributor
-- Maintainer (we also call this core maintainer sometimes. They're the same thing)
+- Maintainer
 
 Read on to find out more!
 
@@ -63,6 +63,8 @@ To become a contributor, the core maintainers of the project would like to see y
 
 After you become a contributor, you'll have the opportunity to become a maintainer.
 Here's what being a maintainer means and how to become one.
+
+_Note: We sometimes refer to maintainers as "core maintainers," but they're the same thing._
 
 ## What Being a Maintainer Means
 
