@@ -119,6 +119,7 @@ func (f *Filter) initFromConfig() {
 	lines, err := getConfigLines()
 
 	if err != nil || len(lines) == 0 {
+		f.Off = true
 		return
 	}
 
