@@ -45,8 +45,9 @@ should do to become one.
 
 Contributors have read access to the Athens repository on Github. This means that as a contributor, you'll have issues assigned to you and you'll be requested 
 to review pull requests (PRs) via the 
-[Github pull request review system](https://help.github.com/articles/about-pull-request-reviews/). 
-We rely heavily on Github PR reviews, so if you review a PR as a contributor, you can decide 
+[Github pull request review system](https://help.github.com/articles/about-pull-request-reviews/).
+
+We rely heavily on the Github PR review system, which means that if you review a PR as a contributor, you can decide 
 when that PR is ready to be merged.
 
 ## How to Become a Contributor
