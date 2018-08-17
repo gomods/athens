@@ -16,17 +16,17 @@ Athens is developed on Go1.11+.
 
 If you have a stable version of go running, then a later version of go can be downloaded.
 
-For example, to get `go1.11beta3`, run the following commands which won't affect your stable version
+For example, to get `go1.11rc1`, run the following commands which won't affect your stable version
 ```
-go get golang.org/dl/go1.11beta3
-go1.11beta3 download
+go get golang.org/dl/go1.11rc1
+go1.11rc1 download
 ```
 
-To point Athens to `go1.11beta3` or to a different version
+To point Athens to `go1.11rc1` or to a different version
 set the following environment variable
 
 ```
-GO_BINARY_PATH=go1.11beta3
+GO_BINARY_PATH=go1.11rc1
 or whichever binary you want to use with athens
 ```
 
@@ -80,3 +80,24 @@ Starting application at 127.0.0.1:3000
 
 And you'll be up and running. As you edit and save code, the `buffalo dev` command will notice and automatically
 re-compile and restart the server.
+
+# Run unit tests
+
+In order to run unit tests, services they depend on must be running first:
+
+```console
+make alldeps
+```
+
+and database created:
+
+```console
+buffalo db create
+buffalo db migrate up
+```
+
+then you can run the unit tests:
+
+```console
+make test-unit
+```
