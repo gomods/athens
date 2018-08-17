@@ -15,6 +15,7 @@ var (
 
 // Filter is a filter of modules
 type Filter struct {
+	Off  bool
 	root ruleNode
 }
 

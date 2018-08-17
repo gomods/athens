@@ -17,6 +17,10 @@ func newFilterMiddleware(mf *module.Filter) buffalo.MiddlewareFunc {
 
 	return func(next buffalo.Handler) buffalo.Handler {
 		return func(c buffalo.Context) error {
+			if mf.Off {
+				return next(c)
+			}
+
 			sp := buffet.SpanFromContext(c).SetOperationName("filterMiddleware")
 			defer sp.Finish()
 			mod, err := paths.GetModule(c)
@@ -42,7 +46,8 @@ func newFilterMiddleware(mf *module.Filter) buffalo.MiddlewareFunc {
 				return next(c)
 			case module.Include:
 				// TODO : spin up cache filling worker and serve the request using the cache
-				return next(c)
+				newURL := redirectToOlympusURL(c.Request().URL)
+				return c.Redirect(http.StatusSeeOther, newURL)
 			}
 
 			return next(c)
