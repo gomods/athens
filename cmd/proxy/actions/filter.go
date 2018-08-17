@@ -53,18 +53,6 @@ func newFilterMiddleware(mf *module.Filter, entry log.Entry) buffalo.MiddlewareF
 			// i.e. list requests path is like /{module:.+}/@v/list with no version parameter
 			version, _ := paths.GetVersion(c)
 
-			if validatorHook, ok := env.ValidatorHook(); ok && version != "" {
-				valid, err := validate(validatorHook, mod, version)
-				if err != nil {
-					entry.SystemErr(err)
-					return c.Render(http.StatusInternalServerError, nil)
-				}
-
-				if !valid {
-					return c.Render(http.StatusForbidden, nil)
-				}
-			}
-
 			if isPseudoVersion(version) {
 				return next(c)
 			}
@@ -92,6 +80,41 @@ func isPseudoVersion(version string) bool {
 
 func redirectToOlympusURL(u *url.URL) string {
 	return strings.TrimSuffix(GetOlympusEndpoint(), "/") + u.Path
+}
+
+func newValidationMiddleware(mf *module.Filter, entry log.Entry) buffalo.MiddlewareFunc {
+	const op errors.Op = "actions.ValidationMiddleware"
+
+	return func(next buffalo.Handler) buffalo.Handler {
+		return func(c buffalo.Context) error {
+			sp := buffet.SpanFromContext(c).SetOperationName("validationMiddleware")
+			defer sp.Finish()
+
+			mod, err := paths.GetModule(c)
+
+			if err != nil {
+				// if there is no module the path we are hitting is not one related to modules, like /
+				return next(c)
+			}
+
+			// not checking the error. Not all requests include a version
+			// i.e. list requests path is like /{module:.+}/@v/list with no version parameter
+			version, _ := paths.GetVersion(c)
+
+			if validatorHook, ok := env.ValidatorHook(); ok && version != "" {
+				valid, err := validate(validatorHook, mod, version)
+				if err != nil {
+					entry.SystemErr(err)
+					return c.Render(http.StatusInternalServerError, nil)
+				}
+
+				if !valid {
+					return c.Render(http.StatusForbidden, nil)
+				}
+			}
+			return next(c)
+		}
+	}
 }
 
 type validationParams struct {
