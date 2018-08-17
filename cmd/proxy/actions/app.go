@@ -113,11 +113,11 @@ func App() (*buffalo.App, error) {
 		app.Stop(err)
 	}
 	app.Use(T.Middleware())
-	app.Use(LogEntryMiddleware(newFilterMiddleware, lggr, mf))
+	app.Use(newFilterMiddleware(mf))
 
 	// Having the hook set means we want to use it
 	if _, ok := env.ValidatorHook(); ok {
-		app.Use(LogEntryMiddleware(newValidationMiddleware, lggr, mf))
+		app.Use(LogEntryMiddleware(newValidationMiddleware, lggr))
 	}
 
 	user, pass, ok := env.BasicAuth()

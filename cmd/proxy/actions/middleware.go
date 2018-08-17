@@ -19,11 +19,11 @@ import (
 
 // MiddlewareFunc is a function that takes all that it needs to return
 // a ready-to-go buffalo middleware.
-type MiddlewareFunc func(mf *module.Filter, entry log.Entry) buffalo.MiddlewareFunc
+type MiddlewareFunc func(entry log.Entry) buffalo.MiddlewareFunc
 
 // LogEntryMiddleware builds a log.Entry applying the request parameter to the given
 // log.Logger and propagates it to the given MiddlewareFunc
-func LogEntryMiddleware(middleware MiddlewareFunc, lggr *log.Logger, mf *module.Filter) buffalo.MiddlewareFunc {
+func LogEntryMiddleware(middleware MiddlewareFunc, lggr *log.Logger) buffalo.MiddlewareFunc {
 	return func(next buffalo.Handler) buffalo.Handler {
 		return func(c buffalo.Context) error {
 			req := c.Request()
@@ -32,13 +32,13 @@ func LogEntryMiddleware(middleware MiddlewareFunc, lggr *log.Logger, mf *module.
 				"http-path":   req.URL.Path,
 				"http-url":    req.URL.String(),
 			})
-			m := middleware(mf, ent)
+			m := middleware(ent)
 			return m(next)(c)
 		}
 	}
 }
 
-func newFilterMiddleware(mf *module.Filter, entry log.Entry) buffalo.MiddlewareFunc {
+func newFilterMiddleware(mf *module.Filter) buffalo.MiddlewareFunc {
 	const op errors.Op = "actions.FilterMiddleware"
 
 	return func(next buffalo.Handler) buffalo.Handler {
@@ -78,7 +78,7 @@ func newFilterMiddleware(mf *module.Filter, entry log.Entry) buffalo.MiddlewareF
 	}
 }
 
-func newValidationMiddleware(mf *module.Filter, entry log.Entry) buffalo.MiddlewareFunc {
+func newValidationMiddleware(entry log.Entry) buffalo.MiddlewareFunc {
 	const op errors.Op = "actions.ValidationMiddleware"
 
 	return func(next buffalo.Handler) buffalo.Handler {

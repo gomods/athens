@@ -25,7 +25,7 @@ func middlewareFilterApp() *buffalo.App {
 
 	a := buffalo.New(buffalo.Options{})
 	mf := newTestFilter()
-	a.Use(LogEntryMiddleware(newFilterMiddleware, log.New("none", "debug"), mf))
+	a.Use(newFilterMiddleware(mf))
 	initializeTracing(a)
 
 	a.GET(download.PathList, h)
@@ -66,8 +66,7 @@ func hookFilterApp() *buffalo.App {
 	}
 
 	a := buffalo.New(buffalo.Options{})
-	mf := newTestFilter()
-	a.Use(LogEntryMiddleware(newValidationMiddleware, log.New("none", "debug"), mf))
+	a.Use(LogEntryMiddleware(newValidationMiddleware, log.New("none", "debug")))
 	initializeTracing(a)
 
 	a.GET(download.PathList, h)
