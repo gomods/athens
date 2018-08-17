@@ -18,7 +18,7 @@ Community members are folks who decide they want to get involved with our
 community. Absolutely anyone can do that whenever they want. If you want
 to get involved, that doesn't mean you have to continue being involved, but
 we hope our community is welcoming and the work is interesting enough to 
-convince you to say :)
+convince you to stay :)
 
 We'll provide all the support we can possibly provide to help you contribute
 in any way you'd like. If you're considering joining us, here are some ideas
