@@ -115,6 +115,11 @@ func App() (*buffalo.App, error) {
 	app.Use(T.Middleware())
 	app.Use(LogEntryMiddleware(newFilterMiddleware, lggr, mf))
 
+	// Having the hook set means we want to use it
+	if _, ok := env.ValidatorHook(); ok {
+		app.Use(LogEntryMiddleware(newValidationMiddleware, lggr, mf))
+	}
+
 	if err := addProxyRoutes(app, store, mf, lggr); err != nil {
 		err = fmt.Errorf("error adding proxy routes (%s)", err)
 		return nil, err
