@@ -7,7 +7,6 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/Sirupsen/logrus"
 	"github.com/bketelsen/buffet"
 	"github.com/gobuffalo/buffalo"
 	"github.com/gomods/athens/pkg/config/env"
@@ -15,6 +14,7 @@ import (
 	"github.com/gomods/athens/pkg/log"
 	"github.com/gomods/athens/pkg/module"
 	"github.com/gomods/athens/pkg/paths"
+	"github.com/sirupsen/logrus"
 )
 
 // MiddlewareFunc is a function that takes all that it needs to return
