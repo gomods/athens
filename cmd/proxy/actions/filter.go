@@ -17,10 +17,6 @@ func newFilterMiddleware(mf *module.Filter) buffalo.MiddlewareFunc {
 
 	return func(next buffalo.Handler) buffalo.Handler {
 		return func(c buffalo.Context) error {
-			if mf.Off {
-				return next(c)
-			}
-
 			sp := buffet.SpanFromContext(c).SetOperationName("filterMiddleware")
 			defer sp.Finish()
 			mod, err := paths.GetModule(c)

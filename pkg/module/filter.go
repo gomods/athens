@@ -15,7 +15,6 @@ var (
 
 // Filter is a filter of modules
 type Filter struct {
-	Off  bool
 	root ruleNode
 }
 
@@ -119,7 +118,6 @@ func (f *Filter) initFromConfig() {
 	lines, err := getConfigLines()
 
 	if err != nil || len(lines) == 0 {
-		f.Off = true
 		return
 	}
 
