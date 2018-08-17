@@ -2,7 +2,7 @@ package env
 
 import "github.com/gobuffalo/envy"
 
-const noProxyValidator = "NOVALIDATOR"
+const noProxyValidator = ""
 
 // ValidatorHook specifies the url of the endpoint to validate the modules agains
 // It returns the endpoint (if it was configured) and a bool meaning that the endpoint return value is valid

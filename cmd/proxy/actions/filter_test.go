@@ -93,7 +93,7 @@ func (suite *HookTestsSuite) SetupTest() {
 }
 
 func (suite *HookTestsSuite) TearDownSuite() {
-	envy.Set("ATHENS_PROXY_VALIDATOR", "NOVALIDATOR")
+	envy.Set("ATHENS_PROXY_VALIDATOR", "")
 	suite.server.Close()
 }
 
