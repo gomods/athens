@@ -11,8 +11,9 @@ test:
   database: proxy_testing
   host: 127.0.0.1
   pool: 5
-  user: vgp
-  password: vgp
+  port: 5432
+  user: postgres
+  password: postgres
 
 production:
   dialect: "postgres"

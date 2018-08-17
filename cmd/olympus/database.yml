@@ -10,9 +10,10 @@ test:
   dialect: "postgres"
   database: olympus_testing
   host: 127.0.0.1
-  user: vgp
-  password: vgp
-  
+  port: 5432
+  user: postgres
+  password: postgres
+
 production:
   dialect: "postgres"
   database: olympus
