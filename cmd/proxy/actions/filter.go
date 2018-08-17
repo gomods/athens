@@ -7,25 +7,40 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/Sirupsen/logrus"
 	"github.com/bketelsen/buffet"
 	"github.com/gobuffalo/buffalo"
 	"github.com/gomods/athens/pkg/config/env"
-	"github.com/gomods/athens/pkg/download"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/log"
 	"github.com/gomods/athens/pkg/module"
 	"github.com/gomods/athens/pkg/paths"
 )
 
-func newFilterMiddleware(mf *module.Filter, lggr *log.Logger) buffalo.MiddlewareFunc {
+type MiddlewareFunc func(mf *module.Filter, entry log.Entry) buffalo.MiddlewareFunc
+
+func LogEntryMiddleware(middleware MiddlewareFunc, lggr *log.Logger, mf *module.Filter) buffalo.MiddlewareFunc {
+	return func(next buffalo.Handler) buffalo.Handler {
+		return func(c buffalo.Context) error {
+			req := c.Request()
+			ent := lggr.WithFields(logrus.Fields{
+				"http-method": req.Method,
+				"http-path":   req.URL.Path,
+				"http-url":    req.URL.String(),
+			})
+			m := middleware(mf, ent)
+			return m(next)(c)
+		}
+	}
+}
+
+func newFilterMiddleware(mf *module.Filter, entry log.Entry) buffalo.MiddlewareFunc {
 	const op errors.Op = "actions.FilterMiddleware"
 
 	return func(next buffalo.Handler) buffalo.Handler {
 		return func(c buffalo.Context) error {
 			sp := buffet.SpanFromContext(c).SetOperationName("filterMiddleware")
 			defer sp.Finish()
-
-			entry := download.ContextLogEntry(c, lggr)
 
 			mod, err := paths.GetModule(c)
 
