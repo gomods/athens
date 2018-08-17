@@ -18,7 +18,7 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
-func middlewareApp() *buffalo.App {
+func middlewareFilterApp() *buffalo.App {
 	h := func(c buffalo.Context) error {
 		return c.Render(200, nil)
 	}
@@ -41,10 +41,10 @@ func newTestFilter() *module.Filter {
 	return f
 }
 
-func Test_Middleware(t *testing.T) {
+func Test_FilterMiddleware(t *testing.T) {
 	r := require.New(t)
 
-	w := willie.New(middlewareApp())
+	w := willie.New(middlewareFilterApp())
 
 	// Public, expects to be redirected to olympus
 	res := w.Request("/github.com/gomods/athens/@v/list").Get()
@@ -58,6 +58,21 @@ func Test_Middleware(t *testing.T) {
 	// Private, the proxy is working and returns a 200
 	res = w.Request("/github.com/athens-artifacts/happy-path/@v/list").Get()
 	r.Equal(200, res.Code)
+}
+
+func hookFilterApp() *buffalo.App {
+	h := func(c buffalo.Context) error {
+		return c.Render(200, nil)
+	}
+
+	a := buffalo.New(buffalo.Options{})
+	mf := newTestFilter()
+	a.Use(LogEntryMiddleware(newValidationMiddleware, log.New("none", "debug"), mf))
+	initializeTracing(a)
+
+	a.GET(download.PathList, h)
+	a.GET(download.PathVersionInfo, h)
+	return a
 }
 
 type hookMock struct {
@@ -84,7 +99,7 @@ func (suite *HookTestsSuite) SetupSuite() {
 	fmt.Println("setup")
 	suite.server = httptest.NewServer(&suite.mock)
 	envy.Set("ATHENS_PROXY_VALIDATOR", suite.server.URL)
-	suite.w = willie.New(middlewareApp())
+	suite.w = willie.New(hookFilterApp())
 }
 
 func (suite *HookTestsSuite) SetupTest() {
