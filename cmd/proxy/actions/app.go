@@ -66,10 +66,6 @@ func App() (*buffalo.App, error) {
 		err = fmt.Errorf("error getting storage configuration (%s)", err)
 		return nil, err
 	}
-	if err := store.Connect(); err != nil {
-		err = fmt.Errorf("error connecting to storage (%s)", err)
-		return nil, err
-	}
 
 	worker, err := getWorker(ctx, store, mf)
 	if err != nil {
@@ -117,8 +113,13 @@ func App() (*buffalo.App, error) {
 		app.Stop(err)
 	}
 	app.Use(T.Middleware())
-	app.Use(newFilterMiddleware(mf))
-
+	if !env.FilterOff() {
+		app.Use(newFilterMiddleware(mf))
+	}
+	user, pass, ok := env.BasicAuth()
+	if ok {
+		app.Use(basicAuth(user, pass))
+	}
 	if err := addProxyRoutes(app, store, mf, lggr); err != nil {
 		err = fmt.Errorf("error adding proxy routes (%s)", err)
 		return nil, err
