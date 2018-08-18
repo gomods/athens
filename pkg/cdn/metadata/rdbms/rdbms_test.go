@@ -4,15 +4,15 @@ import (
 	"github.com/gobuffalo/envy"
 )
 
-func (rd *RDBMSTestSuite) TestGetSaveRoundTrip() {
-	r := rd.Require()
-	err := rd.storage.Save(module, redirectURL)
-	r.NoError(err)
+// func (rd *RDBMSTestSuite) TestGetSaveRoundTrip() {
+// 	r := rd.Require()
+// 	err := rd.storage.Save(module, redirectURL)
+// 	r.NoError(err)
 
-	gotten, err := rd.storage.Get(module)
-	r.NoError(err)
-	r.Equal(gotten, redirectURL)
-}
+// 	gotten, err := rd.storage.Get(module)
+// 	r.NoError(err)
+// 	r.Equal(gotten, redirectURL)
+// }
 
 func (rd *RDBMSTestSuite) TestNewRDBMSStorage() {
 	r := rd.Require()
