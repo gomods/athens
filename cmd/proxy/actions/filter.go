@@ -7,10 +7,23 @@ import (
 
 	"github.com/bketelsen/buffet"
 	"github.com/gobuffalo/buffalo"
+	"github.com/gomods/athens/pkg/config/env"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/module"
 	"github.com/gomods/athens/pkg/paths"
 )
+
+const (
+	// OlympusGlobalEndpoint is a default olympus DNS address
+	OlympusGlobalEndpoint = "http://localhost:3001"
+	// OlympusGlobalEndpointOverrideKey overrides default olympus settings
+	OlympusGlobalEndpointOverrideKey = "OLYMPUS_GLOBAL_ENDPOINT"
+)
+
+// GetOlympusEndpoint returns global endpoint with override in mind
+func GetOlympusEndpoint() string {
+	return env.OlympusGlobalEndpointWithDefault(OlympusGlobalEndpoint)
+}
 
 func newFilterMiddleware(mf *module.Filter) buffalo.MiddlewareFunc {
 	const op errors.Op = "actions.FilterMiddleware"
