@@ -9,7 +9,6 @@ type StorageConfig struct {
 	GCP   *GCPConfig   `validate:""`
 	Minio *MinioConfig `validate:""`
 	Mongo *MongoConfig `validate:""`
-	RDBMS *RDBMSConfig `validate:""`
 }
 
 func setDefaultTimeouts(s *StorageConfig, defaultTimeout int) {
@@ -27,9 +26,6 @@ func setDefaultTimeouts(s *StorageConfig, defaultTimeout int) {
 	}
 	if s.Mongo != nil && s.Mongo.Timeout == 0 {
 		s.Mongo.Timeout = defaultTimeout
-	}
-	if s.RDBMS != nil && s.RDBMS.Timeout == 0 {
-		s.RDBMS.Timeout = defaultTimeout
 	}
 }
 
@@ -65,12 +61,6 @@ func deleteInvalidStorageConfigs(s *StorageConfig) {
 	if s.Mongo != nil {
 		if err := validate.Struct(s.Mongo); err != nil {
 			s.Mongo = nil
-		}
-	}
-
-	if s.RDBMS != nil {
-		if err := validate.Struct(s.RDBMS); err != nil {
-			s.RDBMS = nil
 		}
 	}
 }

@@ -94,10 +94,6 @@ func TestStorageEnvOverrides(t *testing.T) {
 			URL:     "mongoURL",
 			Timeout: 25,
 		},
-		RDBMS: &RDBMSConfig{
-			Name:    "production",
-			Timeout: globalTimeout,
-		},
 	}
 	envVars := getEnvMap(&Config{Storage: expStorage})
 	envVarBackup := map[string]string{}
@@ -142,7 +138,6 @@ func TestParseExampleConfig(t *testing.T) {
 			GCP:   &GCPConfig{},
 			Minio: &MinioConfig{},
 			Mongo: &MongoConfig{},
-			RDBMS: &RDBMSConfig{},
 		},
 	}
 	// unset all environment variables
@@ -193,10 +188,6 @@ func TestParseExampleConfig(t *testing.T) {
 		},
 		Mongo: &MongoConfig{
 			URL:     "mongo.example.com",
-			Timeout: globalTimeout,
-		},
-		RDBMS: &RDBMSConfig{
-			Name:    "development",
 			Timeout: globalTimeout,
 		},
 	}
@@ -282,9 +273,6 @@ func getEnvMap(config *Config) map[string]string {
 		if storage.Mongo != nil {
 			envVars["ATHENS_MONGO_STORAGE_URL"] = storage.Mongo.URL
 			envVars["MONGO_CONN_TIMEOUT_SEC"] = strconv.Itoa(storage.Mongo.Timeout)
-		}
-		if storage.RDBMS != nil {
-			envVars["ATHENS_RDBMS_STORAGE_NAME"] = storage.RDBMS.Name
 		}
 	}
 	return envVars
