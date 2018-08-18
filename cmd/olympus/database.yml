@@ -24,7 +24,7 @@ test_mysql:
   password: vgp
 
 production:
-  dialect: "mysql"
+  dialect: "postgres"
   database: olympusdb
   host: {{ env "DB_HOST" }}
   port: {{ env "DB_PORT" }}

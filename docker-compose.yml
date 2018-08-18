@@ -14,8 +14,8 @@ services:
     ports:
       - "5432:5432"
     environment:
-      POSTGRES_USER: vgp
-      POSTGRES_PASSWORD: vgp
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
   minio:
     image: minio/minio:latest
     command: server /data
