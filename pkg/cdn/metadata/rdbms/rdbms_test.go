@@ -1,15 +1,11 @@
 package rdbms
 
 import (
-	"fmt"
-	"os"
-
 	"github.com/gobuffalo/envy"
 )
 
 func (rd *RDBMSTestSuite) TestGetSaveRoundTrip() {
 	r := rd.Require()
-	fmt.Fprintf(os.Stderr, rd.DB.String())
 	err := rd.storage.Save(module, redirectURL)
 	r.NoError(err)
 

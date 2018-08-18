@@ -1,8 +1,6 @@
 package rdbms
 
 import (
-	"fmt"
-
 	"github.com/gobuffalo/pop"
 )
 
@@ -24,7 +22,6 @@ func NewStorage(connectionName string) *MetadataStore {
 
 // Connect creates connection to rdmbs backend.
 func (r *MetadataStore) Connect() error {
-	fmt.Println(r.connectionName)
 	c, err := pop.Connect(r.connectionName)
 	if err != nil {
 		return err
