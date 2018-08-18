@@ -20,8 +20,8 @@ before_script:
   - make setup-dev-env
   - wget "https://dl.minio.io/server/minio/release/linux-amd64/minio"
   - chmod +x minio && nohup ./minio server . &
-  - buffalo db create -e test -d -c $POP_PATH/database.yml
-  - buffalo db migrate up -e test -d -c $POP_PATH/database.yml
+  - buffalo db create -e $GO_ENV -d -c $POP_PATH/database.yml
+  - buffalo db migrate up -e $GO_ENV -d -c $POP_PATH/database.yml
 
 
 script:
