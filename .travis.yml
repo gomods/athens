@@ -7,7 +7,7 @@ go:
 env:
   global:
     - PATH=${PATH}:./bin
-    - POP_PATH=$PWD/cmd/proxy
+    - POP_PATH=$PWD/cmd/olympus
     - GO_ENV=test
     - MINIO_ACCESS_KEY=minio
     - MINIO_SECRET_KEY=minio123

@@ -7,11 +7,11 @@ if [ -z ${ATHENS_MONGO_STORAGE_URL} ]; then
 fi
 
 if [ -z ${GO_ENV} ]; then
-    export GO_ENV="test_postgres"
+    export GO_ENV="test"
 fi
 
 if [ -z ${POP_PATH} ]; then
-    export POP_PATH="${PWD}/cmd/proxy"
+    export POP_PATH="${PWD}/cmd/olympus"
 fi
 
 # Run the unit tests with the race detector and code coverage enabled
