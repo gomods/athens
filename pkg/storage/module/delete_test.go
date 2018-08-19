@@ -3,7 +3,6 @@ package module
 import (
 	"context"
 	"errors"
-	"fmt"
 	"testing"
 	"time"
 
@@ -23,7 +22,6 @@ const (
 func TestDelete(t *testing.T) {
 	conf := config.GetConfLogErr(testConfigFile, t)
 	timeout := config.TimeoutDuration(conf.Timeout)
-	fmt.Printf("TIMEOUT: %d\n", timeout/time.Second)
 	suite.Run(t, &DeleteTests{
 		timeout: timeout,
 	})

@@ -2,7 +2,6 @@ package mongo
 
 import (
 	"context"
-	"fmt"
 	"io"
 	"strings"
 
@@ -17,10 +16,6 @@ func (s *ModuleStore) Info(ctx context.Context, module, vsn string) ([]byte, err
 	const op errors.Op = "mongo.Info"
 	sp, _ := opentracing.StartSpanFromContext(ctx, "storage.mongo.Info")
 	defer sp.Finish()
-	fmt.Printf("%+v", s.s)
-	fmt.Printf("%+v", s.d)
-	//fmt.Printf("%+v", s.s.DB(s.d))
-	fmt.Printf("%+v", s.s)
 	c := s.s.DB(s.d).C(s.c)
 	result := &storage.Module{}
 	err := c.Find(bson.M{"module": module, "version": vsn}).One(result)

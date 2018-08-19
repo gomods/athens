@@ -2,7 +2,6 @@ package actions
 
 import (
 	"encoding/json"
-	"path/filepath"
 	"testing"
 	"time"
 
@@ -23,15 +22,11 @@ type ActionSuite struct {
 }
 
 func Test_ActionSuite(t *testing.T) {
-	absPath, err := filepath.Abs(testConfigFile)
-	if err != nil {
-		t.Errorf("Unable to construct absolute path to test config file")
-	}
-	conf, err := config.ParseConfigFile(absPath)
-	if err != nil {
-		t.Errorf("Unable to parse test config file: %s", err.Error())
-	}
+	conf := config.GetConfLogErr(testConfigFile, t)
 	app, err := App(conf)
+	if err != nil {
+		t.Fatal(err)
+	}
 	as := &ActionSuite{suite.NewAction(app)}
 	suite.Run(t, as)
 }
