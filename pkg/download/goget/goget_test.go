@@ -37,20 +37,8 @@ var listTests = []listTest{
 	},
 }
 
-func getConf(t *testing.T) *config.Config {
-	absPath, err := filepath.Abs(testConfigFile)
-	if err != nil {
-		t.Errorf("Unable to construct absolute path to test config file")
-	}
-	conf, err := config.ParseConfigFile(absPath)
-	if err != nil {
-		t.Errorf("Unable to parse config file")
-	}
-	return conf
-}
-
 func TestList(t *testing.T) {
-	conf := getConf(t)
+	conf := config.GetConfLogErr(testConfigFile, t)
 	dp, err := New(conf.GoBinary)
 	require.NoError(t, err, "failed to create protocol")
 	ctx := context.Background()
@@ -91,7 +79,7 @@ var latestTests = []latestTest{
 }
 
 func TestLatest(t *testing.T) {
-	conf := getConf(t)
+	conf := config.GetConfLogErr(testConfigFile, t)
 	dp, err := New(conf.GoBinary)
 	require.NoError(t, err)
 	ctx := context.Background()
@@ -139,7 +127,7 @@ var infoTests = []infoTest{
 }
 
 func TestInfo(t *testing.T) {
-	conf := getConf(t)
+	conf := config.GetConfLogErr(testConfigFile, t)
 	dp, err := New(conf.GoBinary)
 	require.NoError(t, err)
 	ctx := context.Background()
@@ -187,7 +175,7 @@ var modTests = []modTest{
 }
 
 func TestGoMod(t *testing.T) {
-	conf := getConf(t)
+	conf := config.GetConfLogErr(testConfigFile, t)
 	dp, err := New(conf.GoBinary)
 	require.NoError(t, err)
 	ctx := context.Background()

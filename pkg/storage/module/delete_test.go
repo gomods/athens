@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"path/filepath"
 	"testing"
 	"time"
 
@@ -21,21 +20,8 @@ const (
 	testConfigFile = "../../../config.test.toml"
 )
 
-func getConf(t *testing.T) *config.Config {
-	fmt.Printf("Config File: %s", testConfigFile)
-	absPath, err := filepath.Abs(testConfigFile)
-	if err != nil {
-		t.Errorf("Unable to construct absolute path to test config file")
-	}
-	conf, err := config.ParseConfigFile(absPath)
-	if err != nil {
-		t.Errorf("Unable to parse config file")
-	}
-	return conf
-}
-
 func TestDelete(t *testing.T) {
-	conf := getConf(t)
+	conf := config.GetConfLogErr(testConfigFile, t)
 	timeout := config.TimeoutDuration(conf.Timeout)
 	fmt.Printf("TIMEOUT: %d\n", timeout/time.Second)
 	suite.Run(t, &DeleteTests{

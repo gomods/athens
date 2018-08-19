@@ -17,20 +17,8 @@ type FilterTests struct {
 	filterFile string
 }
 
-func getConf(t *testing.T) *config.Config {
-	absPath, err := filepath.Abs(testConfigFile)
-	if err != nil {
-		t.Errorf("Unable to construct absolute path to test config file")
-	}
-	conf, err := config.ParseConfigFile(absPath)
-	if err != nil {
-		t.Errorf("Unable to parse config file")
-	}
-	return conf
-}
-
 func Test_Filter(t *testing.T) {
-	conf := getConf(t)
+	conf := config.GetConfLogErr(testConfigFile, t)
 	absPath, err := filepath.Abs(conf.FilterFile)
 	if err != nil {
 		t.Errorf("Unable to construct absolute path to test config file")

@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/gobuffalo/buffalo"
+	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/download"
 	"github.com/gomods/athens/pkg/module"
 	"github.com/markbates/willie"
@@ -41,10 +42,7 @@ func newTestFilter(filterFile string) (*module.Filter, error) {
 
 func Test_Middleware(t *testing.T) {
 	r := require.New(t)
-	conf, err := getConf()
-	if err != nil {
-		t.Error(err)
-	}
+	conf := config.GetConfLogErr(testConfigFile, t)
 
 	filterFile := conf.FilterFile
 	olympusEndpoint := conf.Proxy.OlympusGlobalEndpoint

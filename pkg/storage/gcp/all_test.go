@@ -3,7 +3,6 @@ package gcp
 import (
 	"context"
 	"net/url"
-	"path/filepath"
 	"testing"
 	"time"
 
@@ -20,18 +19,6 @@ var (
 const (
 	testConfigFile = "../../../config.test.toml"
 )
-
-func getConf(t *testing.T) *config.Config {
-	absPath, err := filepath.Abs(testConfigFile)
-	if err != nil {
-		t.Errorf("Unable to construct absolute path to test config file")
-	}
-	conf, err := config.ParseConfigFile(absPath)
-	if err != nil {
-		t.Errorf("Unable to parse config file")
-	}
-	return conf
-}
 
 type GcpTests struct {
 	suite.Suite
@@ -54,7 +41,7 @@ func (g *GcpTests) SetupSuite() {
 }
 
 func TestGcpStorage(t *testing.T) {
-	conf := getConf(t)
+	conf := config.GetConfLogErr(testConfigFile, t)
 	if conf.Storage == nil || conf.Storage.GCP == nil {
 		t.Fatalf("Invalid GCP config provided")
 	}

@@ -1,8 +1,11 @@
 package config
 
 import (
+	"fmt"
 	"io/ioutil"
+	"path/filepath"
 	"runtime"
+	"testing"
 
 	"github.com/BurntSushi/toml"
 	"github.com/kelseyhightower/envconfig"
@@ -114,4 +117,28 @@ func validateConfig(c Config) error {
 		return err
 	}
 	return nil
+}
+
+// GetConf accepts the path to a file, constructs an absolute path to the file,
+// and attempts to parse it into a Config struct.
+func GetConf(path string) (*Config, error) {
+	absPath, err := filepath.Abs(path)
+	if err != nil {
+		return nil, fmt.Errorf("Unable to construct absolute path to test config file")
+	}
+	conf, err := ParseConfigFile(absPath)
+	if err != nil {
+		return nil, fmt.Errorf("Unable to parse test config file: %s", err.Error())
+	}
+	return conf, nil
+}
+
+// GetConfLogErr is similar to GetConf, except it logs a failure for the calling test
+// if any errors are encountered
+func GetConfLogErr(path string, t *testing.T) *Config {
+	c, err := GetConf(path)
+	if err != nil {
+		t.Fatalf("Unable to parse config file: %s", err.Error())
+	}
+	return c
 }

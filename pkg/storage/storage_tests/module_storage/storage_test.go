@@ -11,7 +11,6 @@ import (
 	"bytes"
 	"context"
 	"io/ioutil"
-	"path/filepath"
 	"testing"
 	"time"
 
@@ -39,18 +38,6 @@ type TestSuites struct {
 	mod         []byte
 	zip         []byte
 	info        []byte
-}
-
-func getConf() (*config.Config, error) {
-	absPath, err := filepath.Abs(testConfigFile)
-	if err != nil {
-		return nil, err
-	}
-	conf, err := config.ParseConfigFile(absPath)
-	if err != nil {
-		return nil, err
-	}
-	return conf, nil
 }
 
 func (d *TestSuites) SetupTest() {
@@ -92,10 +79,7 @@ func (d *TestSuites) SetupTest() {
 }
 
 func TestModuleStorages(t *testing.T) {
-	conf, err := getConf()
-	if err != nil {
-		t.Error(err)
-	}
+	conf := config.GetConfLogErr(testConfigFile, t)
 
 	suite.Run(t, &TestSuites{
 		Model:       suite.NewModel(),

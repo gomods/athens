@@ -122,7 +122,7 @@ func BenchmarkStorageExists(b *testing.B) {
 }
 
 func getStores(b *testing.B) []storage.TestSuite {
-	conf, err := getConf()
+	conf, err := config.GetConf(testConfigFile)
 	if err != nil {
 		b.Error(err)
 	}

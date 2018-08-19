@@ -2,7 +2,6 @@ package s3
 
 import (
 	"fmt"
-	"path/filepath"
 	"testing"
 
 	"github.com/gomods/athens/pkg/config"
@@ -19,20 +18,8 @@ type S3Tests struct {
 	storage  *Storage
 }
 
-func getConf(t *testing.T) *config.Config {
-	absPath, err := filepath.Abs(testConfigFile)
-	if err != nil {
-		t.Errorf("Unable to construct absolute path to test config file")
-	}
-	conf, err := config.ParseConfigFile(absPath)
-	if err != nil {
-		t.Errorf("Unable to parse config file %s", err.Error())
-	}
-	return conf
-}
-
 func Test_ActionSuite(t *testing.T) {
-	conf := getConf(t)
+	conf := config.GetConfLogErr(testConfigFile, t)
 	if conf.Storage.CDN == nil {
 		t.Errorf("Invalid CDN Configuration provided")
 	}

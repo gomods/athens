@@ -18,7 +18,7 @@ type UploadTests struct {
 }
 
 func TestUpload(t *testing.T) {
-	conf := getConf(t)
+	conf := config.GetConfLogErr(testConfigFile, t)
 	timeout := config.TimeoutDuration(conf.Timeout)
 	suite.Run(t, &UploadTests{
 		timeout: timeout,
