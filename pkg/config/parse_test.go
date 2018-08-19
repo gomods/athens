@@ -21,6 +21,8 @@ func TestEnvOverrides(t *testing.T) {
 		RedisQueueAddress:     ":6380",
 		Port:                  ":7000",
 		FilterOff:             &filterOff,
+		BasicAuthUser:         "testuser",
+		BasicAuthPass:         "testpass",
 	}
 
 	expOlympus := OlympusConfig{
@@ -163,6 +165,8 @@ func TestParseExampleConfig(t *testing.T) {
 		RedisQueueAddress:     ":6379",
 		Port:                  ":3000",
 		FilterOff:             &filterOff,
+		BasicAuthUser:         "user",
+		BasicAuthPass:         "pass",
 	}
 
 	expOlympus := &OlympusConfig{
@@ -304,6 +308,8 @@ func getEnvMap(config *Config) map[string]string {
 		if proxy.FilterOff != nil {
 			envVars["PROXY_FILTER_OFF"] = strconv.FormatBool(*proxy.FilterOff)
 		}
+		envVars["BASIC_AUTH_USER"] = proxy.BasicAuthUser
+		envVars["BASIC_AUTH_PASS"] = proxy.BasicAuthPass
 	}
 
 	olympus := config.Olympus
