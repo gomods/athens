@@ -4,7 +4,7 @@ import (
 	"os"
 )
 
-// ForceSSL returns true if the PROXY_FORCE_SSL
+// ProxyForceSSL returns true if the PROXY_FORCE_SSL
 // env is set to "true", otherwise defaults to false.
 // This is used to make sure the Proxy would redirect
 // to https on any request.
