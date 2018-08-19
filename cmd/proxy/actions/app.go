@@ -99,8 +99,8 @@ func App(conf *config.Config) (*buffalo.App, error) {
 		app.Stop(err)
 	}
 	app.Use(T.Middleware())
-	if !env.FilterOff() {
-		app.Use(newFilterMiddleware(mf))
+	if !(*conf.Proxy.FilterOff) {
+		app.Use(newFilterMiddleware(mf, conf.Proxy.OlympusGlobalEndpoint))
 	}
 	user, pass, ok := env.BasicAuth()
 	if ok {
