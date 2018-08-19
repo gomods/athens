@@ -1,7 +1,6 @@
 package actions
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/gobuffalo/buffalo"
@@ -11,16 +10,34 @@ import (
 	"github.com/gobuffalo/buffalo/middleware/ssl"
 	"github.com/gobuffalo/buffalo/render"
 	"github.com/gobuffalo/packr"
+<<<<<<< HEAD
+	"github.com/gomods/athens/pkg/config/env"
+=======
+	"github.com/gocraft/work"
 	"github.com/gomods/athens/pkg/config"
+>>>>>>> wip plumb config
 	"github.com/gomods/athens/pkg/log"
 	"github.com/gomods/athens/pkg/module"
 	"github.com/rs/cors"
 	"github.com/unrolled/secure"
 )
 
+<<<<<<< HEAD
+// ENV is used to help switch settings based on where the
+// application is being run. Default is "development".
+var ENV = env.GoEnvironmentWithDefault("development")
+=======
 const (
-	configFile = "../../config.example.toml"
+	// FetcherWorkerName is the name of the worker fetching sources from experienced cache misses
+	FetcherWorkerName = "olympusfetcher"
+	// ReporterWorkerName is the name of the worker reporting cache misses
+	ReporterWorkerName = "olympusreporter"
+	workerQueue        = "default"
+	workerModuleKey    = "module"
+	workerVersionKey   = "version"
+	configFile         = "../../config.example.toml"
 )
+>>>>>>> wip plumb config
 
 // T is the translator to use
 var T *i18n.Translator
@@ -43,6 +60,11 @@ func init() {
 // App is where all routes and middleware for buffalo
 // should be defined. This is the nerve center of your
 // application.
+<<<<<<< HEAD
+func App() (*buffalo.App, error) {
+	store, err := GetStorage()
+	mf := module.NewFilter()
+=======
 func App(conf *config.Config) (*buffalo.App, error) {
 
 	// ENV is used to help switch settings based on where the
@@ -50,6 +72,7 @@ func App(conf *config.Config) (*buffalo.App, error) {
 	ENV := conf.GoEnv
 	ctx := context.Background()
 	store, err := GetStorage(conf.Proxy.StorageType, conf.Storage)
+>>>>>>> wip plumb config
 	if err != nil {
 		err = fmt.Errorf("error getting storage configuration (%s)", err)
 		return nil, err
@@ -60,7 +83,16 @@ func App(conf *config.Config) (*buffalo.App, error) {
 		return nil, err
 	}
 
-	lggr := log.New(conf.CloudRuntime, conf.LogLevel)
+<<<<<<< HEAD
+	lggr := log.New(env.CloudRuntime(), env.LogLevel())
+=======
+	worker, err := getWorker(ctx, store, mf)
+	if err != nil {
+		return nil, err
+	}
+
+	lggr := log.New(conf.CloudRuntime, env.LogLevel())
+>>>>>>> wip plumb config
 
 	app := buffalo.New(buffalo.Options{
 		Env: ENV,
@@ -84,7 +116,7 @@ func App(conf *config.Config) (*buffalo.App, error) {
 	initializeAuth(app)
 	// Protect against CSRF attacks. https://www.owasp.org/index.php/Cross-Site_Request_Forgery_(CSRF)
 	// Remove to disable this.
-	if conf.EnableCSRFProtection {
+	if env.EnableCSRFProtection() {
 		csrfMiddleware := csrf.New
 		app.Use(csrfMiddleware)
 	}
