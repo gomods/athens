@@ -81,7 +81,7 @@ func App() (*buffalo.App, error) {
 		SessionName: "_athens_session",
 		Worker:      worker,
 		WorkerOff:   true, // TODO(marwan): turned off until worker is being used.
-		Logger:      log.Buffalo(),
+		Logger:      log.Buffalo(ENV),
 	})
 	if prefix := env.AthensPathPrefix(); prefix != "" {
 		app = app.Group(prefix)

@@ -72,7 +72,7 @@ func App(config *AppConfig) (*buffalo.App, error) {
 		SessionName: "_olympus_session",
 		Worker:      w,
 		WorkerOff:   true, // TODO(marwan): turned off until worker is being used.
-		Logger:      log.Buffalo(),
+		Logger:      log.Buffalo(ENV),
 	})
 	// Automatically redirect to SSL
 	app.Use(ssl.ForceSSL(secure.Options{
