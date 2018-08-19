@@ -11,15 +11,15 @@ import (
 
 // Config provides configuration values for all components
 type Config struct {
-	GoEnv                string         `validate:"required" envconfig:"GO_ENV" default:"development"`
-	GoBinary             string         `validate:"required" envconfig:"GO_BINARY_PATH" default:"go"`
-	LogLevel             string         `validate:"required" split_words:"true" default:"debug"`
+	GoEnv                string         `validate:"required" envconfig:"GO_ENV"`
+	GoBinary             string         `validate:"required" envconfig:"GO_BINARY_PATH"`
+	LogLevel             string         `validate:"required" split_words:"true"`
 	MaxConcurrency       int            `validate:"required" split_words:"true"`
-	MaxWorkerFails       uint           `validate:"required" split_words:"true" default:"5"`
-	CloudRuntime         string         `validate:"required" split_words:"true" default:"none"`
-	FilterFile           string         `validate:"required" split_words:"true" default:"filter.conf"`
-	Timeout              int            `validate:"required" default:"300"`
-	EnableCSRFProtection bool           `envconfig:"ATHENS_ENABLE_CSRF_PROTECTION" default:"false"`
+	MaxWorkerFails       uint           `validate:"required" split_words:"true"`
+	CloudRuntime         string         `validate:"required" split_words:"true"`
+	FilterFile           string         `validate:"required" split_words:"true"`
+	Timeout              int            `validate:"required"`
+	EnableCSRFProtection bool           `envconfig:"ATHENS_ENABLE_CSRF_PROTECTION"`
 	Proxy                *ProxyConfig   `validate:""`
 	Olympus              *OlympusConfig `validate:""`
 	Storage              *StorageConfig `validate:""`
@@ -48,11 +48,8 @@ func parseConfig(confStr string) (*Config, error) {
 		return nil, err
 	}
 
-	// set default values that are dependent on the runtime
-	setRuntimeDefaults(&config)
-
-	// set default timeouts for storage backends if not already set
-	setDefaultTimeouts(config.Storage, config.Timeout)
+	// set default values
+	setDefaults(&config)
 
 	// delete invalid storage backend configs
 	// envconfig initializes *all* struct pointers, even if there are no corresponding defaults or env variables
@@ -66,9 +63,39 @@ func parseConfig(confStr string) (*Config, error) {
 	return &config, nil
 }
 
-func setRuntimeDefaults(config *Config) {
+func setDefaults(config *Config) {
 	if config.MaxConcurrency == 0 {
 		config.MaxConcurrency = runtime.NumCPU()
+	}
+
+	overrideDefaultStr(&config.GoEnv, "development")
+	overrideDefaultStr(&config.GoBinary, "go")
+	overrideDefaultStr(&config.LogLevel, "debug")
+	overrideDefaultStr(&config.CloudRuntime, "none")
+	overrideDefaultStr(&config.FilterFile, "filter.conf")
+	overrideDefaultInt(&config.Timeout, 300)
+	overrideDefaultUint(&config.MaxWorkerFails, 5)
+
+	config.Proxy = setProxyDefaults(config.Proxy)
+	config.Olympus = setOlympusDefaults(config.Olympus)
+	config.Storage = setStorageDefaults(config.Storage, config.Timeout)
+}
+
+func overrideDefaultUint(val *uint, override uint) {
+	if *val == 0 {
+		*val = override
+	}
+}
+
+func overrideDefaultInt(val *int, override int) {
+	if *val == 0 {
+		*val = override
+	}
+}
+
+func overrideDefaultStr(val *string, override string) {
+	if *val == "" {
+		*val = override
 	}
 }
 

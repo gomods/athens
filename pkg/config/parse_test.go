@@ -67,7 +67,7 @@ func TestEnvOverrides(t *testing.T) {
 func TestStorageEnvOverrides(t *testing.T) {
 
 	globalTimeout := 300
-
+	minioSSL := false
 	// Set values that are not defaults for everything
 	expStorage := &StorageConfig{
 		CDN: &CDNConfig{
@@ -86,7 +86,7 @@ func TestStorageEnvOverrides(t *testing.T) {
 			Endpoint:  "minioEndpoint",
 			Key:       "minioKey",
 			Secret:    "minioSecret",
-			EnableSSL: false,
+			EnableSSL: &minioSSL,
 			Bucket:    "minioBucket",
 			Timeout:   globalTimeout,
 		},
@@ -107,7 +107,7 @@ func TestStorageEnvOverrides(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Env override failed: %v", err)
 	}
-	setDefaultTimeouts(conf.Storage, globalTimeout)
+	conf.Storage = setStorageDefaults(conf.Storage, globalTimeout)
 	deleteInvalidStorageConfigs(conf.Storage)
 
 	eq := cmp.Equal(conf.Storage, expStorage)
@@ -129,14 +129,17 @@ func TestParseDefaultsSuccess(t *testing.T) {
 func TestParseExampleConfig(t *testing.T) {
 
 	// initialize all struct pointers so we get all applicable env variables
+	minioSSLDefault := false
 	emptyConf := &Config{
 		Proxy:   &ProxyConfig{},
 		Olympus: &OlympusConfig{},
 		Storage: &StorageConfig{
-			CDN:   &CDNConfig{},
-			Disk:  &DiskConfig{},
-			GCP:   &GCPConfig{},
-			Minio: &MinioConfig{},
+			CDN:  &CDNConfig{},
+			Disk: &DiskConfig{},
+			GCP:  &GCPConfig{},
+			Minio: &MinioConfig{
+				EnableSSL: &minioSSLDefault,
+			},
 			Mongo: &MongoConfig{},
 		},
 	}
@@ -165,6 +168,7 @@ func TestParseExampleConfig(t *testing.T) {
 		WorkerType:        "redis",
 	}
 
+	minioSSL := true
 	expStorage := &StorageConfig{
 		CDN: &CDNConfig{
 			Endpoint: "cdn.example.com",
@@ -182,7 +186,7 @@ func TestParseExampleConfig(t *testing.T) {
 			Endpoint:  "minio.example.com",
 			Key:       "MY_KEY",
 			Secret:    "MY_SECRET",
-			EnableSSL: true,
+			EnableSSL: &minioSSL,
 			Bucket:    "gomods",
 			Timeout:   globalTimeout,
 		},
@@ -220,6 +224,56 @@ func TestParseExampleConfig(t *testing.T) {
 	if !eq {
 		t.Errorf("Parsed Example configuration did not match expected values. Expected: %+v. Actual: %+v", expConf, parsedConf)
 	}
+	restoreEnv(envVarBackup)
+}
+
+// TestConfigOverridesDefault validates that a value provided by the config is not overwritten by defaults
+func TestConfigOverridesDefault(t *testing.T) {
+
+	// set values to anything but defaults
+	minioSSL := false
+	config := &Config{
+		Timeout: 1,
+		Storage: &StorageConfig{
+			Minio: &MinioConfig{
+				Bucket:    "notgomods",
+				EnableSSL: &minioSSL,
+				Timeout:   42,
+			},
+		},
+	}
+
+	// should be identical to config above
+	expConfig := &Config{
+		Timeout: config.Timeout,
+		Storage: &StorageConfig{
+			Minio: &MinioConfig{
+				Bucket:    config.Storage.Minio.Bucket,
+				EnableSSL: config.Storage.Minio.EnableSSL,
+				Timeout:   config.Storage.Minio.Timeout,
+			},
+		},
+	}
+
+	// unset all environment variables
+	envVars := getEnvMap(&Config{})
+	envVarBackup := map[string]string{}
+	for k := range envVars {
+		oldVal := os.Getenv(k)
+		envVarBackup[k] = oldVal
+		os.Unsetenv(k)
+	}
+
+	envOverride(config)
+
+	if config.Timeout != expConfig.Timeout {
+		t.Errorf("Default timeout is overriding specified timeout")
+	}
+
+	if !cmp.Equal(config.Storage.Minio, expConfig.Storage.Minio) {
+		t.Errorf("Default Minio config is overriding specified config")
+	}
+
 	restoreEnv(envVarBackup)
 }
 
@@ -267,7 +321,7 @@ func getEnvMap(config *Config) map[string]string {
 			envVars["ATHENS_MINIO_ENDPOINT"] = storage.Minio.Endpoint
 			envVars["ATHENS_MINIO_ACCESS_KEY_ID"] = storage.Minio.Key
 			envVars["ATHENS_MINIO_SECRET_ACCESS_KEY"] = storage.Minio.Secret
-			envVars["ATHENS_MINIO_USE_SSL"] = strconv.FormatBool(storage.Minio.EnableSSL)
+			envVars["ATHENS_MINIO_USE_SSL"] = strconv.FormatBool(*storage.Minio.EnableSSL)
 			envVars["ATHENS_MINIO_BUCKET_NAME"] = storage.Minio.Bucket
 		}
 		if storage.Mongo != nil {

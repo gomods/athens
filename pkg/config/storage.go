@@ -11,9 +11,9 @@ type StorageConfig struct {
 	Mongo *MongoConfig `validate:""`
 }
 
-func setDefaultTimeouts(s *StorageConfig, defaultTimeout int) {
+func setStorageDefaults(s *StorageConfig, defaultTimeout int) *StorageConfig {
 	if s == nil {
-		return
+		return s
 	}
 	if s.CDN != nil && s.CDN.Timeout == 0 {
 		s.CDN.Timeout = defaultTimeout
@@ -21,12 +21,13 @@ func setDefaultTimeouts(s *StorageConfig, defaultTimeout int) {
 	if s.GCP != nil && s.GCP.Timeout == 0 {
 		s.GCP.Timeout = defaultTimeout
 	}
-	if s.Minio != nil && s.Minio.Timeout == 0 {
-		s.Minio.Timeout = defaultTimeout
+	if s.Minio != nil {
+		s.Minio = setMinioDefaults(s.Minio, defaultTimeout)
 	}
 	if s.Mongo != nil && s.Mongo.Timeout == 0 {
 		s.Mongo.Timeout = defaultTimeout
 	}
+	return s
 }
 
 // envconfig initializes *all* struct pointers, even if there are no corresponding defaults or env variables
