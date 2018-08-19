@@ -10,16 +10,15 @@ import (
 	"github.com/gobuffalo/buffalo/middleware/ssl"
 	"github.com/gobuffalo/buffalo/render"
 	"github.com/gobuffalo/packr"
-	"github.com/gomods/athens/pkg/config/env"
 	"github.com/gomods/athens/pkg/log"
 	"github.com/gomods/athens/pkg/module"
 	"github.com/rs/cors"
 	"github.com/unrolled/secure"
 )
 
-// ENV is used to help switch settings based on where the
-// application is being run. Default is "development".
-var ENV = env.GoEnvironmentWithDefault("development")
+const (
+	configFile         = "../../config.example.toml"
+)
 
 // T is the translator to use
 var T *i18n.Translator
@@ -42,15 +41,29 @@ func init() {
 // App is where all routes and middleware for buffalo
 // should be defined. This is the nerve center of your
 // application.
-func App() (*buffalo.App, error) {
-	store, err := GetStorage()
-	mf := module.NewFilter()
+func App(conf *config.Config) (*buffalo.App, error) {
+
+	// ENV is used to help switch settings based on where the
+	// application is being run. Default is "development".
+	ENV := conf.GoEnv
+	ctx := context.Background()
+	store, err := GetStorage(conf.Proxy.StorageType, conf.Storage)
 	if err != nil {
 		err = fmt.Errorf("error getting storage configuration (%s)", err)
 		return nil, err
 	}
+	mf, err := module.NewFilter(conf.FilterFile)
+	if err != nil {
+		err = fmt.Errorf("error creating filter (%s)", err)
+		return nil, err
+	}
 
-	lggr := log.New(env.CloudRuntime(), env.LogLevel())
+	worker, err := getWorker(ctx, store, mf)
+	if err != nil {
+		return nil, err
+	}
+
+	lggr := log.New(conf.CloudRuntime, env.LogLevel())
 
 	app := buffalo.New(buffalo.Options{
 		Env: ENV,
@@ -96,7 +109,7 @@ func App() (*buffalo.App, error) {
 	if ok {
 		app.Use(basicAuth(user, pass))
 	}
-	if err := addProxyRoutes(app, store, mf, lggr); err != nil {
+	if err := addProxyRoutes(app, store, mf, lggr, conf.GoBinary); err != nil {
 		err = fmt.Errorf("error adding proxy routes (%s)", err)
 		return nil, err
 	}

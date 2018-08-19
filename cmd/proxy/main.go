@@ -3,11 +3,17 @@ package main
 import (
 	"log"
 
+	"github.com/gobuffalo/buffalo"
 	"github.com/gomods/athens/cmd/proxy/actions"
+	"github.com/gomods/athens/pkg/config"
+)
+
+const (
+	configFile = "../../config.example.toml"
 )
 
 func main() {
-	app, err := actions.App()
+	app, err := setupApp()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -15,4 +21,14 @@ func main() {
 	if err := app.Serve(); err != nil {
 		log.Fatal(err)
 	}
+}
+
+func setupApp() (*buffalo.App, error) {
+
+	conf, err := config.ParseConfigFile(configFile)
+	if err != nil {
+		return nil, err
+	}
+
+	return actions.App(conf)
 }

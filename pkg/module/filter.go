@@ -5,7 +5,6 @@ import (
 	"os"
 	"strings"
 
-	"github.com/gomods/athens/pkg/config/env"
 	"github.com/gomods/athens/pkg/errors"
 )
 
@@ -15,7 +14,8 @@ var (
 
 // Filter is a filter of modules
 type Filter struct {
-	root ruleNode
+	root           ruleNode
+	filterFilePath string
 }
 
 // NewFilter creates new filter based on rules defined in a configuration file
@@ -29,14 +29,19 @@ type Filter struct {
 //   -
 //   + github.com/a
 // will exclude all items from communication except github.com/a
-func NewFilter() *Filter {
+func NewFilter(filterFilePath string) (*Filter, error) {
 	rn := newRule(Default)
-	modFilter := Filter{}
-	modFilter.root = rn
+	modFilter := Filter{
+		filterFilePath: filterFilePath,
+		root:           rn,
+	}
 
-	modFilter.initFromConfig()
+	err := modFilter.initFromConfig()
+	if err != nil {
+		return nil, err
+	}
 
-	return &modFilter
+	return &modFilter, nil
 }
 
 // AddRule adds rule for specified path
@@ -114,11 +119,15 @@ func (f *Filter) getAssociatedRule(path ...string) FilterRule {
 	return f.root.rule
 }
 
-func (f *Filter) initFromConfig() {
-	lines, err := getConfigLines()
+func (f *Filter) initFromConfig() error {
+	const op errors.Op = "filter.initFromConfig"
+	lines, err := getConfigLines(f.filterFilePath)
 
-	if err != nil || len(lines) == 0 {
-		return
+	if err != nil {
+		if os.IsNotExist(err) {
+			return nil
+		}
+		return errors.E(op, err)
 	}
 
 	for _, line := range lines {
@@ -149,6 +158,7 @@ func (f *Filter) initFromConfig() {
 		path := strings.TrimSpace(split[1])
 		f.AddRule(path, rule)
 	}
+	return nil
 }
 
 func getPathSegments(path string) []string {
@@ -170,13 +180,11 @@ func newRule(r FilterRule) ruleNode {
 	return rn
 }
 
-func getConfigLines() ([]string, error) {
-	const op errors.Op = "module.getConfigLines"
-	configName := env.FilterConfigurationFileName()
+func getConfigLines(filterFile string) ([]string, error) {
 
-	f, err := os.Open(configName)
+	f, err := os.Open(filterFile)
 	if err != nil {
-		return nil, errors.E(op, err)
+		return nil, err
 	}
 	defer f.Close()
 

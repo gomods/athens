@@ -3,33 +3,50 @@ package module
 import (
 	"context"
 	"errors"
+	"fmt"
+	"path/filepath"
 	"testing"
 	"time"
 
-	"github.com/gobuffalo/envy"
+	"github.com/gomods/athens/pkg/config"
 	"github.com/stretchr/testify/suite"
 )
 
 type DeleteTests struct {
 	suite.Suite
+	timeout time.Duration
+}
+
+const (
+	testConfigFile = "../../../config.test.toml"
+)
+
+func getConf(t *testing.T) *config.Config {
+	fmt.Printf("Config File: %s", testConfigFile)
+	absPath, err := filepath.Abs(testConfigFile)
+	if err != nil {
+		t.Errorf("Unable to construct absolute path to test config file")
+	}
+	conf, err := config.ParseConfigFile(absPath)
+	if err != nil {
+		t.Errorf("Unable to parse config file")
+	}
+	return conf
 }
 
 func TestDelete(t *testing.T) {
-	suite.Run(t, new(DeleteTests))
-}
-
-func (d *DeleteTests) SetupTest() {
-	envy.Set("ATHENS_TIMEOUT", "1")
-}
-
-func (d *DeleteTests) TearDownTest() {
-	envy.Set("ATHENS_TIMEOUT", "300")
+	conf := getConf(t)
+	timeout := config.TimeoutDuration(conf.Timeout)
+	fmt.Printf("TIMEOUT: %d\n", timeout/time.Second)
+	suite.Run(t, &DeleteTests{
+		timeout: timeout,
+	})
 }
 
 func (d *DeleteTests) TestDeleteTimeout() {
 	r := d.Require()
 
-	err := Delete(context.Background(), "mx", "1.1.1", delWithTimeout)
+	err := Delete(context.Background(), "mx", "1.1.1", delWithTimeout, d.timeout)
 
 	r.Error(err, "deleter returned at least one error")
 	r.Contains(err.Error(), "deleting mx.1.1.1.info failed: context deadline exceeded")
@@ -40,7 +57,7 @@ func (d *DeleteTests) TestDeleteTimeout() {
 func (d *DeleteTests) TestDeleteError() {
 	r := d.Require()
 
-	err := Delete(context.Background(), "mx", "1.1.1", delWithErr)
+	err := Delete(context.Background(), "mx", "1.1.1", delWithErr, d.timeout)
 
 	r.Error(err, "deleter returned at least one error")
 	r.Contains(err.Error(), "some err")

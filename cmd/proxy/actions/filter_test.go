@@ -10,32 +10,44 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func middlewareApp() *buffalo.App {
+func middlewareApp() (*buffalo.App, error) {
 	h := func(c buffalo.Context) error {
 		return c.Render(200, nil)
 	}
 
 	a := buffalo.New(buffalo.Options{})
-	mf := newTestFilter()
+	mf, err := newTestFilter()
+	if err != nil {
+		return nil, err
+	}
 	a.Use(newFilterMiddleware(mf))
 	initializeTracing(a)
 
 	a.GET(download.PathList, h)
-	return a
+	return a, nil
 }
 
-func newTestFilter() *module.Filter {
-	f := module.NewFilter()
+func newTestFilter() (*module.Filter, error) {
+	conf, err := getConf()
+	if err != nil {
+		return nil, err
+	}
+	f, err := module.NewFilter(conf.FilterFile)
+	if err != nil {
+		return nil, err
+	}
 	f.AddRule("github.com/gomods/athens/", module.Include)
 	f.AddRule("github.com/athens-artifacts/no-tags", module.Exclude)
 	f.AddRule("github.com/athens-artifacts", module.Direct)
-	return f
+	return f, nil
 }
 
 func Test_Middleware(t *testing.T) {
 	r := require.New(t)
 
-	w := willie.New(middlewareApp())
+	mw, err := middlewareApp()
+	r.NoError(err)
+	w := willie.New(mw)
 
 	// Public, expects to be redirected to olympus
 	res := w.Request("/github.com/gomods/athens/@v/list").Get()

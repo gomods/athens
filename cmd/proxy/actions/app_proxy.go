@@ -14,11 +14,12 @@ func addProxyRoutes(
 	s storage.Backend,
 	mf *module.Filter,
 	l *log.Logger,
+	goBin string,
 ) error {
 	app.GET("/", proxyHomeHandler)
 
 	// Download Protocol
-	gg, err := goget.New()
+	gg, err := goget.New(goBin)
 	if err != nil {
 		return err
 	}

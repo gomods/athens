@@ -11,10 +11,12 @@ import (
 	"bytes"
 	"context"
 	"io/ioutil"
+	"path/filepath"
 	"testing"
 	"time"
 
 	"github.com/gobuffalo/suite"
+	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/storage"
 	"github.com/gomods/athens/pkg/storage/fs"
@@ -24,20 +26,37 @@ import (
 	// "github.com/gomods/athens/pkg/storage/rdbms"
 )
 
+const (
+	testConfigFile = "../../../../config.example.toml"
+)
+
 type TestSuites struct {
 	*suite.Model
-	storages []storage.TestSuite
-	module   string
-	version  string
-	mod      []byte
-	zip      []byte
-	info     []byte
+	storageConf *config.StorageConfig
+	storages    []storage.TestSuite
+	module      string
+	version     string
+	mod         []byte
+	zip         []byte
+	info        []byte
+}
+
+func getConf() (*config.Config, error) {
+	absPath, err := filepath.Abs(testConfigFile)
+	if err != nil {
+		return nil, err
+	}
+	conf, err := config.ParseConfigFile(absPath)
+	if err != nil {
+		return nil, err
+	}
+	return conf, nil
 }
 
 func (d *TestSuites) SetupTest() {
 	ra := d.Require()
-
 	//
+	ra.NotNil(d.storageConf.Disk)
 	fsTests, err := fs.NewTestSuite(d.Model)
 	ra.NoError(err)
 	d.storages = append(d.storages, fsTests)
@@ -48,12 +67,14 @@ func (d *TestSuites) SetupTest() {
 	d.storages = append(d.storages, memStore)
 
 	// minio
+	ra.NotNil(d.storageConf.Minio)
 	minioStorage, err := minio.NewTestSuite(d.Model)
 	ra.NoError(err)
 	d.storages = append(d.storages, minioStorage)
 
-	// mongo
-	mongoStore, err := mongo.NewTestSuite(d.Model)
+	ra.NotNil(d.storageConf.Mongo)
+	mongoTimeout := config.TimeoutDuration(d.storageConf.Mongo.Timeout)
+	mongoStore, err := mongo.NewTestSuite(d.Model, d.storageConf.Mongo.URL, mongoTimeout)
 	ra.NoError(err)
 	d.storages = append(d.storages, mongoStore)
 
@@ -71,7 +92,15 @@ func (d *TestSuites) SetupTest() {
 }
 
 func TestModuleStorages(t *testing.T) {
-	suite.Run(t, &TestSuites{Model: suite.NewModel()})
+	conf, err := getConf()
+	if err != nil {
+		t.Error(err)
+	}
+
+	suite.Run(t, &TestSuites{
+		Model:       suite.NewModel(),
+		storageConf: conf.Storage,
+	})
 }
 
 func (d *TestSuites) TestStorages() {

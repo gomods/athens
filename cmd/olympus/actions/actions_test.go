@@ -2,17 +2,20 @@ package actions
 
 import (
 	"encoding/json"
+	"path/filepath"
 	"testing"
 	"time"
 
 	"github.com/gobuffalo/gocraft-work-adapter"
 	"github.com/gobuffalo/suite"
 	"github.com/gocraft/work"
-	"github.com/gomods/athens/pkg/config/env"
+	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/eventlog"
-	"github.com/gomods/athens/pkg/eventlog/mongo"
 	"github.com/gomods/athens/pkg/payloads"
-	"github.com/gomods/athens/pkg/storage/mem"
+)
+
+const (
+	testConfigFile = "../../../config.example.toml"
 )
 
 type ActionSuite struct {
@@ -20,24 +23,15 @@ type ActionSuite struct {
 }
 
 func Test_ActionSuite(t *testing.T) {
-	stg, err := mem.NewStorage()
+	absPath, err := filepath.Abs(testConfigFile)
 	if err != nil {
-		t.Fatalf("error creating storage (%s)", err)
+		t.Errorf("Unable to construct absolute path to test config file")
 	}
-	mURI, err := env.MongoURI()
+	conf, err := config.ParseConfigFile(absPath)
 	if err != nil {
-		t.Fatalf("error getting mongo uri (%s)", err)
+		t.Errorf("Unable to parse test config file: %s", err.Error())
 	}
-	eLog, err := mongo.NewLog(mURI)
-	if err != nil {
-		t.Fatalf("error creating event log (%s)", err)
-	}
-	config := AppConfig{
-		Storage:        stg,
-		EventLog:       eLog,
-		CacheMissesLog: eLog,
-	}
-	app, err := App(&config)
+	app, err := App(conf)
 	as := &ActionSuite{suite.NewAction(app)}
 	suite.Run(t, as)
 }
