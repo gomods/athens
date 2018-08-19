@@ -26,13 +26,6 @@ import (
 	"github.com/unrolled/secure"
 )
 
-// AppConfig contains dependencies used in App
-type AppConfig struct {
-	Storage        storage.Backend
-	EventLog       eventlog.Eventlog
-	CacheMissesLog eventlog.Appender
-}
-
 type workerConfig struct {
 	store           storage.Backend
 	eLog            eventlog.Eventlog
