@@ -10,29 +10,26 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func middlewareApp() (*buffalo.App, error) {
+func middlewareApp(filterFile, olympusEndpoint string) (*buffalo.App, error) {
 	h := func(c buffalo.Context) error {
 		return c.Render(200, nil)
 	}
 
 	a := buffalo.New(buffalo.Options{})
-	mf, err := newTestFilter()
+	mf, err := newTestFilter(filterFile)
 	if err != nil {
 		return nil, err
 	}
-	a.Use(newFilterMiddleware(mf))
+	a.Use(newFilterMiddleware(mf, olympusEndpoint))
 	initializeTracing(a)
 
 	a.GET(download.PathList, h)
 	return a, nil
 }
 
-func newTestFilter() (*module.Filter, error) {
-	conf, err := getConf()
-	if err != nil {
-		return nil, err
-	}
-	f, err := module.NewFilter(conf.FilterFile)
+func newTestFilter(filterFile string) (*module.Filter, error) {
+
+	f, err := module.NewFilter(filterFile)
 	if err != nil {
 		return nil, err
 	}
@@ -44,15 +41,22 @@ func newTestFilter() (*module.Filter, error) {
 
 func Test_Middleware(t *testing.T) {
 	r := require.New(t)
+	conf, err := getConf()
+	if err != nil {
+		t.Error(err)
+	}
 
-	mw, err := middlewareApp()
+	filterFile := conf.FilterFile
+	olympusEndpoint := conf.Proxy.OlympusGlobalEndpoint
+
+	mw, err := middlewareApp(filterFile, olympusEndpoint)
 	r.NoError(err)
 	w := willie.New(mw)
 
 	// Public, expects to be redirected to olympus
 	res := w.Request("/github.com/gomods/athens/@v/list").Get()
 	r.Equal(303, res.Code)
-	r.Equal(GetOlympusEndpoint()+"/github.com/gomods/athens/@v/list", res.HeaderMap.Get("Location"))
+	r.Equal(olympusEndpoint+"/github.com/gomods/athens/@v/list", res.HeaderMap.Get("Location"))
 
 	// Excluded, expects a 403
 	res = w.Request("/github.com/athens-artifacts/no-tags/@v/list").Get()

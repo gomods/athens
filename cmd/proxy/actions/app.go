@@ -1,7 +1,6 @@
 package actions
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/gobuffalo/buffalo"
@@ -48,7 +47,6 @@ func App(conf *config.Config) (*buffalo.App, error) {
 	// ENV is used to help switch settings based on where the
 	// application is being run. Default is "development".
 	ENV := conf.GoEnv
-	ctx := context.Background()
 	store, err := GetStorage(conf.Proxy.StorageType, conf.Storage)
 	if err != nil {
 		err = fmt.Errorf("error getting storage configuration (%s)", err)
@@ -102,7 +100,7 @@ func App(conf *config.Config) (*buffalo.App, error) {
 	if !(*conf.Proxy.FilterOff) {
 		app.Use(newFilterMiddleware(mf, conf.Proxy.OlympusGlobalEndpoint))
 	}
-	user, pass, ok := env.BasicAuth()
+	user, pass, ok := conf.Proxy.BasicAuth()
 	if ok {
 		app.Use(basicAuth(user, pass))
 	}
