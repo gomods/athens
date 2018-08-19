@@ -14,11 +14,13 @@ const exampleConfigPath = "../../config.example.toml"
 func TestEnvOverrides(t *testing.T) {
 
 	// Set values that are not defaults for everything
+	filterOff := false
 	expProxy := ProxyConfig{
 		StorageType:           "minio",
 		OlympusGlobalEndpoint: "mytikas.gomods.io",
 		RedisQueueAddress:     ":6380",
 		Port:                  ":7000",
+		FilterOff:             &filterOff,
 	}
 
 	expOlympus := OlympusConfig{
@@ -154,11 +156,13 @@ func TestParseExampleConfig(t *testing.T) {
 
 	globalTimeout := 300
 
+	filterOff := true
 	expProxy := &ProxyConfig{
 		StorageType:           "mongo",
 		OlympusGlobalEndpoint: "http://localhost:3001",
 		RedisQueueAddress:     ":6379",
 		Port:                  ":3000",
+		FilterOff:             &filterOff,
 	}
 
 	expOlympus := &OlympusConfig{
@@ -297,6 +301,9 @@ func getEnvMap(config *Config) map[string]string {
 		envVars["OLYMPUS_GLOBAL_ENDPOINT"] = proxy.OlympusGlobalEndpoint
 		envVars["PORT"] = proxy.Port
 		envVars["ATHENS_REDIS_QUEUE_PORT"] = proxy.RedisQueueAddress
+		if proxy.FilterOff != nil {
+			envVars["PROXY_FILTER_OFF"] = strconv.FormatBool(*proxy.FilterOff)
+		}
 	}
 
 	olympus := config.Olympus
@@ -321,7 +328,9 @@ func getEnvMap(config *Config) map[string]string {
 			envVars["ATHENS_MINIO_ENDPOINT"] = storage.Minio.Endpoint
 			envVars["ATHENS_MINIO_ACCESS_KEY_ID"] = storage.Minio.Key
 			envVars["ATHENS_MINIO_SECRET_ACCESS_KEY"] = storage.Minio.Secret
-			envVars["ATHENS_MINIO_USE_SSL"] = strconv.FormatBool(*storage.Minio.EnableSSL)
+			if storage.Minio.EnableSSL != nil {
+				envVars["ATHENS_MINIO_USE_SSL"] = strconv.FormatBool(*storage.Minio.EnableSSL)
+			}
 			envVars["ATHENS_MINIO_BUCKET_NAME"] = storage.Minio.Bucket
 		}
 		if storage.Mongo != nil {
