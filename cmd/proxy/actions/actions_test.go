@@ -4,6 +4,11 @@ import (
 	"testing"
 
 	"github.com/gobuffalo/suite"
+	"github.com/gomods/athens/pkg/config"
+)
+
+const (
+	testConfigFile = "../../../config.test.toml"
 )
 
 type ActionSuite struct {
@@ -11,7 +16,8 @@ type ActionSuite struct {
 }
 
 func Test_ActionSuite(t *testing.T) {
-	app, err := App()
+	conf := config.GetConfLogErr(testConfigFile, t)
+	app, err := App(conf)
 	if err != nil {
 		t.Fatal(err)
 	}

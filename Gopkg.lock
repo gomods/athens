@@ -195,6 +195,25 @@
   version = "v1.38.1"
 
 [[projects]]
+  digest = "1:e1ff887e232b2d8f4f7c7db15a5fac7be418025afc4dda53c59c765dbb5aa6b4"
+  name = "github.com/go-playground/locales"
+  packages = [
+    ".",
+    "currency",
+  ]
+  pruneopts = "UT"
+  revision = "f63010822830b6fe52288ee52d5a1151088ce039"
+  version = "v0.12.1"
+
+[[projects]]
+  digest = "1:e022cf244bcac1b6ef933f1a2e0adcf6a6dfd7b872d8d41e4d4179bb09a87cbc"
+  name = "github.com/go-playground/universal-translator"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "b32fa301c9fe55953584134cb6853a13c87ec0a1"
+  version = "v0.16.0"
+
+[[projects]]
   digest = "1:adea5a94903eb4384abef30f3d878dc9ff6b6b5b0722da25b82e5169216dfb61"
   name = "github.com/go-sql-driver/mysql"
   packages = ["."]
@@ -364,42 +383,6 @@
   version = "v1.1.0"
 
 [[projects]]
-  digest = "1:dc128c78674610b1d036433c3afc6c966768ff04a1bab32988c97373f5c697c0"
-  name = "github.com/gomods/athens"
-  packages = [
-    "cmd/olympus/actions",
-    "cmd/proxy/actions",
-    "pkg/cdn/metadata",
-    "pkg/cdn/metadata/azurecdn",
-    "pkg/config",
-    "pkg/config/env",
-    "pkg/download",
-    "pkg/download/goget",
-    "pkg/errors",
-    "pkg/eventlog",
-    "pkg/eventlog/mongo",
-    "pkg/fixtures",
-    "pkg/log",
-    "pkg/module",
-    "pkg/paths",
-    "pkg/payloads",
-    "pkg/storage",
-    "pkg/storage/azurecdn",
-    "pkg/storage/fs",
-    "pkg/storage/gcp",
-    "pkg/storage/mem",
-    "pkg/storage/minio",
-    "pkg/storage/module",
-    "pkg/storage/mongo",
-    "pkg/storage/olympus",
-    "pkg/storage/rdbms",
-    "pkg/storage/rdbms/models",
-  ]
-  pruneopts = "UT"
-  revision = "59d5d5ffac0d19617b31e490b7786e1c2acb94aa"
-  version = "v0.0.1"
-
-[[projects]]
   digest = "1:38ec74012390146c45af1f92d46e5382b50531247929ff3a685d2b2be65155ac"
   name = "github.com/gomodule/redigo"
   packages = [
@@ -409,6 +392,19 @@
   pruneopts = "UT"
   revision = "9c11da706d9b7902c6da69c592f75637793fe121"
   version = "v2.0.0"
+
+[[projects]]
+  digest = "1:2e3c336fc7fde5c984d2841455a658a6d626450b1754a854b3b32e7a8f49a07a"
+  name = "github.com/google/go-cmp"
+  packages = [
+    "cmp",
+    "cmp/internal/diff",
+    "cmp/internal/function",
+    "cmp/internal/value",
+  ]
+  pruneopts = "UT"
+  revision = "3af367b6b30c263d47e8895973edcca9a49cf029"
+  version = "v0.2.0"
 
 [[projects]]
   digest = "1:e145e9710a10bc114a6d3e2738aadf8de146adaa031854ffdf7bbfe15da85e63"
@@ -499,6 +495,14 @@
   pruneopts = "UT"
   revision = "a79fa1e548e2c689c241d10173efd51e5d689d5b"
   version = "v1.2.0"
+
+[[projects]]
+  digest = "1:edbef42561faa44c19129b68d1e109fbc1647f63239250391eadc8d0e7c9f669"
+  name = "github.com/kelseyhightower/envconfig"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "f611eb38b3875cc3bd991ca91c51d06446afa14c"
+  version = "v1.3.0"
 
 [[projects]]
   branch = "master"
@@ -1161,6 +1165,14 @@
   version = "v1.13.0"
 
 [[projects]]
+  digest = "1:a351fd4cb95e313ecb345a521f276e7a00913d1f2e84c61543bc4fa1785ba7f3"
+  name = "gopkg.in/go-playground/validator.v9"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "ab2a8a99087e827c9af87ed6777ba897348fb178"
+  version = "v9.20.2"
+
+[[projects]]
   digest = "1:342378ac4dcb378a5448dd723f0784ae519383532f5e70ade24132c4c8693202"
   name = "gopkg.in/yaml.v2"
   packages = ["."]
@@ -1174,6 +1186,7 @@
   input-imports = [
     "cloud.google.com/go/storage",
     "github.com/Azure/azure-storage-blob-go/2017-07-29/azblob",
+    "github.com/BurntSushi/toml",
     "github.com/aws/aws-sdk-go/aws",
     "github.com/aws/aws-sdk-go/aws/session",
     "github.com/aws/aws-sdk-go/service/s3/s3manager",
@@ -1198,35 +1211,10 @@
     "github.com/gobuffalo/validate",
     "github.com/gobuffalo/validate/validators",
     "github.com/gocraft/work",
-    "github.com/gomods/athens/cmd/olympus/actions",
-    "github.com/gomods/athens/cmd/proxy/actions",
-    "github.com/gomods/athens/pkg/cdn/metadata",
-    "github.com/gomods/athens/pkg/cdn/metadata/azurecdn",
-    "github.com/gomods/athens/pkg/config",
-    "github.com/gomods/athens/pkg/config/env",
-    "github.com/gomods/athens/pkg/download",
-    "github.com/gomods/athens/pkg/download/goget",
-    "github.com/gomods/athens/pkg/errors",
-    "github.com/gomods/athens/pkg/eventlog",
-    "github.com/gomods/athens/pkg/eventlog/mongo",
-    "github.com/gomods/athens/pkg/fixtures",
-    "github.com/gomods/athens/pkg/log",
-    "github.com/gomods/athens/pkg/module",
-    "github.com/gomods/athens/pkg/paths",
-    "github.com/gomods/athens/pkg/payloads",
-    "github.com/gomods/athens/pkg/storage",
-    "github.com/gomods/athens/pkg/storage/azurecdn",
-    "github.com/gomods/athens/pkg/storage/fs",
-    "github.com/gomods/athens/pkg/storage/gcp",
-    "github.com/gomods/athens/pkg/storage/mem",
-    "github.com/gomods/athens/pkg/storage/minio",
-    "github.com/gomods/athens/pkg/storage/module",
-    "github.com/gomods/athens/pkg/storage/mongo",
-    "github.com/gomods/athens/pkg/storage/olympus",
-    "github.com/gomods/athens/pkg/storage/rdbms",
-    "github.com/gomods/athens/pkg/storage/rdbms/models",
     "github.com/gomodule/redigo/redis",
+    "github.com/google/go-cmp/cmp",
     "github.com/hashicorp/go-multierror",
+    "github.com/kelseyhightower/envconfig",
     "github.com/markbates/goth",
     "github.com/markbates/goth/gothic",
     "github.com/markbates/goth/providers/github",
@@ -1248,6 +1236,7 @@
     "github.com/unrolled/secure",
     "google.golang.org/api/googleapi",
     "google.golang.org/api/iterator",
+    "gopkg.in/go-playground/validator.v9",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1

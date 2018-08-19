@@ -8,11 +8,13 @@ import (
 	"github.com/gobuffalo/gocraft-work-adapter"
 	"github.com/gobuffalo/suite"
 	"github.com/gocraft/work"
-	"github.com/gomods/athens/pkg/config/env"
+	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/eventlog"
-	"github.com/gomods/athens/pkg/eventlog/mongo"
 	"github.com/gomods/athens/pkg/payloads"
-	"github.com/gomods/athens/pkg/storage/mem"
+)
+
+const (
+	testConfigFile = "../../../config.test.toml"
 )
 
 type ActionSuite struct {
@@ -20,24 +22,11 @@ type ActionSuite struct {
 }
 
 func Test_ActionSuite(t *testing.T) {
-	stg, err := mem.NewStorage()
+	conf := config.GetConfLogErr(testConfigFile, t)
+	app, err := App(conf)
 	if err != nil {
-		t.Fatalf("error creating storage (%s)", err)
+		t.Fatal(err)
 	}
-	mURI, err := env.MongoURI()
-	if err != nil {
-		t.Fatalf("error getting mongo uri (%s)", err)
-	}
-	eLog, err := mongo.NewLog(mURI)
-	if err != nil {
-		t.Fatalf("error creating event log (%s)", err)
-	}
-	config := AppConfig{
-		Storage:        stg,
-		EventLog:       eLog,
-		CacheMissesLog: eLog,
-	}
-	app, err := App(&config)
 	as := &ActionSuite{suite.NewAction(app)}
 	suite.Run(t, as)
 }

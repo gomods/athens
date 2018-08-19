@@ -2,39 +2,38 @@ package mongo
 
 import (
 	"strings"
+	"time"
 
 	"github.com/globalsign/mgo"
-	"github.com/gomods/athens/pkg/config/env"
 	"github.com/gomods/athens/pkg/errors"
 )
 
 // ModuleStore represents a mongo backed storage backend.
 type ModuleStore struct {
-	s   *mgo.Session
-	d   string // database
-	c   string // collection
-	url string
+	s       *mgo.Session
+	d       string // database
+	c       string // collection
+	url     string
+	timeout time.Duration
 }
 
-// NewStorage returns a connected Mongo backed storage
+// NewStorage returns an connected Mongo backed storage
 // that satisfies the Backend interface.
-func NewStorage(url string) (*ModuleStore, error) {
-	const op errors.Op = "fs.NewStorage"
-	ms := &ModuleStore{url: url}
+func NewStorage(url string, timeout time.Duration) (*ModuleStore, error) {
+	const op errors.Op = "mongo.NewStorage"
+	ms := &ModuleStore{url: url, timeout: timeout}
 
 	err := ms.connect()
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
 	return ms, nil
-
 }
 
+// Connect conntect the the newly created mongo backend.
 func (m *ModuleStore) connect() error {
-	const op errors.Op = "mongo.connect"
-	timeout := env.MongoConnectionTimeoutSecWithDefault(1)
-	s, err := mgo.DialWithTimeout(m.url, timeout)
-
+	const op errors.Op = "mongo.Connect"
+	s, err := mgo.DialWithTimeout(m.url, m.timeout)
 	if err != nil {
 		return errors.E(op, err)
 	}

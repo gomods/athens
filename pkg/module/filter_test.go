@@ -1,23 +1,40 @@
 package module
 
 import (
+	"path/filepath"
 	"testing"
 
+	"github.com/gomods/athens/pkg/config"
 	"github.com/stretchr/testify/suite"
+)
+
+const (
+	testConfigFile = "../../config.test.toml"
 )
 
 type FilterTests struct {
 	suite.Suite
+	filterFile string
 }
 
 func Test_Filter(t *testing.T) {
-	suite.Run(t, new(FilterTests))
+	conf := config.GetConfLogErr(testConfigFile, t)
+	absPath, err := filepath.Abs(conf.FilterFile)
+	if err != nil {
+		t.Errorf("Unable to construct absolute path to test config file")
+	}
+	suite.Run(t, &FilterTests{
+		filterFile: absPath,
+	})
 }
 
 func (t *FilterTests) Test_IgnoreSimple() {
 	r := t.Require()
 
-	f := NewFilter()
+	f, err := NewFilter(t.filterFile)
+	if err != nil {
+		t.Error(err)
+	}
 	f.AddRule("github.com/a/b", Exclude)
 
 	r.Equal(Include, f.Rule("github.com/a"))
@@ -30,7 +47,10 @@ func (t *FilterTests) Test_IgnoreSimple() {
 func (t *FilterTests) Test_IgnoreParentAllowChildren() {
 	r := t.Require()
 
-	f := NewFilter()
+	f, err := NewFilter(t.filterFile)
+	if err != nil {
+		t.Error(err)
+	}
 	f.AddRule("github.com/a/b", Exclude)
 	f.AddRule("github.com/a/b/c", Include)
 
@@ -44,7 +64,10 @@ func (t *FilterTests) Test_IgnoreParentAllowChildren() {
 func (t *FilterTests) Test_OnlyAllowed() {
 	r := t.Require()
 
-	f := NewFilter()
+	f, err := NewFilter(t.filterFile)
+	if err != nil {
+		t.Error(err)
+	}
 	f.AddRule("github.com/a/b", Include)
 	f.AddRule("", Exclude)
 
@@ -58,7 +81,9 @@ func (t *FilterTests) Test_OnlyAllowed() {
 func (t *FilterTests) Test_Direct() {
 	r := t.Require()
 
-	f := NewFilter()
+	f, err := NewFilter(t.filterFile)
+	t.NotNil(f)
+	t.NoError(err)
 	f.AddRule("github.com/a/b/c", Exclude)
 	f.AddRule("github.com/a/b", Direct)
 	f.AddRule("github.com/a", Include)

@@ -1,7 +1,6 @@
 package actions
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/gobuffalo/buffalo"
@@ -10,32 +9,17 @@ import (
 	"github.com/gobuffalo/buffalo/middleware/i18n"
 	"github.com/gobuffalo/buffalo/middleware/ssl"
 	"github.com/gobuffalo/buffalo/render"
-	"github.com/gobuffalo/buffalo/worker"
-	"github.com/gobuffalo/gocraft-work-adapter"
 	"github.com/gobuffalo/packr"
-	"github.com/gocraft/work"
-	"github.com/gomods/athens/pkg/config/env"
+	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/log"
 	"github.com/gomods/athens/pkg/module"
-	"github.com/gomods/athens/pkg/storage"
-	"github.com/gomodule/redigo/redis"
 	"github.com/rs/cors"
 	"github.com/unrolled/secure"
 )
 
 const (
-	// FetcherWorkerName is the name of the worker fetching sources from experienced cache misses
-	FetcherWorkerName = "olympusfetcher"
-	// ReporterWorkerName is the name of the worker reporting cache misses
-	ReporterWorkerName = "olympusreporter"
-	workerQueue        = "default"
-	workerModuleKey    = "module"
-	workerVersionKey   = "version"
+	configFile = "../../config.test.toml"
 )
-
-// ENV is used to help switch settings based on where the
-// application is being run. Default is "development".
-var ENV = env.GoEnvironmentWithDefault("development")
 
 // T is the translator to use
 var T *i18n.Translator
@@ -58,21 +42,23 @@ func init() {
 // App is where all routes and middleware for buffalo
 // should be defined. This is the nerve center of your
 // application.
-func App() (*buffalo.App, error) {
-	ctx := context.Background()
-	store, err := GetStorage()
-	mf := module.NewFilter()
+func App(conf *config.Config) (*buffalo.App, error) {
+
+	// ENV is used to help switch settings based on where the
+	// application is being run. Default is "development".
+	ENV := conf.GoEnv
+	store, err := GetStorage(conf.Proxy.StorageType, conf.Storage)
 	if err != nil {
 		err = fmt.Errorf("error getting storage configuration (%s)", err)
 		return nil, err
 	}
-
-	worker, err := getWorker(ctx, store, mf)
+	mf, err := module.NewFilter(conf.FilterFile)
 	if err != nil {
+		err = fmt.Errorf("error creating filter (%s)", err)
 		return nil, err
 	}
 
-	lggr := log.New(env.CloudRuntime(), env.LogLevel())
+	lggr := log.New(conf.CloudRuntime, conf.LogLevel)
 
 	app := buffalo.New(buffalo.Options{
 		Env: ENV,
@@ -80,8 +66,6 @@ func App() (*buffalo.App, error) {
 			cors.Default().Handler,
 		},
 		SessionName: "_athens_session",
-		Worker:      worker,
-		WorkerOff:   true, // TODO(marwan): turned off until worker is being used.
 		Logger:      log.Buffalo(),
 	})
 
@@ -98,7 +82,7 @@ func App() (*buffalo.App, error) {
 	initializeAuth(app)
 	// Protect against CSRF attacks. https://www.owasp.org/index.php/Cross-Site_Request_Forgery_(CSRF)
 	// Remove to disable this.
-	if env.EnableCSRFProtection() {
+	if conf.EnableCSRFProtection {
 		csrfMiddleware := csrf.New
 		app.Use(csrfMiddleware)
 	}
@@ -113,14 +97,14 @@ func App() (*buffalo.App, error) {
 		app.Stop(err)
 	}
 	app.Use(T.Middleware())
-	if !env.FilterOff() {
-		app.Use(newFilterMiddleware(mf))
+	if !(*conf.Proxy.FilterOff) {
+		app.Use(newFilterMiddleware(mf, conf.Proxy.OlympusGlobalEndpoint))
 	}
-	user, pass, ok := env.BasicAuth()
+	user, pass, ok := conf.Proxy.BasicAuth()
 	if ok {
 		app.Use(basicAuth(user, pass))
 	}
-	if err := addProxyRoutes(app, store, mf, lggr); err != nil {
+	if err := addProxyRoutes(app, store, mf, lggr, conf.GoBinary); err != nil {
 		err = fmt.Errorf("error adding proxy routes (%s)", err)
 		return nil, err
 	}
@@ -130,27 +114,4 @@ func App() (*buffalo.App, error) {
 	app.ServeFiles("/", assetsBox)
 
 	return app, nil
-}
-
-func getWorker(ctx context.Context, s storage.Backend, mf *module.Filter) (worker.Worker, error) {
-	port := env.RedisQueuePortWithDefault(":6379")
-	w := gwa.New(gwa.Options{
-		Pool: &redis.Pool{
-			MaxActive: 5,
-			MaxIdle:   5,
-			Wait:      true,
-			Dial: func() (redis.Conn, error) {
-				return redis.Dial("tcp", port)
-			},
-		},
-		Name:           FetcherWorkerName,
-		MaxConcurrency: env.AthensMaxConcurrency(),
-	})
-
-	opts := work.JobOptions{
-		SkipDead: true,
-		MaxFails: env.WorkerMaxFails(),
-	}
-
-	return w, w.RegisterWithOptions(FetcherWorkerName, opts, GetProcessCacheMissJob(ctx, s, w, mf))
 }

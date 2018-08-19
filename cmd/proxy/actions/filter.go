@@ -12,7 +12,7 @@ import (
 	"github.com/gomods/athens/pkg/paths"
 )
 
-func newFilterMiddleware(mf *module.Filter) buffalo.MiddlewareFunc {
+func newFilterMiddleware(mf *module.Filter, olympusURL string) buffalo.MiddlewareFunc {
 	const op errors.Op = "actions.FilterMiddleware"
 
 	return func(next buffalo.Handler) buffalo.Handler {
@@ -42,7 +42,7 @@ func newFilterMiddleware(mf *module.Filter) buffalo.MiddlewareFunc {
 				return next(c)
 			case module.Include:
 				// TODO : spin up cache filling worker and serve the request using the cache
-				newURL := redirectToOlympusURL(c.Request().URL)
+				newURL := redirectToOlympusURL(olympusURL, c.Request().URL)
 				return c.Redirect(http.StatusSeeOther, newURL)
 			}
 
@@ -55,6 +55,6 @@ func isPseudoVersion(version string) bool {
 	return strings.HasPrefix(version, "v0.0.0-")
 }
 
-func redirectToOlympusURL(u *url.URL) string {
-	return strings.TrimSuffix(GetOlympusEndpoint(), "/") + u.Path
+func redirectToOlympusURL(olympusURL string, u *url.URL) string {
+	return strings.TrimSuffix(olympusURL, "/") + u.Path
 }

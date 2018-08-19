@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/gobuffalo/suite"
+	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/storage"
 	"github.com/gomods/athens/pkg/storage/fs"
@@ -121,6 +122,13 @@ func BenchmarkStorageExists(b *testing.B) {
 }
 
 func getStores(b *testing.B) []storage.TestSuite {
+	conf, err := config.GetConf(testConfigFile)
+	if err != nil {
+		b.Error(err)
+	}
+	if conf.Storage == nil {
+		b.Errorf("Invalid Storage configuration provided")
+	}
 	var stores []storage.TestSuite
 
 	//TODO: create the instance without model or TestSuite
@@ -129,7 +137,9 @@ func getStores(b *testing.B) []storage.TestSuite {
 	require.NoError(b, err, "couldn't create filesystem store")
 	stores = append(stores, fsStore)
 
-	mongoStore, err := mongo.NewTestSuite(model)
+	mongoURL := conf.Storage.Mongo.URL
+	mongoTimeout := config.TimeoutDuration(conf.Storage.Mongo.Timeout)
+	mongoStore, err := mongo.NewTestSuite(model, mongoURL, mongoTimeout)
 	require.NoError(b, err, "couldn't create mongo store")
 	stores = append(stores, mongoStore)
 

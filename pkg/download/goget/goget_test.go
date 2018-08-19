@@ -10,8 +10,13 @@ import (
 	"testing"
 	"time"
 
+	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/storage"
 	"github.com/stretchr/testify/require"
+)
+
+const (
+	testConfigFile = "../../../config.test.toml"
 )
 
 type listTest struct {
@@ -33,7 +38,8 @@ var listTests = []listTest{
 }
 
 func TestList(t *testing.T) {
-	dp, err := New()
+	conf := config.GetConfLogErr(testConfigFile, t)
+	dp, err := New(conf.GoBinary)
 	require.NoError(t, err, "failed to create protocol")
 	ctx := context.Background()
 
@@ -73,7 +79,8 @@ var latestTests = []latestTest{
 }
 
 func TestLatest(t *testing.T) {
-	dp, err := New()
+	conf := config.GetConfLogErr(testConfigFile, t)
+	dp, err := New(conf.GoBinary)
 	require.NoError(t, err)
 	ctx := context.Background()
 
@@ -120,7 +127,8 @@ var infoTests = []infoTest{
 }
 
 func TestInfo(t *testing.T) {
-	dp, err := New()
+	conf := config.GetConfLogErr(testConfigFile, t)
+	dp, err := New(conf.GoBinary)
 	require.NoError(t, err)
 	ctx := context.Background()
 
@@ -167,7 +175,8 @@ var modTests = []modTest{
 }
 
 func TestGoMod(t *testing.T) {
-	dp, err := New()
+	conf := config.GetConfLogErr(testConfigFile, t)
+	dp, err := New(conf.GoBinary)
 	require.NoError(t, err)
 	ctx := context.Background()
 
