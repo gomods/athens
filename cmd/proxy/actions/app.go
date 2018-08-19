@@ -18,7 +18,7 @@ import (
 )
 
 const (
-	configFile = "../../config.example.toml"
+	configFile = "../../config.test.toml"
 )
 
 // T is the translator to use

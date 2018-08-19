@@ -35,7 +35,7 @@ const (
 	workerQueue        = "default"
 	workerModuleKey    = "module"
 	workerVersionKey   = "version"
-	configFile         = "../../config.example.toml"
+	configFile         = "../../config.test.toml"
 )
 >>>>>>> wip plumb config
 

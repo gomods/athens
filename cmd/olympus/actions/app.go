@@ -57,7 +57,7 @@ const (
 	workerModuleKey           = "module"
 	workerVersionKey          = "version"
 	workerPushNotificationKey = "push-notification"
-	configFile                = "../../config.example.toml"
+	configFile                = "../../config.test.toml"
 )
 
 var (

@@ -91,7 +91,7 @@ EnableCSRFProtection = false
         Endpoint = "cdn.example.com"
         # Timeout for networks calls made to the CDN in seconds
         # Defaults to Global Timeout
-        Timeout = 300
+        Timeout = 1
     [Storage.Disk]
         # RootPath is the Athens Disk Root folder 
         # Env override: ATHENS_DISK_STORAGE_ROOT
@@ -105,7 +105,7 @@ EnableCSRFProtection = false
         Bucket = "MY_GCP_BUCKET"
         # Timeout for networks calls made to GCP in seconds
         # Defaults to Global Timeout
-        Timeout = 300
+        Timeout = 1
     [Storage.Minio]
         # Endpoint for Minio storage
         # Env override: ATHENS_MINIO_ENDPOINT
@@ -118,7 +118,7 @@ EnableCSRFProtection = false
         Secret = "MY_SECRET"
         # Timeout for networks calls made to Minio in seconds
         # Defaults to Global Timeout
-        Timeout = 300
+        Timeout = 1
         # Enable SSL for Minio connections
         # Defaults to true
         # Env override: ATHENS_MINIO_USE_SSL
@@ -134,11 +134,11 @@ EnableCSRFProtection = false
         # Timeout for networks calls made to Mongo in seconds
         # Defaults to Global Timeout
         # Env override: MONGO_CONN_TIMEOUT_SEC
-        Timeout = 300
+        Timeout = 1
     [Storage.RDBMS]
         # The name of the RDBMS instance to use as defined in database.yml in the POP_PATH
         # Env override: ATHENS_RDBMS_STORAGE_NAME
         Name = "development"
         # Timeout for networks calls made to the RDBMS instance in seconds
         # Defaults to Global Timeout
-        TimeoutSeconds = 300
+        TimeoutSeconds = 1

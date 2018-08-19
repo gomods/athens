@@ -27,7 +27,7 @@ import (
 )
 
 const (
-	testConfigFile = "../../../../config.example.toml"
+	testConfigFile = "../../../../config.test.toml"
 )
 
 type TestSuites struct {

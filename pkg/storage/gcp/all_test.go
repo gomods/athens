@@ -18,7 +18,7 @@ var (
 )
 
 const (
-	testConfigFile = "../../../config.example.toml"
+	testConfigFile = "../../../config.test.toml"
 )
 
 func getConf(t *testing.T) *config.Config {
