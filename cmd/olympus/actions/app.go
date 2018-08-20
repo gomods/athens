@@ -62,7 +62,18 @@ func App(config *AppConfig) (*buffalo.App, error) {
 		return nil, err
 	}
 
-	lggr := log.New(env.CloudRuntime(), env.LogLevel())
+	lvl, err := env.LogLevel()
+	if err != nil {
+		return nil, err
+	}
+	lggr := log.New(env.CloudRuntime(), lvl)
+
+	blvl, err := env.BuffaloLogLevel()
+	if err != nil {
+		return nil, err
+	}
+	blggr := log.Buffalo(blvl)
+
 	app := buffalo.New(buffalo.Options{
 		Addr: port,
 		Env:  ENV,
@@ -72,7 +83,7 @@ func App(config *AppConfig) (*buffalo.App, error) {
 		SessionName: "_olympus_session",
 		Worker:      w,
 		WorkerOff:   true, // TODO(marwan): turned off until worker is being used.
-		Logger:      log.Buffalo(),
+		Logger:      blggr,
 	})
 	// Automatically redirect to SSL
 	app.Use(ssl.ForceSSL(secure.Options{
@@ -114,13 +125,14 @@ func App(config *AppConfig) (*buffalo.App, error) {
 	app.GET("/eventlog/{sequence_id}", eventlogHandler(config.EventLog))
 	app.POST("/cachemiss", cachemissHandler(w))
 	app.POST("/push", pushNotificationHandler(w))
+	app.GET("/healthz", healthHandler)
 
 	// Download Protocol
 	gg, err := goget.New()
 	if err != nil {
 		return nil, err
 	}
-	dp := download.New(gg, config.Storage)
+	dp := download.New(gg, config.Storage, env.GoGetWorkers())
 	opts := &download.HandlerOpts{Protocol: dp, Logger: lggr, Engine: renderEng}
 	download.RegisterHandlers(app, opts)
 
