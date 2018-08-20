@@ -70,7 +70,7 @@ func hookFilterApp() *buffalo.App {
 	}
 
 	a := buffalo.New(buffalo.Options{})
-	a.Use(LogEntryMiddleware(newValidationMiddleware, log.New("none", "debug")))
+	a.Use(LogEntryMiddleware(NewValidationMiddleware, log.New("none", "debug")))
 	initializeTracing(a)
 
 	a.GET(download.PathList, h)

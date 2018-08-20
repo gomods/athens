@@ -16,9 +16,9 @@ import (
 	"github.com/gocraft/work"
 	"github.com/gomods/athens/pkg/config/env"
 	"github.com/gomods/athens/pkg/log"
+	gomodsmiddleware "github.com/gomods/athens/pkg/middleware"
 	"github.com/gomods/athens/pkg/module"
 	"github.com/gomods/athens/pkg/storage"
-	gomodsmiddleware "github.com/gomods/athens/pkg/storage"
 
 	"github.com/gomodule/redigo/redis"
 	"github.com/rs/cors"
@@ -119,7 +119,7 @@ func App() (*buffalo.App, error) {
 
 	// Having the hook set means we want to use it
 	if _, ok := env.ValidatorHook(); ok {
-		app.Use(gomodsmiddleware.LogEntryMiddleware(gomodsmiddlewarenew.ValidationMiddleware, lggr))
+		app.Use(gomodsmiddleware.LogEntryMiddleware(gomodsmiddleware.NewValidationMiddleware, lggr))
 	}
 
 	user, pass, ok := env.BasicAuth()
@@ -127,7 +127,7 @@ func App() (*buffalo.App, error) {
 		app.Use(basicAuth(user, pass))
 	}
 
-	if err := addProxyRoutes(app, store, mf, lggr); err != nil {
+	if err := addProxyRoutes(app, store, lggr); err != nil {
 		err = fmt.Errorf("error adding proxy routes (%s)", err)
 		return nil, err
 	}

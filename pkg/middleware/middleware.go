@@ -78,7 +78,7 @@ func NewFilterMiddleware(mf *module.Filter) buffalo.MiddlewareFunc {
 	}
 }
 
-func newValidationMiddleware(entry log.Entry) buffalo.MiddlewareFunc {
+func NewValidationMiddleware(entry log.Entry) buffalo.MiddlewareFunc {
 	const op errors.Op = "actions.ValidationMiddleware"
 
 	return func(next buffalo.Handler) buffalo.Handler {
