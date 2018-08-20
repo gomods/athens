@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/spf13/afero"
 	"github.com/gomods/athens/pkg/cdn/metadata"
 	"github.com/gomods/athens/pkg/cdn/metadata/fs"
 	"github.com/gomods/athens/pkg/errors"
+	"github.com/spf13/afero"
 )
 
 var (
