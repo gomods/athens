@@ -27,7 +27,7 @@ func TestDownloadProtocol(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	dp := New(&mockProtocol{}, s)
+	dp := New(&mockProtocol{}, s, 2)
 	ctx := context.Background()
 
 	var eg errgroup.Group

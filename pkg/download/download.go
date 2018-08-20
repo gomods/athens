@@ -45,10 +45,10 @@ type job struct {
 // New takes an upstream Protocol and storage
 // it always prefers storage, otherwise it goes to upstream
 // and fills the storage with the results.
-func New(dp Protocol, s storage.Backend) Protocol {
+func New(dp Protocol, s storage.Backend, workers int) Protocol {
 	ch := make(chan *job)
 	p := &protocol{dp: dp, s: s, ch: ch}
-	p.start(5)
+	p.start(workers)
 	return p
 }
 
