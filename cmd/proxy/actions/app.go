@@ -61,13 +61,12 @@ func init() {
 func App() (*buffalo.App, error) {
 	ctx := context.Background()
 	store, err := GetStorage()
-	mf := module.NewFilter()
 	if err != nil {
 		err = fmt.Errorf("error getting storage configuration (%s)", err)
 		return nil, err
 	}
 
-	worker, err := getWorker(ctx, store, mf)
+	worker, err := getWorker(ctx, store)
 	if err != nil {
 		return nil, err
 	}
@@ -87,7 +86,7 @@ func App() (*buffalo.App, error) {
 
 	// Automatically redirect to SSL
 	app.Use(ssl.ForceSSL(secure.Options{
-		SSLRedirect:     ENV == "production",
+		SSLRedirect:     env.ProxyForceSSL(),
 		SSLProxyHeaders: map[string]string{"X-Forwarded-Proto": "https"},
 	}))
 
@@ -108,13 +107,14 @@ func App() (*buffalo.App, error) {
 	}
 	app.Use(T.Middleware())
 	if !env.FilterOff() {
+		mf := module.NewFilter()
 		app.Use(newFilterMiddleware(mf))
 	}
 	user, pass, ok := env.BasicAuth()
 	if ok {
 		app.Use(basicAuth(user, pass))
 	}
-	if err := addProxyRoutes(app, store, mf, lggr); err != nil {
+	if err := addProxyRoutes(app, store, lggr); err != nil {
 		err = fmt.Errorf("error adding proxy routes (%s)", err)
 		return nil, err
 	}
@@ -126,7 +126,7 @@ func App() (*buffalo.App, error) {
 	return app, nil
 }
 
-func getWorker(ctx context.Context, s storage.Backend, mf *module.Filter) (worker.Worker, error) {
+func getWorker(ctx context.Context, s storage.Backend) (worker.Worker, error) {
 	port := env.RedisQueuePortWithDefault(":6379")
 	w := gwa.New(gwa.Options{
 		Pool: &redis.Pool{
@@ -146,5 +146,5 @@ func getWorker(ctx context.Context, s storage.Backend, mf *module.Filter) (worke
 		MaxFails: env.WorkerMaxFails(),
 	}
 
-	return w, w.RegisterWithOptions(FetcherWorkerName, opts, GetProcessCacheMissJob(ctx, s, w, mf))
+	return w, w.RegisterWithOptions(FetcherWorkerName, opts, GetProcessCacheMissJob(ctx, s, w))
 }
