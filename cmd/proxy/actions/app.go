@@ -136,13 +136,13 @@ func App() (*buffalo.App, error) {
 		mf := module.NewFilter()
 		app.Use(gomodsmiddleware.NewFilterMiddleware(mf))
 	}
-  
-  // Having the hook set means we want to use it
+
+	// Having the hook set means we want to use it
 	if _, ok := env.ValidatorHook(); ok {
 		app.Use(gomodsmiddleware.LogEntryMiddleware(gomodsmiddleware.NewValidationMiddleware, lggr))
-  }
-  
-  user, pass, ok := env.BasicAuth()
+	}
+
+	user, pass, ok := env.BasicAuth()
 	if ok {
 		app.Use(basicAuth(user, pass))
 	}
