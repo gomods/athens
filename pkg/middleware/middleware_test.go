@@ -1,4 +1,4 @@
-package actions
+package middleware
 
 import (
 	"encoding/json"
@@ -7,13 +7,17 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/bketelsen/buffet"
 	"github.com/gobuffalo/envy"
+	"github.com/uber/jaeger-client-go/config"
 
 	"github.com/gobuffalo/buffalo"
+	"github.com/gomods/athens/pkg/config/env"
 	"github.com/gomods/athens/pkg/download"
 	"github.com/gomods/athens/pkg/log"
 	"github.com/gomods/athens/pkg/module"
 	"github.com/markbates/willie"
+
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 )
@@ -25,7 +29,7 @@ func middlewareFilterApp() *buffalo.App {
 
 	a := buffalo.New(buffalo.Options{})
 	mf := newTestFilter()
-	a.Use(newFilterMiddleware(mf))
+	a.Use(NewFilterMiddleware(mf))
 	initializeTracing(a)
 
 	a.GET(download.PathList, h)
@@ -49,7 +53,7 @@ func Test_FilterMiddleware(t *testing.T) {
 	// Public, expects to be redirected to olympus
 	res := w.Request("/github.com/gomods/athens/@v/list").Get()
 	r.Equal(303, res.Code)
-	r.Equal(GetOlympusEndpoint()+"/github.com/gomods/athens/@v/list", res.HeaderMap.Get("Location"))
+	r.Equal(env.GetOlympusEndpoint()+"/github.com/gomods/athens/@v/list", res.HeaderMap.Get("Location"))
 
 	// Excluded, expects a 403
 	res = w.Request("/github.com/athens-artifacts/no-tags/@v/list").Get()
@@ -151,4 +155,14 @@ func (suite *HookTestsSuite) TestHookUnexpectedError() {
 	res := suite.w.Request("/github.com/athens-artifacts/happy-path/@v/v1.0.0.info").Get()
 	r.True(suite.mock.invoked)
 	r.Equal(http.StatusInternalServerError, res.Code)
+}
+
+func initializeTracing(app *buffalo.App) {
+	var cfg config.Configuration
+	tracer, _, _ := cfg.New(
+		"athens.proxy",
+	)
+	//	opentracing.SetGlobalTracer(tracer)
+	app.Use(buffet.OpenTracing(tracer))
+
 }

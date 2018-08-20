@@ -1,4 +1,4 @@
-package actions
+package middleware
 
 import (
 	"bytes"
@@ -38,7 +38,7 @@ func LogEntryMiddleware(middleware MiddlewareFunc, lggr *log.Logger) buffalo.Mid
 	}
 }
 
-func newFilterMiddleware(mf *module.Filter) buffalo.MiddlewareFunc {
+func NewFilterMiddleware(mf *module.Filter) buffalo.MiddlewareFunc {
 	const op errors.Op = "actions.FilterMiddleware"
 
 	return func(next buffalo.Handler) buffalo.Handler {
@@ -118,7 +118,7 @@ func isPseudoVersion(version string) bool {
 }
 
 func redirectToOlympusURL(u *url.URL) string {
-	return strings.TrimSuffix(GetOlympusEndpoint(), "/") + u.Path
+	return strings.TrimSuffix(env.GetOlympusEndpoint(), "/") + u.Path
 }
 
 type validationParams struct {

@@ -18,6 +18,8 @@ import (
 	"github.com/gomods/athens/pkg/log"
 	"github.com/gomods/athens/pkg/module"
 	"github.com/gomods/athens/pkg/storage"
+	gomodsmiddleware "github.com/gomods/athens/pkg/storage"
+
 	"github.com/gomodule/redigo/redis"
 	"github.com/rs/cors"
 	"github.com/unrolled/secure"
@@ -113,11 +115,11 @@ func App() (*buffalo.App, error) {
 		app.Stop(err)
 	}
 	app.Use(T.Middleware())
-	app.Use(newFilterMiddleware(mf))
+	app.Use(gomodsmiddleware.NewFilterMiddleware(mf))
 
 	// Having the hook set means we want to use it
 	if _, ok := env.ValidatorHook(); ok {
-		app.Use(LogEntryMiddleware(newValidationMiddleware, lggr))
+		app.Use(gomodsmiddleware.LogEntryMiddleware(gomodsmiddlewarenew.ValidationMiddleware, lggr))
 	}
 
 	user, pass, ok := env.BasicAuth()
