@@ -11,6 +11,4 @@ ENV GO_ENV=production
 
 EXPOSE 3000
 
-# Comment out to run the migrations before running the binary:
-# CMD /bin/app migrate; /bin/app
 ENTRYPOINT ["/bin/app"]
