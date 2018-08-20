@@ -15,9 +15,16 @@ WORKDIR $GOPATH/src/github.com/gomods/athens
 ADD . .
 RUN cd cmd/proxy && buffalo build -s -o /bin/app
 
-FROM alpine
-RUN apk add --no-cache bash
-RUN apk add --no-cache ca-certificates
+FROM ubuntu:14.04
+RUN apt-get update
+RUN apt-get install -y ca-certificates
+RUN apt-get install -y git
+RUN apt-get install -y golang
+
+ENV GOPATH=/go
+RUN mkdir /go
+RUN go get golang.org/dl/go1.11beta3
+RUN go1.11beta3 download
 
 WORKDIR /bin/
 

@@ -1,0 +1,38 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ template "fullname" . }}
+  labels:
+    app: {{ template "fullname" . }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+spec:
+  replicas: {{ .Values.replicaCount }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "fullname" . }}
+        chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+        release: "{{ .Release.Name }}"
+    spec:
+      containers:
+      - name: {{ template "fullname" . }}
+        image: "{{ .Values.image.registry }}/{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy | quote }}
+        env:
+        - name: ATHENS_MONGO_STORAGE_URL
+          value: {{ .Values.mongoStorageURL | quote }}
+        - name: ATHENS_DISK_STORAGE_ROOT
+          value: {{ .Values.diskStorageRoot | quote }}
+        - name: ATHENS_STORAGE_TYPE
+          value: {{ .Values.storageType | quote }}
+        - name: ATHENS_REDIS_QUEUE_PORT
+          value: {{ .Values.redisPort | quote }}
+        - name: GO_ENV
+          value: {{ .Values.goEnv | quote }}
+        - name: GO_BINARY_PATH
+          value: {{ .Values.goBinaryPath | quote }}
+        ports:
+        - name: http
+          containerPort: 8080
