@@ -12,20 +12,12 @@ $GOMOD_CACHE = Join-Path $tmpDirPath "pkg" "mod"
 $env:Path += ";" + "${$(Join-Path $REPO_DIR "bin")}"
 
 function clearGoModCache () {
-  if ($IsLinux) {
-    # this is required because deps are read-only
-    chmod -R 0770 $GOMOD_CACHE
-    Get-ChildItem -Path $GOMOD_CACHE -Recurse | Remove-Item -Recurse -Force -Confirm:$false -ErrorAction SilentlyContinue
-  }
-  if ($IsWindows) {
-    # on Win -Force passed to Remove-Item should do the trick
-    Get-ChildItem -Path $GOMOD_CACHE -Recurse | Remove-Item -Recurse -Force -Confirm:$false -ErrorAction SilentlyContinue
-  }
+  Get-ChildItem -Path $GOMOD_CACHE -Recurse | Remove-Item -Recurse -Force -Confirm:$false
 }
 
 function stopProcesses () {
-  Get-Process -Name buffalo -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
-  Get-Process -Name athens-build -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
+  Get-Process -Name buffalo -ErrorAction SilentlyContinue | Stop-Process -Force
+  Get-Process -Name athens-build -ErrorAction SilentlyContinue | Stop-Process -Force
 }
 
 function teardown () {
