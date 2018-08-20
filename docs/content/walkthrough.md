@@ -30,8 +30,8 @@ The 🦁 says rawr!
 The end result of running this command is that Go downloaded the package source and packaged
 it into a module, saving it in the Go Modules cache.
 
-Now that we know what stuff looks like without the proxy, only using Go Modules, let's take a look at
-how the proxy changes what we see.
+Now that we have seen Go Modules in action without the proxy, let's take a look at
+how the proxy changes the workflow and the output.
 
 ## With the proxy
 Using the most simple installation possible, let's walk through how to use the
@@ -54,17 +54,19 @@ rm -recurse -force $(go env GOPATH)\pkg\mod
 ```
 -->
 
-Now use Go to install and run the Athens proxy in a background process:
+Now run the Athens proxy in a background process:
 
 **Bash**
 ```console
 $ cd ..
 $ git clone https://github.com/gomods/athens.git
 $ cd athens
-$ go run ./cmd/proxy &
+$ GO111Modules=off go run ./cmd/proxy &
 [1] 25243
 INFO[0000] Starting application at 127.0.0.1:3000
 ```
+
+Note: [Building Athens Go Modules enabled is not yet supported](https://github.com/gomods/athens/pull/371), so we have turned it off in the above example.
 
 <!--
 **PowerShell**
@@ -165,4 +167,11 @@ The 🦁 says rawr!
 ```
 
 No additional output is printed because Go found **github.com/athens-artifacts/samplelib@v1.0.0** in the Go Modules
-cache and did not need to request it from the proxy. 
+cache and did not need to request it from the proxy.
+
+## Next Steps
+
+Now that you have seen Athens in Action:
+
+* Learn more how to share an Athens server with your development team. [Coming Soon/Help Wanted](https://github.com/gomods/athens/issues/533)
+* Explore best practices for running Athens in Production. [Coming Soon/Help Wanted](https://github.com/gomods/athens/issues/534)
