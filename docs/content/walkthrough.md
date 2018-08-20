@@ -85,7 +85,7 @@ from localhost (127.0.0.1) on port 3000.
 
 Since we didn't provide any specific configuration
 the proxy is using in-memory storage, which is only suitable for trying out the proxy
-for a short period of time, as you will quickly run out of memory and the cache
+for a short period of time, as you will quickly run out of memory and the storage
 doesn't persist between restarts.
 
 Next, you will need to enable the [Go Modules](https://github.com/golang/go/wiki/Modules)
@@ -153,11 +153,11 @@ Let's break down what is happening here:
     running this, our cache is empty and Go keeps looking.
 1. Go requests **github.com/athens-artifacts/samplelib@v1.0.0** from our proxy because
     it is set in the GOPROXY environment variable.
-1. The proxy checks its own cache (in this case is in-memory) for the package and doesn't find it. So it
-    retrieves it from github.com and then adds it to its cache.
+1. The proxy checks its own storage (in this case is in-memory) for the package and doesn't find it. So it
+    retrieves it from github.com and then saves it for subsequent requests.
 1. Go downloads the module zip and puts it in the Go Modules cache
     GOPATH/pkg/mod.
-1. Go will use the mod cache and build our application!
+1. Go will use the module and build our application!
 
 Subsequent calls to `go run .` will be much less verbose:
 
@@ -166,7 +166,7 @@ $ go run .
 The 🦁 says rawr!
 ```
 
-No additional output is printed because Go found **github.com/athens-artifacts/samplelib@v1.0.0** in the Go Modules
+No additional output is printed because Go found **github.com/athens-artifacts/samplelib@v1.0.0** in the Go Module
 cache and did not need to request it from the proxy.
 
 ## Next Steps

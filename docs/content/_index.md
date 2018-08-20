@@ -7,7 +7,7 @@ date: 2018-02-11T16:52:23-05:00
 
 ## Welcome to Athens
 
-Athens is the name of the combined project that includes a global registry for [Go Modules](https://github.com/golang/go/wiki/Modules) and a stand-alone proxy server that can be deployed on-premise to cache and control available Go modules for your organization.
+Athens is the name of the combined project that includes a global registry for [Go Modules](https://github.com/golang/go/wiki/Modules) and a stand-alone proxy server that can be deployed on-premise to storage and control available Go modules for your organization.
 
 ## Try out Athens
 
