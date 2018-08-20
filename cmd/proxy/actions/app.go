@@ -66,12 +66,26 @@ func App() (*buffalo.App, error) {
 		return nil, err
 	}
 
+	// mount .netrc to home dir
+	// to have access to private repos.
+	initializeNETRC()
+
 	worker, err := getWorker(ctx, store)
 	if err != nil {
 		return nil, err
 	}
 
-	lggr := log.New(env.CloudRuntime(), env.LogLevel())
+	lvl, err := env.LogLevel()
+	if err != nil {
+		return nil, err
+	}
+	lggr := log.New(env.CloudRuntime(), lvl)
+
+	blvl, err := env.BuffaloLogLevel()
+	if err != nil {
+		return nil, err
+	}
+	blggr := log.Buffalo(blvl)
 
 	app := buffalo.New(buffalo.Options{
 		Env: ENV,
@@ -81,7 +95,7 @@ func App() (*buffalo.App, error) {
 		SessionName: "_athens_session",
 		Worker:      worker,
 		WorkerOff:   true, // TODO(marwan): turned off until worker is being used.
-		Logger:      log.Buffalo(),
+		Logger:      blggr,
 	})
 	if prefix := env.AthensPathPrefix(); prefix != "" {
 		app = app.Group(prefix)
