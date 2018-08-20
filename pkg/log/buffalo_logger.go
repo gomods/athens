@@ -13,12 +13,10 @@ import (
 // from buffalo should only be allowed in development
 // as our logging-system should be handled from our codebase.
 // If the environment is production, then its a noop logger.
-func Buffalo(env string) buffalo.Logger {
+func Buffalo(lvl logrus.Level) buffalo.Logger {
 	l := logrus.New()
 	l.Formatter = &buffaloFormatter{}
-	if env == "production" {
-		l.Out = nopwriter{}
-	}
+	l.SetLevel(lvl)
 
 	return &buffaloLogger{l}
 }

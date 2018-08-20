@@ -21,6 +21,7 @@ import (
 	"github.com/gomods/athens/pkg/storage"
 	"github.com/gomodule/redigo/redis"
 	"github.com/rs/cors"
+	"github.com/sirupsen/logrus"
 	"github.com/unrolled/secure"
 )
 
@@ -62,7 +63,14 @@ func App(config *AppConfig) (*buffalo.App, error) {
 		return nil, err
 	}
 
-	lggr := log.New(env.CloudRuntime(), env.LogLevel())
+	lvl, err := env.LogLevel()
+	if err != nil {
+		return nil, err
+	}
+	lggr := log.New(env.CloudRuntime(), lvl)
+	if ENV == "production" {
+		lvl = logrus.PanicLevel
+	}
 	app := buffalo.New(buffalo.Options{
 		Addr: port,
 		Env:  ENV,
@@ -72,7 +80,7 @@ func App(config *AppConfig) (*buffalo.App, error) {
 		SessionName: "_olympus_session",
 		Worker:      w,
 		WorkerOff:   true, // TODO(marwan): turned off until worker is being used.
-		Logger:      log.Buffalo(ENV),
+		Logger:      log.Buffalo(lvl),
 	})
 	// Automatically redirect to SSL
 	app.Use(ssl.ForceSSL(secure.Options{
