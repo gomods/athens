@@ -9,6 +9,7 @@ import (
 
 	"github.com/bketelsen/buffet"
 	"github.com/gobuffalo/envy"
+	"github.com/sirupsen/logrus"
 	"github.com/uber/jaeger-client-go/config"
 
 	"github.com/gobuffalo/buffalo"
@@ -70,7 +71,7 @@ func hookFilterApp() *buffalo.App {
 	}
 
 	a := buffalo.New(buffalo.Options{})
-	a.Use(LogEntryMiddleware(NewValidationMiddleware, log.New("none", "debug")))
+	a.Use(LogEntryMiddleware(NewValidationMiddleware, log.New("none", logrus.DebugLevel)))
 	initializeTracing(a)
 
 	a.GET(download.PathList, h)
