@@ -73,4 +73,4 @@ down:
 dev-teardown:
 	docker-compose -p athensdev down
 	docker volume prune
-	docker network prune
+
