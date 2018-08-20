@@ -5,7 +5,6 @@ import (
 	"sync"
 
 	"github.com/spf13/afero"
-
 	"github.com/gomods/athens/pkg/cdn/metadata"
 	"github.com/gomods/athens/pkg/cdn/metadata/fs"
 	"github.com/gomods/athens/pkg/errors"
@@ -32,5 +31,6 @@ func NewStorage() (metadata.Storage, error) {
 		return nil, errors.E(op, fmt.Errorf("could not create temp dir for 'In Memory' CDN metadata (%s)", err))
 	}
 
-	return fs.NewStorage(memFs, tmpDir), nil
+	memStorage = fs.NewStorage(memFs, tmpDir)
+	return memStorage, nil
 }
