@@ -17,13 +17,11 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// MiddlewareFunc is a function that takes all that it needs to return
-// a ready-to-go buffalo middleware.
-type MiddlewareFunc func(entry log.Entry) buffalo.MiddlewareFunc
+type middlewareFunc func(entry log.Entry) buffalo.MiddlewareFunc
 
 // LogEntryMiddleware builds a log.Entry applying the request parameter to the given
 // log.Logger and propagates it to the given MiddlewareFunc
-func LogEntryMiddleware(middleware MiddlewareFunc, lggr *log.Logger) buffalo.MiddlewareFunc {
+func LogEntryMiddleware(middleware middlewareFunc, lggr *log.Logger) buffalo.MiddlewareFunc {
 	return func(next buffalo.Handler) buffalo.Handler {
 		return func(c buffalo.Context) error {
 			req := c.Request()
