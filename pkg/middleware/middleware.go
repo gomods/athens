@@ -36,6 +36,8 @@ func LogEntryMiddleware(middleware middlewareFunc, lggr *log.Logger) buffalo.Mid
 	}
 }
 
+// NewFilterMiddleware builds a middleware function that implements the filters configured in
+// the filter file.
 func NewFilterMiddleware(mf *module.Filter) buffalo.MiddlewareFunc {
 	const op errors.Op = "actions.FilterMiddleware"
 
@@ -76,6 +78,8 @@ func NewFilterMiddleware(mf *module.Filter) buffalo.MiddlewareFunc {
 	}
 }
 
+// NewValidationMiddleware builds a middleware function that performs validation checks by calling
+// an external webhook
 func NewValidationMiddleware(entry log.Entry) buffalo.MiddlewareFunc {
 	const op errors.Op = "actions.ValidationMiddleware"
 
