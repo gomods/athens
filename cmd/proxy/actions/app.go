@@ -16,7 +16,7 @@ import (
 	"github.com/gocraft/work"
 	"github.com/gomods/athens/pkg/config/env"
 	"github.com/gomods/athens/pkg/log"
-	gomodsmiddleware "github.com/gomods/athens/pkg/middleware"
+	mw "github.com/gomods/athens/pkg/middleware"
 	"github.com/gomods/athens/pkg/module"
 	"github.com/gomods/athens/pkg/storage"
 
@@ -134,12 +134,12 @@ func App() (*buffalo.App, error) {
 
 	if !env.FilterOff() {
 		mf := module.NewFilter()
-		app.Use(gomodsmiddleware.NewFilterMiddleware(mf))
+		app.Use(mw.NewFilterMiddleware(mf))
 	}
 
 	// Having the hook set means we want to use it
 	if _, ok := env.ValidatorHook(); ok {
-		app.Use(gomodsmiddleware.LogEntryMiddleware(gomodsmiddleware.NewValidationMiddleware, lggr))
+		app.Use(mw.LogEntryMiddleware(mw.NewValidationMiddleware, lggr))
 	}
 
 	user, pass, ok := env.BasicAuth()
