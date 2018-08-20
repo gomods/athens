@@ -9,10 +9,20 @@ First, make sure you have [Go 1.11 installed](https://gophersource.com/setup/) a
 ## Without the proxy
 Let's review what everything looks like in Go 1.11 without the proxy in the picture:
 
+**Bash**
 ```console
 $ git clone https://github.com/athens-artifacts/walkthrough.git
 $ cd walkthrough
 $ GO111MODULE=on go run .
+go: downloading github.com/athens-artifacts/samplelib v1.0.0
+The 🦁 says rawr!
+```
+
+**PowerShell**
+```console
+$ git clone https://github.com/athens-artifacts/walkthrough.git
+$ cd walkthrough
+$ cmd /C "set GOMODULE111=on && C:\GO\bin\go run ."
 go: downloading github.com/athens-artifacts/samplelib v1.0.0
 The 🦁 says rawr!
 ```
@@ -25,7 +35,9 @@ how the proxy changes what we see.
 
 ## With the proxy
 Using the most simple installation possible, let's walk through how to use the
-Athens proxy, and figure out what is happening at each step. 
+Athens proxy, and figure out what is happening at each step.
+
+Note: [Currently, the proxy does not work on Windows](https://github.com/gomods/athens/issues/532).
 
 Before moving on, let's clear our Go Modules cache so that we can see the proxy
 in action without any caches populated:
@@ -35,13 +47,16 @@ in action without any caches populated:
 sudo rm -fr $(go env GOPATH)/pkg/mod
 ```
 
+<!-- 
 **PowerShell**
 ```powershell
-rm -recurse $(go env GOPATH)\pkg\mod
+rm -recurse -force $(go env GOPATH)\pkg\mod
 ```
+-->
 
 Now use Go to install and run the Athens proxy in a background process:
 
+**Bash**
 ```console
 $ cd ..
 $ git clone https://github.com/gomods/athens.git
@@ -50,6 +65,18 @@ $ go run ./cmd/proxy &
 [1] 25243
 INFO[0000] Starting application at 127.0.0.1:3000
 ```
+
+<!--
+**PowerShell**
+```console
+$ cd ..
+$ git clone https://github.com/gomods/athens.git
+$ cd athens
+$ start -NoNewWindow go "run .\cmd\proxy"
+[1] 25243
+INFO[0000] Starting application at 127.0.0.1:3000
+```
+-->
 
 The Athens proxy is now running in the background and is listening for requests
 from localhost (127.0.0.1) on port 3000.
@@ -68,11 +95,13 @@ export GO111MODULE=on
 export GOPROXY=http://127.0.0.1:3000
 ```
 
+<!--
 **PowerShell**
 ```powershell
 $env:GO111MODULE = "on"
 $env:GOPROXY = "http://127.0.0.1:3000"
 ```
+-->
 
 The `GO111MODULE` environment variable controls the Go Modules feature in Go 1.11 only.
 Possible values are:
