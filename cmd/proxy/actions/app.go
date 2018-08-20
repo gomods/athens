@@ -20,7 +20,6 @@ import (
 	"github.com/gomods/athens/pkg/storage"
 	"github.com/gomodule/redigo/redis"
 	"github.com/rs/cors"
-	"github.com/sirupsen/logrus"
 	"github.com/unrolled/secure"
 )
 
@@ -77,9 +76,13 @@ func App() (*buffalo.App, error) {
 		return nil, err
 	}
 	lggr := log.New(env.CloudRuntime(), lvl)
-	if ENV == "production" {
-		lvl = logrus.PanicLevel
+
+	blvl, err := env.BuffaloLogLevel()
+	if err != nil {
+		return nil, err
 	}
+	blggr := log.Buffalo(blvl)
+
 	app := buffalo.New(buffalo.Options{
 		Env: ENV,
 		PreWares: []buffalo.PreWare{
@@ -88,7 +91,7 @@ func App() (*buffalo.App, error) {
 		SessionName: "_athens_session",
 		Worker:      worker,
 		WorkerOff:   true, // TODO(marwan): turned off until worker is being used.
-		Logger:      log.Buffalo(lvl),
+		Logger:      blggr,
 	})
 	if prefix := env.AthensPathPrefix(); prefix != "" {
 		app = app.Group(prefix)
