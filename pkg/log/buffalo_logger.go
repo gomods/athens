@@ -33,9 +33,3 @@ func (bf *buffaloLogger) WithFields(fields map[string]interface{}) buffalo.Logge
 	e := bf.FieldLogger.WithFields(fields)
 	return &buffaloLogger{e}
 }
-
-type nopwriter struct{}
-
-func (nopwriter) Write(p []byte) (int, error) {
-	return len(p), nil
-}
