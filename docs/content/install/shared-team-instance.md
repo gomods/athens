@@ -17,7 +17,7 @@ In order to run Athens with disk storage, you will next need to identify where y
 
 **Bash**
 ```bash
-export ATHENS_STORAGE=athens-storage
+export ATHENS_STORAGE=~/athens-storage
 mkdir -p $ATHENS_STORAGE
 docker run -d -v $ATHENS_STORAGE:/var/lib/athens \
    -e ATHENS_DISK_STORAGE_ROOT=/var/lib/athens \
@@ -30,7 +30,7 @@ docker run -d -v $ATHENS_STORAGE:/var/lib/athens \
 
 **PowerShell**
 ```PowerShell
-set $env:ATHENS_STORAGE = "C:\athens-storage"
+$env:ATHENS_STORAGE = "$(Join-Path $pwd athens-storage)"
 md -Path $env:ATHENS_STORAGE
 docker run -d -v "$($env:ATHENS-STORAGE):/var/lib/athens" `
    -e ATHENS_DISK_STORAGE_ROOT=/var/lib/athens `
