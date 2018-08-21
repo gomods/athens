@@ -5,9 +5,9 @@ import (
 
 	"github.com/gobuffalo/buffalo/worker"
 	"github.com/gomods/athens/pkg/config/env"
+	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/module"
 	"github.com/gomods/athens/pkg/storage"
-	"github.com/gomods/athens/pkg/errors"
 	olympusStore "github.com/gomods/athens/pkg/storage/olympus"
 )
 
@@ -15,8 +15,8 @@ const (
 	// OlympusGlobalEndpoint is a default olympus DNS address
 	OlympusGlobalEndpoint = "http://localhost:3001"
 	// OlympusGlobalEndpointOverrideKey overrides default olympus settings
-	OlympusGlobalEndpointOverrideKey = "OLYMPUS_GLOBAL_ENDPOINT"
-	op errors.Op = "GetProcessCacheMissJob"
+	OlympusGlobalEndpointOverrideKey           = "OLYMPUS_GLOBAL_ENDPOINT"
+	op                               errors.Op = "GetProcessCacheMissJob"
 )
 
 // GetProcessCacheMissJob processes queue of cache misses and downloads sources from active Olympus

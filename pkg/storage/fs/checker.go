@@ -4,9 +4,9 @@ import (
 	"context"
 	"path/filepath"
 
+	"github.com/gomods/athens/pkg/errors"
 	opentracing "github.com/opentracing/opentracing-go"
 	"github.com/spf13/afero"
-	"github.com/gomods/athens/pkg/errors"
 )
 
 func (v *storageImpl) Exists(ctx context.Context, module, version string) (bool, error) {
