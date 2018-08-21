@@ -9,6 +9,21 @@ image:
   ##
   pullPolicy: Always
 
+service:
+  ## Type of service; valid values are "ClusterIP", "LoadBalancer", and
+  ## "NodePort". "ClusterIP" is sufficient in the average case where a service
+  ## catalog installation in the same cluster is the only client that needs to
+  ## communicate with this broker. i.e. The broker does not need to receive
+  ## inbound requests from outside the cluster.
+  type: ClusterIP
+  ## Further configuration if service is of type "NodePort"
+  nodePort:
+    ## Available port in allowable range (e.g. 30000 - 32767 on minikube)
+    port: 30080
+
+ingress:
+  enabled: false
+    
 storageType: disk
 redisPort: 6379
 goEnv: development
