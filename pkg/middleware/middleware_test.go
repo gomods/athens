@@ -160,7 +160,5 @@ func initializeTracing(app *buffalo.App) {
 	tracer, _, _ := cfg.New(
 		"athens.proxy",
 	)
-	//	opentracing.SetGlobalTracer(tracer)
 	app.Use(buffet.OpenTracing(tracer))
-
 }
