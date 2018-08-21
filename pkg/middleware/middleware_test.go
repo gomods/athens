@@ -8,7 +8,6 @@ import (
 	"testing"
 
 	"github.com/bketelsen/buffet"
-	"github.com/gobuffalo/envy"
 	"github.com/sirupsen/logrus"
 	"github.com/uber/jaeger-client-go/config"
 
@@ -65,13 +64,13 @@ func Test_FilterMiddleware(t *testing.T) {
 	r.Equal(200, res.Code)
 }
 
-func hookFilterApp() *buffalo.App {
+func hookFilterApp(hook string) *buffalo.App {
 	h := func(c buffalo.Context) error {
 		return c.Render(200, nil)
 	}
 
 	a := buffalo.New(buffalo.Options{})
-	a.Use(LogEntryMiddleware(NewValidationMiddleware, log.New("none", logrus.DebugLevel)))
+	a.Use(LogEntryMiddleware(NewValidationMiddleware, log.New("none", logrus.DebugLevel), hook))
 	initializeTracing(a)
 
 	a.GET(download.PathList, h)
@@ -102,8 +101,7 @@ type HookTestsSuite struct {
 func (suite *HookTestsSuite) SetupSuite() {
 	fmt.Println("setup")
 	suite.server = httptest.NewServer(&suite.mock)
-	envy.Set("ATHENS_PROXY_VALIDATOR", suite.server.URL)
-	suite.w = willie.New(hookFilterApp())
+	suite.w = willie.New(hookFilterApp(suite.server.URL))
 }
 
 func (suite *HookTestsSuite) SetupTest() {
@@ -112,7 +110,6 @@ func (suite *HookTestsSuite) SetupTest() {
 }
 
 func (suite *HookTestsSuite) TearDownSuite() {
-	envy.Set("ATHENS_PROXY_VALIDATOR", "")
 	suite.server.Close()
 }
 
