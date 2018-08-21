@@ -61,18 +61,31 @@ func init() {
 func App() (*buffalo.App, error) {
 	ctx := context.Background()
 	store, err := GetStorage()
-	mf := module.NewFilter()
 	if err != nil {
 		err = fmt.Errorf("error getting storage configuration (%s)", err)
 		return nil, err
 	}
 
-	worker, err := getWorker(ctx, store, mf)
+	// mount .netrc to home dir
+	// to have access to private repos.
+	initializeNETRC()
+
+	worker, err := getWorker(ctx, store)
 	if err != nil {
 		return nil, err
 	}
 
-	lggr := log.New(env.CloudRuntime(), env.LogLevel())
+	lvl, err := env.LogLevel()
+	if err != nil {
+		return nil, err
+	}
+	lggr := log.New(env.CloudRuntime(), lvl)
+
+	blvl, err := env.BuffaloLogLevel()
+	if err != nil {
+		return nil, err
+	}
+	blggr := log.Buffalo(blvl)
 
 	app := buffalo.New(buffalo.Options{
 		Env: ENV,
@@ -82,12 +95,15 @@ func App() (*buffalo.App, error) {
 		SessionName: "_athens_session",
 		Worker:      worker,
 		WorkerOff:   true, // TODO(marwan): turned off until worker is being used.
-		Logger:      log.Buffalo(),
+		Logger:      blggr,
 	})
+	if prefix := env.AthensPathPrefix(); prefix != "" {
+		app = app.Group(prefix)
+	}
 
 	// Automatically redirect to SSL
 	app.Use(ssl.ForceSSL(secure.Options{
-		SSLRedirect:     ENV == "production",
+		SSLRedirect:     env.ProxyForceSSL(),
 		SSLProxyHeaders: map[string]string{"X-Forwarded-Proto": "https"},
 	}))
 
@@ -113,9 +129,15 @@ func App() (*buffalo.App, error) {
 		app.Stop(err)
 	}
 	app.Use(T.Middleware())
-	app.Use(newFilterMiddleware(mf))
-
-	if err := addProxyRoutes(app, store, mf, lggr); err != nil {
+	if !env.FilterOff() {
+		mf := module.NewFilter()
+		app.Use(newFilterMiddleware(mf))
+	}
+	user, pass, ok := env.BasicAuth()
+	if ok {
+		app.Use(basicAuth(user, pass))
+	}
+	if err := addProxyRoutes(app, store, lggr); err != nil {
 		err = fmt.Errorf("error adding proxy routes (%s)", err)
 		return nil, err
 	}
@@ -127,7 +149,7 @@ func App() (*buffalo.App, error) {
 	return app, nil
 }
 
-func getWorker(ctx context.Context, s storage.Backend, mf *module.Filter) (worker.Worker, error) {
+func getWorker(ctx context.Context, s storage.Backend) (worker.Worker, error) {
 	port := env.RedisQueuePortWithDefault(":6379")
 	w := gwa.New(gwa.Options{
 		Pool: &redis.Pool{
@@ -147,5 +169,5 @@ func getWorker(ctx context.Context, s storage.Backend, mf *module.Filter) (worke
 		MaxFails: env.WorkerMaxFails(),
 	}
 
-	return w, w.RegisterWithOptions(FetcherWorkerName, opts, GetProcessCacheMissJob(ctx, s, w, mf))
+	return w, w.RegisterWithOptions(FetcherWorkerName, opts, GetProcessCacheMissJob(ctx, s, w))
 }
