@@ -13,7 +13,7 @@ Athens currently supports a number of storage drivers. For local use we recommen
 
 ## Running Athens with Local Disk Storage
 
-In order to run Athens with disk storage, you will next need to identify where you would like to persist modules. In the example below, we will create a new directory named **athens-storage** in our current directory. Next, create an environment variable named **ATHENS_DISK_STORAGE_ROOT** and set it to this new directory location. This directory needs to be writeable by the user that will run Athens. Additionally, you will need to set the **ATHENS_STORAGE_TYPE** environment variable to the value **disk**. Now you are ready to run Athens with disk storage enabled.
+In order to run Athens with disk storage, you will next need to identify where you would like to persist modules. In the example below, we will create a new directory named **athens-storage** in our current directory.  Now you are ready to run Athens with disk storage enabled. To enable disk storage, you need to set the **ATHENS_STORAGE_TYPE** and **ATHENS_DISK_STORAGE_ROOT** environment variables when you run the Docker container.
 
 **Bash**
 ```bash
