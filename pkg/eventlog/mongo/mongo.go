@@ -137,6 +137,7 @@ func (m *Log) newSession() (*mgo.Session, error) {
 			return nil, fmt.Errorf("failed to parse certificate from: %s", m.certPath)
 		}
 
+		// TODO: Support for custom CAs #540
 		tlsConfig.InsecureSkipVerify = true
 		tlsConfig.ClientCAs = roots
 
