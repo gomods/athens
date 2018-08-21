@@ -20,7 +20,7 @@ const (
 )
 
 // GetProcessCacheMissJob processes queue of cache misses and downloads sources from active Olympus
-func GetProcessCacheMissJob(ctx context.Context, s storage.Backend, w worker.Worker, mf *module.Filter) worker.Handler {
+func GetProcessCacheMissJob(ctx context.Context, s storage.Backend, w worker.Worker) worker.Handler {
 	return func(args worker.Args) (err error) {
 		mod, version, err := parseArgs(args)
 		if err != nil {
