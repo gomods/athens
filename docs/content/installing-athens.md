@@ -18,6 +18,7 @@ Athens currently supports a number of storage drivers. For local use we recommen
 
 First, let's build the proxy and install it locally.
 
+**Bash**
 ```bash
 go get -u github.com/gomods/athens/cmd/proxy
 mv $GOPATH/bin/proxy /usr/local/bin/athens
