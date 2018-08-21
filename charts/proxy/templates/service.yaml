@@ -12,7 +12,7 @@ spec:
   selector:
     app: {{ template "fullname" . }}
   ports:
-   - name: http
+  - name: http
     port: 80
     targetPort: 3000
     protocol: TCP

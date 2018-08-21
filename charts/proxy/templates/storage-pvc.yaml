@@ -1,0 +1,24 @@
+{{- if and (eq .Values.storageType "disk") .Values.disk.persistence.enabled }}
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: {{ template "fullname" . }}-storage
+  labels:
+    app: {{ template "fullname" . }}-storage
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+spec:
+  accessModes:
+    - {{ .Values.disk.persistence.accessMode | quote }}
+  resources:
+    requests:
+      storage: {{ .Values.disk.persistence.size | quote }}
+{{- if .Values.disk.persistence.storageClass }}
+{{- if (eq "-" .Values.disk.persistence.storageClass) }}
+  storageClassName: ""
+{{- else }}
+  storageClassName: "{{ .Values.disk.persistence.storageClass }}"
+{{- end }}
+{{- end }}
+{{- end }}
