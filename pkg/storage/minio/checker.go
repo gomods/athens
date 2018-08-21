@@ -15,5 +15,9 @@ func (v *storageImpl) Exists(ctx context.Context, module, version string) (bool,
 	modPath := fmt.Sprintf("%s/go.mod", versionedPath)
 	_, err := v.minioClient.StatObject(v.bucketName, modPath, minio.StatObjectOptions{})
 
+	if minio.ToErrorResponse(err).Code == "NoSuchKey" {
+		return false, nil
+	}
+
 	return err == nil, err
 }

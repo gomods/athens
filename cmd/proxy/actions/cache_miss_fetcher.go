@@ -6,7 +6,6 @@ import (
 	"github.com/gobuffalo/buffalo/worker"
 	"github.com/gomods/athens/pkg/config/env"
 	"github.com/gomods/athens/pkg/errors"
-	"github.com/gomods/athens/pkg/module"
 	"github.com/gomods/athens/pkg/storage"
 	olympusStore "github.com/gomods/athens/pkg/storage/olympus"
 )
