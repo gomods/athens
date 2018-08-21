@@ -104,13 +104,13 @@ total 24
 -rwxr-xr-x  1 jeremyrickard  wheel    45 Aug 21 10:52 go.mod
 ```
 
-When Athens is restarted, it will serve the module from this location without redownloading it. To verify that, we need to first remove the Athens container.
+When Athens is restarted, it will serve the module from this location without re-downloading it. To verify that, we need to first remove the Athens container.
 
 ```console
 docker rm -f athens-proxy
 ```
 
-Now, we need ot clear the local Go modules cache:
+Now, we need to clear the local Go modules cache. This is needed so that your local Go command line tool will re-download the module from Athens. The following commands will clear the local module cache:
 
 **Bash**
 ```bash
@@ -166,7 +166,7 @@ total 24
 -rwxr-xr-x  1 jeremyrickard  wheel    45 Aug 21 10:52 go.mod
 ```
 
-Notice that the timestamps given have not changed. 
+Notice that the timestamps given have not changed.
 
 Next Steps:
 
