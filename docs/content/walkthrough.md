@@ -173,5 +173,5 @@ cache and did not need to request it from the proxy.
 
 Now that you have seen Athens in Action:
 
-* Learn how to [install Athens]((/installing-athens) with persistent storage.
+* Learn how to [install a shared team Athens](/install/shared-team-instance) with persistent storage.
 * Explore best practices for running Athens in Production. [Coming Soon/Help Wanted](https://github.com/gomods/athens/issues/531)

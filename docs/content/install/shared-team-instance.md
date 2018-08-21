@@ -1,7 +1,6 @@
 ---
-title: Installing Athens
+title: Shared Team Instance
 description: Installing an Athens Instance For Your Development Team
-menu: shortcuts
 ---
 
 When you follow the instructions in the [Walkthrough](/walkthrough), you end up with an Athens Proxy that uses in-memory storage. This is only suitable for trying out the proxy for a short period of time, as you will quickly run out of memory and Athens won't persist modules between restarts. This guide will help you get Athens running in a more suitable manner for scenarios like providing an instance for your development team to share.
@@ -10,7 +9,7 @@ We will use Docker to run the Athens proxy, so first make sure you have Docker [
 
 ## Selecting a Storage Provider
 
-Athens currently supports a number of storage drivers. For local use we recommend starting with the local disk provider. For other providers, please see [Storage Providers]() [Coming Soon].
+Athens currently supports a number of storage drivers. For local use we recommend starting with the local disk provider. For other providers, please see the Storage Provider documentation [Coming Soon].
 
 ## Running Athens with Local Disk Storage
 
@@ -46,7 +45,6 @@ Athens should now be running as a Docker container with the local directory, **a
 
 ```console
 $ docker ps | grep athens-proxy
-ocker ps | grep athens-proxy
 d658e9a211b9        jeremyrickard/athens-proxy:latest   "/bin/app"               About a minute ago   Up About a minute      0.0.0.0:3000->3000/tcp   athens-proxy
 ```
 
