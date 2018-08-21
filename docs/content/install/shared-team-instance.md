@@ -13,12 +13,12 @@ Athens currently supports a number of storage drivers. For local use we recommen
 
 ## Running Athens with Local Disk Storage
 
-In order to run Athens with disk storage, you will next need to identify where you would like to persist modules. In the example below, we will create a new directory named **athens-storage** in our current directory.  Now you are ready to run Athens with disk storage enabled. To enable disk storage, you need to set the **ATHENS_STORAGE_TYPE** and **ATHENS_DISK_STORAGE_ROOT** environment variables when you run the Docker container.
+In order to run Athens with disk storage, you will next need to identify where you would like to persist modules. In the example below, we will create a new directory named `athens-storage` in our current directory.  Now you are ready to run Athens with disk storage enabled. To enable disk storage, you need to set the `ATHENS_STORAGE_TYPE` and `ATHENS_DISK_STORAGE_ROOT` environment variables when you run the Docker container.
 
 **Bash**
 ```bash
 export ATHENS_STORAGE=athens-storage
-mkdir $ATHENS_STORAGE
+mkdir -p $ATHENS_STORAGE
 docker run -d -v $ATHENS_STORAGE:/var/lib/athens \
    -e ATHENS_DISK_STORAGE_ROOT=/var/lib/athens \
    -e ATHENS_STORAGE_TYPE=disk \
@@ -30,9 +30,9 @@ docker run -d -v $ATHENS_STORAGE:/var/lib/athens \
 
 **PowerShell**
 ```PowerShell
-set $env:ATHENS_STORAGE = "athens-storage"
+set $env:ATHENS_STORAGE = "C:\athens-storage"
 md -Path $env:ATHENS_STORAGE
-docker run -d -v $env:ATHENS_STORAGE:/var/lib/athens `
+docker run -d -v "$($env:ATHENS-STORAGE):/var/lib/athens" `
    -e ATHENS_DISK_STORAGE_ROOT=/var/lib/athens `
    -e ATHENS_STORAGE_TYPE=disk `
    --name athens-proxy `
@@ -41,11 +41,14 @@ docker run -d -v $env:ATHENS_STORAGE:/var/lib/athens `
    jeremyrickard/athens-proxy:latest
 ```
 
-Athens should now be running as a Docker container with the local directory, **athens-storage** mounted as a volume. When Athens retrieves the modules, they will be will be stored in the directory previously created. First, let's verify that Athens is running:
+Note: if you have not previously mounted this drive with Docker for Windows, you may be prompted to allow access
+
+Athens should now be running as a Docker container with the local directory, `athens-storage` mounted as a volume. When Athens retrieves the modules, they will be will be stored in the directory previously created. First, let's verify that Athens is running:
 
 ```console
-$ docker ps | grep athens-proxy
-d658e9a211b9        jeremyrickard/athens-proxy:latest   "/bin/app"               About a minute ago   Up About a minute      0.0.0.0:3000->3000/tcp   athens-proxy
+$ docker ps
+CONTAINER ID        IMAGE                               COMMAND           PORTS                    NAMES
+f0429b81a4f9        jeremyrickard/athens-proxy:latest   "/bin/app"        0.0.0.0:3000->3000/tcp   athens-proxy
 ```
 
 Now, we can use Athens from any development machine that has Go 1.11 installed. To verify this, try the following example:
@@ -84,7 +87,7 @@ handler: GET /github.com/athens-artifacts/samplelib/@v/v1.0.0.mod [200]
 handler: GET /github.com/athens-artifacts/samplelib/@v/v1.0.0.zip [200]
 ```
 
-Now, if you view the contents of the **ATHENS_STORAGE** directory, you will see that you now have additional files representing the samplelib module.
+Now, if you view the contents of the `athens_storage` directory, you will see that you now have additional files representing the samplelib module.
 
 **Bash**
 ```console
@@ -97,11 +100,17 @@ total 24
 
 **PowerShell**
 ```console
-$ dir $ATHENS_STORAGE/github.com/athens-artifacts/samplelib/v1.0.0/
-total 24
--rwxr-xr-x  1 jeremyrickard  wheel    50 Aug 21 10:52 v1.0.0.info
--rwxr-xr-x  1 jeremyrickard  wheel  2391 Aug 21 10:52 source.zip
--rwxr-xr-x  1 jeremyrickard  wheel    45 Aug 21 10:52 go.mod
+$ dir $env:ATHENS_STORAGE\github.com\athens-artifacts\samplelib\v1.0.0\
+
+
+    Directory: C:\athens-storage\github.com\athens-artifacts\samplelib\v1.0.0
+
+
+Mode                LastWriteTime         Length Name
+----                -------------         ------ ----
+-a----        8/21/2018   3:31 PM             45 go.mod
+-a----        8/21/2018   3:31 PM           2391 source.zip
+-a----        8/21/2018   3:31 PM             50 v1.0.0.info
 ```
 
 When Athens is restarted, it will serve the module from this location without re-downloading it. To verify that, we need to first remove the Athens container.
@@ -137,7 +146,7 @@ docker run -d -v $ATHENS_STORAGE:/var/lib/athens \
 
 **PowerShell**
 ```console
-docker run -d -v $env:ATHENS_STORAGE:/var/lib/athens `
+docker run -d -v "$($env:ATHENS-STORAGE):/var/lib/athens" `
    -e ATHENS_DISK_STORAGE_ROOT=/var/lib/athens `
    -e ATHENS_STORAGE_TYPE=disk `
    --name athens-proxy `
@@ -146,7 +155,7 @@ docker run -d -v $env:ATHENS_STORAGE:/var/lib/athens `
    jeremyrickard/athens-proxy:latest
 ```
 
-When we re-run our Go example, the Go cli will again download module from Athens. Athens, however, will not need to retrieve the module. It will be served from the existing storage.
+When we re-run our Go example, the Go cli will again download module from Athens. Athens, however, will not need to retrieve the module. It will be served from the Athens on-disk storage.
 
 **Bash**
 ```console
@@ -159,11 +168,17 @@ total 24
 
 **PowerShell**
 ```console
-$ dir $ATHENS_STORAGE/github.com/athens-artifacts/samplelib/v1.0.0/
-total 24
--rwxr-xr-x  1 jeremyrickard  wheel    50 Aug 21 10:52 v1.0.0.info
--rwxr-xr-x  1 jeremyrickard  wheel  2391 Aug 21 10:52 source.zip
--rwxr-xr-x  1 jeremyrickard  wheel    45 Aug 21 10:52 go.mod
+$ dir $env:ATHENS_STORAGE\github.com\athens-artifacts\samplelib\v1.0.0\
+
+
+    Directory: C:\athens-storage\github.com\athens-artifacts\samplelib\v1.0.0
+
+
+Mode                LastWriteTime         Length Name
+----                -------------         ------ ----
+-a----        8/21/2018   3:31 PM             45 go.mod
+-a----        8/21/2018   3:31 PM           2391 source.zip
+-a----        8/21/2018   3:31 PM             50 v1.0.0.info
 ```
 
 Notice that the timestamps given have not changed.
