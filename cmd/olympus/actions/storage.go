@@ -28,11 +28,12 @@ func GetStorage() (storage.Backend, error) {
 		}
 		return s, nil
 	case "mongo":
-		mongoURI, err := env.MongoURI()
+		connectionString, err := env.MongoConnectionString()
 		if err != nil {
 			return nil, err
 		}
-		return mongo.NewStorage(mongoURI)
+		certPath := env.MongoCertPath()
+		return mongo.NewStorageWithCert(connectionString, certPath)
 	default:
 		return nil, fmt.Errorf("storage type %s is unknown", storageType)
 	}
