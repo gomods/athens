@@ -19,7 +19,6 @@ import (
 	mw "github.com/gomods/athens/pkg/middleware"
 	"github.com/gomods/athens/pkg/module"
 	"github.com/gomods/athens/pkg/storage"
-
 	"github.com/gomodule/redigo/redis"
 	"github.com/rs/cors"
 	"github.com/unrolled/secure"
