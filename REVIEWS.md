@@ -21,6 +21,8 @@ Here they are:
 - Pull requests must be reviewed by at least one 
   [maintainer](https://github.com/orgs/gomods/teams/maintainers), enforced by GitHub.
   Only maintainers can merge a pull request.
+- For important changes we want to make sure that people in other time zones have a chance to
+    review, so keep the pull request open for 24-36 hours before merging.
 - Pull requests have to pass continuous integration (CI) tests.
 
 
