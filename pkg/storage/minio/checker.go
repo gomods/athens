@@ -6,6 +6,12 @@ import (
 
 	minio "github.com/minio/minio-go"
 	opentracing "github.com/opentracing/opentracing-go"
+	"github.com/gomods/athens/pkg/errors"
+)
+
+const (
+	minioErrorCodeNoSuchKey = "NoSuchKey"
+	op errors.Op = "storage.minio.Exists"
 )
 
 func (v *storageImpl) Exists(ctx context.Context, module, version string) (bool, error) {
@@ -15,9 +21,14 @@ func (v *storageImpl) Exists(ctx context.Context, module, version string) (bool,
 	modPath := fmt.Sprintf("%s/go.mod", versionedPath)
 	_, err := v.minioClient.StatObject(v.bucketName, modPath, minio.StatObjectOptions{})
 
-	if minio.ToErrorResponse(err).Code == "NoSuchKey" {
+	if minio.ToErrorResponse(err).Code == minioErrorCodeNoSuchKey {
 		return false, nil
 	}
 
-	return err == nil, err
+	if err != nil {
+		return false, errors.E(op, err)
+	}
+
+
+	return true, nil
 }

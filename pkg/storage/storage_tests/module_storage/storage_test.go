@@ -144,7 +144,7 @@ func (d *TestSuites) testDelete(ts storage.TestSuite) {
 			version: "v1.0.0",
 			want:    errors.KindNotFound,
 		},
-		{
+		{bucket_cloud.go
 			module:  d.module,
 			version: version,
 			want:    errors.KindUnexpected,
