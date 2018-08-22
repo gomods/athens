@@ -12,7 +12,6 @@ import (
 	"github.com/gomods/athens/pkg/storage/mem"
 	"github.com/gomods/athens/pkg/storage/minio"
 	"github.com/gomods/athens/pkg/storage/mongo"
-	"github.com/gomods/athens/pkg/storage/rdbms"
 	"github.com/spf13/afero"
 )
 
@@ -26,11 +25,13 @@ func GetStorage() (storage.Backend, error) {
 	case "memory":
 		return mem.NewStorage()
 	case "mongo":
-		storageRoot, err = env.MongoURI()
+		connectionString, err := env.MongoConnectionString()
 		if err != nil {
 			return nil, err
 		}
-		return mongo.NewStorage(storageRoot)
+
+		certPath := env.MongoCertPath()
+		return mongo.NewStorageWithCert(connectionString, certPath)
 	case "disk":
 		storageRoot, err = env.DiskRoot()
 		if err != nil {
@@ -41,12 +42,6 @@ func GetStorage() (storage.Backend, error) {
 			return nil, fmt.Errorf("could not create new storage from os fs (%s)", err)
 		}
 		return s, nil
-	case "postgres", "sqlite", "cockroach", "mysql":
-		storageRoot, err = env.RdbmsName()
-		if err != nil {
-			return nil, err
-		}
-		return rdbms.NewRDBMSStorage(storageRoot)
 	case "minio":
 		endpoint, err := env.MinioEndpoint()
 		if err != nil {
