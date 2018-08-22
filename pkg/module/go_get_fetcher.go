@@ -86,15 +86,10 @@ func getSources(goBinaryName string, fs afero.Fs, gopath, repoRoot, module, vers
 
 	fullURI := fmt.Sprintf("%s@%s", uri, version)
 
-	gopathEnv := fmt.Sprintf("GOPATH=%s", gopath)
-	cacheEnv := fmt.Sprintf("GOCACHE=%s", filepath.Join(gopath, "cache"))
-	disableCgo := "CGO_ENABLED=0"
-	enableGoModules := "GO111MODULE=on"
-
 	cmd := exec.Command(goBinaryName, "mod", "download", fullURI)
 	// PATH is needed for vgo to recognize vcs binaries
 	// this breaks windows.
-	cmd.Env = []string{"PATH=" + os.Getenv("PATH"), gopathEnv, cacheEnv, disableCgo, enableGoModules}
+	cmd.Env = prepareEnv(gopath)
 	cmd.Dir = repoRoot
 	o, err := cmd.CombinedOutput()
 	if err != nil {
@@ -118,6 +113,38 @@ func getSources(goBinaryName string, fs afero.Fs, gopath, repoRoot, module, vers
 	}
 
 	return nil
+}
+
+func prepareEnv(gopath string) []string {
+	names := []string{
+		"GOPATH",
+		"GOCACHE",
+		"CGO_ENABLED",
+		"GO111MODULE",
+		"GOPROXY",
+	}
+	parentEnv := os.Environ()
+	shouldRemove := func(parentEnv string) bool {
+		for _, n := range names {
+			if strings.Contains(parentEnv, n) {
+				return true
+			}
+		}
+		return false
+	}
+	cmdEnv := []string{}
+	for _, ev := range parentEnv {
+		if !shouldRemove(ev) {
+			cmdEnv = append(cmdEnv, ev)
+		}
+	}
+	gopathEnv := fmt.Sprintf("GOPATH=%s", gopath)
+	cacheEnv := fmt.Sprintf("GOCACHE=%s", filepath.Join(gopath, "cache"))
+	disableCgo := "CGO_ENABLED=0"
+	enableGoModules := "GO111MODULE=on"
+
+	cmdEnv = append(cmdEnv, gopathEnv, cacheEnv, disableCgo, enableGoModules)
+	return cmdEnv
 }
 
 func checkFiles(fs afero.Fs, path, version string) error {
