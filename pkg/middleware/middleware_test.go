@@ -13,7 +13,6 @@ import (
 
 	"github.com/gobuffalo/buffalo"
 	"github.com/gomods/athens/pkg/config/env"
-	"github.com/gomods/athens/pkg/download"
 	"github.com/gomods/athens/pkg/log"
 	"github.com/gomods/athens/pkg/module"
 	"github.com/markbates/willie"
@@ -21,6 +20,10 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 )
+
+// Avoid import cycle.
+const pathList = "/{module:.+}/@v/list"
+const pathVersionInfo = "/{module:.+}/@v/{version}.info"
 
 func middlewareFilterApp() *buffalo.App {
 	h := func(c buffalo.Context) error {
@@ -32,8 +35,8 @@ func middlewareFilterApp() *buffalo.App {
 	a.Use(NewFilterMiddleware(mf))
 	initializeTracing(a)
 
-	a.GET(download.PathList, h)
-	a.GET(download.PathVersionInfo, h)
+	a.GET(pathList, h)
+	a.GET(pathVersionInfo, h)
 	return a
 }
 
@@ -73,8 +76,8 @@ func hookFilterApp(hook string) *buffalo.App {
 	a.Use(LogEntryMiddleware(NewValidationMiddleware, log.New("none", logrus.DebugLevel), hook))
 	initializeTracing(a)
 
-	a.GET(download.PathList, h)
-	a.GET(download.PathVersionInfo, h)
+	a.GET(pathList, h)
+	a.GET(pathVersionInfo, h)
 	return a
 }
 
