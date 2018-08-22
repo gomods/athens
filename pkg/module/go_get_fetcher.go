@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strings"
 
 	"github.com/gomods/athens/pkg/errors"
@@ -86,7 +87,11 @@ func getSources(goBinaryName string, fs afero.Fs, gopath, repoRoot, module, vers
 	fullURI := fmt.Sprintf("%s@%s", uri, version)
 
 	cmd := exec.Command(goBinaryName, "mod", "download", fullURI)
-	cmd.Env = prepareEnv(gopath)
+	cmdEnv, err := prepareEnv(gopath)
+	if err != nil {
+		return errors.E(op, err)
+	}
+	cmd.Env = cmdEnv
 	cmd.Dir = repoRoot
 	o, err := cmd.CombinedOutput()
 	if err != nil {
@@ -112,7 +117,9 @@ func getSources(goBinaryName string, fs afero.Fs, gopath, repoRoot, module, vers
 	return nil
 }
 
-func prepareEnv(gopath string) []string {
+func prepareEnv(gopath string) ([]string, error) {
+	const op errors.Op = "module.prepareEnv"
+
 	pathEnv := fmt.Sprintf("PATH=%s", os.Getenv("PATH"))
 	gopathEnv := fmt.Sprintf("GOPATH=%s", gopath)
 	cacheEnv := fmt.Sprintf("GOCACHE=%s", filepath.Join(gopath, "cache"))
@@ -123,12 +130,16 @@ func prepareEnv(gopath string) []string {
 	// if this one is missing we will get an error from go
 	if val, ok := os.LookupEnv("USERPROFILE"); ok {
 		cmdEnv = append(cmdEnv, fmt.Sprintf("USERPROFILE=%s", val))
+	} else if runtime.GOOS == "windows" {
+		return nil, errors.E(op, "missing ENV VAR: USERPROFILE")
 	}
 	// if this one is missing go won't give any error but the pkg/mod dir will be empty
 	if val, ok := os.LookupEnv("SystemRoot"); ok {
 		cmdEnv = append(cmdEnv, fmt.Sprintf("SystemRoot=%s", val))
+	} else if runtime.GOOS == "windows" {
+		return nil, errors.E(op, "missing ENV VAR: SystemRoot")
 	}
-	return cmdEnv
+	return cmdEnv, nil
 }
 
 func checkFiles(fs afero.Fs, path, version string) error {
