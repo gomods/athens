@@ -83,12 +83,9 @@ func Dummy(fs afero.Fs, repoRoot string) error {
 func getSources(goBinaryName string, fs afero.Fs, gopath, repoRoot, module, version string) error {
 	const op errors.Op = "module.getSources"
 	uri := strings.TrimSuffix(module, "/")
-
 	fullURI := fmt.Sprintf("%s@%s", uri, version)
 
 	cmd := exec.Command(goBinaryName, "mod", "download", fullURI)
-	// PATH is needed for vgo to recognize vcs binaries
-	// this breaks windows.
 	cmd.Env = prepareEnv(gopath)
 	cmd.Dir = repoRoot
 	o, err := cmd.CombinedOutput()
@@ -116,34 +113,21 @@ func getSources(goBinaryName string, fs afero.Fs, gopath, repoRoot, module, vers
 }
 
 func prepareEnv(gopath string) []string {
-	names := []string{
-		"GOPATH",
-		"GOCACHE",
-		"CGO_ENABLED",
-		"GO111MODULE",
-		"GOPROXY",
-	}
-	parentEnv := os.Environ()
-	shouldRemove := func(parentEnvVar string) bool {
-		for _, n := range names {
-			if strings.Contains(parentEnvVar, n) {
-				return true
-			}
-		}
-		return false
-	}
-	cmdEnv := []string{}
-	for _, ev := range parentEnv {
-		if !shouldRemove(ev) {
-			cmdEnv = append(cmdEnv, ev)
-		}
-	}
+	pathEnv := fmt.Sprintf("PATH=%s", os.Getenv("PATH"))
 	gopathEnv := fmt.Sprintf("GOPATH=%s", gopath)
 	cacheEnv := fmt.Sprintf("GOCACHE=%s", filepath.Join(gopath, "cache"))
 	disableCgo := "CGO_ENABLED=0"
 	enableGoModules := "GO111MODULE=on"
-
-	cmdEnv = append(cmdEnv, gopathEnv, cacheEnv, disableCgo, enableGoModules)
+	cmdEnv := []string{pathEnv, gopathEnv, cacheEnv, disableCgo, enableGoModules}
+	// add Windows specific ENV VARS
+	// if this one is missing we will get an error from go
+	if val, ok := os.LookupEnv("USERPROFILE"); ok {
+		cmdEnv = append(cmdEnv, fmt.Sprintf("USERPROFILE=%s", val))
+	}
+	// if this one is missing go won't give any error but the pkg/mod dir will be empty
+	if val, ok := os.LookupEnv("SystemRoot"); ok {
+		cmdEnv = append(cmdEnv, fmt.Sprintf("SystemRoot=%s", val))
+	}
 	return cmdEnv
 }
 
