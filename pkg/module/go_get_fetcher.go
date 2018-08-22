@@ -124,9 +124,9 @@ func prepareEnv(gopath string) []string {
 		"GOPROXY",
 	}
 	parentEnv := os.Environ()
-	shouldRemove := func(parentEnv string) bool {
+	shouldRemove := func(parentEnvVar string) bool {
 		for _, n := range names {
-			if strings.Contains(parentEnv, n) {
+			if strings.Contains(parentEnvVar, n) {
 				return true
 			}
 		}
