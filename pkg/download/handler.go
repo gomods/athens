@@ -45,7 +45,7 @@ func RegisterHandlers(app *buffalo.App, opts *HandlerOpts) {
 	if opts == nil || opts.Protocol == nil || opts.Engine == nil || opts.Logger == nil {
 		panic("absolutely unacceptable handler opts")
 	}
-	noCacheMw := middleware.CacheControl("private, no-store")
+	noCacheMw := middleware.CacheControl("no-cache, no-store, must-revalidate")
 
 	listHandler := LogEntryHandler(ListHandler, opts)
 	app.GET(PathList, noCacheMw(listHandler))

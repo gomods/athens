@@ -13,7 +13,7 @@ func TestCacheControl(t *testing.T) {
 	a := buffalo.New(buffalo.Options{})
 	a.GET("/test", h)
 
-	expected := "no-cache, no-store, must-revalidate"
+	expected := "private, no-store"
 	a.Use(CacheControl(expected))
 
 	w := httptest.NewRecorder()
