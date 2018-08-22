@@ -4,14 +4,14 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/gomods/athens/pkg/errors"
 	minio "github.com/minio/minio-go"
 	opentracing "github.com/opentracing/opentracing-go"
-	"github.com/gomods/athens/pkg/errors"
 )
 
 const (
-	minioErrorCodeNoSuchKey = "NoSuchKey"
-	op errors.Op = "storage.minio.Exists"
+	minioErrorCodeNoSuchKey           = "NoSuchKey"
+	op                      errors.Op = "storage.minio.Exists"
 )
 
 func (v *storageImpl) Exists(ctx context.Context, module, version string) (bool, error) {
@@ -28,7 +28,6 @@ func (v *storageImpl) Exists(ctx context.Context, module, version string) (bool,
 	if err != nil {
 		return false, errors.E(op, err)
 	}
-
 
 	return true, nil
 }
