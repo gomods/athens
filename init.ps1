@@ -58,6 +58,8 @@ if ($build.IsPresent) {
 }
 
 if ($run.IsPresent) {
+	Set-Location cmd/proxy 
+	& buffalo build
 	& ./athens
 }
 

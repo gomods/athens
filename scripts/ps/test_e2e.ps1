@@ -1,14 +1,14 @@
 # Execute end-to-end (e2e) tests to verify that everything is working right
 # from the end user perpsective
 Get-Process -Name *buffalo*
-$REPO_DIR = Join-Path $PSScriptRoot ".." ".."
+$REPO_DIR = Join-Path $PSScriptRoot ".." | Join-Path -ChildPath ".."
 if (-not (Test-Path env:GO_BINARY_PATH)) { $env:GO_BINARY_PATH = "go" }
 $globalTmpDir = [System.IO.Path]::GetTempPath()
 $tmpDirName = [GUID]::NewGuid()
 $tmpDirPath = Join-Path $globalTmpDir $tmpDirName
 New-Item $tmpDirPath -ItemType Directory | Out-Null
 $goPath = $env:GOPATH
-$GOMOD_CACHE = Join-Path $tmpDirPath "pkg" "mod"
+$GOMOD_CACHE = Join-Path $tmpDirPath "pkg" | Join-Path -ChildPath "mod"
 $env:Path += ";" + "${$(Join-Path $REPO_DIR "bin")}"
 
 function clearGoModCache () {
@@ -30,19 +30,16 @@ function teardown () {
 
 try {
   ## Start the proxy in the background and wait for it to be ready
-  Push-Location $(Join-Path $REPO_DIR cmd proxy)
+  Push-Location $(Join-Path $REPO_DIR cmd | Join-Path -ChildPath proxy)
   ## just in case something is still running
   stopProcesses
   Start-Process -NoNewWindow buffalo dev
 
-  $retryNum = 0
-  $maxRetryNum = 3
+
   $proxyUp = $false
   do {
     try {
-      if ($retryNum -gt $maxRetryNum) { ThrowError -ExceptionMessage "could not start proxy" }
       $proxyUp = (Invoke-WebRequest  -Method GET -Uri http://localhost:3000).StatusCode -eq "200"
-      $retryNum++
     }
     catch {
       Start-Sleep -Seconds 5
