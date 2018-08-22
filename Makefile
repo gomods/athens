@@ -51,8 +51,6 @@ bench:
 
 .PHONY: alldeps
 alldeps:
-	docker-compose -p athensdev up -d mysql
-	docker-compose -p athensdev up -d postgres
 	docker-compose -p athensdev up -d mongo
 	docker-compose -p athensdev up -d redis
 	docker-compose -p athensdev up -d minio
@@ -67,10 +65,8 @@ dev:
 
 .PHONY: down
 down:
-	docker-compose -p athensdev down
-	docker volume prune
+	docker-compose -p athensdev down -v
 
 .PHONY: dev-teardown
 dev-teardown:
-	docker-compose -p athensdev down
-	docker volume prune
+	docker-compose -p athensdev down -v

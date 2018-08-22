@@ -16,6 +16,7 @@ import (
 	"github.com/gocraft/work"
 	"github.com/gomods/athens/pkg/config/env"
 	"github.com/gomods/athens/pkg/log"
+	mw "github.com/gomods/athens/pkg/middleware"
 	"github.com/gomods/athens/pkg/module"
 	"github.com/gomods/athens/pkg/storage"
 	"github.com/gomodule/redigo/redis"
@@ -66,12 +67,26 @@ func App() (*buffalo.App, error) {
 		return nil, err
 	}
 
+	// mount .netrc to home dir
+	// to have access to private repos.
+	initializeNETRC()
+
 	worker, err := getWorker(ctx, store)
 	if err != nil {
 		return nil, err
 	}
 
-	lggr := log.New(env.CloudRuntime(), env.LogLevel())
+	lvl, err := env.LogLevel()
+	if err != nil {
+		return nil, err
+	}
+	lggr := log.New(env.CloudRuntime(), lvl)
+
+	blvl, err := env.BuffaloLogLevel()
+	if err != nil {
+		return nil, err
+	}
+	blggr := log.Buffalo(blvl)
 
 	app := buffalo.New(buffalo.Options{
 		Env: ENV,
@@ -81,8 +96,11 @@ func App() (*buffalo.App, error) {
 		SessionName: "_athens_session",
 		Worker:      worker,
 		WorkerOff:   true, // TODO(marwan): turned off until worker is being used.
-		Logger:      log.Buffalo(),
+		Logger:      blggr,
 	})
+	if prefix := env.AthensPathPrefix(); prefix != "" {
+		app = app.Group(prefix)
+	}
 
 	// Automatically redirect to SSL
 	app.Use(ssl.ForceSSL(secure.Options{
@@ -101,25 +119,27 @@ func App() (*buffalo.App, error) {
 		csrfMiddleware := csrf.New
 		app.Use(csrfMiddleware)
 	}
-
-	// Wraps each request in a transaction.
-	//  c.Value("tx").(*pop.PopTransaction)
-	// Remove to disable this.
-	// app.Use(middleware.PopTransaction(models.DB))
-
 	// Setup and use translations:
 	if T, err = i18n.New(packr.NewBox("../locales"), "en-US"); err != nil {
 		app.Stop(err)
 	}
 	app.Use(T.Middleware())
+
 	if !env.FilterOff() {
 		mf := module.NewFilter()
-		app.Use(newFilterMiddleware(mf))
+		app.Use(mw.NewFilterMiddleware(mf))
 	}
+
+	// Having the hook set means we want to use it
+	if validatorHook, ok := env.ValidatorHook(); ok {
+		app.Use(mw.LogEntryMiddleware(mw.NewValidationMiddleware, lggr, validatorHook))
+	}
+
 	user, pass, ok := env.BasicAuth()
 	if ok {
 		app.Use(basicAuth(user, pass))
 	}
+
 	if err := addProxyRoutes(app, store, lggr); err != nil {
 		err = fmt.Errorf("error adding proxy routes (%s)", err)
 		return nil, err
