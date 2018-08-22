@@ -8,6 +8,7 @@ metadata:
     release: "{{ .Release.Name }}"
     heritage: "{{ .Release.Service }}"
 spec:
+  
   replicas: {{ .Values.replicaCount }}
   template:
     metadata:
@@ -22,26 +23,27 @@ spec:
         imagePullPolicy: {{ .Values.image.pullPolicy | quote }}
         env:
         - name: ATHENS_STORAGE_TYPE
-          value: {{ .Values.storageType | quote }}
-        {{- if eq .Values.storageType "disk"}}
+          value: {{ .Values.storage.type | quote }}
+        {{- if eq .Values.storage.type "disk"}}
         - name: ATHENS_DISK_STORAGE_ROOT
-          value: {{ .Values.disk.storageRoot | quote }}
-        {{- else if eq .Values.storageType "mongo"}}
+          value: {{ .Values.storage.disk.storageRoot | quote }}
+        {{- else if eq .Values.storage.type "mongo"}}
         - name: ATHENS_MONGO_STORAGE_URL
-          value: {{ .Values.mongo.url | quote }}
+          value: {{ .Values.storage.mongo.url | quote }}
         {{- end }}
-        - name: ATHENS_REDIS_QUEUE_PORT
-          value: {{ .Values.redisPort | quote }}
+        # TODO: re-enable when workers are used
+        #- name: ATHENS_REDIS_QUEUE_PORT
+        #  value: {{ .Values.redisPort | quote }}
         ports:
         - containerPort: 3000
-        {{- if eq .Values.storageType "disk" }}
+        {{- if eq .Values.storage.type "disk" }}
         volumeMounts:
         - name: storage-volume
-          mountPath: {{ .Values.disk.storageRoot | quote }}
+          mountPath: {{ .Values.storage.disk.storageRoot | quote }}
         {{- end }}
       volumes:
       - name: storage-volume
-      {{- if .Values.disk.persistence.enabled }}
+      {{- if .Values.storage.disk.persistence.enabled }}
         persistentVolumeClaim: 
           claimName: {{ template "fullname" . }}-storage
       {{- else }}

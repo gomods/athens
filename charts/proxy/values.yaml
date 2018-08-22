@@ -1,4 +1,4 @@
-replicaCount: 3
+replicaCount: 1
 image:
   registry: docker.io
   repository: gomods/athens
@@ -24,17 +24,24 @@ service:
 ingress:
   enabled: false
     
-storageType: disk
-redisPort: 6379
-# you must set this on the command line when you run 'helm install'
-# for example, you need to run 'helm install --set mongoStorageURL=myurl ...'
-mongo:
-  url: "SET THIS ON THE COMMAND LINE"
+storage:
+  type: disk
+  disk:
+    storageRoot: "/var/lib/athens"
+    persistence:
+      ## Note if you use disk.persistence.enabled, replicaCount should be set to 1 unless your access mode is ReadWriteMany
+      enabled: false
+      accessMode: ReadWriteOnce
+      size: 4Gi
+  mongo:
+    # you must set this on the command line when you run 'helm install'
+    # for example, you need to run 'helm install --set mongoStorageURL=myurl ...'
+    url: "SET THIS ON THE COMMAND LINE"
 
-disk:
-  storageRoot: "/var/lib/athens"
-  persistence: 
-    ## Note if you use disk.persistence.enabled, replicaCount should be set to 1 unless your access mode is ReadWriteMany
-    enabled: false
-    accessMode: ReadWriteOnce
-    size: 4Gi
+# Worker is disabled right now
+#redis:
+#  useEmbedded: true
+#  port: 6379
+#  username: 
+#  password:
+#  host:
