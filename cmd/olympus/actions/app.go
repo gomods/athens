@@ -1,7 +1,9 @@
 package actions
 
 import (
+	"fmt"
 	stdlog "log"
+	"strings"
 
 	"github.com/gobuffalo/buffalo"
 	"github.com/gobuffalo/buffalo/middleware"
@@ -56,6 +58,9 @@ var (
 // This is the nerve center of your application.
 func App(config *AppConfig) (*buffalo.App, error) {
 	port := env.Port(":3001")
+	if hasColon := strings.HasPrefix(port, ":"); hasColon == false {
+		port = fmt.Sprintf(":%s", port)
+	}
 
 	w, err := getWorker(config.Storage, config.EventLog)
 	if err != nil {

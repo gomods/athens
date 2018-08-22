@@ -1,9 +1,4 @@
-# This is a multi-stage Dockerfile and requires >= Docker 17.05
-# https://docs.docker.com/engine/userguide/eng-image/multistage-build/
-#
-# use 'make olympus-docker' from the root of the athens repo to build
-# the olympus docker image
-FROM gobuffalo/buffalo:v0.11.0 as builder
+FROM gobuffalo/buffalo:v0.12.6 as builder
 
 RUN mkdir -p $GOPATH/src/github.com/gomods/athens/cmd/olympus
 WORKDIR $GOPATH/src/github.com/gomods/athens/cmd/olympus
@@ -18,13 +13,11 @@ ADD . .
 
 RUN cd cmd/olympus && buffalo build -s -o /bin/app
 
-FROM alpine
-RUN apk add --no-cache bash
-RUN apk add --no-cache ca-certificates
 
-WORKDIR /bin/
+FROM golang:1.11-rc-alpine
+RUN apk add --no-cache bash git openssh ca-certificates
 
-COPY --from=builder /bin/app .
+COPY --from=builder /bin/app /bin/app
 
 # Comment out to run the binary in "production" mode:
 # ENV GO_ENV=production
