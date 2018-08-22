@@ -86,3 +86,67 @@ helm install ./charts/proxy -n athens
 
 This will deploy a single Athens instance in the `default` namespace with `disk` storage enabled. Additionally, a `ClusterIP` service will be created.
 
+## Advanced Configuration
+
+### Storage Providers
+
+The Helm chart currently supports running Athens with two different storage providers: `disk` and `mongo`. The default behavior is to use the `disk` storage provider.
+
+#### Disk Storage Configuration
+
+When using the `disk` storage provider, you can configure a number of options regarding data persistence. By default, Athens will deploy using an `emptyDir` volume. This probably isn't sufficient for production use cases, so the chart also allows you to configure persistence via a [PersistentVolumeClaim](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#persistentvolumeclaims). The chartr currently allows you to set the following values:
+
+```yaml
+persistence:
+  enabled: false
+  accessMode: ReadWriteOnce
+  size: 4Gi
+  storageClass:
+```
+
+`enabled` is used to turn on the PVC feature of the chart, while the other values relate directly to the values defined in the PersistentVolumeClaim documentation.
+
+#### Mongo DB Configuration
+
+To use the Mongo DB storage provider, you will first need a MongoDB instance. Once you have deployed MongoDB, you can configure Athens using the connection string via `storage.mongo.url`. You will also need to set `storage.type` to "mongo".
+
+```
+helm install ./charts/proxy -n athens --set storage.type=mongo --set storage.mongo.url=<some-mongodb-connection-string>
+```
+
+### Kuberentes Service
+
+By default, a Kubernetes `ClusterIP` service is created for the Athens proxy. "ClusterIP" is sufficient in the case when the Proxy will be used from within the cluster. To expose Athens outside of the cluster, consider using a "NodePort" or "LoadBalancer" service. This can be changed by setting the `service.type` value when installing the chart. For example, to deploy Athens using a NodePort service, the following command could be used:
+
+```console
+helm install ./charts/proxy -n athens --set service.type=NodePort
+```
+
+### Ingress Resource
+
+The chart can optionally create a Kubernetes [Ingress Resource](https://kubernetes.io/docs/concepts/services-networking/ingress/#the-ingress-resource) for you as well. To enable this feature, set the `ingress.enabled` resource to true. 
+
+```console
+helm install ./charts/proxy -n athens --set ingress.enabled=true
+```
+
+Further configuration values are available in the `values.yaml` file:
+
+```yaml
+ingress:
+  enabled: false
+  # provie key/value annotations
+  annotations:
+  # Provide an array of values for the ingress host mapping
+  hosts:
+  # Provide a base64 encoded cert for TLS use 
+  tls: 
+```
+
+### Replicas
+
+By default, the chart will install Athens with a replica count of 1. To change this, change the `replicaCount` value:
+
+```console
+helm install ./charts/proxy -n athens --set replicaCount=3
+```

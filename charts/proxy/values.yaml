@@ -11,10 +11,8 @@ image:
 
 service:
   ## Type of service; valid values are "ClusterIP", "LoadBalancer", and
-  ## "NodePort". "ClusterIP" is sufficient in the average case where a service
-  ## catalog installation in the same cluster is the only client that needs to
-  ## communicate with this broker. i.e. The broker does not need to receive
-  ## inbound requests from outside the cluster.
+  ## "NodePort". "ClusterIP" is sufficient in the case when the Proxy will be used
+  ## from within the cluster. To expose externally, consider a "NodePort" or "LoadBalancer" service.
   type: ClusterIP
   ## Further configuration if service is of type "NodePort"
   nodePort:
@@ -23,6 +21,12 @@ service:
 
 ingress:
   enabled: false
+  # provie key/value annotations
+  annotations:
+  # Provide an array of values for the ingress host mapping
+  hosts:
+  # Provide a base64 encoded cert for TLS use 
+  tls: 
     
 storage:
   type: disk
@@ -38,9 +42,9 @@ storage:
     # for example, you need to run 'helm install --set mongoStorageURL=myurl ...'
     url: "SET THIS ON THE COMMAND LINE"
 
-# Worker is disabled right now
+# Worker is disabled right now. When it's turned on, we can use helm dependencies to start this up!
 #redis:
-#  useEmbedded: true
+#  useEmbedded: false
 #  port: 6379
 #  username: 
 #  password:
