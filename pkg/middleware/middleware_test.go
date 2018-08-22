@@ -8,17 +8,15 @@ import (
 	"testing"
 
 	"github.com/bketelsen/buffet"
-	"github.com/sirupsen/logrus"
-	"github.com/uber/jaeger-client-go/config"
-
 	"github.com/gobuffalo/buffalo"
 	"github.com/gomods/athens/pkg/config/env"
 	"github.com/gomods/athens/pkg/log"
 	"github.com/gomods/athens/pkg/module"
 	"github.com/markbates/willie"
-
+	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
+	"github.com/uber/jaeger-client-go/config"
 )
 
 // Avoid import cycle.
