@@ -126,7 +126,7 @@ func prepareEnv(gopath string) []string {
 	// add Windows specific ENV VARS
 	if runtime.GOOS == "windows" {
 		cmdEnv = append(cmdEnv, fmt.Sprintf("USERPROFILE=%s", os.Getenv("USERPROFILE")))
-		cmdEnv = append(cmdEnv, fmt.Sprintf("SystemRoot=%s", os.Getenv("USERPROFILE")))
+		cmdEnv = append(cmdEnv, fmt.Sprintf("SystemRoot=%s", os.Getenv("SystemRoot")))
 	}
 
 	return cmdEnv
