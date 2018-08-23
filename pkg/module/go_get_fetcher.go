@@ -114,8 +114,6 @@ func getSources(goBinaryName string, fs afero.Fs, gopath, repoRoot, module, vers
 }
 
 func prepareEnv(gopath string) []string {
-	const op errors.Op = "module.prepareEnv"
-
 	pathEnv := fmt.Sprintf("PATH=%s", os.Getenv("PATH"))
 	gopathEnv := fmt.Sprintf("GOPATH=%s", gopath)
 	cacheEnv := fmt.Sprintf("GOCACHE=%s", filepath.Join(gopath, "cache"))
