@@ -1,2 +1,2 @@
-/ @gomods/contributors @gomods/maintainers
-/pkg @gomods/contributors
+* @gomods/maintainers
+/pkg/ @gomods/contributors
