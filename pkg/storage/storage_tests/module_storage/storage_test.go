@@ -21,7 +21,6 @@ import (
 	"github.com/gomods/athens/pkg/storage/mem"
 	"github.com/gomods/athens/pkg/storage/minio"
 	"github.com/gomods/athens/pkg/storage/mongo"
-	// "github.com/gomods/athens/pkg/storage/rdbms"
 )
 
 type TestSuites struct {
@@ -56,11 +55,6 @@ func (d *TestSuites) SetupTest() {
 	mongoStore, err := mongo.NewTestSuite(d.Model)
 	ra.NoError(err)
 	d.storages = append(d.storages, mongoStore)
-
-	// rdbms
-	// rdbmsStore, err := rdbms.NewTestSuite(d.Model)
-	// d.Model.SetupTest()
-	// d.storages = append(d.storages, rdbmsStore)
 
 	d.module = "testmodule"
 	d.version = "v1.0.0"
@@ -154,7 +148,8 @@ func (d *TestSuites) testDelete(ts storage.TestSuite) {
 	for _, test := range tests {
 		err := ts.Storage().Delete(ctx, test.module, test.version)
 		r.Equal(test.want, errors.Kind(err), ts.StorageHumanReadableName())
-		exists := ts.Storage().Exists(ctx, test.module, test.version)
+		exists, err := ts.Storage().Exists(ctx, test.module, test.version)
+		r.NoError(err)
 		r.Equal(false, exists, ts.StorageHumanReadableName())
 	}
 }
