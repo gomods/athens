@@ -117,7 +117,7 @@ func getSources(goBinaryName string, fs afero.Fs, gopath, repoRoot, module, vers
 	return nil
 }
 
-func prepareEnv(gopath string) ([]string, error) {
+func prepareEnv(gopath string) []string {
 	const op errors.Op = "module.prepareEnv"
 
 	pathEnv := fmt.Sprintf("PATH=%s", os.Getenv("PATH"))
@@ -126,20 +126,14 @@ func prepareEnv(gopath string) ([]string, error) {
 	disableCgo := "CGO_ENABLED=0"
 	enableGoModules := "GO111MODULE=on"
 	cmdEnv := []string{pathEnv, gopathEnv, cacheEnv, disableCgo, enableGoModules}
+
 	// add Windows specific ENV VARS
-	// if this one is missing we will get an error from go
-	if val, ok := os.LookupEnv("USERPROFILE"); ok {
-		cmdEnv = append(cmdEnv, fmt.Sprintf("USERPROFILE=%s", val))
-	} else if runtime.GOOS == "windows" {
-		return nil, errors.E(op, "missing ENV VAR: USERPROFILE")
+	if runtime.GOOS == "windows" {
+		cmdEnv = append(cmdEnv, fmt.Sprintf("USERPROFILE=%s", os.Getenv("USERPROFILE")))
+		cmdEnv = append(cmdEnv, fmt.Sprintf("SystemRoot=%s", os.Getenv("USERPROFILE")))
 	}
-	// if this one is missing go won't give any error but the pkg/mod dir will be empty
-	if val, ok := os.LookupEnv("SystemRoot"); ok {
-		cmdEnv = append(cmdEnv, fmt.Sprintf("SystemRoot=%s", val))
-	} else if runtime.GOOS == "windows" {
-		return nil, errors.E(op, "missing ENV VAR: SystemRoot")
-	}
-	return cmdEnv, nil
+
+	return cmdEnv
 }
 
 func checkFiles(fs afero.Fs, path, version string) error {
