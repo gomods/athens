@@ -46,21 +46,21 @@ Param(
 	[switch]$down
 )
 function execScript($name) {
-	$scriptsDir = "$(join-path . scripts ps)"
+	$scriptsDir = "$(join-path scripts ps)"
 	& "$(Join-Path $scriptsDir $name)"
 }
 
 if ($build.IsPresent) {
-	Set-Location cmd/proxy 
+	Set-Location $(Join-Path cmd proxy)
 	& buffalo build
-	Set-Location cmd/olympus 
+	Set-Location $(Join-Path cmd olympus) 
 	& buffalo build
 }
 
 if ($run.IsPresent) {
-	Set-Location cmd/proxy 
+	Set-Location $(Join-Path cmd proxy)
 	& buffalo build
-	& ./athens
+	& .\bin\proxy.exe
 }
 
 if ($docs.IsPresent) {
@@ -69,7 +69,7 @@ if ($docs.IsPresent) {
 }
 
 if ($setup_dev_env.IsPresent) {
-	execScript "get_dev_tools.sh"
+	execScript "get_dev_tools.ps1"
 	& docker-compose -p athensdev up -d mongo
 	& docker-compose -p athensdev up -d redis
 }
@@ -81,10 +81,20 @@ if ($verify.IsPresent) {
 }
 
 if ($test.IsPresent) {
-	Set-Location cmd/proxy 
-	& buffalo test
-	Set-Location cmd/olympus 
-	& buffalo test
+	try {
+		Push-Location  $(Join-Path cmd proxy)
+		& buffalo test
+	}
+	finally {
+		Pop-Location
+	}
+	try {
+		Push-Location $(Join-Path cmd olympus) 
+		& buffalo test
+	}
+	finally {
+		Pop-Location
+	}
 }
 
 if ($test_unit.IsPresent) {
@@ -113,8 +123,6 @@ if ($bench.IsPresent) {
 }
 
 if ($alldeps.IsPresent) {
-	& docker-compose -p athensdev up -d mysql
-	& docker-compose -p athensdev up -d postgres
 	& docker-compose -p athensdev up -d mongo
 	& docker-compose -p athensdev up -d redis
 	& docker-compose -p athensdev up -d minio
@@ -129,7 +137,6 @@ if ($dev.IsPresent) {
 }
 
 if ($down.IsPresent) {
-	& docker-compose -p athensdev down
-	& docker volume prune
+	& docker-compose -p athensdev down -v
 }
 
