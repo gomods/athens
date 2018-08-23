@@ -87,11 +87,7 @@ func getSources(goBinaryName string, fs afero.Fs, gopath, repoRoot, module, vers
 	fullURI := fmt.Sprintf("%s@%s", uri, version)
 
 	cmd := exec.Command(goBinaryName, "mod", "download", fullURI)
-	cmdEnv, err := prepareEnv(gopath)
-	if err != nil {
-		return errors.E(op, err)
-	}
-	cmd.Env = cmdEnv
+	cmd.Env = prepareEnv(gopath)
 	cmd.Dir = repoRoot
 	o, err := cmd.CombinedOutput()
 	if err != nil {
