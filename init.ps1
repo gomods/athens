@@ -51,16 +51,26 @@ function execScript($name) {
 }
 
 if ($build.IsPresent) {
-	Set-Location $(Join-Path cmd proxy)
-	& buffalo build
-	Set-Location $(Join-Path cmd olympus) 
-	& buffalo build
+	try {
+		Push-Location $(Join-Path cmd proxy)
+		& buffalo build
+	}
+	finally {
+		Pop-Location
+	}
+	
+	try {
+		Push-Location $(Join-Path cmd olympus) 
+		& buffalo build
+	}
+	finally {
+		Pop-Location
+	}
 }
 
 if ($run.IsPresent) {
 	Set-Location $(Join-Path cmd proxy)
-	& buffalo build
-	& .\bin\proxy.exe
+	& buffalo dev
 }
 
 if ($docs.IsPresent) {
@@ -127,7 +137,7 @@ if ($alldeps.IsPresent) {
 	& docker-compose -p athensdev up -d redis
 	& docker-compose -p athensdev up -d minio
 	& docker-compose -p athensdev up -d jaeger
-	Write-Output "sleeping for a bit to wait for the DB to come up"
+	Write-Host "sleeping for a bit to wait for the DB to come up"
 	Start-Sleep 5
 }
 

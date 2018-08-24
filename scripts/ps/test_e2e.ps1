@@ -6,8 +6,10 @@ if (-not (Test-Path env:GO_BINARY_PATH)) { $env:GO_BINARY_PATH = "go" }
 $globalTmpDir = [System.IO.Path]::GetTempPath()
 $tmpDirName = [GUID]::NewGuid()
 $testGoPath = Join-Path $globalTmpDir $tmpDirName
+
 $origGOPATH = $env:GOPATH
-$origGO111MODULE = $env:GO111MODULE
+$origGOPROXY = $env:GOPROXY
+
 New-Item $testGoPath -ItemType Directory | Out-Null
 $goModCache = Join-Path $testGoPath "pkg" | Join-Path -ChildPath "mod"
 $env:Path += ";" + "${$(Join-Path $repoDir "bin")}"
@@ -24,10 +26,12 @@ function stopProcesses () {
 function teardown () {
   # Cleanup after our tests
   $env:GOPATH = $origGOPATH
-  $env:GO111MODULE = $origGO111MODULE
+  $env:GOPROXY = $origGOPROXY
+
   stopProcesses
   # clean test gopath
   Get-ChildItem -Path $testGoPath -Recurse | Remove-Item -Recurse -Force -Confirm:$false
+  
   Pop-Location 
   Pop-Location
 }
