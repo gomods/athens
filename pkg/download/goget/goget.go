@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"io"
 	"os/exec"
-	"strings"
 	"time"
 
 	"github.com/gomods/athens/pkg/config"
@@ -78,13 +77,7 @@ func (gg *goget) Latest(ctx context.Context, mod string) (*storage.RevInfo, erro
 		return nil, errors.E(op, err)
 	}
 
-	pseudoInfo := strings.Split(lr.Version, "-")
-	if len(pseudoInfo) < 3 {
-		return nil, errors.E(op, fmt.Errorf("malformed pseudoInfo %v", lr.Version))
-	}
 	return &storage.RevInfo{
-		Name:    pseudoInfo[2],
-		Short:   pseudoInfo[2],
 		Time:    lr.Time,
 		Version: lr.Version,
 	}, nil
@@ -108,6 +101,13 @@ func (gg *goget) list(op errors.Op, mod string) (*listResp, error) {
 	stderr := &bytes.Buffer{}
 	cmd.Stdout = stdout
 	cmd.Stderr = stderr
+
+	gopath, err := afero.TempDir(gg.fs, "", "athens")
+	if err != nil {
+		return nil, errors.E(op, err)
+	}
+	defer module.ClearFiles(gg.fs, gopath)
+	cmd.Env = module.PrepareEnv(gopath)
 
 	err = cmd.Run()
 	if err != nil {
