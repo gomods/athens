@@ -17,7 +17,7 @@ func (l *storageImpl) List(ctx context.Context, module string) ([]string, error)
 	fileInfos, err := afero.ReadDir(l.filesystem, loc)
 	if err != nil {
 		kind := errors.KindUnexpected
-		if _, ok := err.(*os.PathError); ok {
+		if os.IsNotExist(err) {
 			kind = errors.KindNotFound
 		}
 
