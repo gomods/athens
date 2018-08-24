@@ -10,6 +10,7 @@ Param(
 	[switch]$docs,
 
 	[Parameter(Mandatory=$false)]
+	[Alias("setup-dev-env")]
 	[switch]$setup_dev_env,
 
 	[Parameter(Mandatory=$false)]
@@ -19,18 +20,22 @@ Param(
 	[switch]$test,
 
 	[Parameter(Mandatory=$false)]
+	[Alias("test-unit")]
 	[switch]$test_unit,
 
 	[Parameter(Mandatory=$false)]
+	[Alias("test-e2e")]
 	[switch]$test_e2e,
 
 	[Parameter(Mandatory=$false)]
 	[switch]$docker,
 
 	[Parameter(Mandatory=$false)]
+	[Alias("olympus-docker")]
 	[switch]$olympus_docker,
 
 	[Parameter(Mandatory=$false)]
+	[Alias("proxy-docker")]
 	[switch]$proxy_docker,
 
 	[Parameter(Mandatory=$false)]
@@ -48,6 +53,12 @@ Param(
 function execScript($name) {
 	$scriptsDir = "$(join-path scripts ps)"
 	& "$(Join-Path $scriptsDir $name)"
+}
+
+if ($setup_dev_env.IsPresent) {
+	execScript "get_dev_tools.ps1"
+	& docker-compose -p athensdev up -d mongo
+	& docker-compose -p athensdev up -d redis
 }
 
 if ($build.IsPresent) {
@@ -78,16 +89,24 @@ if ($docs.IsPresent) {
 	& hugo
 }
 
-if ($setup_dev_env.IsPresent) {
-	execScript "get_dev_tools.ps1"
-	& docker-compose -p athensdev up -d mongo
-	& docker-compose -p athensdev up -d redis
-}
-
 if ($verify.IsPresent) {
 	execScript "check_gofmt.ps1"
 	execScript "check_golint.ps1"
 	execScript "check_deps.ps1"
+}
+
+if ($alldeps.IsPresent) {
+	& docker-compose -p athensdev up -d mongo
+	& docker-compose -p athensdev up -d redis
+	& docker-compose -p athensdev up -d minio
+	& docker-compose -p athensdev up -d jaeger
+	Write-Host "sleeping for a bit to wait for the DB to come up"
+	Start-Sleep 5
+}
+
+if ($dev.IsPresent) {
+	& docker-compose -p athensdev up -d mongo
+	& docker-compose -p athensdev up -d redis
 }
 
 if ($test.IsPresent) {
@@ -130,20 +149,6 @@ if ($proxy_docker.IsPresent) {
 
 if ($bench.IsPresent) {
 	execScript "benchmark.ps1"
-}
-
-if ($alldeps.IsPresent) {
-	& docker-compose -p athensdev up -d mongo
-	& docker-compose -p athensdev up -d redis
-	& docker-compose -p athensdev up -d minio
-	& docker-compose -p athensdev up -d jaeger
-	Write-Host "sleeping for a bit to wait for the DB to come up"
-	Start-Sleep 5
-}
-
-if ($dev.IsPresent) {
-	& docker-compose -p athensdev up -d mongo
-	& docker-compose -p athensdev up -d redis
 }
 
 if ($down.IsPresent) {
