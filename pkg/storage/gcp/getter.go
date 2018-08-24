@@ -31,7 +31,7 @@ func (s *Storage) Info(ctx context.Context, module, version string) ([]byte, err
 	infoBytes, err := ioutil.ReadAll(infoReader)
 	infoReader.Close()
 	if err != nil {
-		return nil, errors.E(op, fmt.Errorf("could not read bytes of info file: %s", err), errors.M(module), errors.V(version))
+		return nil, err, errors.M(module), errors.V(version))
 	}
 	return infoBytes, nil
 }
