@@ -2,6 +2,7 @@ package minio
 
 import (
 	"context"
+	"fmt"
 	"sort"
 	"strings"
 
@@ -29,7 +30,12 @@ func (l *storageImpl) List(ctx context.Context, module string) ([]string, error)
 			dict[ver] = struct{}{}
 		}
 	}
+
 	ret := []string{}
+	if len(dict) == 0 {
+		return ret, errors.E(op, fmt.Errorf("Module %s not found", module), errors.KindNotFound)
+	}
+
 	for ver := range dict {
 		ret = append(ret, ver)
 	}
