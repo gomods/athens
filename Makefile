@@ -67,10 +67,6 @@ dev:
 	docker-compose -p athensdev up -d mongo
 	docker-compose -p athensdev up -d redis
 
-.PHONY: down
-down:
-	docker-compose -p athensdev down -v
-
 .PHONY: dev-teardown
 dev-teardown:
 	docker-compose -p athensdev down -v
