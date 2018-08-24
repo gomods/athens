@@ -21,7 +21,7 @@ func (l *storageImpl) List(ctx context.Context, module string) ([]string, error)
 			kind = errors.KindNotFound
 		}
 
-		return nil, errors.E(op, err, kind)
+		return nil, errors.E(op, errors.M(module), err, kind)
 	}
 	ret := []string{}
 	for _, fileInfo := range fileInfos {

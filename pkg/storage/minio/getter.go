@@ -53,7 +53,7 @@ func (v *storageImpl) Zip(ctx context.Context, module, vsn string) (io.ReadClose
 	zipPath := fmt.Sprintf("%s/source.zip", v.versionLocation(module, vsn))
 	_, err := v.minioClient.StatObject(v.bucketName, zipPath, minio.StatObjectOptions{})
 	if err != nil {
-		return nil, errors.E(op, err, errors.KindNotFound)
+		return nil, errors.E(op, err, errors.KindNotFound, errors.M(module), errors.V(vsn))
 	}
 
 	zipReader, err := v.minioClient.GetObject(v.bucketName, zipPath, minio.GetObjectOptions{})

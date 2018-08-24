@@ -2,7 +2,6 @@ package mongo
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
@@ -29,7 +28,7 @@ func (s *ModuleStore) List(ctx context.Context, module string) ([]string, error)
 
 	versions := make([]string, len(result))
 	if len(result) == 0 {
-		return versions, errors.E(op, fmt.Errorf("Module %s not found", module), errors.KindNotFound)
+		return versions, errors.E(op, errors.M(module), errors.KindNotFound)
 	}
 
 	for i, r := range result {
