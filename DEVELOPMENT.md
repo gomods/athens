@@ -16,19 +16,11 @@ Athens relies on having a few tools installed locally. Run `make setup-dev-env` 
 ### Go version
 Athens is developed on Go1.11+.
 
-If you have a stable version of go running, then a later version of go can be downloaded.
-
-For example, to get `go1.11rc2`, run the following commands which won't affect your stable version
-```
-go get golang.org/dl/go1.11rc2
-go1.11rc2 download
-```
-
-To point Athens to `go1.11rc2` or to a different version
+To point Athens to a different version of Go
 set the following environment variable
 
 ```
-GO_BINARY_PATH=go1.11rc2
+GO_BINARY_PATH=go1.11.X
 or whichever binary you want to use with athens
 ```
 
