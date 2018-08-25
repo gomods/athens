@@ -18,14 +18,13 @@ env:
 
 before_script:
   - mkdir -p $ATHENS_DIR && rsync -azr . $ATHENS_DIR && cd $ATHENS_DIR
-  - printf "\n\n GO111MODULE:: $GO111MODULE \n\n"
+  - echo "GO111MODULE $GO111MODULE"
   - make setup-dev-env
   - wget "https://dl.minio.io/server/minio/release/linux-amd64/minio"
   - chmod +x minio && nohup ./minio server . &
 
-
 script:
-  - printf "\n\n GO111MODULE:: $GO111MODULE \n\n"
+  - echo "GO111MODULE $GO111MODULE"
   - make verify test-unit test-e2e
 
 after_success:
