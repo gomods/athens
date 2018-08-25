@@ -1,7 +1,9 @@
 cloud.google.com/go v0.23.0 h1:w1svupRqvZnfjN9+KksMiggoIRQuMzWkVzpxcR96xDs=
 cloud.google.com/go v0.23.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMTw=
 dmitri.shuralyov.com/text/kebabcase v0.0.0-20180217051803-40e40b42552a/go.mod h1:3YpR/7A6nvWHA/oFH66Hp/dJ5A2gM63I3xkA/3FV6tY=
+github.com/Azure/azure-pipeline-go v0.0.0-20180607212504-7571e8eb0876 h1:3c3mGlhASTJh6H6Ba9EHv2FDSmEUyJuJHR6UD7b+YuE=
 github.com/Azure/azure-pipeline-go v0.0.0-20180607212504-7571e8eb0876/go.mod h1:XA1kFWRVhSK+KNFiOhfv83Fv8L9achrP7OxIzeTn1Yg=
+github.com/Azure/azure-storage-blob-go v0.0.0-20180507052152-66ba96e49ebb h1:8Wr8lGYlEyW9AipriIWV+71RZoYHVH1CAUFVKvr9Hp4=
 github.com/Azure/azure-storage-blob-go v0.0.0-20180507052152-66ba96e49ebb/go.mod h1:x2mtS6O3mnMEZOJp7d7oldh8IvatBrMfReiyQ+cKgKY=
 github.com/BurntSushi/toml v0.3.0 h1:e1/Ivsx3Z0FVTV0NSOv/aVgbUWyQuzj7DDnFblkRvsY=
 github.com/BurntSushi/toml v0.3.0/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
@@ -37,6 +39,7 @@ github.com/go-ini/ini v1.38.1 h1:hbtfM8emWUVo9GnXSloXYyFbXxZ+tG6sbepSStoe1FY=
 github.com/go-ini/ini v1.38.1/go.mod h1:ByCAeIL28uOIIG0E3PJtZPDL8WnHpFKFOtgjp+3Ies8=
 github.com/go-sql-driver/mysql v1.4.0 h1:7LxgVwFb2hIQtMm87NdgAVfXjnt4OePseqT1tKx+opk=
 github.com/go-sql-driver/mysql v1.4.0/go.mod h1:zAC/RDZ24gD3HViQzih4MyKcchzm+sOG5ZlKdlhCg5w=
+github.com/gobuffalo/buffalo v0.11.1 h1:SfHnPTrqZujLjLcoKKH1G/e26zAXNecBNji86EYES88=
 github.com/gobuffalo/buffalo v0.11.1/go.mod h1:7QwMJn1yAZ9karZ3PFJS3fl99uOLiK3WvMxsvceOJlg=
 github.com/gobuffalo/buffalo v0.12.0 h1:g+zZmk/3TbB0bztXbC75joI3PWd4vs3cwGL1sXHIiK0=
 github.com/gobuffalo/buffalo v0.12.0/go.mod h1:DCTulFjXpdk39LrnRscis/TsolD7SXIEILvxh9FDeds=
@@ -90,6 +93,7 @@ github.com/gorilla/securecookie v1.1.1 h1:miw7JPhV+b/lAHSXz4qd/nN9jRiAFV5FwjeKyC
 github.com/gorilla/securecookie v1.1.1/go.mod h1:ra0sb63/xPlUeL+yeDciTfxMRAA+MP+HVt/4epWDjd4=
 github.com/gorilla/sessions v1.1.1 h1:YMDmfaK68mUixINzY/XjscuJ47uXFWSSHzFbBQM0PrE=
 github.com/gorilla/sessions v1.1.1/go.mod h1:8KCfur6+4Mqcc6S0FEfKuN15Vl5MgXW92AE8ovaJD0w=
+github.com/gorilla/websocket v1.2.0 h1:VJtLvh6VQym50czpZzx07z/kw9EgAxI3x1ZB8taTMQQ=
 github.com/gorilla/websocket v1.2.0/go.mod h1:E7qHFY5m1UJ88s3WnNqhKjPHQ0heANvMoAMk2YaljkQ=
 github.com/hashicorp/errwrap v0.0.0-20180715044906-d6c0cd880357 h1:Rem2+U35z1QtPQc6r+WolF7yXiefXqDKyk+lN2pE164=
 github.com/hashicorp/errwrap v0.0.0-20180715044906-d6c0cd880357/go.mod h1:YH+1FKiLXxHSkmPseP+kNlulaMuP3n2brvKWEqk/Jc4=
@@ -125,6 +129,7 @@ github.com/markbates/sigtx v1.0.0 h1:y/xtkBvNPRjD4KeEplf4w9rJVSc23/xl+jXYGowTwy0
 github.com/markbates/sigtx v1.0.0/go.mod h1:QF1Hv6Ic6Ca6W+T+DL0Y/ypborFKyvUY9HmuCD4VeTc=
 github.com/markbates/validate v1.0.0 h1:S8c3GX3EJScCYy0SXaktwPTrqY8a6TlekYxcq4jHvsg=
 github.com/markbates/validate v1.0.0/go.mod h1:Um20kS5He4vfMjIo8ywA9/Lv1bz9j+GWD1Rf0Xo0Fm4=
+github.com/markbates/willie v1.0.0 h1:VqxRu5N6E5ZxmcIt32BVmbcnko3jiaxKo6HQ5uSgOAE=
 github.com/markbates/willie v1.0.0/go.mod h1:XtK+fmQ7tgVMIVAS1ghwuqVPup3GtgrNY3UCvUlPdzM=
 github.com/markbates/willie v1.0.1 h1:yOAqW9qb1eG9KwO1I19+eU+mUbhfk27oQnTu4QKvtdI=
 github.com/markbates/willie v1.0.1/go.mod h1:MIrbljpJNLr9mI7dxWrOsQ+J9fcexgtIJ5tOBJhWQdo=
