@@ -1,42 +1,14 @@
-# This is a multi-stage Dockerfile and requires >= Docker 17.05
-# https://docs.docker.com/engine/userguide/eng-image/multistage-build/
-FROM gobuffalo/buffalo:v0.11.0 as builder
+FROM golang:1.11-rc
 
-RUN mkdir -p $GOPATH/src/github.com/gomods/athens/cmd/proxy
-WORKDIR $GOPATH/src/github.com/gomods/athens/cmd/proxy
-
-# this will cache the npm install step, unless package.json changes
-ADD cmd/proxy/package.json .
-ADD cmd/proxy/yarn.lock .
-RUN yarn install --no-progress
-
+RUN mkdir -p $GOPATH/src/github.com/gomods/athens
 WORKDIR $GOPATH/src/github.com/gomods/athens
 
-ADD . .
-RUN cd cmd/proxy && buffalo build -s -o /bin/app
+COPY . .
 
-RUN curl -o go1.11beta2.linux-amd64.tar.gz https://dl.google.com/go/go1.11beta2.linux-amd64.tar.gz
-RUN tar -C /usr/local -xzf go1.11beta2.linux-amd64.tar.gz
+RUN CGO_ENABLED=0 go build -o /bin/app ./cmd/proxy
 
-FROM ubuntu:14.04
-RUN apt-get update
-RUN apt-get install -y ca-certificates
-
-WORKDIR /bin/
-
-COPY --from=builder /bin/app .
-COPY --from=builder /usr/local/go /usr/local/go
-
-ENV GO_BINARY_PATH=/usr/local/go/bin/go
-
-# Comment out to run the binary in "production" mode:
-# ENV GO_ENV=production
-
-# Bind the app to 0.0.0.0 so it can be seen from outside the container
-ENV ADDR=0.0.0.0
+ENV GO_ENV=production
 
 EXPOSE 3000
 
-# Comment out to run the migrations before running the binary:
-# CMD /bin/app migrate; /bin/app
-CMD exec /bin/app
+ENTRYPOINT ["/bin/app"]

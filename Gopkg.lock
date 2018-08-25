@@ -258,8 +258,8 @@
 [[projects]]
   name = "github.com/gobuffalo/uuid"
   packages = ["."]
-  revision = "3a9fb6c5c481d4886f1e9323c61ad743fb955860"
-  version = "v2.0.0"
+  revision = "788767dde529e4b1c0e078569ebe51dc6b2ad6dc"
+  version = "v2.0.1"
 
 [[projects]]
   name = "github.com/gobuffalo/validate"
@@ -921,6 +921,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "a286330690cfc254c2432be9ede8cd7755f5501dae6858213ac7e4f25506379f"
+  inputs-digest = "54396e6e784b6f4b718ca646b7d46e90e561407b0f887a556188537ce16e875f"
   solver-name = "gps-cdcl"
   solver-version = 1

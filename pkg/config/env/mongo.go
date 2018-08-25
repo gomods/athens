@@ -2,18 +2,26 @@ package env
 
 import (
 	"fmt"
+	"strconv"
+	"time"
 
 	"github.com/gobuffalo/envy"
 )
 
-// MongoURI returns Athens Mongo Storage URI defined by ATHENS_MONGO_STORAGE_URL
-func MongoURI() (string, error) {
-	env, err := envy.MustGet("ATHENS_MONGO_STORAGE_URL")
+// MongoConnectionString returns Athens Mongo Storage connection string defined by ATHENS_MONGO_CONNECTION_STRING
+func MongoConnectionString() (string, error) {
+	env, err := envy.MustGet("ATHENS_MONGO_CONNECTION_STRING")
 	if err != nil {
-		return "", fmt.Errorf("missing mongo URL: %s", err)
+		return "", fmt.Errorf("missing mongo connection string: %s", err)
 	}
 
 	return env, nil
+}
+
+// MongoCertPath returns Athens Mongo Storage cert path string defined by ATHENS_MONGO_CERT_PATH
+func MongoCertPath() string {
+	env := envy.Get("ATHENS_MONGO_CERT_PATH", "")
+	return env
 }
 
 // MongoHost returns Athens Mongo host defined by MONGO_HOST
@@ -56,10 +64,15 @@ func MongoPassword() (string, error) {
 	return env, nil
 }
 
-// MongoConnectionTimeoutWithDefault returns Athens Mongo Storage connection timeout defined by MONGO_CONN_TIMEOUT_SEC.
+// MongoConnectionTimeoutSecWithDefault returns Athens Mongo Storage connection timeout defined by MONGO_CONN_TIMEOUT_SEC.
 // Values are in seconds.
-func MongoConnectionTimeoutWithDefault(value string) string {
-	return envy.Get("MONGO_CONN_TIMEOUT_SEC", value)
+func MongoConnectionTimeoutSecWithDefault(defTimeout int) time.Duration {
+	timeoutConf := envy.Get("MONGO_CONN_TIMEOUT_SEC", strconv.Itoa(defTimeout))
+	timeout, err := strconv.ParseInt(timeoutConf, 10, 32)
+	if err != nil {
+		return time.Duration(defTimeout) * time.Second
+	}
+	return time.Duration(timeout) * time.Second
 }
 
 // MongoSSLWithDefault returns Athens Mongo Storage SSL flag defined by MONGO_SSL.
