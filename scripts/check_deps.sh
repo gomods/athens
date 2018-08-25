@@ -1,4 +1,3 @@
-##############
 #!/bin/bash
 
 # check_deps.sh
