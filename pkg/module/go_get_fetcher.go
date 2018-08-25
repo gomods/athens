@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strings"
 
 	"github.com/gomods/athens/pkg/errors"
@@ -19,11 +20,15 @@ type goGetFetcher struct {
 }
 
 // NewGoGetFetcher creates fetcher which uses go get tool to fetch modules
-func NewGoGetFetcher(goBinaryName string, fs afero.Fs) Fetcher {
+func NewGoGetFetcher(goBinaryName string, fs afero.Fs) (Fetcher, error) {
+	const op errors.Op = "module.NewGoGetFetcher"
+	if err := validGoBinary(goBinaryName); err != nil {
+		return nil, errors.E(op, err)
+	}
 	return &goGetFetcher{
 		fs:           fs,
 		goBinaryName: goBinaryName,
-	}
+	}, nil
 }
 
 // Fetch downloads the sources and returns path where it can be found. Make sure to call Clear
@@ -38,19 +43,19 @@ func (g *goGetFetcher) Fetch(mod, ver string) (Ref, error) {
 	sourcePath := filepath.Join(goPathRoot, "src")
 	modPath := filepath.Join(sourcePath, getRepoDirName(mod, ver))
 	if err := g.fs.MkdirAll(modPath, os.ModeDir|os.ModePerm); err != nil {
-		clearFiles(g.fs, goPathRoot)
+		ClearFiles(g.fs, goPathRoot)
 		return nil, errors.E(op, err)
 	}
 
 	// setup the module with barebones stuff
 	if err := Dummy(g.fs, modPath); err != nil {
-		clearFiles(g.fs, goPathRoot)
+		ClearFiles(g.fs, goPathRoot)
 		return nil, errors.E(op, err)
 	}
 
 	err = getSources(g.goBinaryName, g.fs, goPathRoot, modPath, mod, ver)
 	if err != nil {
-		clearFiles(g.fs, goPathRoot)
+		ClearFiles(g.fs, goPathRoot)
 		return nil, errors.E(op, err)
 	}
 
@@ -79,18 +84,10 @@ func Dummy(fs afero.Fs, repoRoot string) error {
 func getSources(goBinaryName string, fs afero.Fs, gopath, repoRoot, module, version string) error {
 	const op errors.Op = "module.getSources"
 	uri := strings.TrimSuffix(module, "/")
-
 	fullURI := fmt.Sprintf("%s@%s", uri, version)
 
-	gopathEnv := fmt.Sprintf("GOPATH=%s", gopath)
-	cacheEnv := fmt.Sprintf("GOCACHE=%s", filepath.Join(gopath, "cache"))
-	disableCgo := "CGO_ENABLED=0"
-	enableGoModules := "GO111MODULE=on"
-
-	cmd := exec.Command(goBinaryName, "get", fullURI)
-	// PATH is needed for vgo to recognize vcs binaries
-	// this breaks windows.
-	cmd.Env = []string{"PATH=" + os.Getenv("PATH"), gopathEnv, cacheEnv, disableCgo, enableGoModules}
+	cmd := exec.Command(goBinaryName, "mod", "download", fullURI)
+	cmd.Env = PrepareEnv(gopath)
 	cmd.Dir = repoRoot
 	o, err := cmd.CombinedOutput()
 	if err != nil {
@@ -114,6 +111,26 @@ func getSources(goBinaryName string, fs afero.Fs, gopath, repoRoot, module, vers
 	}
 
 	return nil
+}
+
+// PrepareEnv will return all the appropriate
+// environment variables for a Go Command to run
+// successfully (such as GOPATH, GOCACHE, PATH etc)
+func PrepareEnv(gopath string) []string {
+	pathEnv := fmt.Sprintf("PATH=%s", os.Getenv("PATH"))
+	gopathEnv := fmt.Sprintf("GOPATH=%s", gopath)
+	cacheEnv := fmt.Sprintf("GOCACHE=%s", filepath.Join(gopath, "cache"))
+	disableCgo := "CGO_ENABLED=0"
+	enableGoModules := "GO111MODULE=on"
+	cmdEnv := []string{pathEnv, gopathEnv, cacheEnv, disableCgo, enableGoModules}
+
+	// add Windows specific ENV VARS
+	if runtime.GOOS == "windows" {
+		cmdEnv = append(cmdEnv, fmt.Sprintf("USERPROFILE=%s", os.Getenv("USERPROFILE")))
+		cmdEnv = append(cmdEnv, fmt.Sprintf("SystemRoot=%s", os.Getenv("SystemRoot")))
+	}
+
+	return cmdEnv
 }
 
 func checkFiles(fs afero.Fs, path, version string) error {
@@ -146,5 +163,15 @@ func getRepoDirName(repoURI, version string) string {
 
 // getPackagePath returns the path to the module cache given the gopath and module name
 func getPackagePath(gopath, module string) string {
-	return filepath.Join(gopath, "src", "mod", "cache", "download", module, "@v")
+	return filepath.Join(gopath, "pkg", "mod", "cache", "download", module, "@v")
+}
+
+func validGoBinary(name string) error {
+	const op errors.Op = "module.validGoBinary"
+	err := exec.Command(name).Run()
+	_, ok := err.(*exec.ExitError)
+	if err != nil && !ok {
+		return errors.E(op, err)
+	}
+	return nil
 }

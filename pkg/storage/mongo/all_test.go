@@ -3,21 +3,19 @@ package mongo
 import (
 	"testing"
 
-	"github.com/gomods/athens/pkg/storage"
 	"github.com/stretchr/testify/suite"
 )
 
 type MongoTests struct {
 	suite.Suite
-	storage storage.BackendConnector
 }
 
 func (d *MongoTests) SetupTest() {
-	store := NewStorage("mongodb://127.0.0.1:27017")
-	store.Connect()
+	ms, err := newTestStore()
 
-	store.s.DB(store.d).C(store.c).RemoveAll(nil)
-	d.storage = store
+	d.Require().NoError(err)
+
+	ms.s.DB(ms.d).C(ms.c).RemoveAll(nil)
 }
 
 func TestDiskStorage(t *testing.T) {
