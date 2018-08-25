@@ -51,7 +51,7 @@ be requested to review pull requests (PRs) via the
 
 We rely heavily on the Github PR review system, which means that if you review
 a PR as a contributor, you can help decide when that PR is ready to be merged.
-Don't worry that you 'don't know enough', the final approval and merge will be
+Don't worry that you _don't know enough_, the final approval and merge will be
 by one or more maintainers.
 
 ## How to Become a Contributor
