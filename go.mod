@@ -6,14 +6,13 @@ require (
 	github.com/Azure/azure-pipeline-go v0.0.0-20180607212504-7571e8eb0876
 	github.com/Azure/azure-storage-blob-go v0.0.0-20180507052152-66ba96e49ebb
 	github.com/BurntSushi/toml v0.3.0
-	github.com/ajg/form v0.0.0-20160822230020-523a5da1a92f
+	github.com/ajg/form v0.0.0-20160802194845-cc2954064ec9
 	github.com/aws/aws-sdk-go v1.14.27
 	github.com/beorn7/perks v0.0.0-20180321164747-3a771d992973
-	github.com/bketelsen/buffet v0.1.5
+	github.com/bketelsen/buffet v0.0.0-20180802220535-2959027395a6
 	github.com/cockroachdb/cockroach-go v0.0.0-20180212155653-59c0560478b7
 	github.com/codahale/hdrhistogram v0.0.0-20161010025455-3a0bb77429bd
 	github.com/davecgh/go-spew v1.1.0
-	github.com/dgrijalva/jwt-go v1.0.2 // indirect
 	github.com/dustin/go-humanize v0.0.0-20180713052910-9f541cc9db5d
 	github.com/fatih/color v1.7.0
 	github.com/fatih/structs v1.0.0
@@ -30,8 +29,7 @@ require (
 	github.com/gobuffalo/plush v0.0.0-20180619220412-2ec029f415ed
 	github.com/gobuffalo/pop v0.0.0-20180710054625-9936c00d4230
 	github.com/gobuffalo/suite v2.1.2+incompatible
-	github.com/gobuffalo/tags v1.9.6
-	github.com/gobuffalo/uuid v2.0.0+incompatible
+	github.com/gobuffalo/tags v0.0.0-20180702174034-96c7cdfcadcb
 	github.com/gobuffalo/validate v2.0.0+incompatible
 	github.com/gobuffalo/x v0.0.0-20180117215853-11ca13c05abd
 	github.com/gocraft/work v0.5.1
@@ -49,16 +47,14 @@ require (
 	github.com/jmoiron/sqlx v0.0.0-20180614180643-0dae4fefe7c0
 	github.com/joho/godotenv v1.2.0
 	github.com/lib/pq v0.0.0-20180523175426-90697d60dd84
-	github.com/markbates/deplist v1.0.0 // indirect
 	github.com/markbates/going v1.0.0
 	github.com/markbates/goth v1.45.7
-	github.com/markbates/grift v1.0.0
+	github.com/markbates/grift v0.0.0-20180616151547-85236aece323
 	github.com/markbates/hmax v1.0.0
 	github.com/markbates/inflect v1.0.0
 	github.com/markbates/refresh v1.4.0
 	github.com/markbates/sigtx v1.0.0
-	github.com/markbates/validate v1.0.0 // indirect
-	github.com/markbates/willie v1.0.0
+	github.com/markbates/willie v1.0.1
 	github.com/mattn/go-colorable v0.0.9
 	github.com/mattn/go-isatty v0.0.3
 	github.com/mattn/go-sqlite3 v1.9.0
@@ -66,7 +62,7 @@ require (
 	github.com/microcosm-cc/bluemonday v0.0.0-20180621201946-f0761eb8ed07
 	github.com/minio/minio-go v6.0.5+incompatible
 	github.com/mitchellh/go-homedir v0.0.0-20180523094522-3864e76763d9
-	github.com/monoculum/formam v0.0.0-20170814190438-f25191ae7744
+	github.com/monoculum/formam v0.0.0-20170619223434-99ca9dcbaca6
 	github.com/nicksnyder/go-i18n v1.10.0
 	github.com/opentracing/opentracing-go v1.0.2
 	github.com/pelletier/go-toml v1.2.0
@@ -78,9 +74,8 @@ require (
 	github.com/prometheus/procfs v0.0.0-20180705121852-ae68e2d4c00f
 	github.com/robfig/cron v0.0.0-20180505203441-b41be1df6967
 	github.com/rs/cors v1.4.0
-	github.com/russross/blackfriday v1.5.1
+	github.com/russross/blackfriday v0.0.0-20180428102519-11635eb403ff
 	github.com/sabhiram/go-gitignore v0.0.0-20180611051255-d3107576ba94
-	github.com/satori/go.uuid v1.2.0 // indirect
 	github.com/serenize/snaker v0.0.0-20171204205717-a683aaf2d516
 	github.com/sergi/go-diff v1.0.0
 	github.com/shurcooL/github_flavored_markdown v0.0.0-20180602233135-8913699a52e3
@@ -111,6 +106,5 @@ require (
 	google.golang.org/appengine v1.1.0
 	google.golang.org/genproto v0.0.0-20180709204101-e92b11657268
 	google.golang.org/grpc v1.13.0
-	gopkg.in/mail.v2 v2.0.0-20180609202316-c55e3fbae0e2 // indirect
 	gopkg.in/yaml.v2 v2.2.1
 )
