@@ -13,6 +13,7 @@ require (
 	github.com/cockroachdb/cockroach-go v0.0.0-20180212155653-59c0560478b7
 	github.com/codahale/hdrhistogram v0.0.0-20161010025455-3a0bb77429bd
 	github.com/davecgh/go-spew v1.1.0
+	github.com/dgrijalva/jwt-go v1.0.2 // indirect
 	github.com/dustin/go-humanize v0.0.0-20180713052910-9f541cc9db5d
 	github.com/fatih/color v1.7.0
 	github.com/fatih/structs v1.0.0
@@ -20,17 +21,17 @@ require (
 	github.com/globalsign/mgo v0.0.0-20180615134936-113d3961e731
 	github.com/go-ini/ini v1.38.1
 	github.com/go-sql-driver/mysql v1.4.0
-	github.com/gobuffalo/buffalo v0.12.0
+	github.com/gobuffalo/buffalo v0.11.1
 	github.com/gobuffalo/envy v1.6.3
 	github.com/gobuffalo/fizz v1.0.1
 	github.com/gobuffalo/gocraft-work-adapter v0.0.0-20180714213200-7d6504f1dffe
 	github.com/gobuffalo/makr v1.1.0
 	github.com/gobuffalo/packr v1.11.1
-	github.com/gobuffalo/plush v1.0.0
+	github.com/gobuffalo/plush v0.0.0-20180619220412-2ec029f415ed
 	github.com/gobuffalo/pop v0.0.0-20180710054625-9936c00d4230
 	github.com/gobuffalo/suite v2.1.2+incompatible
 	github.com/gobuffalo/tags v1.9.6
-	github.com/gobuffalo/uuid v2.0.3+incompatible // indirect
+	github.com/gobuffalo/uuid v2.0.3+incompatible
 	github.com/gobuffalo/validate v2.0.0+incompatible
 	github.com/gobuffalo/x v0.0.0-20180117215853-11ca13c05abd
 	github.com/gocraft/work v0.5.1
@@ -48,6 +49,7 @@ require (
 	github.com/jmoiron/sqlx v0.0.0-20180614180643-0dae4fefe7c0
 	github.com/joho/godotenv v1.2.0
 	github.com/lib/pq v0.0.0-20180523175426-90697d60dd84
+	github.com/markbates/deplist v1.0.0 // indirect
 	github.com/markbates/going v1.0.0
 	github.com/markbates/goth v1.45.7
 	github.com/markbates/grift v1.0.0
@@ -55,7 +57,8 @@ require (
 	github.com/markbates/inflect v1.0.0
 	github.com/markbates/refresh v1.4.0
 	github.com/markbates/sigtx v1.0.0
-	github.com/markbates/willie v1.0.1
+	github.com/markbates/validate v1.0.0 // indirect
+	github.com/markbates/willie v1.0.0
 	github.com/mattn/go-colorable v0.0.9
 	github.com/mattn/go-isatty v0.0.3
 	github.com/mattn/go-sqlite3 v1.9.0
@@ -77,6 +80,7 @@ require (
 	github.com/rs/cors v1.4.0
 	github.com/russross/blackfriday v1.5.1
 	github.com/sabhiram/go-gitignore v0.0.0-20180611051255-d3107576ba94
+	github.com/satori/go.uuid v1.2.0 // indirect
 	github.com/serenize/snaker v0.0.0-20171204205717-a683aaf2d516
 	github.com/sergi/go-diff v1.0.0
 	github.com/shurcooL/github_flavored_markdown v0.0.0-20180602233135-8913699a52e3
@@ -107,5 +111,6 @@ require (
 	google.golang.org/appengine v1.1.0
 	google.golang.org/genproto v0.0.0-20180709204101-e92b11657268
 	google.golang.org/grpc v1.13.0
+	gopkg.in/mail.v2 v2.0.0-20180609202316-c55e3fbae0e2 // indirect
 	gopkg.in/yaml.v2 v2.2.1
 )
