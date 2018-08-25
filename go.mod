@@ -6,7 +6,7 @@ require (
 	github.com/Azure/azure-pipeline-go v0.0.0-20180607212504-7571e8eb0876
 	github.com/Azure/azure-storage-blob-go v0.0.0-20180507052152-66ba96e49ebb
 	github.com/BurntSushi/toml v0.3.0
-	github.com/ajg/form v0.0.0-20160802194845-cc2954064ec9
+	github.com/ajg/form v0.0.0-20160822230020-523a5da1a92f
 	github.com/aws/aws-sdk-go v1.14.27
 	github.com/beorn7/perks v0.0.0-20180321164747-3a771d992973
 	github.com/bketelsen/buffet v0.0.0-20180802220535-2959027395a6
@@ -20,16 +20,17 @@ require (
 	github.com/globalsign/mgo v0.0.0-20180615134936-113d3961e731
 	github.com/go-ini/ini v1.38.1
 	github.com/go-sql-driver/mysql v1.4.0
-	github.com/gobuffalo/buffalo v0.11.1
+	github.com/gobuffalo/buffalo v0.12.0
 	github.com/gobuffalo/envy v1.6.3
 	github.com/gobuffalo/fizz v1.0.1
 	github.com/gobuffalo/gocraft-work-adapter v0.0.0-20180714213200-7d6504f1dffe
 	github.com/gobuffalo/makr v1.1.0
 	github.com/gobuffalo/packr v1.11.1
-	github.com/gobuffalo/plush v0.0.0-20180619220412-2ec029f415ed
+	github.com/gobuffalo/plush v1.0.0
 	github.com/gobuffalo/pop v0.0.0-20180710054625-9936c00d4230
 	github.com/gobuffalo/suite v2.1.2+incompatible
-	github.com/gobuffalo/tags v0.0.0-20180702174034-96c7cdfcadcb
+	github.com/gobuffalo/tags v1.9.6
+	github.com/gobuffalo/uuid v2.0.3+incompatible // indirect
 	github.com/gobuffalo/validate v2.0.0+incompatible
 	github.com/gobuffalo/x v0.0.0-20180117215853-11ca13c05abd
 	github.com/gocraft/work v0.5.1
@@ -49,7 +50,7 @@ require (
 	github.com/lib/pq v0.0.0-20180523175426-90697d60dd84
 	github.com/markbates/going v1.0.0
 	github.com/markbates/goth v1.45.7
-	github.com/markbates/grift v0.0.0-20180616151547-85236aece323
+	github.com/markbates/grift v1.0.0
 	github.com/markbates/hmax v1.0.0
 	github.com/markbates/inflect v1.0.0
 	github.com/markbates/refresh v1.4.0
@@ -62,7 +63,7 @@ require (
 	github.com/microcosm-cc/bluemonday v0.0.0-20180621201946-f0761eb8ed07
 	github.com/minio/minio-go v6.0.5+incompatible
 	github.com/mitchellh/go-homedir v0.0.0-20180523094522-3864e76763d9
-	github.com/monoculum/formam v0.0.0-20170619223434-99ca9dcbaca6
+	github.com/monoculum/formam v0.0.0-20170814190438-f25191ae7744
 	github.com/nicksnyder/go-i18n v1.10.0
 	github.com/opentracing/opentracing-go v1.0.2
 	github.com/pelletier/go-toml v1.2.0
@@ -74,7 +75,7 @@ require (
 	github.com/prometheus/procfs v0.0.0-20180705121852-ae68e2d4c00f
 	github.com/robfig/cron v0.0.0-20180505203441-b41be1df6967
 	github.com/rs/cors v1.4.0
-	github.com/russross/blackfriday v0.0.0-20180428102519-11635eb403ff
+	github.com/russross/blackfriday v1.5.1
 	github.com/sabhiram/go-gitignore v0.0.0-20180611051255-d3107576ba94
 	github.com/serenize/snaker v0.0.0-20171204205717-a683aaf2d516
 	github.com/sergi/go-diff v1.0.0
