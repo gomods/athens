@@ -1,10 +1,11 @@
 ---
 title: "Participating in the Athens Community"
-date: 2018-02-11T15:57:56-05:00
+date: 2018-08-24T17:01:56-07:00
 ---
 
 Absolutely everyone is welcome to join our community at any time! We
-are a friendly and inclusive group and we'd love to have you. We have three roles in the Athens community:
+are a friendly and inclusive group and we'd love to have you. We have three
+roles in the Athens community:
 
 - Community member
 - Contributor
@@ -16,8 +17,8 @@ Read on to find out more!
 
 Community members are folks who decide they want to get involved with our
 community. Absolutely anyone can do that whenever they want. If you want
-to get involved, that doesn't mean you have to continue being involved, but
-we hope our community is welcoming and the work is interesting enough to 
+to get involved, that doesn't mean you have to commit to being involved, but
+we hope our community is welcoming and the work is interesting enough to
 convince you to stay :)
 
 We'll provide all the support we can possibly provide to help you contribute
@@ -26,7 +27,7 @@ for how you can get involved:
 
 - Comment on an [issue](https://github.com/gomods/athens/issues) that you're
 interested in
-- Submit a [pull request](https://github.com/gomods/athens/pulls) (PR) to fix 
+- Submit a [pull request](https://github.com/gomods/athens/pulls) (PR) to fix
 an issue, or to improve something that doesn't have an issue
 - Review a PR that you're interested in
 - Join us at a weekly [development meeting](https://docs.google.com/document/d/1xpvgmR1Fq4iy1j975Tb4H_XjeXUQUOAvn0FximUzvIk/edit#)
@@ -37,52 +38,68 @@ an issue, or to improve something that doesn't have an issue
 
 # Contributors
 
-As you participate in the community more and more, you'll have the opportunity 
+As you participate in the community more and more, you'll have the opportunity
 to become a contributor. Here's what being a contributor means, and what you
 should do to become one.
 
 ## What Being a Contributor Means
 
-Contributors have read access to the Athens repository on Github. This means that as a contributor, you'll have issues assigned to you and you'll be requested 
-to review pull requests (PRs) via the 
+Contributors have read access to the Athens repository on Github. This means
+that as a contributor, you're able to have issues assigned to you and you'll
+be requested to review pull requests (PRs) via the
 [Github pull request review system](https://help.github.com/articles/about-pull-request-reviews/).
 
-We rely heavily on the Github PR review system, which means that if you review a PR as a contributor, you can decide 
-when that PR is ready to be merged.
+We rely heavily on the Github PR review system, which means that if you review
+a PR as a contributor, you can help decide when that PR is ready to be merged.
+Don't worry that you 'don't know enough', the final approval and merge will be
+by one or more maintainers.
 
 ## How to Become a Contributor
 
-To become a contributor, the core maintainers of the project would like to see you:
+To become a contributor, the core maintainers of the project would like to see
+you:
 
 - Attend our development meetings regularly<sup>1</sup>
 - Comment on issues with your experiences and opinions
-- Add your comments and reviews on pull requests (anyone can do this as a community member)
+- Add your comments and reviews on pull requests (anyone can do this as a
+community member)
 - Contribute PRs to fix issues
 - Open issues as you find them
 
+Contributors and maintainers will do their best to watch for community members
+who may make good contributors. But don't be shy, if you feel that this is you,
+please reach out to one or more of the contributors or maintainers.
+
 # Maintainers
 
-After you become a contributor, you'll have the opportunity to become a maintainer.
+After you become a contributor, you'll have the opportunity to become a
+maintainer.
 Here's what being a maintainer means and how to become one.
 
-_Note: We sometimes refer to maintainers as "core maintainers," but they're the same thing._
+_Note: We sometimes refer to maintainers as "core maintainers," but they're
+the same thing._
 
 ## What Being a Maintainer Means
 
-As a maintainer, you'll be doing the same things as a contributor with a few 
+As a maintainer, you'll be doing the same things as a contributor with a few
 extras:
 
 - Help organize our development meetings (i.e. help organize the agenda)
-- Promote the project and build community (e.g. present on it where possible, write about it, ...) when possible<sup>2</sup>
-- Triage issues (e.g. adding labels, promoting discussions, finalizing decisions)
-- Organize and promote PR reviews (e.g. prompting community members, contributors, and other maintainers to review)
+- Promote the project and build community (e.g. present on it where possible,
+write about it, ...) when possible<sup>2</sup>
+- Triage issues (e.g. adding labels, promoting discussions, finalizing
+decisions)
+- Organize and promote PR reviews (e.g. prompting community members,
+contributors, and other maintainers to review)
 - Handle code of conduct issues
 
 ## How to Become a Maintainer
 
-To become a maintainer, we would like you to see you be an effective contributor,
-and show that you can do some of the things maintainers do. Also, if you feel
-that this is you, please reach out to one or more of the maintainers. 
+To become a maintainer, we would like you to see you be an effective
+contributor, and show that you can do some of the things maintainers do.
+Maintainers will do their best to regularly discuss promoting contributors.
+But don't be shy, if you feel that this is you, please reach out to one or
+more of the maintainers.
 
 # The End
 
