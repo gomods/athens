@@ -3,6 +3,7 @@ package download
 import (
 	"context"
 	"io"
+	"time"
 
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/storage"
@@ -33,13 +34,44 @@ type Protocol interface {
 type protocol struct {
 	s  storage.Backend
 	dp Protocol
+	ch chan *job
+}
+
+type job struct {
+	mod, ver string
+	done     chan error
 }
 
 // New takes an upstream Protocol and storage
 // it always prefers storage, otherwise it goes to upstream
 // and fills the storage with the results.
-func New(dp Protocol, s storage.Backend) Protocol {
-	return &protocol{dp: dp, s: s}
+func New(dp Protocol, s storage.Backend, workers int) Protocol {
+	ch := make(chan *job)
+	p := &protocol{dp: dp, s: s, ch: ch}
+	p.start(workers)
+	return p
+}
+
+func (p *protocol) start(numWorkers int) {
+	for i := 0; i < numWorkers; i++ {
+		go p.listen()
+	}
+}
+
+func (p *protocol) listen() {
+	for j := range p.ch {
+		j.done <- p.fillCache(j.mod, j.ver)
+	}
+}
+
+func (p *protocol) request(mod, ver string) error {
+	j := &job{
+		mod:  mod,
+		ver:  ver,
+		done: make(chan error),
+	}
+	p.ch <- j
+	return <-j.done
 }
 
 func (p *protocol) List(ctx context.Context, mod string) ([]string, error) {
@@ -48,30 +80,36 @@ func (p *protocol) List(ctx context.Context, mod string) ([]string, error) {
 
 func (p *protocol) Info(ctx context.Context, mod, ver string) ([]byte, error) {
 	const op errors.Op = "protocol.Info"
-	v, err := p.s.Get(ctx, mod, ver)
-	if storage.IsNotFoundError(err) {
-		v, err = p.fillCache(ctx, mod, ver)
+	info, err := p.s.Info(ctx, mod, ver)
+	if errors.IsNotFoundErr(err) {
+		err = p.request(mod, ver)
+		if err != nil {
+			return nil, errors.E(op, err)
+		}
+		info, err = p.s.Info(ctx, mod, ver)
 	}
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
 
-	return v.Info, nil
+	return info, nil
 }
 
-func (p *protocol) fillCache(ctx context.Context, mod, ver string) (*storage.Version, error) {
+func (p *protocol) fillCache(mod, ver string) error {
 	const op errors.Op = "protocol.fillCache"
+	ctx, cancel := context.WithTimeout(context.Background(), time.Minute*10)
+	defer cancel()
 	v, err := p.dp.Version(ctx, mod, ver)
 	if err != nil {
-		return nil, errors.E(op, err)
+		return errors.E(op, err)
 	}
 	defer v.Zip.Close()
 	err = p.s.Save(ctx, mod, ver, v.Mod, v.Zip, v.Info)
 	if err != nil {
-		return nil, errors.E(op, err)
+		return errors.E(op, err)
 	}
 
-	return p.s.Get(ctx, mod, ver)
+	return nil
 }
 
 func (p *protocol) Latest(ctx context.Context, mod string) (*storage.RevInfo, error) {
@@ -86,36 +124,58 @@ func (p *protocol) Latest(ctx context.Context, mod string) (*storage.RevInfo, er
 
 func (p *protocol) GoMod(ctx context.Context, mod, ver string) ([]byte, error) {
 	const op errors.Op = "protocol.GoMod"
-	v, err := p.s.Get(ctx, mod, ver)
-	if storage.IsNotFoundError(err) {
-		v, err = p.fillCache(ctx, mod, ver)
+	goMod, err := p.s.GoMod(ctx, mod, ver)
+	if errors.IsNotFoundErr(err) {
+		err = p.request(mod, ver)
+		if err != nil {
+			return nil, errors.E(op, err)
+		}
+		goMod, err = p.s.GoMod(ctx, mod, ver)
 	}
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
 
-	return v.Mod, nil
+	return goMod, nil
 }
 
 func (p *protocol) Zip(ctx context.Context, mod, ver string) (io.ReadCloser, error) {
 	const op errors.Op = "protocol.Zip"
-	v, err := p.s.Get(ctx, mod, ver)
-	if storage.IsNotFoundError(err) {
-		v, err = p.fillCache(ctx, mod, ver)
+	zip, err := p.s.Zip(ctx, mod, ver)
+	if errors.IsNotFoundErr(err) {
+		err = p.request(mod, ver)
+		if err != nil {
+			return nil, errors.E(op, err)
+		}
+		zip, err = p.s.Zip(ctx, mod, ver)
 	}
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
 
-	return v.Zip, nil
+	return zip, nil
 }
 
 func (p *protocol) Version(ctx context.Context, mod, ver string) (*storage.Version, error) {
 	const op errors.Op = "protocol.Version"
-	v, err := p.dp.Version(ctx, mod, ver)
+	info, err := p.Info(ctx, mod, ver)
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
 
-	return v, nil
+	goMod, err := p.GoMod(ctx, mod, ver)
+	if err != nil {
+		return nil, errors.E(op, err)
+	}
+
+	zip, err := p.s.Zip(ctx, mod, ver)
+	if err != nil {
+		return nil, errors.E(op, err)
+	}
+
+	return &storage.Version{
+		Info: info,
+		Mod:  goMod,
+		Zip:  zip,
+	}, nil
 }

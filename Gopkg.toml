@@ -42,10 +42,6 @@
   version = "1.10.6"
 
 [[constraint]]
-  name = "github.com/gobuffalo/pop"
-  version = "4.3.0"
-
-[[constraint]]
   name = "github.com/gobuffalo/suite"
   version = "2.1.0"
 
@@ -56,10 +52,6 @@
 [[constraint]]
   branch = "master"
   name = "github.com/markbates/grift"
-
-[[constraint]]
-  name = "github.com/pkg/errors"
-  version = "0.8.0"
 
 [[constraint]]
   name = "github.com/rs/cors"
@@ -116,3 +108,7 @@
 [[constraint]]
   name = "github.com/aws/aws-sdk-go"
   version = "1.14.12"
+
+[[constraint]]
+  name = "github.com/bketelsen/buffet"
+  branch = "master"

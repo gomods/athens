@@ -6,5 +6,5 @@ set -xeuo pipefail
 
 go get github.com/golang/lint/golint
 go get github.com/golang/dep/cmd/dep
-go get -u -v golang.org/x/vgo
+
 ./scripts/get_buffalo.sh

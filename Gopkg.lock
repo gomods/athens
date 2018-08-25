@@ -93,10 +93,10 @@
   revision = "3a771d992973f24aa725d07868b467d1ddfceafb"
 
 [[projects]]
+  branch = "master"
   name = "github.com/bketelsen/buffet"
   packages = ["."]
-  revision = "338531d2dcd9545cf4e0f2e0bb7a4dd486595e17"
-  version = "v0.1.5"
+  revision = "2959027395a6a33e8b18b8169b2896d1bfb558c3"
 
 [[projects]]
   branch = "master"
@@ -258,8 +258,8 @@
 [[projects]]
   name = "github.com/gobuffalo/uuid"
   packages = ["."]
-  revision = "3a9fb6c5c481d4886f1e9323c61ad743fb955860"
-  version = "v2.0.0"
+  revision = "788767dde529e4b1c0e078569ebe51dc6b2ad6dc"
+  version = "v2.0.1"
 
 [[projects]]
   name = "github.com/gobuffalo/validate"
@@ -921,6 +921,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "8dce3e075320b50eb647b0e09252f4ae981df99cee607453acf87b03492d8248"
+  inputs-digest = "54396e6e784b6f4b718ca646b7d46e90e561407b0f887a556188537ce16e875f"
   solver-name = "gps-cdcl"
   solver-version = 1

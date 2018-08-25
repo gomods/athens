@@ -6,10 +6,11 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strings"
 
 	"github.com/gomods/athens/pkg/errors"
-	pkgerrors "github.com/pkg/errors"
+	"github.com/gomods/athens/pkg/paths"
 	"github.com/spf13/afero"
 )
 
@@ -19,42 +20,43 @@ type goGetFetcher struct {
 }
 
 // NewGoGetFetcher creates fetcher which uses go get tool to fetch modules
-func NewGoGetFetcher(goBinaryName string, fs afero.Fs) Fetcher {
+func NewGoGetFetcher(goBinaryName string, fs afero.Fs) (Fetcher, error) {
+	const op errors.Op = "module.NewGoGetFetcher"
+	if err := validGoBinary(goBinaryName); err != nil {
+		return nil, errors.E(op, err)
+	}
 	return &goGetFetcher{
 		fs:           fs,
 		goBinaryName: goBinaryName,
-	}
+	}, nil
 }
 
 // Fetch downloads the sources and returns path where it can be found. Make sure to call Clear
 // on the returned Ref when you are done with it
 func (g *goGetFetcher) Fetch(mod, ver string) (Ref, error) {
-
+	const op errors.Op = "goGetFetcher.Fetch"
 	// setup the GOPATH
 	goPathRoot, err := afero.TempDir(g.fs, "", "athens")
 	if err != nil {
-		return nil, err
+		return nil, errors.E(op, err)
 	}
 	sourcePath := filepath.Join(goPathRoot, "src")
 	modPath := filepath.Join(sourcePath, getRepoDirName(mod, ver))
 	if err := g.fs.MkdirAll(modPath, os.ModeDir|os.ModePerm); err != nil {
-		diskRef := newDiskRef(g.fs, goPathRoot, "", "")
-		diskRef.Clear()
-		return nil, err
+		ClearFiles(g.fs, goPathRoot)
+		return nil, errors.E(op, err)
 	}
 
 	// setup the module with barebones stuff
 	if err := Dummy(g.fs, modPath); err != nil {
-		diskRef := newDiskRef(g.fs, goPathRoot, "", "")
-		diskRef.Clear()
-		return nil, err
+		ClearFiles(g.fs, goPathRoot)
+		return nil, errors.E(op, err)
 	}
 
 	err = getSources(g.goBinaryName, g.fs, goPathRoot, modPath, mod, ver)
 	if err != nil {
-		diskRef := newDiskRef(g.fs, goPathRoot, "", "")
-		diskRef.Clear()
-		return nil, err
+		ClearFiles(g.fs, goPathRoot)
+		return nil, errors.E(op, err)
 	}
 
 	return newDiskRef(g.fs, goPathRoot, mod, ver), nil
@@ -80,46 +82,69 @@ func Dummy(fs afero.Fs, repoRoot string) error {
 // given a filesystem, gopath, repository root, module and version, runs 'vgo get'
 // on module@version from the repoRoot with GOPATH=gopath, and returns a non-nil error if anything went wrong.
 func getSources(goBinaryName string, fs afero.Fs, gopath, repoRoot, module, version string) error {
+	const op errors.Op = "module.getSources"
 	uri := strings.TrimSuffix(module, "/")
-
 	fullURI := fmt.Sprintf("%s@%s", uri, version)
 
-	gopathEnv := fmt.Sprintf("GOPATH=%s", gopath)
-	cacheEnv := fmt.Sprintf("GOCACHE=%s", filepath.Join(gopath, "cache"))
-	disableCgo := "CGO_ENABLED=0"
-	enableGoModules := "GO111MODULE=on"
-
-	cmd := exec.Command(goBinaryName, "get", fullURI)
-	// PATH is needed for vgo to recognize vcs binaries
-	// this breaks windows.
-	cmd.Env = []string{"PATH=" + os.Getenv("PATH"), gopathEnv, cacheEnv, disableCgo, enableGoModules}
+	cmd := exec.Command(goBinaryName, "mod", "download", fullURI)
+	cmd.Env = PrepareEnv(gopath)
 	cmd.Dir = repoRoot
 	o, err := cmd.CombinedOutput()
 	if err != nil {
 		errMsg := fmt.Sprintf("%v : %s", err, o)
 		// github quota exceeded
 		if isLimitHit(o) {
-			return errors.E("module.getSources", errMsg, errors.KindRateLimit)
+			return errors.E(op, errMsg, errors.KindRateLimit)
 		}
 		// another error in the output
-		return errors.E("module.getSources", errMsg)
+		return errors.E(op, errMsg)
 	}
 	// make sure the expected files exist
-	packagePath := getPackagePath(gopath, module)
-	return checkFiles(fs, packagePath, version)
+	encmod, err := paths.EncodePath(module)
+	if err != nil {
+		return errors.E(op, err)
+	}
+	packagePath := getPackagePath(gopath, encmod)
+	err = checkFiles(fs, packagePath, version)
+	if err != nil {
+		return errors.E(op, err)
+	}
+
+	return nil
+}
+
+// PrepareEnv will return all the appropriate
+// environment variables for a Go Command to run
+// successfully (such as GOPATH, GOCACHE, PATH etc)
+func PrepareEnv(gopath string) []string {
+	pathEnv := fmt.Sprintf("PATH=%s", os.Getenv("PATH"))
+	gopathEnv := fmt.Sprintf("GOPATH=%s", gopath)
+	cacheEnv := fmt.Sprintf("GOCACHE=%s", filepath.Join(gopath, "cache"))
+	disableCgo := "CGO_ENABLED=0"
+	enableGoModules := "GO111MODULE=on"
+	cmdEnv := []string{pathEnv, gopathEnv, cacheEnv, disableCgo, enableGoModules}
+
+	// add Windows specific ENV VARS
+	if runtime.GOOS == "windows" {
+		cmdEnv = append(cmdEnv, fmt.Sprintf("USERPROFILE=%s", os.Getenv("USERPROFILE")))
+		cmdEnv = append(cmdEnv, fmt.Sprintf("SystemRoot=%s", os.Getenv("SystemRoot")))
+	}
+
+	return cmdEnv
 }
 
 func checkFiles(fs afero.Fs, path, version string) error {
+	const op errors.Op = "module.checkFiles"
 	if _, err := fs.Stat(filepath.Join(path, version+".mod")); err != nil {
-		return pkgerrors.WithMessage(err, fmt.Sprintf("%s.mod not found in %s", version, path))
+		return errors.E(op, fmt.Sprintf("%s.mod not found in %s", version, path))
 	}
 
 	if _, err := fs.Stat(filepath.Join(path, version+".zip")); err != nil {
-		return pkgerrors.WithMessage(err, fmt.Sprintf("%s.zip not found in %s", version, path))
+		return errors.E(op, fmt.Sprintf("%s.mod not found in %s", version, path))
 	}
 
 	if _, err := fs.Stat(filepath.Join(path, version+".info")); err != nil {
-		return pkgerrors.WithMessage(err, fmt.Sprintf("%s.info not found in %s", version, path))
+		return errors.E(op, fmt.Sprintf("%s.mod not found in %s", version, path))
 	}
 
 	return nil
@@ -138,5 +163,15 @@ func getRepoDirName(repoURI, version string) string {
 
 // getPackagePath returns the path to the module cache given the gopath and module name
 func getPackagePath(gopath, module string) string {
-	return filepath.Join(gopath, "src", "mod", "cache", "download", module, "@v")
+	return filepath.Join(gopath, "pkg", "mod", "cache", "download", module, "@v")
+}
+
+func validGoBinary(name string) error {
+	const op errors.Op = "module.validGoBinary"
+	err := exec.Command(name).Run()
+	_, ok := err.(*exec.ExitError)
+	if err != nil && !ok {
+		return errors.E(op, err)
+	}
+	return nil
 }

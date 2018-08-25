@@ -11,6 +11,27 @@ See our [Contributing Guide](CONTRIBUTING.md) for tips on how to submit a pull r
 # Initial Development Environment Setup
 Athens relies on having a few tools installed locally. Run `make setup-dev-env` to install them.
 
+### Go version
+Athens is developed on Go1.11+.
+
+If you have a stable version of go running, then a later version of go can be downloaded.
+
+For example, to get `go1.11rc2`, run the following commands which won't affect your stable version
+```
+go get golang.org/dl/go1.11rc2
+go1.11rc2 download
+```
+
+To point Athens to `go1.11rc2` or to a different version
+set the following environment variable
+
+```
+GO_BINARY_PATH=go1.11rc2
+or whichever binary you want to use with athens
+```
+
+### Dependencies
+
 # Services that Athens Needs
 
 Both the proxy and the registry rely on several services (i.e. databases, etc...) to function
@@ -25,15 +46,17 @@ it easy to get up and running:
 That's it! After the `make dev` command is done, everything will be up and running and you can move
 on to the next step.
 
-If you want to stop everything at any time, run `make dev-teardown`.
+If you want to stop everything at any time, run `make down`.
+
+Note that `make dev` only runs the minimum amount of dependencies needed for things to work. If you'd like to run all the possible dependencies run `make alldeps` or directly the services available in the `docker-compose.yml` file.
 
 # Run the Proxy or the Registry
 
 As you know from reading the [README](./README.md) (if you didn't read the whole thing, that's ok. Just read the
 introduction), the Athens project is made up of two components:
 
-1. [Package Registry](https://github.com/gomods/athens/wiki/The-Central-Package-Registry-(Olympus))
-2. [Edge Proxy](https://github.com/gomods/athens/wiki/Proxies-(Zeus))
+1. [Package Registry](https://docs.gomods.io/design/registry/)
+2. [Edge Proxy](https://docs.gomods.io/design/proxy/)
 
 To run the registry:
 
@@ -44,7 +67,7 @@ buffalo dev
 
 To run the proxy:
 
-```consols
+```console
 cd cmd/proxy
 buffalo dev
 ```
@@ -57,3 +80,24 @@ Starting application at 127.0.0.1:3000
 
 And you'll be up and running. As you edit and save code, the `buffalo dev` command will notice and automatically
 re-compile and restart the server.
+
+# Run unit tests
+
+In order to run unit tests, services they depend on must be running first:
+
+```console
+make alldeps
+```
+
+and database created:
+
+```console
+buffalo db create
+buffalo db migrate up
+```
+
+then you can run the unit tests:
+
+```console
+make test-unit
+```

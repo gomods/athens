@@ -3,90 +3,93 @@ package gcp
 import (
 	"bytes"
 	"context"
+
 	"io/ioutil"
 	"testing"
 	"time"
 
-	athensStorage "github.com/gomods/athens/pkg/storage"
+	"github.com/gomods/athens/pkg/errors"
 )
-
-func (g *GcpTests) TestNewWithCredentials() {
-	r := g.Require()
-	store, err := NewWithCredentials(g.context, g.options)
-	r.NoError(err)
-	r.NotNil(store.bucket)
-}
 
 func (g *GcpTests) TestSaveGetListExistsRoundTrip() {
 	r := g.Require()
-	store, err := NewWithCredentials(g.context, g.options)
-	r.NoError(err)
 
 	g.T().Run("Save to storage", func(t *testing.T) {
-		err = store.Save(g.context, g.module, g.version, mod, bytes.NewReader(zip), info)
+		err := g.store.Save(g.context, g.module, g.version, mod, bytes.NewReader(zip), info)
 		r.NoError(err)
 	})
 
 	g.T().Run("Get from storage", func(t *testing.T) {
-		version, err := store.Get(context.Background(), g.module, g.version)
+		ctx := context.Background()
+		modBts, err := g.store.GoMod(ctx, g.module, g.version)
 		r.NoError(err)
-		defer version.Zip.Close()
+		r.Equal(mod, modBts)
 
-		r.Equal(mod, version.Mod)
-		r.Equal(info, version.Info)
+		infoBts, err := g.store.Info(ctx, g.module, g.version)
+		r.NoError(err)
+		r.Equal(info, infoBts)
 
-		gotZip, err := ioutil.ReadAll(version.Zip)
-		r.NoError(version.Zip.Close())
+		ziprc, err := g.store.Zip(ctx, g.module, g.version)
+		gotZip, err := ioutil.ReadAll(ziprc)
+		r.NoError(ziprc.Close())
 		r.NoError(err)
 		r.Equal(zip, gotZip)
 	})
 
 	g.T().Run("List module versions", func(t *testing.T) {
-		versionList, err := store.List(g.context, g.module)
+		versionList, err := g.store.List(g.context, g.module)
 		r.NoError(err)
 		r.Equal(1, len(versionList))
 		r.Equal(g.version, versionList[0])
 	})
 
 	g.T().Run("Module exists", func(t *testing.T) {
-		r.Equal(true, store.Exists(g.context, g.module, g.version))
+		exists, err := g.store.Exists(g.context, g.module, g.version)
+		r.NoError(err)
+		r.Equal(true, exists)
+	})
+
+	g.T().Run("Resources closed", func(t *testing.T) {
+		r.Equal(true, g.bucket.ReadClosed())
+		r.Equal(true, g.bucket.WriteClosed())
 	})
 }
 
 func (g *GcpTests) TestDeleter() {
 	r := g.Require()
-	store, err := NewWithCredentials(g.context, g.options)
-	r.NoError(err)
 
 	version := "delete" + time.Now().String()
-	err = store.Save(g.context, g.module, version, mod, bytes.NewReader(zip), info)
+	err := g.store.Save(g.context, g.module, version, mod, bytes.NewReader(zip), info)
 	r.NoError(err)
 
-	err = store.Delete(g.context, g.module, version)
+	err = g.store.Delete(g.context, g.module, version)
 	r.NoError(err)
 
-	exists := store.Exists(g.context, g.module, version)
+	exists, err := g.store.Exists(g.context, g.module, version)
+	r.NoError(err)
 	r.Equal(false, exists)
 }
 
 func (g *GcpTests) TestNotFounds() {
 	r := g.Require()
-	store, err := NewWithCredentials(g.context, g.options)
-	r.NoError(err)
 
 	g.T().Run("Get module version not found", func(t *testing.T) {
-		_, err = store.Get(context.Background(), "never", "there")
-		versionNotFoundErr := athensStorage.ErrVersionNotFound{Module: "never", Version: "there"}
-		r.EqualError(versionNotFoundErr, err.Error())
+		_, err := g.store.Info(context.Background(), "never", "there")
+		r.True(errors.IsNotFoundErr(err))
+		_, err = g.store.GoMod(context.Background(), "never", "there")
+		r.True(errors.IsNotFoundErr(err))
+		_, err = g.store.Zip(context.Background(), "never", "there")
+		r.True(errors.IsNotFoundErr(err))
 	})
 
 	g.T().Run("Exists module version not found", func(t *testing.T) {
-		r.Equal(false, store.Exists(g.context, "never", "there"))
+		exists, err := g.store.Exists(g.context, "never", "there")
+		r.NoError(err)
+		r.Equal(false, exists)
 	})
 
 	g.T().Run("List not found", func(t *testing.T) {
-		_, err = store.List(g.context, "nothing/to/see/here")
-		modNotFoundErr := athensStorage.ErrNotFound{Module: "nothing/to/see/here"}
-		r.EqualError(modNotFoundErr, err.Error())
+		_, err := g.store.List(g.context, "nothing/to/see/here")
+		r.True(errors.IsNotFoundErr(err))
 	})
 }
