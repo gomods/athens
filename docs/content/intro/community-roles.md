@@ -119,7 +119,7 @@ everyone the best we can.
     We know that this time can be problematic for some folks due to work commitments,
     different time zones, and so on. If you can't come to meetings, that's totally ok
     and doesn't mean you can't become a contributor! Just let one of the maintainers
-    know about it.
+    know about it, or leave a message in `#athens` in the <a href="https://invite.slack.golangbridge.org/">gophers slack</a>.
 </i></p>
 <p><i>
     <sup>2</sup> Anyone and everyone is of course welcome to do this too!
