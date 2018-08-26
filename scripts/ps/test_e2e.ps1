@@ -27,9 +27,9 @@ function stopProcesses () {
 
 function teardown () {
   # Cleanup ENV after our tests
-  if ($origGOPATH) {$env:GOPATH = $origGOPATH} else {Remove-Alias env:GOPATH}
-  if ($origGOPROXY) {$env:GOPROXY = $origGOPROXY} else {Remove-Alias env:GOPROXY}
-  if ($origGO111MODULE) {$env:GO111MODULE = $origGO111MODULE} else {Remove-Alias env:GO111MODULE}
+  if ($origGOPATH) {$env:GOPATH = $origGOPATH} else {Remove-Item env:GOPATH}
+  if ($origGOPROXY) {$env:GOPROXY = $origGOPROXY} else {Remove-Item env:GOPROXY}
+  if ($origGO111MODULE) {$env:GO111MODULE = $origGO111MODULE} else {Remove-Item env:GO111MODULE}
   # stop buffalo
   stopProcesses
   # clear test gopath
