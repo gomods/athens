@@ -91,7 +91,9 @@ write about it, ...) when possible<sup>2</sup>
 decisions)
 - Organize and promote PR reviews (e.g. prompting community members,
 contributors, and other maintainers to review)
-- Handle code of conduct issues
+- Help foster a safe and welcoming environment for all project participants.
+This will include enforcing our code of conduct. We adhere to the [Contributor
+Covenant](https://www.contributor-covenant.org), if you haven't read it yet you can do so [here](https://www.contributor-covenant.org/version/1/4/code-of-conduct)(english version).
 
 ## How to Become a Maintainer
 
