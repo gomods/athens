@@ -22,7 +22,7 @@ Run `make test-e2e` to run the end-to-end tests.
 
 The first time you run the tests,
 you must run `make setup-dev-env` first, otherwise you will see errors like the one below:
-<<<<<<<HEAD
+
 ```
 error connecting to storage (no reachable servers)
 ```
