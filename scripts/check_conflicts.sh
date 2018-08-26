@@ -11,7 +11,7 @@
 # CI build to fail. Merge conflict artifacts must be removed before continuing.
 
 git remote set-branches --add origin master && git fetch
-COUNT=$(git diff origin/master -- . ':1*.go' ':!go.mod' ':!go.sum' | grep -Ec "^[\+~][<>=]{7}\w{0,}")
+COUNT=$(git diff origin/master -- . ':!*.go' ':!go.mod' ':!go.sum' | grep -Ec "^[\+~][<>=]{7}\w{0,}")
 
 if (($COUNT > 0));then
   exit 1
