@@ -13,7 +13,6 @@ import (
 	"github.com/gomods/athens/pkg/storage/mem"
 	"github.com/gomods/athens/pkg/storage/minio"
 	"github.com/gomods/athens/pkg/storage/mongo"
-	"github.com/gomods/athens/pkg/storage/rdbms"
 	"github.com/stretchr/testify/require"
 )
 
@@ -112,7 +111,9 @@ func BenchmarkStorageExists(b *testing.B) {
 		b.ResetTimer()
 		b.Run(store.StorageHumanReadableName(), func(b *testing.B) {
 			for i := 0; i < b.N; i++ {
-				require.True(b, backend.Exists(context.Background(), moduleName, version))
+				exists, err := backend.Exists(context.Background(), moduleName, version)
+				require.NoError(b, err)
+				require.True(b, exists)
 			}
 		})
 
@@ -132,10 +133,6 @@ func getStores(b *testing.B) []storage.TestSuite {
 	mongoStore, err := mongo.NewTestSuite(model)
 	require.NoError(b, err, "couldn't create mongo store")
 	stores = append(stores, mongoStore)
-
-	rdbmsStore, err := rdbms.NewTestSuite(model)
-	require.NoError(b, err, "couldn't create mongo store")
-	stores = append(stores, rdbmsStore)
 
 	memStore, err := mem.NewTestSuite(model)
 	require.NoError(b, err)
