@@ -10,7 +10,7 @@ import (
 
 // MongoConnectionString returns Athens Mongo Storage connection string defined by ATHENS_MONGO_CONNECTION_STRING
 func MongoConnectionString() (string, error) {
-	env, err := envy.MustGet("ATHENS_MONGO_CONNECTION_STRING")
+	env, err := envy.MustGet("ATHENS_MONGO_CONNECTION_STRING", "mongodb://127.0.0.1:27017")
 	if err != nil {
 		return "", fmt.Errorf("missing mongo connection string: %s", err)
 	}
