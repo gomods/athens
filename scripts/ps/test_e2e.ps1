@@ -69,12 +69,12 @@ try {
   ## Make sure that our test repo works without the GOPROXY first
   if (Test-Path env:GOPROXY) { Remove-Item env:GOPROXY }
   
-  & $env:GO_BINARY_PATH run .
+  & $env:GO_BINARY_PATH run -mod=vendor .
   clearGoModCache
 
   ## Verify that the test works against the proxy
   $env:GOPROXY = "http://localhost:3000"
-  & $env:GO_BINARY_PATH run .
+  & $env:GO_BINARY_PATH run -mod=vendor .
 }
 finally {
   teardown
