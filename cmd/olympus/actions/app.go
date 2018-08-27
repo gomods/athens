@@ -3,8 +3,6 @@ package actions
 import (
 	stdlog "log"
 
-	"github.com/gomods/athens/pkg/stash"
-
 	"github.com/gobuffalo/buffalo"
 	"github.com/gobuffalo/buffalo/middleware"
 	"github.com/gobuffalo/buffalo/middleware/csrf"
@@ -21,6 +19,7 @@ import (
 	"github.com/gomods/athens/pkg/download/stasher"
 	"github.com/gomods/athens/pkg/eventlog"
 	"github.com/gomods/athens/pkg/log"
+	"github.com/gomods/athens/pkg/stash"
 	"github.com/gomods/athens/pkg/storage"
 	"github.com/gomodule/redigo/redis"
 	"github.com/rs/cors"
