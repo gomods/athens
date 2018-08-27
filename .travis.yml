@@ -5,8 +5,6 @@ install: false
 go:
   - "1.11.x"
 env:
-  - GO111MODULE=auto
-  - GO111MODULE=on
   global:
     - PATH=${PATH}:./bin
     - GO_ENV=test
@@ -16,6 +14,10 @@ env:
     - CODE_COV=1
     - ATHENS_DIR=${GOPATH}/src/github.com/gomods/athens
     - REGISTRY=gomods/
+  matrix:
+    # remove this after Go1.12 ships
+    - GO111MODULE=auto
+    - GO111MODULE=on
 
 before_script:
   - mkdir -p $ATHENS_DIR && rsync -azr . $ATHENS_DIR && cd $ATHENS_DIR
