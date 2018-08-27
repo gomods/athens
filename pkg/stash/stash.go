@@ -10,7 +10,7 @@ import (
 )
 
 // Stasher has the job of taking a module
-// from its upstream Sownload Protcool and
+// from its upstream Download Protcool and
 // stashing to its Storage Backend. Both
 // interfaces must be defined on the type previously.
 type Stasher interface {
