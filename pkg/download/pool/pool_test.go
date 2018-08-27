@@ -41,10 +41,10 @@ type mockPool struct {
 func (m *mockPool) List(ctx context.Context, mod string) ([]string, error) {
 	m.mu.Lock()
 	m.num++
-	m.mu.Unlock()
 	if m.num == 5 {
 		m.ch <- struct{}{}
 	}
+	m.mu.Unlock()
 
 	time.Sleep(time.Minute)
 	return nil, nil
