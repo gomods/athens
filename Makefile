@@ -21,6 +21,7 @@ verify:
 	./scripts/check_gofmt.sh
 	./scripts/check_golint.sh
 	./scripts/check_deps.sh
+	./scripts/check_conflicts.sh
 
 .PHONY: test
 test:
