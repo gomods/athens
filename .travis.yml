@@ -5,6 +5,8 @@ install: false
 go:
   - "1.11.x"
 env:
+  - GO111MODULE=auto
+  - GO111MODULE=on
   global:
     - PATH=${PATH}:./bin
     - GO_ENV=test
