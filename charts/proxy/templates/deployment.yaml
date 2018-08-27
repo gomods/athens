@@ -1,0 +1,51 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ template "fullname" . }}
+  labels:
+    app: {{ template "fullname" . }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+spec:
+  
+  replicas: {{ .Values.replicaCount }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "fullname" . }}
+        chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+        release: "{{ .Release.Name }}"
+    spec:
+      containers:
+      - name: {{ template "fullname" . }}
+        image: "{{ .Values.image.registry }}/{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy | quote }}
+        env:
+        - name: ATHENS_STORAGE_TYPE
+          value: {{ .Values.storage.type | quote }}
+        {{- if eq .Values.storage.type "disk"}}
+        - name: ATHENS_DISK_STORAGE_ROOT
+          value: {{ .Values.storage.disk.storageRoot | quote }}
+        {{- else if eq .Values.storage.type "mongo"}}
+        - name: ATHENS_MONGO_STORAGE_URL
+          value: {{ .Values.storage.mongo.url | quote }}
+        {{- end }}
+        # TODO: re-enable when workers are used
+        #- name: ATHENS_REDIS_QUEUE_PORT
+        #  value: {{ .Values.redisPort | quote }}
+        ports:
+        - containerPort: 3000
+        {{- if eq .Values.storage.type "disk" }}
+        volumeMounts:
+        - name: storage-volume
+          mountPath: {{ .Values.storage.disk.storageRoot | quote }}
+        {{- end }}
+      volumes:
+      - name: storage-volume
+      {{- if .Values.storage.disk.persistence.enabled }}
+        persistentVolumeClaim: 
+          claimName: {{ template "fullname" . }}-storage
+      {{- else }}
+        emptyDir: {}
+      {{- end }}

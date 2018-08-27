@@ -1,0 +1,51 @@
+replicaCount: 1
+image:
+  registry: docker.io
+  repository: gomods/proxy
+  tag: v0.1.0
+  ## Specify a imagePullPolicy
+  ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
+  ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
+  ##
+  pullPolicy: Always
+
+service:
+  ## Type of service; valid values are "ClusterIP", "LoadBalancer", and
+  ## "NodePort". "ClusterIP" is sufficient in the case when the Proxy will be used
+  ## from within the cluster. To expose externally, consider a "NodePort" or "LoadBalancer" service.
+  type: ClusterIP
+  ## Further configuration if service is of type "NodePort"
+  nodePort:
+    ## Available port in allowable range (e.g. 30000 - 32767 on minikube)
+    port: 30080
+
+ingress:
+  enabled: false
+  # provie key/value annotations
+  annotations:
+  # Provide an array of values for the ingress host mapping
+  hosts:
+  # Provide a base64 encoded cert for TLS use 
+  tls: 
+    
+storage:
+  type: disk
+  disk:
+    storageRoot: "/var/lib/athens"
+    persistence:
+      ## Note if you use disk.persistence.enabled, replicaCount should be set to 1 unless your access mode is ReadWriteMany
+      enabled: false
+      accessMode: ReadWriteOnce
+      size: 4Gi
+  mongo:
+    # you must set this on the command line when you run 'helm install'
+    # for example, you need to run 'helm install --set mongoStorageURL=myurl ...'
+    url: "SET THIS ON THE COMMAND LINE"
+
+# Worker is disabled right now. When it's turned on, we can use helm dependencies to start this up!
+#redis:
+#  useEmbedded: false
+#  port: 6379
+#  username: 
+#  password:
+#  host:
