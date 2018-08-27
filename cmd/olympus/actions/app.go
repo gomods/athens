@@ -3,6 +3,8 @@ package actions
 import (
 	stdlog "log"
 
+	"github.com/gomods/athens/pkg/stash"
+
 	"github.com/gobuffalo/buffalo"
 	"github.com/gobuffalo/buffalo/middleware"
 	"github.com/gobuffalo/buffalo/middleware/csrf"
@@ -16,6 +18,7 @@ import (
 	"github.com/gomods/athens/pkg/config/env"
 	"github.com/gomods/athens/pkg/download"
 	"github.com/gomods/athens/pkg/download/goget"
+	"github.com/gomods/athens/pkg/download/stasher"
 	"github.com/gomods/athens/pkg/eventlog"
 	"github.com/gomods/athens/pkg/log"
 	"github.com/gomods/athens/pkg/storage"
@@ -127,7 +130,8 @@ func App(config *AppConfig) (*buffalo.App, error) {
 	if err != nil {
 		return nil, err
 	}
-	dp := download.New(gg, config.Storage, env.GoGetWorkers())
+	st := stash.New(gg, config.Storage)
+	dp := stasher.New(gg, config.Storage, st)
 	opts := &download.HandlerOpts{Protocol: dp, Logger: lggr, Engine: renderEng}
 	download.RegisterHandlers(app, opts)
 
