@@ -1,10 +1,13 @@
-package download
+package stasher
 
 import (
 	"bytes"
 	"context"
 	"io/ioutil"
 	"testing"
+
+	"github.com/gomods/athens/pkg/download"
+	"github.com/gomods/athens/pkg/stash"
 
 	"github.com/gomods/athens/pkg/storage/mem"
 
@@ -27,7 +30,8 @@ func TestDownloadProtocol(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	dp := New(&mockProtocol{}, s, 2)
+	mp := &mockProtocol{}
+	dp := New(mp, s, stash.New(mp, s))
 	ctx := context.Background()
 
 	var eg errgroup.Group
@@ -56,7 +60,7 @@ func TestDownloadProtocol(t *testing.T) {
 }
 
 type mockProtocol struct {
-	Protocol
+	download.Protocol
 }
 
 // Info implements GET /{module}/@v/{version}.info
