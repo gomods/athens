@@ -3,7 +3,7 @@ services:
 language: go
 install: false
 go:
-  - "1.11rc2"
+  - "1.11"
 env:
   global:
     - PATH=${PATH}:./bin
@@ -14,13 +14,13 @@ env:
     - CODE_COV=1
     - ATHENS_DIR=${GOPATH}/src/github.com/gomods/athens
     - REGISTRY=carolynvs/ # Temporary workaround until we have access to the gomods/ registry
+    - GO111MODULE=on
 
 before_script:
   - mkdir -p $ATHENS_DIR && rsync -azr . $ATHENS_DIR && cd $ATHENS_DIR
   - make setup-dev-env
   - wget "https://dl.minio.io/server/minio/release/linux-amd64/minio"
   - chmod +x minio && nohup ./minio server . &
-
 
 script:
   - make verify test-unit test-e2e
