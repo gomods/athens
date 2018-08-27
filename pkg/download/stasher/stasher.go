@@ -3,7 +3,6 @@ package stasher
 import (
 	"context"
 	"io"
-	"time"
 
 	"github.com/gomods/athens/pkg/download"
 	"github.com/gomods/athens/pkg/errors"
@@ -45,22 +44,6 @@ func (p *protocol) Info(ctx context.Context, mod, ver string) ([]byte, error) {
 	}
 
 	return info, nil
-}
-
-func (p *protocol) Stash(mod, ver string) error {
-	const op errors.Op = "stasher.Stash"
-	ctx, cancel := context.WithTimeout(context.Background(), time.Minute*10)
-	defer cancel()
-	v, err := p.dp.Version(ctx, mod, ver)
-	if err != nil {
-		return errors.E(op, err)
-	}
-	defer v.Zip.Close()
-	err = p.s.Save(ctx, mod, ver, v.Mod, v.Zip, v.Info)
-	if err != nil {
-		return errors.E(op, err)
-	}
-	return nil
 }
 
 func (p *protocol) Latest(ctx context.Context, mod string) (*storage.RevInfo, error) {
