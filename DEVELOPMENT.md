@@ -89,13 +89,6 @@ In order to run unit tests, services they depend on must be running first:
 make alldeps
 ```
 
-and database created:
-
-```console
-buffalo db create
-buffalo db migrate up
-```
-
 then you can run the unit tests:
 
 ```console
