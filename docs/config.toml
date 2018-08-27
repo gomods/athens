@@ -5,6 +5,7 @@ title = "Athens"
 
 [params]
 disableShortcutsTitle = true
+disableInlineCopyToClipBoard = true
 
 [outputs]
 home = [ "HTML", "RSS", "JSON"]
