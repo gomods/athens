@@ -90,6 +90,9 @@ func (gg *goget) list(op errors.Op, mod string) (*listResp, error) {
 	}
 	defer gg.fs.RemoveAll(hackyPath)
 	err = module.Dummy(gg.fs, hackyPath)
+	if err != nil {
+		return nil, errors.E(op, err)
+	}
 
 	cmd := exec.Command(
 		gg.goBinPath,
