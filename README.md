@@ -14,9 +14,7 @@ See our documentation site [https://docs.gomods.io](https://docs.gomods.io) for 
 [![Build Status](https://travis-ci.org/gomods/athens.svg?branch=master)](https://travis-ci.org/gomods/athens)
 [![codecov](https://codecov.io/gh/gomods/athens/branch/master/graph/badge.svg)](https://codecov.io/gh/gomods/athens)
 [![GoDoc](https://godoc.org/github.com/gomods/athens?status.svg)](https://godoc.org/github.com/gomods/athens)
-[![Go Report Card](https://goreportcard.com/badge/github.com/gomods/athens)](https://goreportcard.com/report/github.com/gomods/athens)              
-
-
+[![Go Report Card](https://goreportcard.com/badge/github.com/gomods/athens)](https://goreportcard.com/report/github.com/gomods/athens)
 
 Project Athens is in a very early alpha release and everything might change.
 Don't run it in production, but do play around with it and [contribute](#contributing)
@@ -79,10 +77,10 @@ The Athens project would not be possible without the amazing projects it builds 
 
 # Coding Guidlines
 
-We all strive to write nice and readable code which can be understood by every person of the team. To achive that we follow principles described in Brians talk `Code like the Go team`.
+We all strive to write nice and readable code which can be understood by every person of the team. To achieve that we follow principles described in Brian's talk `Code like the Go team`.
 
-- [Printed version]("https://learn-golang.com/en/goteam/")
-- [Gophercon RU talk]("https://www.youtube.com/watch?v=MzTcsI6tn-0")
+- [Printed version](https://learn-golang.com/en/goteam/)
+- [Gophercon RU talk](https://www.youtube.com/watch?v=MzTcsI6tn-0)
 
 # Code of Conduct
 
