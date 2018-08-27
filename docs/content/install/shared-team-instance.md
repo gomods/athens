@@ -25,7 +25,7 @@ docker run -d -v $ATHENS_STORAGE:/var/lib/athens \
    --name athens-proxy \
    --restart always \
    -p 3000:3000 \
-   jeremyrickard/athens-proxy:latest
+   gomods/proxy:latest
 ```
 
 **PowerShell**
@@ -38,7 +38,7 @@ docker run -d -v "$($env:ATHENS-STORAGE):/var/lib/athens" `
    --name athens-proxy `
    --restart always `
    -p 3000:3000 `
-   jeremyrickard/athens-proxy:latest
+   gomods/proxy:latest
 ```
 
 Note: if you have not previously mounted this drive with Docker for Windows, you may be prompted to allow access
@@ -48,7 +48,7 @@ Athens should now be running as a Docker container with the local directory, `at
 ```console
 $ docker ps
 CONTAINER ID        IMAGE                               COMMAND           PORTS                    NAMES
-f0429b81a4f9        jeremyrickard/athens-proxy:latest   "/bin/app"        0.0.0.0:3000->3000/tcp   athens-proxy
+f0429b81a4f9        gomods/proxy:latest   "/bin/app"        0.0.0.0:3000->3000/tcp   athens-proxy
 ```
 
 Now, we can use Athens from any development machine that has Go 1.11 installed. To verify this, try the following example:
@@ -141,7 +141,7 @@ docker run -d -v $ATHENS_STORAGE:/var/lib/athens \
    --name athens-proxy \
    --restart always \
    -p 3000:3000 \
-   jeremyrickard/athens-proxy:latest
+   gomods/proxy:latest
 ```
 
 **PowerShell**
@@ -152,7 +152,7 @@ docker run -d -v "$($env:ATHENS-STORAGE):/var/lib/athens" `
    --name athens-proxy `
    --restart always `
    -p 3000:3000 `
-   jeremyrickard/athens-proxy:latest
+   gomods/proxy:latest
 ```
 
 When we re-run our Go example, the Go cli will again download module from Athens. Athens, however, will not need to retrieve the module. It will be served from the Athens on-disk storage.
