@@ -1,4 +1,4 @@
-FROM golang:1.11-rc
+FROM golang:1.11
 
 RUN mkdir -p $GOPATH/src/github.com/gomods/athens
 WORKDIR $GOPATH/src/github.com/gomods/athens
