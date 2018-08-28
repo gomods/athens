@@ -16,9 +16,7 @@ Athens relies on having a few tools installed locally. Run `make setup-dev-env` 
 ### Go version
 Athens is developed on Go1.11+.
 
-To point Athens to a different version of Go
-set the following environment variable
-
+To point Athens to a different version of Go set the following environment variable
 ```
 GO_BINARY_PATH=go1.11.X
 or whichever binary you want to use with athens
