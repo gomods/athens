@@ -24,10 +24,7 @@ func Test_ActionSuite(t *testing.T) {
 	if err != nil {
 		t.Fatalf("error creating storage (%s)", err)
 	}
-	mURI, err := env.MongoConnectionString()
-	if err != nil {
-		t.Fatalf("error getting mongo uri (%s)", err)
-	}
+	mURI := env.MongoConnectionString()
 	certPath := env.MongoCertPath()
 	eLog, err := mongo.NewLog(mURI, certPath)
 	if err != nil {
