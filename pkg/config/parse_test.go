@@ -13,7 +13,6 @@ const exampleConfigPath = "../../config.example.toml"
 
 func TestEnvOverrides(t *testing.T) {
 
-	// Set values that are not defaults for everything
 	filterOff := false
 	expProxy := ProxyConfig{
 		StorageType:           "minio",
@@ -71,8 +70,6 @@ func TestEnvOverrides(t *testing.T) {
 func TestStorageEnvOverrides(t *testing.T) {
 
 	globalTimeout := 300
-	minioSSL := false
-	// Set values that are not defaults for everything
 	expStorage := &StorageConfig{
 		CDN: &CDNConfig{
 			Endpoint: "cdnEndpoint",
@@ -90,7 +87,7 @@ func TestStorageEnvOverrides(t *testing.T) {
 			Endpoint:  "minioEndpoint",
 			Key:       "minioKey",
 			Secret:    "minioSecret",
-			EnableSSL: &minioSSL,
+			EnableSSL: false,
 			Bucket:    "minioBucket",
 			Timeout:   globalTimeout,
 		},
@@ -111,7 +108,7 @@ func TestStorageEnvOverrides(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Env override failed: %v", err)
 	}
-	conf.Storage = setStorageDefaults(conf.Storage, globalTimeout)
+	setStorageTimeouts(conf.Storage, globalTimeout)
 	deleteInvalidStorageConfigs(conf.Storage)
 
 	eq := cmp.Equal(conf.Storage, expStorage)
@@ -121,19 +118,11 @@ func TestStorageEnvOverrides(t *testing.T) {
 	restoreEnv(envVarBackup)
 }
 
-func TestParseDefaultsSuccess(t *testing.T) {
-	_, err := parseConfig("")
-	if err != nil {
-		t.Errorf("Default values are causing validation failures")
-	}
-}
-
 // TestParseExampleConfig validates that all the properties in the example configuration file
 // can be parsed and validated without any environment variables
 func TestParseExampleConfig(t *testing.T) {
 
 	// initialize all struct pointers so we get all applicable env variables
-	minioSSLDefault := false
 	emptyConf := &Config{
 		Proxy:   &ProxyConfig{},
 		Olympus: &OlympusConfig{},
@@ -142,7 +131,7 @@ func TestParseExampleConfig(t *testing.T) {
 			Disk: &DiskConfig{},
 			GCP:  &GCPConfig{},
 			Minio: &MinioConfig{
-				EnableSSL: &minioSSLDefault,
+				EnableSSL: false,
 			},
 			Mongo: &MongoConfig{},
 		},
@@ -176,7 +165,6 @@ func TestParseExampleConfig(t *testing.T) {
 		WorkerType:        "redis",
 	}
 
-	minioSSL := true
 	expStorage := &StorageConfig{
 		CDN: &CDNConfig{
 			Endpoint: "cdn.example.com",
@@ -194,7 +182,7 @@ func TestParseExampleConfig(t *testing.T) {
 			Endpoint:  "minio.example.com",
 			Key:       "MY_KEY",
 			Secret:    "MY_SECRET",
-			EnableSSL: &minioSSL,
+			EnableSSL: true,
 			Bucket:    "gomods",
 			Timeout:   globalTimeout,
 		},
@@ -235,17 +223,16 @@ func TestParseExampleConfig(t *testing.T) {
 	restoreEnv(envVarBackup)
 }
 
-// TestConfigOverridesDefault validates that a value provided by the config is not overwritten by defaults
+// TestConfigOverridesDefault validates that a value provided by the config is not overwritten during parsing
 func TestConfigOverridesDefault(t *testing.T) {
 
 	// set values to anything but defaults
-	minioSSL := false
 	config := &Config{
 		Timeout: 1,
 		Storage: &StorageConfig{
 			Minio: &MinioConfig{
 				Bucket:    "notgomods",
-				EnableSSL: &minioSSL,
+				EnableSSL: false,
 				Timeout:   42,
 			},
 		},
@@ -334,9 +321,7 @@ func getEnvMap(config *Config) map[string]string {
 			envVars["ATHENS_MINIO_ENDPOINT"] = storage.Minio.Endpoint
 			envVars["ATHENS_MINIO_ACCESS_KEY_ID"] = storage.Minio.Key
 			envVars["ATHENS_MINIO_SECRET_ACCESS_KEY"] = storage.Minio.Secret
-			if storage.Minio.EnableSSL != nil {
-				envVars["ATHENS_MINIO_USE_SSL"] = strconv.FormatBool(*storage.Minio.EnableSSL)
-			}
+			envVars["ATHENS_MINIO_USE_SSL"] = strconv.FormatBool(storage.Minio.EnableSSL)
 			envVars["ATHENS_MINIO_BUCKET_NAME"] = storage.Minio.Bucket
 		}
 		if storage.Mongo != nil {

@@ -11,21 +11,6 @@ type ProxyConfig struct {
 	BasicAuthPass         string `envconfig:"BASIC_AUTH_PASS"`
 }
 
-func setProxyDefaults(p *ProxyConfig) *ProxyConfig {
-	if p == nil {
-		p = &ProxyConfig{}
-	}
-	overrideDefaultStr(&p.StorageType, "memory")
-	overrideDefaultStr(&p.OlympusGlobalEndpoint, "http://localhost:3001")
-	overrideDefaultStr(&p.Port, ":3000")
-	overrideDefaultStr(&p.RedisQueueAddress, ":6379")
-	filter := true
-	if p.FilterOff == nil {
-		p.FilterOff = &filter
-	}
-	return p
-}
-
 // BasicAuth returns BasicAuthUser and BasicAuthPassword
 // and ok if neither of them are empty
 func (p *ProxyConfig) BasicAuth() (user, pass string, ok bool) {

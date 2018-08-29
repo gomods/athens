@@ -1,7 +1,6 @@
 package config
 
 import (
-	"io/ioutil"
 	"runtime"
 
 	"github.com/BurntSushi/toml"
@@ -28,18 +27,9 @@ type Config struct {
 // ParseConfigFile parses the given file into an athens config struct
 func ParseConfigFile(configFile string) (*Config, error) {
 
-	// attempt to read the given config file
-	confBytes, err := ioutil.ReadFile(configFile)
-	if err != nil {
-		return nil, err
-	}
-	confStr := string(confBytes)
-	return parseConfig(confStr)
-}
-
-func parseConfig(confStr string) (*Config, error) {
 	var config Config
-	if _, err := toml.Decode(confStr, &config); err != nil {
+	// attempt to read the given config file
+	if _, err := toml.DecodeFile(configFile, &config); err != nil {
 		return nil, err
 	}
 
@@ -49,7 +39,10 @@ func parseConfig(confStr string) (*Config, error) {
 	}
 
 	// set default values
-	setDefaults(&config)
+	setRuntimeDefaults(&config)
+
+	// If not defined, set storage timeouts to global timeout
+	setStorageTimeouts(config.Storage, config.Timeout)
 
 	// delete invalid storage backend configs
 	// envconfig initializes *all* struct pointers, even if there are no corresponding defaults or env variables
@@ -63,43 +56,13 @@ func parseConfig(confStr string) (*Config, error) {
 	return &config, nil
 }
 
-func setDefaults(config *Config) {
+func setRuntimeDefaults(config *Config) {
 	if config.MaxConcurrency == 0 {
 		config.MaxConcurrency = runtime.NumCPU()
 	}
-
-	overrideDefaultStr(&config.GoEnv, "development")
-	overrideDefaultStr(&config.GoBinary, "go")
-	overrideDefaultStr(&config.LogLevel, "debug")
-	overrideDefaultStr(&config.CloudRuntime, "none")
-	overrideDefaultStr(&config.FilterFile, "filter.conf")
-	overrideDefaultInt(&config.Timeout, 300)
-	overrideDefaultUint(&config.MaxWorkerFails, 5)
-
-	config.Proxy = setProxyDefaults(config.Proxy)
-	config.Olympus = setOlympusDefaults(config.Olympus)
-	config.Storage = setStorageDefaults(config.Storage, config.Timeout)
 }
 
-func overrideDefaultUint(val *uint, override uint) {
-	if *val == 0 {
-		*val = override
-	}
-}
-
-func overrideDefaultInt(val *int, override int) {
-	if *val == 0 {
-		*val = override
-	}
-}
-
-func overrideDefaultStr(val *string, override string) {
-	if *val == "" {
-		*val = override
-	}
-}
-
-// envOverride uses Environment variables and specified defaults to override unspecified properties
+// envOverride uses Environment variables to override unspecified properties
 func envOverride(config *Config) error {
 	if err := envconfig.Process("athens", config); err != nil {
 		return err
