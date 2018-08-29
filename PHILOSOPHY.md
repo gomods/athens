@@ -55,7 +55,7 @@ We want to apply that wisdom to our community.
 Questions are a great way for us to share ideas and make the project and community better.
 
 - If you don't know something, try not to be afraid to ask
-- If you think you're question is stupid, ask it anyway
+- If you think your question is stupid, ask it anyway
 - ... And if you're still uncomfortable asking in public, ask a maintainer in private
 - If someone asks you a question, it's ok to answer it later
 - Put answers on paper where everyone can read them, if you can

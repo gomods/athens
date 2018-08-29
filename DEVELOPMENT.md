@@ -14,19 +14,9 @@ Athens relies on having a few tools installed locally. Run `make setup-dev-env` 
 ### Go version
 Athens is developed on Go1.11+.
 
-If you have a stable version of go running, then a later version of go can be downloaded.
-
-For example, to get `go1.11rc1`, run the following commands which won't affect your stable version
+To point Athens to a different version of Go set the following environment variable
 ```
-go get golang.org/dl/go1.11rc1
-go1.11rc1 download
-```
-
-To point Athens to `go1.11rc1` or to a different version
-set the following environment variable
-
-```
-GO_BINARY_PATH=go1.11rc1
+GO_BINARY_PATH=go1.11.X
 or whichever binary you want to use with athens
 ```
 
@@ -67,7 +57,7 @@ buffalo dev
 
 To run the proxy:
 
-```consols
+```console
 cd cmd/proxy
 buffalo dev
 ```
@@ -87,13 +77,6 @@ In order to run unit tests, services they depend on must be running first:
 
 ```console
 make alldeps
-```
-
-and database created:
-
-```console
-buffalo db create
-buffalo db migrate up
 ```
 
 then you can run the unit tests:

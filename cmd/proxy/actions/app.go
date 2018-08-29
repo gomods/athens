@@ -16,6 +16,7 @@ import (
 	"github.com/gocraft/work"
 	"github.com/gomods/athens/pkg/config/env"
 	"github.com/gomods/athens/pkg/log"
+	mw "github.com/gomods/athens/pkg/middleware"
 	"github.com/gomods/athens/pkg/module"
 	"github.com/gomods/athens/pkg/storage"
 	"github.com/gomodule/redigo/redis"
@@ -98,6 +99,11 @@ func App() (*buffalo.App, error) {
 		Logger:      blggr,
 	})
 	if prefix := env.AthensPathPrefix(); prefix != "" {
+		// certain Ingress Controllers (such as GCP Load Balancer)
+		// can not send custom headers and therefore if the proxy
+		// is running behind a prefix as well as some authentication
+		// mechanism, we should allow the plain / to return 200.
+		app.GET("/", healthHandler)
 		app = app.Group(prefix)
 	}
 
@@ -118,25 +124,27 @@ func App() (*buffalo.App, error) {
 		csrfMiddleware := csrf.New
 		app.Use(csrfMiddleware)
 	}
-
-	// Wraps each request in a transaction.
-	//  c.Value("tx").(*pop.PopTransaction)
-	// Remove to disable this.
-	// app.Use(middleware.PopTransaction(models.DB))
-
 	// Setup and use translations:
 	if T, err = i18n.New(packr.NewBox("../locales"), "en-US"); err != nil {
 		app.Stop(err)
 	}
 	app.Use(T.Middleware())
+
 	if !env.FilterOff() {
 		mf := module.NewFilter()
-		app.Use(newFilterMiddleware(mf))
+		app.Use(mw.NewFilterMiddleware(mf))
 	}
+
+	// Having the hook set means we want to use it
+	if validatorHook, ok := env.ValidatorHook(); ok {
+		app.Use(mw.LogEntryMiddleware(mw.NewValidationMiddleware, lggr, validatorHook))
+	}
+
 	user, pass, ok := env.BasicAuth()
 	if ok {
 		app.Use(basicAuth(user, pass))
 	}
+
 	if err := addProxyRoutes(app, store, lggr); err != nil {
 		err = fmt.Errorf("error adding proxy routes (%s)", err)
 		return nil, err
