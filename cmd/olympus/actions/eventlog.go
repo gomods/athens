@@ -8,20 +8,16 @@ import (
 
 // GetEventLog returns implementation of eventlog.EventLog
 func GetEventLog() (eventlog.Eventlog, error) {
-	mongoURI, err := env.MongoURI()
-	if err != nil {
-		return nil, err
-	}
-	l, err := mongo.NewLog(mongoURI)
+	connectionString := env.MongoConnectionString()
+	certPath := env.MongoCertPath()
+	l, err := mongo.NewLog(connectionString, certPath)
 	return l, err
 }
 
 // NewCacheMissesLog returns impl. of eventlog.Appender
 func NewCacheMissesLog() (eventlog.Appender, error) {
-	mongoURI, err := env.MongoURI()
-	if err != nil {
-		return nil, err
-	}
-	l, err := mongo.NewLogWithCollection(mongoURI, "cachemisseslog")
+	connectionString := env.MongoConnectionString()
+	certPath := env.MongoCertPath()
+	l, err := mongo.NewLogWithCollection(connectionString, certPath, "cachemisseslog")
 	return l, err
 }
