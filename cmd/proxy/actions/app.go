@@ -45,7 +45,7 @@ func init() {
 // application.
 func App() (*buffalo.App, error) {
 	store, err := GetStorage()
-	mf := module.NewFilter()
+
 	if err != nil {
 		err = fmt.Errorf("error getting storage configuration (%s)", err)
 		return nil, err
@@ -133,4 +133,3 @@ func App() (*buffalo.App, error) {
 
 	return app, nil
 }
-
