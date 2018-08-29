@@ -12,11 +12,11 @@ import (
 type Config struct {
 	GoEnv                string         `validate:"required" envconfig:"GO_ENV"`
 	GoBinary             string         `validate:"required" envconfig:"GO_BINARY_PATH"`
-	LogLevel             string         `validate:"required" split_words:"true"`
-	MaxConcurrency       int            `validate:"required" split_words:"true"`
-	MaxWorkerFails       uint           `validate:"required" split_words:"true"`
-	CloudRuntime         string         `validate:"required" split_words:"true"`
-	FilterFile           string         `validate:"required" split_words:"true"`
+	LogLevel             string         `validate:"required" envconfig:"ATHENS_LOG_LEVEL"`
+	MaxConcurrency       int            `validate:"required" envconfig:"ATHENS_MAX_CONCURRENCY"`
+	MaxWorkerFails       uint           `validate:"required" envconfig:"ATHENS_MAX_WORKER_FAILS"`
+	CloudRuntime         string         `validate:"required" envconfig:"ATHENS_CLOUD_RUNTIME"`
+	FilterFile           string         `validate:"required" envconfig:"ATHENS_FILTER_FILE"`
 	Timeout              int            `validate:"required"`
 	EnableCSRFProtection bool           `envconfig:"ATHENS_ENABLE_CSRF_PROTECTION"`
 	Proxy                *ProxyConfig   `validate:""`
