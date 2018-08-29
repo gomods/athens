@@ -145,10 +145,3 @@ EnableCSRFProtection = false
         # Defaults to Global Timeout
         # Env override: MONGO_CONN_TIMEOUT_SEC
         Timeout = 300
-    [Storage.RDBMS]
-        # The name of the RDBMS instance to use as defined in database.yml in the POP_PATH
-        # Env override: ATHENS_RDBMS_STORAGE_NAME
-        Name = "development"
-        # Timeout for networks calls made to the RDBMS instance in seconds
-        # Defaults to Global Timeout
-        TimeoutSeconds = 300
