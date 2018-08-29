@@ -45,7 +45,6 @@ func init() {
 // application.
 func App() (*buffalo.App, error) {
 	store, err := GetStorage()
-
 	if err != nil {
 		err = fmt.Errorf("error getting storage configuration (%s)", err)
 		return nil, err
