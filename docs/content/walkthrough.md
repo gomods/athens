@@ -22,7 +22,7 @@ The 🦁 says rawr!
 ```console
 $ git clone https://github.com/athens-artifacts/walkthrough.git
 $ cd walkthrough
-$ cmd /C "set GOMODULE111=on && C:\GO\bin\go run ."
+$ $env:GO111MODULE = "on" ;  go run .
 go: downloading github.com/athens-artifacts/samplelib v1.0.0
 The 🦁 says rawr!
 ```
@@ -47,12 +47,10 @@ in action without any caches populated:
 sudo rm -fr $(go env GOPATH)/pkg/mod
 ```
 
-<!-- 
 **PowerShell**
 ```powershell
-rm -recurse -force $(go env GOPATH)\pkg\mod
+rm -recurse -force "$(go env GOPATH)\pkg\mod"
 ```
--->
 
 Now run the Athens proxy in a background process:
 
@@ -68,17 +66,15 @@ INFO[0000] Starting application at 127.0.0.1:3000
 
 Note: [Building Athens Go Modules enabled is not yet supported](https://github.com/gomods/athens/pull/371), so we have turned it off in the above example.
 
-<!--
 **PowerShell**
 ```console
 $ cd ..
 $ git clone https://github.com/gomods/athens.git
 $ cd athens
-$ start -NoNewWindow go "run .\cmd\proxy"
+$ $env:GO111MODULE = "off" ; start -NoNewWindow go "run .\cmd\proxy"
 [1] 25243
 INFO[0000] Starting application at 127.0.0.1:3000
 ```
--->
 
 The Athens proxy is now running in the background and is listening for requests
 from localhost (127.0.0.1) on port 3000.
@@ -97,13 +93,11 @@ export GO111MODULE=on
 export GOPROXY=http://127.0.0.1:3000
 ```
 
-<!--
 **PowerShell**
 ```powershell
 $env:GO111MODULE = "on"
 $env:GOPROXY = "http://127.0.0.1:3000"
 ```
--->
 
 The `GO111MODULE` environment variable controls the Go Modules feature in Go 1.11 only.
 Possible values are:
