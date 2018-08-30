@@ -6,7 +6,9 @@ import (
 	"time"
 
 	"github.com/gomods/athens/pkg/errors"
+	"github.com/gomods/athens/pkg/module"
 	"github.com/gomods/athens/pkg/storage"
+	multierror "github.com/hashicorp/go-multierror"
 )
 
 // Protocol is the download protocol which mirrors
@@ -75,7 +77,38 @@ func (p *protocol) request(mod, ver string) error {
 }
 
 func (p *protocol) List(ctx context.Context, mod string) ([]string, error) {
-	return p.dp.List(ctx, mod)
+	const op errors.Op = "protocol.List"
+	goList, goErr := p.dp.List(ctx, mod)
+	sList, sErr := p.s.List(ctx, mod)
+	if goErr != nil && sErr != nil {
+		var errs error
+		errs = multierror.Append(errs, goErr, sErr)
+		return nil, errors.E(op, goErr)
+	}
+	if goErr != nil && sErr == nil {
+		module.SortVersions(sList)
+		return sList, nil
+	}
+	if goErr == nil && sErr != nil {
+		return goList, nil
+	}
+
+	combinedList := union(goList, sList)
+	module.SortVersions(combinedList)
+	return combinedList, nil
+}
+
+func union(list1, list2 []string) []string {
+	list := append(list1, list2...)
+	deduplicated := []string{}
+	m := make(map[string]struct{})
+	for _, v := range list {
+		if _, ok := m[v]; !ok {
+			deduplicated = append(deduplicated, v)
+			m[v] = struct{}{}
+		}
+	}
+	return deduplicated
 }
 
 func (p *protocol) Info(ctx context.Context, mod, ver string) ([]byte, error) {
