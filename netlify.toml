@@ -6,3 +6,9 @@
     publish = "docs/public/"
     command = "hugo -v"
     environment = { HUGO_VERSION = "0.37" }
+
+[[redirects]]
+  from = "http://docs.gomods.io/*"
+  to = "https://docs.gomods.io/:splat"
+  status = 301
+  force = true    
