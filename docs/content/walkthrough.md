@@ -61,7 +61,7 @@ Now run the Athens proxy in a background process:
 $ cd ..
 $ git clone https://github.com/gomods/athens.git
 $ cd athens
-$ GO111Modules=off go run ./cmd/proxy &
+$ GO111MODULE=off go run ./cmd/proxy &
 [1] 25243
 INFO[0000] Starting application at 127.0.0.1:3000
 ```
