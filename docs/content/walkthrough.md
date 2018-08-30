@@ -38,8 +38,6 @@ how the proxy changes the workflow and the output.
 Using the most simple installation possible, let's walk through how to use the
 Athens proxy, and figure out what is happening at each step.
 
-Note: [Currently, the proxy does not work on Windows](https://github.com/gomods/athens/issues/532).
-
 Before moving on, let's clear our Go Modules cache so that we can see the proxy
 in action without any caches populated:
 
