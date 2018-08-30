@@ -1,7 +1,6 @@
 package actions
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/gobuffalo/buffalo"
@@ -10,28 +9,13 @@ import (
 	"github.com/gobuffalo/buffalo/middleware/i18n"
 	"github.com/gobuffalo/buffalo/middleware/ssl"
 	"github.com/gobuffalo/buffalo/render"
-	"github.com/gobuffalo/buffalo/worker"
-	"github.com/gobuffalo/gocraft-work-adapter"
 	"github.com/gobuffalo/packr"
-	"github.com/gocraft/work"
 	"github.com/gomods/athens/pkg/config/env"
 	"github.com/gomods/athens/pkg/log"
 	mw "github.com/gomods/athens/pkg/middleware"
 	"github.com/gomods/athens/pkg/module"
-	"github.com/gomods/athens/pkg/storage"
-	"github.com/gomodule/redigo/redis"
 	"github.com/rs/cors"
 	"github.com/unrolled/secure"
-)
-
-const (
-	// FetcherWorkerName is the name of the worker fetching sources from experienced cache misses
-	FetcherWorkerName = "olympusfetcher"
-	// ReporterWorkerName is the name of the worker reporting cache misses
-	ReporterWorkerName = "olympusreporter"
-	workerQueue        = "default"
-	workerModuleKey    = "module"
-	workerVersionKey   = "version"
 )
 
 // ENV is used to help switch settings based on where the
@@ -60,7 +44,6 @@ func init() {
 // should be defined. This is the nerve center of your
 // application.
 func App() (*buffalo.App, error) {
-	ctx := context.Background()
 	store, err := GetStorage()
 	if err != nil {
 		err = fmt.Errorf("error getting storage configuration (%s)", err)
@@ -70,11 +53,6 @@ func App() (*buffalo.App, error) {
 	// mount .netrc to home dir
 	// to have access to private repos.
 	initializeNETRC()
-
-	worker, err := getWorker(ctx, store)
-	if err != nil {
-		return nil, err
-	}
 
 	lvl, err := env.LogLevel()
 	if err != nil {
@@ -94,8 +72,6 @@ func App() (*buffalo.App, error) {
 			cors.Default().Handler,
 		},
 		SessionName: "_athens_session",
-		Worker:      worker,
-		WorkerOff:   true, // TODO(marwan): turned off until worker is being used.
 		Logger:      blggr,
 	})
 	if prefix := env.AthensPathPrefix(); prefix != "" {
@@ -155,27 +131,4 @@ func App() (*buffalo.App, error) {
 	app.ServeFiles("/", assetsBox)
 
 	return app, nil
-}
-
-func getWorker(ctx context.Context, s storage.Backend) (worker.Worker, error) {
-	port := env.RedisQueuePortWithDefault(":6379")
-	w := gwa.New(gwa.Options{
-		Pool: &redis.Pool{
-			MaxActive: 5,
-			MaxIdle:   5,
-			Wait:      true,
-			Dial: func() (redis.Conn, error) {
-				return redis.Dial("tcp", port)
-			},
-		},
-		Name:           FetcherWorkerName,
-		MaxConcurrency: env.AthensMaxConcurrency(),
-	})
-
-	opts := work.JobOptions{
-		SkipDead: true,
-		MaxFails: env.WorkerMaxFails(),
-	}
-
-	return w, w.RegisterWithOptions(FetcherWorkerName, opts, GetProcessCacheMissJob(ctx, s, w))
 }
