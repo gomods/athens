@@ -41,10 +41,10 @@ clearGoModCache
 export GO111MODULE=on
 # Make sure that our test repo works without the GOPROXY first
 unset GOPROXY
-$GO_BINARY_PATH run -mod=vendor .
+$GO_BINARY_PATH run .
 
 clearGoModCache
 
 # Verify that the test works against the proxy
 export GOPROXY=http://localhost:3000
-$GO_BINARY_PATH run -mod=vendor .
+$GO_BINARY_PATH run .
