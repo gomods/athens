@@ -7,7 +7,7 @@
     command = "hugo -v"
     environment = { HUGO_VERSION = "0.37" }
 
-[redirects]
+[[redirects]]
   from = "http://docs.gomods.io/*"
   to = "https://docs.gomods.io/:splat"
   status = 301
