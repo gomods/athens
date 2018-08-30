@@ -137,7 +137,7 @@ proxy was run in the background, you should also see output from Athens indicati
 Let's break down what is happening here:
 
 1. Before Go runs our code, it detects that our code depends on the **github.com/athens-artifacts/samplelib** package
-   which is not present in the vendor directory.
+   which is not present in the Go Modules cache.
 1. At this point the Go Modules feature comes into play because we have it enabled.
     Instead of looking in the GOPATH for the package, Go reads our **go.mod** file
     and sees that we want a particular version of that package, v1.0.0.
