@@ -16,7 +16,7 @@ So for each of endpoints mentioned bellow we will assume address `acidburn/htp/@
 This endpoint returns a list of versions that Athens knows about for `acidburn/htp`. The list is just separated by newlines:
 
 ```HTTP
-GET athens.io/acidburn/htp/@v/list
+GET localhost:3000/github.com/arschles/assert/@v/list
 ```
 
 ```HTML
@@ -29,7 +29,7 @@ v2.0
 
 
 ```HTTP
-GET athens.io/acidburn/htp/@v/v1.0.0.info
+GET localhost:3000/github.com/arschles/assert/@v/v1.0.0.info
 ```
 
 This returns JSON with information about v1.0.0. It looks like this:
@@ -46,19 +46,19 @@ This returns JSON with information about v1.0.0. It looks like this:
 ## Go.mod file
 
 ```HTTP
-GET athens.io/acidburn/htp/@v/v1.0.0.mod
+GET localhost:3000/github.com/arschles/assert/@v/v1.0.0.mod
 ```
 
-This returns the go.mod file for version v1.0.0. If athens.io/acidburn/htp version `v1.0.0` has no dependencies, the response body would look like this:
+This returns the go.mod file for version v1.0.0. If localhost:3000/github.com/arschles/assert version `v1.0.0` has no dependencies, the response body would look like this:
 
 ```
-module "athens.io/acidburn/htp"
+module github.com/arschles/assert
 ```
 
 ## Module sources
 
 ```HTTP
-GET athens.io/acidburn/htp/@v/v1.0.0.zip
+GET localhost:3000/github.com/arschles/assert/@v/v1.0.0.zip
 ```
 
 This is what it sounds like — it sends back a zip file with the source code for the module in version v1.0.0.
@@ -66,7 +66,7 @@ This is what it sounds like — it sends back a zip file with the source code fo
 ## Latest
 
 ```HTTP
-GET athens.io/acidburn/htp/@latest
+GET localhost:3000/github.com/arschles/assert/@latest
 ```
 
 This endpoint returns the latest version of the module.
