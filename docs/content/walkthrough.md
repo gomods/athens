@@ -55,10 +55,11 @@ Now run the Athens proxy in a background process:
 
 **Bash**
 ```console
-$ cd ..
+$ mkdir -p $(go env GOPATH)/src/github.com/gomods
+$ cd $(go env GOPATH)/src/github.com/gomods
 $ git clone https://github.com/gomods/athens.git
 $ cd athens
-$ GO111Modules=off go run ./cmd/proxy &
+$ GO111MODULE=off go run ./cmd/proxy &
 [1] 25243
 INFO[0000] Starting application at 127.0.0.1:3000
 ```
@@ -67,7 +68,8 @@ Note: [Building Athens Go Modules enabled is not yet supported](https://github.c
 
 **PowerShell**
 ```console
-$ cd ..
+$ mkdir $(go env GOPATH)\src\github.com\gomods
+$ cd $(go env GOPATH)\src\github.com\gomods
 $ git clone https://github.com/gomods/athens.git
 $ cd athens
 $ $env:GO111MODULE = "off"
@@ -131,7 +133,7 @@ proxy was run in the background, you should also see output from Athens indicati
 Let's break down what is happening here:
 
 1. Before Go runs our code, it detects that our code depends on the **github.com/athens-artifacts/samplelib** package
-   which is not present in the vendor directory.
+   which is not present in the Go Modules cache.
 1. At this point the Go Modules feature comes into play because we have it enabled.
     Instead of looking in the GOPATH for the package, Go reads our **go.mod** file
     and sees that we want a particular version of that package, v1.0.0.
