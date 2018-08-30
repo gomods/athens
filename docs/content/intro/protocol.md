@@ -11,12 +11,14 @@ Each of these endpoints sits on top of a module. Let's assume module `htp` autho
 
 So for each of endpoints mentioned bellow we will assume address `acidburn/htp/@v/{endpoint}` (e.g `acidburn/htp/@v/list`)
 
+In the examples below, `$HOST` and `$PORT` are placeholders for the host and port of your Athens server.
+
 ## List of versions
 
 This endpoint returns a list of versions that Athens knows about for `acidburn/htp`. The list is just separated by newlines:
 
 ```HTTP
-GET localhost:3000/github.com/arschles/assert/@v/list
+GET $HOST:$PORT/github.com/arschles/assert/@v/list
 ```
 
 ```HTML
@@ -29,7 +31,7 @@ v2.0
 
 
 ```HTTP
-GET localhost:3000/github.com/arschles/assert/@v/v1.0.0.info
+GET $HOST:$PORT/github.com/arschles/assert/@v/v1.0.0.info
 ```
 
 This returns JSON with information about v1.0.0. It looks like this:
@@ -46,10 +48,10 @@ This returns JSON with information about v1.0.0. It looks like this:
 ## Go.mod file
 
 ```HTTP
-GET localhost:3000/github.com/arschles/assert/@v/v1.0.0.mod
+GET $HOST:$PORT/github.com/arschles/assert/@v/v1.0.0.mod
 ```
 
-This returns the go.mod file for version v1.0.0. If localhost:3000/github.com/arschles/assert version `v1.0.0` has no dependencies, the response body would look like this:
+This returns the go.mod file for version v1.0.0. If $HOST:$PORT/github.com/arschles/assert version `v1.0.0` has no dependencies, the response body would look like this:
 
 ```
 module github.com/arschles/assert
@@ -58,7 +60,7 @@ module github.com/arschles/assert
 ## Module sources
 
 ```HTTP
-GET localhost:3000/github.com/arschles/assert/@v/v1.0.0.zip
+GET $HOST:$PORT/github.com/arschles/assert/@v/v1.0.0.zip
 ```
 
 This is what it sounds like — it sends back a zip file with the source code for the module in version v1.0.0.
@@ -66,7 +68,7 @@ This is what it sounds like — it sends back a zip file with the source code fo
 ## Latest
 
 ```HTTP
-GET localhost:3000/github.com/arschles/assert/@latest
+GET $HOST:$PORT/github.com/arschles/assert/@latest
 ```
 
 This endpoint returns the latest version of the module.
