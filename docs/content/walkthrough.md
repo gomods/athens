@@ -22,7 +22,8 @@ The 🦁 says rawr!
 ```console
 $ git clone https://github.com/athens-artifacts/walkthrough.git
 $ cd walkthrough
-$ $env:GO111MODULE = "on" ;  go run .
+$ $env:GO111MODULE = "on"
+$ go run .
 go: downloading github.com/athens-artifacts/samplelib v1.0.0
 The 🦁 says rawr!
 ```
