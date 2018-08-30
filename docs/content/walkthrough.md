@@ -58,7 +58,8 @@ Now run the Athens proxy in a background process:
 
 **Bash**
 ```console
-$ cd ..
+$ mkdir -p $(go env GOPATH)/src/github.com/gomods
+$ cd $(go env GOPATH)/src/github.com/gomods
 $ git clone https://github.com/gomods/athens.git
 $ cd athens
 $ GO111MODULE=off go run ./cmd/proxy &
@@ -71,7 +72,8 @@ Note: [Building Athens Go Modules enabled is not yet supported](https://github.c
 <!--
 **PowerShell**
 ```console
-$ cd ..
+$ mkdir $(go env GOPATH)\src\github.com\gomods
+$ cd $(go env GOPATH)\src\github.com\gomods
 $ git clone https://github.com/gomods/athens.git
 $ cd athens
 $ start -NoNewWindow go "run .\cmd\proxy"
