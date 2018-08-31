@@ -68,8 +68,8 @@ Note: [Building Athens Go Modules enabled is not yet supported](https://github.c
 
 **PowerShell**
 ```console
-$ mkdir $(go env GOPATH)\src\github.com\gomods
-$ cd $(go env GOPATH)\src\github.com\gomods
+$ mkdir "$(go env GOPATH)\src\github.com\gomods"
+$ cd "$(go env GOPATH)\src\github.com\gomods"
 $ git clone https://github.com/gomods/athens.git
 $ cd athens
 $ $env:GO111MODULE = "off"
