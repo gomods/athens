@@ -64,7 +64,7 @@ $ GO111MODULE=off go run ./cmd/proxy &
 INFO[0000] Starting application at 127.0.0.1:3000
 ```
 
-Note: [Building Athens Go Modules enabled is not yet supported](https://github.com/gomods/athens/pull/371), so we have turned it off in the above example.
+Note: [Building Athens with Go Modules enabled is not yet supported](https://github.com/gomods/athens/pull/371), so we have turned it off in the above example.
 
 **PowerShell**
 ```console
