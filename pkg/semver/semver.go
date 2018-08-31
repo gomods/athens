@@ -235,9 +235,8 @@ func compareInt(x, y string) int {
 	}
 	if x < y {
 		return -1
-	} else {
-		return +1
 	}
+	return +1
 }
 
 func comparePrerelease(x, y string) int {
@@ -276,9 +275,8 @@ func comparePrerelease(x, y string) int {
 			if ix != iy {
 				if ix {
 					return -1
-				} else {
-					return +1
 				}
+				return +1
 			}
 			if ix {
 				if len(dx) < len(dy) {
@@ -290,16 +288,14 @@ func comparePrerelease(x, y string) int {
 			}
 			if dx < dy {
 				return -1
-			} else {
-				return +1
 			}
+			return +1
 		}
 	}
 	if x == "" {
 		return -1
-	} else {
-		return +1
 	}
+	return +1
 }
 
 func nextIdent(x string) (dx, rest string) {
