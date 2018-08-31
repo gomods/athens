@@ -149,13 +149,13 @@ func TestParseExampleConfig(t *testing.T) {
 
 	filterOff := true
 	expProxy := &ProxyConfig{
-		StorageType:           "mongo",
+		StorageType:           "memory",
 		OlympusGlobalEndpoint: "http://localhost:3001",
 		RedisQueueAddress:     ":6379",
 		Port:                  ":3000",
 		FilterOff:             &filterOff,
-		BasicAuthUser:         "user",
-		BasicAuthPass:         "pass",
+		BasicAuthUser:         "",
+		BasicAuthPass:         "",
 	}
 
 	expOlympus := &OlympusConfig{
