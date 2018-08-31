@@ -15,8 +15,6 @@ archive:
     }}v{{ .Arm }}{{ end }}'
   format: tar.gz
   files:
-  - licence*
-  - LICENCE*
   - license*
   - LICENSE*
   - readme*
