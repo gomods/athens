@@ -12,6 +12,10 @@ the discretion of a [maintainer](#).
 In this template we will assume this may be the contributor's first pull
 request in The Athens Project.
 
+> NOTE: Although this is written with maintainers in mind, anyone writing an
+> issue with the goal of helping first time contributors is welcome to use this
+> template as their guide.
+
 ---
 
 Generally we will still want to try and follow the issue template for [bugs](#) or
@@ -22,7 +26,7 @@ information to fulfill the below template.
 
 ### New to Athens?
 
-Link to contribution docs, slack etc.
+TODO: Link to contribution docs, slack etc.
 
 ### What needs to be done?
 
@@ -37,4 +41,4 @@ has been experimented with already.
 
 #### New To Open Source
 
-Here some links to stuff that helps.
+TODO: Some links to stuff that helps. Blog post, video?
