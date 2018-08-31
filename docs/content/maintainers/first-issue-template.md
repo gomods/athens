@@ -4,21 +4,37 @@ date: 2018-08-25T20:00:24-07:00
 draft: false
 ---
 
-This document provides a template for any issue body that is to be labeled
-`good first issue`. This should assume the contributor is either new to open
-source or at least new to the project.
+The following is intended for project [maintainers](#) when triaging issues and
+deciding to label them as a `good first issue`. It is meant to serve as a guide
+on good practices only as each issue is different. This designation will be at
+the discretion of a [maintainer](#).
+
+In this template we will assume this may be the contributor's first pull
+request in The Athens Project.
 
 ---
 
+Generally we will still want to try and follow the issue template for [bugs](#) or
+[features](#). If you are performing issue triage you may need to add more
+information to fulfill the below template.
+
+## Template
+
+### New to Athens?
+
+Link to contribution docs, slack etc.
+
 ### What needs to be done?
 
-Here should be a detailed outline of the issue or feature.
+The issue should contain a detailed outline of the bug or feature.
 
 This should include links to any relevant references both within and outside of
-the project. Other issues, pull requests or comments.
+the project. Other issues, pull requests or comments. It could also include
+relevant links to our docs or maybe blogs posts.
 
-Try to include ideas of what good a starting place might be.
+Try to include ideas of what good a starting place might be, or anything that
+has been experimented with already.
 
 #### New To Open Source
 
-#### New To The Athens Project
+Here some links to stuff that helps.
