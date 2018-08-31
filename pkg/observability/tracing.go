@@ -19,13 +19,11 @@ type ObserverContext struct {
 // RegisterTraceExporter returns a jaeger exporter for exporting traces to opencensus.
 // It should in the future have a nice sampling rate defined
 func RegisterTraceExporter(service string) *(jaeger.Exporter) {
-	agentEndpointURI := "0.0.0.0:6831"
-	collectorEndpointURI := "http://0.0.0.0:9411"
+	collectorEndpointURI := "http://0.0.0.0:14268"
 
 	je, err := jaeger.NewExporter(jaeger.Options{
-		AgentEndpoint: agentEndpointURI,
-		Endpoint:      collectorEndpointURI,
-		ServiceName:   service,
+		Endpoint:    collectorEndpointURI,
+		ServiceName: service,
 	})
 	if err != nil {
 		log.Fatalf("Failed to create the Jaeger exporter: %v", err)
@@ -33,6 +31,7 @@ func RegisterTraceExporter(service string) *(jaeger.Exporter) {
 
 	// And now finally register it as a Trace Exporter
 	trace.RegisterExporter(je)
+	trace.ApplyConfig(trace.Config{DefaultSampler: trace.AlwaysSample()})
 	return je
 }
 
