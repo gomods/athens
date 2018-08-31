@@ -53,7 +53,7 @@ EnableCSRFProtection = false
     # Possible values are memory, disk, mongo, postgres, sqlite, cockroach, mysql
     # Defaults to mongo
     # Env override: ATHENS_STORAGE_TYPE
-    StorageType = "mongo"
+    StorageType = "memory"
     # Port sets the port the proxy listens on
     # Env override: PORT
     Port = ":3000"
