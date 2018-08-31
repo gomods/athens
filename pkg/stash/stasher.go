@@ -9,7 +9,8 @@ import (
 	"github.com/gomods/athens/pkg/storage"
 )
 
-// Stasher does it
+// Stasher has the job of taking a module
+// from an upstream entity and stashing it to a Storage Backend.
 type Stasher interface {
 	Stash(string, string) error
 }
