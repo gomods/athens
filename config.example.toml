@@ -70,10 +70,10 @@ EnableCSRFProtection = false
     FilterOff = true
     # Username for basic auth
     # Env override: BASIC_AUTH_USER
-    BasicAuthUser = "user"
+    BasicAuthUser = ""
     # Password for basic auth
     # Env override: BASIC_AUTH_PASS
-    BasicAuthPass = "pass"
+    BasicAuthPass = ""
 
 [Olympus]
     # StorageType sets the type of storage backend Olympus will use.
