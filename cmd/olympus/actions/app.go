@@ -15,8 +15,8 @@ import (
 	"github.com/gomods/athens/pkg/cdn/metadata/azurecdn"
 	"github.com/gomods/athens/pkg/config/env"
 	"github.com/gomods/athens/pkg/download"
+	"github.com/gomods/athens/pkg/download/addons"
 	"github.com/gomods/athens/pkg/download/goget"
-	"github.com/gomods/athens/pkg/download/stasher"
 	"github.com/gomods/athens/pkg/eventlog"
 	"github.com/gomods/athens/pkg/log"
 	"github.com/gomods/athens/pkg/stash"
@@ -87,6 +87,7 @@ func App(config *AppConfig) (*buffalo.App, error) {
 		WorkerOff:   true, // TODO(marwan): turned off until worker is being used.
 		Logger:      blggr,
 	})
+
 	// Automatically redirect to SSL
 	app.Use(ssl.ForceSSL(secure.Options{
 		SSLRedirect:     ENV == "production",
@@ -130,7 +131,7 @@ func App(config *AppConfig) (*buffalo.App, error) {
 		return nil, err
 	}
 	st := stash.New(gg, config.Storage)
-	dp := stasher.New(gg, config.Storage, st)
+	dp := addons.WithStasher(gg, config.Storage, st)
 	opts := &download.HandlerOpts{Protocol: dp, Logger: lggr, Engine: renderEng}
 	download.RegisterHandlers(app, opts)
 
