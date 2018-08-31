@@ -63,7 +63,7 @@ EnableCSRFProtection = false
     # Redis queue for buffalo workers
     # Defaults to ":6379"
     # Env override: ATHENS_REDIS_QUEUE_PORT
-    RedisQueueAddress     = ":6379"
+    RedisQueueAddress = ":6379"
     # Flag to turn off Proxy Filter middleware
     # Defaults to true
     # Env override: PROXY_FILTER_OFF
