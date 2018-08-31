@@ -7,24 +7,22 @@ Athens builds on top of Go CLI which specifies a set of endpoints with which it 
 
 The original vgo research paper on Download protocol can be found here: https://research.swtch.com/vgo-module
 
-Each of these endpoints sits on top of a module. Let's assume module `htp` authored by `acidburn`.
+Each of these endpoints sits on top of a module. Let's assume module `assert` authored by `arschles`.
 
-So for each of endpoints mentioned bellow we will assume address `acidburn/htp/@v/{endpoint}` (e.g `acidburn/htp/@v/list`)
+So for each of endpoints mentioned bellow we will assume address `arschles/assert/@v/{endpoint}` (e.g `arschles/assert/@v/list`)
 
 In the examples below, `$HOST` and `$PORT` are placeholders for the host and port of your Athens server.
 
 ## List of versions
 
-This endpoint returns a list of versions that Athens knows about for `acidburn/htp`. The list is just separated by newlines:
+This endpoint returns a list of versions that Athens knows about for `arschles/assert`. The list is just separated by newlines:
 
 ```HTTP
 GET $HOST:$PORT/github.com/arschles/assert/@v/list
 ```
 
 ```HTML
-v1.0
-v1.1
-v2.0
+v1.0.0
 ```
 
 ## Version info
@@ -38,10 +36,8 @@ This returns JSON with information about v1.0.0. It looks like this:
 
 ```json
 {
-    "Name": "v1.0.0",
-    "Short": "v1.0.0",
     "Version": "v1.0.0",
-    "Time": "1972-07-18T12:34:56Z"
+    "Time": "2016-10-18T16:26:22Z"
 }
 ```
 
