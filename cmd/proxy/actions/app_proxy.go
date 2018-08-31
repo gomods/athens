@@ -4,13 +4,9 @@ import (
 	"github.com/gobuffalo/buffalo"
 	"github.com/gomods/athens/pkg/config/env"
 	"github.com/gomods/athens/pkg/download"
+	"github.com/gomods/athens/pkg/download/addons"
 	"github.com/gomods/athens/pkg/download/goget"
-	downloadpool "github.com/gomods/athens/pkg/download/pool"
-	"github.com/gomods/athens/pkg/download/stasher"
 	"github.com/gomods/athens/pkg/log"
-	"github.com/gomods/athens/pkg/stash"
-	stashpool "github.com/gomods/athens/pkg/stash/pool"
-	"github.com/gomods/athens/pkg/stash/singleflight"
 	"github.com/gomods/athens/pkg/storage"
 )
 
@@ -48,14 +44,9 @@ func addProxyRoutes(
 	if err != nil {
 		return err
 	}
-	st := singleflight.New(
-		stashpool.New(
-			stash.New(gg, s),
-			env.GoGetWorkers(),
-		),
-	)
-	p := downloadpool.New(
-		stasher.New(gg, s, st),
+	st := stash.New(gg, s, stash.WithSingleflight, stash.Withpool)
+	p := addons.WithPool(
+		addons.WithStasher(gg, s, st),
 		env.GoGetWorkers(),
 	)
 	opts := &download.HandlerOpts{Protocol: p, Logger: l, Engine: proxy}

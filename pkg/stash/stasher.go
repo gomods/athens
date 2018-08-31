@@ -9,19 +9,24 @@ import (
 	"github.com/gomods/athens/pkg/storage"
 )
 
-// Stasher has the job of taking a module
-// from its upstream Download Protcool and
-// stashing to its Storage Backend. Both
-// interfaces must be defined on the type previously.
+// Stasher does it
 type Stasher interface {
-	Stash(mod, ver string) error
+	Stash(string, string) error
 }
+
+// Wrapper helps extend the main stasher's functionality with addons.
+type Wrapper func(Stasher) Stasher
 
 // New returns a plain stasher that takes
 // a module from a download.Protocol and
 // stashes it into a backend.Storage.
-func New(dp download.Protocol, s storage.Backend) Stasher {
-	return &stasher{dp, s}
+func New(dp download.Protocol, s storage.Backend, wrappers ...Wrapper) Stasher {
+	var st Stasher = &stasher{dp, s}
+	for _, w := range wrappers {
+		st = w(st)
+	}
+
+	return st
 }
 
 type stasher struct {

@@ -1,4 +1,4 @@
-package singleflight
+package stash
 
 import (
 	"fmt"
@@ -13,8 +13,8 @@ import (
 // response. We can ensure that because only the first response does not return an error
 // and therefore all 5 responses should have no error.
 func TestSingleFlight(t *testing.T) {
-	ms := &mockStasher{}
-	s := New(ms)
+	ms := &mockSFStasher{}
+	s := WithSingleflight(ms)
 
 	var eg errgroup.Group
 	for i := 0; i < 5; i++ {
@@ -39,12 +39,17 @@ func TestSingleFlight(t *testing.T) {
 	}
 }
 
-type mockStasher struct {
+// mockSFStasher mocks a Stash request that
+// will always return a different result after the
+// first one. This way we can prove that a second
+// request did not get a second result, but the first
+// one, provided the request came in at the right time.
+type mockSFStasher struct {
 	mu  sync.Mutex
 	num int
 }
 
-func (ms *mockStasher) Stash(mod, ver string) error {
+func (ms *mockSFStasher) Stash(mod, ver string) error {
 	time.Sleep(time.Millisecond * 100) // allow for second requests to come in.
 	ms.mu.Lock()
 	defer ms.mu.Unlock()

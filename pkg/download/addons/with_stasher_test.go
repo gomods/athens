@@ -1,4 +1,4 @@
-package stasher
+package addons
 
 import (
 	"bytes"
@@ -31,7 +31,7 @@ func TestDownloadProtocol(t *testing.T) {
 		t.Fatal(err)
 	}
 	mp := &mockProtocol{}
-	dp := New(mp, s, stash.New(mp, s))
+	dp := WithStasher(mp, s, stash.New(mp, s))
 	ctx := context.Background()
 
 	var eg errgroup.Group

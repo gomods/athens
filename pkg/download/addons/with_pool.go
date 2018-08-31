@@ -1,4 +1,4 @@
-package pool
+package addons
 
 import (
 	"context"
@@ -9,35 +9,35 @@ import (
 	"github.com/gomods/athens/pkg/storage"
 )
 
-type protocol struct {
+type withpool struct {
 	dp download.Protocol
 	ch chan func()
 }
 
-// New takes a download Protocol and a number of workers
+// WithPool takes a download Protocol and a number of workers
 // and creates a N worker pool that share all the download.Protocol
 // methods.
-func New(dp download.Protocol, workers int) download.Protocol {
+func WithPool(dp download.Protocol, workers int) download.Protocol {
 	ch := make(chan func())
-	p := &protocol{dp: dp, ch: ch}
+	p := &withpool{dp: dp, ch: ch}
 
 	p.start(workers)
 	return p
 }
 
-func (p *protocol) start(numWorkers int) {
+func (p *withpool) start(numWorkers int) {
 	for i := 0; i < numWorkers; i++ {
 		go p.listen()
 	}
 }
 
-func (p *protocol) listen() {
+func (p *withpool) listen() {
 	for f := range p.ch {
 		f()
 	}
 }
 
-func (p *protocol) List(ctx context.Context, mod string) ([]string, error) {
+func (p *withpool) List(ctx context.Context, mod string) ([]string, error) {
 	const op errors.Op = "pool.List"
 	var vers []string
 	var err error
@@ -54,7 +54,7 @@ func (p *protocol) List(ctx context.Context, mod string) ([]string, error) {
 	return vers, nil
 }
 
-func (p *protocol) Info(ctx context.Context, mod, ver string) ([]byte, error) {
+func (p *withpool) Info(ctx context.Context, mod, ver string) ([]byte, error) {
 	const op errors.Op = "pool.Info"
 	var info []byte
 	var err error
@@ -70,7 +70,7 @@ func (p *protocol) Info(ctx context.Context, mod, ver string) ([]byte, error) {
 	return info, nil
 }
 
-func (p *protocol) Latest(ctx context.Context, mod string) (*storage.RevInfo, error) {
+func (p *withpool) Latest(ctx context.Context, mod string) (*storage.RevInfo, error) {
 	const op errors.Op = "pool.Latest"
 	var info *storage.RevInfo
 	var err error
@@ -86,7 +86,7 @@ func (p *protocol) Latest(ctx context.Context, mod string) (*storage.RevInfo, er
 	return info, nil
 }
 
-func (p *protocol) GoMod(ctx context.Context, mod, ver string) ([]byte, error) {
+func (p *withpool) GoMod(ctx context.Context, mod, ver string) ([]byte, error) {
 	const op errors.Op = "pool.GoMod"
 	var goMod []byte
 	var err error
@@ -102,7 +102,7 @@ func (p *protocol) GoMod(ctx context.Context, mod, ver string) ([]byte, error) {
 	return goMod, nil
 }
 
-func (p *protocol) Zip(ctx context.Context, mod, ver string) (io.ReadCloser, error) {
+func (p *withpool) Zip(ctx context.Context, mod, ver string) (io.ReadCloser, error) {
 	const op errors.Op = "pool.Zip"
 	var zip io.ReadCloser
 	var err error
@@ -118,7 +118,7 @@ func (p *protocol) Zip(ctx context.Context, mod, ver string) (io.ReadCloser, err
 	return zip, nil
 }
 
-func (p *protocol) Version(ctx context.Context, mod, ver string) (*storage.Version, error) {
+func (p *withpool) Version(ctx context.Context, mod, ver string) (*storage.Version, error) {
 	const op errors.Op = "pool.Version"
 	info, err := p.Info(ctx, mod, ver)
 	if err != nil {

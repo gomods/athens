@@ -1,4 +1,4 @@
-package pool
+package addons
 
 import (
 	"bytes"
@@ -19,7 +19,7 @@ import (
 // at one time.
 func TestPoolLogic(t *testing.T) {
 	m := &mockPool{}
-	dp := New(m, 5)
+	dp := WithPool(m, 5)
 	ctx := context.Background()
 	m.ch = make(chan struct{})
 	for i := 0; i < 10; i++ {
@@ -54,7 +54,7 @@ func (m *mockPool) List(ctx context.Context, mod string) ([]string, error) {
 // are successfully called.
 func TestPoolWrapper(t *testing.T) {
 	m := &mockDP{}
-	dp := New(m, 1)
+	dp := WithPool(m, 1)
 	ctx := context.Background()
 	mod := "pkg"
 	ver := "v0.1.0"

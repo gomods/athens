@@ -1,19 +1,18 @@
-package pool
+package stash
 
 import (
 	"github.com/gomods/athens/pkg/errors"
-	"github.com/gomods/athens/pkg/stash"
 )
 
-type stasher struct {
-	s  stash.Stasher
+type withpool struct {
+	s  Stasher
 	ch chan func()
 }
 
-// New returns a stasher that runs a stash operation
+// WithPool returns a stasher that runs a stash operation
 // {numWorkers} at a time.
-func New(s stash.Stasher, numWorkers int) stash.Stasher {
-	st := &stasher{
+func WithPool(s Stasher, numWorkers int) Stasher {
+	st := &withpool{
 		s:  s,
 		ch: make(chan func()),
 	}
@@ -21,19 +20,19 @@ func New(s stash.Stasher, numWorkers int) stash.Stasher {
 	return st
 }
 
-func (s *stasher) start(numWorkers int) {
+func (s *withpool) start(numWorkers int) {
 	for i := 0; i < numWorkers; i++ {
 		go s.listen()
 	}
 }
 
-func (s *stasher) listen() {
+func (s *withpool) listen() {
 	for f := range s.ch {
 		f()
 	}
 }
 
-func (s *stasher) Stash(mod, ver string) error {
+func (s *withpool) Stash(mod, ver string) error {
 	const op errors.Op = "stash.Pool"
 	var err error
 	done := make(chan struct{}, 1)
