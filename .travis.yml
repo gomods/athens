@@ -13,7 +13,7 @@ env:
     - CODE_COV=1
     - ATHENS_DIR=${GOPATH}/src/github.com/gomods/athens
     - REGISTRY=gomods/
-    - GORELEASER_ON=0
+    - GORELEASER_ON=1
   matrix:
     # remove this after Go1.12 ships
     - GO111MODULE=auto
@@ -46,7 +46,6 @@ deploy:
       all_branches: true
   - provider: script
     skip_cleanup: true
-    script: curl -sL https://git.io/goreleaser | bash
+    script: curl -sL https://git.io/goreleaser | bash -s -- --snapshot
     on:
-      tags: true
       condition: $GORELEASER_ON = 1 AND $GO111MODULE = on
