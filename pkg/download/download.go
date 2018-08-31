@@ -93,9 +93,23 @@ func (p *protocol) List(ctx context.Context, mod string) ([]string, error) {
 		return goList, nil
 	}
 
-	combinedList := semver.Union(goList, strList)
+	combinedList := union(goList, strList)
 	semver.SortVersions(combinedList)
 	return combinedList, nil
+}
+
+// union concatenates two version lists and removes duplicates
+func union(list1, list2 []string) []string {
+	list := append(list1, list2...)
+	unique := []string{}
+	m := make(map[string]struct{})
+	for _, v := range list {
+		if _, ok := m[v]; !ok {
+			unique = append(unique, v)
+			m[v] = struct{}{}
+		}
+	}
+	return unique
 }
 
 func (p *protocol) Info(ctx context.Context, mod, ver string) ([]byte, error) {
