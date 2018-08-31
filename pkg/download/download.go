@@ -83,7 +83,7 @@ func (p *protocol) List(ctx context.Context, mod string) ([]string, error) {
 	if goErr != nil && sErr != nil {
 		var errs error
 		errs = multierror.Append(errs, goErr, sErr)
-		return nil, errors.E(op, goErr)
+		return nil, errors.E(op, errs)
 	}
 	if goErr != nil && sErr == nil {
 		module.SortVersions(sList)
@@ -100,15 +100,15 @@ func (p *protocol) List(ctx context.Context, mod string) ([]string, error) {
 
 func union(list1, list2 []string) []string {
 	list := append(list1, list2...)
-	deduplicated := []string{}
+	unique := []string{}
 	m := make(map[string]struct{})
 	for _, v := range list {
 		if _, ok := m[v]; !ok {
-			deduplicated = append(deduplicated, v)
+			unique = append(unique, v)
 			m[v] = struct{}{}
 		}
 	}
-	return deduplicated
+	return unique
 }
 
 func (p *protocol) Info(ctx context.Context, mod, ver string) ([]byte, error) {

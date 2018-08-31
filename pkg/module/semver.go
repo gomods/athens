@@ -15,7 +15,7 @@ type parsed struct {
 	err        string
 }
 
-// SortVersions sorts a list of versions
+// SortVersions sorts a list of versions according to semantic version precedence
 func SortVersions(list []string) {
 	sort.Slice(list, func(i, j int) bool {
 		cmp := compare(list[i], list[j])
