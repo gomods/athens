@@ -11,13 +11,15 @@ type withpool struct {
 
 // WithPool returns a stasher that runs a stash operation
 // {numWorkers} at a time.
-func WithPool(s Stasher, numWorkers int) Stasher {
-	st := &withpool{
-		s:  s,
-		ch: make(chan func()),
+func WithPool(numWorkers int) Wrapper {
+	return func(s Stasher) Stasher {
+		st := &withpool{
+			s:  s,
+			ch: make(chan func()),
+		}
+		st.start(numWorkers)
+		return st
 	}
-	st.start(numWorkers)
-	return st
 }
 
 func (s *withpool) start(numWorkers int) {
