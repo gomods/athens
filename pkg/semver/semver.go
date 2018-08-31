@@ -1,4 +1,4 @@
-package module
+package semver
 
 // *********** Copied from cmd/go **********
 
@@ -24,6 +24,20 @@ func SortVersions(list []string) {
 		}
 		return list[i] < list[j]
 	})
+}
+
+// Union concatenates two version lists and removes duplicates
+func Union(list1, list2 []string) []string {
+	list := append(list1, list2...)
+	unique := []string{}
+	m := make(map[string]struct{})
+	for _, v := range list {
+		if _, ok := m[v]; !ok {
+			unique = append(unique, v)
+			m[v] = struct{}{}
+		}
+	}
+	return unique
 }
 
 // Compare returns an integer comparing two versions according to
