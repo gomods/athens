@@ -7,6 +7,7 @@ import (
 
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/storage"
+	"go.opencensus.io/trace"
 )
 
 // Protocol is the download protocol which mirrors
@@ -79,7 +80,9 @@ func (p *protocol) List(ctx context.Context, mod string) ([]string, error) {
 }
 
 func (p *protocol) Info(ctx context.Context, mod, ver string) ([]byte, error) {
-	const op errors.Op = "protocol.Info"
+	const op errors.Op = "download.protocol.Info"
+	ctx, span := trace.StartSpan(ctx, op.String())
+	defer span.End()
 	info, err := p.s.Info(ctx, mod, ver)
 	if errors.IsNotFoundErr(err) {
 		err = p.request(mod, ver)
