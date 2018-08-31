@@ -11,11 +11,12 @@ A clear and concise description of what the bug is.
 **Error Message**
 If applicable add error message to help explain your problem or console output enclose in triple back ticks eg,
 
-
-```console
-error message
+<pre>
+```
+console error message
 and other output
 ```
+</pre>
 
 
 **To Reproduce**
