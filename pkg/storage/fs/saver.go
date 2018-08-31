@@ -7,14 +7,14 @@ import (
 	"path/filepath"
 
 	"github.com/gomods/athens/pkg/errors"
-	opentracing "github.com/opentracing/opentracing-go"
+	"github.com/gomods/athens/pkg/observability"
 	"github.com/spf13/afero"
 )
 
 func (s *storageImpl) Save(ctx context.Context, module, version string, mod []byte, zip io.Reader, info []byte) error {
-	const op errors.Op = "fs.Save"
-	sp, ctx := opentracing.StartSpanFromContext(ctx, "storage.fs.Save")
-	defer sp.Finish()
+	const op errors.Op = "storage.fs.Save"
+	ctx, span := observability.StartSpan(ctx, op.String())
+	defer span.End()
 	dir := s.versionLocation(module, version)
 	// TODO: 777 is not the best filemode, use something better
 

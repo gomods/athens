@@ -6,14 +6,14 @@ import (
 	"io"
 
 	"github.com/gomods/athens/pkg/errors"
+	"github.com/gomods/athens/pkg/observability"
 	minio "github.com/minio/minio-go"
-	opentracing "github.com/opentracing/opentracing-go"
 )
 
 func (s *storageImpl) Save(ctx context.Context, module, vsn string, mod []byte, zip io.Reader, info []byte) error {
-	const op errors.Op = "minio.SAve"
-	sp, ctx := opentracing.StartSpanFromContext(ctx, "storage.minio.Save")
-	defer sp.Finish()
+	const op errors.Op = "storage.minio.Save"
+	ctx, span := observability.StartSpan(ctx, op.String())
+	defer span.End()
 	dir := s.versionLocation(module, vsn)
 	modFileName := dir + "/" + "go.mod"
 	zipFileName := dir + "/" + "source.zip"

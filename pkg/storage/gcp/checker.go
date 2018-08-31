@@ -4,13 +4,15 @@ import (
 	"context"
 
 	"github.com/gomods/athens/pkg/config"
-	opentracing "github.com/opentracing/opentracing-go"
+	"github.com/gomods/athens/pkg/errors"
+	"github.com/gomods/athens/pkg/observability"
 )
 
 // Exists implements the (./pkg/storage).Checker interface
 // returning true if the module at version exists in storage
 func (s *Storage) Exists(ctx context.Context, module, version string) (bool, error) {
-	sp, ctx := opentracing.StartSpanFromContext(ctx, "storage.gcp.Exists")
-	defer sp.Finish()
+	const op errors.Op = "storage.gcp.Exists"
+	ctx, span := observability.StartSpan(ctx, op.String())
+	defer span.End()
 	return s.bucket.Exists(ctx, config.PackageVersionedName(module, version, "mod"))
 }

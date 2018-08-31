@@ -22,6 +22,13 @@
   revision = "40e40b42552a9cb37d6e98f4ad31f63ae53ea43a"
 
 [[projects]]
+  branch = "master"
+  name = "git.apache.org/thrift.git"
+  packages = ["lib/go/thrift"]
+  revision = "8de3749235db03c1d043c9f31dcbdc4c0fb011ea"
+  source = "github.com/apache/thrift"
+
+[[projects]]
   name = "github.com/Azure/azure-pipeline-go"
   packages = ["pipeline"]
   revision = "7571e8eb0876932ab505918ff7ed5107773e5ee2"
@@ -741,6 +748,8 @@
   name = "go.opencensus.io"
   packages = [
     ".",
+    "exporter/jaeger",
+    "exporter/jaeger/internal/gen-go/jaeger",
     "exporter/stackdriver/propagation",
     "internal",
     "internal/tagencoding",
@@ -801,7 +810,10 @@
 [[projects]]
   branch = "master"
   name = "golang.org/x/sync"
-  packages = ["errgroup"]
+  packages = [
+    "errgroup",
+    "semaphore"
+  ]
   revision = "1d60e4601c6fd243af51cc01ddf169918a5407ca"
 
 [[projects]]
@@ -847,6 +859,7 @@
     "iterator",
     "option",
     "storage/v1",
+    "support/bundler",
     "transport/http"
   ]
   revision = "781db45e5b94469718b0c615037e76333cd050e3"
@@ -921,6 +934,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "54396e6e784b6f4b718ca646b7d46e90e561407b0f887a556188537ce16e875f"
+  inputs-digest = "fd3c105dd6a11870ed52cb52e88489307bfe4744d9da21e330f36bf1f13b742b"
   solver-name = "gps-cdcl"
   solver-version = 1

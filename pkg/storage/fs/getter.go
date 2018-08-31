@@ -7,14 +7,14 @@ import (
 	"path/filepath"
 
 	"github.com/gomods/athens/pkg/errors"
-	"github.com/opentracing/opentracing-go"
+	"github.com/gomods/athens/pkg/observability"
 	"github.com/spf13/afero"
 )
 
 func (v *storageImpl) Info(ctx context.Context, module, version string) ([]byte, error) {
-	const op errors.Op = "fs.Info"
-	sp, ctx := opentracing.StartSpanFromContext(ctx, "storage.fs.Info")
-	defer sp.Finish()
+	const op errors.Op = "storage.fs.Info"
+	ctx, span := observability.StartSpan(ctx, op.String())
+	defer span.End()
 	versionedPath := v.versionLocation(module, version)
 	info, err := afero.ReadFile(v.filesystem, filepath.Join(versionedPath, version+".info"))
 	if err != nil {
@@ -25,9 +25,9 @@ func (v *storageImpl) Info(ctx context.Context, module, version string) ([]byte,
 }
 
 func (v *storageImpl) GoMod(ctx context.Context, module, version string) ([]byte, error) {
-	const op errors.Op = "fs.GoMod"
-	sp, ctx := opentracing.StartSpanFromContext(ctx, "storage.fs.GoMod")
-	defer sp.Finish()
+	const op errors.Op = "storage.fs.GoMod"
+	ctx, span := observability.StartSpan(ctx, op.String())
+	defer span.End()
 	versionedPath := v.versionLocation(module, version)
 	mod, err := afero.ReadFile(v.filesystem, filepath.Join(versionedPath, "go.mod"))
 	if err != nil {
@@ -38,9 +38,9 @@ func (v *storageImpl) GoMod(ctx context.Context, module, version string) ([]byte
 }
 
 func (v *storageImpl) Zip(ctx context.Context, module, version string) (io.ReadCloser, error) {
-	const op errors.Op = "fs.Zip"
-	sp, ctx := opentracing.StartSpanFromContext(ctx, "storage.fs.Zip")
-	defer sp.Finish()
+	const op errors.Op = "storage.fs.Zip"
+	ctx, span := observability.StartSpan(ctx, op.String())
+	defer span.End()
 	versionedPath := v.versionLocation(module, version)
 
 	src, err := v.filesystem.OpenFile(filepath.Join(versionedPath, "source.zip"), os.O_RDONLY, 0666)

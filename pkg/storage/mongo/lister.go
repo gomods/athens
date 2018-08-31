@@ -6,15 +6,15 @@ import (
 	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
 	"github.com/gomods/athens/pkg/errors"
+	"github.com/gomods/athens/pkg/observability"
 	"github.com/gomods/athens/pkg/storage"
-	opentracing "github.com/opentracing/opentracing-go"
 )
 
 // List lists all versions of a module
 func (s *ModuleStore) List(ctx context.Context, module string) ([]string, error) {
-	const op errors.Op = "mongo.List"
-	sp, ctx := opentracing.StartSpanFromContext(ctx, "storage.mongo.List")
-	defer sp.Finish()
+	const op errors.Op = "storage.mongo.List"
+	ctx, span := observability.StartSpan(ctx, op.String())
+	defer span.End()
 	c := s.s.DB(s.d).C(s.c)
 	result := make([]storage.Module, 0)
 	err := c.Find(bson.M{"module": module}).All(&result)

@@ -36,7 +36,7 @@ func SpanFromContext(ctx context.Context) Span {
 // Example usage:
 //
 //    SomeFunction(ctx context.Context, ...) {
-//        sp, ctx := opentracing.StartSpanFromContext(ctx, "SomeFunction")
+//        ctx, span := observability.StartSpan(ctx, op.String())"SomeFunction")
 //        defer sp.Finish()
 //        ...
 //    }

@@ -5,14 +5,14 @@ import (
 	"os"
 
 	"github.com/gomods/athens/pkg/errors"
-	opentracing "github.com/opentracing/opentracing-go"
+	"github.com/gomods/athens/pkg/observability"
 	"github.com/spf13/afero"
 )
 
 func (l *storageImpl) List(ctx context.Context, module string) ([]string, error) {
-	const op errors.Op = "fs.List"
-	sp, ctx := opentracing.StartSpanFromContext(ctx, "storage.fs.List")
-	defer sp.Finish()
+	const op errors.Op = "storage.fs.List"
+	ctx, span := observability.StartSpan(ctx, op.String())
+	defer span.End()
 	loc := l.moduleLocation(module)
 	fileInfos, err := afero.ReadDir(l.filesystem, loc)
 	if err != nil {

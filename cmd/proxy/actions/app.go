@@ -3,6 +3,8 @@ package actions
 import (
 	"fmt"
 
+	"github.com/gomods/athens/pkg/observability"
+
 	"github.com/gobuffalo/buffalo"
 	"github.com/gobuffalo/buffalo/middleware"
 	"github.com/gobuffalo/buffalo/middleware/csrf"
@@ -17,6 +19,9 @@ import (
 	"github.com/rs/cors"
 	"github.com/unrolled/secure"
 )
+
+// Service is the name of the service that we want to tag our processes with
+const Service = "athens.proxy"
 
 // ENV is used to help switch settings based on where the
 // application is being run. Default is "development".
@@ -83,6 +88,11 @@ func App() (*buffalo.App, error) {
 		app = app.Group(prefix)
 	}
 
+	// Register exporter to export traces
+	exporter := observability.RegisterTraceExporter(Service)
+	exporter.Flush()
+	app.Use(observability.Tracer(Service))
+
 	// Automatically redirect to SSL
 	app.Use(ssl.ForceSSL(secure.Options{
 		SSLRedirect:     env.ProxyForceSSL(),
@@ -92,7 +102,7 @@ func App() (*buffalo.App, error) {
 	if ENV == "development" {
 		app.Use(middleware.ParameterLogger)
 	}
-	initializeTracing(app)
+
 	initializeAuth(app)
 	// Protect against CSRF attacks. https://www.owasp.org/index.php/Cross-Site_Request_Forgery_(CSRF)
 	// Remove to disable this.

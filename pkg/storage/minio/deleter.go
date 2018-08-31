@@ -5,13 +5,13 @@ import (
 	"fmt"
 
 	"github.com/gomods/athens/pkg/errors"
-	opentracing "github.com/opentracing/opentracing-go"
+	"github.com/gomods/athens/pkg/observability"
 )
 
 func (v *storageImpl) Delete(ctx context.Context, module, version string) error {
-	const op errors.Op = "minio.Delete"
-	sp, ctx := opentracing.StartSpanFromContext(ctx, "storage.minio.Delete")
-	defer sp.Finish()
+	const op errors.Op = "storage.minio.Delete"
+	ctx, span := observability.StartSpan(ctx, op.String())
+	defer span.End()
 	exists, err := v.Exists(ctx, module, version)
 	if err != nil {
 		return errors.E(op, err, errors.M(module), errors.V(version))
