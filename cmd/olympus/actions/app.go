@@ -19,10 +19,12 @@ import (
 	"github.com/gomods/athens/pkg/download/goget"
 	"github.com/gomods/athens/pkg/eventlog"
 	"github.com/gomods/athens/pkg/log"
+	"github.com/gomods/athens/pkg/module"
 	"github.com/gomods/athens/pkg/stash"
 	"github.com/gomods/athens/pkg/storage"
 	"github.com/gomodule/redigo/redis"
 	"github.com/rs/cors"
+	"github.com/spf13/afero"
 	"github.com/unrolled/secure"
 )
 
@@ -126,11 +128,14 @@ func App(config *AppConfig) (*buffalo.App, error) {
 	app.GET("/healthz", healthHandler)
 
 	// Download Protocol
-	gg, err := goget.New()
+	goBin := env.GoBinPath()
+	fs := afero.NewOsFs()
+	mf, err := module.NewGoGetFetcher(goBin, fs)
 	if err != nil {
 		return nil, err
 	}
-	st := stash.New(gg, config.Storage)
+	gg := goget.New(goBin, fs, mf)
+	st := stash.New(mf, config.Storage)
 	dp := addons.WithStasher(gg, config.Storage, st)
 	opts := &download.HandlerOpts{Protocol: dp, Logger: lggr, Engine: renderEng}
 	download.RegisterHandlers(app, opts)
