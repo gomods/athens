@@ -278,8 +278,8 @@ gopkg.in/gemnasium/logrus-airbrake-hook.v2 v2.1.2 h1:OAj3g0cR6Dx/R07QgQe8wkA9RNj
 gopkg.in/gemnasium/logrus-airbrake-hook.v2 v2.1.2/go.mod h1:Xk6kEKp8OKb+X14hQBKWaSkCsqBpgog8nAV2xsGOxlo=
 gopkg.in/go-playground/assert.v1 v1.2.1 h1:xoYuJVE7KT85PYWrN730RguIQO0ePzVRfFMXadIrXTM=
 gopkg.in/go-playground/assert.v1 v1.2.1/go.mod h1:9RXL0bg/zibRAgZUYszZSwO/z8Y/a8bDuhia5mkpMnE=
-gopkg.in/go-playground/validator.v9 v9.21.0 h1:wSDJGBpQBYC1wLpVnGHLmshm2JicoSNdrb38Zj+8yHI=
-gopkg.in/go-playground/validator.v9 v9.21.0/go.mod h1:+c9/zcJMFNgbLvly1L1V+PpxWdVbfP1avr/N00E2vyQ=
+gopkg.in/go-playground/validator.v9 v9.20.2 h1:6AVDyt8bk0FDiSYSeWivUfzqEjHyVSCMRkpTr6ZCIgk=
+gopkg.in/go-playground/validator.v9 v9.20.2/go.mod h1:+c9/zcJMFNgbLvly1L1V+PpxWdVbfP1avr/N00E2vyQ=
 gopkg.in/mail.v2 v2.0.0-20180301192024-63235f23494b/go.mod h1:htwXN1Qh09vZJ1NVKxQqHPBaCBbzKhp5GzuJEA4VJWw=
 gopkg.in/russross/blackfriday.v1 v1.5.1 h1:/G8rrKhg8HTP6/VLtuQLbNSXHUzpDdNqZS5umeauNvc=
 gopkg.in/russross/blackfriday.v1 v1.5.1/go.mod h1:NAEMj3mL3YDCD1Mxuzav3y8y68EZs2OnJ9xdWYLES00=
