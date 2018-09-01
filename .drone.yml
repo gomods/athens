@@ -10,7 +10,7 @@ pipeline:
   build:
     image: golang:1.10
     commands:
-      - go test ./...
+      - go test -mod=vendor ./...
 
 services:
   mongo:
