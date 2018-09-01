@@ -13,9 +13,6 @@ env:
     - CODE_COV=1
     - ATHENS_DIR=${GOPATH}/src/github.com/gomods/athens
     - REGISTRY=gomods/
-  matrix:
-    # remove this after Go1.12 ships
-    - GO111MODULE=auto
     - GO111MODULE=on
 
 before_script:
