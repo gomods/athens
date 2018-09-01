@@ -29,5 +29,8 @@ func (l *storageImpl) List(ctx context.Context, module string) ([]string, error)
 			ret = append(ret, fileInfo.Name())
 		}
 	}
+	if len(ret) == 0 {
+		return nil, errors.E(op, errors.M(module), err, errors.KindNotFound)
+	}
 	return ret, nil
 }

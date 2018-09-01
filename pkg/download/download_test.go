@@ -56,93 +56,71 @@ func TestDownloadProtocol(t *testing.T) {
 	}
 }
 
-func TestListGoListFullStorageEmpty(t *testing.T) {
-	module := "testmodule"
-
-	ctx := context.Background()
-	s, err := mem.NewStorage()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	dp := New(&mockProtocol{list: []string{"v1.0.0", "v1.0.1", "v1.0.2"}}, s, 1)
-
-	list, err := dp.List(ctx, module)
-
-	expected := []string{"v1.0.0", "v1.0.1", "v1.0.2"}
-
-	if ok := testEq(expected, list); !ok {
-		t.Fatalf("expected list: %v, got: %v", expected, list)
-	}
+type listTest struct {
+	name          string
+	module        string
+	gogetVersions []string
+	strVersions   []string
+	expected      []string
 }
 
-func TestListGoListFullStorageFull(t *testing.T) {
-	module := "testmodule"
-	versions := []string{"v1.0.0", "v1.0.1", "v1.0.2"}
-	bts := []byte("123")
-
-	ctx := context.Background()
-	s, err := mem.NewStorage()
-	if err != nil {
-		t.Fatal(err)
-	}
-	for _, v := range versions {
-		s.Save(ctx, module, v, bts, ioutil.NopCloser(bytes.NewReader(bts)), bts)
-	}
-
-	dp := New(&mockProtocol{list: []string{"v1.0.0", "v1.0.2", "v1.0.3"}}, s, 1)
-
-	list, err := dp.List(ctx, module)
-
-	expected := []string{"v1.0.0", "v1.0.1", "v1.0.2", "v1.0.3"}
-
-	if ok := testEq(expected, list); !ok {
-		t.Fatalf("expected list: %v, got: %v", expected, list)
-	}
+var listTests = []listTest{
+	{
+		name:          "go list full and storage full",
+		module:        "happy tags",
+		gogetVersions: []string{"v1.0.0", "v1.0.2", "v1.0.3"},
+		strVersions:   []string{"v1.0.0", "v1.0.1", "v1.0.2"},
+		expected:      []string{"v1.0.0", "v1.0.1", "v1.0.2", "v1.0.3"},
+	},
+	{
+		name:          "go list full and storage empty",
+		module:        "happy tags",
+		gogetVersions: []string{"v1.0.0", "v1.0.1", "v1.0.2"},
+		strVersions:   []string{},
+		expected:      []string{"v1.0.0", "v1.0.1", "v1.0.2"},
+	},
+	{
+		name:          "go list empty and storage full",
+		module:        "happy tags",
+		gogetVersions: nil,
+		strVersions:   []string{"v1.0.0", "v1.0.1", "v1.0.2"},
+		expected:      []string{"v1.0.0", "v1.0.1", "v1.0.2"},
+	},
+	{
+		name:          "go list empty and storage empty",
+		module:        "happy tags",
+		gogetVersions: nil,
+		strVersions:   []string{},
+		expected:      nil,
+	},
 }
 
-func TestListGoListEmptyStorageFull(t *testing.T) {
-	module := "testmodule"
-	versions := []string{"v1.0.0", "v1.0.1", "v1.0.2"}
-	bts := []byte("123")
-
+func TestList(t *testing.T) {
 	ctx := context.Background()
 	s, err := mem.NewStorage()
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, v := range versions {
-		s.Save(ctx, module, v, bts, ioutil.NopCloser(bytes.NewReader(bts)), bts)
+	clearStorage := func(st storage.Backend, module string, versions []string) {
+		for _, v := range versions {
+			s.Delete(ctx, module, v)
+		}
 	}
 
-	dp := New(&mockProtocol{}, s, 1)
+	for _, tc := range listTests {
+		t.Run(tc.name, func(t *testing.T) {
+			bts := []byte("123")
+			for _, v := range tc.strVersions {
+				s.Save(ctx, tc.module, v, bts, ioutil.NopCloser(bytes.NewReader(bts)), bts)
+			}
+			defer clearStorage(s, tc.module, tc.strVersions)
+			dp := New(&mockProtocol{list: tc.gogetVersions}, s, 1)
+			list, _ := dp.List(ctx, tc.module)
 
-	list, err := dp.List(ctx, module)
-
-	expected := []string{"v1.0.0", "v1.0.1", "v1.0.2"}
-
-	if ok := testEq(expected, list); !ok {
-		t.Fatalf("expected list: %v, got: %v", expected, list)
-	}
-}
-
-func TestListGoListEmptyStorageEmpty(t *testing.T) {
-	module := "testmodule"
-
-	ctx := context.Background()
-	s, err := mem.NewStorage()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	dp := New(&mockProtocol{}, s, 1)
-
-	list, err := dp.List(ctx, module)
-	if list != nil {
-		t.Fatal("list should be nil")
-	}
-	if err == nil {
-		t.Fatal("err shouldn't be nil")
+			if ok := testEq(tc.expected, list); !ok {
+				t.Fatalf("expected list: %v, got: %v", tc.expected, list)
+			}
+		})
 	}
 }
 
