@@ -139,7 +139,7 @@ func TestListGoListEmptyStorageEmpty(t *testing.T) {
 
 	list, err := dp.List(ctx, module)
 	if list != nil {
-		t.Fatal("should be nil")
+		t.Fatal("list should be nil")
 	}
 	if err == nil {
 		t.Fatal("err shouldn't be nil")
