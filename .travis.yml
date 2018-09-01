@@ -49,6 +49,6 @@ deploy:
     script: curl -sL https://git.io/goreleaser | bash -s -- --snapshot
     on:
       repo: gomods/athens
-      branch: goreleaser #only to test
+      branch: master
       # tags: true 
       condition: $GORELEASER_ON = 1 AND $GO111MODULE = on
