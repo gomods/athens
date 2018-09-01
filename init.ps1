@@ -51,7 +51,7 @@ Param(
 	[switch]$down
 )
 function execScript($name) {
-	$scriptsDir = "$(join-path scripts ps)"
+	$scriptsDir = "$(Join-Path scripts ps)"
 	& "$(Join-Path $scriptsDir $name)"
 }
 
