@@ -7,8 +7,10 @@ import (
 	"github.com/gomods/athens/pkg/download/addons"
 	"github.com/gomods/athens/pkg/download/goget"
 	"github.com/gomods/athens/pkg/log"
+	"github.com/gomods/athens/pkg/module"
 	"github.com/gomods/athens/pkg/stash"
 	"github.com/gomods/athens/pkg/storage"
+	"github.com/spf13/afero"
 )
 
 func addProxyRoutes(
@@ -41,11 +43,14 @@ func addProxyRoutes(
 	// 2. The singleflight passes the stash to its parent: stashpool.
 	// 3. The stashpool manages limiting concurrent requests and passes them to stash.
 	// 4. The plain stash.New just takes a request from upstream and saves it into storage.
-	gg, err := goget.New()
+	goBin := env.GoBinPath()
+	fs := afero.NewOsFs()
+	mf, err := module.NewGoGetFetcher(goBin, fs)
 	if err != nil {
 		return err
 	}
-	st := stash.New(gg, s, stash.WithSingleflight, stash.WithPool(env.GoGetWorkers()))
+	st := stash.New(mf, s, stash.WithSingleflight, stash.WithPool(env.GoGetWorkers()))
+	gg := goget.New(goBin, fs, mf)
 	p := addons.WithPool(
 		addons.WithStasher(gg, s, st),
 		env.ProtocolWorkers(),

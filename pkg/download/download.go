@@ -24,7 +24,4 @@ type Protocol interface {
 
 	// Zip implements GET /{module}/@v/{version}.zip
 	Zip(ctx context.Context, mod, ver string) (io.ReadCloser, error)
-
-	// Version is a helper method to get Info, GoMod, and Zip together.
-	Version(ctx context.Context, mod, ver string) (*storage.Version, error)
 }

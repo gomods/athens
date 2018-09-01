@@ -11,9 +11,25 @@ import (
 	"testing"
 	"time"
 
+	"github.com/gomods/athens/pkg/config/env"
+	"github.com/gomods/athens/pkg/download"
+	"github.com/gomods/athens/pkg/module"
 	"github.com/gomods/athens/pkg/storage"
+	"github.com/spf13/afero"
 	"github.com/stretchr/testify/require"
 )
+
+func getDP(t *testing.T) download.Protocol {
+	t.Helper()
+	goBin := env.GoBinPath()
+	fs := afero.NewOsFs()
+	mf, err := module.NewGoGetFetcher(goBin, fs)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	return New(goBin, fs, mf)
+}
 
 type listTest struct {
 	name string
@@ -34,8 +50,7 @@ var listTests = []listTest{
 }
 
 func TestList(t *testing.T) {
-	dp, err := New()
-	require.NoError(t, err, "failed to create protocol")
+	dp := getDP(t)
 	ctx := context.Background()
 
 	for _, tc := range listTests {
@@ -48,8 +63,7 @@ func TestList(t *testing.T) {
 }
 
 func TestConcurrentLists(t *testing.T) {
-	dp, err := New()
-	require.NoError(t, err, "failed to create protocol")
+	dp := getDP(t)
 	ctx := context.Background()
 
 	pkg := "github.com/athens-artifacts/samplelib"
@@ -106,8 +120,7 @@ var latestTests = []latestTest{
 }
 
 func TestLatest(t *testing.T) {
-	dp, err := New()
-	require.NoError(t, err)
+	dp := getDP(t)
 	ctx := context.Background()
 
 	for _, tc := range latestTests {
@@ -153,8 +166,7 @@ var infoTests = []infoTest{
 }
 
 func TestInfo(t *testing.T) {
-	dp, err := New()
-	require.NoError(t, err)
+	dp := getDP(t)
 	ctx := context.Background()
 
 	for _, tc := range infoTests {
@@ -200,8 +212,7 @@ var modTests = []modTest{
 }
 
 func TestGoMod(t *testing.T) {
-	dp, err := New()
-	require.NoError(t, err)
+	dp := getDP(t)
 	ctx := context.Background()
 
 	for _, tc := range modTests {

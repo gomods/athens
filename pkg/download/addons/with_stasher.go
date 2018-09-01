@@ -89,27 +89,3 @@ func (p *withstasher) Zip(ctx context.Context, mod, ver string) (io.ReadCloser, 
 
 	return zip, nil
 }
-
-func (p *withstasher) Version(ctx context.Context, mod, ver string) (*storage.Version, error) {
-	const op errors.Op = "stasher.Version"
-	info, err := p.Info(ctx, mod, ver)
-	if err != nil {
-		return nil, errors.E(op, err)
-	}
-
-	goMod, err := p.GoMod(ctx, mod, ver)
-	if err != nil {
-		return nil, errors.E(op, err)
-	}
-
-	zip, err := p.s.Zip(ctx, mod, ver)
-	if err != nil {
-		return nil, errors.E(op, err)
-	}
-
-	return &storage.Version{
-		Info: info,
-		Mod:  goMod,
-		Zip:  zip,
-	}, nil
-}

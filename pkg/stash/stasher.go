@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
-	"github.com/gomods/athens/pkg/download"
 	"github.com/gomods/athens/pkg/errors"
+	"github.com/gomods/athens/pkg/module"
 	"github.com/gomods/athens/pkg/storage"
 )
 
@@ -21,8 +21,8 @@ type Wrapper func(Stasher) Stasher
 // New returns a plain stasher that takes
 // a module from a download.Protocol and
 // stashes it into a backend.Storage.
-func New(dp download.Protocol, s storage.Backend, wrappers ...Wrapper) Stasher {
-	var st Stasher = &stasher{dp, s}
+func New(f module.Fetcher, s storage.Backend, wrappers ...Wrapper) Stasher {
+	var st Stasher = &stasher{f, s}
 	for _, w := range wrappers {
 		st = w(st)
 	}
@@ -31,15 +31,15 @@ func New(dp download.Protocol, s storage.Backend, wrappers ...Wrapper) Stasher {
 }
 
 type stasher struct {
-	dp download.Protocol
-	s  storage.Backend
+	f module.Fetcher
+	s storage.Backend
 }
 
 func (s *stasher) Stash(mod, ver string) error {
 	const op errors.Op = "stasher.Stash"
 	ctx, cancel := context.WithTimeout(context.Background(), time.Minute*10)
 	defer cancel()
-	v, err := s.dp.Version(ctx, mod, ver)
+	v, err := s.fetchModule(ctx, mod, ver)
 	if err != nil {
 		return errors.E(op, err)
 	}
@@ -49,4 +49,18 @@ func (s *stasher) Stash(mod, ver string) error {
 		return errors.E(op, err)
 	}
 	return nil
+}
+
+func (s *stasher) fetchModule(ctx context.Context, mod, ver string) (*storage.Version, error) {
+	const op errors.Op = "stasher.fetchModule"
+	ref, err := s.f.Fetch(mod, ver)
+	if err != nil {
+		return nil, errors.E(op, err)
+	}
+	v, err := ref.Read()
+	if err != nil {
+		return nil, errors.E(op, err)
+	}
+
+	return v, nil
 }
