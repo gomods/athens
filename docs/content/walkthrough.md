@@ -73,7 +73,7 @@ $ cd "$(go env GOPATH)\src\github.com\gomods"
 $ git clone https://github.com/gomods/athens.git
 $ cd athens
 $ $env:GO111MODULE = "off"
-$ start -NoNewWindow go "run .\cmd\proxy"
+$ Start-Process -NoNewWindow go "run .\cmd\proxy"
 [1] 25243
 INFO[0000] Starting application at 127.0.0.1:3000
 ```
