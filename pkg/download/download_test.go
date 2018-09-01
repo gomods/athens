@@ -3,6 +3,7 @@ package download
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"io/ioutil"
 	"testing"
 
@@ -55,7 +56,52 @@ func TestDownloadProtocol(t *testing.T) {
 	}
 }
 
-func TestList(t *testing.T) {
+func TestListGoListFullStorageEmpty(t *testing.T) {
+	module := "testmodule"
+
+	ctx := context.Background()
+	s, err := mem.NewStorage()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	dp := New(&mockProtocol{list: []string{"v1.0.0", "v1.0.1", "v1.0.2"}}, s, 1)
+
+	list, err := dp.List(ctx, module)
+
+	expected := []string{"v1.0.0", "v1.0.1", "v1.0.2"}
+
+	if ok := testEq(expected, list); !ok {
+		t.Fatalf("expected list: %v, got: %v", expected, list)
+	}
+}
+
+func TestListGoListFullStorageFull(t *testing.T) {
+	module := "testmodule"
+	versions := []string{"v1.0.0", "v1.0.1", "v1.0.2"}
+	bts := []byte("123")
+
+	ctx := context.Background()
+	s, err := mem.NewStorage()
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, v := range versions {
+		s.Save(ctx, module, v, bts, ioutil.NopCloser(bytes.NewReader(bts)), bts)
+	}
+
+	dp := New(&mockProtocol{list: []string{"v1.0.0", "v1.0.2", "v1.0.3"}}, s, 1)
+
+	list, err := dp.List(ctx, module)
+
+	expected := []string{"v1.0.0", "v1.0.1", "v1.0.2", "v1.0.3"}
+
+	if ok := testEq(expected, list); !ok {
+		t.Fatalf("expected list: %v, got: %v", expected, list)
+	}
+}
+
+func TestListGoListEmptyStorageFull(t *testing.T) {
 	module := "testmodule"
 	versions := []string{"v1.0.0", "v1.0.1", "v1.0.2"}
 	bts := []byte("123")
@@ -73,15 +119,36 @@ func TestList(t *testing.T) {
 
 	list, err := dp.List(ctx, module)
 
-	expected := []string{"v1.0.0", "v1.0.1", "v1.0.2", "v1.0.3"}
+	expected := []string{"v1.0.0", "v1.0.1", "v1.0.2"}
 
 	if ok := testEq(expected, list); !ok {
 		t.Fatalf("expected list: %v, got: %v", expected, list)
 	}
 }
 
+func TestListGoListEmptyStorageEmpty(t *testing.T) {
+	module := "testmodule"
+
+	ctx := context.Background()
+	s, err := mem.NewStorage()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	dp := New(&mockProtocol{}, s, 1)
+
+	list, err := dp.List(ctx, module)
+	if list != nil {
+		t.Fatal("should be nil")
+	}
+	if err == nil {
+		t.Fatal("err shouldn't be nil")
+	}
+}
+
 type mockProtocol struct {
 	Protocol
+	list []string
 }
 
 // Info implements GET /{module}/@v/{version}.info
@@ -99,7 +166,10 @@ func (m *mockProtocol) Version(ctx context.Context, mod, ver string) (*storage.V
 }
 
 func (m *mockProtocol) List(ctx context.Context, mod string) ([]string, error) {
-	return []string{"v1.0.0", "v1.0.2", "v1.0.3"}, nil
+	if m.list == nil {
+		return nil, fmt.Errorf("list empty")
+	}
+	return m.list, nil
 }
 
 func testEq(a, b []string) bool {
