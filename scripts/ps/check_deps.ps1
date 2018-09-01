@@ -13,5 +13,5 @@ $ChangedFiles=$(git diff --name-only origin/master)
 # in the case that ChangedFiles contains go.mod or go.sum run go mod verify
 $contains= $ChangedFiles | Select-String -Pattern "go.mod|go.sum"
 if ($contains.length -gt 0) {
-	go mod verify
+	Write-Error $(go mod verify)
 }
