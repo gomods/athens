@@ -51,4 +51,5 @@ deploy:
       repo: gomods/athens
       branch: master
       # tags: true 
-      condition: $GORELEASER_ON = 1 AND $GO111MODULE = on
+      condition: $GORELEASER_ON = 1
+      condition: $GO111MODULE = on
