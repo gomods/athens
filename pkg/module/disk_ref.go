@@ -50,7 +50,7 @@ func newDiskRef(fs afero.Fs, root, module, version string) *diskRef {
 // ClearFiles deletes all data from the given fs at path root
 // This function must be called when zip is closed to cleanup the entire GOPATH created by the diskref
 func ClearFiles(fs afero.Fs, root string) error {
-	const op errors.Op = "clearFiles"
+	const op errors.Op = "ClearFiles"
 	// This is required because vgo ensures dependencies are read-only
 	// See https://github.com/golang/go/issues/24111 and
 	// https://go-review.googlesource.com/c/vgo/+/96978
