@@ -1,6 +1,4 @@
-#!/bin/bash
-
-# check_deps.sh
+# check_deps.ps1
 # this script checks for changes to the files go.mod and go.sum
 #
 # this is intended to be used in your CI tests
@@ -9,14 +7,11 @@
 # to check for any conflicts in versions or digests
 # which on any exit code > 0 would suggest that action should be taken
 # before a pull request can be merged.
-set -xeuo pipefail
-
-git remote set-branches --add origin master && git fetch
-ChangedFiles=`git diff --name-only origin/master`
+git remote set-branches --add origin master ; git fetch
+$ChangedFiles=$(git diff --name-only origin/master)
 
 # in the case that ChangedFiles contains go.mod or go.sum run go mod verify
-case "$ChangedFiles" in
-  go.mod | go.sum)
-    go mod verify
-  ;;
-esac
+$contains= $ChangedFiles | Select-String -Pattern "go.mod|go.sum"
+if ($contains.length -gt 0) {
+	Write-Error $(go mod verify)
+}
