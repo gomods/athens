@@ -133,9 +133,16 @@ func App(config *AppConfig) (*buffalo.App, error) {
 		return nil, err
 	}
 	st := stash.New(mf, config.Storage)
-	dp := download.New(config.Storage, st, goBin, fs)
-	opts := &download.HandlerOpts{Protocol: dp, Logger: lggr, Engine: renderEng}
-	download.RegisterHandlers(app, opts)
+	dpOpts := &download.Opts{
+		Storage:   config.Storage,
+		Stasher:   st,
+		GoBinPath: goBin,
+		Fs:        fs,
+	}
+	dp := download.New(dpOpts)
+
+	handlerOpts := &download.HandlerOpts{Protocol: dp, Logger: lggr, Engine: renderEng}
+	download.RegisterHandlers(app, handlerOpts)
 
 	app.ServeFiles("/", assetsBox) // serve files from the public directory
 
