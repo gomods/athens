@@ -28,10 +28,7 @@ func NewTestSuite(model *suite.Model) (storage.TestSuite, error) {
 }
 
 func newTestStore() (*ModuleStore, error) {
-	muri, err := env.MongoConnectionString()
-	if err != nil {
-		return nil, err
-	}
+	muri := env.MongoConnectionString()
 	certPath := env.MongoCertPath()
 	mongoStore, err := NewStorageWithCert(muri, certPath)
 	if err != nil {
@@ -53,10 +50,7 @@ func (ts *TestSuite) StorageHumanReadableName() string {
 
 // Cleanup tears down test
 func (ts *TestSuite) Cleanup() error {
-	muri, err := env.MongoConnectionString()
-	if err != nil {
-		return err
-	}
+	muri := env.MongoConnectionString()
 	timeout := env.MongoConnectionTimeoutSecWithDefault(1)
 	s, err := mgo.DialWithTimeout(muri, timeout)
 	defer s.Close()

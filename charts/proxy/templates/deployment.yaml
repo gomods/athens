@@ -28,7 +28,7 @@ spec:
         - name: ATHENS_DISK_STORAGE_ROOT
           value: {{ .Values.storage.disk.storageRoot | quote }}
         {{- else if eq .Values.storage.type "mongo"}}
-        - name: ATHENS_MONGO_STORAGE_URL
+        - name: ATHENS_MONGO_CONNECTION_STRING
           value: {{ .Values.storage.mongo.url | quote }}
         {{- end }}
         # TODO: re-enable when workers are used

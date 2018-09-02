@@ -4,7 +4,7 @@ import "github.com/gomods/athens/pkg/config/env"
 
 func (m *MongoTests) TestNewMongoStorage() {
 	r := m.Require()
-	muri, err := env.MongoConnectionString()
+	muri := env.MongoConnectionString()
 	certPath := env.MongoCertPath()
 	getterSaver, err := NewStorageWithCert(muri, certPath)
 
