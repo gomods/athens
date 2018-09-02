@@ -13,6 +13,7 @@ env:
     - CODE_COV=1
     - ATHENS_DIR=${GOPATH}/src/github.com/gomods/athens
     - REGISTRY=gomods/
+    - GORELEASER_ON=1
     - GO111MODULE=on
 
 before_script:
@@ -35,8 +36,16 @@ before_deploy:
   - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
 
 deploy:
-  provider: script
-  script: make docker-push
-  on:
-    repo: gomods/athens
-    all_branches: true
+  - provider: script
+    script: make docker-push
+    on:
+      repo: gomods/athens
+      all_branches: true
+  - provider: script
+    skip_cleanup: true
+    script: curl -sL https://git.io/goreleaser | bash
+    on:
+      repo: gomods/athens
+      tags: true 
+      condition: $GORELEASER_ON = 1
+      condition: $GO111MODULE = on
