@@ -3,6 +3,7 @@ release:
     owner: gomods
     name: athens
   name_template: '{{.Tag}}'
+  draft: true
 builds:
   -
     goos:
