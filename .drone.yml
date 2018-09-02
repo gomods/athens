@@ -8,7 +8,7 @@ pipeline:
     commands:
       - sleep 15
   build:
-    image: golang:1.10
+    image: golang:1.11
     commands:
       - go test -mod=vendor ./...
 
