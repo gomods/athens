@@ -1,5 +1,6 @@
 - using github
 - using git
+>    http://kbroman.org/github_tutorial/pages/fork.html
 - using forks
 - using remotes
 - creating pull requests
