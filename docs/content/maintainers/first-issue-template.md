@@ -1,13 +1,13 @@
 ---
-title: "First Issue Template"
+title: "Good First Issues"
 date: 2018-08-25T20:00:24-07:00
 draft: false
 ---
 
-The following is intended for project [maintainers](#) when triaging issues and
+The following is intended for project maintainers when triaging issues and
 deciding to label them as a `good first issue`. It is meant to serve as a guide
 on good practices only as each issue is different. This designation will be at
-the discretion of a [maintainer](#).
+the discretion of a maintainer.
 
 In this template we will assume this may be the contributor's first pull
 request in The Athens Project.
@@ -18,8 +18,8 @@ request in The Athens Project.
 
 ---
 
-Generally we will still want to try and follow the issue template for [bugs](#) or
-[features](#). If you are performing issue triage you may need to add more
+Generally we will still want to try and follow the issue template for [bugs](https://github.com/gomods/athens/blob/master/.github/ISSUE_TEMPLATE/bug_report.md) or
+[features](https://github.com/gomods/athens/blob/master/.github/ISSUE_TEMPLATE/feature_request.md). If you are performing issue triage you may need to add more
 information to fulfill the below template.
 
 ## Template
