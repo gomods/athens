@@ -8,3 +8,8 @@ LastModifiedEmail: "hello@robloranger.ca"
 ---
 
 # Contributing
+
+We're so glad to see you here, we hope the following pages help you understand
+the part different roles play in our community and how some decisions are made.
+
+> TODO: something about transparency and what type of documents lie within.
