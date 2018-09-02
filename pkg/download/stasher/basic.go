@@ -38,6 +38,11 @@ func (s *stasher) Stash(mod, ver string) error {
 	const op errors.Op = "stasher.Stash"
 	ctx, cancel := context.WithTimeout(context.Background(), time.Minute*10)
 	defer cancel()
+
+	if e, _ := s.s.Exists(ctx, mod, ver); e == true {
+		return nil
+	}
+
 	v, err := s.versionFn(ctx, mod, ver)
 	if err != nil {
 		return errors.E(op, err)
