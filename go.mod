@@ -5,13 +5,15 @@ require (
 	contrib.go.opencensus.io/exporter/stackdriver v0.6.0 // indirect
 	github.com/Azure/azure-pipeline-go v0.0.0-20180607212504-7571e8eb0876 // indirect
 	github.com/Azure/azure-storage-blob-go v0.0.0-20180727221336-197d1c0aea1b
-	github.com/BurntSushi/toml v0.3.0 // indirect
+	github.com/BurntSushi/toml v0.3.0
 	github.com/aws/aws-sdk-go v1.15.24
 	github.com/beorn7/perks v0.0.0-20180321164747-3a771d992973 // indirect
 	github.com/bketelsen/buffet v0.1.5
 	github.com/codahale/hdrhistogram v0.0.0-20161010025455-3a0bb77429bd // indirect
 	github.com/fatih/color v1.7.0
 	github.com/globalsign/mgo v0.0.0-20180828104044-6f9f54af1356
+	github.com/go-playground/locales v0.12.1 // indirect
+	github.com/go-playground/universal-translator v0.16.0 // indirect
 	github.com/gobuffalo/buffalo v0.12.6
 	github.com/gobuffalo/envy v1.6.4
 	github.com/gobuffalo/gocraft-work-adapter v0.0.0-20180714213200-7d6504f1dffe
@@ -23,6 +25,7 @@ require (
 	github.com/gomodule/redigo v2.0.0+incompatible
 	github.com/googleapis/gax-go v2.0.0+incompatible // indirect
 	github.com/hashicorp/go-multierror v1.0.0
+	github.com/kelseyhightower/envconfig v1.3.0
 	github.com/markbates/goth v1.46.0
 	github.com/markbates/grift v1.0.1
 	github.com/matttproud/golang_protobuf_extensions v1.0.1 // indirect
@@ -48,4 +51,5 @@ require (
 	google.golang.org/api v0.0.0-20180829000535-087779f1d2c9
 	google.golang.org/genproto v0.0.0-20180817151627-c66870c02cf8 // indirect
 	google.golang.org/grpc v1.14.0 // indirect
+	gopkg.in/go-playground/validator.v9 v9.21.0
 )
