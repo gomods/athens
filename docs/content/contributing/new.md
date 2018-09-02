@@ -1,0 +1,6 @@
+- using github
+- using git
+- using forks
+- using remotes
+- creating pull requests
+- best practices re: working on github. i.e. commenting interest on an issue.
