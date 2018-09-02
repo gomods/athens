@@ -7,7 +7,7 @@ LastModifierEmail: "hello@robloranger.ca"
 
 ---
 
-### contributing
+### Contributing
 
 # New Contributors
 
