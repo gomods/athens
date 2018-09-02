@@ -22,9 +22,6 @@ builds:
       - "6"
     main: ./packr/main.go
     binary: packr
-    hooks:
-      pre: packr
-      post: packr clean
 archive:
   name_template: '{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ if .Arm
     }}v{{ .Arm }}{{ end }}'

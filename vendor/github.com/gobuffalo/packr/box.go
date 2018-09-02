@@ -15,6 +15,7 @@ import (
 )
 
 var (
+	// ErrResOutsideBox gets returned in case of the requested resources being outside the box
 	ErrResOutsideBox = errors.New("Can't find a resource outside the box")
 )
 
@@ -51,10 +52,12 @@ type Box struct {
 	directories map[string]bool
 }
 
+// AddString converts t to a byteslice and delegates to AddBytes to add to b.data
 func (b Box) AddString(path string, t string) {
 	b.AddBytes(path, []byte(t))
 }
 
+// AddBytes sets t in b.data by the given path
 func (b Box) AddBytes(path string, t []byte) {
 	b.data[path] = t
 }
@@ -132,13 +135,13 @@ func (b Box) find(name string) (File, error) {
 			bb = b.decompress(bb)
 			return newVirtualFile(cleanName, bb), nil
 		}
+		if _, ok := b.directories[cleanName]; ok {
+			return newVirtualDir(cleanName), nil
+		}
 		if filepath.Ext(cleanName) != "" {
 			// The Handler created by http.FileSystem checks for those errors and
 			// returns http.StatusNotFound instead of http.StatusInternalServerError.
 			return nil, os.ErrNotExist
-		}
-		if _, ok := b.directories[cleanName]; ok {
-			return newVirtualDir(cleanName), nil
 		}
 		return nil, os.ErrNotExist
 	}
@@ -147,46 +150,6 @@ func (b Box) find(name string) (File, error) {
 	cleanName = filepath.FromSlash(cleanName)
 	p := filepath.Join(b.callingDir, b.Path, cleanName)
 	return fileFor(p, cleanName)
-}
-
-type WalkFunc func(string, File) error
-
-func (b Box) Walk(wf WalkFunc) error {
-	if data[b.Path] == nil {
-		base, err := filepath.EvalSymlinks(filepath.Join(b.callingDir, b.Path))
-		if err != nil {
-			return errors.WithStack(err)
-		}
-		return filepath.Walk(base, func(path string, info os.FileInfo, err error) error {
-			cleanName, err := filepath.Rel(base, path)
-			if err != nil {
-				cleanName = strings.TrimPrefix(path, base)
-			}
-			cleanName = filepath.ToSlash(filepath.Clean(cleanName))
-			cleanName = strings.TrimPrefix(cleanName, "/")
-			cleanName = filepath.FromSlash(cleanName)
-			if info == nil || info.IsDir() {
-				return nil
-			}
-
-			file, err := fileFor(path, cleanName)
-			if err != nil {
-				return err
-			}
-			return wf(cleanName, file)
-		})
-	}
-	for n := range data[b.Path] {
-		f, err := b.find(n)
-		if err != nil {
-			return err
-		}
-		err = wf(n, f)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
 }
 
 // Open returns a File using the http.File interface
