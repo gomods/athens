@@ -53,11 +53,7 @@ func (s *stasher) Stash(mod, ver string) error {
 
 func (s *stasher) fetchModule(ctx context.Context, mod, ver string) (*storage.Version, error) {
 	const op errors.Op = "stasher.fetchModule"
-	ref, err := s.f.Fetch(mod, ver)
-	if err != nil {
-		return nil, errors.E(op, err)
-	}
-	v, err := ref.Read()
+	v, err := s.f.Fetch(ctx, mod, ver)
 	if err != nil {
 		return nil, errors.E(op, err)
 	}

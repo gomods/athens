@@ -5,7 +5,6 @@ import (
 	"github.com/gomods/athens/pkg/config/env"
 	"github.com/gomods/athens/pkg/download"
 	"github.com/gomods/athens/pkg/download/addons"
-	"github.com/gomods/athens/pkg/download/goget"
 	"github.com/gomods/athens/pkg/log"
 	"github.com/gomods/athens/pkg/module"
 	"github.com/gomods/athens/pkg/stash"
@@ -50,12 +49,9 @@ func addProxyRoutes(
 		return err
 	}
 	st := stash.New(mf, s, stash.WithSingleflight, stash.WithPool(env.GoGetWorkers()))
-	gg := goget.New(goBin, fs, mf)
-	p := addons.WithPool(
-		addons.WithStasher(gg, s, st),
-		env.ProtocolWorkers(),
-	)
-	opts := &download.HandlerOpts{Protocol: p, Logger: l, Engine: proxy}
+	dp := download.New(s, st, goBin, fs)
+	dp = addons.WithPool(dp, env.ProtocolWorkers())
+	opts := &download.HandlerOpts{Protocol: dp, Logger: l, Engine: proxy}
 	download.RegisterHandlers(app, opts)
 
 	return nil

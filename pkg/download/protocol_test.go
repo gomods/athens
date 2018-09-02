@@ -1,4 +1,4 @@
-package goget
+package download
 
 import (
 	"bytes"
@@ -12,14 +12,16 @@ import (
 	"time"
 
 	"github.com/gomods/athens/pkg/config/env"
-	"github.com/gomods/athens/pkg/download"
 	"github.com/gomods/athens/pkg/module"
+	"github.com/gomods/athens/pkg/stash"
 	"github.com/gomods/athens/pkg/storage"
+	"github.com/gomods/athens/pkg/storage/mem"
 	"github.com/spf13/afero"
 	"github.com/stretchr/testify/require"
+	"golang.org/x/sync/errgroup"
 )
 
-func getDP(t *testing.T) download.Protocol {
+func getDP(t *testing.T) Protocol {
 	t.Helper()
 	goBin := env.GoBinPath()
 	fs := afero.NewOsFs()
@@ -27,8 +29,12 @@ func getDP(t *testing.T) download.Protocol {
 	if err != nil {
 		t.Fatal(err)
 	}
-
-	return New(goBin, fs, mf)
+	s, err := mem.NewStorage()
+	if err != nil {
+		t.Fatal(err)
+	}
+	st := stash.New(mf, s)
+	return New(s, st, goBin, fs)
 }
 
 type listTest struct {
@@ -238,4 +244,60 @@ func getGoldenFile(t *testing.T, name string) []byte {
 	}
 
 	return bts
+}
+
+type testMod struct {
+	mod, ver string
+}
+
+var mods = []testMod{
+	{"github.com/athens-artifacts/no-tags", "v0.0.2"},
+	{"github.com/athens-artifacts/happy-path", "v0.0.0-20180803035119-e4e0177efdb5"},
+	{"github.com/athens-artifacts/samplelib", "v1.0.0"},
+}
+
+func TestDownloadProtocol(t *testing.T) {
+	s, err := mem.NewStorage()
+	if err != nil {
+		t.Fatal(err)
+	}
+	mp := &mockFetcher{}
+	st := stash.New(mp, s)
+	dp := New(s, st, "", afero.NewMemMapFs())
+	ctx := context.Background()
+
+	var eg errgroup.Group
+	for i := 0; i < len(mods); i++ {
+		m := mods[i]
+		eg.Go(func() error {
+			_, err := dp.GoMod(ctx, m.mod, m.ver)
+			return err
+		})
+	}
+
+	err = eg.Wait()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	for _, m := range mods {
+		bts, err := dp.GoMod(ctx, m.mod, m.ver)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if !bytes.Equal(bts, []byte(m.mod+"@"+m.ver)) {
+			t.Fatalf("unexpected gomod content: %s", bts)
+		}
+	}
+}
+
+type mockFetcher struct{}
+
+func (m *mockFetcher) Fetch(ctx context.Context, mod, ver string) (*storage.Version, error) {
+	bts := []byte(mod + "@" + ver)
+	return &storage.Version{
+		Mod:  bts,
+		Info: bts,
+		Zip:  ioutil.NopCloser(bytes.NewReader(bts)),
+	}, nil
 }
