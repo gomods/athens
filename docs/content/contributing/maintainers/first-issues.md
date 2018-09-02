@@ -1,7 +1,9 @@
 ---
 title: "Good First Issues"
 date: 2018-08-25T20:00:24-07:00
-draft: false
+LastModifierDisplayName: "Robbie"
+LastModifierEmail: "hello@robloranger.ca"
+
 ---
 
 The following is intended for project maintainers when triaging issues and
