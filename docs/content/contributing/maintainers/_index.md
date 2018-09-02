@@ -9,14 +9,6 @@ LastModifiedEmail: "hello@robloranger.ca"
 
 ### Contributing
 
-# Everyone
-
-Coming Soon
-
-# Contributors
-
-Coming Soon
-
 # Maintainers
 
 These pages outline both the duties and processes for project maintainers. We
