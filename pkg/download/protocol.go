@@ -17,10 +17,45 @@ import (
 	"github.com/spf13/afero"
 )
 
+// Protocol is the download protocol which mirrors
+// the http requests that cmd/go makes to the proxy.
+type Protocol interface {
+	// List implements GET /{module}/@v/list
+	List(ctx context.Context, mod string) ([]string, error)
+
+	// Info implements GET /{module}/@v/{version}.info
+	Info(ctx context.Context, mod, ver string) ([]byte, error)
+
+	// Latest implements GET /{module}/@latest
+	Latest(ctx context.Context, mod string) (*storage.RevInfo, error)
+
+	// GoMod implements GET /{module}/@v/{version}.mod
+	GoMod(ctx context.Context, mod, ver string) ([]byte, error)
+
+	// Zip implements GET /{module}/@v/{version}.zip
+	Zip(ctx context.Context, mod, ver string) (io.ReadCloser, error)
+}
+
+// Wrapper helps extend the main stasher's functionality with addons.
+type Wrapper func(Protocol) Protocol
+
+// Opts specifies download protocol options to avoid long func signature.
+type Opts struct {
+	Storage   storage.Backend
+	Stasher   stash.Stasher
+	GoBinPath string
+	Fs        afero.Fs
+}
+
 // New returns a full implementation of the download.Protocol
 // that the proxy needs.
-func New(s storage.Backend, st stash.Stasher, goBinPath string, fs afero.Fs) Protocol {
-	return &protocol{s, st, goBinPath, fs}
+func New(opts *Opts, wrappers ...Wrapper) Protocol {
+	var p Protocol = &protocol{opts.Storage, opts.Stasher, opts.GoBinPath, opts.Fs}
+	for _, w := range wrappers {
+		p = w(p)
+	}
+
+	return p
 }
 
 type protocol struct {

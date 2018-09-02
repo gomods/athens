@@ -17,12 +17,14 @@ type withpool struct {
 // WithPool takes a download Protocol and a number of workers
 // and creates a N worker pool that share all the download.Protocol
 // methods.
-func WithPool(dp download.Protocol, workers int) download.Protocol {
-	ch := make(chan func())
-	p := &withpool{dp: dp, ch: ch}
+func WithPool(workers int) download.Wrapper {
+	return func(dp download.Protocol) download.Protocol {
+		ch := make(chan func())
+		p := &withpool{dp: dp, ch: ch}
 
-	p.start(workers)
-	return p
+		p.start(workers)
+		return p
+	}
 }
 
 func (p *withpool) start(numWorkers int) {

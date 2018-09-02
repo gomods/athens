@@ -49,10 +49,17 @@ func addProxyRoutes(
 		return err
 	}
 	st := stash.New(mf, s, stash.WithSingleflight, stash.WithPool(env.GoGetWorkers()))
-	dp := download.New(s, st, goBin, fs)
-	dp = addons.WithPool(dp, env.ProtocolWorkers())
-	opts := &download.HandlerOpts{Protocol: dp, Logger: l, Engine: proxy}
-	download.RegisterHandlers(app, opts)
+
+	dpOpts := &download.Opts{
+		Storage:   s,
+		Stasher:   st,
+		GoBinPath: goBin,
+		Fs:        fs,
+	}
+	dp := download.New(dpOpts, addons.WithPool(env.ProtocolWorkers()))
+
+	handlerOpts := &download.HandlerOpts{Protocol: dp, Logger: l, Engine: proxy}
+	download.RegisterHandlers(app, handlerOpts)
 
 	return nil
 }
