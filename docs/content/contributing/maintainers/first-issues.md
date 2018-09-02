@@ -1,6 +1,6 @@
 ---
 title: "Good First Issues"
-date: 2018-08-25T20:00:24-07:00
+date: 2018-09-02T10:00:00-07:00
 LastModifierDisplayName: "Robbie"
 LastModifierEmail: "hello@robloranger.ca"
 
@@ -28,7 +28,8 @@ information to fulfill the below template.
 
 ### New to Athens?
 
-TODO: Link to contribution docs, slack etc.
+If your new to the project, and you haven't already, please take some time to
+read our [contribution docs](https://docs.gomods.io/contributing).
 
 ### What needs to be done?
 
@@ -43,4 +44,6 @@ has been experimented with already.
 
 #### New To Open Source
 
-TODO: Some links to stuff that helps. Blog post, video?
+If your new to open source, using git or GitHub, or just want some workflow
+tips, head over to our [new contributor guide](https://docs.gomods.io/contributing/new).
+
