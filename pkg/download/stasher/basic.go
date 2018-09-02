@@ -1,10 +1,9 @@
-package stash
+package stasher
 
 import (
 	"context"
 	"time"
 
-	"github.com/gomods/athens/pkg/download"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/storage"
 )
@@ -17,23 +16,29 @@ type Stasher interface {
 	Stash(mod, ver string) error
 }
 
-// New returns a plain stasher that takes
-// a module from a download.Protocol and
-// stashes it into a backend.Storage.
-func New(dp download.Protocol, s storage.Backend) Stasher {
-	return &stasher{dp, s}
+// DPVersionFn is a version func of download protocol
+type DPVersionFn func(context.Context, string, string) (*storage.Version, error)
+
+// FactoryFn is a factory func accepting version func of download protocol resulting in a stasher
+type FactoryFn func(DPVersionFn) Stasher
+
+// Basic is a ctor for basic stasher
+func Basic(sb storage.Backend) FactoryFn {
+	return func(vfn DPVersionFn) Stasher {
+		return &stasher{vfn, sb}
+	}
 }
 
 type stasher struct {
-	dp download.Protocol
-	s  storage.Backend
+	versionFn DPVersionFn
+	s         storage.Backend
 }
 
 func (s *stasher) Stash(mod, ver string) error {
 	const op errors.Op = "stasher.Stash"
 	ctx, cancel := context.WithTimeout(context.Background(), time.Minute*10)
 	defer cancel()
-	v, err := s.dp.Version(ctx, mod, ver)
+	v, err := s.versionFn(ctx, mod, ver)
 	if err != nil {
 		return errors.E(op, err)
 	}

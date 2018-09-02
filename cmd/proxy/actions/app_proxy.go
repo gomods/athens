@@ -5,12 +5,9 @@ import (
 	"github.com/gomods/athens/pkg/config/env"
 	"github.com/gomods/athens/pkg/download"
 	"github.com/gomods/athens/pkg/download/goget"
-	downloadpool "github.com/gomods/athens/pkg/download/pool"
+	"github.com/gomods/athens/pkg/download/pool"
 	"github.com/gomods/athens/pkg/download/stasher"
 	"github.com/gomods/athens/pkg/log"
-	"github.com/gomods/athens/pkg/stash"
-	stashpool "github.com/gomods/athens/pkg/stash/pool"
-	"github.com/gomods/athens/pkg/stash/singleflight"
 	"github.com/gomods/athens/pkg/storage"
 )
 
@@ -44,20 +41,13 @@ func addProxyRoutes(
 	// 2. The singleflight passes the stash to its parent: stashpool.
 	// 3. The stashpool manages limiting concurrent requests and passes them to stash.
 	// 4. The plain stash.New just takes a request from upstream and saves it into storage.
-	gg, err := goget.New()
+	stasherFactory := stasher.Deduplicated(stasher.Pooled(stasher.Basic(s), env.GoGetWorkers()))
+
+	gg, err := goget.New(stasherFactory)
 	if err != nil {
 		return err
 	}
-	st := singleflight.New(
-		stashpool.New(
-			stash.New(gg, s),
-			env.GoGetWorkers(),
-		),
-	)
-	p := downloadpool.New(
-		stasher.New(gg, s, st),
-		env.GoGetWorkers(),
-	)
+	p := pool.New(gg, env.GoGetWorkers())
 	opts := &download.HandlerOpts{Protocol: p, Logger: l, Engine: proxy}
 	download.RegisterHandlers(app, opts)
 

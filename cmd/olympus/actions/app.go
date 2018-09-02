@@ -19,7 +19,6 @@ import (
 	"github.com/gomods/athens/pkg/download/stasher"
 	"github.com/gomods/athens/pkg/eventlog"
 	"github.com/gomods/athens/pkg/log"
-	"github.com/gomods/athens/pkg/stash"
 	"github.com/gomods/athens/pkg/storage"
 	"github.com/gomodule/redigo/redis"
 	"github.com/rs/cors"
@@ -108,7 +107,7 @@ func App(config *AppConfig) (*buffalo.App, error) {
 	//
 	// Defaulting to Azure for now
 	app.Use(GoGet(azurecdn.Metadata{
-		// TODO: initialize the azurecdn.Storage struct here
+	// TODO: initialize the azurecdn.Storage struct here
 	}))
 
 	// Setup and use translations:
@@ -125,13 +124,12 @@ func App(config *AppConfig) (*buffalo.App, error) {
 	app.GET("/healthz", healthHandler)
 
 	// Download Protocol
-	gg, err := goget.New()
+	st := stasher.Basic(config.Storage)
+	gg, err := goget.New(st)
 	if err != nil {
 		return nil, err
 	}
-	st := stash.New(gg, config.Storage)
-	dp := stasher.New(gg, config.Storage, st)
-	opts := &download.HandlerOpts{Protocol: dp, Logger: lggr, Engine: renderEng}
+	opts := &download.HandlerOpts{Protocol: gg, Logger: lggr, Engine: renderEng}
 	download.RegisterHandlers(app, opts)
 
 	app.ServeFiles("/", assetsBox) // serve files from the public directory
