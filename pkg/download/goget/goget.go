@@ -67,6 +67,9 @@ type listResp struct {
 
 func (gg *goget) Info(ctx context.Context, mod string, ver string) ([]byte, error) {
 	const op errors.Op = "goget.Info"
+	if err := gg.st.Stash(mod, ver); err != nil {
+		return nil, err
+	}
 	v, err := gg.Version(ctx, mod, ver)
 	if err != nil {
 		return nil, errors.E(op, err)
@@ -135,6 +138,9 @@ func (gg *goget) list(op errors.Op, mod string) (*listResp, error) {
 
 func (gg *goget) GoMod(ctx context.Context, mod string, ver string) ([]byte, error) {
 	const op errors.Op = "goget.Info"
+	if err := gg.st.Stash(mod, ver); err != nil {
+		return nil, err
+	}
 	v, err := gg.Version(ctx, mod, ver)
 	if err != nil {
 		return nil, errors.E(op, err)
@@ -146,6 +152,9 @@ func (gg *goget) GoMod(ctx context.Context, mod string, ver string) ([]byte, err
 
 func (gg *goget) Zip(ctx context.Context, mod, ver string) (io.ReadCloser, error) {
 	const op errors.Op = "goget.Info"
+	if err := gg.st.Stash(mod, ver); err != nil {
+		return nil, err
+	}
 	v, err := gg.Version(ctx, mod, ver)
 	if err != nil {
 		return nil, errors.E(op, err)
