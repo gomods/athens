@@ -10,9 +10,11 @@ import (
 )
 
 type JSON struct {
-	URL     string
-	Willie  *Willie
-	Headers map[string]string
+	URL      string
+	Willie   *Willie
+	Headers  map[string]string
+	Username string
+	Password string
 }
 
 type JSONResponse struct {
@@ -54,6 +56,9 @@ func (r *JSON) Patch(body interface{}) *JSONResponse {
 func (r *JSON) perform(req *http.Request) *JSONResponse {
 	if r.Willie.HmaxSecret != "" {
 		hmax.SignRequest(req, []byte(r.Willie.HmaxSecret))
+	}
+	if r.Username != "" || r.Password != "" {
+		req.SetBasicAuth(r.Username, r.Password)
 	}
 	res := &JSONResponse{&Response{httptest.NewRecorder()}}
 	for key, value := range r.Headers {

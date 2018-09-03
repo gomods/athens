@@ -83,6 +83,7 @@ func (g *Generator) Run(rootPath string, data Data) error {
 	})
 }
 
+// Fmt formats Go code using `goimports` if available, or `gofmt` otherwise.
 func (g *Generator) Fmt(rootPath string) {
 	pwd, _ := os.Getwd()
 	files := []string{}
@@ -100,7 +101,7 @@ func (g *Generator) Fmt(rootPath string) {
 		return nil
 	})
 	c := GoFmt(files...)
-	fmt.Printf("--> %s\n", strings.Join(c.Args, " "))
+	fmt.Printf("         run  %s\n", strings.Join(c.Args, " "))
 	c.Stdout = os.Stdout
 	c.Stderr = os.Stderr
 	err := c.Run()
