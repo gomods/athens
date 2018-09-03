@@ -21,7 +21,7 @@ func (c Command) Run(rootPath string, data Data) error {
 		}
 
 		cmd := c.Command
-		fmt.Printf("--> %s\n", strings.Join(cmd.Args, " "))
+		fmt.Printf("         run  %s\n", strings.Join(cmd.Args, " "))
 		cmd.Stdin = os.Stdin
 		cmd.Stderr = os.Stderr
 		cmd.Stdout = os.Stdout

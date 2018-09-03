@@ -16,6 +16,8 @@ sleep 4 # Ensure mysql is online
 
 go build -v -tags sqlite -o tsoda ./soda
 
+export GO111MODULE=on
+
 function test {
   echo "!!! Testing $1"
   export SODA_DIALECT=$1

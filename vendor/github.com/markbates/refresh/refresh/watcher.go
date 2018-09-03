@@ -37,6 +37,9 @@ func (w *Watcher) Start() {
 					return errors.New("nil directory!")
 				}
 				if info.IsDir() {
+					if strings.HasPrefix(filepath.Base(path), "_") {
+						return filepath.SkipDir
+					}
 					if len(path) > 1 && strings.HasPrefix(filepath.Base(path), ".") || w.isIgnoredFolder(path) {
 						return filepath.SkipDir
 					}

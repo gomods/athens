@@ -14,7 +14,7 @@ set -xeuo pipefail
 git remote set-branches --add origin master && git fetch
 ChangedFiles=`git diff --name-only origin/master`
 
-# in the casse that ChangedFiles contains go.mod or go.sum run go mod verify
+# in the case that ChangedFiles contains go.mod or go.sum run go mod verify
 case "$ChangedFiles" in
   go.mod | go.sum)
     go mod verify
