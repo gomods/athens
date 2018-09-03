@@ -48,7 +48,7 @@ type Opts struct {
 }
 
 // New returns a full implementation of the download.Protocol
-// that the proxy needs. New also taks a variadic list of wrappers
+// that the proxy needs. New also takes a variadic list of wrappers
 // to extend the protocol's functionality (see addons package).
 // The wrappers are applied in order, meaning the last wrapper
 // passed is the Protocol that gets hit first.
