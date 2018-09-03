@@ -184,7 +184,10 @@ EnableCSRFProtection = false
     [Storage.Mongo]
         # Full URL for mongo storage
         # Env override: ATHENS_MONGO_STORAGE_URL
-        URL = "mongo.example.com"
+        URL = "mongodb://127.0.0.1:27017"
+        # Path to certificate to use for the mongo connection
+        # Env override: ATHENS_MONGO_CERT_PATH
+        CertPath = ""
         # Timeout for networks calls made to Mongo in seconds
         # Defaults to Global Timeout
         # Env override: MONGO_CONN_TIMEOUT_SEC

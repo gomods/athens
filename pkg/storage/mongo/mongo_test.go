@@ -1,8 +1,7 @@
 package mongo
 
 import (
-	"time"
-
+	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/config/env"
 )
 
@@ -11,7 +10,14 @@ func (m *MongoTests) TestNewMongoStorage() {
 	r := m.Require()
 	muri := env.MongoConnectionString()
 	certPath := env.MongoCertPath()
-	getterSaver, err := NewStorageWithCert(muri, certPath, time.Second)
+	conf := &config.MongoConfig{
+		URL:      muri,
+		CertPath: certPath,
+		TimeoutConf: config.TimeoutConf{
+			Timeout: 1,
+		},
+	}
+	getterSaver, err := NewStorage(conf)
 
 	r.NoError(err)
 	r.NotNil(getterSaver.c)

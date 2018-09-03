@@ -7,9 +7,50 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
 )
 
 const exampleConfigPath = "../../config.example.toml"
+
+func compareConfigs(parsedConf *Config, expConf *Config, t *testing.T) {
+	opts := cmpopts.IgnoreTypes(StorageConfig{}, ProxyConfig{}, OlympusConfig{})
+	eq := cmp.Equal(parsedConf, expConf, opts)
+	if !eq {
+		t.Errorf("Parsed Example configuration did not match expected values. Expected: %+v. Actual: %+v", expConf, parsedConf)
+	}
+	eq = cmp.Equal(parsedConf.Proxy, expConf.Proxy)
+	if !eq {
+		t.Errorf("Parsed Example Proxy configuration did not match expected values. Expected: %+v. Actual: %+v", expConf.Proxy, parsedConf.Proxy)
+	}
+	eq = cmp.Equal(parsedConf.Olympus, expConf.Olympus)
+	if !eq {
+		t.Errorf("Parsed Example Olympus configuration did not match expected values. Expected: %+v. Actual: %+v", expConf.Olympus, parsedConf.Olympus)
+	}
+	compareStorageConfigs(parsedConf.Storage, expConf.Storage, t)
+}
+
+func compareStorageConfigs(parsedStorage *StorageConfig, expStorage *StorageConfig, t *testing.T) {
+	eq := cmp.Equal(parsedStorage.CDN, expStorage.CDN)
+	if !eq {
+		t.Errorf("Parsed Example Storage configuration did not match expected values. Expected: %+v. Actual: %+v", expStorage.CDN, parsedStorage.CDN)
+	}
+	eq = cmp.Equal(parsedStorage.Mongo, expStorage.Mongo)
+	if !eq {
+		t.Errorf("Parsed Example Storage configuration did not match expected values. Expected: %+v. Actual: %+v", expStorage.Mongo, parsedStorage.Mongo)
+	}
+	eq = cmp.Equal(parsedStorage.Minio, expStorage.Minio)
+	if !eq {
+		t.Errorf("Parsed Example Storage configuration did not match expected values. Expected: %+v. Actual: %+v", expStorage.Minio, parsedStorage.Minio)
+	}
+	eq = cmp.Equal(parsedStorage.Disk, expStorage.Disk)
+	if !eq {
+		t.Errorf("Parsed Example Storage configuration did not match expected values. Expected: %+v. Actual: %+v", expStorage.Disk, parsedStorage.Disk)
+	}
+	eq = cmp.Equal(parsedStorage.GCP, expStorage.GCP)
+	if !eq {
+		t.Errorf("Parsed Example Storage configuration did not match expected values. Expected: %+v. Actual: %+v", expStorage.GCP, parsedStorage.GCP)
+	}
+}
 
 func TestEnvOverrides(t *testing.T) {
 
@@ -68,10 +109,7 @@ func TestEnvOverrides(t *testing.T) {
 	}
 	deleteInvalidStorageConfigs(conf.Storage)
 
-	eq := cmp.Equal(conf, expConf)
-	if !eq {
-		t.Errorf("Environment variables did not correctly override config values. Expected: %+v. Actual: %+v", expConf, conf)
-	}
+	compareConfigs(conf, expConf, t)
 	restoreEnv(envVarBackup)
 }
 
@@ -106,7 +144,8 @@ func TestStorageEnvOverrides(t *testing.T) {
 			},
 		},
 		Mongo: &MongoConfig{
-			URL: "mongoURL",
+			URL:      "mongoURL",
+			CertPath: "/test/path",
 			TimeoutConf: TimeoutConf{
 				Timeout: globalTimeout,
 			},
@@ -127,10 +166,7 @@ func TestStorageEnvOverrides(t *testing.T) {
 	setStorageTimeouts(conf.Storage, globalTimeout)
 	deleteInvalidStorageConfigs(conf.Storage)
 
-	eq := cmp.Equal(conf.Storage, expStorage)
-	if !eq {
-		t.Error("Environment variables did not correctly override storage config values")
-	}
+	compareStorageConfigs(conf.Storage, expStorage, t)
 	restoreEnv(envVarBackup)
 }
 
@@ -208,7 +244,8 @@ func TestParseExampleConfig(t *testing.T) {
 			},
 		},
 		Mongo: &MongoConfig{
-			URL: "mongo.example.com",
+			URL:      "mongodb://127.0.0.1:27017",
+			CertPath: "",
 			TimeoutConf: TimeoutConf{
 				Timeout: globalTimeout,
 			},
@@ -244,10 +281,7 @@ func TestParseExampleConfig(t *testing.T) {
 		t.Errorf("Unable to parse example config file: %+v", err)
 	}
 
-	eq := cmp.Equal(parsedConf, expConf)
-	if !eq {
-		t.Errorf("Parsed Example configuration did not match expected values. Expected: %+v. Actual: %+v", expConf, parsedConf)
-	}
+	compareConfigs(parsedConf, expConf, t)
 	restoreEnv(envVarBackup)
 }
 
@@ -363,7 +397,7 @@ func getEnvMap(config *Config) map[string]string {
 		}
 		if storage.Mongo != nil {
 			envVars["ATHENS_MONGO_STORAGE_URL"] = storage.Mongo.URL
-			envVars["MONGO_CONN_TIMEOUT_SEC"] = strconv.Itoa(storage.Mongo.Timeout)
+			envVars["ATHENS_MONGO_CERT_PATH"] = storage.Mongo.CertPath
 		}
 	}
 	return envVars

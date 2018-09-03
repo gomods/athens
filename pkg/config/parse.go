@@ -105,6 +105,7 @@ func GetConfLogErr(path string, t *testing.T) *Config {
 	c, err := GetConf(path)
 	if err != nil {
 		t.Fatalf("Unable to parse config file: %s", err.Error())
+		return nil
 	}
 	return c
 }

@@ -3,7 +3,6 @@ package actions
 import (
 	"context"
 	"fmt"
-	"log"
 
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/errors"
@@ -19,7 +18,6 @@ import (
 // GetStorage returns storage backend based on env configuration
 func GetStorage(sType string, sConf *config.StorageConfig) (storage.Backend, error) {
 	const op errors.Op = "actions.GetStorage"
-	log.Printf(sType)
 	switch sType {
 	case "memory":
 		return mem.NewStorage()

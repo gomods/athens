@@ -27,16 +27,8 @@ type ModuleStore struct {
 // NewStorage returns a connected Mongo backed storage
 // that satisfies the Backend interface.
 func NewStorage(conf *config.MongoConfig) (*ModuleStore, error) {
-	connectionString := conf.URL
-	timeout := conf.TimeoutDuration()
-	return NewStorageWithCert(connectionString, "", timeout)
-}
-
-// NewStorageWithCert returns a connected Mongo backed storage
-// that satisfies the Backend interface.
-func NewStorageWithCert(connectionString, certPath string, timeout time.Duration) (*ModuleStore, error) {
 	const op errors.Op = "fs.NewStorage"
-	ms := &ModuleStore{url: connectionString, certPath: certPath, timeout: timeout}
+	ms := &ModuleStore{url: conf.URL, certPath: conf.CertPath, timeout: conf.TimeoutDuration()}
 
 	err := ms.connect()
 	if err != nil {
