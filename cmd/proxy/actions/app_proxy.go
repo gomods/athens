@@ -5,6 +5,8 @@ import (
 	"github.com/gomods/athens/pkg/config/env"
 	"github.com/gomods/athens/pkg/download"
 	"github.com/gomods/athens/pkg/download/goget"
+	"github.com/gomods/athens/pkg/download/pool"
+	"github.com/gomods/athens/pkg/download/stasher"
 	"github.com/gomods/athens/pkg/log"
 	"github.com/gomods/athens/pkg/storage"
 )
@@ -18,11 +20,34 @@ func addProxyRoutes(
 	app.GET("/healthz", healthHandler)
 
 	// Download Protocol
-	gg, err := goget.New()
+	// the download.Protocol and the stash.Stasher interfaces are composable
+	// in a middleware fashion. Therefore you can separate concerns
+	// by the functionality: a download.Protocol that just takes care
+	// of "go getting" things, and another Protocol that just takes care
+	// of "pooling" requests etc.
+
+	// In our case, we'd like to compose both interfaces in a particular
+	// order to ensure logical ordering of execution.
+
+	// Here's the order of an incoming request to the download.Protocol:
+
+	// 1. The downloadpool gets hit first, and manages concurrent requests
+	// 2. The downloadpool passes the request to its parent Protocol: stasher
+	// 3. The stasher Protocol checks storage first, and if storage is empty
+	// it makes a Stash request to the stash.Stasher interface.
+
+	// Once the stasher picks up an order, here's how the requests go in order:
+	// 1. The singleflight picks up the first request and latches duplicate ones.
+	// 2. The singleflight passes the stash to its parent: stashpool.
+	// 3. The stashpool manages limiting concurrent requests and passes them to stash.
+	// 4. The plain stash.New just takes a request from upstream and saves it into storage.
+	stasherFactory := stasher.Deduplicated(stasher.Pooled(stasher.Basic(s), env.GoGetWorkers()))
+
+	gg, err := goget.New(stasherFactory)
 	if err != nil {
 		return err
 	}
-	p := download.New(gg, s, env.GoGetWorkers())
+	p := pool.New(gg, env.GoGetWorkers())
 	opts := &download.HandlerOpts{Protocol: p, Logger: l, Engine: proxy}
 	download.RegisterHandlers(app, opts)
 

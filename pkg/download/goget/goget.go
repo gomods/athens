@@ -12,6 +12,7 @@ import (
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/config/env"
 	"github.com/gomods/athens/pkg/download"
+	"github.com/gomods/athens/pkg/download/stasher"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/module"
 	"github.com/gomods/athens/pkg/storage"
@@ -21,7 +22,7 @@ import (
 // New returns a download protocol by using
 // go get. You must have a modules supported
 // go binary for this to work.
-func New() (download.Protocol, error) {
+func New(stasherFactory stasher.FactoryFn) (download.Protocol, error) {
 	const op errors.Op = "goget.New"
 	goBin := env.GoBinPath()
 	fs := afero.NewOsFs()
@@ -29,17 +30,22 @@ func New() (download.Protocol, error) {
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
-	return &goget{
+
+	gg := &goget{
 		goBinPath: goBin,
 		fetcher:   mf,
 		fs:        fs,
-	}, nil
+	}
+
+	gg.st = stasherFactory(gg.Version)
+	return gg, nil
 }
 
 type goget struct {
 	goBinPath string
 	fetcher   module.Fetcher
 	fs        afero.Fs
+	st        stasher.Stasher
 }
 
 func (gg *goget) List(ctx context.Context, mod string) ([]string, error) {
@@ -61,6 +67,9 @@ type listResp struct {
 
 func (gg *goget) Info(ctx context.Context, mod string, ver string) ([]byte, error) {
 	const op errors.Op = "goget.Info"
+	if err := gg.st.Stash(mod, ver); err != nil {
+		return nil, err
+	}
 	v, err := gg.Version(ctx, mod, ver)
 	if err != nil {
 		return nil, errors.E(op, err)
@@ -90,6 +99,9 @@ func (gg *goget) list(op errors.Op, mod string) (*listResp, error) {
 	}
 	defer gg.fs.RemoveAll(hackyPath)
 	err = module.Dummy(gg.fs, hackyPath)
+	if err != nil {
+		return nil, errors.E(op, err)
+	}
 
 	cmd := exec.Command(
 		gg.goBinPath,
@@ -126,6 +138,9 @@ func (gg *goget) list(op errors.Op, mod string) (*listResp, error) {
 
 func (gg *goget) GoMod(ctx context.Context, mod string, ver string) ([]byte, error) {
 	const op errors.Op = "goget.Info"
+	if err := gg.st.Stash(mod, ver); err != nil {
+		return nil, err
+	}
 	v, err := gg.Version(ctx, mod, ver)
 	if err != nil {
 		return nil, errors.E(op, err)
@@ -137,6 +152,9 @@ func (gg *goget) GoMod(ctx context.Context, mod string, ver string) ([]byte, err
 
 func (gg *goget) Zip(ctx context.Context, mod, ver string) (io.ReadCloser, error) {
 	const op errors.Op = "goget.Info"
+	if err := gg.st.Stash(mod, ver); err != nil {
+		return nil, err
+	}
 	v, err := gg.Version(ctx, mod, ver)
 	if err != nil {
 		return nil, errors.E(op, err)
