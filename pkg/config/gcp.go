@@ -4,5 +4,5 @@ package config
 type GCPConfig struct {
 	ProjectID string `envconfig:"GOOGLE_CLOUD_PROJECT"`
 	Bucket    string `validate:"required" envconfig:"ATHENS_STORAGE_GCP_BUCKET"`
-	Timeout   int    `validate:"required"`
+	TimeoutConf
 }

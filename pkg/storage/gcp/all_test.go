@@ -5,6 +5,7 @@ import (
 	"net/url"
 	"testing"
 
+	"github.com/gomods/athens/pkg/config"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -30,7 +31,7 @@ func (g *GcpTests) SetupSuite() {
 	g.version = "v1.2.3"
 	g.url, _ = url.Parse("https://storage.googleapis.com/testbucket")
 	g.bucket = newBucketMock()
-	g.store = newWithBucket(g.bucket, g.url)
+	g.store = newWithBucket(g.bucket, g.url, &config.CDNConfig{})
 }
 
 func TestGcpStorage(t *testing.T) {

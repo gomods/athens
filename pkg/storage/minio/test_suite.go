@@ -2,6 +2,7 @@ package minio
 
 import (
 	"github.com/gobuffalo/suite"
+	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/storage"
 	minio "github.com/minio/minio-go"
 )
@@ -19,7 +20,14 @@ func NewTestSuite(model *suite.Model) (storage.TestSuite, error) {
 	bucketName := "gomods"
 	accessKeyID := "minio"
 	secretAccessKey := "minio123"
-	minioStorage, err := NewStorage(endpoint, accessKeyID, secretAccessKey, bucketName, false)
+	conf := &config.MinioConfig{
+		Endpoint:  endpoint,
+		Bucket:    bucketName,
+		Key:       accessKeyID,
+		Secret:    secretAccessKey,
+		EnableSSL: false,
+	}
+	minioStorage, err := NewStorage(conf)
 
 	return &TestSuite{
 		storage:         minioStorage,

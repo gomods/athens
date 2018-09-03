@@ -13,15 +13,18 @@ const exampleConfigPath = "../../config.example.toml"
 
 func TestEnvOverrides(t *testing.T) {
 
-	filterOff := false
 	expProxy := ProxyConfig{
 		StorageType:           "minio",
 		OlympusGlobalEndpoint: "mytikas.gomods.io",
 		RedisQueueAddress:     ":6380",
 		Port:                  ":7000",
-		FilterOff:             &filterOff,
+		FilterOff:             false,
 		BasicAuthUser:         "testuser",
 		BasicAuthPass:         "testpass",
+		ForceSSL:              true,
+		ValidatorHook:         "testhook.io",
+		PathPrefix:            "prefix",
+		NETRCPath:             "/test/path",
 	}
 
 	expOlympus := OlympusConfig{
@@ -32,14 +35,18 @@ func TestEnvOverrides(t *testing.T) {
 	}
 
 	expConf := &Config{
-		GoEnv:                "production",
-		LogLevel:             "info",
-		GoBinary:             "go11",
-		MaxConcurrency:       4,
-		MaxWorkerFails:       10,
-		CloudRuntime:         "gcp",
-		FilterFile:           "filter2.conf",
-		Timeout:              30,
+		GoEnv:           "production",
+		GoGetWorkers:    10,
+		LogLevel:        "info",
+		BuffaloLogLevel: "info",
+		GoBinary:        "go11",
+		MaxConcurrency:  4,
+		MaxWorkerFails:  10,
+		CloudRuntime:    "gcp",
+		FilterFile:      "filter2.conf",
+		TimeoutConf: TimeoutConf{
+			Timeout: 30,
+		},
 		EnableCSRFProtection: true,
 		Proxy:                &expProxy,
 		Olympus:              &expOlympus,
@@ -73,7 +80,9 @@ func TestStorageEnvOverrides(t *testing.T) {
 	expStorage := &StorageConfig{
 		CDN: &CDNConfig{
 			Endpoint: "cdnEndpoint",
-			Timeout:  globalTimeout,
+			TimeoutConf: TimeoutConf{
+				Timeout: globalTimeout,
+			},
 		},
 		Disk: &DiskConfig{
 			RootPath: "/my/root/path",
@@ -81,7 +90,9 @@ func TestStorageEnvOverrides(t *testing.T) {
 		GCP: &GCPConfig{
 			ProjectID: "gcpproject",
 			Bucket:    "gcpbucket",
-			Timeout:   globalTimeout,
+			TimeoutConf: TimeoutConf{
+				Timeout: globalTimeout,
+			},
 		},
 		Minio: &MinioConfig{
 			Endpoint:  "minioEndpoint",
@@ -89,11 +100,15 @@ func TestStorageEnvOverrides(t *testing.T) {
 			Secret:    "minioSecret",
 			EnableSSL: false,
 			Bucket:    "minioBucket",
-			Timeout:   globalTimeout,
+			TimeoutConf: TimeoutConf{
+				Timeout: globalTimeout,
+			},
 		},
 		Mongo: &MongoConfig{
-			URL:     "mongoURL",
-			Timeout: 25,
+			URL: "mongoURL",
+			TimeoutConf: TimeoutConf{
+				Timeout: globalTimeout,
+			},
 		},
 	}
 	envVars := getEnvMap(&Config{Storage: expStorage})
@@ -147,13 +162,12 @@ func TestParseExampleConfig(t *testing.T) {
 
 	globalTimeout := 300
 
-	filterOff := true
 	expProxy := &ProxyConfig{
 		StorageType:           "memory",
 		OlympusGlobalEndpoint: "http://localhost:3001",
 		RedisQueueAddress:     ":6379",
 		Port:                  ":3000",
-		FilterOff:             &filterOff,
+		FilterOff:             true,
 		BasicAuthUser:         "",
 		BasicAuthPass:         "",
 	}
@@ -168,7 +182,9 @@ func TestParseExampleConfig(t *testing.T) {
 	expStorage := &StorageConfig{
 		CDN: &CDNConfig{
 			Endpoint: "cdn.example.com",
-			Timeout:  globalTimeout,
+			TimeoutConf: TimeoutConf{
+				Timeout: globalTimeout,
+			},
 		},
 		Disk: &DiskConfig{
 			RootPath: "/path/on/disk",
@@ -176,7 +192,9 @@ func TestParseExampleConfig(t *testing.T) {
 		GCP: &GCPConfig{
 			ProjectID: "MY_GCP_PROJECT_ID",
 			Bucket:    "MY_GCP_BUCKET",
-			Timeout:   globalTimeout,
+			TimeoutConf: TimeoutConf{
+				Timeout: globalTimeout,
+			},
 		},
 		Minio: &MinioConfig{
 			Endpoint:  "minio.example.com",
@@ -184,23 +202,31 @@ func TestParseExampleConfig(t *testing.T) {
 			Secret:    "MY_SECRET",
 			EnableSSL: true,
 			Bucket:    "gomods",
-			Timeout:   globalTimeout,
+			TimeoutConf: TimeoutConf{
+				Timeout: globalTimeout,
+			},
 		},
 		Mongo: &MongoConfig{
-			URL:     "mongo.example.com",
-			Timeout: globalTimeout,
+			URL: "mongo.example.com",
+			TimeoutConf: TimeoutConf{
+				Timeout: globalTimeout,
+			},
 		},
 	}
 
 	expConf := &Config{
-		GoEnv:                "development",
-		LogLevel:             "debug",
-		GoBinary:             "go",
-		MaxConcurrency:       4,
-		MaxWorkerFails:       5,
-		CloudRuntime:         "none",
-		FilterFile:           "filter.conf",
-		Timeout:              300,
+		GoEnv:           "development",
+		LogLevel:        "debug",
+		BuffaloLogLevel: "debug",
+		GoBinary:        "go",
+		GoGetWorkers:    30,
+		MaxConcurrency:  4,
+		MaxWorkerFails:  5,
+		CloudRuntime:    "none",
+		FilterFile:      "filter.conf",
+		TimeoutConf: TimeoutConf{
+			Timeout: 300,
+		},
 		EnableCSRFProtection: false,
 		Proxy:                expProxy,
 		Olympus:              expOlympus,
@@ -228,24 +254,28 @@ func TestConfigOverridesDefault(t *testing.T) {
 
 	// set values to anything but defaults
 	config := &Config{
-		Timeout: 1,
+		TimeoutConf: TimeoutConf{
+			Timeout: 1,
+		},
 		Storage: &StorageConfig{
 			Minio: &MinioConfig{
 				Bucket:    "notgomods",
 				EnableSSL: false,
-				Timeout:   42,
+				TimeoutConf: TimeoutConf{
+					Timeout: 42,
+				},
 			},
 		},
 	}
 
 	// should be identical to config above
 	expConfig := &Config{
-		Timeout: config.Timeout,
+		TimeoutConf: config.TimeoutConf,
 		Storage: &StorageConfig{
 			Minio: &MinioConfig{
-				Bucket:    config.Storage.Minio.Bucket,
-				EnableSSL: config.Storage.Minio.EnableSSL,
-				Timeout:   config.Storage.Minio.Timeout,
+				Bucket:      config.Storage.Minio.Bucket,
+				EnableSSL:   config.Storage.Minio.EnableSSL,
+				TimeoutConf: config.Storage.Minio.TimeoutConf,
 			},
 		},
 	}
@@ -277,7 +307,9 @@ func getEnvMap(config *Config) map[string]string {
 	envVars := map[string]string{
 		"GO_ENV":                        config.GoEnv,
 		"GO_BINARY_PATH":                config.GoBinary,
+		"ATHENS_GOGET_WORKERS":          strconv.Itoa(config.GoGetWorkers),
 		"ATHENS_LOG_LEVEL":              config.LogLevel,
+		"BUFFALO_LOG_LEVEL":             config.BuffaloLogLevel,
 		"ATHENS_CLOUD_RUNTIME":          config.CloudRuntime,
 		"ATHENS_MAX_CONCURRENCY":        strconv.Itoa(config.MaxConcurrency),
 		"ATHENS_MAX_WORKER_FAILS":       strconv.FormatUint(uint64(config.MaxWorkerFails), 10),
@@ -292,11 +324,13 @@ func getEnvMap(config *Config) map[string]string {
 		envVars["OLYMPUS_GLOBAL_ENDPOINT"] = proxy.OlympusGlobalEndpoint
 		envVars["PORT"] = proxy.Port
 		envVars["ATHENS_REDIS_QUEUE_PORT"] = proxy.RedisQueueAddress
-		if proxy.FilterOff != nil {
-			envVars["PROXY_FILTER_OFF"] = strconv.FormatBool(*proxy.FilterOff)
-		}
+		envVars["PROXY_FILTER_OFF"] = strconv.FormatBool(proxy.FilterOff)
 		envVars["BASIC_AUTH_USER"] = proxy.BasicAuthUser
 		envVars["BASIC_AUTH_PASS"] = proxy.BasicAuthPass
+		envVars["PROXY_FORCE_SSL"] = strconv.FormatBool(proxy.ForceSSL)
+		envVars["ATHENS_PROXY_VALIDATOR"] = proxy.ValidatorHook
+		envVars["ATHENS_PATH_PREFIX"] = proxy.PathPrefix
+		envVars["ATHENS_NETRC_PATH"] = proxy.NETRCPath
 	}
 
 	olympus := config.Olympus

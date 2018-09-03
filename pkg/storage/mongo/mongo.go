@@ -7,9 +7,10 @@ import (
 	"io/ioutil"
 	"net"
 	"strings"
+	"time"
 
 	"github.com/globalsign/mgo"
-	"github.com/gomods/athens/pkg/config/env"
+	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/errors"
 )
 
@@ -20,19 +21,22 @@ type ModuleStore struct {
 	c        string // collection
 	url      string
 	certPath string
+	timeout  time.Duration
 }
 
 // NewStorage returns a connected Mongo backed storage
 // that satisfies the Backend interface.
-func NewStorage(connectionString string) (*ModuleStore, error) {
-	return NewStorageWithCert(connectionString, "")
+func NewStorage(conf *config.MongoConfig) (*ModuleStore, error) {
+	connectionString := conf.URL
+	timeout := conf.TimeoutDuration()
+	return NewStorageWithCert(connectionString, "", timeout)
 }
 
 // NewStorageWithCert returns a connected Mongo backed storage
 // that satisfies the Backend interface.
-func NewStorageWithCert(connectionString, certPath string) (*ModuleStore, error) {
+func NewStorageWithCert(connectionString, certPath string, timeout time.Duration) (*ModuleStore, error) {
 	const op errors.Op = "fs.NewStorage"
-	ms := &ModuleStore{url: connectionString, certPath: certPath}
+	ms := &ModuleStore{url: connectionString, certPath: certPath, timeout: timeout}
 
 	err := ms.connect()
 	if err != nil {
@@ -46,7 +50,7 @@ func (m *ModuleStore) connect() error {
 	const op errors.Op = "mongo.connect"
 
 	var err error
-	m.s, err = m.newSession()
+	m.s, err = m.newSession(m.timeout)
 	if err != nil {
 		return errors.E(op, err)
 	}
@@ -66,7 +70,7 @@ func (m *ModuleStore) connect() error {
 	return c.EnsureIndex(index)
 }
 
-func (m *ModuleStore) newSession() (*mgo.Session, error) {
+func (m *ModuleStore) newSession(timeout time.Duration) (*mgo.Session, error) {
 	tlsConfig := &tls.Config{}
 
 	dialInfo, err := mgo.ParseURL(m.url)
@@ -74,7 +78,7 @@ func (m *ModuleStore) newSession() (*mgo.Session, error) {
 		return nil, err
 	}
 
-	dialInfo.Timeout = env.MongoConnectionTimeoutSecWithDefault(1)
+	dialInfo.Timeout = timeout
 
 	if m.certPath != "" {
 		roots := x509.NewCertPool()

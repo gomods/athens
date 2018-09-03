@@ -2,6 +2,7 @@ package mongo
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/globalsign/mgo"
 	"github.com/gobuffalo/suite"
@@ -30,7 +31,7 @@ func NewTestSuite(model *suite.Model) (storage.TestSuite, error) {
 func newTestStore() (*ModuleStore, error) {
 	muri := env.MongoConnectionString()
 	certPath := env.MongoCertPath()
-	mongoStore, err := NewStorageWithCert(muri, certPath)
+	mongoStore, err := NewStorageWithCert(muri, certPath, time.Second)
 	if err != nil {
 		return nil, fmt.Errorf("Not able to connect to mongo storage: %s", err.Error())
 	}

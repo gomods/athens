@@ -10,17 +10,14 @@ import (
 	"github.com/gobuffalo/buffalo/middleware/ssl"
 	"github.com/gobuffalo/buffalo/render"
 	"github.com/gobuffalo/packr"
-	"github.com/gomods/athens/pkg/config/env"
+	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/log"
 	mw "github.com/gomods/athens/pkg/middleware"
 	"github.com/gomods/athens/pkg/module"
 	"github.com/rs/cors"
+	"github.com/sirupsen/logrus"
 	"github.com/unrolled/secure"
 )
-
-// ENV is used to help switch settings based on where the
-// application is being run. Default is "development".
-var ENV = env.GoEnvironmentWithDefault("development")
 
 // T is the translator to use
 var T *i18n.Translator
@@ -43,8 +40,11 @@ func init() {
 // App is where all routes and middleware for buffalo
 // should be defined. This is the nerve center of your
 // application.
-func App() (*buffalo.App, error) {
-	store, err := GetStorage()
+func App(conf *config.Config) (*buffalo.App, error) {
+	// ENV is used to help switch settings based on where the
+	// application is being run. Default is "development".
+	ENV := conf.GoEnv
+	store, err := GetStorage(conf.Proxy.StorageType, conf.Storage)
 	if err != nil {
 		err = fmt.Errorf("error getting storage configuration (%s)", err)
 		return nil, err
@@ -52,19 +52,19 @@ func App() (*buffalo.App, error) {
 
 	// mount .netrc to home dir
 	// to have access to private repos.
-	initializeNETRC()
+	initializeNETRC(conf.Proxy.NETRCPath)
 
-	lvl, err := env.LogLevel()
+	logLvl, err := logrus.ParseLevel(conf.LogLevel)
 	if err != nil {
 		return nil, err
 	}
-	lggr := log.New(env.CloudRuntime(), lvl)
+	lggr := log.New(conf.CloudRuntime, logLvl)
 
-	blvl, err := env.BuffaloLogLevel()
+	bLogLvl, err := logrus.ParseLevel(conf.BuffaloLogLevel)
 	if err != nil {
 		return nil, err
 	}
-	blggr := log.Buffalo(blvl)
+	blggr := log.Buffalo(bLogLvl)
 
 	app := buffalo.New(buffalo.Options{
 		Env: ENV,
@@ -73,9 +73,9 @@ func App() (*buffalo.App, error) {
 		},
 		SessionName: "_athens_session",
 		Logger:      blggr,
-		Addr:        env.Port(":3000"),
+		Addr:        conf.Proxy.Port,
 	})
-	if prefix := env.AthensPathPrefix(); prefix != "" {
+	if prefix := conf.Proxy.PathPrefix; prefix != "" {
 		// certain Ingress Controllers (such as GCP Load Balancer)
 		// can not send custom headers and therefore if the proxy
 		// is running behind a prefix as well as some authentication
@@ -86,7 +86,7 @@ func App() (*buffalo.App, error) {
 
 	// Automatically redirect to SSL
 	app.Use(ssl.ForceSSL(secure.Options{
-		SSLRedirect:     env.ProxyForceSSL(),
+		SSLRedirect:     conf.Proxy.ForceSSL,
 		SSLProxyHeaders: map[string]string{"X-Forwarded-Proto": "https"},
 	}))
 
@@ -97,7 +97,7 @@ func App() (*buffalo.App, error) {
 	initializeAuth(app)
 	// Protect against CSRF attacks. https://www.owasp.org/index.php/Cross-Site_Request_Forgery_(CSRF)
 	// Remove to disable this.
-	if env.EnableCSRFProtection() {
+	if conf.EnableCSRFProtection {
 		csrfMiddleware := csrf.New
 		app.Use(csrfMiddleware)
 	}
@@ -107,22 +107,22 @@ func App() (*buffalo.App, error) {
 	}
 	app.Use(T.Middleware())
 
-	if !env.FilterOff() {
+	if !conf.Proxy.FilterOff {
 		mf := module.NewFilter()
 		app.Use(mw.NewFilterMiddleware(mf))
 	}
 
 	// Having the hook set means we want to use it
-	if validatorHook, ok := env.ValidatorHook(); ok {
-		app.Use(mw.LogEntryMiddleware(mw.NewValidationMiddleware, lggr, validatorHook))
+	if vHook := conf.Proxy.ValidatorHook; vHook != "" {
+		app.Use(mw.LogEntryMiddleware(mw.NewValidationMiddleware, lggr, vHook))
 	}
 
-	user, pass, ok := env.BasicAuth()
+	user, pass, ok := conf.Proxy.BasicAuth()
 	if ok {
 		app.Use(basicAuth(user, pass))
 	}
 
-	if err := addProxyRoutes(app, store, lggr); err != nil {
+	if err := addProxyRoutes(app, store, lggr, conf.GoGetWorkers); err != nil {
 		err = fmt.Errorf("error adding proxy routes (%s)", err)
 		return nil, err
 	}
