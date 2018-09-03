@@ -14,7 +14,6 @@ import (
 func WithSingleflight(s Stasher) Stasher {
 	sf := &withsf{}
 	sf.s = s
-	sf.mp = map[string]struct{}{}
 	sf.subs = map[string][]chan error{}
 
 	return sf
@@ -24,7 +23,6 @@ type withsf struct {
 	s Stasher
 
 	mu   sync.Mutex
-	mp   map[string]struct{}
 	subs map[string][]chan error
 }
 
@@ -37,18 +35,18 @@ func (s *withsf) process(mod, ver string) {
 		ch <- err
 	}
 	delete(s.subs, mv)
-	delete(s.mp, mv)
 }
 
 func (s *withsf) Stash(mod, ver string) error {
 	mv := config.FmtModVer(mod, ver)
 	s.mu.Lock()
 	subCh := make(chan error, 1)
-	s.subs[mv] = append(s.subs[mv], subCh)
-	_, ok := s.mp[mv]
-	if !ok {
-		s.mp[mv] = struct{}{}
+	_, inFlight := s.subs[mv]
+	if !inFlight {
+		s.subs[mv] = []chan error{subCh}
 		go s.process(mod, ver)
+	} else {
+		s.subs[mv] = append(s.subs[mv], subCh)
 	}
 	s.mu.Unlock()
 

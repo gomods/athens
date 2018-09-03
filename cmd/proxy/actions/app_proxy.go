@@ -48,7 +48,7 @@ func addProxyRoutes(
 	if err != nil {
 		return err
 	}
-	st := stash.New(mf, s, stash.WithSingleflight, stash.WithPool(env.GoGetWorkers()))
+	st := stash.New(mf, s, stash.WithPool(env.GoGetWorkers()), stash.WithSingleflight)
 
 	dpOpts := &download.Opts{
 		Storage:   s,

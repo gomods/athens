@@ -11,7 +11,15 @@ import (
 
 type withpool struct {
 	dp download.Protocol
-	ch chan func()
+
+	// jobCh is a channel that takes an anonymous
+	// function that it executes based on the pool's
+	// business. The design levarages closures
+	// so that the worker does not need to worry about
+	// what the type of job it is taking (Info, Zip etc),
+	// it just regulates functions and executes them
+	// in a worker-pool fashion.
+	jobCh chan func()
 }
 
 // WithPool takes a download Protocol and a number of workers
@@ -19,8 +27,8 @@ type withpool struct {
 // methods.
 func WithPool(workers int) download.Wrapper {
 	return func(dp download.Protocol) download.Protocol {
-		ch := make(chan func())
-		p := &withpool{dp: dp, ch: ch}
+		jobCh := make(chan func())
+		p := &withpool{dp: dp, jobCh: jobCh}
 
 		p.start(workers)
 		return p
@@ -34,7 +42,7 @@ func (p *withpool) start(numWorkers int) {
 }
 
 func (p *withpool) listen() {
-	for f := range p.ch {
+	for f := range p.jobCh {
 		f()
 	}
 }
@@ -44,9 +52,9 @@ func (p *withpool) List(ctx context.Context, mod string) ([]string, error) {
 	var vers []string
 	var err error
 	done := make(chan struct{}, 1)
-	p.ch <- func() {
+	p.jobCh <- func() {
 		vers, err = p.dp.List(ctx, mod)
-		done <- struct{}{}
+		close(done)
 	}
 	<-done
 	if err != nil {
@@ -61,9 +69,9 @@ func (p *withpool) Info(ctx context.Context, mod, ver string) ([]byte, error) {
 	var info []byte
 	var err error
 	done := make(chan struct{}, 1)
-	p.ch <- func() {
+	p.jobCh <- func() {
 		info, err = p.dp.Info(ctx, mod, ver)
-		done <- struct{}{}
+		close(done)
 	}
 	<-done
 	if err != nil {
@@ -77,9 +85,9 @@ func (p *withpool) Latest(ctx context.Context, mod string) (*storage.RevInfo, er
 	var info *storage.RevInfo
 	var err error
 	done := make(chan struct{}, 1)
-	p.ch <- func() {
+	p.jobCh <- func() {
 		info, err = p.dp.Latest(ctx, mod)
-		done <- struct{}{}
+		close(done)
 	}
 	<-done
 	if err != nil {
@@ -93,9 +101,9 @@ func (p *withpool) GoMod(ctx context.Context, mod, ver string) ([]byte, error) {
 	var goMod []byte
 	var err error
 	done := make(chan struct{}, 1)
-	p.ch <- func() {
+	p.jobCh <- func() {
 		goMod, err = p.dp.GoMod(ctx, mod, ver)
-		done <- struct{}{}
+		close(done)
 	}
 	<-done
 	if err != nil {
@@ -109,9 +117,9 @@ func (p *withpool) Zip(ctx context.Context, mod, ver string) (io.ReadCloser, err
 	var zip io.ReadCloser
 	var err error
 	done := make(chan struct{}, 1)
-	p.ch <- func() {
+	p.jobCh <- func() {
 		zip, err = p.dp.Zip(ctx, mod, ver)
-		done <- struct{}{}
+		close(done)
 	}
 	<-done
 	if err != nil {

@@ -48,7 +48,10 @@ type Opts struct {
 }
 
 // New returns a full implementation of the download.Protocol
-// that the proxy needs.
+// that the proxy needs. New also taks a variadic list of wrappers
+// to extend the protocol's functionality (see addons package).
+// The wrappers are applied in order, meaning the last wrapper
+// passed is the Protocol that gets hit first.
 func New(opts *Opts, wrappers ...Wrapper) Protocol {
 	var p Protocol = &protocol{opts.Storage, opts.Stasher, opts.GoBinPath, opts.Fs}
 	for _, w := range wrappers {
@@ -66,7 +69,7 @@ type protocol struct {
 }
 
 func (p *protocol) List(ctx context.Context, mod string) ([]string, error) {
-	const op errors.Op = "goget.List"
+	const op errors.Op = "protocol.List"
 	lr, err := p.list(op, mod)
 	if err != nil {
 		return nil, err
@@ -76,7 +79,7 @@ func (p *protocol) List(ctx context.Context, mod string) ([]string, error) {
 }
 
 func (p *protocol) Latest(ctx context.Context, mod string) (*storage.RevInfo, error) {
-	const op errors.Op = "goget.Latest"
+	const op errors.Op = "protocol.Latest"
 	lr, err := p.list(op, mod)
 	if err != nil {
 		return nil, errors.E(op, err)
@@ -140,7 +143,7 @@ func (p *protocol) list(op errors.Op, mod string) (*listResp, error) {
 }
 
 func (p *protocol) Info(ctx context.Context, mod, ver string) ([]byte, error) {
-	const op errors.Op = "stasher.Info"
+	const op errors.Op = "protocol.Info"
 	info, err := p.s.Info(ctx, mod, ver)
 	if errors.IsNotFoundErr(err) {
 		err = p.stasher.Stash(mod, ver)
@@ -157,7 +160,7 @@ func (p *protocol) Info(ctx context.Context, mod, ver string) ([]byte, error) {
 }
 
 func (p *protocol) GoMod(ctx context.Context, mod, ver string) ([]byte, error) {
-	const op errors.Op = "stasher.GoMod"
+	const op errors.Op = "protocol.GoMod"
 	goMod, err := p.s.GoMod(ctx, mod, ver)
 	if errors.IsNotFoundErr(err) {
 		err = p.stasher.Stash(mod, ver)
@@ -174,7 +177,7 @@ func (p *protocol) GoMod(ctx context.Context, mod, ver string) ([]byte, error) {
 }
 
 func (p *protocol) Zip(ctx context.Context, mod, ver string) (io.ReadCloser, error) {
-	const op errors.Op = "stasher.Zip"
+	const op errors.Op = "protocol.Zip"
 	zip, err := p.s.Zip(ctx, mod, ver)
 	if errors.IsNotFoundErr(err) {
 		err = p.stasher.Stash(mod, ver)
