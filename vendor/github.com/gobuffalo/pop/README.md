@@ -224,7 +224,7 @@ Running this command will generate the following files:
 ./migrations/20160815134952_name_of_migration.down.fizz
 ```
 
-The generated files are `fizz` files. [Fizz](./fizz/README.md) lets you use a common DSL for generating migrations. This means the same `.fizz` file can be run against any of the supported dialects of Pop! Find out more about [Fizz](./fizz/README.md)
+The generated files are `fizz` files. [Fizz](https://github.com/gobuffalo/fizz/blob/master/README.md) lets you use a common DSL for generating migrations. This means the same `.fizz` file can be run against any of the supported dialects of Pop! Find out more about [Fizz](https://github.com/gobuffalo/fizz/blob/master/README.md)
 
 If you want to generate old fashion `.sql` files you can use the `-t` flag for that:
 

@@ -1,9 +1,10 @@
-<p align="center"><img src="logo.svg" width="360"></p>
+<p align="center"><img src="https://github.com/gobuffalo/buffalo/blob/master/logo.svg" width="360"></p>
 
 <p align="center">
 <a href="https://godoc.org/github.com/gobuffalo/buffalo"><img src="https://godoc.org/github.com/gobuffalo/buffalo?status.svg" alt="GoDoc" /></a>
 <a href="https://travis-ci.org/gobuffalo/buffalo"><img src="https://travis-ci.org/gobuffalo/buffalo.svg?branch=master" alt="Build Status" /></a>
 <a href="https://ci.appveyor.com/project/markbates/buffalo/branch/master"><img src="https://ci.appveyor.com/api/projects/status/fjv5u499p78uvbxa/branch/master?svg=true&passingText=Windows%20-%20OK&failingText=Windows%20-%20failed&pendingText=Windows%20-%20pending" alt="Windows Build status" /></a>
+<a href="https://codecov.io/gh/gobuffalo/buffalo"><img src="https://codecov.io/gh/gobuffalo/buffalo/branch/master/graph/badge.svg" alt="Code coverage status" /></a>
 <a href="https://goreportcard.com/report/github.com/gobuffalo/buffalo"><img src="https://goreportcard.com/badge/github.com/gobuffalo/buffalo" alt="Go Report Card" /></a>
 <a href="https://www.codetriage.com/gobuffalo/buffalo"><img src="https://www.codetriage.com/gobuffalo/buffalo/badges/users.svg" alt="Open Source Helpers" /></a>
 </p>
@@ -99,3 +100,9 @@ Buffalo would not be possible if not for all of the great projects it depends on
 ## Benchmarks
 
 Oh, yeah, everyone wants benchmarks! What would a web framework be without its benchmarks? Well, guess what? I'm not giving you any! That's right. This is Go! I assure you that it is plenty fast enough for you. If you want benchmarks you can either a) checkout any benchmarks that the [GIANTS](SHOULDERS.md) Buffalo is built upon have published, or b) run your own. I have no interest in playing the benchmark game, and neither should you.
+
+## Contributing
+
+First, thank you so much for wanting to contribute! It means so much that you care enough to want to contribute. We appreciate every PR from the smallest of typos to the be biggest of features.
+
+To contribute, please read the contribution guidelines: [CONTRIBUTING](CONTRIBUTING.md)
