@@ -22,7 +22,11 @@ GET $HOST:$PORT/github.com/arschles/assert/@v/list
 ```
 
 ```HTML
+v0.1.0
+v0.1.1
 v1.0.0
+v1.0.1
+v1.2.0
 ```
 
 ## Version info
@@ -36,8 +40,10 @@ This returns JSON with information about v1.0.0. It looks like this:
 
 ```json
 {
+    "Name": "v1.0.0",
+    "Short": "v1.0.0",
     "Version": "v1.0.0",
-    "Time": "2016-10-18T16:26:22Z"
+    "Time": "1972-07-18T12:34:56Z"
 }
 ```
 
