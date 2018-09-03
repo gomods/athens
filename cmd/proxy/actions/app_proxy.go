@@ -2,7 +2,6 @@ package actions
 
 import (
 	"github.com/gobuffalo/buffalo"
-	"github.com/gomods/athens/pkg/config/env"
 	"github.com/gomods/athens/pkg/download"
 	"github.com/gomods/athens/pkg/download/addons"
 	"github.com/gomods/athens/pkg/log"
@@ -16,6 +15,9 @@ func addProxyRoutes(
 	app *buffalo.App,
 	s storage.Backend,
 	l *log.Logger,
+	goBin string,
+	goGetWorkers int,
+	protocolWorkers int,
 ) error {
 	app.GET("/", proxyHomeHandler)
 	app.GET("/healthz", healthHandler)
@@ -42,13 +44,12 @@ func addProxyRoutes(
 	// 2. The singleflight passes the stash to its parent: stashpool.
 	// 3. The stashpool manages limiting concurrent requests and passes them to stash.
 	// 4. The plain stash.New just takes a request from upstream and saves it into storage.
-	goBin := env.GoBinPath()
 	fs := afero.NewOsFs()
 	mf, err := module.NewGoGetFetcher(goBin, fs)
 	if err != nil {
 		return err
 	}
-	st := stash.New(mf, s, stash.WithPool(env.GoGetWorkers()), stash.WithSingleflight)
+	st := stash.New(mf, s, stash.WithPool(goGetWorkers), stash.WithSingleflight)
 
 	dpOpts := &download.Opts{
 		Storage:   s,
@@ -56,7 +57,7 @@ func addProxyRoutes(
 		GoBinPath: goBin,
 		Fs:        fs,
 	}
-	dp := download.New(dpOpts, addons.WithPool(env.ProtocolWorkers()))
+	dp := download.New(dpOpts, addons.WithPool(protocolWorkers))
 
 	handlerOpts := &download.HandlerOpts{Protocol: dp, Logger: l, Engine: proxy}
 	download.RegisterHandlers(app, handlerOpts)

@@ -16,6 +16,7 @@ type Config struct {
 	GoEnv                string         `validate:"required" envconfig:"GO_ENV"`
 	GoBinary             string         `validate:"required" envconfig:"GO_BINARY_PATH"`
 	GoGetWorkers         int            `validate:"required" envconfig:"ATHENS_GOGET_WORKERS"`
+	ProtocolWorkers      int            `validate:"required" envconfig:"ATHENS_PROTOCOL_WORKERS"`
 	LogLevel             string         `validate:"required" envconfig:"ATHENS_LOG_LEVEL"`
 	BuffaloLogLevel      string         `validate:"required" envconfig:"BUFFALO_LOG_LEVEL"`
 	MaxConcurrency       int            `validate:"required" envconfig:"ATHENS_MAX_CONCURRENCY"`

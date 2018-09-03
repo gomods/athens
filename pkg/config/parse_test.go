@@ -37,6 +37,7 @@ func TestEnvOverrides(t *testing.T) {
 	expConf := &Config{
 		GoEnv:           "production",
 		GoGetWorkers:    10,
+		ProtocolWorkers: 10,
 		LogLevel:        "info",
 		BuffaloLogLevel: "info",
 		GoBinary:        "go11",
@@ -220,6 +221,7 @@ func TestParseExampleConfig(t *testing.T) {
 		BuffaloLogLevel: "debug",
 		GoBinary:        "go",
 		GoGetWorkers:    30,
+		ProtocolWorkers: 30,
 		MaxConcurrency:  4,
 		MaxWorkerFails:  5,
 		CloudRuntime:    "none",
@@ -308,6 +310,7 @@ func getEnvMap(config *Config) map[string]string {
 		"GO_ENV":                        config.GoEnv,
 		"GO_BINARY_PATH":                config.GoBinary,
 		"ATHENS_GOGET_WORKERS":          strconv.Itoa(config.GoGetWorkers),
+		"ATHENS_PROTOCOL_WORKERS":       strconv.Itoa(config.ProtocolWorkers),
 		"ATHENS_LOG_LEVEL":              config.LogLevel,
 		"BUFFALO_LOG_LEVEL":             config.BuffaloLogLevel,
 		"ATHENS_CLOUD_RUNTIME":          config.CloudRuntime,

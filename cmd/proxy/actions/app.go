@@ -122,7 +122,7 @@ func App(conf *config.Config) (*buffalo.App, error) {
 		app.Use(basicAuth(user, pass))
 	}
 
-	if err := addProxyRoutes(app, store, lggr, conf.GoGetWorkers); err != nil {
+	if err := addProxyRoutes(app, store, lggr, conf.GoBinary, conf.GoGetWorkers, conf.ProtocolWorkers); err != nil {
 		err = fmt.Errorf("error adding proxy routes (%s)", err)
 		return nil, err
 	}
