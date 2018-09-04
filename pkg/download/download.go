@@ -6,9 +6,7 @@ import (
 	"time"
 
 	"github.com/gomods/athens/pkg/errors"
-	"github.com/gomods/athens/pkg/semver"
 	"github.com/gomods/athens/pkg/storage"
-	multierror "github.com/hashicorp/go-multierror"
 )
 
 // Protocol is the download protocol which mirrors
@@ -78,28 +76,32 @@ func (p *protocol) request(mod, ver string) error {
 
 func (p *protocol) List(ctx context.Context, mod string) ([]string, error) {
 	const op errors.Op = "protocol.List"
-	goList, goErr := p.dp.List(ctx, mod)
+
 	strList, sErr := p.s.List(ctx, mod)
-	if goErr != nil && sErr != nil {
-		var errs error
-		errs = multierror.Append(errs, goErr, sErr)
-		return nil, errors.E(op, errs)
+	isUnexpectedStorageErr := sErr != nil && !errors.IsNotFoundErr(sErr)
+	// if we got an unexpected storage err then we can not guarantee that the end result will contain all versions
+	if isUnexpectedStorageErr {
+		return nil, sErr
 	}
-	if goErr != nil && sErr == nil {
-		semver.SortVersions(strList)
-		return strList, nil
-	}
-	if goErr == nil && sErr != nil {
-		return goList, nil
+	goList, goErr := p.dp.List(ctx, mod)
+	isUnexpectedGoErr := goErr != nil && !errors.IsRepoNotFoundErr(goErr)
+	// if i.e. github is unavailable we should fail as well so that the behavior of the proxy is stable
+	if isUnexpectedGoErr {
+		return nil, goErr
 	}
 
 	combinedList := union(goList, strList)
-	semver.SortVersions(combinedList)
 	return combinedList, nil
 }
 
 // union concatenates two version lists and removes duplicates
 func union(list1, list2 []string) []string {
+	if list1 == nil {
+		list1 = []string{}
+	}
+	if list2 == nil {
+		list2 = []string{}
+	}
 	list := append(list1, list2...)
 	unique := []string{}
 	m := make(map[string]struct{})
