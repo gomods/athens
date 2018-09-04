@@ -165,6 +165,17 @@ The 🦁 says rawr!
 No additional output is printed because Go found **github.com/athens-artifacts/samplelib@v1.0.0** in the Go Module
 cache and did not need to request it from the proxy.
 
+In order to quit from the proxy at any point of time, we can press Ctlr-C
+
+```console
+^CINFO[0075] Shutting down application                    
+INFO[0075] Shutting down worker                         
+buffalo: Stopping Simple Background Worker
+ERRO[0075] http: Server closed                          
+2018/09/03 23:47:30 http: Server closed
+exit status 1
+```
+
 ## Next Steps
 
 Now that you have seen Athens in Action:
