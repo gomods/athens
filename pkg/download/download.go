@@ -76,6 +76,9 @@ func (p *protocol) request(mod, ver string) error {
 }
 
 func (p *protocol) List(ctx context.Context, mod string) ([]string, error) {
+	const op errors.Op = "download.protocol.List"
+	ctx, span := trace.StartSpan(ctx, op.String())
+	defer span.End()
 	return p.dp.List(ctx, mod)
 }
 
@@ -116,7 +119,9 @@ func (p *protocol) fillCache(mod, ver string) error {
 }
 
 func (p *protocol) Latest(ctx context.Context, mod string) (*storage.RevInfo, error) {
-	const op errors.Op = "protocol.Latest"
+	const op errors.Op = "download.protocol.Latest"
+	ctx, span := trace.StartSpan(ctx, op.String())
+	defer span.End()
 	info, err := p.dp.Latest(ctx, mod)
 	if err != nil {
 		return nil, errors.E(op, err)
@@ -126,7 +131,9 @@ func (p *protocol) Latest(ctx context.Context, mod string) (*storage.RevInfo, er
 }
 
 func (p *protocol) GoMod(ctx context.Context, mod, ver string) ([]byte, error) {
-	const op errors.Op = "protocol.GoMod"
+	const op errors.Op = "download.protocol.GoMod"
+	ctx, span := trace.StartSpan(ctx, op.String())
+	defer span.End()
 	goMod, err := p.s.GoMod(ctx, mod, ver)
 	if errors.IsNotFoundErr(err) {
 		err = p.request(mod, ver)
@@ -143,7 +150,9 @@ func (p *protocol) GoMod(ctx context.Context, mod, ver string) ([]byte, error) {
 }
 
 func (p *protocol) Zip(ctx context.Context, mod, ver string) (io.ReadCloser, error) {
-	const op errors.Op = "protocol.Zip"
+	const op errors.Op = "download.protocol.Zip"
+	ctx, span := trace.StartSpan(ctx, op.String())
+	defer span.End()
 	zip, err := p.s.Zip(ctx, mod, ver)
 	if errors.IsNotFoundErr(err) {
 		err = p.request(mod, ver)
@@ -160,7 +169,9 @@ func (p *protocol) Zip(ctx context.Context, mod, ver string) (io.ReadCloser, err
 }
 
 func (p *protocol) Version(ctx context.Context, mod, ver string) (*storage.Version, error) {
-	const op errors.Op = "protocol.Version"
+	const op errors.Op = "download.protocol.Version"
+	ctx, span := trace.StartSpan(ctx, op.String())
+	defer span.End()
 	info, err := p.Info(ctx, mod, ver)
 	if err != nil {
 		return nil, errors.E(op, err)
