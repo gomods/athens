@@ -110,9 +110,5 @@
   version = "1.14.12"
 
 [[constraint]]
-  name = "github.com/bketelsen/buffet"
-  branch = "master"
-
-[[constraint]]
   name = "go.opencensus.io"
   version = "0.14.0"
