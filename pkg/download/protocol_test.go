@@ -11,7 +11,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/gomods/athens/pkg/config/env"
+	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/module"
 	"github.com/gomods/athens/pkg/stash"
 	"github.com/gomods/athens/pkg/storage"
@@ -21,9 +21,14 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
+const (
+	testConfigPath = "../../config.test.toml"
+)
+
 func getDP(t *testing.T) Protocol {
 	t.Helper()
-	goBin := env.GoBinPath()
+	conf := config.GetConfLogErr(testConfigPath, t)
+	goBin := conf.GoBinary
 	fs := afero.NewOsFs()
 	mf, err := module.NewGoGetFetcher(goBin, fs)
 	if err != nil {

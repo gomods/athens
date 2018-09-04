@@ -6,7 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 
-	"github.com/gomods/athens/pkg/config/env"
+	"github.com/gobuffalo/envy"
 	"github.com/spf13/afero"
 	"github.com/stretchr/testify/assert"
 )
@@ -53,7 +53,7 @@ func (s *ModuleSuite) TestGoGetFetcherFetch() {
 func ExampleFetcher() {
 	repoURI := "github.com/arschles/assert"
 	version := "v1.0.0"
-	goBinaryName := env.GoBinPath()
+	goBinaryName := envy.Get("GO_BINARY_PATH", "go")
 	fetcher, err := NewGoGetFetcher(goBinaryName, afero.NewOsFs())
 	if err != nil {
 		log.Fatal(err)

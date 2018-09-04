@@ -6,10 +6,10 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net"
+	"time"
 
 	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
-	"github.com/gomods/athens/pkg/config/env"
 	"github.com/gomods/athens/pkg/eventlog"
 )
 
@@ -20,20 +20,22 @@ type Log struct {
 	col      string // collection
 	url      string
 	certPath string
+	timeout  time.Duration
 }
 
 // NewLog creates event log from backing mongo database
-func NewLog(url, certPath string) (*Log, error) {
-	return NewLogWithCollection(url, certPath, "eventlog")
+func NewLog(url, certPath string, timeout time.Duration) (*Log, error) {
+	return NewLogWithCollection(url, certPath, "eventlog", timeout)
 }
 
 // NewLogWithCollection creates event log from backing mongo database
-func NewLogWithCollection(url, certPath, collection string) (*Log, error) {
+func NewLogWithCollection(url, certPath, collection string, timeout time.Duration) (*Log, error) {
 	m := &Log{
 		url:      url,
 		col:      collection,
 		db:       "athens",
 		certPath: certPath,
+		timeout:  timeout,
 	}
 	return m, m.Connect()
 }
@@ -124,7 +126,7 @@ func (m *Log) newSession() (*mgo.Session, error) {
 		return nil, err
 	}
 
-	dialInfo.Timeout = env.MongoConnectionTimeoutSecWithDefault(1)
+	dialInfo.Timeout = m.timeout
 
 	if m.certPath != "" {
 		roots := x509.NewCertPool()

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"time"
 
 	"cloud.google.com/go/storage"
 	"github.com/gomods/athens/pkg/config"
@@ -19,6 +20,7 @@ type Storage struct {
 	closeStorage func() error
 	projectID    string
 	cdnConf      *config.CDNConfig
+	timeout      time.Duration
 }
 
 // New returns a new Storage instance backed by a Google Cloud Storage bucket.
@@ -30,7 +32,6 @@ type Storage struct {
 // credentials will be automatically provided.
 // See https://cloud.google.com/docs/authentication/getting-started.
 func New(ctx context.Context, gcpConf *config.GCPConfig, cdnConf *config.CDNConfig) (*Storage, error) {
-	// TODO: use timeouts from gcpConf throughout
 	const op errors.Op = "gcp.New"
 	storage, err := storage.NewClient(ctx)
 	if err != nil {
@@ -52,6 +53,7 @@ func New(ctx context.Context, gcpConf *config.GCPConfig, cdnConf *config.CDNConf
 		baseURI:      u,
 		closeStorage: storage.Close,
 		cdnConf:      cdnConf,
+		timeout:      gcpConf.TimeoutDuration(),
 	}, nil
 }
 

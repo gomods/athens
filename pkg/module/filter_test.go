@@ -3,7 +3,12 @@ package module
 import (
 	"testing"
 
+	"github.com/gomods/athens/pkg/config"
 	"github.com/stretchr/testify/suite"
+)
+
+const (
+	testConfigFile = "../../config.test.toml"
 )
 
 type FilterTests struct {
@@ -16,8 +21,8 @@ func Test_Filter(t *testing.T) {
 
 func (t *FilterTests) Test_IgnoreSimple() {
 	r := t.Require()
-
-	f := NewFilter()
+	conf := config.GetConfLogErr(testConfigFile, t.T())
+	f := NewFilter(conf.FilterFile)
 	f.AddRule("github.com/a/b", Exclude)
 
 	r.Equal(Include, f.Rule("github.com/a"))
@@ -29,8 +34,8 @@ func (t *FilterTests) Test_IgnoreSimple() {
 
 func (t *FilterTests) Test_IgnoreParentAllowChildren() {
 	r := t.Require()
-
-	f := NewFilter()
+	conf := config.GetConfLogErr(testConfigFile, t.T())
+	f := NewFilter(conf.FilterFile)
 	f.AddRule("github.com/a/b", Exclude)
 	f.AddRule("github.com/a/b/c", Include)
 
@@ -44,7 +49,8 @@ func (t *FilterTests) Test_IgnoreParentAllowChildren() {
 func (t *FilterTests) Test_OnlyAllowed() {
 	r := t.Require()
 
-	f := NewFilter()
+	conf := config.GetConfLogErr(testConfigFile, t.T())
+	f := NewFilter(conf.FilterFile)
 	f.AddRule("github.com/a/b", Include)
 	f.AddRule("", Exclude)
 
@@ -58,7 +64,8 @@ func (t *FilterTests) Test_OnlyAllowed() {
 func (t *FilterTests) Test_Direct() {
 	r := t.Require()
 
-	f := NewFilter()
+	conf := config.GetConfLogErr(testConfigFile, t.T())
+	f := NewFilter(conf.FilterFile)
 	f.AddRule("github.com/a/b/c", Exclude)
 	f.AddRule("github.com/a/b", Direct)
 	f.AddRule("github.com/a", Include)

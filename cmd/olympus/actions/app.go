@@ -72,7 +72,7 @@ func App(conf *config.Config) (*buffalo.App, error) {
 	if conf.Storage == nil || conf.Storage.Mongo == nil {
 		return nil, fmt.Errorf("A valid Mongo configuration is required to create the event log")
 	}
-	eLog, err := GetEventLog(conf.Storage.Mongo.URL, conf.Storage.Mongo.CertPath)
+	eLog, err := GetEventLog(conf.Storage.Mongo.URL, conf.Storage.Mongo.CertPath, conf.Storage.Mongo.TimeoutDuration())
 	if err != nil {
 		return nil, fmt.Errorf("error creating eventlog (%s)", err)
 	}

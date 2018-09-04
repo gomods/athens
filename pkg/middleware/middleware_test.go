@@ -9,28 +9,31 @@ import (
 
 	"github.com/bketelsen/buffet"
 	"github.com/gobuffalo/buffalo"
-	"github.com/gomods/athens/pkg/config/env"
+	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/log"
 	"github.com/gomods/athens/pkg/module"
 	"github.com/markbates/willie"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
-	"github.com/uber/jaeger-client-go/config"
+	jConfig "github.com/uber/jaeger-client-go/config"
 )
 
 // Avoid import cycle.
-const pathList = "/{module:.+}/@v/list"
-const pathVersionInfo = "/{module:.+}/@v/{version}.info"
+const (
+	pathList        = "/{module:.+}/@v/list"
+	pathVersionInfo = "/{module:.+}/@v/{version}.info"
+	testConfigFile  = "../../config.test.toml"
+)
 
-func middlewareFilterApp() *buffalo.App {
+func middlewareFilterApp(olympusEndpoint string) *buffalo.App {
 	h := func(c buffalo.Context) error {
 		return c.Render(200, nil)
 	}
 
 	a := buffalo.New(buffalo.Options{})
 	mf := newTestFilter()
-	a.Use(NewFilterMiddleware(mf))
+	a.Use(NewFilterMiddleware(mf, olympusEndpoint))
 	initializeTracing(a)
 
 	a.GET(pathList, h)
@@ -49,12 +52,17 @@ func newTestFilter() *module.Filter {
 func Test_FilterMiddleware(t *testing.T) {
 	r := require.New(t)
 
-	w := willie.New(middlewareFilterApp())
+	conf := config.GetConfLogErr(testConfigFile, t)
+	if conf.Proxy == nil {
+		t.Fatalf("No Proxy configuration in test config")
+	}
+	app := middlewareFilterApp(conf.Proxy.OlympusGlobalEndpoint)
+	w := willie.New(app)
 
 	// Public, expects to be redirected to olympus
 	res := w.Request("/github.com/gomods/athens/@v/list").Get()
 	r.Equal(303, res.Code)
-	r.Equal(env.GetOlympusEndpoint()+"/github.com/gomods/athens/@v/list", res.HeaderMap.Get("Location"))
+	r.Equal(conf.Proxy.OlympusGlobalEndpoint+"/github.com/gomods/athens/@v/list", res.HeaderMap.Get("Location"))
 
 	// Excluded, expects a 403
 	res = w.Request("/github.com/athens-artifacts/no-tags/@v/list").Get()
@@ -157,7 +165,7 @@ func (suite *HookTestsSuite) TestHookUnexpectedError() {
 }
 
 func initializeTracing(app *buffalo.App) {
-	var cfg config.Configuration
+	var cfg jConfig.Configuration
 	tracer, _, _ := cfg.New(
 		"athens.proxy",
 	)

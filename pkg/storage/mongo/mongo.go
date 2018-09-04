@@ -28,6 +28,9 @@ type ModuleStore struct {
 // that satisfies the Backend interface.
 func NewStorage(conf *config.MongoConfig) (*ModuleStore, error) {
 	const op errors.Op = "fs.NewStorage"
+	if conf == nil {
+		return nil, errors.E(op, "No Mongo Configuration provided")
+	}
 	ms := &ModuleStore{url: conf.URL, certPath: conf.CertPath, timeout: conf.TimeoutDuration()}
 
 	err := ms.connect()
