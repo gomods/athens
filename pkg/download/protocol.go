@@ -14,8 +14,8 @@ import (
 	"github.com/gomods/athens/pkg/module"
 	"github.com/gomods/athens/pkg/stash"
 	"github.com/gomods/athens/pkg/storage"
-	"go.opencensus.io/trace"
 	"github.com/spf13/afero"
+	"go.opencensus.io/trace"
 )
 
 // Protocol is the download protocol which mirrors
@@ -70,7 +70,7 @@ type protocol struct {
 }
 
 func (p *protocol) List(ctx context.Context, mod string) ([]string, error) {
-	const op errors.Op = "download.protocol.List"
+	const op errors.Op = "storage.protocol.List"
 	ctx, span := trace.StartSpan(ctx, op.String())
 	defer span.End()
 	lr, err := p.list(op, mod)
@@ -82,7 +82,7 @@ func (p *protocol) List(ctx context.Context, mod string) ([]string, error) {
 }
 
 func (p *protocol) Latest(ctx context.Context, mod string) (*storage.RevInfo, error) {
-	const op errors.Op = "download.protocol.Latest"
+	const op errors.Op = "storage.protocol.Latest"
 	ctx, span := trace.StartSpan(ctx, op.String())
 	defer span.End()
 	lr, err := p.list(op, mod)
@@ -96,24 +96,6 @@ func (p *protocol) Latest(ctx context.Context, mod string) (*storage.RevInfo, er
 	}, nil
 }
 
-func (p *protocol) List(ctx context.Context, mod string) ([]string, error) {
-	const op errors.Op = "download.protocol.List"
-	ctx, span := trace.StartSpan(ctx, op.String())
-	defer span.End()
-	return p.dp.List(ctx, mod)
-}
-
-func (p *protocol) Info(ctx context.Context, mod, ver string) ([]byte, error) {
-	const op errors.Op = "download.protocol.Info"
-	ctx, span := trace.StartSpan(ctx, op.String())
-	defer span.End()
-	info, err := p.s.Info(ctx, mod, ver)
-	if errors.IsNotFoundErr(err) {
-		err = p.request(mod, ver)
-		if err != nil {
-			return nil, errors.E(op, err)
-		}
-		info, err = p.s.Info(ctx, mod, ver)
 type listResp struct {
 	Path     string
 	Version  string
@@ -166,9 +148,10 @@ func (p *protocol) list(op errors.Op, mod string) (*listResp, error) {
 }
 
 func (p *protocol) Info(ctx context.Context, mod, ver string) ([]byte, error) {
-	const op errors.Op = "download.protocol.Latest"
+	const op errors.Op = "storage.protocol.Info"
 	ctx, span := trace.StartSpan(ctx, op.String())
 	defer span.End()
+	info, err := p.s.Info(ctx, mod, ver)
 	if errors.IsNotFoundErr(err) {
 		err = p.stasher.Stash(mod, ver)
 		if err != nil {
@@ -184,7 +167,7 @@ func (p *protocol) Info(ctx context.Context, mod, ver string) ([]byte, error) {
 }
 
 func (p *protocol) GoMod(ctx context.Context, mod, ver string) ([]byte, error) {
-	const op errors.Op = "download.protocol.GoMod"
+	const op errors.Op = "storage.protocol.GoMod"
 	ctx, span := trace.StartSpan(ctx, op.String())
 	defer span.End()
 	goMod, err := p.s.GoMod(ctx, mod, ver)
@@ -203,7 +186,7 @@ func (p *protocol) GoMod(ctx context.Context, mod, ver string) ([]byte, error) {
 }
 
 func (p *protocol) Zip(ctx context.Context, mod, ver string) (io.ReadCloser, error) {
-	const op errors.Op = "download.protocol.Zip"
+	const op errors.Op = "storage.protocol.Zip"
 	ctx, span := trace.StartSpan(ctx, op.String())
 	defer span.End()
 	zip, err := p.s.Zip(ctx, mod, ver)

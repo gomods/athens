@@ -3,6 +3,7 @@ module github.com/gomods/athens
 require (
 	cloud.google.com/go v0.26.0
 	contrib.go.opencensus.io/exporter/stackdriver v0.6.0 // indirect
+	git.apache.org/thrift.git v0.0.0-20180902110319-2566ecd5d999 // indirect
 	github.com/Azure/azure-pipeline-go v0.0.0-20180607212504-7571e8eb0876 // indirect
 	github.com/Azure/azure-storage-blob-go v0.0.0-20180727221336-197d1c0aea1b
 	github.com/BurntSushi/toml v0.3.0
@@ -60,7 +61,7 @@ require (
 	github.com/uber/jaeger-client-go v2.14.0+incompatible
 	github.com/uber/jaeger-lib v1.5.0
 	github.com/unrolled/secure v0.0.0-20180618144512-8287f3899c8e
-	go.opencensus.io v0.15.0 // indirect
+	go.opencensus.io v0.15.0
 	go.uber.org/atomic v1.3.2 // indirect
 	golang.org/x/sync v0.0.0-20180314180146-1d60e4601c6f
 	golang.org/x/text v0.3.0 // indirect

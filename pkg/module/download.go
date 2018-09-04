@@ -26,7 +26,7 @@ func Download(ctx context.Context, timeout time.Duration, baseURL, module, versi
 	const op errors.Op = "module.Download"
 	ctx, span := trace.StartSpan(ctx, op.String())
 	defer span.End()
-	ctx, cancel := context.WithTimeout(ctx, timeout)
+	tctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
 	var info []byte
