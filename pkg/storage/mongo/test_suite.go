@@ -20,8 +20,8 @@ type TestSuite struct {
 }
 
 // NewTestSuite creates a common test suite
-func NewTestSuite(model *suite.Model) (storage.TestSuite, error) {
-	ms, err := newTestStore()
+func NewTestSuite(model *suite.Model, configFile string) (storage.TestSuite, error) {
+	ms, err := newTestStore(configFile)
 	if err != nil {
 		return nil, err
 	}
@@ -31,8 +31,8 @@ func NewTestSuite(model *suite.Model) (storage.TestSuite, error) {
 	}, err
 }
 
-func newTestStore() (*ModuleStore, error) {
-	conf, err := config.GetConf(testConfigFile)
+func newTestStore(configFile string) (*ModuleStore, error) {
+	conf, err := config.GetConf(configFile)
 	if err != nil {
 		return nil, err
 	}

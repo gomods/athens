@@ -26,13 +26,13 @@ const (
 	testConfigFile  = "../../config.test.toml"
 )
 
-func middlewareFilterApp(olympusEndpoint string) *buffalo.App {
+func middlewareFilterApp(filterFile, olympusEndpoint string) *buffalo.App {
 	h := func(c buffalo.Context) error {
 		return c.Render(200, nil)
 	}
 
 	a := buffalo.New(buffalo.Options{})
-	mf := newTestFilter()
+	mf := newTestFilter(filterFile)
 	a.Use(NewFilterMiddleware(mf, olympusEndpoint))
 	initializeTracing(a)
 
@@ -41,8 +41,8 @@ func middlewareFilterApp(olympusEndpoint string) *buffalo.App {
 	return a
 }
 
-func newTestFilter() *module.Filter {
-	f := module.NewFilter()
+func newTestFilter(filterFile string) *module.Filter {
+	f := module.NewFilter(filterFile)
 	f.AddRule("github.com/gomods/athens/", module.Include)
 	f.AddRule("github.com/athens-artifacts/no-tags", module.Exclude)
 	f.AddRule("github.com/athens-artifacts", module.Direct)
@@ -56,7 +56,7 @@ func Test_FilterMiddleware(t *testing.T) {
 	if conf.Proxy == nil {
 		t.Fatalf("No Proxy configuration in test config")
 	}
-	app := middlewareFilterApp(conf.Proxy.OlympusGlobalEndpoint)
+	app := middlewareFilterApp(conf.FilterFile, conf.Proxy.OlympusGlobalEndpoint)
 	w := willie.New(app)
 
 	// Public, expects to be redirected to olympus

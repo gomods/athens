@@ -23,6 +23,10 @@ import (
 	"github.com/gomods/athens/pkg/storage/mongo"
 )
 
+const (
+	testConfigFile = "../../../../config.test.toml"
+)
+
 type TestSuites struct {
 	*suite.Model
 	storages []storage.TestSuite
@@ -52,7 +56,7 @@ func (d *TestSuites) SetupTest() {
 	d.storages = append(d.storages, minioStorage)
 
 	// mongo
-	mongoStore, err := mongo.NewTestSuite(d.Model)
+	mongoStore, err := mongo.NewTestSuite(d.Model, testConfigFile)
 	ra.NoError(err)
 	d.storages = append(d.storages, mongoStore)
 

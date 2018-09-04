@@ -55,7 +55,7 @@ func New(bucketName string, cdnConf *config.CDNConfig) (*Storage, error) {
 }
 
 // NewWithUploader creates a new AWS S3 CDN saver with provided uploader
-func NewWithUploader(bucketName string, uploader s3manageriface.UploaderAPI) (*Storage, error) {
+func NewWithUploader(bucketName string, uploader s3manageriface.UploaderAPI, cdnConf *config.CDNConfig) (*Storage, error) {
 	const op errors.Op = "s3.NewWithUploader"
 	u, err := url.Parse(fmt.Sprintf("http://%s.s3.amazonaws.com", bucketName))
 	if err != nil {
@@ -66,6 +66,7 @@ func NewWithUploader(bucketName string, uploader s3manageriface.UploaderAPI) (*S
 		bucket:   bucketName,
 		uploader: uploader,
 		baseURI:  u,
+		cdnConf:  cdnConf,
 	}, nil
 }
 

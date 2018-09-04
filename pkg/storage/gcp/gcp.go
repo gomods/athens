@@ -66,11 +66,12 @@ func bucketExistsErr(err error) bool {
 	return apiErr.Code == http.StatusConflict
 }
 
-func newWithBucket(bkt Bucket, uri *url.URL, cdnConf *config.CDNConfig) *Storage {
+func newWithBucket(bkt Bucket, uri *url.URL, timeout time.Duration, cdnConf *config.CDNConfig) *Storage {
 	return &Storage{
 		bucket:       bkt,
 		baseURI:      uri,
 		closeStorage: func() error { return nil },
+		timeout:      timeout,
 		cdnConf:      cdnConf,
 	}
 }
