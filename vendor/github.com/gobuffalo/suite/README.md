@@ -198,6 +198,7 @@ We've also add a couple of useful helpers for you as well:
 * `uuid()` - returns a new `github.com/gobuffalo/uuid.UUID`
 * `now()` - returns `time.Now()`
 * `uuidNamed(name)` - will attempt to return a previously declared UUID with that name, useful, for relations/associations. If there was one that wasn't defined with that name, a new one will be created.
+* `hash(string, opts)` - will create the hashed value of the string (useful for creating a password), you can define the cost as an opts (the default is `bcrypt.DefaultCost`)
 
 ### Using in Tests
 

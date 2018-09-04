@@ -78,6 +78,7 @@ func App() (*buffalo.App, error) {
 		},
 		SessionName: "_athens_session",
 		Logger:      blggr,
+		Addr:        env.Port(":3000"),
 	})
 	if prefix := env.AthensPathPrefix(); prefix != "" {
 		// certain Ingress Controllers (such as GCP Load Balancer)
