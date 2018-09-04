@@ -1,10 +1,14 @@
 package module
 
+import (
+	"context"
+
+	"github.com/gomods/athens/pkg/storage"
+)
+
 // Fetcher fetches module from an upstream source
 type Fetcher interface {
-	// Fetch fetches the module and puts it somewhere addressable by ModuleRef.
-	// returns a non-nil error on failure.
-	//
-	// The caller should call moduleRef.Clear() after they're done with the module
-	Fetch(mod, ver string) (Ref, error)
+	// Fetch downloads the sources from an upstream and returns the corresponding
+	// .info, .mod, and .zip files.
+	Fetch(ctx context.Context, mod, ver string) (*storage.Version, error)
 }
