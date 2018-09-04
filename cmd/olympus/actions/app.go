@@ -15,12 +15,14 @@ import (
 	"github.com/gomods/athens/pkg/cdn/metadata/azurecdn"
 	"github.com/gomods/athens/pkg/config/env"
 	"github.com/gomods/athens/pkg/download"
-	"github.com/gomods/athens/pkg/download/goget"
 	"github.com/gomods/athens/pkg/eventlog"
 	"github.com/gomods/athens/pkg/log"
+	"github.com/gomods/athens/pkg/module"
+	"github.com/gomods/athens/pkg/stash"
 	"github.com/gomods/athens/pkg/storage"
 	"github.com/gomodule/redigo/redis"
 	"github.com/rs/cors"
+	"github.com/spf13/afero"
 	"github.com/unrolled/secure"
 )
 
@@ -85,6 +87,7 @@ func App(config *AppConfig) (*buffalo.App, error) {
 		WorkerOff:   true, // TODO(marwan): turned off until worker is being used.
 		Logger:      blggr,
 	})
+
 	// Automatically redirect to SSL
 	app.Use(ssl.ForceSSL(secure.Options{
 		SSLRedirect:     ENV == "production",
@@ -123,13 +126,23 @@ func App(config *AppConfig) (*buffalo.App, error) {
 	app.GET("/healthz", healthHandler)
 
 	// Download Protocol
-	gg, err := goget.New()
+	goBin := env.GoBinPath()
+	fs := afero.NewOsFs()
+	mf, err := module.NewGoGetFetcher(goBin, fs)
 	if err != nil {
 		return nil, err
 	}
-	dp := download.New(gg, config.Storage, env.GoGetWorkers())
-	opts := &download.HandlerOpts{Protocol: dp, Logger: lggr, Engine: renderEng}
-	download.RegisterHandlers(app, opts)
+	st := stash.New(mf, config.Storage)
+	dpOpts := &download.Opts{
+		Storage:   config.Storage,
+		Stasher:   st,
+		GoBinPath: goBin,
+		Fs:        fs,
+	}
+	dp := download.New(dpOpts)
+
+	handlerOpts := &download.HandlerOpts{Protocol: dp, Logger: lggr, Engine: renderEng}
+	download.RegisterHandlers(app, handlerOpts)
 
 	app.ServeFiles("/", assetsBox) // serve files from the public directory
 
