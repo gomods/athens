@@ -67,6 +67,7 @@ alldeps:
 dev:
 	docker-compose -p athensdev up -d mongo
 	docker-compose -p athensdev up -d redis
+	cp config.example.toml config.toml
 
 .PHONY: down
 down:
