@@ -70,7 +70,9 @@ type protocol struct {
 }
 
 func (p *protocol) List(ctx context.Context, mod string) ([]string, error) {
-	const op errors.Op = "protocol.List"
+	const op errors.Op = "download.protocol.List"
+	ctx, span := trace.StartSpan(ctx, op.String())
+	defer span.End()
 	lr, err := p.list(op, mod)
 	if err != nil {
 		return nil, err
@@ -80,7 +82,9 @@ func (p *protocol) List(ctx context.Context, mod string) ([]string, error) {
 }
 
 func (p *protocol) Latest(ctx context.Context, mod string) (*storage.RevInfo, error) {
-	const op errors.Op = "protocol.Latest"
+	const op errors.Op = "download.protocol.Latest"
+	ctx, span := trace.StartSpan(ctx, op.String())
+	defer span.End()
 	lr, err := p.list(op, mod)
 	if err != nil {
 		return nil, errors.E(op, err)
@@ -164,6 +168,7 @@ func (p *protocol) list(op errors.Op, mod string) (*listResp, error) {
 func (p *protocol) Info(ctx context.Context, mod, ver string) ([]byte, error) {
 	const op errors.Op = "download.protocol.Latest"
 	ctx, span := trace.StartSpan(ctx, op.String())
+	defer span.End()
 	if errors.IsNotFoundErr(err) {
 		err = p.stasher.Stash(mod, ver)
 		if err != nil {

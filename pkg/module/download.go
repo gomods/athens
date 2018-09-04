@@ -14,6 +14,7 @@ import (
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/storage"
 	multierror "github.com/hashicorp/go-multierror"
+	"go.opencensus.io/trace"
 )
 
 // Downloader downloads a module version from a URL exposing Download Protocol endpoints
@@ -23,7 +24,9 @@ type Downloader func(ctx context.Context, timeout time.Duration, baseURL, module
 // representing the downloaded module/version or a non-nil error if something went wrong
 func Download(ctx context.Context, timeout time.Duration, baseURL, module, version string) (*storage.Version, error) {
 	const op errors.Op = "module.Download"
-	tctx, cancel := context.WithTimeout(ctx, timeout)
+	ctx, span := trace.StartSpan(ctx, op.String())
+	defer span.End()
+	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
 	var info []byte
@@ -118,6 +121,8 @@ func getResBody(req *http.Request, timeout time.Duration) (io.ReadCloser, error)
 
 func getRequest(ctx context.Context, baseURL, module, version, ext string) (*http.Request, error) {
 	const op errors.Op = "module.getRequest"
+	ctx, span := trace.StartSpan(ctx, op.String())
+	defer span.End()
 	u, err := join(baseURL, module, version, ext)
 	if err != nil {
 		return nil, errors.E(op, err)
