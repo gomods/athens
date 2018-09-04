@@ -41,6 +41,7 @@ func Tracer(service string) buffalo.MiddlewareFunc {
 	return func(next buffalo.Handler) buffalo.Handler {
 		return func(ctx buffalo.Context) error {
 			spanCtx, span := trace.StartSpan(ctx, service)
+			span.AddAttributes(trace.StringAttribute("url", ctx.Request().URL.String()))
 			defer span.End()
 			return next(&ObserverContext{ctx, spanCtx})
 		}
