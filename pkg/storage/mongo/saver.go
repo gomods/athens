@@ -5,14 +5,14 @@ import (
 	"io"
 
 	"github.com/gomods/athens/pkg/errors"
-	"github.com/gomods/athens/pkg/observability"
+	"github.com/gomods/athens/pkg/observ"
 	"github.com/gomods/athens/pkg/storage"
 )
 
 // Save stores a module in mongo storage.
 func (s *ModuleStore) Save(ctx context.Context, module, version string, mod []byte, zip io.Reader, info []byte) error {
 	const op errors.Op = "storage.mongo.Save"
-	ctx, span := observability.StartSpan(ctx, op.String())
+	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 
 	zipName := s.gridFileName(module, version)

@@ -8,13 +8,13 @@ import (
 	"net/http"
 
 	"github.com/gomods/athens/pkg/errors"
-	"github.com/gomods/athens/pkg/observability"
+	"github.com/gomods/athens/pkg/observ"
 	minio "github.com/minio/minio-go"
 )
 
 func (v *storageImpl) Info(ctx context.Context, module, vsn string) ([]byte, error) {
 	const op errors.Op = "storage.minio.Info"
-	ctx, span := observability.StartSpan(ctx, op.String())
+	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 	infoPath := fmt.Sprintf("%s/%s.info", v.versionLocation(module, vsn), vsn)
 	infoReader, err := v.minioClient.GetObject(v.bucketName, infoPath, minio.GetObjectOptions{})
@@ -31,7 +31,7 @@ func (v *storageImpl) Info(ctx context.Context, module, vsn string) ([]byte, err
 
 func (v *storageImpl) GoMod(ctx context.Context, module, vsn string) ([]byte, error) {
 	const op errors.Op = "storage.minio.GoMod"
-	ctx, span := observability.StartSpan(ctx, op.String())
+	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 	modPath := fmt.Sprintf("%s/go.mod", v.versionLocation(module, vsn))
 	modReader, err := v.minioClient.GetObject(v.bucketName, modPath, minio.GetObjectOptions{})
@@ -47,7 +47,7 @@ func (v *storageImpl) GoMod(ctx context.Context, module, vsn string) ([]byte, er
 }
 func (v *storageImpl) Zip(ctx context.Context, module, vsn string) (io.ReadCloser, error) {
 	const op errors.Op = "storage.minio.Zip"
-	ctx, span := observability.StartSpan(ctx, op.String())
+	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 
 	zipPath := fmt.Sprintf("%s/source.zip", v.versionLocation(module, vsn))

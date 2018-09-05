@@ -9,7 +9,7 @@ import (
 
 	"github.com/gomods/athens/pkg/config/env"
 	"github.com/gomods/athens/pkg/errors"
-	"github.com/gomods/athens/pkg/observability"
+	"github.com/gomods/athens/pkg/observ"
 	moduploader "github.com/gomods/athens/pkg/storage/module"
 )
 
@@ -58,7 +58,7 @@ func (s Storage) BaseURL() *url.URL {
 // Save implements the (github.com/gomods/athens/pkg/storage).Saver interface.
 func (s *Storage) Save(ctx context.Context, module, version string, mod []byte, zip io.Reader, info []byte) error {
 	const op errors.Op = "azurecdn.Save"
-	ctx, span := observability.StartSpan(ctx, op.String())
+	ctx, span := observ.StartSpan(ctx, op.String())
 	span.End()
 	err := moduploader.Upload(ctx, module, version, bytes.NewReader(info), bytes.NewReader(mod), zip, s.cl.UploadWithContext)
 	// TODO: take out lease on the /list file and add the version to it

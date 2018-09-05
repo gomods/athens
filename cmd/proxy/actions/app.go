@@ -3,7 +3,7 @@ package actions
 import (
 	"fmt"
 
-	"github.com/gomods/athens/pkg/observability"
+	"github.com/gomods/athens/pkg/observ"
 
 	"github.com/gobuffalo/buffalo"
 	"github.com/gobuffalo/buffalo/middleware"
@@ -90,9 +90,9 @@ func App() (*buffalo.App, error) {
 	}
 
 	// Register exporter to export traces
-	exporter := observability.RegisterTraceExporter(Service)
+	exporter := observ.RegisterTraceExporter(Service)
 	exporter.Flush()
-	app.Use(observability.Tracer(Service))
+	app.Use(observ.Tracer(Service))
 
 	// Automatically redirect to SSL
 	app.Use(ssl.ForceSSL(secure.Options{

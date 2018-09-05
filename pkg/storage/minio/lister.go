@@ -6,12 +6,12 @@ import (
 	"strings"
 
 	"github.com/gomods/athens/pkg/errors"
-	"github.com/gomods/athens/pkg/observability"
+	"github.com/gomods/athens/pkg/observ"
 )
 
 func (l *storageImpl) List(ctx context.Context, module string) ([]string, error) {
 	const op errors.Op = "storage.minio.List"
-	ctx, span := observability.StartSpan(ctx, op.String())
+	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 	dict := make(map[string]struct{})
 

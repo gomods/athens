@@ -6,14 +6,14 @@ import (
 	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
 	"github.com/gomods/athens/pkg/errors"
-	"github.com/gomods/athens/pkg/observability"
+	"github.com/gomods/athens/pkg/observ"
 	"github.com/gomods/athens/pkg/storage"
 )
 
 // List lists all versions of a module
 func (s *ModuleStore) List(ctx context.Context, module string) ([]string, error) {
 	const op errors.Op = "storage.mongo.List"
-	ctx, span := observability.StartSpan(ctx, op.String())
+	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 	c := s.s.DB(s.d).C(s.c)
 	result := make([]storage.Module, 0)

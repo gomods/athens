@@ -5,12 +5,12 @@ import (
 	"fmt"
 
 	"github.com/gomods/athens/pkg/errors"
-	"github.com/gomods/athens/pkg/observability"
+	"github.com/gomods/athens/pkg/observ"
 )
 
 func (v *storageImpl) Delete(ctx context.Context, module, version string) error {
 	const op errors.Op = "storage.minio.Delete"
-	ctx, span := observability.StartSpan(ctx, op.String())
+	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 	exists, err := v.Exists(ctx, module, version)
 	if err != nil {

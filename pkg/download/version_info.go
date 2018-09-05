@@ -3,7 +3,7 @@ package download
 import (
 	"net/http"
 
-	"github.com/gomods/athens/pkg/observability"
+	"github.com/gomods/athens/pkg/observ"
 
 	"github.com/gobuffalo/buffalo"
 	"github.com/gobuffalo/buffalo/render"
@@ -18,7 +18,7 @@ const PathVersionInfo = "/{module:.+}/@v/{version}.info"
 func VersionInfoHandler(dp Protocol, lggr log.Entry, eng *render.Engine) buffalo.Handler {
 	const op errors.Op = "download.versionInfoHandler"
 	return func(c buffalo.Context) error {
-		ctx, span := observability.StartSpan(c, op.String())
+		ctx, span := observ.StartSpan(c, op.String())
 		defer span.End()
 		mod, ver, err := getModuleParams(c, op)
 		if err != nil {

@@ -8,7 +8,7 @@ import (
 	"github.com/gobuffalo/buffalo"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/log"
-	"github.com/gomods/athens/pkg/observability"
+	"github.com/gomods/athens/pkg/observ"
 	"github.com/gomods/athens/pkg/paths"
 )
 
@@ -19,7 +19,7 @@ func NewValidationMiddleware(entry log.Entry, validatorHook string) buffalo.Midd
 
 	return func(next buffalo.Handler) buffalo.Handler {
 		return func(c buffalo.Context) error {
-			c, sp := observability.StartBuffaloSpan(c, op.String())
+			c, sp := observ.StartBuffaloSpan(c, op.String())
 			defer sp.End()
 
 			mod, err := paths.GetModule(c)

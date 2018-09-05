@@ -7,7 +7,7 @@ import (
 	"github.com/gobuffalo/buffalo/render"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/log"
-	"github.com/gomods/athens/pkg/observability"
+	"github.com/gomods/athens/pkg/observ"
 )
 
 // PathVersionZip URL.
@@ -18,7 +18,7 @@ func VersionZipHandler(dp Protocol, lggr log.Entry, eng *render.Engine) buffalo.
 	const op errors.Op = "download.VersionZipHandler"
 
 	return func(c buffalo.Context) error {
-		ctx, span := observability.StartSpan(c, op.String())
+		ctx, span := observ.StartSpan(c, op.String())
 		defer span.End()
 		mod, ver, err := getModuleParams(c, op)
 		if err != nil {

@@ -7,7 +7,7 @@ import (
 	"log"
 
 	"github.com/gomods/athens/pkg/errors"
-	"github.com/gomods/athens/pkg/observability"
+	"github.com/gomods/athens/pkg/observ"
 
 	moduploader "github.com/gomods/athens/pkg/storage/module"
 )
@@ -21,7 +21,7 @@ import (
 // an ACL rule.
 func (s *Storage) Save(ctx context.Context, module, version string, mod []byte, zip io.Reader, info []byte) error {
 	const op errors.Op = "storage.gcp.Save"
-	ctx, span := observability.StartSpan(ctx, op.String())
+	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 	exists, err := s.Exists(ctx, module, version)
 	if err != nil {
@@ -44,7 +44,7 @@ func (s *Storage) Save(ctx context.Context, module, version string, mod []byte, 
 
 func (s *Storage) upload(ctx context.Context, path, contentType string, stream io.Reader) error {
 	const op errors.Op = "storage.gcp.upload"
-	ctx, span := observability.StartSpan(ctx, op.String())
+	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 	wc := s.bucket.Write(ctx, path)
 	defer func(wc io.WriteCloser) {

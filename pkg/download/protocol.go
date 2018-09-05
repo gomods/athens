@@ -12,7 +12,7 @@ import (
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/module"
-	"github.com/gomods/athens/pkg/observability"
+	"github.com/gomods/athens/pkg/observ"
 	"github.com/gomods/athens/pkg/stash"
 	"github.com/gomods/athens/pkg/storage"
 	"github.com/spf13/afero"
@@ -71,7 +71,7 @@ type protocol struct {
 
 func (p *protocol) List(ctx context.Context, mod string) ([]string, error) {
 	const op errors.Op = "storage.protocol.List"
-	ctx, span := observability.StartSpan(ctx, op.String())
+	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 	lr, err := p.list(op, mod)
 	if err != nil {
@@ -83,7 +83,7 @@ func (p *protocol) List(ctx context.Context, mod string) ([]string, error) {
 
 func (p *protocol) Latest(ctx context.Context, mod string) (*storage.RevInfo, error) {
 	const op errors.Op = "storage.protocol.Latest"
-	ctx, span := observability.StartSpan(ctx, op.String())
+	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 	lr, err := p.list(op, mod)
 	if err != nil {
@@ -149,7 +149,7 @@ func (p *protocol) list(op errors.Op, mod string) (*listResp, error) {
 
 func (p *protocol) Info(ctx context.Context, mod, ver string) ([]byte, error) {
 	const op errors.Op = "storage.protocol.Info"
-	ctx, span := observability.StartSpan(ctx, op.String())
+	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 	info, err := p.s.Info(ctx, mod, ver)
 	if errors.IsNotFoundErr(err) {
@@ -168,7 +168,7 @@ func (p *protocol) Info(ctx context.Context, mod, ver string) ([]byte, error) {
 
 func (p *protocol) GoMod(ctx context.Context, mod, ver string) ([]byte, error) {
 	const op errors.Op = "storage.protocol.GoMod"
-	ctx, span := observability.StartSpan(ctx, op.String())
+	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 	goMod, err := p.s.GoMod(ctx, mod, ver)
 	if errors.IsNotFoundErr(err) {
@@ -187,7 +187,7 @@ func (p *protocol) GoMod(ctx context.Context, mod, ver string) ([]byte, error) {
 
 func (p *protocol) Zip(ctx context.Context, mod, ver string) (io.ReadCloser, error) {
 	const op errors.Op = "storage.protocol.Zip"
-	ctx, span := observability.StartSpan(ctx, op.String())
+	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 	zip, err := p.s.Zip(ctx, mod, ver)
 	if errors.IsNotFoundErr(err) {

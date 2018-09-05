@@ -1,4 +1,4 @@
-package observability
+package observ
 
 import (
 	"context"
@@ -43,7 +43,7 @@ func Tracer(service string) buffalo.MiddlewareFunc {
 			spanCtx, span := trace.StartSpan(ctx, service)
 			span.AddAttributes(trace.StringAttribute("url", ctx.Request().URL.String()))
 			defer span.End()
-			return next(&ObserverContext{ctx, spanCtx})
+			return next(spanCtx.(buffalo.Context))
 		}
 	}
 }
@@ -58,5 +58,5 @@ func StartSpan(ctx context.Context, op string) (context.Context, *trace.Span) {
 // and span
 func StartBuffaloSpan(ctx buffalo.Context, op string) (buffalo.Context, *trace.Span) {
 	spanCtx, span := trace.StartSpan(ctx, op)
-	return &ObserverContext{ctx, spanCtx}, span
+	return spanCtx.(buffalo.Context), span
 }

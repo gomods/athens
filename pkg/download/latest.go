@@ -7,7 +7,7 @@ import (
 	"github.com/gobuffalo/buffalo/render"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/log"
-	"github.com/gomods/athens/pkg/observability"
+	"github.com/gomods/athens/pkg/observ"
 	"github.com/gomods/athens/pkg/paths"
 )
 
@@ -18,7 +18,7 @@ const PathLatest = "/{module:.+}/@latest"
 func LatestHandler(dp Protocol, lggr log.Entry, eng *render.Engine) buffalo.Handler {
 	const op errors.Op = "download.LatestHandler"
 	return func(c buffalo.Context) error {
-		c, sp := observability.StartBuffaloSpan(c, op.String())
+		c, sp := observ.StartBuffaloSpan(c, op.String())
 		defer sp.End()
 		mod, err := paths.GetModule(c)
 		if err != nil {

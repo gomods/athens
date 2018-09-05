@@ -7,7 +7,7 @@ import (
 
 	"github.com/Azure/azure-storage-blob-go/2017-07-29/azblob"
 	"github.com/gomods/athens/pkg/errors"
-	"github.com/gomods/athens/pkg/observability"
+	"github.com/gomods/athens/pkg/observ"
 )
 
 type azureBlobStoreClient struct {
@@ -29,7 +29,7 @@ func newBlobStoreClient(accountURL *url.URL, accountName, accountKey, containerN
 
 func (c *azureBlobStoreClient) UploadWithContext(ctx context.Context, path, contentType string, content io.Reader) error {
 	const op errors.Op = "azurecdn.UploadWithContext"
-	ctx, span := observability.StartSpan(ctx, op.String())
+	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 	blobURL := c.containerURL.NewBlockBlobURL(path)
 	emptyMeta := map[string]string{}

@@ -5,7 +5,7 @@ import (
 	"github.com/gobuffalo/buffalo/render"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/log"
-	"github.com/gomods/athens/pkg/observability"
+	"github.com/gomods/athens/pkg/observ"
 )
 
 // PathVersionModule URL.
@@ -15,7 +15,7 @@ const PathVersionModule = "/{module:.+}/@v/{version}.mod"
 func VersionModuleHandler(dp Protocol, lggr log.Entry, eng *render.Engine) buffalo.Handler {
 	const op errors.Op = "download.VersionModuleHandler"
 	return func(c buffalo.Context) error {
-		ctx, span := observability.StartSpan(c, op.String())
+		ctx, span := observ.StartSpan(c, op.String())
 		defer span.End()
 		mod, ver, err := getModuleParams(c, op)
 		if err != nil {

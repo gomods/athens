@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/gomods/athens/pkg/observability"
+	"github.com/gomods/athens/pkg/observ"
 
 	"github.com/gobuffalo/buffalo"
 	"github.com/gobuffalo/buffalo/render"
@@ -20,7 +20,7 @@ const PathList = "/{module:.+}/@v/list"
 func ListHandler(dp Protocol, lggr log.Entry, eng *render.Engine) buffalo.Handler {
 	const op errors.Op = "download.ListHandler"
 	return func(c buffalo.Context) error {
-		c, sp := observability.StartBuffaloSpan(c, op.String())
+		c, sp := observ.StartBuffaloSpan(c, op.String())
 		defer sp.End()
 		mod, err := paths.GetModule(c)
 		if err != nil {

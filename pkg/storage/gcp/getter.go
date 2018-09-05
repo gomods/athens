@@ -8,13 +8,13 @@ import (
 
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/errors"
-	"github.com/gomods/athens/pkg/observability"
+	"github.com/gomods/athens/pkg/observ"
 )
 
 // Info implements storage.Getter
 func (s *Storage) Info(ctx context.Context, module, version string) ([]byte, error) {
 	const op errors.Op = "storage.gcp.Info"
-	ctx, span := observability.StartSpan(ctx, op.String())
+	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 	exists, err := s.Exists(ctx, module, version)
 	if err != nil {
@@ -39,7 +39,7 @@ func (s *Storage) Info(ctx context.Context, module, version string) ([]byte, err
 // GoMod implements storage.Getter
 func (s *Storage) GoMod(ctx context.Context, module, version string) ([]byte, error) {
 	const op errors.Op = "storage.gcp.GoMod"
-	ctx, span := observability.StartSpan(ctx, op.String())
+	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 	exists, err := s.Exists(ctx, module, version)
 	if err != nil {
@@ -65,7 +65,7 @@ func (s *Storage) GoMod(ctx context.Context, module, version string) ([]byte, er
 // Zip implements storage.Getter
 func (s *Storage) Zip(ctx context.Context, module, version string) (io.ReadCloser, error) {
 	const op errors.Op = "storage.gcp.Zip"
-	ctx, span := observability.StartSpan(ctx, op.String())
+	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 	exists, err := s.Exists(ctx, module, version)
 	if err != nil {

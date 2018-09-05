@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/gomods/athens/pkg/errors"
-	"github.com/gomods/athens/pkg/observability"
+	"github.com/gomods/athens/pkg/observ"
 	minio "github.com/minio/minio-go"
 )
 
@@ -15,7 +15,7 @@ const (
 
 func (v *storageImpl) Exists(ctx context.Context, module, version string) (bool, error) {
 	const op errors.Op = "storage.minio.Exists"
-	ctx, span := observability.StartSpan(ctx, op.String())
+	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 	versionedPath := v.versionLocation(module, version)
 	modPath := fmt.Sprintf("%s/go.mod", versionedPath)

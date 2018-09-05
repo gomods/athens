@@ -4,13 +4,13 @@ import (
 	"context"
 
 	"github.com/gomods/athens/pkg/errors"
-	"github.com/gomods/athens/pkg/observability"
+	"github.com/gomods/athens/pkg/observ"
 )
 
 // Delete removes a specific version of a module.
 func (v *storageImpl) Delete(ctx context.Context, module, version string) error {
 	const op errors.Op = "fs.Delete"
-	ctx, span := observability.StartSpan(ctx, op.String())
+	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 	versionedPath := v.versionLocation(module, version)
 	exists, err := v.Exists(ctx, module, version)

@@ -5,13 +5,13 @@ import (
 
 	"github.com/globalsign/mgo/bson"
 	"github.com/gomods/athens/pkg/errors"
-	"github.com/gomods/athens/pkg/observability"
+	"github.com/gomods/athens/pkg/observ"
 )
 
 // Delete removes a specific version of a module
 func (s *ModuleStore) Delete(ctx context.Context, module, version string) error {
 	const op errors.Op = "storage.mongo.Delete"
-	ctx, span := observability.StartSpan(ctx, op.String())
+	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 	exists, err := s.Exists(ctx, module, version)
 	if err != nil {

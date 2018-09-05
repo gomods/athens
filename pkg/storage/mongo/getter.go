@@ -7,14 +7,14 @@ import (
 	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
 	"github.com/gomods/athens/pkg/errors"
-	"github.com/gomods/athens/pkg/observability"
+	"github.com/gomods/athens/pkg/observ"
 	"github.com/gomods/athens/pkg/storage"
 )
 
 // Info implements storage.Getter
 func (s *ModuleStore) Info(ctx context.Context, module, vsn string) ([]byte, error) {
 	const op errors.Op = "storage.mongo.Info"
-	ctx, span := observability.StartSpan(ctx, op.String())
+	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 	c := s.s.DB(s.d).C(s.c)
 	result := &storage.Module{}
@@ -33,7 +33,7 @@ func (s *ModuleStore) Info(ctx context.Context, module, vsn string) ([]byte, err
 // GoMod implements storage.Getter
 func (s *ModuleStore) GoMod(ctx context.Context, module, vsn string) ([]byte, error) {
 	const op errors.Op = "storage.mongo.GoMod"
-	ctx, span := observability.StartSpan(ctx, op.String())
+	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 	c := s.s.DB(s.d).C(s.c)
 	result := &storage.Module{}
@@ -52,7 +52,7 @@ func (s *ModuleStore) GoMod(ctx context.Context, module, vsn string) ([]byte, er
 // Zip implements storage.Getter
 func (s *ModuleStore) Zip(ctx context.Context, module, vsn string) (io.ReadCloser, error) {
 	const op errors.Op = "storage.mongo.Zip"
-	ctx, span := observability.StartSpan(ctx, op.String())
+	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 
 	zipName := s.gridFileName(module, vsn)

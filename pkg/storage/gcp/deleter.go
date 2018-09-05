@@ -5,7 +5,7 @@ import (
 
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/errors"
-	"github.com/gomods/athens/pkg/observability"
+	"github.com/gomods/athens/pkg/observ"
 	modupl "github.com/gomods/athens/pkg/storage/module"
 )
 
@@ -14,7 +14,7 @@ import (
 // if the version does not exist.
 func (s *Storage) Delete(ctx context.Context, module, version string) error {
 	const op errors.Op = "storage.gcp.Delete"
-	ctx, span := observability.StartSpan(ctx, op.String())
+	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 	exists, err := s.bucket.Exists(ctx, config.PackageVersionedName(module, version, "mod"))
 	if err != nil {

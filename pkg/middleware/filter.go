@@ -9,7 +9,7 @@ import (
 	"github.com/gomods/athens/pkg/config/env"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/module"
-	"github.com/gomods/athens/pkg/observability"
+	"github.com/gomods/athens/pkg/observ"
 	"github.com/gomods/athens/pkg/paths"
 )
 
@@ -20,7 +20,7 @@ func NewFilterMiddleware(mf *module.Filter) buffalo.MiddlewareFunc {
 
 	return func(next buffalo.Handler) buffalo.Handler {
 		return func(c buffalo.Context) error {
-			c, sp := observability.StartBuffaloSpan(c, op.String())
+			c, sp := observ.StartBuffaloSpan(c, op.String())
 			defer sp.End()
 
 			mod, err := paths.GetModule(c)
