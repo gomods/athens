@@ -91,7 +91,7 @@ func App() (*buffalo.App, error) {
 
 	// Register exporter to export traces
 	exporter := observ.RegisterTraceExporter(Service)
-	exporter.Flush()
+	defer exporter.Flush()
 	app.Use(observ.Tracer(Service))
 
 	// Automatically redirect to SSL
