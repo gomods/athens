@@ -34,7 +34,7 @@ func getDP(t *testing.T) Protocol {
 		t.Fatal(err)
 	}
 	st := stash.New(mf, s)
-	return New(&Opts{s, st, goBin, fs})
+	return New(&Opts{s, st, NewGoLister(goBin, fs)})
 }
 
 type listTest struct {
@@ -263,7 +263,7 @@ func TestDownloadProtocol(t *testing.T) {
 	}
 	mp := &mockFetcher{}
 	st := stash.New(mp, s)
-	dp := New(&Opts{s, st, "", afero.NewMemMapFs()})
+	dp := New(&Opts{s, st, nil})
 	ctx := context.Background()
 
 	var eg errgroup.Group

@@ -134,10 +134,9 @@ func App(config *AppConfig) (*buffalo.App, error) {
 	}
 	st := stash.New(mf, config.Storage)
 	dpOpts := &download.Opts{
-		Storage:   config.Storage,
-		Stasher:   st,
-		GoBinPath: goBin,
-		Fs:        fs,
+		Storage: config.Storage,
+		Stasher: st,
+		Lister:  download.NewGoLister(goBin, fs),
 	}
 	dp := download.New(dpOpts)
 
