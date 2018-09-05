@@ -58,10 +58,8 @@ func walkFunc(fs afero.Fs, zw *zip.Writer, dir, module, version string, ignorePa
 		}
 
 		_, err = f.Write(fileContent)
-		if err != nil {
-			return errors.E(op, err)
-		}
-		return nil
+
+		return errors.E(op, err)
 	}
 }
 

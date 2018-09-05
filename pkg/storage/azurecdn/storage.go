@@ -64,8 +64,5 @@ func (s *Storage) Save(ctx context.Context, module, version string, mod []byte, 
 	// TODO: take out lease on the /list file and add the version to it
 	//
 	// Do that only after module source+metadata is uploaded
-	if err != nil {
-		return errors.E(op, err, errors.M(module), errors.V(version))
-	}
-	return nil
+	return errors.E(op, err, errors.M(module), errors.V(version))
 }

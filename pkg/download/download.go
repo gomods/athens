@@ -88,11 +88,8 @@ func (p *protocol) Info(ctx context.Context, mod, ver string) ([]byte, error) {
 		}
 		info, err = p.s.Info(ctx, mod, ver)
 	}
-	if err != nil {
-		return nil, errors.E(op, err)
-	}
 
-	return info, nil
+	return info, errors.E(op, err)
 }
 
 func (p *protocol) fillCache(mod, ver string) error {
@@ -105,21 +102,15 @@ func (p *protocol) fillCache(mod, ver string) error {
 	}
 	defer v.Zip.Close()
 	err = p.s.Save(ctx, mod, ver, v.Mod, v.Zip, v.Info)
-	if err != nil {
-		return errors.E(op, err)
-	}
 
-	return nil
+	return errors.E(op, err)
 }
 
 func (p *protocol) Latest(ctx context.Context, mod string) (*storage.RevInfo, error) {
 	const op errors.Op = "protocol.Latest"
 	info, err := p.dp.Latest(ctx, mod)
-	if err != nil {
-		return nil, errors.E(op, err)
-	}
 
-	return info, nil
+	return info, errors.E(op, err)
 }
 
 func (p *protocol) GoMod(ctx context.Context, mod, ver string) ([]byte, error) {
@@ -132,11 +123,8 @@ func (p *protocol) GoMod(ctx context.Context, mod, ver string) ([]byte, error) {
 		}
 		goMod, err = p.s.GoMod(ctx, mod, ver)
 	}
-	if err != nil {
-		return nil, errors.E(op, err)
-	}
 
-	return goMod, nil
+	return goMod, errors.E(op, err)
 }
 
 func (p *protocol) Zip(ctx context.Context, mod, ver string) (io.ReadCloser, error) {
@@ -149,11 +137,8 @@ func (p *protocol) Zip(ctx context.Context, mod, ver string) (io.ReadCloser, err
 		}
 		zip, err = p.s.Zip(ctx, mod, ver)
 	}
-	if err != nil {
-		return nil, errors.E(op, err)
-	}
 
-	return zip, nil
+	return zip, errors.E(op, err)
 }
 
 func (p *protocol) Version(ctx context.Context, mod, ver string) (*storage.Version, error) {

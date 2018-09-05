@@ -41,8 +41,6 @@ func (s *storageImpl) Save(ctx context.Context, module, version string, mod []by
 
 	// write the info file
 	err = afero.WriteFile(s.filesystem, filepath.Join(dir, version+".info"), info, os.ModePerm)
-	if err != nil {
-		return errors.E(op, err)
-	}
-	return nil
+
+	return errors.E(op, err)
 }

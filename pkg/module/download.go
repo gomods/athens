@@ -110,10 +110,7 @@ func getResBody(req *http.Request, timeout time.Duration) (io.ReadCloser, error)
 	const op errors.Op = "module.getResBody"
 	client := http.Client{Timeout: timeout}
 	res, err := client.Do(req)
-	if err != nil {
-		return nil, errors.E(op, err)
-	}
-	return res.Body, nil
+	return res.Body, errors.E(op, err)
 }
 
 func getRequest(ctx context.Context, baseURL, module, version, ext string) (*http.Request, error) {

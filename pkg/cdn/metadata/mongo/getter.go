@@ -13,8 +13,5 @@ func (s *MetadataStore) Get(module string) (string, error) {
 	params := bson.M{"module": module}
 	entry := metadata.CDNMetadataEntry{}
 	err := coll.Find(params).One(&entry)
-	if err != nil {
-		return "", errors.E(op, err)
-	}
-	return entry.RedirectURL, nil
+	return entry.RedirectURL, errors.E(op, err)
 }

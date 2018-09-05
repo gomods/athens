@@ -64,9 +64,5 @@ func (b *gcpBucket) Exists(ctx context.Context, path string) (bool, error) {
 		return false, nil
 	}
 
-	if err != nil {
-		return false, errors.E(op, err)
-	}
-
-	return true, nil
+	return true, errors.E(op, err)
 }

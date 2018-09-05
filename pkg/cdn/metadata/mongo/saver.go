@@ -26,8 +26,5 @@ func (s *MetadataStore) Save(module, redirectURL string) error {
 
 	c := s.session.DB(s.db).C(s.col)
 	err = c.Insert(m)
-	if err != nil {
-		return errors.E(op, err)
-	}
-	return nil
+	return errors.E(op, err)
 }

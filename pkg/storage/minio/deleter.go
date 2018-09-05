@@ -35,8 +35,5 @@ func (v *storageImpl) Delete(ctx context.Context, module, version string) error 
 
 	infoPath := fmt.Sprintf("%s/%s.info", versionedPath, version)
 	err = v.minioClient.RemoveObject(v.bucketName, infoPath)
-	if err != nil {
-		return errors.E(op, err, errors.M(module), errors.V(version))
-	}
-	return nil
+	return errors.E(op, err, errors.M(module), errors.V(version))
 }

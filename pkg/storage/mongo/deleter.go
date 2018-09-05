@@ -28,8 +28,7 @@ func (s *ModuleStore) Delete(ctx context.Context, module, version string) error 
 		return errors.E(op, err, errors.M(module), errors.V(version))
 	}
 	err = c.Remove(bson.M{"module": module, "version": version})
-	if err != nil {
-		return errors.E(op, err, errors.M(module), errors.V(version))
-	}
-	return nil
+
+	return errors.E(op, err, errors.M(module), errors.V(version))
+
 }

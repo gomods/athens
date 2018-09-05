@@ -40,8 +40,5 @@ func (m *MetadataStore) Connect() error {
 	}
 	c := m.session.DB(m.db).C(m.col)
 	err = c.EnsureIndex(index)
-	if err != nil {
-		return errors.E(op, err)
-	}
-	return nil
+	return errors.E(op, err)
 }

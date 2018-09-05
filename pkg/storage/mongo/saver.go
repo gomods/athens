@@ -37,9 +37,6 @@ func (s *ModuleStore) Save(ctx context.Context, module, version string, mod []by
 
 	c := s.s.DB(s.d).C(s.c)
 	err = c.Insert(m)
-	if err != nil {
-		return errors.E(op, err, errors.M(module), errors.V(version))
-	}
 
-	return nil
+	return errors.E(op, err, errors.M(module), errors.V(version))
 }

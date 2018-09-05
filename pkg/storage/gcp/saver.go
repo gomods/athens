@@ -32,14 +32,12 @@ func (s *Storage) Save(ctx context.Context, module, version string, mod []byte, 
 	}
 
 	err = moduploader.Upload(ctx, module, version, bytes.NewReader(info), bytes.NewReader(mod), zip, s.upload)
-	if err != nil {
-		return errors.E(op, err, errors.M(module), errors.V(version))
-	}
+
+	return errors.E(op, err, errors.M(module), errors.V(version))
 
 	// TODO: take out lease on the /list file and add the version to it
 	//
 	// Do that only after module source+metadata is uploaded
-	return nil
 }
 
 func (s *Storage) upload(ctx context.Context, path, contentType string, stream io.Reader) error {

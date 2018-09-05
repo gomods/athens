@@ -106,11 +106,8 @@ func getSources(goBinaryName string, fs afero.Fs, gopath, repoRoot, module, vers
 	}
 	packagePath := getPackagePath(gopath, encmod)
 	err = checkFiles(fs, packagePath, version)
-	if err != nil {
-		return errors.E(op, err)
-	}
 
-	return nil
+	return errors.E(op, err)
 }
 
 // PrepareEnv will return all the appropriate

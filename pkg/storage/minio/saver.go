@@ -27,8 +27,7 @@ func (s *storageImpl) Save(ctx context.Context, module, vsn string, mod []byte, 
 		return errors.E(op, err)
 	}
 	_, err = s.minioClient.PutObject(s.bucketName, infoFileName, bytes.NewReader(info), int64(len(info)), minio.PutObjectOptions{})
-	if err != nil {
-		return errors.E(op, err)
-	}
-	return nil
+
+	return errors.E(op, err)
+
 }

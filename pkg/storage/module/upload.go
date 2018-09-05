@@ -55,9 +55,7 @@ func Upload(ctx context.Context, module, version string, info, mod, zip io.Reade
 		}
 	}
 	close(errChan)
-	if errs != nil {
-		return errors.E(op, errs)
-	}
 
-	return nil
+	return errors.E(op, errs)
+
 }

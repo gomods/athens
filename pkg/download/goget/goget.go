@@ -117,11 +117,8 @@ func (gg *goget) list(op errors.Op, mod string) (*listResp, error) {
 
 	var lr listResp
 	err = json.NewDecoder(stdout).Decode(&lr)
-	if err != nil {
-		return nil, errors.E(op, err)
-	}
 
-	return &lr, nil
+	return &lr, errors.E(op, err)
 }
 
 func (gg *goget) GoMod(ctx context.Context, mod string, ver string) ([]byte, error) {
@@ -138,11 +135,8 @@ func (gg *goget) GoMod(ctx context.Context, mod string, ver string) ([]byte, err
 func (gg *goget) Zip(ctx context.Context, mod, ver string) (io.ReadCloser, error) {
 	const op errors.Op = "goget.Info"
 	v, err := gg.Version(ctx, mod, ver)
-	if err != nil {
-		return nil, errors.E(op, err)
-	}
 
-	return v.Zip, nil
+	return v.Zip, errors.E(op, err)
 }
 
 func (gg *goget) Version(ctx context.Context, mod, ver string) (*storage.Version, error) {
@@ -152,9 +146,6 @@ func (gg *goget) Version(ctx context.Context, mod, ver string) (*storage.Version
 		return nil, errors.E(op, err)
 	}
 	v, err := ref.Read()
-	if err != nil {
-		return nil, errors.E(op, err)
-	}
 
-	return v, nil
+	return v, errors.E(op, err)
 }

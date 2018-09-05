@@ -65,10 +65,7 @@ func ClearFiles(fs afero.Fs, root string) error {
 		return errors.E(op, err)
 	}
 	err = fs.RemoveAll(root)
-	if err != nil {
-		return errors.E(op, err)
-	}
-	return nil
+	return errors.E(op, err)
 }
 
 // read is the Ref interface implementation.

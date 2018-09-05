@@ -50,8 +50,6 @@ func (c *azureBlobStoreClient) UploadWithContext(ctx context.Context, path, cont
 		AccessConditions: emptyBlobAccessCond,
 	}
 	_, err := azblob.UploadStreamToBlockBlob(ctx, content, blobURL, uploadStreamOpts)
-	if err != nil {
-		return errors.E(op, err)
-	}
-	return nil
+
+	return errors.E(op, err)
 }

@@ -76,9 +76,6 @@ func (s *Storage) Zip(ctx context.Context, module, version string) (io.ReadClose
 	}
 
 	zipReader, err := s.bucket.Open(ctx, config.PackageVersionedName(module, version, "zip"))
-	if err != nil {
-		return nil, errors.E(op, err, errors.M(module), errors.V(version))
-	}
 
-	return zipReader, nil
+	return zipReader, errors.E(op, err, errors.M(module), errors.V(version))
 }

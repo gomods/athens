@@ -20,8 +20,5 @@ func (s *fsStore) Get(module string) (string, error) {
 	dec := json.NewDecoder(f)
 	md := &metadata.CDNMetadataEntry{}
 	err = dec.Decode(md)
-	if err != nil {
-		return "", errors.E(op, err)
-	}
-	return md.RedirectURL, nil
+	return md.RedirectURL, errors.E(op, err)
 }

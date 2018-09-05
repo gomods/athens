@@ -8,9 +8,6 @@ import (
 
 func getModuleParams(op errors.Op, c buffalo.Context) (mod string, vers string, err error) {
 	params, err := paths.GetAllParams(c)
-	if err != nil {
-		return "", "", errors.E(op, err, errors.KindBadRequest)
-	}
 
-	return params.Module, params.Version, nil
+	return params.Module, params.Version, errors.E(op, err, errors.KindBadRequest)
 }
