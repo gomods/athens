@@ -1,18 +1,23 @@
 package main
 
 import (
+	"flag"
 	"log"
 
 	"github.com/gomods/athens/cmd/olympus/actions"
 	"github.com/gomods/athens/pkg/config"
 )
 
-const (
-	configPath = "../../config.toml"
+var (
+	configFile = flag.String("config_file", "../../config.toml", "The path to the config file")
 )
 
 func main() {
-	conf, err := config.ParseConfigFile(configPath)
+	flag.Parse()
+	if configFile == nil {
+		log.Fatal("Invalid config file path provided")
+	}
+	conf, err := config.ParseConfigFile(*configFile)
 	if err != nil {
 		log.Fatal(err)
 	}
