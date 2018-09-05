@@ -23,9 +23,6 @@ type ActionSuite struct {
 
 func Test_ActionSuite(t *testing.T) {
 	conf := config.GetConfLogErr(testConfigFile, t)
-	if conf == nil {
-		t.Fatalf("Nil config")
-	}
 	app, err := App(conf)
 	if err != nil {
 		t.Fatalf("Failed to initialize app: %s", err)
