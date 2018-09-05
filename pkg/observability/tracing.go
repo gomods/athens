@@ -48,8 +48,15 @@ func Tracer(service string) buffalo.MiddlewareFunc {
 	}
 }
 
-// StartSpan takes in a ObserverContext and opName and starts a span. It returns the new attached ObserverContext
+// StartSpan takes in a Context Interface and opName and starts a span. It returns the new attached ObserverContext
 // and span
 func StartSpan(ctx context.Context, op string) (context.Context, *trace.Span) {
 	return trace.StartSpan(ctx, op)
+}
+
+// StartBuffaloSpan takes in a BuffaloContext Interface and opName and starts a span. It returns the new attached ObserverContext
+// and span
+func StartBuffaloSpan(ctx buffalo.Context, op string) (buffalo.Context, *trace.Span) {
+	spanCtx, span := trace.StartSpan(ctx, op)
+	return &ObserverContext{ctx, spanCtx}, span
 }

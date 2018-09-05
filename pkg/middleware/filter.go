@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"context"
 	"net/http"
 	"net/url"
 	"strings"
@@ -21,7 +20,7 @@ func NewFilterMiddleware(mf *module.Filter) buffalo.MiddlewareFunc {
 
 	return func(next buffalo.Handler) buffalo.Handler {
 		return func(c buffalo.Context) error {
-			_, sp := observability.StartSpan(context.Background(), op.String())
+			c, sp := observability.StartBuffaloSpan(c, op.String())
 			defer sp.End()
 
 			mod, err := paths.GetModule(c)

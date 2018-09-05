@@ -1,7 +1,6 @@
 package download
 
 import (
-	"context"
 	"net/http"
 	"strings"
 
@@ -21,7 +20,7 @@ const PathList = "/{module:.+}/@v/list"
 func ListHandler(dp Protocol, lggr log.Entry, eng *render.Engine) buffalo.Handler {
 	const op errors.Op = "download.ListHandler"
 	return func(c buffalo.Context) error {
-		_, sp := observability.StartSpan(context.Background(), op.String())
+		c, sp := observability.StartBuffaloSpan(c, op.String())
 		defer sp.End()
 		mod, err := paths.GetModule(c)
 		if err != nil {
