@@ -48,7 +48,7 @@ func (f File) save(rootPath, path, body string) error {
 	}
 
 	odir := filepath.Join(rootPath, path)
-	fmt.Printf("--> %s\n", odir)
+	fmt.Printf("      create  %s\n", path)
 
 	ff, err := os.Create(odir)
 	if err != nil {

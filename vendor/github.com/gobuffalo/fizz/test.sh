@@ -14,7 +14,7 @@ fi
 docker-compose up -d
 sleep 4 # Ensure mysql is online
 
-go get -v -tags sqlite github.com/gobuffalo/pop/...
+go get -v -tags sqlite github.com/gobuffalo/pop
 # go build -v -tags sqlite -o tsoda ./soda
 
 function test {

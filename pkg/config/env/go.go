@@ -36,3 +36,24 @@ func GoGetWorkers() int {
 
 	return num
 }
+
+// ProtocolWorkers returns how many concurrent
+// requests can you handle at a time for all
+// download protocol paths. This is different from
+// GoGetWorkers in that you can potentially serve
+// 30 requests to the Download Protocol but only 5
+// at a time can stash a module from Upstream to Storage.
+func ProtocolWorkers() int {
+	defaultNum := 30
+	str := os.Getenv("ATHENS_PROTOCOL_WORKERS")
+	if str == "" {
+		return defaultNum
+	}
+
+	num, err := strconv.Atoi(str)
+	if err != nil {
+		return defaultNum
+	}
+
+	return num
+}

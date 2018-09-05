@@ -2,6 +2,7 @@ package module
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"os"
 	"os/exec"
@@ -11,6 +12,7 @@ import (
 
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/paths"
+	"github.com/gomods/athens/pkg/storage"
 	"github.com/spf13/afero"
 )
 
@@ -31,9 +33,9 @@ func NewGoGetFetcher(goBinaryName string, fs afero.Fs) (Fetcher, error) {
 	}, nil
 }
 
-// Fetch downloads the sources and returns path where it can be found. Make sure to call Clear
-// on the returned Ref when you are done with it
-func (g *goGetFetcher) Fetch(mod, ver string) (Ref, error) {
+// Fetch downloads the sources from the go binary and returns the corresponding
+// .info, .mod, and .zip files.
+func (g *goGetFetcher) Fetch(ctx context.Context, mod, ver string) (*storage.Version, error) {
 	const op errors.Op = "goGetFetcher.Fetch"
 	// setup the GOPATH
 	goPathRoot, err := afero.TempDir(g.fs, "", "athens")
@@ -59,7 +61,8 @@ func (g *goGetFetcher) Fetch(mod, ver string) (Ref, error) {
 		return nil, errors.E(op, err)
 	}
 
-	return newDiskRef(g.fs, goPathRoot, mod, ver), nil
+	dr := newDiskRef(g.fs, goPathRoot, mod, ver)
+	return dr.Read()
 }
 
 // Dummy Hacky thing makes vgo not to complain
