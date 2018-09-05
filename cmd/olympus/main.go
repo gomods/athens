@@ -3,13 +3,14 @@ package main
 import (
 	"flag"
 	"log"
+	"path/filepath"
 
 	"github.com/gomods/athens/cmd/olympus/actions"
 	"github.com/gomods/athens/pkg/config"
 )
 
 var (
-	configFile = flag.String("config_file", "../../config.toml", "The path to the config file")
+	configFile = flag.String("config_file", filepath.Join("../../config.toml"), "The path to the config file")
 )
 
 func main() {

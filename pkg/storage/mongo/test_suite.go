@@ -2,6 +2,7 @@ package mongo
 
 import (
 	"fmt"
+	"path/filepath"
 
 	"github.com/globalsign/mgo"
 	"github.com/gobuffalo/suite"
@@ -9,8 +10,8 @@ import (
 	"github.com/gomods/athens/pkg/storage"
 )
 
-const (
-	testConfigFile = "../../../config.test.toml"
+var (
+	testConfigFile = filepath.Join("../../../config.test.toml")
 )
 
 // TestSuite implements storage.TestSuite interface

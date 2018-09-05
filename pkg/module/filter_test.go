@@ -1,14 +1,15 @@
 package module
 
 import (
+	"path/filepath"
 	"testing"
 
 	"github.com/gomods/athens/pkg/config"
 	"github.com/stretchr/testify/suite"
 )
 
-const (
-	testConfigFile = "../../config.test.toml"
+var (
+	testConfigFile = filepath.Join("../../config.test.toml")
 )
 
 type FilterTests struct {

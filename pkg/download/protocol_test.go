@@ -21,8 +21,8 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
-const (
-	testConfigPath = "../../config.test.toml"
+var (
+	testConfigPath = filepath.Join("../../config.test.toml")
 )
 
 func getDP(t *testing.T) Protocol {

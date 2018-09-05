@@ -11,6 +11,7 @@ import (
 	"bytes"
 	"context"
 	"io/ioutil"
+	"path/filepath"
 	"testing"
 	"time"
 
@@ -23,8 +24,8 @@ import (
 	"github.com/gomods/athens/pkg/storage/mongo"
 )
 
-const (
-	testConfigFile = "../../../../config.test.toml"
+var (
+	testConfigFile = filepath.Join("../../../../config.test.toml")
 )
 
 type TestSuites struct {

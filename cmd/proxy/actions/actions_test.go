@@ -1,14 +1,15 @@
 package actions
 
 import (
+	"path/filepath"
 	"testing"
 
 	"github.com/gobuffalo/suite"
 	"github.com/gomods/athens/pkg/config"
 )
 
-const (
-	testConfigFile = "../../../config.test.toml"
+var (
+	testConfigFile = filepath.Join("../../../config.test.toml")
 )
 
 type ActionSuite struct {

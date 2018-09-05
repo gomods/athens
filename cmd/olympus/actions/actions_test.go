@@ -2,6 +2,7 @@ package actions
 
 import (
 	"encoding/json"
+	"path/filepath"
 	"testing"
 	"time"
 
@@ -13,8 +14,8 @@ import (
 	"github.com/gomods/athens/pkg/payloads"
 )
 
-const (
-	testConfigFile = "../../../config.test.toml"
+var (
+	testConfigFile = filepath.Join("../../../config.test.toml")
 )
 
 type ActionSuite struct {

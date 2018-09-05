@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"path/filepath"
 	"testing"
 
 	"github.com/bketelsen/buffet"
@@ -23,7 +24,10 @@ import (
 const (
 	pathList        = "/{module:.+}/@v/list"
 	pathVersionInfo = "/{module:.+}/@v/{version}.info"
-	testConfigFile  = "../../config.test.toml"
+)
+
+var (
+	testConfigFile = filepath.Join("../../config.test.toml")
 )
 
 func middlewareFilterApp(filterFile, olympusEndpoint string) *buffalo.App {
