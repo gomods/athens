@@ -13,6 +13,7 @@ import (
 
 // Config provides configuration values for all components
 type Config struct {
+	TimeoutConf
 	GoEnv                string         `validate:"required" envconfig:"GO_ENV"`
 	GoBinary             string         `validate:"required" envconfig:"GO_BINARY_PATH"`
 	GoGetWorkers         int            `validate:"required" envconfig:"ATHENS_GOGET_WORKERS"`
@@ -27,7 +28,6 @@ type Config struct {
 	Proxy                *ProxyConfig   `validate:""`
 	Olympus              *OlympusConfig `validate:""`
 	Storage              *StorageConfig `validate:""`
-	TimeoutConf
 }
 
 // ParseConfigFile parses the given file into an athens config struct
