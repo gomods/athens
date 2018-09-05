@@ -16,21 +16,21 @@ import (
 )
 
 // GetStorage returns storage backend based on env configuration
-func GetStorage(sType string, sConf *config.StorageConfig) (storage.Backend, error) {
+func GetStorage(storageType string, storageConfig *config.StorageConfig) (storage.Backend, error) {
 	const op errors.Op = "actions.GetStorage"
-	switch sType {
+	switch storageType {
 	case "memory":
 		return mem.NewStorage()
 	case "mongo":
-		if sConf.Mongo == nil {
+		if storageConfig.Mongo == nil {
 			return nil, errors.E(op, "Invalid Mongo Storage Configuration")
 		}
-		return mongo.NewStorage(sConf.Mongo)
+		return mongo.NewStorage(storageConfig.Mongo)
 	case "disk":
-		if sConf.Disk == nil {
+		if storageConfig.Disk == nil {
 			return nil, errors.E(op, "Invalid Disk Storage Configuration")
 		}
-		rootLocation := sConf.Disk.RootPath
+		rootLocation := storageConfig.Disk.RootPath
 		s, err := fs.NewStorage(rootLocation, afero.NewOsFs())
 		if err != nil {
 			errStr := fmt.Sprintf("could not create new storage from os fs (%s)", err)
@@ -38,19 +38,19 @@ func GetStorage(sType string, sConf *config.StorageConfig) (storage.Backend, err
 		}
 		return s, nil
 	case "minio":
-		if sConf.Minio == nil {
+		if storageConfig.Minio == nil {
 			return nil, errors.E(op, "Invalid Minio Storage Configuration")
 		}
-		return minio.NewStorage(sConf.Minio)
+		return minio.NewStorage(storageConfig.Minio)
 	case "gcp":
-		if sConf.GCP == nil {
+		if storageConfig.GCP == nil {
 			return nil, errors.E(op, "Invalid GCP Storage Configuration")
 		}
-		if sConf.CDN == nil {
+		if storageConfig.CDN == nil {
 			return nil, errors.E(op, "Invalid CDN Storage Configuration")
 		}
-		return gcp.New(context.Background(), sConf.GCP, sConf.CDN)
+		return gcp.New(context.Background(), storageConfig.GCP, storageConfig.CDN)
 	default:
-		return nil, fmt.Errorf("storage type %s is unknown", sType)
+		return nil, fmt.Errorf("storage type %s is unknown", storageType)
 	}
 }

@@ -13,27 +13,27 @@ import (
 )
 
 // GetStorage returns storage.Backend implementation
-func GetStorage(sType string, sConf *config.StorageConfig) (storage.Backend, error) {
+func GetStorage(storageType string, storageConfig *config.StorageConfig) (storage.Backend, error) {
 	const op errors.Op = "actions.GetStorage"
-	switch sType {
+	switch storageType {
 	case "memory":
 		return mem.NewStorage()
 	case "disk":
-		if sConf.Disk == nil {
+		if storageConfig.Disk == nil {
 			return nil, errors.E(op, "Invalid Disk Storage Configuration")
 		}
-		rootLocation := sConf.Disk.RootPath
+		rootLocation := storageConfig.Disk.RootPath
 		s, err := fs.NewStorage(rootLocation, afero.NewOsFs())
 		if err != nil {
 			return nil, fmt.Errorf("could not create new storage from os fs (%s)", err)
 		}
 		return s, nil
 	case "mongo":
-		if sConf.Mongo == nil {
+		if storageConfig.Mongo == nil {
 			return nil, errors.E(op, "Invalid Mongo Storage Configuration")
 		}
-		return mongo.NewStorage(sConf.Mongo)
+		return mongo.NewStorage(storageConfig.Mongo)
 	default:
-		return nil, fmt.Errorf("storage type %s is unknown", sType)
+		return nil, fmt.Errorf("storage type %s is unknown", storageType)
 	}
 }
