@@ -77,6 +77,9 @@ func E(op Op, args ...interface{}) error {
 	for _, a := range args {
 		switch a := a.(type) {
 		case error:
+			if a == nil {
+				return nil
+			}
 			e.Err = a
 		case string:
 			e.Err = errors.New(a)
