@@ -1,15 +1,16 @@
 package middleware
 
 import (
+	"context"
 	"net/http"
 	"net/url"
 	"strings"
 
-	"github.com/bketelsen/buffet"
 	"github.com/gobuffalo/buffalo"
 	"github.com/gomods/athens/pkg/config/env"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/module"
+	"github.com/gomods/athens/pkg/observability"
 	"github.com/gomods/athens/pkg/paths"
 )
 
@@ -20,8 +21,8 @@ func NewFilterMiddleware(mf *module.Filter) buffalo.MiddlewareFunc {
 
 	return func(next buffalo.Handler) buffalo.Handler {
 		return func(c buffalo.Context) error {
-			sp := buffet.SpanFromContext(c).SetOperationName("filterMiddleware")
-			defer sp.Finish()
+			_, sp := observability.StartSpan(context.Background(), op.String())
+			defer sp.End()
 
 			mod, err := paths.GetModule(c)
 
