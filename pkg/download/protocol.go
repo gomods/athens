@@ -35,7 +35,7 @@ type Wrapper func(Protocol) Protocol
 type Opts struct {
 	Storage storage.Backend
 	Stasher stash.Stasher
-	Lister  Lister
+	Lister  UpstreamLister
 }
 
 // New returns a full implementation of the download.Protocol
@@ -55,38 +55,36 @@ func New(opts *Opts, wrappers ...Wrapper) Protocol {
 type protocol struct {
 	s       storage.Backend
 	stasher stash.Stasher
-	lister  Lister
+	lister  UpstreamLister
 }
 
 func (p *protocol) List(ctx context.Context, mod string) ([]string, error) {
 	const op errors.Op = "protocol.List"
 
 	strList, sErr := p.s.List(ctx, mod)
-	isUnexpStorageErr := sErr != nil && !errors.IsNotFoundErr(sErr)
 	// if we got an unexpected storage err then we can not guarantee that the end result will contain all versions
-	if isUnexpStorageErr {
+	if sErr != nil {
 		return nil, errors.E(op, sErr)
 	}
-	_, goRes, goErr := p.lister(mod)
+	_, goList, goErr := p.lister.List(mod)
 	isUnexpGoErr := goErr != nil && !errors.IsRepoNotFoundErr(goErr)
 	// if i.e. github is unavailable we should fail as well so that the behavior of the proxy is stable
 	if isUnexpGoErr {
 		return nil, errors.E(op, goErr)
 	}
 
-	repoNotFound := goErr != nil && errors.IsRepoNotFoundErr(goErr)
-	storageEmpty := sErr != nil && errors.IsNotFoundErr(sErr)
-	if storageEmpty && repoNotFound {
-		return nil, errors.E(op, errors.M(mod), errors.KindNotFound)
+	isRepoNotFoundErr := goErr != nil && errors.IsRepoNotFoundErr(goErr)
+	storageEmpty := len(strList) == 0
+	if isRepoNotFoundErr && storageEmpty {
+		return nil, errors.E(op, errors.M(mod), errors.KindNotFound, goErr)
 	}
 
-	combinedList := union(goRes, strList)
-	return combinedList, nil
+	return union(goList, strList), nil
 }
 
 func (p *protocol) Latest(ctx context.Context, mod string) (*storage.RevInfo, error) {
 	const op errors.Op = "protocol.Latest"
-	lr, _, err := p.lister(mod)
+	lr, _, err := p.lister.List(mod)
 	if err != nil {
 		return nil, errors.E(op, err)
 	}

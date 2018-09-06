@@ -34,7 +34,7 @@ func getDP(t *testing.T) Protocol {
 		t.Fatal(err)
 	}
 	st := stash.New(mf, s)
-	return New(&Opts{s, st, NewGoLister(goBin, fs)})
+	return New(&Opts{s, st, NewVCSLister(goBin, fs)})
 }
 
 type listTest struct {
@@ -52,6 +52,7 @@ var listTests = []listTest{
 	{
 		name: "no tags",
 		path: "github.com/athens-artifacts/no-tags",
+		tags: []string{},
 	},
 }
 

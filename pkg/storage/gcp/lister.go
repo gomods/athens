@@ -18,11 +18,7 @@ func (s *Storage) List(ctx context.Context, module string) ([]string, error) {
 	if err != nil {
 		return nil, errors.E(op, err, errors.M(module))
 	}
-	versions := extractVersions(paths)
-	if len(versions) < 1 {
-		return nil, errors.E(op, "empty versions list", errors.M(module), errors.KindNotFound)
-	}
-	return versions, nil
+	return extractVersions(paths), nil
 }
 
 func extractVersions(paths []string) []string {

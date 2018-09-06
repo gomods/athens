@@ -53,7 +53,7 @@ func addProxyRoutes(
 	dpOpts := &download.Opts{
 		Storage: s,
 		Stasher: st,
-		Lister:  download.NewGoLister(goBin, fs),
+		Lister:  download.NewVCSLister(goBin, fs),
 	}
 	dp := download.New(dpOpts, addons.WithPool(env.ProtocolWorkers()))
 

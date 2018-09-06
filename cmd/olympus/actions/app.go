@@ -136,7 +136,7 @@ func App(config *AppConfig) (*buffalo.App, error) {
 	dpOpts := &download.Opts{
 		Storage: config.Storage,
 		Stasher: st,
-		Lister:  download.NewGoLister(goBin, fs),
+		Lister:  download.NewVCSLister(goBin, fs),
 	}
 	dp := download.New(dpOpts)
 

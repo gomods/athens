@@ -10,10 +10,15 @@ import (
 	athenser "github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/storage"
 	"github.com/gomods/athens/pkg/storage/mem"
+	"github.com/stretchr/testify/require"
 )
+
+const testOp athenser.Op = "download.vcsLister.List"
+const modName = "happy tags"
 
 type listMergeTest struct {
 	name        string
+	newStorage  func() (storage.Backend, error)
 	module      string
 	goVersions  []string
 	goErr       error
@@ -23,12 +28,20 @@ type listMergeTest struct {
 	expectedErr error
 }
 
-const testOp athenser.Op = "protocol.List"
+type storageMock struct {
+	storage.Backend
+	versions []string
+	err      error
+}
+
+func (s *storageMock) List(ctx context.Context, module string) ([]string, error) {
+	return s.versions, s.err
+}
 
 var listMergeTests = []listMergeTest{
 	{
 		name:        "go list full and storage full",
-		module:      "happy tags",
+		newStorage:  mem.NewStorage,
 		goVersions:  []string{"v1.0.0", "v1.0.2", "v1.0.3"},
 		goErr:       nil,
 		strVersions: []string{"v1.0.0", "v1.0.1", "v1.0.2"},
@@ -37,17 +50,17 @@ var listMergeTests = []listMergeTest{
 	},
 	{
 		name:        "go list full and storage empty",
-		module:      "happy tags",
+		newStorage:  mem.NewStorage,
 		goVersions:  []string{"v1.0.0", "v1.0.1", "v1.0.2"},
 		goErr:       nil,
 		strVersions: []string{},
-		strErr:      athenser.E(testOp, athenser.M("happy tags"), athenser.KindNotFound),
+		strErr:      nil,
 		expected:    []string{"v1.0.0", "v1.0.1", "v1.0.2"},
 		expectedErr: nil,
 	},
 	{
 		name:        "go list repo not found and storage full",
-		module:      "happy tags",
+		newStorage:  mem.NewStorage,
 		goVersions:  nil,
 		goErr:       errors.New("remote: Repository not found"),
 		strVersions: []string{"v1.0.0", "v1.0.1", "v1.0.2"},
@@ -57,17 +70,17 @@ var listMergeTests = []listMergeTest{
 	},
 	{
 		name:        "go list repo not found and storage empty",
-		module:      "happy tags",
+		newStorage:  mem.NewStorage,
 		goVersions:  nil,
 		goErr:       errors.New("remote: Repository not found"),
-		strVersions: nil,
-		strErr:      athenser.E(testOp, athenser.M("happy tags"), athenser.KindNotFound),
+		strVersions: []string{},
+		strErr:      nil,
 		expected:    nil,
-		expectedErr: athenser.E(testOp, athenser.M("happy tags"), athenser.KindNotFound),
+		expectedErr: athenser.E(testOp, athenser.M(modName), athenser.KindNotFound, errors.New("remote: Repository not found")),
 	},
 	{
 		name:        "unexpected go err",
-		module:      "happy tags",
+		newStorage:  mem.NewStorage,
 		goVersions:  nil,
 		goErr:       errors.New("unexpected error"),
 		strVersions: []string{"1.1.1"},
@@ -77,7 +90,7 @@ var listMergeTests = []listMergeTest{
 	},
 	{
 		name:        "unexpected storage err",
-		module:      "happy tags",
+		newStorage:  func() (storage.Backend, error) { return &storageMock{err: errors.New("unexpected error")}, nil },
 		goVersions:  []string{"1.1.1"},
 		goErr:       nil,
 		strVersions: nil,
@@ -87,56 +100,59 @@ var listMergeTests = []listMergeTest{
 	},
 }
 
+type listerMock struct {
+	versions []string
+	err      error
+}
+
+func (l *listerMock) List(mod string) (*storage.RevInfo, []string, error) {
+	return nil, l.versions, l.err
+}
+
 func TestListMerge(t *testing.T) {
 	ctx := context.Background()
-	s, err := mem.NewStorage()
-	if err != nil {
-		t.Fatal(err)
-	}
+	bts := []byte("123")
 	clearStorage := func(st storage.Backend, module string, versions []string) {
 		for _, v := range versions {
-			s.Delete(ctx, module, v)
+			st.Delete(ctx, module, v)
 		}
 	}
 
-	newLister := func(versions []string, err error) Lister {
-		return func(mod string) (*storage.RevInfo, []string, error) {
-			return nil, versions, err
-		}
-	}
 	for _, tc := range listMergeTests {
 		t.Run(tc.name, func(t *testing.T) {
-			bts := []byte("123")
+			s, err := tc.newStorage()
+			if err != nil {
+				t.Fatal(err)
+			}
 			for _, v := range tc.strVersions {
-				s.Save(ctx, tc.module, v, bts, ioutil.NopCloser(bytes.NewReader(bts)), bts)
+				s.Save(ctx, modName, v, bts, ioutil.NopCloser(bytes.NewReader(bts)), bts)
 			}
-			defer clearStorage(s, tc.module, tc.strVersions)
-			dp := New(&Opts{s, nil, newLister(tc.goVersions, tc.goErr)})
-			list, _ := dp.List(ctx, tc.module)
+			defer clearStorage(s, modName, tc.strVersions)
+			dp := New(&Opts{s, nil, &listerMock{versions: tc.goVersions, err: tc.goErr}})
+			list, err := dp.List(ctx, modName)
 
-			if ok := testEq(tc.expected, list); !ok {
-				t.Fatalf("expected list: %v, got: %v", tc.expected, list)
+			if ok := testErrEq(tc.expectedErr, err); !ok {
+				t.Fatalf("expected err: %v, got: %v", tc.expectedErr, err)
 			}
+			if tc.expectedErr != nil {
+				require.Equal(t, athenser.Kind(tc.expectedErr), athenser.Kind(err))
+			}
+			require.ElementsMatch(t, tc.expected, list, "expected list: %v, got: %v", tc.expected, list)
 		})
 	}
 }
 
-func testEq(a, b []string) bool {
+func testErrEq(a, b error) bool {
+	if a == nil && b == nil {
+		return true
+	}
 
-	// If one is nil, the other must also be nil.
 	if (a == nil) != (b == nil) {
 		return false
 	}
 
-	if len(a) != len(b) {
+	if a.Error() != b.Error() {
 		return false
 	}
-
-	for i := range a {
-		if a[i] != b[i] {
-			return false
-		}
-	}
-
 	return true
 }

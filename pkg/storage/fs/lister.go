@@ -16,21 +16,17 @@ func (l *storageImpl) List(ctx context.Context, module string) ([]string, error)
 	loc := l.moduleLocation(module)
 	fileInfos, err := afero.ReadDir(l.filesystem, loc)
 	if err != nil {
-		kind := errors.KindUnexpected
 		if os.IsNotExist(err) {
-			kind = errors.KindNotFound
+			return []string{}, nil
 		}
 
-		return nil, errors.E(op, errors.M(module), err, kind)
+		return nil, errors.E(op, errors.M(module), err, errors.KindUnexpected)
 	}
 	ret := []string{}
 	for _, fileInfo := range fileInfos {
 		if fileInfo.IsDir() {
 			ret = append(ret, fileInfo.Name())
 		}
-	}
-	if len(ret) == 0 {
-		return nil, errors.E(op, errors.M(module), err, errors.KindNotFound)
 	}
 	return ret, nil
 }
