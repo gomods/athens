@@ -9,12 +9,8 @@ import (
 	"go.opencensus.io/trace"
 )
 
-// ObserverContext is a context that wraps around a buffaloCtx and also keeps a span context
-// for spans to use it
-type ObserverContext struct {
-	buffalo.Context
-	SpanCtx context.Context
-}
+// TraceCtx is the name of the key where we will store the traceCtx in buffalo context
+const TraceCtx = "traceCtx"
 
 // RegisterTraceExporter returns a jaeger exporter for exporting traces to opencensus.
 // It should in the future have a nice sampling rate defined
@@ -40,10 +36,23 @@ func RegisterTraceExporter(service string) *(jaeger.Exporter) {
 func Tracer(service string) buffalo.MiddlewareFunc {
 	return func(next buffalo.Handler) buffalo.Handler {
 		return func(ctx buffalo.Context) error {
-			spanCtx, span := trace.StartSpan(ctx, service)
+			var spanCtx context.Context
+			var span *trace.Span
+			if tCtx := ctx.Data()[TraceCtx]; tCtx != nil {
+				spanCtx, span = trace.StartSpan(tCtx.(context.Context), service)
+				defer span.End()
+			} else {
+				spanCtx, span = trace.StartSpan(ctx, service)
+				defer span.End()
+
+				// Set the traceCtx in spanCtx
+				ctx.Set("traceCtx", spanCtx)
+			}
+
+			// Add attributes that are required
 			span.AddAttributes(trace.StringAttribute("url", ctx.Request().URL.String()))
-			defer span.End()
-			return next(spanCtx.(buffalo.Context))
+
+			return next(ctx)
 		}
 	}
 }
@@ -56,7 +65,17 @@ func StartSpan(ctx context.Context, op string) (context.Context, *trace.Span) {
 
 // StartBuffaloSpan takes in a BuffaloContext Interface and opName and starts a span. It returns the new attached ObserverContext
 // and span
-func StartBuffaloSpan(ctx buffalo.Context, op string) (buffalo.Context, *trace.Span) {
-	spanCtx, span := trace.StartSpan(ctx, op)
-	return spanCtx.(buffalo.Context), span
+func StartBuffaloSpan(ctx buffalo.Context, op string) (buffalo.Context, context.Context, *trace.Span) {
+	var spanCtx context.Context
+	var span *trace.Span
+	// StartSpan if the span already exists
+	if tCtx := ctx.Data()[TraceCtx]; tCtx != nil {
+		spanCtx, span = trace.StartSpan(tCtx.(context.Context), op)
+	} else {
+		spanCtx, span = trace.StartSpan(ctx, op)
+		// Set the traceCtx in spanCtx
+		ctx.Set("traceCtx", spanCtx)
+	}
+
+	return ctx, spanCtx, span
 }

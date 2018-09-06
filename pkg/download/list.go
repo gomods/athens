@@ -20,7 +20,7 @@ const PathList = "/{module:.+}/@v/list"
 func ListHandler(dp Protocol, lggr log.Entry, eng *render.Engine) buffalo.Handler {
 	const op errors.Op = "download.ListHandler"
 	return func(c buffalo.Context) error {
-		c, sp := observ.StartBuffaloSpan(c, op.String())
+		c, spanCtx, sp := observ.StartBuffaloSpan(c, op.String())
 		defer sp.End()
 		mod, err := paths.GetModule(c)
 		if err != nil {
@@ -28,7 +28,7 @@ func ListHandler(dp Protocol, lggr log.Entry, eng *render.Engine) buffalo.Handle
 			return c.Render(500, nil)
 		}
 
-		versions, err := dp.List(c, mod)
+		versions, err := dp.List(spanCtx, mod)
 		if err != nil {
 			lggr.SystemErr(errors.E(op, err))
 			return c.Render(errors.Kind(err), eng.JSON(errors.KindText(err)))

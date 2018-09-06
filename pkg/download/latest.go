@@ -18,7 +18,7 @@ const PathLatest = "/{module:.+}/@latest"
 func LatestHandler(dp Protocol, lggr log.Entry, eng *render.Engine) buffalo.Handler {
 	const op errors.Op = "download.LatestHandler"
 	return func(c buffalo.Context) error {
-		c, sp := observ.StartBuffaloSpan(c, op.String())
+		c, spanCtx, sp := observ.StartBuffaloSpan(c, op.String())
 		defer sp.End()
 		mod, err := paths.GetModule(c)
 		if err != nil {
@@ -26,7 +26,7 @@ func LatestHandler(dp Protocol, lggr log.Entry, eng *render.Engine) buffalo.Hand
 			return c.Render(500, nil)
 		}
 
-		info, err := dp.Latest(c, mod)
+		info, err := dp.Latest(spanCtx, mod)
 		if err != nil {
 			lggr.SystemErr(errors.E(op, err))
 			return c.Render(errors.Kind(err), eng.JSON(errors.KindText(err)))

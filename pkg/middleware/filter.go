@@ -20,7 +20,7 @@ func NewFilterMiddleware(mf *module.Filter) buffalo.MiddlewareFunc {
 
 	return func(next buffalo.Handler) buffalo.Handler {
 		return func(c buffalo.Context) error {
-			c, sp := observ.StartBuffaloSpan(c, op.String())
+			c, _, sp := observ.StartBuffaloSpan(c, op.String())
 			defer sp.End()
 
 			mod, err := paths.GetModule(c)
