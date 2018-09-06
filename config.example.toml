@@ -84,7 +84,7 @@ EnableCSRFProtection = false
     OlympusGlobalEndpoint = "http://localhost:3001"
     # Redis queue for buffalo workers
     # Defaults to ":6379"
-    # Env override: ATHENS_REDIS_QUEUE_PORT
+    # Env override: ATHENS_REDIS_QUEUE_ADDRESS
     RedisQueueAddress = ":6379"
     # Flag to turn off Proxy Filter middleware
     # Defaults to true
@@ -134,7 +134,7 @@ EnableCSRFProtection = false
     WorkerType = "redis"
     # Redis queue for buffalo workers
     # Defaults to ":6379"
-    # Env override: OLYMPUS_REDIS_QUEUE_PORT
+    # Env override: OLYMPUS_REDIS_QUEUE_ADDRESS
     RedisQueueAddress = ":6379"
 
 [Storage]

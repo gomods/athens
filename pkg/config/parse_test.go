@@ -360,7 +360,7 @@ func getEnvMap(config *Config) map[string]string {
 		envVars["ATHENS_STORAGE_TYPE"] = proxy.StorageType
 		envVars["OLYMPUS_GLOBAL_ENDPOINT"] = proxy.OlympusGlobalEndpoint
 		envVars["PORT"] = proxy.Port
-		envVars["ATHENS_REDIS_QUEUE_PORT"] = proxy.RedisQueueAddress
+		envVars["ATHENS_REDIS_QUEUE_ADDRESS"] = proxy.RedisQueueAddress
 		envVars["PROXY_FILTER_OFF"] = strconv.FormatBool(proxy.FilterOff)
 		envVars["BASIC_AUTH_USER"] = proxy.BasicAuthUser
 		envVars["BASIC_AUTH_PASS"] = proxy.BasicAuthPass
@@ -373,7 +373,7 @@ func getEnvMap(config *Config) map[string]string {
 	olympus := config.Olympus
 	if olympus != nil {
 		envVars["OLYMPUS_BACKGROUND_WORKER_TYPE"] = olympus.WorkerType
-		envVars["OLYMPUS_REDIS_QUEUE_PORT"] = olympus.RedisQueueAddress
+		envVars["OLYMPUS_REDIS_QUEUE_ADDRESS"] = olympus.RedisQueueAddress
 	}
 
 	storage := config.Storage

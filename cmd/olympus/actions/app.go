@@ -196,14 +196,14 @@ func registerInMem(wConf workerConfig) (worker.Worker, error) {
 }
 
 func registerRedis(wConf workerConfig) (worker.Worker, error) {
-	port := wConf.redisEndpoint
+	addr := wConf.redisEndpoint
 	w := gwa.New(gwa.Options{
 		Pool: &redis.Pool{
 			MaxActive: 5,
 			MaxIdle:   5,
 			Wait:      true,
 			Dial: func() (redis.Conn, error) {
-				return redis.Dial("tcp", port)
+				return redis.Dial("tcp", addr)
 			},
 		},
 		Name:           OlympusWorkerName,
