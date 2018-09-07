@@ -5,7 +5,6 @@ import (
 )
 
 func (m *MongoTests) TestNewMongoStorage() {
-	// TODO: what is the difference between all_test, mongo_test, test_suite.go??
 	r := m.Require()
 	conf := config.GetConfLogErr(testConfigFile, m.T())
 	getterSaver, err := NewStorage(conf.Storage.Mongo)

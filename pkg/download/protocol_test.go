@@ -22,7 +22,7 @@ import (
 )
 
 var (
-	testConfigPath = filepath.Join("../../config.test.toml")
+	testConfigPath = filepath.Join("..", "..", "config.test.toml")
 )
 
 func getDP(t *testing.T) Protocol {

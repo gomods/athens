@@ -16,7 +16,6 @@ type MinioTests struct {
 }
 
 func (d *MinioTests) SetupTest() {
-	// TODO: what is the difference between all_test and test_suite.go??
 	d.endpoint = "127.0.0.1:9000"
 	d.bucketName = "gomods"
 	d.accessKeyID = "minio"
