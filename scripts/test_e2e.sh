@@ -17,15 +17,15 @@ clearGoModCache () {
 
 teardown () {
   # Cleanup after our tests
-  pkill buffalo || true
+  pkill proxy || true
   popd 2> /dev/null || true
 }
 trap teardown EXIT
 
 # Start the proxy in the background and wait for it to be ready
 cd $REPO_DIR/cmd/proxy
-pkill buffalo || true # cleanup old buffalos
-buffalo dev &
+pkill proxy || true # cleanup proxy if it is running
+go build -mod=vendor && ./proxy &
 while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' localhost:3000)" != "200" ]]; do sleep 5; done
 
 # Clone our test repo

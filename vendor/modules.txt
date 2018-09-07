@@ -251,8 +251,6 @@ github.com/prometheus/procfs/internal/util
 github.com/robfig/cron
 # github.com/rs/cors v1.5.0
 github.com/rs/cors
-# github.com/sabhiram/go-gitignore v0.0.0-20180611051255-d3107576ba94
-github.com/sabhiram/go-gitignore
 # github.com/serenize/snaker v0.0.0-20171204205717-a683aaf2d516
 github.com/serenize/snaker
 # github.com/sergi/go-diff v1.0.0
