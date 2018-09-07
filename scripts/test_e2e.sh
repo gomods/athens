@@ -24,7 +24,7 @@ trap teardown EXIT
 
 # Start the proxy in the background and wait for it to be ready
 cd $REPO_DIR/cmd/proxy
-pkill proxy || true # cleanup old buffalos
+pkill proxy || true # cleanup proxy if it is running
 go build -mod=vendor && ./proxy &
 while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' localhost:3000)" != "200" ]]; do sleep 5; done
 
