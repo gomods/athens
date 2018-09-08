@@ -21,7 +21,7 @@ import (
 )
 
 // Service is the name of the service that we want to tag our processes with
-const Service = "athens.proxy"
+const Service = "proxy"
 
 // ENV is used to help switch settings based on where the
 // application is being run. Default is "development".
