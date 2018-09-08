@@ -79,9 +79,12 @@ func genericCreate(s store, model *Model, cols columns.Columns) error {
 		}
 		_, err = stmt.Exec(model.Value)
 		if err != nil {
+			if err := stmt.Close(); err != nil {
+				return errors.WithMessage(err, "failed to close statement")
+			}
 			return errors.WithStack(err)
 		}
-		return nil
+		return errors.WithMessage(stmt.Close(), "failed to close statement")
 	}
 	return errors.Errorf("can not use %s as a primary key type!", keyType)
 }

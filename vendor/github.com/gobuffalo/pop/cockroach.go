@@ -1,7 +1,6 @@
 package pop
 
 import (
-	"bytes"
 	"fmt"
 	"io"
 	"os"
@@ -54,10 +53,13 @@ func (p *cockroach) Create(s store, model *Model, cols columns.Columns) error {
 		}
 		err = stmt.Get(&id, model.Value)
 		if err != nil {
+			if err := stmt.Close(); err != nil {
+				return errors.WithMessage(err, "failed to close statement")
+			}
 			return errors.WithStack(err)
 		}
 		model.setID(id.ID)
-		return nil
+		return errors.WithMessage(stmt.Close(), "failed to close statement")
 	}
 	return genericCreate(s, model, cols)
 }
@@ -182,39 +184,7 @@ func (p *cockroach) DumpSchema(w io.Writer) error {
 }
 
 func (p *cockroach) LoadSchema(r io.Reader) error {
-	secure := ""
-	c := p.ConnectionDetails
-	if defaults.String(c.Options["sslmode"], "disable") == "disable" {
-		secure = "--insecure"
-	}
-
-	cmd := exec.Command("cockroach", "sql", secure, fmt.Sprintf("--database=%s", p.Details().Database), fmt.Sprintf("--user=%s", p.Details().User))
-	in, err := cmd.StdinPipe()
-	if err != nil {
-		return err
-	}
-	go func() {
-		defer in.Close()
-		io.Copy(in, r)
-	}()
-	Log(strings.Join(cmd.Args, " "))
-
-	bb := &bytes.Buffer{}
-	cmd.Stdout = bb
-	cmd.Stderr = bb
-
-	err = cmd.Start()
-	if err != nil {
-		return errors.WithMessage(err, bb.String())
-	}
-
-	err = cmd.Wait()
-	if err != nil {
-		return errors.WithMessage(err, bb.String())
-	}
-
-	fmt.Printf("loaded schema for %s\n", p.Details().Database)
-	return nil
+	return genericLoadSchema(p.ConnectionDetails, p.MigrationURL(), r)
 }
 
 func (p *cockroach) TruncateAll(tx *Connection) error {

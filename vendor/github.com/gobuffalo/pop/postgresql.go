@@ -50,10 +50,13 @@ func (p *postgresql) Create(s store, model *Model, cols columns.Columns) error {
 		}
 		err = stmt.Get(&id, model.Value)
 		if err != nil {
+			if err := stmt.Close(); err != nil {
+				return errors.WithMessage(err, "failed to close statement")
+			}
 			return errors.WithStack(err)
 		}
 		model.setID(id.ID)
-		return nil
+		return errors.WithMessage(stmt.Close(), "failed to close statement")
 	}
 	return genericCreate(s, model, cols)
 }
