@@ -2,13 +2,20 @@ package observ
 
 import (
 	"context"
+	"fmt"
 	"log"
+	"net/http"
 
 	"github.com/gobuffalo/buffalo"
+	"github.com/gomods/athens/pkg/config/env"
 	"go.opencensus.io/exporter/jaeger"
 	"go.opencensus.io/trace"
 )
 
+// ENV is used to define the sampling rate
+var ENV = env.GoEnvironmentWithDefault("development")
+
+// observabilityContext is a private context that is used by the packages to start the span
 type observabilityContext struct {
 	buffalo.Context
 	spanCtx context.Context
@@ -29,7 +36,12 @@ func RegisterTraceExporter(service string) *(jaeger.Exporter) {
 
 	// And now finally register it as a Trace Exporter
 	trace.RegisterExporter(je)
-	trace.ApplyConfig(trace.Config{DefaultSampler: trace.AlwaysSample()})
+
+	fmt.Println(ENV, "---------------------------")
+	if ENV == "development" {
+		trace.ApplyConfig(trace.Config{DefaultSampler: trace.AlwaysSample()})
+	}
+
 	return je
 }
 
@@ -38,10 +50,28 @@ func RegisterTraceExporter(service string) *(jaeger.Exporter) {
 func Tracer(service string) buffalo.MiddlewareFunc {
 	return func(next buffalo.Handler) buffalo.Handler {
 		return func(ctx buffalo.Context) error {
-			spanCtx, span := trace.StartSpan(ctx, ctx.Request().URL.Path)
+			spanCtx, span := trace.StartSpan(ctx,
+				ctx.Request().URL.Path,
+				trace.WithSpanKind(trace.SpanKindClient))
 			defer span.End()
+
+			span.AddAttributes(
+				requestAttrs(ctx.Request())...,
+			)
+
 			return next(&observabilityContext{Context: ctx, spanCtx: spanCtx})
 		}
+	}
+}
+
+// Applies request information to the span
+func requestAttrs(r *http.Request) []trace.Attribute {
+	// From: https://github.com/census-instrumentation/opencensus-go/blob/master/plugin/ochttp/trace.go
+	return []trace.Attribute{
+		trace.StringAttribute("http.path", r.URL.Path),
+		trace.StringAttribute("http.host", r.URL.Host),
+		trace.StringAttribute("http.method", r.Method),
+		trace.StringAttribute("http.user_agent", r.UserAgent()),
 	}
 }
 
