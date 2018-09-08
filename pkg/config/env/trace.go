@@ -1,10 +1,12 @@
 package env
 
-import (
-	"github.com/gobuffalo/envy"
-)
+import "os"
 
 // TraceExporterURL returns where the trace is stored to
 func TraceExporterURL() string {
-	return envy.Get("TRACE_EXPORTER", "http://0.0.0.0:14268")
+	url := os.Getenv("TRACE_EXPORTER")
+	if url == "" {
+		return "http://0.0.0.0:14268"
+	}
+	return url
 }
