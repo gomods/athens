@@ -54,6 +54,9 @@ var (
 	T *i18n.Translator
 )
 
+// Service is the name of the service that we want to tag our processes with
+const Service = "olympus"
+
 // App is where all routes and middleware for buffalo should be defined.
 // This is the nerve center of your application.
 func App(config *AppConfig) (*buffalo.App, error) {
