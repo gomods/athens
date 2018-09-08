@@ -132,11 +132,12 @@ func App(config *AppConfig) (*buffalo.App, error) {
 	if err != nil {
 		return nil, err
 	}
+	lister := download.NewVCSLister(goBin, fs)
 	st := stash.New(mf, config.Storage)
 	dpOpts := &download.Opts{
 		Storage: config.Storage,
 		Stasher: st,
-		Lister:  download.NewVCSLister(goBin, fs),
+		Lister:  lister,
 	}
 	dp := download.New(dpOpts)
 

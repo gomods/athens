@@ -32,7 +32,7 @@ type vcsLister struct {
 }
 
 func (l *vcsLister) List(mod string) (*storage.RevInfo, []string, error) {
-	const op errors.Op = "download.vcsLister.List"
+	const op errors.Op = "vcsLister.List"
 	hackyPath, err := afero.TempDir(l.fs, "", "hackymod")
 	if err != nil {
 		return nil, nil, errors.E(op, err)
@@ -79,7 +79,7 @@ func (l *vcsLister) List(mod string) (*storage.RevInfo, []string, error) {
 	return &rev, lr.Versions, nil
 }
 
-// NewVCSLister
+// NewVCSLister creates an UpstreamLister which uses VCS to fetch a list of available versions
 func NewVCSLister(goBinPath string, fs afero.Fs) UpstreamLister {
 	return &vcsLister{goBinPath: goBinPath, fs: fs}
 }

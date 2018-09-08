@@ -7,14 +7,14 @@ import (
 	"io/ioutil"
 	"testing"
 
-	athenser "github.com/gomods/athens/pkg/errors"
+	athenserr "github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/storage"
 	"github.com/gomods/athens/pkg/storage/mem"
 	"github.com/stretchr/testify/require"
 )
 
-const testOp athenser.Op = "download.vcsLister.List"
-const modName = "happy tags"
+const testOp athenserr.Op = "vcsLister.List"
+const testModName = "happy tags"
 
 type listMergeTest struct {
 	name        string
@@ -76,7 +76,7 @@ var listMergeTests = []listMergeTest{
 		strVersions: []string{},
 		strErr:      nil,
 		expected:    nil,
-		expectedErr: athenser.E(testOp, athenser.M(modName), athenser.KindNotFound, errors.New("remote: Repository not found")),
+		expectedErr: athenserr.E(testOp, athenserr.M(testModName), athenserr.KindNotFound, errors.New("remote: Repository not found")),
 	},
 	{
 		name:        "unexpected go err",
@@ -86,7 +86,7 @@ var listMergeTests = []listMergeTest{
 		strVersions: []string{"1.1.1"},
 		strErr:      nil,
 		expected:    nil,
-		expectedErr: athenser.E(testOp, errors.New("unexpected error")),
+		expectedErr: athenserr.E(testOp, errors.New("unexpected error")),
 	},
 	{
 		name:        "unexpected storage err",
@@ -96,7 +96,7 @@ var listMergeTests = []listMergeTest{
 		strVersions: nil,
 		strErr:      errors.New("unexpected error"),
 		expected:    nil,
-		expectedErr: athenser.E(testOp, errors.New("unexpected error")),
+		expectedErr: athenserr.E(testOp, errors.New("unexpected error")),
 	},
 }
 
@@ -125,17 +125,17 @@ func TestListMerge(t *testing.T) {
 				t.Fatal(err)
 			}
 			for _, v := range tc.strVersions {
-				s.Save(ctx, modName, v, bts, ioutil.NopCloser(bytes.NewReader(bts)), bts)
+				s.Save(ctx, testModName, v, bts, ioutil.NopCloser(bytes.NewReader(bts)), bts)
 			}
-			defer clearStorage(s, modName, tc.strVersions)
+			defer clearStorage(s, testModName, tc.strVersions)
 			dp := New(&Opts{s, nil, &listerMock{versions: tc.goVersions, err: tc.goErr}})
-			list, err := dp.List(ctx, modName)
+			list, err := dp.List(ctx, testModName)
 
 			if ok := testErrEq(tc.expectedErr, err); !ok {
 				t.Fatalf("expected err: %v, got: %v", tc.expectedErr, err)
 			}
 			if tc.expectedErr != nil {
-				require.Equal(t, athenser.Kind(tc.expectedErr), athenser.Kind(err))
+				require.Equal(t, athenserr.Kind(tc.expectedErr), athenserr.Kind(err))
 			}
 			require.ElementsMatch(t, tc.expected, list, "expected list: %v, got: %v", tc.expected, list)
 		})

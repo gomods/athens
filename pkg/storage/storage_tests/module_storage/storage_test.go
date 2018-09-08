@@ -61,7 +61,6 @@ func (d *TestSuites) SetupTest() {
 	d.mod = []byte("123")
 	d.zip = []byte("456")
 	d.info = []byte("789")
-
 }
 
 func TestModuleStorages(t *testing.T) {
