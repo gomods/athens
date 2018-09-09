@@ -165,15 +165,18 @@ The 🦁 says rawr!
 No additional output is printed because Go found **github.com/athens-artifacts/samplelib@v1.0.0** in the Go Module
 cache and did not need to request it from the proxy.
 
-In order to quit from the proxy at any point of time, we can press Ctlr-C
+Lastly, quitting from the proxy. This cannot be done directly because we are starting the proxy in the background, thus we must kill it by finding it's process ID and killing it manually.
 
-```console
-^CINFO[0075] Shutting down application                    
-INFO[0075] Shutting down worker                         
-buffalo: Stopping Simple Background Worker
-ERRO[0075] http: Server closed                          
-2018/09/03 23:47:30 http: Server closed
-exit status 1
+**Bash**
+```bash
+lsof -i @localhost:3000
+kill -9 <<PID>>
+```
+
+**PowerShell**
+```powershell
+netstat -ano | findstr :3000 (local host Port number)
+taskkill /PID typeyourPIDhere /F
 ```
 
 ## Next Steps
