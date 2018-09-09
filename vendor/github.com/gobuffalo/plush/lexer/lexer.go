@@ -170,6 +170,9 @@ func (l *Lexer) nextInsideToken() token.Token {
 	case '"':
 		tok.Type = token.STRING
 		tok.Literal = l.readString()
+	case '`':
+		tok.Type = token.B_STRING
+		tok.Literal = l.readBString()
 	case '[':
 		tok = l.newToken(token.LBRACKET)
 	case ']':
@@ -273,6 +276,18 @@ func (l *Lexer) readString() string {
 	}
 	s := l.input[position:l.position]
 	return strings.Replace(s, "\\\"", "\"", -1)
+}
+
+func (l *Lexer) readBString() string {
+	position := l.position + 1
+	for l.ch != 0 {
+		l.readChar()
+		if l.ch == '`' {
+			break
+		}
+	}
+	s := l.input[position:l.position]
+	return s
 }
 
 func (l *Lexer) readHTML() string {

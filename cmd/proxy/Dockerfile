@@ -5,7 +5,7 @@ WORKDIR $GOPATH/src/github.com/gomods/athens
 
 COPY . .
 
-RUN CGO_ENABLED=0 go build -o /bin/app ./cmd/proxy
+RUN CGO_ENABLED=0 go build -mod=vendor -o /bin/app ./cmd/proxy
 
 ENV GO_ENV=production
 

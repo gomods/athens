@@ -5,7 +5,7 @@
 ## Create a Table
 
 ``` javascript
-create_table("users", func(t) {
+create_table("users") {
   t.Column("email", "string", {})
   t.Column("twitter_handle", "string", {"size": 50})
   t.Column("age", "integer", {"default": 0})
@@ -13,23 +13,23 @@ create_table("users", func(t) {
   t.Column("company_id", "uuid", {"default_raw": "uuid_generate_v1()"})
   t.Column("bio", "text", {"null": true})
   t.Column("joined_at", "timestamp", {})
-})
+}
 
-create_table("todos", func(t) {
+create_table("todos") {
   t.Column("user_id", "integer", {})
   t.Column("title", "string", {"size": 100})
   t.Column("details", "text", {"null": true})
   t.ForeignKey("user_id", {"users": ["id"]}, {"on_delete": "cascade"})
-})
+}
 ```
 
 The `create_table` function will generate an `id` column of type `integer` that will auto-increment. This can be changed to use the [`UUID`](https://github.com/gobuffalo/uuid) type:
 
 ```javascript
-create_table("users", func(t) {
-  t.Column("id", "uuid", {})
+create_table("users") {
+  t.Column("id", "uuid", {primary: true})
   // ...
-})
+}
 ```
 
 It will also generate two `timestamp` columns; `created_at` and `updated_at`.
