@@ -2,11 +2,11 @@ package observ
 
 import (
 	"context"
-	"log"
 	"net/http"
 
 	"github.com/gobuffalo/buffalo"
 	"github.com/gomods/athens/pkg/config/env"
+	"github.com/gomods/athens/pkg/errors"
 	"go.opencensus.io/exporter/jaeger"
 	"go.opencensus.io/trace"
 )
@@ -23,15 +23,20 @@ type observabilityContext struct {
 // RegisterTraceExporter returns a jaeger exporter for exporting traces to opencensus.
 // It should in the future have a nice sampling rate defined
 // TODO: Extend beyond jaeger
-func RegisterTraceExporter(service string) *(jaeger.Exporter) {
+func RegisterTraceExporter(service string) (*(jaeger.Exporter), error) {
+	const op errors.Op = "RegisterTracer"
 	collectorEndpointURI := env.TraceExporterURL()
+	if collectorEndpointURI == "" {
+		return nil, errors.E(op, "Exporter URL is empty. Traces won't be exported")
+	}
 
 	je, err := jaeger.NewExporter(jaeger.Options{
 		Endpoint:    collectorEndpointURI,
 		ServiceName: service,
 	})
+
 	if err != nil {
-		log.Fatalf("Failed to create the Jaeger exporter: %v", err)
+		return nil, errors.E(op, err)
 	}
 
 	// And now finally register it as a Trace Exporter
@@ -40,7 +45,7 @@ func RegisterTraceExporter(service string) *(jaeger.Exporter) {
 		trace.ApplyConfig(trace.Config{DefaultSampler: trace.AlwaysSample()})
 	}
 
-	return je
+	return je, nil
 }
 
 // Tracer is a middleware that starts a span from the top of a buffalo context
