@@ -7,6 +7,7 @@ import (
 
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/require"
+	"github.com/stretchr/testify/suite"
 )
 
 func TestErrMsg(t *testing.T) {
@@ -50,7 +51,15 @@ func TestKind(t *testing.T) {
 	require.Equal(t, http.StatusText(http.StatusBadRequest), KindText(err))
 }
 
+type OpTests struct {
+	suite.Suite
+}
+
 func TestOps(t *testing.T) {
+	suite.Run(t, new(OpTests))
+}
+
+func (op *OpTests) TestOps() {
 	const (
 		op1 Op = "TestOps.op1"
 		op2 Op = "TestOps.op2"
@@ -61,10 +70,12 @@ func TestOps(t *testing.T) {
 	err2 := E(op2, err1)
 	err3 := E(op3, err2)
 
-	require.ElementsMatch(t, []Op{op1, op2, op3}, Ops(err3.(Error)))
+	require.ElementsMatch(op.T(), []Op{op1, op2, op3}, Ops(err3.(Error)))
 }
 
-func TestString(t *testing.T) {
-	const op Op = "testOps.op1"
-	require.Equal(t, op.String(), "testOps.op1")
+func (op *OpTests) SetupTest() {}
+
+func (op *OpTests) TestString() {
+	const op1 Op = "testOps.op1"
+	require.Equal(op.T(), op1.String(), "testOps.op1")
 }
