@@ -10,6 +10,11 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
+//OpTests composes a testsuite to run all the Ops related tests in one group
+type OpTests struct {
+	suite.Suite
+}
+
 func TestErrMsg(t *testing.T) {
 	const op Op = "TestErrMsg"
 	msg := "test error"
@@ -49,10 +54,6 @@ func TestKind(t *testing.T) {
 	err := E(op, msg, KindBadRequest)
 	require.Equal(t, KindBadRequest, Kind(err))
 	require.Equal(t, http.StatusText(http.StatusBadRequest), KindText(err))
-}
-
-type OpTests struct {
-	suite.Suite
 }
 
 func TestOps(t *testing.T) {
