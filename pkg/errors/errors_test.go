@@ -63,3 +63,8 @@ func TestOps(t *testing.T) {
 
 	require.ElementsMatch(t, []Op{op1, op2, op3}, Ops(err3.(Error)))
 }
+
+func TestString(t *testing.T) {
+	const op Op = "testOps.op1"
+	require.Equal(t, op.String(), "testOps.op1")
+}
