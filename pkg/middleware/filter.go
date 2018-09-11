@@ -5,7 +5,6 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/bketelsen/buffet"
 	"github.com/gobuffalo/buffalo"
 	"github.com/gomods/athens/pkg/config/env"
 	"github.com/gomods/athens/pkg/errors"
@@ -20,9 +19,6 @@ func NewFilterMiddleware(mf *module.Filter) buffalo.MiddlewareFunc {
 
 	return func(next buffalo.Handler) buffalo.Handler {
 		return func(c buffalo.Context) error {
-			sp := buffet.SpanFromContext(c).SetOperationName("filterMiddleware")
-			defer sp.Finish()
-
 			mod, err := paths.GetModule(c)
 
 			if err != nil {

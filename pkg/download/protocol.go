@@ -12,6 +12,7 @@ import (
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/module"
+	"github.com/gomods/athens/pkg/observ"
 	"github.com/gomods/athens/pkg/stash"
 	"github.com/gomods/athens/pkg/storage"
 	"github.com/spf13/afero"
@@ -69,7 +70,9 @@ type protocol struct {
 }
 
 func (p *protocol) List(ctx context.Context, mod string) ([]string, error) {
-	const op errors.Op = "protocol.List"
+	const op errors.Op = "download.protocol.List"
+	ctx, span := observ.StartSpan(ctx, op.String())
+	defer span.End()
 	lr, err := p.list(op, mod)
 	if err != nil {
 		return nil, err
@@ -79,7 +82,9 @@ func (p *protocol) List(ctx context.Context, mod string) ([]string, error) {
 }
 
 func (p *protocol) Latest(ctx context.Context, mod string) (*storage.RevInfo, error) {
-	const op errors.Op = "protocol.Latest"
+	const op errors.Op = "download.protocol.Latest"
+	ctx, span := observ.StartSpan(ctx, op.String())
+	defer span.End()
 	lr, err := p.list(op, mod)
 	if err != nil {
 		return nil, errors.E(op, err)
@@ -143,7 +148,9 @@ func (p *protocol) list(op errors.Op, mod string) (*listResp, error) {
 }
 
 func (p *protocol) Info(ctx context.Context, mod, ver string) ([]byte, error) {
-	const op errors.Op = "protocol.Info"
+	const op errors.Op = "download.protocol.Info"
+	ctx, span := observ.StartSpan(ctx, op.String())
+	defer span.End()
 	info, err := p.s.Info(ctx, mod, ver)
 	if errors.IsNotFoundErr(err) {
 		err = p.stasher.Stash(mod, ver)
@@ -160,7 +167,9 @@ func (p *protocol) Info(ctx context.Context, mod, ver string) ([]byte, error) {
 }
 
 func (p *protocol) GoMod(ctx context.Context, mod, ver string) ([]byte, error) {
-	const op errors.Op = "protocol.GoMod"
+	const op errors.Op = "download.protocol.GoMod"
+	ctx, span := observ.StartSpan(ctx, op.String())
+	defer span.End()
 	goMod, err := p.s.GoMod(ctx, mod, ver)
 	if errors.IsNotFoundErr(err) {
 		err = p.stasher.Stash(mod, ver)
@@ -177,7 +186,9 @@ func (p *protocol) GoMod(ctx context.Context, mod, ver string) ([]byte, error) {
 }
 
 func (p *protocol) Zip(ctx context.Context, mod, ver string) (io.ReadCloser, error) {
-	const op errors.Op = "protocol.Zip"
+	const op errors.Op = "download.protocol.Zip"
+	ctx, span := observ.StartSpan(ctx, op.String())
+	defer span.End()
 	zip, err := p.s.Zip(ctx, mod, ver)
 	if errors.IsNotFoundErr(err) {
 		err = p.stasher.Stash(mod, ver)

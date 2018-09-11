@@ -53,8 +53,6 @@ github.com/aws/aws-sdk-go/private/protocol/xml/xmlutil
 github.com/aws/aws-sdk-go/private/protocol/query/queryutil
 # github.com/beorn7/perks v0.0.0-20180321164747-3a771d992973
 github.com/beorn7/perks/quantile
-# github.com/bketelsen/buffet v0.1.5
-github.com/bketelsen/buffet
 # github.com/cockroachdb/cockroach-go v0.0.0-20180212155653-59c0560478b7
 github.com/cockroachdb/cockroach-go/crdb
 # github.com/codahale/hdrhistogram v0.0.0-20161010025455-3a0bb77429bd
@@ -223,10 +221,6 @@ github.com/nicksnyder/go-i18n/i18n
 github.com/nicksnyder/go-i18n/i18n/language
 github.com/nicksnyder/go-i18n/i18n/translation
 github.com/nicksnyder/go-i18n/i18n/bundle
-# github.com/opentracing/opentracing-go v1.0.2
-github.com/opentracing/opentracing-go
-github.com/opentracing/opentracing-go/ext
-github.com/opentracing/opentracing-go/log
 # github.com/pelletier/go-toml v1.2.0
 github.com/pelletier/go-toml
 # github.com/pkg/errors v0.8.0
