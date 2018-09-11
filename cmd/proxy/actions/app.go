@@ -90,7 +90,7 @@ func App(conf *config.Config) (*buffalo.App, error) {
 	}
 
 	// Register exporter to export traces
-	exporter, err := observ.RegisterTraceExporter(Service)
+	exporter, err := observ.RegisterTraceExporter(Service, ENV)
 	if err != nil {
 		lggr.SystemErr(err)
 	} else {
