@@ -7,13 +7,12 @@ import (
 
 	"github.com/gobuffalo/buffalo"
 	"github.com/gomods/athens/pkg/errors"
-	"github.com/gomods/athens/pkg/log"
 	"github.com/gomods/athens/pkg/paths"
 )
 
 // NewValidationMiddleware builds a middleware function that performs validation checks by calling
 // an external webhook
-func NewValidationMiddleware(entry log.Entry, validatorHook string) buffalo.MiddlewareFunc {
+func NewValidationMiddleware(validatorHook string) buffalo.MiddlewareFunc {
 	const op errors.Op = "actions.ValidationMiddleware"
 
 	return func(next buffalo.Handler) buffalo.Handler {
@@ -32,7 +31,11 @@ func NewValidationMiddleware(entry log.Entry, validatorHook string) buffalo.Midd
 			if version != "" {
 				valid, err := validate(validatorHook, mod, version)
 				if err != nil {
-					entry.SystemErr(err)
+					// Not sure if we can create a `SystemErr` function instead of this?
+					//
+					// If we can, maybe we could call log.SystemErr(c.Logger(), err)
+					// c.Logger().SystemErr(err)
+					c.Logger().Error(err)
 					return c.Render(http.StatusInternalServerError, nil)
 				}
 

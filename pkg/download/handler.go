@@ -5,7 +5,6 @@ import (
 	"github.com/gobuffalo/buffalo/render"
 	"github.com/gomods/athens/pkg/log"
 	"github.com/gomods/athens/pkg/middleware"
-	"github.com/sirupsen/logrus"
 )
 
 // ProtocolHandler is a function that takes all that it needs to return
@@ -20,24 +19,6 @@ type HandlerOpts struct {
 	Engine   *render.Engine
 }
 
-// LogEntryHandler constructs a log.Entry out of the given
-// *log.Logger so that it applies default fields to every single
-// incoming request without having to do those in every single handler.
-// This is like a middleware minus the context magic.
-func LogEntryHandler(ph ProtocolHandler, opts *HandlerOpts) buffalo.Handler {
-	return func(c buffalo.Context) error {
-		req := c.Request()
-		ent := opts.Logger.WithFields(logrus.Fields{
-			"http-method": req.Method,
-			"http-path":   req.URL.Path,
-			"http-url":    req.URL.String(),
-		})
-		handler := ph(opts.Protocol, ent, opts.Engine)
-
-		return handler(c)
-	}
-}
-
 // RegisterHandlers is a convenience method that registers
 // all the download protocol paths for you.
 func RegisterHandlers(app *buffalo.App, opts *HandlerOpts) {
@@ -47,13 +28,13 @@ func RegisterHandlers(app *buffalo.App, opts *HandlerOpts) {
 	}
 	noCacheMw := middleware.CacheControl("no-cache, no-store, must-revalidate")
 
-	listHandler := LogEntryHandler(ListHandler, opts)
+	listHandler := ListHandler(opts.Protocol, opts.Engine)
 	app.GET(PathList, noCacheMw(listHandler))
 
-	latestHandler := LogEntryHandler(LatestHandler, opts)
+	latestHandler := LatestHandler(opts.Protocol, opts.Engine)
 	app.GET(PathLatest, noCacheMw(latestHandler))
 
-	app.GET(PathVersionInfo, LogEntryHandler(VersionInfoHandler, opts))
-	app.GET(PathVersionModule, LogEntryHandler(VersionModuleHandler, opts))
-	app.GET(PathVersionZip, LogEntryHandler(VersionZipHandler, opts))
+	app.GET(PathVersionInfo, VersionInfoHandler(opts.Protocol, opts.Engine))
+	app.GET(PathVersionModule, VersionModuleHandler(opts.Protocol, opts.Engine))
+	app.GET(PathVersionZip, VersionZipHandler(opts.Protocol, opts.Engine))
 }

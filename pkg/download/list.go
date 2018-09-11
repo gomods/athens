@@ -7,7 +7,6 @@ import (
 	"github.com/gobuffalo/buffalo"
 	"github.com/gobuffalo/buffalo/render"
 	"github.com/gomods/athens/pkg/errors"
-	"github.com/gomods/athens/pkg/log"
 	"github.com/gomods/athens/pkg/paths"
 )
 
@@ -15,18 +14,20 @@ import (
 const PathList = "/{module:.+}/@v/list"
 
 // ListHandler implements GET baseURL/module/@v/list
-func ListHandler(dp Protocol, lggr log.Entry, eng *render.Engine) buffalo.Handler {
+func ListHandler(dp Protocol, eng *render.Engine) buffalo.Handler {
 	const op errors.Op = "download.ListHandler"
 	return func(c buffalo.Context) error {
 		mod, err := paths.GetModule(c)
 		if err != nil {
-			lggr.SystemErr(errors.E(op, err))
+			c.Logger().Warn(errors.E(op, err))
+			// lggr.SystemErr(errors.E(op, err))
 			return c.Render(500, nil)
 		}
 
 		versions, err := dp.List(c, mod)
 		if err != nil {
-			lggr.SystemErr(errors.E(op, err))
+			c.Logger().Warn(errors.E(op, err))
+			// lggr.SystemErr(errors.E(op, err))
 			return c.Render(errors.Kind(err), eng.JSON(errors.KindText(err)))
 		}
 
