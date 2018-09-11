@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"time"
 
 	"github.com/gobuffalo/buffalo"
 	"github.com/gobuffalo/buffalo/worker"
@@ -35,7 +36,7 @@ func pushNotificationHandler(w worker.Worker) func(c buffalo.Context) error {
 }
 
 // GetProcessPushNotificationJob processes queue of push notifications
-func GetProcessPushNotificationJob(storage storage.Backend, eLog eventlog.Eventlog) worker.Handler {
+func GetProcessPushNotificationJob(storage storage.Backend, eLog eventlog.Eventlog, downloadTimeout time.Duration) worker.Handler {
 	return func(args worker.Args) (err error) {
 		// TODO: background for now
 		ctx := context.Background()
@@ -47,7 +48,7 @@ func GetProcessPushNotificationJob(storage storage.Backend, eLog eventlog.Eventl
 		if err != nil {
 			return err
 		}
-		return mergeDB(ctx, pn.OriginURL, *diff, eLog, storage, module.Download)
+		return mergeDB(ctx, pn.OriginURL, *diff, eLog, storage, module.Download, downloadTimeout)
 	}
 }
 

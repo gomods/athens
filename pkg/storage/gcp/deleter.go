@@ -24,5 +24,5 @@ func (s *Storage) Delete(ctx context.Context, module, version string) error {
 		return errors.E(op, errors.M(module), errors.V(version), errors.KindNotFound)
 	}
 
-	return modupl.Delete(ctx, module, version, s.bucket.Delete)
+	return modupl.Delete(ctx, module, version, s.bucket.Delete, s.timeout)
 }
