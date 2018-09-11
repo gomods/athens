@@ -39,6 +39,7 @@ Athens proxy, and figure out what is happening at each step.
 
 Note: [Currently, the proxy does not work on Windows](https://github.com/gomods/athens/issues/532).
 
+### Manual install
 Before moving on, let's clear our Go Modules cache so that we can see the proxy
 in action without any caches populated:
 
@@ -90,9 +91,41 @@ the proxy is using in-memory storage, which is only suitable for trying out the 
 for a short period of time, as you will quickly run out of memory and the storage
 doesn't persist between restarts.
 
+### With Docker
+In order to run Athens locally in our dev machine with Docker (proxy enabled), we need first to create a directory that will store the persitant modules.
+In the example below, the new directory is named `athens-storage` and his located in our userspace (i.e. `$HOME`). 
+Then we need to set the `ATHENS_STORAGE_TYPE` and `ATHENS_DISK_STORAGE_ROOT` environment variables when we run the Docker container.
+
+**Bash**
+```bash
+export ATHENS_STORAGE=$HOME/athens-storage
+mkdir -p $ATHENS_STORAGE
+docker run -d -v $ATHENS_STORAGE:/var/lib/athens \
+   -e ATHENS_DISK_STORAGE_ROOT=/var/lib/athens \
+   -e ATHENS_STORAGE_TYPE=disk \
+   --name athens-proxy \
+   --restart always \
+   -p 3000:3000 \
+   gomods/proxy:latest
+```
+
+**PowerShell**
+```PowerShell
+$env:ATHENS_STORAGE = "$(Join-Path $HOME athens-storage)"
+md -Path $env:ATHENS_STORAGE
+docker run -d -v "$($env:ATHENS-STORAGE):/var/lib/athens" `
+   -e ATHENS_DISK_STORAGE_ROOT=/var/lib/athens `
+   -e ATHENS_STORAGE_TYPE=disk `
+   --name athens-proxy `
+   --restart always `
+   -p 3000:3000 `
+   gomods/proxy:latest
+```
+
 Next, you will need to enable the [Go Modules](https://github.com/golang/go/wiki/Modules)
 feature and configure Go to use the proxy!
 
+### Using the proxy
 **Bash**
 ```bash
 export GO111MODULE=on
