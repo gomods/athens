@@ -3,6 +3,8 @@ package actions
 import (
 	"fmt"
 
+	"github.com/gomods/athens/pkg/observ"
+
 	"github.com/gobuffalo/buffalo"
 	"github.com/gobuffalo/buffalo/middleware"
 	"github.com/gobuffalo/buffalo/middleware/csrf"
@@ -18,6 +20,9 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/unrolled/secure"
 )
+
+// Service is the name of the service that we want to tag our processes with
+const Service = "proxy"
 
 // T is the translator to use
 var T *i18n.Translator
@@ -84,6 +89,15 @@ func App(conf *config.Config) (*buffalo.App, error) {
 		app = app.Group(prefix)
 	}
 
+	// Register exporter to export traces
+	exporter, err := observ.RegisterTraceExporter(Service)
+	if err != nil {
+		lggr.SystemErr(err)
+	} else {
+		defer exporter.Flush()
+		app.Use(observ.Tracer(Service))
+	}
+
 	// Automatically redirect to SSL
 	app.Use(ssl.ForceSSL(secure.Options{
 		SSLRedirect:     conf.Proxy.ForceSSL,
@@ -93,7 +107,7 @@ func App(conf *config.Config) (*buffalo.App, error) {
 	if ENV == "development" {
 		app.Use(middleware.ParameterLogger)
 	}
-	initializeTracing(app)
+
 	initializeAuth(app)
 	// Protect against CSRF attacks. https://www.owasp.org/index.php/Cross-Site_Request_Forgery_(CSRF)
 	// Remove to disable this.

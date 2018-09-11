@@ -57,6 +57,9 @@ var (
 	T *i18n.Translator
 )
 
+// Service is the name of the service that we want to tag our processes with
+const Service = "olympus"
+
 // App is where all routes and middleware for buffalo should be defined.
 // This is the nerve center of your application.
 func App(conf *config.Config) (*buffalo.App, error) {
@@ -123,7 +126,6 @@ func App(conf *config.Config) (*buffalo.App, error) {
 	if ENV == "development" {
 		app.Use(middleware.ParameterLogger)
 	}
-	initializeTracing(app)
 	// Protect against CSRF attacks. https://www.owasp.org/index.php/Cross-Site_Request_Forgery_(CSRF)
 	// Remove to disable this.
 	if conf.EnableCSRFProtection {

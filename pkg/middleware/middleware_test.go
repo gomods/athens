@@ -84,7 +84,6 @@ func hookFilterApp(hook string) *buffalo.App {
 
 	a := buffalo.New(buffalo.Options{})
 	a.Use(LogEntryMiddleware(NewValidationMiddleware, log.New("none", logrus.DebugLevel), hook))
-	initializeTracing(a)
 
 	a.GET(pathList, h)
 	a.GET(pathVersionInfo, h)

@@ -12,6 +12,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3/s3manager/s3manageriface"
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/errors"
+	"github.com/gomods/athens/pkg/observ"
 	moduploader "github.com/gomods/athens/pkg/storage/module"
 	"github.com/opentracing/opentracing-go"
 )
@@ -85,7 +86,7 @@ func (s *Storage) Save(ctx context.Context, module, version string, mod []byte, 
 	const op errors.Op = "s3.Save"
 	sp, ctx := opentracing.StartSpanFromContext(ctx, "storage.s3.Save")
 	defer sp.Finish()
-	err := moduploader.Upload(ctx, module, version, bytes.NewReader(info), bytes.NewReader(mod), zip, s.upload, s.cdnConf.TimeoutDuration())
+	err := moduploader.Upload(ctx, module, version, bytes.NewReader(info), bytes.NewReader(mod), zip, s.upload)
 	// TODO: take out lease on the /list file and add the version to it
 	//
 	// Do that only after module source+metadata is uploaded
@@ -96,9 +97,9 @@ func (s *Storage) Save(ctx context.Context, module, version string, mod []byte, 
 }
 
 func (s *Storage) upload(ctx context.Context, path, contentType string, stream io.Reader) error {
-	const op errors.Op = "s3.upload"
-	sp, ctx := opentracing.StartSpanFromContext(ctx, "storage.s3.upload")
-	defer sp.Finish()
+	const op errors.Op = "storage.s3.upload"
+	ctx, span := observ.StartSpan(ctx, op.String())
+	defer span.End()
 	upParams := &s3manager.UploadInput{
 		Bucket:      &s.bucket,
 		Key:         &path,

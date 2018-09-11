@@ -3,7 +3,7 @@ services:
   redis:
     image: redis:alpine
     command: ["redis-server", "--appendonly", "yes"]
-    ports: 
+    ports:
       - "6379:6379"
   mongo:
     image: mongo:3.7.9-jessie
