@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/bketelsen/buffet"
 	"github.com/gobuffalo/buffalo"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/log"
@@ -19,9 +18,6 @@ func NewValidationMiddleware(entry log.Entry, validatorHook string) buffalo.Midd
 
 	return func(next buffalo.Handler) buffalo.Handler {
 		return func(c buffalo.Context) error {
-			sp := buffet.SpanFromContext(c).SetOperationName("validationMiddleware")
-			defer sp.Finish()
-
 			mod, err := paths.GetModule(c)
 
 			if err != nil {

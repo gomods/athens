@@ -165,6 +165,20 @@ The 🦁 says rawr!
 No additional output is printed because Go found **github.com/athens-artifacts/samplelib@v1.0.0** in the Go Module
 cache and did not need to request it from the proxy.
 
+Lastly, quitting from the proxy. This cannot be done directly because we are starting the proxy in the background, thus we must kill it by finding it's process ID and killing it manually.
+
+**Bash**
+```bash
+lsof -i @localhost:3000
+kill -9 <<PID>>
+```
+
+**PowerShell**
+```powershell
+netstat -ano | findstr :3000 (local host Port number)
+taskkill /PID typeyourPIDhere /F
+```
+
 ## Next Steps
 
 Now that you have seen Athens in Action:

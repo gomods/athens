@@ -3,11 +3,11 @@ package download
 import (
 	"io"
 
-	"github.com/bketelsen/buffet"
 	"github.com/gobuffalo/buffalo"
 	"github.com/gobuffalo/buffalo/render"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/log"
+	"github.com/gomods/athens/pkg/observ"
 )
 
 // PathVersionZip URL.
@@ -18,14 +18,14 @@ func VersionZipHandler(dp Protocol, lggr log.Entry, eng *render.Engine) buffalo.
 	const op errors.Op = "download.VersionZipHandler"
 
 	return func(c buffalo.Context) error {
-		sp := buffet.SpanFromContext(c).SetOperationName("versionZipHandler")
-		defer sp.Finish()
-		mod, ver, err := getModuleParams(op, c)
+		ctx, span := observ.StartSpan(c, op.String())
+		defer span.End()
+		mod, ver, err := getModuleParams(c, op)
 		if err != nil {
 			lggr.SystemErr(err)
 			return c.Render(errors.Kind(err), nil)
 		}
-		zip, err := dp.Zip(c, mod, ver)
+		zip, err := dp.Zip(ctx, mod, ver)
 		if err != nil {
 			lggr.SystemErr(err)
 			return c.Render(errors.Kind(err), nil)

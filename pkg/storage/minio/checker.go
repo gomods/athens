@@ -5,18 +5,18 @@ import (
 	"fmt"
 
 	"github.com/gomods/athens/pkg/errors"
+	"github.com/gomods/athens/pkg/observ"
 	minio "github.com/minio/minio-go"
-	opentracing "github.com/opentracing/opentracing-go"
 )
 
 const (
-	minioErrorCodeNoSuchKey           = "NoSuchKey"
-	op                      errors.Op = "storage.minio.Exists"
+	minioErrorCodeNoSuchKey = "NoSuchKey"
 )
 
 func (v *storageImpl) Exists(ctx context.Context, module, version string) (bool, error) {
-	sp, ctx := opentracing.StartSpanFromContext(ctx, "storage.minio.Exists")
-	defer sp.Finish()
+	const op errors.Op = "storage.minio.Exists"
+	ctx, span := observ.StartSpan(ctx, op.String())
+	defer span.End()
 	versionedPath := v.versionLocation(module, version)
 	modPath := fmt.Sprintf("%s/go.mod", versionedPath)
 	_, err := v.minioClient.StatObject(v.bucketName, modPath, minio.StatObjectOptions{})
