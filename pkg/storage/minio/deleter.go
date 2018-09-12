@@ -9,7 +9,7 @@ import (
 )
 
 func (v *storageImpl) Delete(ctx context.Context, module, version string) error {
-	const op errors.Op = "storage.minio.Delete"
+	const op errors.Op = "minio.Delete"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 	exists, err := v.Exists(ctx, module, version)

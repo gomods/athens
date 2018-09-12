@@ -13,7 +13,7 @@ import (
 )
 
 func (v *storageImpl) Info(ctx context.Context, module, vsn string) ([]byte, error) {
-	const op errors.Op = "storage.minio.Info"
+	const op errors.Op = "minio.Info"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 	infoPath := fmt.Sprintf("%s/%s.info", v.versionLocation(module, vsn), vsn)
@@ -30,7 +30,7 @@ func (v *storageImpl) Info(ctx context.Context, module, vsn string) ([]byte, err
 }
 
 func (v *storageImpl) GoMod(ctx context.Context, module, vsn string) ([]byte, error) {
-	const op errors.Op = "storage.minio.GoMod"
+	const op errors.Op = "minio.GoMod"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 	modPath := fmt.Sprintf("%s/go.mod", v.versionLocation(module, vsn))
@@ -46,7 +46,7 @@ func (v *storageImpl) GoMod(ctx context.Context, module, vsn string) ([]byte, er
 	return mod, nil
 }
 func (v *storageImpl) Zip(ctx context.Context, module, vsn string) (io.ReadCloser, error) {
-	const op errors.Op = "storage.minio.Zip"
+	const op errors.Op = "minio.Zip"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 

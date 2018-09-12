@@ -3,8 +3,6 @@ package actions
 import (
 	"fmt"
 
-	"github.com/gomods/athens/pkg/observ"
-
 	"github.com/gobuffalo/buffalo"
 	"github.com/gobuffalo/buffalo/middleware"
 	"github.com/gobuffalo/buffalo/middleware/csrf"
@@ -16,6 +14,7 @@ import (
 	"github.com/gomods/athens/pkg/log"
 	mw "github.com/gomods/athens/pkg/middleware"
 	"github.com/gomods/athens/pkg/module"
+	"github.com/gomods/athens/pkg/observ"
 	"github.com/rs/cors"
 	"github.com/sirupsen/logrus"
 	"github.com/unrolled/secure"

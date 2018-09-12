@@ -12,7 +12,7 @@ import (
 )
 
 func (v *storageImpl) Info(ctx context.Context, module, version string) ([]byte, error) {
-	const op errors.Op = "storage.fs.Info"
+	const op errors.Op = "fs.Info"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 	versionedPath := v.versionLocation(module, version)
@@ -25,7 +25,7 @@ func (v *storageImpl) Info(ctx context.Context, module, version string) ([]byte,
 }
 
 func (v *storageImpl) GoMod(ctx context.Context, module, version string) ([]byte, error) {
-	const op errors.Op = "storage.fs.GoMod"
+	const op errors.Op = "fs.GoMod"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 	versionedPath := v.versionLocation(module, version)
@@ -38,7 +38,7 @@ func (v *storageImpl) GoMod(ctx context.Context, module, version string) ([]byte
 }
 
 func (v *storageImpl) Zip(ctx context.Context, module, version string) (io.ReadCloser, error) {
-	const op errors.Op = "storage.fs.Zip"
+	const op errors.Op = "fs.Zip"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 	versionedPath := v.versionLocation(module, version)
