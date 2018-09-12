@@ -79,7 +79,7 @@ func (s Storage) BaseURL() *url.URL {
 
 // Save implements the (github.com/gomods/athens/pkg/storage).Saver interface.
 func (s *Storage) Save(ctx context.Context, module, version string, mod []byte, zip io.Reader, info []byte) error {
-	const op errors.Op = "storage.s3.Save"
+	const op errors.Op = "s3.Save"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 	err := moduploader.Upload(ctx, module, version, bytes.NewReader(info), bytes.NewReader(mod), zip, s.upload)
@@ -93,7 +93,7 @@ func (s *Storage) Save(ctx context.Context, module, version string, mod []byte, 
 }
 
 func (s *Storage) upload(ctx context.Context, path, contentType string, stream io.Reader) error {
-	const op errors.Op = "storage.s3.upload"
+	const op errors.Op = "s3.upload"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 	upParams := &s3manager.UploadInput{
