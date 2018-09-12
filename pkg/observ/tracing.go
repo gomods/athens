@@ -11,9 +11,6 @@ import (
 	"go.opencensus.io/trace"
 )
 
-// ENV is used to define the sampling rate
-var ENV = env.GoEnvironmentWithDefault("development")
-
 // observabilityContext is a private context that is used by the packages to start the span
 type observabilityContext struct {
 	buffalo.Context
@@ -23,7 +20,7 @@ type observabilityContext struct {
 // RegisterTraceExporter returns a jaeger exporter for exporting traces to opencensus.
 // It should in the future have a nice sampling rate defined
 // TODO: Extend beyond jaeger
-func RegisterTraceExporter(service string) (*(jaeger.Exporter), error) {
+func RegisterTraceExporter(service, ENV string) (*(jaeger.Exporter), error) {
 	const op errors.Op = "RegisterTracer"
 	collectorEndpointURI := env.TraceExporterURL()
 	if collectorEndpointURI == "" {

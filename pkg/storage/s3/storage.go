@@ -10,7 +10,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager/s3manageriface"
-	"github.com/gomods/athens/pkg/config/env"
+	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/observ"
 	moduploader "github.com/gomods/athens/pkg/storage/module"
@@ -28,10 +28,11 @@ type Storage struct {
 	bucket   string
 	baseURI  *url.URL
 	uploader s3manageriface.UploaderAPI
+	cdnConf  *config.CDNConfig
 }
 
 // New creates a new AWS S3 CDN saver
-func New(bucketName string) (*Storage, error) {
+func New(bucketName string, cdnConf *config.CDNConfig) (*Storage, error) {
 	const op errors.Op = "s3.New"
 	u, err := url.Parse(fmt.Sprintf("http://%s.s3.amazonaws.com", bucketName))
 	if err != nil {
@@ -49,11 +50,12 @@ func New(bucketName string) (*Storage, error) {
 		bucket:   bucketName,
 		uploader: uploader,
 		baseURI:  u,
+		cdnConf:  cdnConf,
 	}, nil
 }
 
 // NewWithUploader creates a new AWS S3 CDN saver with provided uploader
-func NewWithUploader(bucketName string, uploader s3manageriface.UploaderAPI) (*Storage, error) {
+func NewWithUploader(bucketName string, uploader s3manageriface.UploaderAPI, cdnConf *config.CDNConfig) (*Storage, error) {
 	const op errors.Op = "s3.NewWithUploader"
 	u, err := url.Parse(fmt.Sprintf("http://%s.s3.amazonaws.com", bucketName))
 	if err != nil {
@@ -64,6 +66,7 @@ func NewWithUploader(bucketName string, uploader s3manageriface.UploaderAPI) (*S
 		bucket:   bucketName,
 		uploader: uploader,
 		baseURI:  u,
+		cdnConf:  cdnConf,
 	}, nil
 }
 
@@ -74,7 +77,7 @@ func NewWithUploader(bucketName string, uploader s3manageriface.UploaderAPI) (*S
 //
 //	<meta name="go-import" content="gomods.com/athens mod BaseURL()">
 func (s Storage) BaseURL() *url.URL {
-	return env.CDNEndpointWithDefault(s.baseURI)
+	return s.cdnConf.CDNEndpointWithDefault(s.baseURI)
 }
 
 // Save implements the (github.com/gomods/athens/pkg/storage).Saver interface.
@@ -82,7 +85,7 @@ func (s *Storage) Save(ctx context.Context, module, version string, mod []byte, 
 	const op errors.Op = "s3.Save"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
-	err := moduploader.Upload(ctx, module, version, bytes.NewReader(info), bytes.NewReader(mod), zip, s.upload)
+	err := moduploader.Upload(ctx, module, version, bytes.NewReader(info), bytes.NewReader(mod), zip, s.upload, s.cdnConf.TimeoutDuration())
 	// TODO: take out lease on the /list file and add the version to it
 	//
 	// Do that only after module source+metadata is uploaded

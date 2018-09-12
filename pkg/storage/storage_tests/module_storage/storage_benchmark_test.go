@@ -130,7 +130,7 @@ func getStores(b *testing.B) []storage.TestSuite {
 	require.NoError(b, err, "couldn't create filesystem store")
 	stores = append(stores, fsStore)
 
-	mongoStore, err := mongo.NewTestSuite(model)
+	mongoStore, err := mongo.NewTestSuite(model, testConfigFile)
 	require.NoError(b, err, "couldn't create mongo store")
 	stores = append(stores, mongoStore)
 

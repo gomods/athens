@@ -11,6 +11,7 @@ import (
 	"bytes"
 	"context"
 	"io/ioutil"
+	"path/filepath"
 	"testing"
 	"time"
 
@@ -21,6 +22,10 @@ import (
 	"github.com/gomods/athens/pkg/storage/mem"
 	"github.com/gomods/athens/pkg/storage/minio"
 	"github.com/gomods/athens/pkg/storage/mongo"
+)
+
+var (
+	testConfigFile = filepath.Join("..", "..", "..", "..", "config.test.toml")
 )
 
 type TestSuites struct {
@@ -52,7 +57,7 @@ func (d *TestSuites) SetupTest() {
 	d.storages = append(d.storages, minioStorage)
 
 	// mongo
-	mongoStore, err := mongo.NewTestSuite(d.Model)
+	mongoStore, err := mongo.NewTestSuite(d.Model, testConfigFile)
 	ra.NoError(err)
 	d.storages = append(d.storages, mongoStore)
 
