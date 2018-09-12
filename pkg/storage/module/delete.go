@@ -3,9 +3,9 @@ package module
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/gomods/athens/pkg/config"
-	"github.com/gomods/athens/pkg/config/env"
 	"github.com/gomods/athens/pkg/errors"
 	multierror "github.com/hashicorp/go-multierror"
 )
@@ -15,9 +15,9 @@ type Deleter func(ctx context.Context, path string) error
 
 // Delete deletes .info, .mod and .zip files from the blob store in parallel.
 // Returns multierror containing errors from all deletes and timeouts
-func Delete(ctx context.Context, module, version string, delete Deleter) error {
+func Delete(ctx context.Context, module, version string, delete Deleter, timeout time.Duration) error {
 	const op errors.Op = "module.Delete"
-	tctx, cancel := context.WithTimeout(ctx, env.Timeout())
+	tctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
 	del := func(ext string) <-chan error {

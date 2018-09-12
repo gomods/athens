@@ -45,7 +45,7 @@ storage:
 # Worker is disabled right now. When it's turned on, we can use helm dependencies to start this up!
 #redis:
 #  useEmbedded: false
-#  port: 6379
+#  address: ":6379"
 #  username: 
 #  password:
 #  host:

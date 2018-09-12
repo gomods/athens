@@ -5,7 +5,6 @@ import (
 	"os"
 	"strings"
 
-	"github.com/gomods/athens/pkg/config/env"
 	"github.com/gomods/athens/pkg/errors"
 )
 
@@ -15,7 +14,8 @@ var (
 
 // Filter is a filter of modules
 type Filter struct {
-	root ruleNode
+	root     ruleNode
+	filePath string
 }
 
 // NewFilter creates new filter based on rules defined in a configuration file
@@ -29,9 +29,11 @@ type Filter struct {
 //   -
 //   + github.com/a
 // will exclude all items from communication except github.com/a
-func NewFilter() *Filter {
+func NewFilter(filterFilePath string) *Filter {
 	rn := newRule(Default)
-	modFilter := Filter{}
+	modFilter := Filter{
+		filePath: filterFilePath,
+	}
 	modFilter.root = rn
 
 	modFilter.initFromConfig()
@@ -115,7 +117,7 @@ func (f *Filter) getAssociatedRule(path ...string) FilterRule {
 }
 
 func (f *Filter) initFromConfig() {
-	lines, err := getConfigLines()
+	lines, err := getConfigLines(f.filePath)
 
 	if err != nil || len(lines) == 0 {
 		return
@@ -170,11 +172,10 @@ func newRule(r FilterRule) ruleNode {
 	return rn
 }
 
-func getConfigLines() ([]string, error) {
+func getConfigLines(filterFile string) ([]string, error) {
 	const op errors.Op = "module.getConfigLines"
-	configName := env.FilterConfigurationFileName()
 
-	f, err := os.Open(configName)
+	f, err := os.Open(filterFile)
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
