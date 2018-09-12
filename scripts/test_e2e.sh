@@ -7,9 +7,9 @@ set -xeuo pipefail
 
 REPO_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )/.."
 
-OGOPATH=$GOPATH
-OGO111MODULE=$GO111MODULE
-OGOPROXY=$GOPROXY
+OGOPATH=${GOPATH:-}
+OGO111MODULE=${GO111MODULE:-}
+OGOPROXY=${GOPROXY:-}
 export GO_BINARY_PATH=${GO_BINARY_PATH:-go}
 TMPDIR=$(mktemp -d)
 export GOPATH=$TMPDIR
