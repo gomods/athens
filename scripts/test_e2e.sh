@@ -6,8 +6,13 @@
 set -xeuo pipefail
 
 REPO_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )/.."
+
+OGOPATH=$GOPATH
+OGO111MODULE = $GO111MODULE
+OGOPROXY = $GOPROXY
 export GO_BINARY_PATH=${GO_BINARY_PATH:-go}
 TMPDIR=$(mktemp -d)
+export GOPATH=$TMPDIR
 GOMOD_CACHE=$TMPDIR/pkg/mod
 export PATH=${REPO_DIR}/bin:${PATH}
 
@@ -17,10 +22,17 @@ clearGoModCache () {
 
 teardown () {
   # Cleanup after our tests
+  [[ -z "$OGOPATH" ]] && unset GOPATH || export GOPATH = $OGOPATH
+  [[ -z "$OGO111MODULE" ]] && unset GO111MODULE || export GO111MODULE = $OGO111MODULE
+  [[ -z "$OGOPROXY" ]] && unset GOPROXY || export GOPROXY = $OGOPROXY
+
   pkill proxy || true
+  rm -fr ${TMPDIR}
   popd 2> /dev/null || true
 }
 trap teardown EXIT
+
+export GO111MODULE=on
 
 # Start the proxy in the background and wait for it to be ready
 cd $REPO_DIR/cmd/proxy
@@ -36,9 +48,6 @@ pushd ${TEST_SOURCE}
 
 clearGoModCache
 
-# set modules on after running buffalo dev, not sure why
-# issue https://github.com/gomods/athens/issues/412
-export GO111MODULE=on
 # Make sure that our test repo works without the GOPROXY first
 unset GOPROXY
 $GO_BINARY_PATH run .
