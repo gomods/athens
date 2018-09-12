@@ -10,7 +10,7 @@ import (
 
 // Delete removes a specific version of a module
 func (s *ModuleStore) Delete(ctx context.Context, module, version string) error {
-	const op errors.Op = "storage.mongo.Delete"
+	const op errors.Op = "mongo.Delete"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 	exists, err := s.Exists(ctx, module, version)

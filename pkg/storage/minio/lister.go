@@ -10,7 +10,7 @@ import (
 )
 
 func (l *storageImpl) List(ctx context.Context, module string) ([]string, error) {
-	const op errors.Op = "storage.minio.List"
+	const op errors.Op = "minio.List"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 	dict := make(map[string]struct{})

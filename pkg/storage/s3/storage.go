@@ -14,7 +14,6 @@ import (
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/observ"
 	moduploader "github.com/gomods/athens/pkg/storage/module"
-	"github.com/opentracing/opentracing-go"
 )
 
 // Storage implements (github.com/gomods/athens/pkg/storage).Saver and
@@ -84,8 +83,8 @@ func (s Storage) BaseURL() *url.URL {
 // Save implements the (github.com/gomods/athens/pkg/storage).Saver interface.
 func (s *Storage) Save(ctx context.Context, module, version string, mod []byte, zip io.Reader, info []byte) error {
 	const op errors.Op = "s3.Save"
-	sp, ctx := opentracing.StartSpanFromContext(ctx, "storage.s3.Save")
-	defer sp.Finish()
+	ctx, span := observ.StartSpan(ctx, op.String())
+	defer span.End()
 	err := moduploader.Upload(ctx, module, version, bytes.NewReader(info), bytes.NewReader(mod), zip, s.upload, s.cdnConf.TimeoutDuration())
 	// TODO: take out lease on the /list file and add the version to it
 	//
@@ -97,7 +96,7 @@ func (s *Storage) Save(ctx context.Context, module, version string, mod []byte, 
 }
 
 func (s *Storage) upload(ctx context.Context, path, contentType string, stream io.Reader) error {
-	const op errors.Op = "storage.s3.upload"
+	const op errors.Op = "s3.upload"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 	upParams := &s3manager.UploadInput{

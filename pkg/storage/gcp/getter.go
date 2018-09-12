@@ -11,9 +11,9 @@ import (
 	"github.com/gomods/athens/pkg/observ"
 )
 
-// Info implements storage.Getter
+// Info implements Getter
 func (s *Storage) Info(ctx context.Context, module, version string) ([]byte, error) {
-	const op errors.Op = "storage.gcp.Info"
+	const op errors.Op = "gcp.Info"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 	exists, err := s.Exists(ctx, module, version)
@@ -36,9 +36,9 @@ func (s *Storage) Info(ctx context.Context, module, version string) ([]byte, err
 	return infoBytes, nil
 }
 
-// GoMod implements storage.Getter
+// GoMod implements Getter
 func (s *Storage) GoMod(ctx context.Context, module, version string) ([]byte, error) {
-	const op errors.Op = "storage.gcp.GoMod"
+	const op errors.Op = "gcp.GoMod"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 	exists, err := s.Exists(ctx, module, version)
@@ -62,9 +62,9 @@ func (s *Storage) GoMod(ctx context.Context, module, version string) ([]byte, er
 	return modBytes, nil
 }
 
-// Zip implements storage.Getter
+// Zip implements Getter
 func (s *Storage) Zip(ctx context.Context, module, version string) (io.ReadCloser, error) {
-	const op errors.Op = "storage.gcp.Zip"
+	const op errors.Op = "gcp.Zip"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 	exists, err := s.Exists(ctx, module, version)
