@@ -8,8 +8,8 @@ set -xeuo pipefail
 REPO_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )/.."
 
 OGOPATH=$GOPATH
-OGO111MODULE = $GO111MODULE
-OGOPROXY = $GOPROXY
+OGO111MODULE=$GO111MODULE
+OGOPROXY=$GOPROXY
 export GO_BINARY_PATH=${GO_BINARY_PATH:-go}
 TMPDIR=$(mktemp -d)
 export GOPATH=$TMPDIR
@@ -22,9 +22,9 @@ clearGoModCache () {
 
 teardown () {
   # Cleanup after our tests
-  [[ -z "$OGOPATH" ]] && unset GOPATH || export GOPATH = $OGOPATH
-  [[ -z "$OGO111MODULE" ]] && unset GO111MODULE || export GO111MODULE = $OGO111MODULE
-  [[ -z "$OGOPROXY" ]] && unset GOPROXY || export GOPROXY = $OGOPROXY
+  [[ -z "${OGOPATH}" ]] && unset GOPATH || export GOPATH=$OGOPATH
+  [[ -z "${OGO111MODULE}" ]] && unset GO111MODULE || export GO111MODULE=$OGO111MODULE
+  [[ -z "${OGOPROXY}" ]] && unset GOPROXY || export GOPROXY=$OGOPROXY
 
   pkill proxy || true
   rm -fr ${TMPDIR}
