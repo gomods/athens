@@ -17,7 +17,7 @@ GOMOD_CACHE=$TMPDIR/pkg/mod
 export PATH=${REPO_DIR}/bin:${PATH}
 
 clearGoModCache () {
-  rm -fr ${GOMOD_CACHE}
+  sudo rm -fr ${GOMOD_CACHE}
 }
 
 teardown () {
@@ -26,8 +26,8 @@ teardown () {
   [[ -z "${OGO111MODULE}" ]] && unset GO111MODULE || export GO111MODULE=$OGO111MODULE
   [[ -z "${OGOPROXY}" ]] && unset GOPROXY || export GOPROXY=$OGOPROXY
 
-  pkill proxy || true
-  rm -fr ${TMPDIR}
+  sudo pkill proxy || true
+  sudo rm -fr ${TMPDIR}
   popd 2> /dev/null || true
 }
 trap teardown EXIT
