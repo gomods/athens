@@ -11,7 +11,7 @@ type MongoTests struct {
 }
 
 func (d *MongoTests) SetupTest() {
-	ms, err := newTestStore()
+	ms, err := newTestStore(testConfigFile)
 
 	d.Require().NoError(err)
 

@@ -1,7 +1,6 @@
 package download
 
 import (
-	"github.com/bketelsen/buffet"
 	"github.com/gobuffalo/buffalo"
 	"github.com/gobuffalo/buffalo/render"
 	"github.com/gomods/athens/pkg/errors"
@@ -15,9 +14,7 @@ const PathVersionModule = "/{module:.+}/@v/{version}.mod"
 func VersionModuleHandler(dp Protocol, lggr log.Entry, eng *render.Engine) buffalo.Handler {
 	const op errors.Op = "download.VersionModuleHandler"
 	return func(c buffalo.Context) error {
-		sp := buffet.SpanFromContext(c).SetOperationName("VersionModuleHandler")
-		defer sp.Finish()
-		mod, ver, err := getModuleParams(op, c)
+		mod, ver, err := getModuleParams(c, op)
 		if err != nil {
 			lggr.SystemErr(err)
 			return c.Render(errors.Kind(err), nil)

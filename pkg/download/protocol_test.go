@@ -11,7 +11,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/gomods/athens/pkg/config/env"
+	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/module"
 	"github.com/gomods/athens/pkg/stash"
 	"github.com/gomods/athens/pkg/storage"
@@ -21,9 +21,14 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
+var (
+	testConfigPath = filepath.Join("..", "..", "config.test.toml")
+)
+
 func getDP(t *testing.T) Protocol {
 	t.Helper()
-	goBin := env.GoBinPath()
+	conf := config.GetConfLogErr(testConfigPath, t)
+	goBin := conf.GoBinary
 	fs := afero.NewOsFs()
 	mf, err := module.NewGoGetFetcher(goBin, fs)
 	if err != nil {
@@ -34,7 +39,7 @@ func getDP(t *testing.T) Protocol {
 		t.Fatal(err)
 	}
 	st := stash.New(mf, s)
-	return New(&Opts{s, st, goBin, fs})
+	return New(&Opts{s, st, NewVCSLister(goBin, fs)})
 }
 
 type listTest struct {
@@ -52,6 +57,7 @@ var listTests = []listTest{
 	{
 		name: "no tags",
 		path: "github.com/athens-artifacts/no-tags",
+		tags: []string{},
 	},
 }
 
@@ -263,7 +269,7 @@ func TestDownloadProtocol(t *testing.T) {
 	}
 	mp := &mockFetcher{}
 	st := stash.New(mp, s)
-	dp := New(&Opts{s, st, "", afero.NewMemMapFs()})
+	dp := New(&Opts{s, st, nil})
 	ctx := context.Background()
 
 	var eg errgroup.Group

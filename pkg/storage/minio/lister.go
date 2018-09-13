@@ -6,13 +6,13 @@ import (
 	"strings"
 
 	"github.com/gomods/athens/pkg/errors"
-	opentracing "github.com/opentracing/opentracing-go"
+	"github.com/gomods/athens/pkg/observ"
 )
 
 func (l *storageImpl) List(ctx context.Context, module string) ([]string, error) {
 	const op errors.Op = "minio.List"
-	sp, ctx := opentracing.StartSpanFromContext(ctx, "storage.minio.List")
-	defer sp.Finish()
+	ctx, span := observ.StartSpan(ctx, op.String())
+	defer span.End()
 	dict := make(map[string]struct{})
 
 	doneCh := make(chan struct{})
@@ -31,10 +31,6 @@ func (l *storageImpl) List(ctx context.Context, module string) ([]string, error)
 	}
 
 	ret := []string{}
-	if len(dict) == 0 {
-		return ret, errors.E(op, errors.M(module), errors.KindNotFound)
-	}
-
 	for ver := range dict {
 		ret = append(ret, ver)
 	}

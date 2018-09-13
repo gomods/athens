@@ -12,6 +12,7 @@ import (
 
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/errors"
+	"github.com/gomods/athens/pkg/observ"
 	"github.com/gomods/athens/pkg/storage"
 	multierror "github.com/hashicorp/go-multierror"
 )
@@ -23,6 +24,8 @@ type Downloader func(ctx context.Context, timeout time.Duration, baseURL, module
 // representing the downloaded module/version or a non-nil error if something went wrong
 func Download(ctx context.Context, timeout time.Duration, baseURL, module, version string) (*storage.Version, error) {
 	const op errors.Op = "module.Download"
+	ctx, span := observ.StartSpan(ctx, op.String())
+	defer span.End()
 	tctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
@@ -118,6 +121,8 @@ func getResBody(req *http.Request, timeout time.Duration) (io.ReadCloser, error)
 
 func getRequest(ctx context.Context, baseURL, module, version, ext string) (*http.Request, error) {
 	const op errors.Op = "module.getRequest"
+	ctx, span := observ.StartSpan(ctx, op.String())
+	defer span.End()
 	u, err := join(baseURL, module, version, ext)
 	if err != nil {
 		return nil, errors.E(op, err)

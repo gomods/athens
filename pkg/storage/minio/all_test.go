@@ -3,6 +3,7 @@ package minio
 import (
 	"testing"
 
+	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/storage"
 	minio "github.com/minio/minio-go"
 	"github.com/stretchr/testify/suite"
@@ -19,7 +20,14 @@ func (d *MinioTests) SetupTest() {
 	d.bucketName = "gomods"
 	d.accessKeyID = "minio"
 	d.secretAccessKey = "minio123"
-	storage, err := NewStorage(d.endpoint, d.accessKeyID, d.secretAccessKey, d.bucketName, false)
+	conf := &config.MinioConfig{
+		Endpoint:  d.endpoint,
+		Bucket:    d.bucketName,
+		Key:       d.accessKeyID,
+		Secret:    d.secretAccessKey,
+		EnableSSL: false,
+	}
+	storage, err := NewStorage(conf)
 	d.Require().NoError(err)
 	d.storage = storage
 }
