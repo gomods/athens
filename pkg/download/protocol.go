@@ -5,7 +5,6 @@ import (
 	"io"
 
 	"github.com/gomods/athens/pkg/errors"
-	"github.com/gomods/athens/pkg/module"
 	"github.com/gomods/athens/pkg/observ"
 	"github.com/gomods/athens/pkg/stash"
 	"github.com/gomods/athens/pkg/storage"
@@ -62,7 +61,7 @@ type protocol struct {
 
 func (p *protocol) List(ctx context.Context, mod string) ([]string, error) {
 	const op errors.Op = "protocol.List"
-  ctx, span := observ.StartSpan(ctx, op.String())
+	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 
 	strList, sErr := p.s.List(ctx, mod)
@@ -90,7 +89,7 @@ func (p *protocol) List(ctx context.Context, mod string) ([]string, error) {
 
 func (p *protocol) Latest(ctx context.Context, mod string) (*storage.RevInfo, error) {
 	const op errors.Op = "protocol.Latest"
-  ctx, span := observ.StartSpan(ctx, op.String())
+	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 	lr, _, err := p.lister.List(mod)
 	if err != nil {
