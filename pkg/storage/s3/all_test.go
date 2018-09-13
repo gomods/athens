@@ -2,9 +2,15 @@ package s3
 
 import (
 	"fmt"
+	"path/filepath"
 	"testing"
 
+	"github.com/gomods/athens/pkg/config"
 	"github.com/stretchr/testify/suite"
+)
+
+var (
+	testConfigFile = filepath.Join("..", "..", "..", "config.test.toml")
 )
 
 type S3Tests struct {
@@ -15,7 +21,11 @@ type S3Tests struct {
 
 func Test_ActionSuite(t *testing.T) {
 	uploaderMock := newUploaderMock()
-	storage, err := NewWithUploader("test", uploaderMock)
+	conf := config.GetConfLogErr(testConfigFile, t)
+	if conf.Storage == nil || conf.Storage.CDN == nil {
+		t.Fatalf("Invalid CDN Config provided")
+	}
+	storage, err := NewWithUploader("test", uploaderMock, conf.Storage.CDN)
 	if err != nil {
 		t.Error(err)
 	}

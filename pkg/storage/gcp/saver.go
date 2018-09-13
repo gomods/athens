@@ -20,7 +20,7 @@ import (
 // Uploaded files are publicly accessable in the storage bucket as per
 // an ACL rule.
 func (s *Storage) Save(ctx context.Context, module, version string, mod []byte, zip io.Reader, info []byte) error {
-	const op errors.Op = "storage.gcp.Save"
+	const op errors.Op = "gcp.Save"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 	exists, err := s.Exists(ctx, module, version)
@@ -31,7 +31,7 @@ func (s *Storage) Save(ctx context.Context, module, version string, mod []byte, 
 		return errors.E(op, "already exists", errors.M(module), errors.V(version), errors.KindAlreadyExists)
 	}
 
-	err = moduploader.Upload(ctx, module, version, bytes.NewReader(info), bytes.NewReader(mod), zip, s.upload)
+	err = moduploader.Upload(ctx, module, version, bytes.NewReader(info), bytes.NewReader(mod), zip, s.upload, s.timeout)
 	if err != nil {
 		return errors.E(op, err, errors.M(module), errors.V(version))
 	}
@@ -43,7 +43,7 @@ func (s *Storage) Save(ctx context.Context, module, version string, mod []byte, 
 }
 
 func (s *Storage) upload(ctx context.Context, path, contentType string, stream io.Reader) error {
-	const op errors.Op = "storage.gcp.upload"
+	const op errors.Op = "gcp.upload"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 	wc := s.bucket.Write(ctx, path)

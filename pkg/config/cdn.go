@@ -4,8 +4,8 @@ import "net/url"
 
 // CDNConfig specifies the properties required to use a CDN as the storage backend
 type CDNConfig struct {
+	TimeoutConf
 	Endpoint string `envconfig:"CDN_ENDPOINT"`
-	Timeout  int    `validate:"required"`
 }
 
 // CDNEndpointWithDefault returns CDN endpoint if set
