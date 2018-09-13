@@ -1,7 +1,7 @@
 version: '3'
 services:
   proxy:
-    image: gopackages/proxy
+    image: gomods/proxy
     depends_on:
       - redis
     ports:
