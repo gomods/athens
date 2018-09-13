@@ -66,7 +66,6 @@ func (d *TestSuites) SetupTest() {
 	d.mod = []byte("123")
 	d.zip = []byte("456")
 	d.info = []byte("789")
-
 }
 
 func TestModuleStorages(t *testing.T) {
@@ -111,9 +110,9 @@ func (d *TestSuites) testKindNotFound(ts storage.TestSuite) {
 	r.Error(err, hrn)
 	r.Equal(errors.KindNotFound, errors.Kind(err), hrn)
 
-	_, err = s.List(ctx, mod)
-	r.Error(err, hrn)
-	r.Equal(errors.KindNotFound, errors.Kind(err), hrn)
+	vs, err := s.List(ctx, mod)
+	r.NoError(err)
+	r.Equal(0, len(vs))
 
 	_, err = s.Zip(ctx, mod, ver)
 	r.Error(err, hrn)
