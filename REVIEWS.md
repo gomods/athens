@@ -66,6 +66,10 @@ to merge the PR after your feedback has been addressed, without requiring you to
 come back and manually re-review and approve the PR. In other words, you won't
 be blocking the PR from being merged.
 
+Conversely, if you are considering whether to merge a PR, please make sure that other 
+reviewers' `Comment` reviews are addressed (e.g. the author has made requested changes, 
+responded to questions, etc...) before you merge.
+
 ## Approve
 
 This one is the easiest. When you decide to submit your review, please use `Approve` if everything
