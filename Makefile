@@ -53,7 +53,7 @@ docker-push: docker
 
 .PHONY: proxy-docker
 proxy-docker:
-	docker build -t gopackages/proxy -f cmd/proxy/Dockerfile .
+	docker build -t gomods/proxy -f cmd/proxy/Dockerfile .
 
 .PHONY: bench
 bench:
