@@ -8,7 +8,6 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/bketelsen/buffet"
 	"github.com/gobuffalo/buffalo"
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/log"
@@ -17,7 +16,6 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
-	jConfig "github.com/uber/jaeger-client-go/config"
 )
 
 // Avoid import cycle.
@@ -38,7 +36,6 @@ func middlewareFilterApp(filterFile, olympusEndpoint string) *buffalo.App {
 	a := buffalo.New(buffalo.Options{})
 	mf := newTestFilter(filterFile)
 	a.Use(NewFilterMiddleware(mf, olympusEndpoint))
-	initializeTracing(a)
 
 	a.GET(pathList, h)
 	a.GET(pathVersionInfo, h)
@@ -165,12 +162,4 @@ func (suite *HookTestsSuite) TestHookUnexpectedError() {
 	res := suite.w.Request("/github.com/athens-artifacts/happy-path/@v/v1.0.0.info").Get()
 	r.True(suite.mock.invoked)
 	r.Equal(http.StatusInternalServerError, res.Code)
-}
-
-func initializeTracing(app *buffalo.App) {
-	var cfg jConfig.Configuration
-	tracer, _, _ := cfg.New(
-		"athens.proxy",
-	)
-	app.Use(buffet.OpenTracing(tracer))
 }
