@@ -22,7 +22,8 @@ The 🦁 says rawr!
 ```console
 $ git clone https://github.com/athens-artifacts/walkthrough.git
 $ cd walkthrough
-$ cmd /C "set GOMODULE111=on && C:\GO\bin\go run ."
+$ $env:GO111MODULE = "on"
+$ go run .
 go: downloading github.com/athens-artifacts/samplelib v1.0.0
 The 🦁 says rawr!
 ```
@@ -37,8 +38,6 @@ how the proxy changes the workflow and the output.
 Using the most simple installation possible, let's walk through how to use the
 Athens proxy, and figure out what is happening at each step.
 
-Note: [Currently, the proxy does not work on Windows](https://github.com/gomods/athens/issues/532).
-
 Before moving on, let's clear our Go Modules cache so that we can see the proxy
 in action without any caches populated:
 
@@ -47,38 +46,37 @@ in action without any caches populated:
 sudo rm -fr $(go env GOPATH)/pkg/mod
 ```
 
-<!-- 
 **PowerShell**
 ```powershell
-rm -recurse -force $(go env GOPATH)\pkg\mod
+rm -recurse -force "$(go env GOPATH)\pkg\mod"
 ```
--->
 
 Now run the Athens proxy in a background process:
 
 **Bash**
 ```console
-$ cd ..
+$ mkdir -p $(go env GOPATH)/src/github.com/gomods
+$ cd $(go env GOPATH)/src/github.com/gomods
 $ git clone https://github.com/gomods/athens.git
 $ cd athens
-$ GO111Modules=off go run ./cmd/proxy &
+$ GO111MODULE=off go run ./cmd/proxy -config_file=config.example.toml &
 [1] 25243
 INFO[0000] Starting application at 127.0.0.1:3000
 ```
 
-Note: [Building Athens Go Modules enabled is not yet supported](https://github.com/gomods/athens/pull/371), so we have turned it off in the above example.
+Note: [Building Athens with Go Modules enabled is not yet supported](https://github.com/gomods/athens/pull/371), so we have turned it off in the above example.
 
-<!--
 **PowerShell**
 ```console
-$ cd ..
+$ mkdir "$(go env GOPATH)\src\github.com\gomods"
+$ cd "$(go env GOPATH)\src\github.com\gomods"
 $ git clone https://github.com/gomods/athens.git
 $ cd athens
-$ start -NoNewWindow go "run .\cmd\proxy"
+$ $env:GO111MODULE = "off"
+$ Start-Process -NoNewWindow go "run .\cmd\proxy  -config_file=config.example.toml"
 [1] 25243
 INFO[0000] Starting application at 127.0.0.1:3000
 ```
--->
 
 The Athens proxy is now running in the background and is listening for requests
 from localhost (127.0.0.1) on port 3000.
@@ -97,13 +95,11 @@ export GO111MODULE=on
 export GOPROXY=http://127.0.0.1:3000
 ```
 
-<!--
 **PowerShell**
 ```powershell
 $env:GO111MODULE = "on"
 $env:GOPROXY = "http://127.0.0.1:3000"
 ```
--->
 
 The `GO111MODULE` environment variable controls the Go Modules feature in Go 1.11 only.
 Possible values are:
@@ -137,7 +133,7 @@ proxy was run in the background, you should also see output from Athens indicati
 Let's break down what is happening here:
 
 1. Before Go runs our code, it detects that our code depends on the **github.com/athens-artifacts/samplelib** package
-   which is not present in the vendor directory.
+   which is not present in the Go Modules cache.
 1. At this point the Go Modules feature comes into play because we have it enabled.
     Instead of looking in the GOPATH for the package, Go reads our **go.mod** file
     and sees that we want a particular version of that package, v1.0.0.
@@ -169,9 +165,23 @@ The 🦁 says rawr!
 No additional output is printed because Go found **github.com/athens-artifacts/samplelib@v1.0.0** in the Go Module
 cache and did not need to request it from the proxy.
 
+Lastly, quitting from the proxy. This cannot be done directly because we are starting the proxy in the background, thus we must kill it by finding it's process ID and killing it manually.
+
+**Bash**
+```bash
+lsof -i @localhost:3000
+kill -9 <<PID>>
+```
+
+**PowerShell**
+```powershell
+netstat -ano | findstr :3000 (local host Port number)
+taskkill /PID typeyourPIDhere /F
+```
+
 ## Next Steps
 
 Now that you have seen Athens in Action:
 
-* Learn more how to share an Athens server with your development team. [Coming Soon/Help Wanted](https://github.com/gomods/athens/issues/533)
+* Learn how to [install a shared team Athens](/install/shared-team-instance) with persistent storage.
 * Explore best practices for running Athens in Production. [Coming Soon/Help Wanted](https://github.com/gomods/athens/issues/531)

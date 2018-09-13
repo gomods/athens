@@ -3,9 +3,9 @@ package actions
 import (
 	"context"
 	"fmt"
-	"strings"
 
-	"github.com/gomods/athens/pkg/config/env"
+	"github.com/gomods/athens/pkg/config"
+	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/storage"
 	"github.com/gomods/athens/pkg/storage/fs"
 	"github.com/gomods/athens/pkg/storage/gcp"
@@ -16,53 +16,40 @@ import (
 )
 
 // GetStorage returns storage backend based on env configuration
-func GetStorage() (storage.Backend, error) {
-	storageType := env.StorageTypeWithDefault("memory")
-	var storageRoot string
-	var err error
-
+func GetStorage(storageType string, storageConfig *config.StorageConfig) (storage.Backend, error) {
+	const op errors.Op = "actions.GetStorage"
 	switch storageType {
 	case "memory":
 		return mem.NewStorage()
 	case "mongo":
-		connectionString, err := env.MongoConnectionString()
-		if err != nil {
-			return nil, err
+		if storageConfig.Mongo == nil {
+			return nil, errors.E(op, "Invalid Mongo Storage Configuration")
 		}
-
-		certPath := env.MongoCertPath()
-		return mongo.NewStorageWithCert(connectionString, certPath)
+		return mongo.NewStorage(storageConfig.Mongo)
 	case "disk":
-		storageRoot, err = env.DiskRoot()
-		if err != nil {
-			return nil, err
+		if storageConfig.Disk == nil {
+			return nil, errors.E(op, "Invalid Disk Storage Configuration")
 		}
-		s, err := fs.NewStorage(storageRoot, afero.NewOsFs())
+		rootLocation := storageConfig.Disk.RootPath
+		s, err := fs.NewStorage(rootLocation, afero.NewOsFs())
 		if err != nil {
-			return nil, fmt.Errorf("could not create new storage from os fs (%s)", err)
+			errStr := fmt.Sprintf("could not create new storage from os fs (%s)", err)
+			return nil, errors.E(op, errStr)
 		}
 		return s, nil
 	case "minio":
-		endpoint, err := env.MinioEndpoint()
-		if err != nil {
-			return nil, err
+		if storageConfig.Minio == nil {
+			return nil, errors.E(op, "Invalid Minio Storage Configuration")
 		}
-		accessKeyID, err := env.MinioAccessKeyID()
-		if err != nil {
-			return nil, err
-		}
-		secretAccessKey, err := env.MinioSecretAccessKey()
-		if err != nil {
-			return nil, err
-		}
-		bucketName := env.MinioBucketNameWithDefault("gomods")
-		useSSL := true
-		if useSSLVar := env.MinioSSLWithDefault("yes"); strings.ToLower(useSSLVar) == "no" {
-			useSSL = false
-		}
-		return minio.NewStorage(endpoint, accessKeyID, secretAccessKey, bucketName, useSSL)
+		return minio.NewStorage(storageConfig.Minio)
 	case "gcp":
-		return gcp.New(context.Background())
+		if storageConfig.GCP == nil {
+			return nil, errors.E(op, "Invalid GCP Storage Configuration")
+		}
+		if storageConfig.CDN == nil {
+			return nil, errors.E(op, "Invalid CDN Storage Configuration")
+		}
+		return gcp.New(context.Background(), storageConfig.GCP, storageConfig.CDN)
 	default:
 		return nil, fmt.Errorf("storage type %s is unknown", storageType)
 	}

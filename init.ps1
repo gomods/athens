@@ -51,7 +51,7 @@ Param(
 	[switch]$down
 )
 function execScript($name) {
-	$scriptsDir = "$(join-path scripts ps)"
+	$scriptsDir = "$(Join-Path scripts ps)"
 	& "$(Join-Path $scriptsDir $name)"
 }
 
@@ -107,6 +107,7 @@ if ($alldeps.IsPresent) {
 if ($dev.IsPresent) {
 	& docker-compose -p athensdev up -d mongo
 	& docker-compose -p athensdev up -d redis
+	execScript "create_default_config.ps1"
 }
 
 if ($test.IsPresent) {

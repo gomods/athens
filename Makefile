@@ -21,6 +21,7 @@ verify:
 	./scripts/check_gofmt.sh
 	./scripts/check_golint.sh
 	./scripts/check_deps.sh
+	./scripts/check_conflicts.sh
 
 .PHONY: test
 test:
@@ -71,6 +72,7 @@ alldeps:
 dev:
 	docker-compose -p athensdev up -d mongo
 	docker-compose -p athensdev up -d redis
+	./scripts/create_default_config.sh
 
 .PHONY: down
 down:

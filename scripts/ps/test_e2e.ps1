@@ -1,14 +1,15 @@
 # Execute end-to-end (e2e) tests to verify that everything is working right
 # from the end user perpsective
-Get-Process -Name *buffalo*
 $repoDir = Join-Path $PSScriptRoot ".." | Join-Path -ChildPath ".."
 if (-not (Test-Path env:GO_BINARY_PATH)) { $env:GO_BINARY_PATH = "go" }
+
 $globalTmpDir = [System.IO.Path]::GetTempPath()
 $tmpDirName = [GUID]::NewGuid()
 $testGoPath = Join-Path $globalTmpDir $tmpDirName
 
-$origGOPATH = $env:GOPATH
-$origGOPROXY = $env:GOPROXY
+$origGOPATH = if (Test-Path env:GOPATH) {$env:GOPATH} else {$null}
+$origGOPROXY = if (Test-Path env:GOPROXY) {$env:GOPROXY} else {$null}
+$origGO111MODULE = if (Test-Path env:GO111MODULE) {$env:GO111MODULE} else {$null}
 
 New-Item $testGoPath -ItemType Directory | Out-Null
 $goModCache = Join-Path $testGoPath "pkg" | Join-Path -ChildPath "mod"
@@ -19,17 +20,17 @@ function clearGoModCache () {
 }
 
 function stopProcesses () {
-  Get-Process -Name buffalo* -ErrorAction SilentlyContinue | Stop-Process -Force
-  Get-Process -Name athens-build* -ErrorAction SilentlyContinue | Stop-Process -Force
+  Get-Process -Name proxy* -ErrorAction SilentlyContinue | Stop-Process -Force
 }
 
 function teardown () {
-  # Cleanup after our tests
-  $env:GOPATH = $origGOPATH
-  $env:GOPROXY = $origGOPROXY
-
+  # Cleanup ENV after our tests
+  if ($origGOPATH) {$env:GOPATH = $origGOPATH} else {Remove-Item env:GOPATH}
+  if ($origGOPROXY) {$env:GOPROXY = $origGOPROXY} else {Remove-Item env:GOPROXY}
+  if ($origGO111MODULE) {$env:GO111MODULE = $origGO111MODULE} else {Remove-Item env:GO111MODULE}
+  # stop buffalo
   stopProcesses
-  # clean test gopath
+  # clear test gopath
   Get-ChildItem -Path $testGoPath -Recurse | Remove-Item -Recurse -Force -Confirm:$false
   
   Pop-Location 
@@ -37,11 +38,13 @@ function teardown () {
 }
 
 try {
+  $env:GO111MODULE = "on"
   ## Start the proxy in the background and wait for it to be ready
   Push-Location $(Join-Path $repoDir cmd | Join-Path -ChildPath proxy)
   ## just in case something is still running
   stopProcesses
-  Start-Process -NoNewWindow buffalo dev
+  & go build -mod=vendor
+  Start-Process -NoNewWindow .\proxy.exe
 
   $proxyUp = $false
   do {
@@ -57,11 +60,7 @@ try {
   $testSource = Join-Path $testGoPath "happy-path"
   git clone https://github.com/athens-artifacts/happy-path.git ${testSource}
   Push-Location ${testSource}
-
-  ## set modules on after running buffalo dev, not sure why
-  ## issue https://github.com/gomods/athens/issues/412
-  $env:GO111MODULE = "on"
-
+  
   $env:GOPATH = $testGoPath
   ## Make sure that our test repo works without the GOPROXY first
   if (Test-Path env:GOPROXY) { Remove-Item env:GOPROXY }

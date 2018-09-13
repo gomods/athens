@@ -5,22 +5,20 @@ import (
 	"log"
 	"path/filepath"
 
-	"github.com/gomods/athens/pkg/config/env"
 	"github.com/mitchellh/go-homedir"
 )
 
 // initializeNETRC checks if .netrc is at a pre-configured path
 // and moves to ~/.netrc -- note that this will override whatever
 // .netrc you have in your home directory.
-func initializeNETRC() {
-	p := env.NETRCPath()
-	if p == "" {
+func initializeNETRC(path string) {
+	if path == "" {
 		return
 	}
 
-	netrcBts, err := ioutil.ReadFile(p)
+	netrcBts, err := ioutil.ReadFile(path)
 	if err != nil {
-		log.Fatalf("could not read %s: %v", p, err)
+		log.Fatalf("could not read %s: %v", path, err)
 	}
 
 	hdir, err := homedir.Dir()

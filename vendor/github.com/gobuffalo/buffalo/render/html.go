@@ -3,8 +3,8 @@ package render
 import (
 	"html"
 
+	"github.com/gobuffalo/github_flavored_markdown"
 	"github.com/gobuffalo/plush"
-	"github.com/shurcooL/github_flavored_markdown"
 )
 
 // HTML renders the named files using the 'text/html'
@@ -42,7 +42,7 @@ func (e *Engine) HTML(names ...string) Renderer {
 // MDTemplateEngine runs the input through github flavored markdown before sending it to the Plush engine.
 func MDTemplateEngine(input string, data map[string]interface{}, helpers map[string]interface{}) (string, error) {
 	if ct, ok := data["contentType"].(string); ok && ct == "text/plain" {
-		return plush.BuffaloRenderer(string(input), data, helpers)
+		return plush.BuffaloRenderer(input, data, helpers)
 	}
 	source := github_flavored_markdown.Markdown([]byte(input))
 	source = []byte(html.UnescapeString(string(source)))
