@@ -1,6 +1,5 @@
 # Execute end-to-end (e2e) tests to verify that everything is working right
 # from the end user perpsective
-Get-Process -Name *buffalo*
 $repoDir = Join-Path $PSScriptRoot ".." | Join-Path -ChildPath ".."
 if (-not (Test-Path env:GO_BINARY_PATH)) { $env:GO_BINARY_PATH = "go" }
 
@@ -21,8 +20,7 @@ function clearGoModCache () {
 }
 
 function stopProcesses () {
-  Get-Process -Name buffalo* -ErrorAction SilentlyContinue | Stop-Process -Force
-  Get-Process -Name athens-build* -ErrorAction SilentlyContinue | Stop-Process -Force
+  Get-Process -Name proxy* -ErrorAction SilentlyContinue | Stop-Process -Force
 }
 
 function teardown () {
@@ -40,11 +38,13 @@ function teardown () {
 }
 
 try {
+  $env:GO111MODULE = "on"
   ## Start the proxy in the background and wait for it to be ready
   Push-Location $(Join-Path $repoDir cmd | Join-Path -ChildPath proxy)
   ## just in case something is still running
   stopProcesses
-  Start-Process -NoNewWindow buffalo dev
+  & go build -mod=vendor
+  Start-Process -NoNewWindow .\proxy.exe
 
   $proxyUp = $false
   do {
@@ -60,11 +60,7 @@ try {
   $testSource = Join-Path $testGoPath "happy-path"
   git clone https://github.com/athens-artifacts/happy-path.git ${testSource}
   Push-Location ${testSource}
-
-  ## set modules on after running buffalo dev, not sure why
-  ## issue https://github.com/gomods/athens/issues/412
-  $env:GO111MODULE = "on"
-
+  
   $env:GOPATH = $testGoPath
   ## Make sure that our test repo works without the GOPROXY first
   if (Test-Path env:GOPROXY) { Remove-Item env:GOPROXY }

@@ -89,7 +89,8 @@ func (g *GcpTests) TestNotFounds() {
 	})
 
 	g.T().Run("List not found", func(t *testing.T) {
-		_, err := g.store.List(g.context, "nothing/to/see/here")
-		r.True(errors.IsNotFoundErr(err))
+		list, err := g.store.List(g.context, "nothing/to/see/here")
+		r.NoError(err)
+		r.Equal(0, len(list))
 	})
 }
