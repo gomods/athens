@@ -5,6 +5,8 @@ import (
 	"io"
 
 	"github.com/gomods/athens/pkg/errors"
+	"github.com/gomods/athens/pkg/module"
+	"github.com/gomods/athens/pkg/observ"
 	"github.com/gomods/athens/pkg/stash"
 	"github.com/gomods/athens/pkg/storage"
 )
@@ -60,6 +62,8 @@ type protocol struct {
 
 func (p *protocol) List(ctx context.Context, mod string) ([]string, error) {
 	const op errors.Op = "protocol.List"
+  ctx, span := observ.StartSpan(ctx, op.String())
+	defer span.End()
 
 	strList, sErr := p.s.List(ctx, mod)
 	// if we got an unexpected storage err then we can not guarantee that the end result contains all versions
@@ -86,6 +90,8 @@ func (p *protocol) List(ctx context.Context, mod string) ([]string, error) {
 
 func (p *protocol) Latest(ctx context.Context, mod string) (*storage.RevInfo, error) {
 	const op errors.Op = "protocol.Latest"
+  ctx, span := observ.StartSpan(ctx, op.String())
+	defer span.End()
 	lr, _, err := p.lister.List(mod)
 	if err != nil {
 		return nil, errors.E(op, err)
@@ -96,6 +102,8 @@ func (p *protocol) Latest(ctx context.Context, mod string) (*storage.RevInfo, er
 
 func (p *protocol) Info(ctx context.Context, mod, ver string) ([]byte, error) {
 	const op errors.Op = "protocol.Info"
+	ctx, span := observ.StartSpan(ctx, op.String())
+	defer span.End()
 	info, err := p.s.Info(ctx, mod, ver)
 	if errors.IsNotFoundErr(err) {
 		err = p.stasher.Stash(mod, ver)
@@ -113,6 +121,8 @@ func (p *protocol) Info(ctx context.Context, mod, ver string) ([]byte, error) {
 
 func (p *protocol) GoMod(ctx context.Context, mod, ver string) ([]byte, error) {
 	const op errors.Op = "protocol.GoMod"
+	ctx, span := observ.StartSpan(ctx, op.String())
+	defer span.End()
 	goMod, err := p.s.GoMod(ctx, mod, ver)
 	if errors.IsNotFoundErr(err) {
 		err = p.stasher.Stash(mod, ver)
@@ -130,6 +140,8 @@ func (p *protocol) GoMod(ctx context.Context, mod, ver string) ([]byte, error) {
 
 func (p *protocol) Zip(ctx context.Context, mod, ver string) (io.ReadCloser, error) {
 	const op errors.Op = "protocol.Zip"
+	ctx, span := observ.StartSpan(ctx, op.String())
+	defer span.End()
 	zip, err := p.s.Zip(ctx, mod, ver)
 	if errors.IsNotFoundErr(err) {
 		err = p.stasher.Stash(mod, ver)

@@ -8,14 +8,14 @@ import (
 
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/errors"
-	opentracing "github.com/opentracing/opentracing-go"
+	"github.com/gomods/athens/pkg/observ"
 )
 
-// Info implements storage.Getter
+// Info implements Getter
 func (s *Storage) Info(ctx context.Context, module, version string) ([]byte, error) {
 	const op errors.Op = "gcp.Info"
-	sp, ctx := opentracing.StartSpanFromContext(ctx, "storage.gcp.Info")
-	defer sp.Finish()
+	ctx, span := observ.StartSpan(ctx, op.String())
+	defer span.End()
 	exists, err := s.Exists(ctx, module, version)
 	if err != nil {
 		return nil, errors.E(op, err, errors.M(module), errors.V(version))
@@ -36,11 +36,11 @@ func (s *Storage) Info(ctx context.Context, module, version string) ([]byte, err
 	return infoBytes, nil
 }
 
-// GoMod implements storage.Getter
+// GoMod implements Getter
 func (s *Storage) GoMod(ctx context.Context, module, version string) ([]byte, error) {
 	const op errors.Op = "gcp.GoMod"
-	sp, ctx := opentracing.StartSpanFromContext(ctx, "storage.gcp.GoMod")
-	defer sp.Finish()
+	ctx, span := observ.StartSpan(ctx, op.String())
+	defer span.End()
 	exists, err := s.Exists(ctx, module, version)
 	if err != nil {
 		return nil, errors.E(op, err, errors.M(module), errors.V(version))
@@ -62,11 +62,11 @@ func (s *Storage) GoMod(ctx context.Context, module, version string) ([]byte, er
 	return modBytes, nil
 }
 
-// Zip implements storage.Getter
+// Zip implements Getter
 func (s *Storage) Zip(ctx context.Context, module, version string) (io.ReadCloser, error) {
 	const op errors.Op = "gcp.Zip"
-	sp, ctx := opentracing.StartSpanFromContext(ctx, "storage.gcp.Zip")
-	defer sp.Finish()
+	ctx, span := observ.StartSpan(ctx, op.String())
+	defer span.End()
 	exists, err := s.Exists(ctx, module, version)
 	if err != nil {
 		return nil, errors.E(op, err, errors.M(module), errors.V(version))

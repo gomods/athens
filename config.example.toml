@@ -7,15 +7,37 @@
 # Env override: GO_BINARY_PATH
 GoBinary = "go"
 
-# GoEnv returns the type of environment to run.
+# GoEnv specifies the type of environment to run.
 # Supported values are: 'development' and 'production'. Defaults to "development"
 # Env override: GO_ENV
 GoEnv = "development"
+
+# GoGetWorkers specifies how many times you can concurrently
+# go mod download, this is so that low performance instances
+# can manage go get more sanely and not run out of disk or memory.
+# Env override: ATHENS_GOGET_WORKERS
+GoGetWorkers = 30
+
+# ProtocolWorkers specifies how many concurrent
+# requests can you handle at a time for all
+# download protocol paths. This is different from
+# GoGetWorkers in that you can potentially serve
+# 30 requests to the Download Protocol but only 5
+# at a time can stash a module from Upstream to Storage.
+# Env override: ATHENS_PROTOCOL_WORKERS
+ProtocolWorkers = 30
 
 # LogLevel returns the system's exposure to internal logs. Defaults to debug.
 # Supports all logrus log levels (https://github.com/Sirupsen/logrus#level-logging)
 # Env override: ATHENS_LOG_LEVEL
 LogLevel = "debug"
+
+# BuffaloLogLevel returns the log level for logs
+# emitted by Buffalo itself. This is different from our own
+# LogLevel in this file because you might want info level
+# for our codebase, but panic level for buffalo.
+# Env override: BUFFALO_LOG_LEVEL
+BuffaloLogLevel = "debug"
 
 # CloudRuntime is the Cloud Provider on which the Proxy/Registry is running.
 # Currently available options are "GCP", or "none". Defaults to "none"
@@ -62,7 +84,7 @@ EnableCSRFProtection = false
     OlympusGlobalEndpoint = "http://localhost:3001"
     # Redis queue for buffalo workers
     # Defaults to ":6379"
-    # Env override: ATHENS_REDIS_QUEUE_PORT
+    # Env override: ATHENS_REDIS_QUEUE_ADDRESS
     RedisQueueAddress = ":6379"
     # Flag to turn off Proxy Filter middleware
     # Defaults to true
@@ -74,6 +96,28 @@ EnableCSRFProtection = false
     # Password for basic auth
     # Env override: BASIC_AUTH_PASS
     BasicAuthPass = ""
+    # Set to true to force an SSL redirect
+    # Env override: PROXY_FORCE_SSL
+    ForceSSL = false
+    # ValidatorHook specifies the endpoint to validate modules against
+    # Not used if left blank or not specified
+    # Env override: ATHENS_PROXY_VALIDATOR
+    ValidatorHook = ""
+    # PathPrefix specifies whether the Proxy
+    # should have a basepath. Certain proxies and services
+    # are distinguished based on subdomain, while others are based
+    # on path prefixes.
+    # Env override: ATHENS_PATH_PREFIX
+    PathPrefix = ""
+
+    # NETRCPath tells you where the .netrc path initially resides.
+    # This is so that you can mount the .netrc file to a secret location
+    # in the fs system and then move it ~/.netrc. In certain deployments
+    # like Kubernetes, we can't mount directly to ~ because it would then
+    # clean out whatever is already there as part of the image (such as
+    # .cache directory in the Go image).
+    # Env override: ATHENS_NETRC_PATH
+    NETRCPath = ""
 
 [Olympus]
     # StorageType sets the type of storage backend Olympus will use.
@@ -90,7 +134,7 @@ EnableCSRFProtection = false
     WorkerType = "redis"
     # Redis queue for buffalo workers
     # Defaults to ":6379"
-    # Env override: OLYMPUS_REDIS_QUEUE_PORT
+    # Env override: OLYMPUS_REDIS_QUEUE_ADDRESS
     RedisQueueAddress = ":6379"
 
 [Storage]
@@ -140,7 +184,10 @@ EnableCSRFProtection = false
     [Storage.Mongo]
         # Full URL for mongo storage
         # Env override: ATHENS_MONGO_STORAGE_URL
-        URL = "mongo.example.com"
+        URL = "mongodb://127.0.0.1:27017"
+        # Path to certificate to use for the mongo connection
+        # Env override: ATHENS_MONGO_CERT_PATH
+        CertPath = ""
         # Timeout for networks calls made to Mongo in seconds
         # Defaults to Global Timeout
         # Env override: MONGO_CONN_TIMEOUT_SEC
