@@ -3,7 +3,6 @@ package download
 import (
 	"net/http"
 
-	"github.com/bketelsen/buffet"
 	"github.com/gobuffalo/buffalo"
 	"github.com/gobuffalo/buffalo/render"
 	"github.com/gomods/athens/pkg/errors"
@@ -15,12 +14,9 @@ import (
 const PathLatest = "/{module:.+}/@latest"
 
 // LatestHandler implements GET baseURL/module/@latest
-func LatestHandler(dp Protocol, lggr *log.Logger, eng *render.Engine) func(c buffalo.Context) error {
+func LatestHandler(dp Protocol, lggr log.Entry, eng *render.Engine) buffalo.Handler {
 	const op errors.Op = "download.LatestHandler"
 	return func(c buffalo.Context) error {
-		sp := buffet.SpanFromContext(c)
-		sp.SetOperationName("latestHandler")
-		defer sp.Finish()
 		mod, err := paths.GetModule(c)
 		if err != nil {
 			lggr.SystemErr(errors.E(op, err))

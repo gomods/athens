@@ -2,27 +2,28 @@ package mongo
 
 import (
 	"context"
-	"strings"
 
+	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
 	"github.com/gomods/athens/pkg/errors"
+	"github.com/gomods/athens/pkg/observ"
 	"github.com/gomods/athens/pkg/storage"
-	opentracing "github.com/opentracing/opentracing-go"
 )
 
 // List lists all versions of a module
 func (s *ModuleStore) List(ctx context.Context, module string) ([]string, error) {
 	const op errors.Op = "mongo.List"
-	sp, ctx := opentracing.StartSpanFromContext(ctx, "storage.mongo.List")
-	defer sp.Finish()
+	ctx, span := observ.StartSpan(ctx, op.String())
+	defer span.End()
 	c := s.s.DB(s.d).C(s.c)
 	result := make([]storage.Module, 0)
 	err := c.Find(bson.M{"module": module}).All(&result)
 	if err != nil {
-		if strings.Contains(err.Error(), "not found") {
-			err = errors.E(op, err, errors.M(module), errors.KindNotFound)
+		kind := errors.KindUnexpected
+		if err == mgo.ErrNotFound {
+			kind = errors.KindNotFound
 		}
-		return nil, err
+		return nil, errors.E(op, kind, errors.M(module), err)
 	}
 
 	versions := make([]string, len(result))

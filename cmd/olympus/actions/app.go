@@ -1,6 +1,10 @@
 package actions
 
 import (
+	"fmt"
+	stdlog "log"
+	"time"
+
 	"github.com/gobuffalo/buffalo"
 	"github.com/gobuffalo/buffalo/middleware"
 	"github.com/gobuffalo/buffalo/middleware/csrf"
@@ -11,22 +15,28 @@ import (
 	"github.com/gobuffalo/packr"
 	"github.com/gocraft/work"
 	"github.com/gomods/athens/pkg/cdn/metadata/azurecdn"
-	"github.com/gomods/athens/pkg/config/env"
+	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/download"
-	"github.com/gomods/athens/pkg/download/goget"
 	"github.com/gomods/athens/pkg/eventlog"
 	"github.com/gomods/athens/pkg/log"
+	"github.com/gomods/athens/pkg/module"
+	"github.com/gomods/athens/pkg/stash"
 	"github.com/gomods/athens/pkg/storage"
 	"github.com/gomodule/redigo/redis"
 	"github.com/rs/cors"
+	"github.com/sirupsen/logrus"
+	"github.com/spf13/afero"
 	"github.com/unrolled/secure"
 )
 
-// AppConfig contains dependencies used in App
-type AppConfig struct {
-	Storage        storage.Backend
-	EventLog       eventlog.Eventlog
-	CacheMissesLog eventlog.Appender
+type workerConfig struct {
+	store           storage.Backend
+	eLog            eventlog.Eventlog
+	wType           string
+	redisEndpoint   string
+	maxConc         int
+	maxFails        uint
+	downloadTimeout time.Duration
 }
 
 const (
@@ -43,24 +53,58 @@ var (
 	workerModuleKey           = "module"
 	workerVersionKey          = "version"
 	workerPushNotificationKey = "push-notification"
-	// ENV is used to help switch settings based on where the
-	// application is being run. Default is "development".
-	ENV = env.GoEnvironmentWithDefault("development")
 	// T is buffalo Translator
 	T *i18n.Translator
 )
 
+// Service is the name of the service that we want to tag our processes with
+const Service = "olympus"
+
 // App is where all routes and middleware for buffalo should be defined.
 // This is the nerve center of your application.
-func App(config *AppConfig) (*buffalo.App, error) {
-	port := env.Port(":3001")
+func App(conf *config.Config) (*buffalo.App, error) {
+	// ENV is used to help switch settings based on where the
+	// application is being run. Default is "development".
+	ENV := conf.GoEnv
+	port := conf.Olympus.Port
 
-	w, err := getWorker(config.Storage, config.EventLog)
+	storage, err := GetStorage(conf.Olympus.StorageType, conf.Storage)
+	if err != nil {
+		return nil, err
+	}
+	if conf.Storage == nil || conf.Storage.Mongo == nil {
+		return nil, fmt.Errorf("A valid Mongo configuration is required to create the event log")
+	}
+	eLog, err := GetEventLog(conf.Storage.Mongo.URL, conf.Storage.Mongo.CertPath, conf.Storage.Mongo.TimeoutDuration())
+	if err != nil {
+		return nil, fmt.Errorf("error creating eventlog (%s)", err)
+	}
+	wConf := workerConfig{
+		store:           storage,
+		eLog:            eLog,
+		wType:           conf.Olympus.WorkerType,
+		maxConc:         conf.MaxConcurrency,
+		maxFails:        conf.MaxWorkerFails,
+		downloadTimeout: conf.TimeoutDuration(),
+		redisEndpoint:   conf.Olympus.RedisQueueAddress,
+	}
+	w, err := getWorker(wConf)
 	if err != nil {
 		return nil, err
 	}
 
-	lggr := log.New(env.CloudRuntime(), env.LogLevel())
+	logLvl, err := logrus.ParseLevel(conf.LogLevel)
+	if err != nil {
+		return nil, err
+	}
+	lggr := log.New(conf.CloudRuntime, logLvl)
+
+	bLogLvl, err := logrus.ParseLevel(conf.BuffaloLogLevel)
+	if err != nil {
+		return nil, err
+	}
+	blggr := log.Buffalo(bLogLvl)
+
 	app := buffalo.New(buffalo.Options{
 		Addr: port,
 		Env:  ENV,
@@ -69,8 +113,10 @@ func App(config *AppConfig) (*buffalo.App, error) {
 		},
 		SessionName: "_olympus_session",
 		Worker:      w,
-		Logger:      log.Buffalo(),
+		WorkerOff:   true, // TODO(marwan): turned off until worker is being used.
+		Logger:      blggr,
 	})
+
 	// Automatically redirect to SSL
 	app.Use(ssl.ForceSSL(secure.Options{
 		SSLRedirect:     ENV == "production",
@@ -80,10 +126,9 @@ func App(config *AppConfig) (*buffalo.App, error) {
 	if ENV == "development" {
 		app.Use(middleware.ParameterLogger)
 	}
-	initializeTracing(app)
 	// Protect against CSRF attacks. https://www.owasp.org/index.php/Cross-Site_Request_Forgery_(CSRF)
 	// Remove to disable this.
-	if env.EnableCSRFProtection() {
+	if conf.EnableCSRFProtection {
 		csrfMiddleware := csrf.New
 		app.Use(csrfMiddleware)
 	}
@@ -95,58 +140,82 @@ func App(config *AppConfig) (*buffalo.App, error) {
 		// TODO: initialize the azurecdn.Storage struct here
 	}))
 
-	// Wraps each request in a transaction.
-	//  c.Value("tx").(*pop.PopTransaction)
-	// Remove to disable this.
-	// app.Use(middleware.PopTransaction(models.DB))
-
 	// Setup and use translations:
 	if T, err = i18n.New(packr.NewBox("../locales"), "en-US"); err != nil {
 		app.Stop(err)
 	}
 	app.Use(T.Middleware())
 
-	app.GET("/diff/{lastID}", diffHandler(config.Storage, config.EventLog))
-	app.GET("/feed/{lastID}", feedHandler(config.Storage))
-	app.GET("/eventlog/{sequence_id}", eventlogHandler(config.EventLog))
+	app.GET("/diff/{lastID}", diffHandler(storage, eLog))
+	app.GET("/feed/{lastID}", feedHandler(storage))
+	app.GET("/eventlog/{sequence_id}", eventlogHandler(eLog))
 	app.POST("/cachemiss", cachemissHandler(w))
 	app.POST("/push", pushNotificationHandler(w))
+	app.GET("/healthz", healthHandler)
 
 	// Download Protocol
-	gg, err := goget.New()
+	goBin := conf.GoBinary
+	fs := afero.NewOsFs()
+	mf, err := module.NewGoGetFetcher(goBin, fs)
 	if err != nil {
 		return nil, err
 	}
-	dp := download.New(gg, config.Storage)
-	app.GET(download.PathList, download.ListHandler(dp, lggr, renderEng))
-	app.GET(download.PathVersionInfo, download.VersionInfoHandler(dp, lggr, renderEng))
-	app.GET(download.PathVersionModule, download.VersionModuleHandler(dp, lggr, renderEng))
-	app.GET(download.PathVersionZip, download.VersionZipHandler(dp, lggr, renderEng))
+	lister := download.NewVCSLister(goBin, fs)
+	st := stash.New(mf, storage)
+	dpOpts := &download.Opts{
+		Storage: storage,
+		Stasher: st,
+		Lister:  lister,
+	}
+	dp := download.New(dpOpts)
+
+	handlerOpts := &download.HandlerOpts{Protocol: dp, Logger: lggr, Engine: renderEng}
+	download.RegisterHandlers(app, handlerOpts)
 
 	app.ServeFiles("/", assetsBox) // serve files from the public directory
 
 	return app, nil
 }
 
-func getWorker(store storage.Backend, eLog eventlog.Eventlog) (worker.Worker, error) {
-	port := env.OlympusRedisQueuePortWithDefault(":6379")
+func getWorker(wConf workerConfig) (worker.Worker, error) {
+	switch wConf.wType {
+	case "redis":
+		return registerRedis(wConf)
+	case "memory":
+		return registerInMem(wConf)
+	default:
+		stdlog.Printf("Provided background worker type %s. Expected redis|memory. Defaulting to memory", wConf.wType)
+		return registerInMem(wConf)
+	}
+}
+
+func registerInMem(wConf workerConfig) (worker.Worker, error) {
+	w := worker.NewSimple()
+	if err := w.Register(PushNotificationHandlerName, GetProcessPushNotificationJob(wConf.store, wConf.eLog, wConf.downloadTimeout)); err != nil {
+		return nil, err
+	}
+	return w, nil
+}
+
+func registerRedis(wConf workerConfig) (worker.Worker, error) {
+	addr := wConf.redisEndpoint
 	w := gwa.New(gwa.Options{
 		Pool: &redis.Pool{
 			MaxActive: 5,
 			MaxIdle:   5,
 			Wait:      true,
 			Dial: func() (redis.Conn, error) {
-				return redis.Dial("tcp", port)
+				return redis.Dial("tcp", addr)
 			},
 		},
 		Name:           OlympusWorkerName,
-		MaxConcurrency: env.AthensMaxConcurrency(),
+		MaxConcurrency: wConf.maxConc,
 	})
 
 	opts := work.JobOptions{
 		SkipDead: true,
-		MaxFails: env.WorkerMaxFails(),
+		MaxFails: wConf.maxFails,
 	}
 
-	return w, w.RegisterWithOptions(PushNotificationHandlerName, opts, GetProcessPushNotificationJob(store, eLog))
+	return w, w.RegisterWithOptions(PushNotificationHandlerName, opts, GetProcessPushNotificationJob(wConf.store, wConf.eLog, wConf.downloadTimeout))
 }

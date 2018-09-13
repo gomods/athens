@@ -3,73 +3,53 @@ package actions
 import (
 	"context"
 	"fmt"
-	"strings"
 
-	"github.com/gomods/athens/pkg/config/env"
+	"github.com/gomods/athens/pkg/config"
+	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/storage"
 	"github.com/gomods/athens/pkg/storage/fs"
 	"github.com/gomods/athens/pkg/storage/gcp"
 	"github.com/gomods/athens/pkg/storage/mem"
 	"github.com/gomods/athens/pkg/storage/minio"
 	"github.com/gomods/athens/pkg/storage/mongo"
-	"github.com/gomods/athens/pkg/storage/rdbms"
 	"github.com/spf13/afero"
 )
 
 // GetStorage returns storage backend based on env configuration
-func GetStorage() (storage.BackendConnector, error) {
-	// changing to mongo storage, memory seems buggy
-	storageType := env.StorageTypeWithDefault("mongo")
-	var storageRoot string
-	var err error
-
+func GetStorage(storageType string, storageConfig *config.StorageConfig) (storage.Backend, error) {
+	const op errors.Op = "actions.GetStorage"
 	switch storageType {
 	case "memory":
 		return mem.NewStorage()
 	case "mongo":
-		storageRoot, err = env.MongoURI()
-		if err != nil {
-			return nil, err
+		if storageConfig.Mongo == nil {
+			return nil, errors.E(op, "Invalid Mongo Storage Configuration")
 		}
-		return mongo.NewStorage(storageRoot), nil
+		return mongo.NewStorage(storageConfig.Mongo)
 	case "disk":
-		storageRoot, err = env.DiskRoot()
-		if err != nil {
-			return nil, err
+		if storageConfig.Disk == nil {
+			return nil, errors.E(op, "Invalid Disk Storage Configuration")
 		}
-		s, err := fs.NewStorage(storageRoot, afero.NewOsFs())
+		rootLocation := storageConfig.Disk.RootPath
+		s, err := fs.NewStorage(rootLocation, afero.NewOsFs())
 		if err != nil {
-			return nil, fmt.Errorf("could not create new storage from os fs (%s)", err)
+			errStr := fmt.Sprintf("could not create new storage from os fs (%s)", err)
+			return nil, errors.E(op, errStr)
 		}
-		return storage.NoOpBackendConnector(s), nil
-	case "postgres", "sqlite", "cockroach", "mysql":
-		storageRoot, err = env.RdbmsName()
-		if err != nil {
-			return nil, err
-		}
-		return rdbms.NewRDBMSStorage(storageRoot), nil
+		return s, nil
 	case "minio":
-		endpoint, err := env.MinioEndpoint()
-		if err != nil {
-			return nil, err
+		if storageConfig.Minio == nil {
+			return nil, errors.E(op, "Invalid Minio Storage Configuration")
 		}
-		accessKeyID, err := env.MinioAccessKeyID()
-		if err != nil {
-			return nil, err
-		}
-		secretAccessKey, err := env.MinioSecretAccessKey()
-		if err != nil {
-			return nil, err
-		}
-		bucketName := env.MinioBucketNameWithDefault("gomods")
-		useSSL := true
-		if useSSLVar := env.MinioSSLWithDefault("yes"); strings.ToLower(useSSLVar) == "no" {
-			useSSL = false
-		}
-		s, err := minio.NewStorage(endpoint, accessKeyID, secretAccessKey, bucketName, useSSL)
-		return storage.NoOpBackendConnector(s), err
+		return minio.NewStorage(storageConfig.Minio)
 	case "gcp":
-		return gcp.New(context.Background())
+		if storageConfig.GCP == nil {
+			return nil, errors.E(op, "Invalid GCP Storage Configuration")
+		}
+		if storageConfig.CDN == nil {
+			return nil, errors.E(op, "Invalid CDN Storage Configuration")
+		}
+		return gcp.New(context.Background(), storageConfig.GCP, storageConfig.CDN)
 	default:
 		return nil, fmt.Errorf("storage type %s is unknown", storageType)
 	}

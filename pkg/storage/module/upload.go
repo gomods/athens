@@ -4,9 +4,10 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"time"
 
 	"github.com/gomods/athens/pkg/config"
-	"github.com/gomods/athens/pkg/config/env"
+	"github.com/gomods/athens/pkg/errors"
 	multierror "github.com/hashicorp/go-multierror"
 )
 
@@ -17,8 +18,9 @@ type Uploader func(ctx context.Context, path, contentType string, stream io.Read
 
 // Upload saves .info, .mod and .zip files to the blob store in parallel.
 // Returns multierror containing errors from all uploads and timeouts
-func Upload(ctx context.Context, module, version string, info, mod, zip io.Reader, uploader Uploader) error {
-	tctx, cancel := context.WithTimeout(ctx, env.Timeout())
+func Upload(ctx context.Context, module, version string, info, mod, zip io.Reader, uploader Uploader, timeout time.Duration) error {
+	const op errors.Op = "module.Upload"
+	tctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
 	save := func(ext, contentType string, stream io.Reader) <-chan error {
@@ -45,14 +47,17 @@ func Upload(ctx context.Context, module, version string, info, mod, zip io.Reade
 	go saveOrAbort("mod", "text/plain", mod)
 	go saveOrAbort("zip", "application/octet-stream", zip)
 
-	var errors error
+	var errs error
 	for i := 0; i < numFiles; i++ {
 		err := <-errChan
 		if err != nil {
-			errors = multierror.Append(errors, err)
+			errs = multierror.Append(errs, err)
 		}
 	}
 	close(errChan)
+	if errs != nil {
+		return errors.E(op, errs)
+	}
 
-	return errors
+	return nil
 }

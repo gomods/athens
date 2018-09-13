@@ -14,12 +14,14 @@ docs:
 .PHONY: setup-dev-env
 setup-dev-env:
 	./scripts/get_dev_tools.sh
+	$(MAKE) dev
 
 .PHONY: verify
 verify:
 	./scripts/check_gofmt.sh
 	./scripts/check_golint.sh
 	./scripts/check_deps.sh
+	./scripts/check_conflicts.sh
 
 .PHONY: test
 test:
@@ -30,19 +32,35 @@ test:
 test-unit:
 	./scripts/test_unit.sh
 
+.PHONY: test-e2e
+test-e2e:
+	./scripts/test_e2e.sh
+
+.PHONY: docker
+docker: olympus-docker proxy-docker
+
 .PHONY: olympus-docker
 olympus-docker:
-	docker build -t gopackages/olympus -f cmd/olympus/Dockerfile .
+	docker build -t gomods/olympus -f cmd/olympus/Dockerfile .
+
+.PHONY: proxy-docker
+proxy-docker:
+	docker build -t gomods/proxy -f cmd/proxy/Dockerfile .
+
+.PHONY: docker-push
+docker-push: docker
+	./scripts/push-docker-images.sh
 
 .PHONY: proxy-docker
 proxy-docker:
 	docker build -t gopackages/proxy -f cmd/proxy/Dockerfile .
 
+.PHONY: bench
+bench:
+	./scripts/benchmark.sh
 
 .PHONY: alldeps
 alldeps:
-	docker-compose -p athensdev up -d mysql
-	docker-compose -p athensdev up -d postgres
 	docker-compose -p athensdev up -d mongo
 	docker-compose -p athensdev up -d redis
 	docker-compose -p athensdev up -d minio
@@ -54,13 +72,12 @@ alldeps:
 dev:
 	docker-compose -p athensdev up -d mongo
 	docker-compose -p athensdev up -d redis
+	./scripts/create_default_config.sh
 
 .PHONY: down
 down:
-	docker-compose -p athensdev down
-	docker volume prune
+	docker-compose -p athensdev down -v
 
 .PHONY: dev-teardown
 dev-teardown:
-	docker-compose -p athensdev down
-	docker volume prune
+	docker-compose -p athensdev down -v

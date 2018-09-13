@@ -1,20 +1,20 @@
+![Athens Banner](./docs/static/banner.png)
+
 # Welcome Gophers!
 
-Welcome to the Athens project! We're building all things Go package repository in here. 
+Welcome to the Athens project! We're building all things Go package repository in here.
 
-1. [Package Registry](./REGISTRY.md)
-2. [Edge Proxy](./PROXY.md)
+1. [Package Registry](https://docs.gomods.io/design/registry/)
+2. [Edge Proxy](https://docs.gomods.io/design/proxy/)
 
-If you want more of a tl;dr on the project, check out [this quick introduction](https://medium.com/@arschles/project-athens-c80606497ce1)
+See our documentation site [https://docs.gomods.io](https://docs.gomods.io) for more details on the project.
 
 # Project Status
 
 [![Build Status](https://travis-ci.org/gomods/athens.svg?branch=master)](https://travis-ci.org/gomods/athens)
 [![codecov](https://codecov.io/gh/gomods/athens/branch/master/graph/badge.svg)](https://codecov.io/gh/gomods/athens)
 [![GoDoc](https://godoc.org/github.com/gomods/athens?status.svg)](https://godoc.org/github.com/gomods/athens)
-[![Go Report Card](https://goreportcard.com/badge/github.com/gomods/athens)](https://goreportcard.com/report/github.com/gomods/athens)              
-
-
+[![Go Report Card](https://goreportcard.com/badge/github.com/gomods/athens)](https://goreportcard.com/report/github.com/gomods/athens)
 
 Project Athens is in a very early alpha release and everything might change.
 Don't run it in production, but do play around with it and [contribute](#contributing)
@@ -27,7 +27,7 @@ Although the project is in development, here's where we're going:
 The package registry and the edge proxy both implement the [vgo download protocol](https://medium.com/@arschles/project-athens-the-download-protocol-2b346926a818), but each one
 is intended for different purposes.
 
-The registry will be hosted globally, and will be "always on" for folks. Anyone will be able to 
+The registry will be hosted globally, and will be "always on" for folks. Anyone will be able to
 configure their machine to do a `go get` (right now, it's a `vgo get`) and have it request
 packages from the registry.
 
@@ -65,15 +65,22 @@ If you're not ready to contribute code yet, there are plenty of other great ways
 - Get familiar with the system. There's lots to read about. Here are some places to start:
     - [Gentle Introduction to the Project](https://medium.com/@arschles/project-athens-c80606497ce1) - the basics of why we started this project
     - [The Download Protocol](https://medium.com/@arschles/project-athens-the-download-protocol-2b346926a818) - the core API that the registry and proxies implement and CLIs use to download packages
-    - [Registry Design](./REGISTRY.md) - what the registry is and how it works
-    - [Proxy Design](./PROXY.md) - what the proxy is and how it works
+    - [Registry Design](https://docs.gomods.io/design/registry/) - what the registry is and how it works
+    - [Proxy Design](https://docs.gomods.io/design/proxy/) - what the proxy is and how it works
     - [vgo wiki](https://github.com/golang/go/wiki/vgo) - context and details on how Go dependency management works in general
     - ["Go and Versioning"](https://research.swtch.com/vgo) - long papers on Go dependency management details, internals, etc...
 
 # Built on the Shoulders of Giants
 
-The Athens project would not be possible without the amazing projects it builds on. Please see 
+The Athens project would not be possible without the amazing projects it builds on. Please see
 [SHOULDERS.md](./SHOULDERS.md) to see a list of them.
+
+# Coding Guidlines
+
+We all strive to write nice and readable code which can be understood by every person of the team. To achieve that we follow principles described in Brian's talk `Code like the Go team`.
+
+- [Printed version](https://learn-golang.com/en/goteam/)
+- [Gophercon RU talk](https://www.youtube.com/watch?v=MzTcsI6tn-0)
 
 # Code of Conduct
 
@@ -82,3 +89,6 @@ This project follows the [Contributor Covenant](https://www.contributor-covenant
 If you have concerns, notice a code of conduct violation, or otherwise would like to talk about something
 related to this code of conduct, please reach out to me, Aaron Schlesinger on the [Gophers Slack](https://gophers.slack.com/). My username is `arschles`. Note that in the future, we will be expanding the
 ways that you can contact us regarding the code of conduct.
+
+---
+Athens banner attributed to Golda Manuel

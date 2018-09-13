@@ -2,18 +2,25 @@ package fs
 
 import (
 	"context"
+	"os"
 
-	opentracing "github.com/opentracing/opentracing-go"
+	"github.com/gomods/athens/pkg/errors"
+	"github.com/gomods/athens/pkg/observ"
 	"github.com/spf13/afero"
 )
 
 func (l *storageImpl) List(ctx context.Context, module string) ([]string, error) {
-	sp, ctx := opentracing.StartSpanFromContext(ctx, "storage.fs.List")
-	defer sp.Finish()
+	const op errors.Op = "fs.List"
+	ctx, span := observ.StartSpan(ctx, op.String())
+	defer span.End()
 	loc := l.moduleLocation(module)
 	fileInfos, err := afero.ReadDir(l.filesystem, loc)
 	if err != nil {
-		return nil, err
+		if os.IsNotExist(err) {
+			return []string{}, nil
+		}
+
+		return nil, errors.E(op, errors.M(module), err, errors.KindUnexpected)
 	}
 	ret := []string{}
 	for _, fileInfo := range fileInfos {

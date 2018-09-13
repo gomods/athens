@@ -2,5 +2,10 @@ baseURL = "https://docs.gomods.io"
 theme = "hugo-theme-learn"
 languageCode = "en-us"
 title = "Athens"
+
+[params]
+disableShortcutsTitle = true
+disableInlineCopyToClipBoard = true
+
 [outputs]
 home = [ "HTML", "RSS", "JSON"]

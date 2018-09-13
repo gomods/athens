@@ -4,7 +4,6 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/bketelsen/buffet"
 	"github.com/gobuffalo/buffalo"
 	"github.com/gobuffalo/buffalo/render"
 	"github.com/gomods/athens/pkg/errors"
@@ -16,11 +15,9 @@ import (
 const PathList = "/{module:.+}/@v/list"
 
 // ListHandler implements GET baseURL/module/@v/list
-func ListHandler(dp Protocol, lggr *log.Logger, eng *render.Engine) func(c buffalo.Context) error {
+func ListHandler(dp Protocol, lggr log.Entry, eng *render.Engine) buffalo.Handler {
 	const op errors.Op = "download.ListHandler"
 	return func(c buffalo.Context) error {
-		sp := buffet.SpanFromContext(c).SetOperationName("listHandler")
-		defer sp.Finish()
 		mod, err := paths.GetModule(c)
 		if err != nil {
 			lggr.SystemErr(errors.E(op, err))

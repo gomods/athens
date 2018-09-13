@@ -7,9 +7,9 @@ import (
 	"io"
 	"net/url"
 
-	"github.com/opentracing/opentracing-go"
-
-	"github.com/gomods/athens/pkg/config/env"
+	"github.com/gomods/athens/pkg/config"
+	"github.com/gomods/athens/pkg/errors"
+	"github.com/gomods/athens/pkg/observ"
 	moduploader "github.com/gomods/athens/pkg/storage/module"
 )
 
@@ -22,28 +22,28 @@ type client interface {
 type Storage struct {
 	cl      client
 	baseURI *url.URL
+	cdnConf *config.CDNConfig
 }
 
 // New creates a new azure CDN saver
-func New(accountName, accountKey, containerName string) (*Storage, error) {
+func New(accountName, accountKey, containerName string, cdnConf *config.CDNConfig) (*Storage, error) {
+	const op errors.Op = "azurecdn.New"
 	u, err := url.Parse(fmt.Sprintf("https://%s.blob.core.windows.net", accountName))
 	if err != nil {
-		return nil, err
+		return nil, errors.E(op, err)
 	}
-	cl, err := newBlobStoreClient(u, accountName, accountKey, containerName)
-	if err != nil {
-		return nil, err
-	}
-	return &Storage{cl: cl, baseURI: u}, nil
+	cl := newBlobStoreClient(u, accountName, accountKey, containerName)
+	return &Storage{cl: cl, baseURI: u, cdnConf: cdnConf}, nil
 }
 
 // newWithClient creates a new azure CDN saver
-func newWithClient(accountName, cl client) (*Storage, error) {
+func newWithClient(accountName, cl client, cdnConf *config.CDNConfig) (*Storage, error) {
+	const op errors.Op = "azurecdn.newWithClient"
 	u, err := url.Parse(fmt.Sprintf("https://%s.blob.core.windows.net", accountName))
 	if err != nil {
-		return nil, err
+		return nil, errors.E(op, err)
 	}
-	return &Storage{cl: cl, baseURI: u}, nil
+	return &Storage{cl: cl, baseURI: u, cdnConf: cdnConf}, nil
 }
 
 // BaseURL returns the base URL that stores all modules. It can be used
@@ -53,16 +53,20 @@ func newWithClient(accountName, cl client) (*Storage, error) {
 //
 //	<meta name="go-import" content="gomods.com/athens mod BaseURL()">
 func (s Storage) BaseURL() *url.URL {
-	return env.CDNEndpointWithDefault(s.baseURI)
+	return s.cdnConf.CDNEndpointWithDefault(s.baseURI)
 }
 
 // Save implements the (github.com/gomods/athens/pkg/storage).Saver interface.
 func (s *Storage) Save(ctx context.Context, module, version string, mod []byte, zip io.Reader, info []byte) error {
-	sp, ctx := opentracing.StartSpanFromContext(ctx, "storage.azurecdn.Save")
-	sp.Finish()
-	err := moduploader.Upload(ctx, module, version, bytes.NewReader(info), bytes.NewReader(mod), zip, s.cl.UploadWithContext)
+	const op errors.Op = "azurecdn.Save"
+	ctx, span := observ.StartSpan(ctx, op.String())
+	defer span.End()
+	err := moduploader.Upload(ctx, module, version, bytes.NewReader(info), bytes.NewReader(mod), zip, s.cl.UploadWithContext, s.cdnConf.TimeoutDuration())
 	// TODO: take out lease on the /list file and add the version to it
 	//
 	// Do that only after module source+metadata is uploaded
-	return err
+	if err != nil {
+		return errors.E(op, err, errors.M(module), errors.V(version))
+	}
+	return nil
 }

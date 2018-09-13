@@ -1,27 +1,29 @@
 package actions
 
 import (
-	"github.com/gomods/athens/pkg/config/env"
+	"time"
+
+	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/eventlog"
 	"github.com/gomods/athens/pkg/eventlog/mongo"
 )
 
 // GetEventLog returns implementation of eventlog.EventLog
-func GetEventLog() (eventlog.Eventlog, error) {
-	mongoURI, err := env.MongoURI()
+func GetEventLog(mongoURL string, certPath string, timeout time.Duration) (eventlog.Eventlog, error) {
+	const op = "actions.GetEventLog"
+	l, err := mongo.NewLog(mongoURL, certPath, timeout)
 	if err != nil {
-		return nil, err
+		return nil, errors.E(op, err)
 	}
-	l, err := mongo.NewLog(mongoURI)
-	return l, err
+	return l, nil
 }
 
 // NewCacheMissesLog returns impl. of eventlog.Appender
-func NewCacheMissesLog() (eventlog.Appender, error) {
-	mongoURI, err := env.MongoURI()
+func NewCacheMissesLog(mongoURL string, certPath string, timeout time.Duration) (eventlog.Appender, error) {
+	const op = "actions.NewCacheMissesLog"
+	l, err := mongo.NewLogWithCollection(mongoURL, certPath, "cachemisseslog", timeout)
 	if err != nil {
-		return nil, err
+		return nil, errors.E(op, err)
 	}
-	l, err := mongo.NewLogWithCollection(mongoURI, "cachemisseslog")
-	return l, err
+	return l, nil
 }

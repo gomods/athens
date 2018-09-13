@@ -2,6 +2,7 @@ package minio
 
 import (
 	"github.com/gobuffalo/suite"
+	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/storage"
 	minio "github.com/minio/minio-go"
 )
@@ -19,7 +20,14 @@ func NewTestSuite(model *suite.Model) (storage.TestSuite, error) {
 	bucketName := "gomods"
 	accessKeyID := "minio"
 	secretAccessKey := "minio123"
-	minioStorage, err := NewStorage(endpoint, accessKeyID, secretAccessKey, bucketName, false)
+	conf := &config.MinioConfig{
+		Endpoint:  endpoint,
+		Bucket:    bucketName,
+		Key:       accessKeyID,
+		Secret:    secretAccessKey,
+		EnableSSL: false,
+	}
+	minioStorage, err := NewStorage(conf)
 
 	return &TestSuite{
 		storage:         minioStorage,
@@ -42,12 +50,16 @@ func (ts *TestSuite) StorageHumanReadableName() string {
 }
 
 // Cleanup tears down test
-func (ts *TestSuite) Cleanup() {
+func (ts *TestSuite) Cleanup() error {
 	minioClient, _ := minio.New(ts.endpoint, ts.accessKeyID, ts.secretAccessKey, false)
 	doneCh := make(chan struct{})
 	defer close(doneCh)
 	objectCh := minioClient.ListObjectsV2(ts.bucketName, "", true, doneCh)
 	for object := range objectCh {
-		ts.Require().NoError(minioClient.RemoveObject(ts.bucketName, object.Key))
+		//TODO: could return multi error and clean other objects
+		if err := minioClient.RemoveObject(ts.bucketName, object.Key); err != nil {
+			return err
+		}
 	}
+	return nil
 }

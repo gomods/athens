@@ -1,0 +1,4 @@
+github.com/gobuffalo/envy v1.6.3/go.mod h1:gOxUQY+OEwqH1a2m25Sqax1GIhj31tPNOIdFzj8QThs=
+github.com/joho/godotenv v1.2.0/go.mod h1:7hK45KPybAkOC6peb+G5yklZfMxEjkZhHbwpqxOKXbg=
+github.com/markbates/inflect v1.0.0/go.mod h1:oTeZL2KHA7CUX6X+fovmK9OvIOFuqu0TwdQrZjLTh88=
+github.com/pkg/errors v0.8.0/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=

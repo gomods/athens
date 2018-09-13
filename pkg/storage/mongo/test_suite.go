@@ -2,36 +2,47 @@ package mongo
 
 import (
 	"fmt"
+	"path/filepath"
 
+	"github.com/globalsign/mgo"
 	"github.com/gobuffalo/suite"
-	"github.com/gomods/athens/pkg/config/env"
+	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/storage"
+)
+
+var (
+	testConfigFile = filepath.Join("..", "..", "..", "config.test.toml")
 )
 
 // TestSuite implements storage.TestSuite interface
 type TestSuite struct {
 	*suite.Model
-	storage storage.Backend
+	storage *ModuleStore
 }
 
 // NewTestSuite creates a common test suite
-func NewTestSuite(model *suite.Model) (storage.TestSuite, error) {
-	muri, err := env.MongoURI()
+func NewTestSuite(model *suite.Model, configFile string) (storage.TestSuite, error) {
+	ms, err := newTestStore(configFile)
 	if err != nil {
 		return nil, err
 	}
-
-	mongoStore := NewStorage(muri)
-	if mongoStore == nil {
-		return nil, fmt.Errorf("Mongo storage is nil")
-	}
-
-	err = mongoStore.Connect()
-
 	return &TestSuite{
-		storage: mongoStore,
+		storage: ms,
 		Model:   model,
 	}, err
+}
+
+func newTestStore(configFile string) (*ModuleStore, error) {
+	conf, err := config.GetConf(configFile)
+	if err != nil {
+		return nil, err
+	}
+	mongoStore, err := NewStorage(conf.Storage.Mongo)
+	if err != nil {
+		return nil, fmt.Errorf("Not able to connect to mongo storage: %s", err.Error())
+	}
+
+	return mongoStore, nil
 }
 
 // Storage retrieves initialized storage backend
@@ -45,5 +56,18 @@ func (ts *TestSuite) StorageHumanReadableName() string {
 }
 
 // Cleanup tears down test
-func (ts *TestSuite) Cleanup() {
+func (ts *TestSuite) Cleanup() error {
+	conf, err := config.GetConf(testConfigFile)
+	if err != nil {
+		return err
+	}
+	if conf.Storage == nil || conf.Storage.Mongo == nil {
+		return fmt.Errorf("Invalid Mongo Storage Provided")
+	}
+	s, err := mgo.DialWithTimeout(conf.Storage.Mongo.URL, conf.Storage.Mongo.TimeoutDuration())
+	defer s.Close()
+	if err != nil {
+		return err
+	}
+	return s.DB("athens").C("modules").DropCollection()
 }

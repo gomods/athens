@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/gobuffalo/envy"
-	multierror "github.com/hashicorp/go-multierror"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -30,25 +29,21 @@ func (d *DeleteTests) TearDownTest() {
 func (d *DeleteTests) TestDeleteTimeout() {
 	r := d.Require()
 
-	err := Delete(context.Background(), "mx", "1.1.1", delWithTimeout)
+	err := Delete(context.Background(), "mx", "1.1.1", delWithTimeout, time.Second)
 
-	me := err.(*multierror.Error)
-	r.Equal(3, len(me.WrappedErrors()))
-	r.Contains(me.Error(), "deleting mx.1.1.1.info failed: context deadline exceeded")
-	r.Contains(me.Error(), "deleting mx.1.1.1.zip failed: context deadline exceeded")
-	r.Contains(me.Error(), "deleting mx.1.1.1.mod failed: context deadline exceeded")
+	r.Error(err, "deleter returned at least one error")
+	r.Contains(err.Error(), "deleting mx.1.1.1.info failed: context deadline exceeded")
+	r.Contains(err.Error(), "deleting mx.1.1.1.zip failed: context deadline exceeded")
+	r.Contains(err.Error(), "deleting mx.1.1.1.mod failed: context deadline exceeded")
 }
 
 func (d *DeleteTests) TestDeleteError() {
 	r := d.Require()
 
-	err := Delete(context.Background(), "mx", "1.1.1", delWithErr)
+	err := Delete(context.Background(), "mx", "1.1.1", delWithErr, time.Second)
 
-	me := err.(*multierror.Error)
-	r.Equal(3, len(me.WrappedErrors()))
-	r.Contains(me.Error(), "some err")
-	r.Contains(me.Error(), "some err")
-	r.Contains(me.Error(), "some err")
+	r.Error(err, "deleter returned at least one error")
+	r.Contains(err.Error(), "some err")
 }
 
 func delWithTimeout(ctx context.Context, path string) error {

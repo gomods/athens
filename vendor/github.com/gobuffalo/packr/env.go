@@ -1,19 +1,31 @@
 package packr
 
 import (
-	"go/build"
 	"os"
+	"os/exec"
+	"path/filepath"
 	"strings"
+	"sync"
 )
+
+var goPath = filepath.Join(os.Getenv("HOME"), "go")
+
+func init() {
+	var once sync.Once
+	once.Do(func() {
+		cmd := exec.Command("go", "env", "GOPATH")
+		b, err := cmd.CombinedOutput()
+		if err != nil {
+			return
+		}
+		goPath = strings.TrimSpace(string(b))
+	})
+}
 
 // GoPath returns the current GOPATH env var
 // or if it's missing, the default.
 func GoPath() string {
-	go_path := strings.Split(os.Getenv("GOPATH"), string(os.PathListSeparator))
-	if len(go_path) == 0 || go_path[0] == "" {
-		return build.Default.GOPATH
-	}
-	return go_path[0]
+	return goPath
 }
 
 // GoBin returns the current GO_BIN env var

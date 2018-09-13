@@ -6,10 +6,23 @@ this framework to make it as straightforward as possible to get your development
 You'll need Buffalo [v0.12.4](https://github.com/gobuffalo/buffalo/releases/tag/v0.12.4) or later to get started on Athens,
 so be sure to download the CLI and put it into your `PATH`.
 
+Athens uses [Go Modules](https://golang.org/cmd/go/#hdr-Modules__module_versions__and_more) for dependency management. You will need Go [v1.11](https://golang.org/dl) or later to get started on Athens.
+
 See our [Contributing Guide](CONTRIBUTING.md) for tips on how to submit a pull request when you are ready.
 
 # Initial Development Environment Setup
 Athens relies on having a few tools installed locally. Run `make setup-dev-env` to install them.
+
+### Go version
+Athens is developed on Go1.11+.
+
+To point Athens to a different version of Go set the following environment variable
+```
+GO_BINARY_PATH=go1.11.X
+or whichever binary you want to use with athens
+```
+
+### Dependencies
 
 # Services that Athens Needs
 
@@ -34,8 +47,8 @@ Note that `make dev` only runs the minimum amount of dependencies needed for thi
 As you know from reading the [README](./README.md) (if you didn't read the whole thing, that's ok. Just read the
 introduction), the Athens project is made up of two components:
 
-1. [Package Registry](https://github.com/gomods/athens/wiki/The-Central-Package-Registry-(Olympus))
-2. [Edge Proxy](https://github.com/gomods/athens/wiki/Proxies-(Zeus))
+1. [Package Registry](https://docs.gomods.io/design/registry/)
+2. [Edge Proxy](https://docs.gomods.io/design/proxy/)
 
 To run the registry:
 
@@ -46,7 +59,7 @@ buffalo dev
 
 To run the proxy:
 
-```consols
+```console
 cd cmd/proxy
 buffalo dev
 ```
@@ -59,3 +72,17 @@ Starting application at 127.0.0.1:3000
 
 And you'll be up and running. As you edit and save code, the `buffalo dev` command will notice and automatically
 re-compile and restart the server.
+
+# Run unit tests
+
+In order to run unit tests, services they depend on must be running first:
+
+```console
+make alldeps
+```
+
+then you can run the unit tests:
+
+```console
+make test-unit
+```

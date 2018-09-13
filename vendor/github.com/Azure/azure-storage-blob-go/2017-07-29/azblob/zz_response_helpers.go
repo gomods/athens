@@ -68,6 +68,9 @@ func (r *DownloadResponse) Body(o RetryReaderOptions) io.ReadCloser {
 					HTTPAccessConditions: HTTPAccessConditions{IfMatch: getInfo.ETag},
 				},
 				false)
+			if err != nil {
+				return nil, err
+			}
 			return resp.Response(), err
 		},
 	)

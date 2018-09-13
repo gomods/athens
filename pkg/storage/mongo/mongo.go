@@ -1,33 +1,54 @@
 package mongo
 
 import (
+	"crypto/tls"
+	"crypto/x509"
+	"fmt"
+	"io/ioutil"
+	"net"
 	"strings"
+	"time"
 
 	"github.com/globalsign/mgo"
+	"github.com/gomods/athens/pkg/config"
+	"github.com/gomods/athens/pkg/errors"
 )
 
 // ModuleStore represents a mongo backed storage backend.
 type ModuleStore struct {
-	s   *mgo.Session
-	d   string // database
-	c   string // collection
-	url string
+	s        *mgo.Session
+	d        string // database
+	c        string // collection
+	url      string
+	certPath string
+	timeout  time.Duration
 }
 
-// NewStorage returns an unconnected Mongo backed storage
-// that satisfies the Backend interface.  You must call
-// Connect() on the returned store before using it.
-func NewStorage(url string) *ModuleStore {
-	return &ModuleStore{url: url}
-}
-
-// Connect conntect the the newly created mongo backend.
-func (m *ModuleStore) Connect() error {
-	s, err := mgo.Dial(m.url)
-	if err != nil {
-		return err
+// NewStorage returns a connected Mongo backed storage
+// that satisfies the Backend interface.
+func NewStorage(conf *config.MongoConfig) (*ModuleStore, error) {
+	const op errors.Op = "fs.NewStorage"
+	if conf == nil {
+		return nil, errors.E(op, "No Mongo Configuration provided")
 	}
-	m.s = s
+	ms := &ModuleStore{url: conf.URL, certPath: conf.CertPath, timeout: conf.TimeoutDuration()}
+
+	err := ms.connect()
+	if err != nil {
+		return nil, errors.E(op, err)
+	}
+	return ms, nil
+
+}
+
+func (m *ModuleStore) connect() error {
+	const op errors.Op = "mongo.connect"
+
+	var err error
+	m.s, err = m.newSession(m.timeout)
+	if err != nil {
+		return errors.E(op, err)
+	}
 
 	// TODO: database and collection as env vars, or params to New()? together with user/mongo
 	m.d = "athens"
@@ -42,6 +63,38 @@ func (m *ModuleStore) Connect() error {
 	}
 	c := m.s.DB(m.d).C(m.c)
 	return c.EnsureIndex(index)
+}
+
+func (m *ModuleStore) newSession(timeout time.Duration) (*mgo.Session, error) {
+	tlsConfig := &tls.Config{}
+
+	dialInfo, err := mgo.ParseURL(m.url)
+	if err != nil {
+		return nil, err
+	}
+
+	dialInfo.Timeout = timeout
+
+	if m.certPath != "" {
+		roots := x509.NewCertPool()
+		cert, err := ioutil.ReadFile(m.certPath)
+		if err != nil {
+			return nil, err
+		}
+
+		if ok := roots.AppendCertsFromPEM(cert); !ok {
+			return nil, fmt.Errorf("failed to parse certificate from: %s", m.certPath)
+		}
+
+		tlsConfig.InsecureSkipVerify = true
+		tlsConfig.ClientCAs = roots
+
+		dialInfo.DialServer = func(addr *mgo.ServerAddr) (net.Conn, error) {
+			return tls.Dial("tcp", addr.String(), tlsConfig)
+		}
+	}
+
+	return mgo.DialWithInfo(dialInfo)
 }
 
 func (m *ModuleStore) gridFileName(mod, ver string) string {
