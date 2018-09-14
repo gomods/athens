@@ -8,16 +8,16 @@
     environment = { HUGO_VERSION = "0.37" }
 
 [[redirects]]
-  from = https://gomods.io/*
-  to = https://docs.gomods.io/:splat
+  from = "https://gomods.io/*"
+  to = "https://docs.gomods.io/:splat"
   status = 303
 
 [[redirects]]
-  from = http://gomods.io/*
-  to = https://docs.gomods.io/:splat
+  from = "http://gomods.io/*"
+  to = "https://docs.gomods.io/:splat"
   status = 303
 
 [[redirects]]
-  from = https://gomods-athens.netlify.com/*
-  to = https://docs.gomods.io/:splat
+  from = "https://gomods-athens.netlify.com/*"
+  to = "https://docs.gomods.io/:splat"
   status = 303
