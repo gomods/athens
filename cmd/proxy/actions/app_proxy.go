@@ -49,13 +49,14 @@ func addProxyRoutes(
 	if err != nil {
 		return err
 	}
+
+	lister := download.NewVCSLister(goBin, fs)
 	st := stash.New(mf, s, stash.WithPool(goGetWorkers), stash.WithSingleflight)
 
 	dpOpts := &download.Opts{
-		Storage:   s,
-		Stasher:   st,
-		GoBinPath: goBin,
-		Fs:        fs,
+		Storage: s,
+		Stasher: st,
+		Lister:  lister,
 	}
 	dp := download.New(dpOpts, addons.WithPool(protocolWorkers))
 

@@ -31,10 +31,6 @@ func (l *storageImpl) List(ctx context.Context, module string) ([]string, error)
 	}
 
 	ret := []string{}
-	if len(dict) == 0 {
-		return ret, errors.E(op, errors.M(module), errors.KindNotFound)
-	}
-
 	for ver := range dict {
 		ret = append(ret, ver)
 	}
