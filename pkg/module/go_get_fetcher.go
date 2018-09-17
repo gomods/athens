@@ -130,7 +130,6 @@ func PrepareEnv(gopath string) []string {
 	enableGoModules := "GO111MODULE=on"
 	cmdEnv := []string{pathEnv, gopathEnv, cacheEnv, disableCgo, enableGoModules, httpProxy, httpsProxy, noProxy}
 
-
 	// add Windows specific ENV VARS
 	if runtime.GOOS == "windows" {
 		cmdEnv = append(cmdEnv, fmt.Sprintf("USERPROFILE=%s", os.Getenv("USERPROFILE")))
