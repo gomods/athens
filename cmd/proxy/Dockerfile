@@ -14,7 +14,7 @@ FROM alpine
 ENV GO111MODULE=on
 
 COPY --from=builder /bin/app /bin/app
-COPY --from=builder /go/src/github.com/gomods/athens/config.toml /go/src/github.com/gomods/athens/config.toml
+COPY --from=builder /go/src/github.com/gomods/athens/config.toml /config/config.toml
 COPY --from=builder /go/src/github.com/gomods/athens/cmd/proxy/locales /go/src/github.com/gomods/athens/cmd/proxy/locales
 COPY --from=builder /go/src/github.com/gomods/athens/cmd/proxy/assets /go/src/github.com/gomods/athens/cmd/proxy/assets
 COPY --from=builder /usr/local/go/bin/go /bin/go
@@ -27,4 +27,4 @@ ENV GO_ENV=production
 
 EXPOSE 3000
 
-ENTRYPOINT /bin/app -config_file=/go/src/github.com/gomods/athens/config.toml
+ENTRYPOINT ["app", "-config_file=/config/config.toml"]
