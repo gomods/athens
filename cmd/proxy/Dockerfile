@@ -1,3 +1,7 @@
+# Links to compare against to ensure we have all VCS's setup in this build
+# https://github.com/docker-library/buildpack-deps/blob/1845b3f918f69b4c97912b0d4d68a5658458e84f/stretch/scm/Dockerfile
+# https://github.com/golang/go/blob/f082dbfd4f23b0c95ee1de5c2b091dad2ff6d930/src/cmd/go/internal/get/vcs.go#L90
+
 FROM golang:1.11-alpine AS builder
 
 WORKDIR $GOPATH/src/github.com/gomods/athens
@@ -20,7 +24,7 @@ COPY --from=builder /go/src/github.com/gomods/athens/cmd/proxy/assets /go/src/gi
 COPY --from=builder /usr/local/go/bin/go /bin/go
 
 RUN apk update &&  \
-		apk add --no-cache bzr git mercurial openssh-client subversion procps && \
+		apk add --no-cache bzr git mercurial openssh-client subversion procps fossil && \
 		mkdir -p /usr/local/go
 
 ENV GO_ENV=production
