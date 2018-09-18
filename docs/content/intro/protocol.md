@@ -18,20 +18,22 @@ In the examples below, `$HOST` and `$PORT` are placeholders for the host and por
 This endpoint returns a list of versions that Athens knows about for `acidburn/htp`. The list is just separated by newlines:
 
 ```HTTP
-GET $HOST:$PORT/github.com/arschles/assert/@v/list
+GET $HOST:$PORT/github.com/acidburn/htp/@v/list
 ```
 
 ```HTML
-v1.0
-v1.1
-v2.0
+v0.1.0
+v0.1.1
+v1.0.0
+v1.0.1
+v1.2.0
 ```
 
 ## Version info
 
 
 ```HTTP
-GET $HOST:$PORT/github.com/arschles/assert/@v/v1.0.0.info
+GET $HOST:$PORT/github.com/acidburn/htp/@v/v1.0.0.info
 ```
 
 This returns JSON with information about v1.0.0. It looks like this:
@@ -48,19 +50,19 @@ This returns JSON with information about v1.0.0. It looks like this:
 ## Go.mod file
 
 ```HTTP
-GET $HOST:$PORT/github.com/arschles/assert/@v/v1.0.0.mod
+GET $HOST:$PORT/github.com/acidburn/htp/@v/v1.0.0.mod
 ```
 
-This returns the go.mod file for version v1.0.0. If $HOST:$PORT/github.com/arschles/assert version `v1.0.0` has no dependencies, the response body would look like this:
+This returns the go.mod file for version v1.0.0. If $HOST:$PORT/github.com/acidburn/htp version `v1.0.0` has no dependencies, the response body would look like this:
 
 ```
-module github.com/arschles/assert
+module github.com/acidburn/htp
 ```
 
 ## Module sources
 
 ```HTTP
-GET $HOST:$PORT/github.com/arschles/assert/@v/v1.0.0.zip
+GET $HOST:$PORT/github.com/acidburn/htp/@v/v1.0.0.zip
 ```
 
 This is what it sounds like — it sends back a zip file with the source code for the module in version v1.0.0.
@@ -68,7 +70,7 @@ This is what it sounds like — it sends back a zip file with the source code fo
 ## Latest
 
 ```HTTP
-GET $HOST:$PORT/github.com/arschles/assert/@latest
+GET $HOST:$PORT/github.com/acidburn/htp/@latest
 ```
 
 This endpoint returns the latest version of the module.
