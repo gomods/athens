@@ -57,7 +57,6 @@ func TestEnvOverrides(t *testing.T) {
 	expProxy := ProxyConfig{
 		StorageType:           "minio",
 		OlympusGlobalEndpoint: "mytikas.gomods.io",
-		RedisQueueAddress:     ":6380",
 		Port:                  ":7000",
 		FilterOff:             false,
 		BasicAuthUser:         "testuser",
@@ -202,7 +201,6 @@ func TestParseExampleConfig(t *testing.T) {
 	expProxy := &ProxyConfig{
 		StorageType:           "memory",
 		OlympusGlobalEndpoint: "http://localhost:3001",
-		RedisQueueAddress:     ":6379",
 		Port:                  ":3000",
 		FilterOff:             true,
 		BasicAuthUser:         "",
@@ -360,7 +358,6 @@ func getEnvMap(config *Config) map[string]string {
 		envVars["ATHENS_STORAGE_TYPE"] = proxy.StorageType
 		envVars["OLYMPUS_GLOBAL_ENDPOINT"] = proxy.OlympusGlobalEndpoint
 		envVars["PORT"] = proxy.Port
-		envVars["ATHENS_REDIS_QUEUE_ADDRESS"] = proxy.RedisQueueAddress
 		envVars["PROXY_FILTER_OFF"] = strconv.FormatBool(proxy.FilterOff)
 		envVars["BASIC_AUTH_USER"] = proxy.BasicAuthUser
 		envVars["BASIC_AUTH_PASS"] = proxy.BasicAuthPass
