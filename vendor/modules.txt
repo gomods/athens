@@ -53,12 +53,8 @@ github.com/aws/aws-sdk-go/private/protocol/query
 github.com/aws/aws-sdk-go/internal/sdkuri
 github.com/aws/aws-sdk-go/private/protocol/xml/xmlutil
 github.com/aws/aws-sdk-go/private/protocol/query/queryutil
-# github.com/bketelsen/buffet v0.1.5
-github.com/bketelsen/buffet
 # github.com/cockroachdb/cockroach-go v0.0.0-20180212155653-59c0560478b7
 github.com/cockroachdb/cockroach-go/crdb
-# github.com/codahale/hdrhistogram v0.0.0-20161010025455-3a0bb77429bd
-github.com/codahale/hdrhistogram
 # github.com/davecgh/go-spew v1.1.1
 github.com/davecgh/go-spew/spew
 # github.com/dustin/go-humanize v0.0.0-20180713052910-9f541cc9db5d
@@ -119,7 +115,7 @@ github.com/gobuffalo/pop/nulls
 github.com/gobuffalo/pop/associations
 github.com/gobuffalo/pop/columns
 github.com/gobuffalo/pop/fix
-# github.com/gobuffalo/suite v2.1.5+incompatible
+# github.com/gobuffalo/suite v2.1.6+incompatible
 github.com/gobuffalo/suite
 github.com/gobuffalo/suite/fix
 # github.com/gobuffalo/tags v2.0.6+incompatible
@@ -222,10 +218,6 @@ github.com/nicksnyder/go-i18n/i18n
 github.com/nicksnyder/go-i18n/i18n/language
 github.com/nicksnyder/go-i18n/i18n/translation
 github.com/nicksnyder/go-i18n/i18n/bundle
-# github.com/opentracing/opentracing-go v1.0.2
-github.com/opentracing/opentracing-go
-github.com/opentracing/opentracing-go/log
-github.com/opentracing/opentracing-go/ext
 # github.com/pelletier/go-toml v1.2.0
 github.com/pelletier/go-toml
 # github.com/pkg/errors v0.8.0
@@ -263,25 +255,6 @@ github.com/stretchr/testify/require
 github.com/stretchr/testify/assert
 # github.com/technosophos/moniker v0.0.0-20180509230615-a5dbd03a2245
 github.com/technosophos/moniker
-# github.com/uber/jaeger-client-go v2.14.0+incompatible
-github.com/uber/jaeger-client-go/config
-github.com/uber/jaeger-client-go
-github.com/uber/jaeger-client-go/internal/baggage/remote
-github.com/uber/jaeger-client-go/internal/throttler/remote
-github.com/uber/jaeger-client-go/rpcmetrics
-github.com/uber/jaeger-client-go/internal/baggage
-github.com/uber/jaeger-client-go/internal/spanlog
-github.com/uber/jaeger-client-go/internal/throttler
-github.com/uber/jaeger-client-go/log
-github.com/uber/jaeger-client-go/thrift
-github.com/uber/jaeger-client-go/thrift-gen/jaeger
-github.com/uber/jaeger-client-go/thrift-gen/sampling
-github.com/uber/jaeger-client-go/thrift-gen/zipkincore
-github.com/uber/jaeger-client-go/utils
-github.com/uber/jaeger-client-go/thrift-gen/baggage
-github.com/uber/jaeger-client-go/thrift-gen/agent
-# github.com/uber/jaeger-lib v1.5.0
-github.com/uber/jaeger-lib/metrics
 # github.com/unrolled/secure v0.0.0-20180618144512-8287f3899c8e
 github.com/unrolled/secure
 # go.opencensus.io v0.15.0
