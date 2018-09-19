@@ -9,7 +9,7 @@ require (
 	github.com/BurntSushi/toml v0.3.0
 	github.com/aws/aws-sdk-go v1.15.24
 	github.com/beorn7/perks v0.0.0-20180321164747-3a771d992973 // indirect
-	github.com/bketelsen/buffet v0.1.5
+	github.com/bketelsen/buffet v0.1.5 // indirect
 	github.com/codahale/hdrhistogram v0.0.0-20161010025455-3a0bb77429bd // indirect
 	github.com/codegangsta/negroni v0.3.0 // indirect
 	github.com/fatih/color v1.7.0
@@ -20,7 +20,7 @@ require (
 	github.com/gobuffalo/envy v1.6.4
 	github.com/gobuffalo/gocraft-work-adapter v0.0.0-20180714213200-7d6504f1dffe
 	github.com/gobuffalo/packr v1.13.3
-	github.com/gobuffalo/suite v2.1.5+incompatible
+	github.com/gobuffalo/suite v2.1.6+incompatible
 	github.com/gobuffalo/uuid v2.0.3+incompatible
 	github.com/gocraft/work v0.5.1
 	github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b // indirect
@@ -43,7 +43,7 @@ require (
 	github.com/mitchellh/go-homedir v1.0.0
 	github.com/onsi/ginkgo v1.6.0 // indirect
 	github.com/onsi/gomega v1.4.1 // indirect
-	github.com/opentracing/opentracing-go v1.0.2
+	github.com/opentracing/opentracing-go v1.0.2 // indirect
 	github.com/prometheus/client_golang v0.8.0 // indirect
 	github.com/prometheus/client_model v0.0.0-20180712105110-5c3871d89910 // indirect
 	github.com/prometheus/common v0.0.0-20180801064454-c7de2306084e // indirect
@@ -57,7 +57,7 @@ require (
 	github.com/stretchr/testify v1.2.2
 	github.com/technosophos/moniker v0.0.0-20180509230615-a5dbd03a2245
 	github.com/uber-go/atomic v1.3.2 // indirect
-	github.com/uber/jaeger-client-go v2.14.0+incompatible
+	github.com/uber/jaeger-client-go v2.14.0+incompatible // indirect
 	github.com/uber/jaeger-lib v1.5.0 // indirect
 	github.com/unrolled/secure v0.0.0-20180618144512-8287f3899c8e
 	go.opencensus.io v0.15.0
