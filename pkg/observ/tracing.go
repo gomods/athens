@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"github.com/gobuffalo/buffalo"
-	"github.com/gomods/athens/pkg/config/env"
 	"github.com/gomods/athens/pkg/errors"
 	"go.opencensus.io/exporter/jaeger"
 	"go.opencensus.io/trace"
@@ -20,15 +19,14 @@ type observabilityContext struct {
 // RegisterTraceExporter returns a jaeger exporter for exporting traces to opencensus.
 // It should in the future have a nice sampling rate defined
 // TODO: Extend beyond jaeger
-func RegisterTraceExporter(service, ENV string) (*(jaeger.Exporter), error) {
+func RegisterTraceExporter(URL, service, ENV string) (*(jaeger.Exporter), error) {
 	const op errors.Op = "RegisterTracer"
-	collectorEndpointURI := env.TraceExporterURL()
-	if collectorEndpointURI == "" {
+	if URL == "" {
 		return nil, errors.E(op, "Exporter URL is empty. Traces won't be exported")
 	}
 
 	je, err := jaeger.NewExporter(jaeger.Options{
-		Endpoint:    collectorEndpointURI,
+		Endpoint:    URL,
 		ServiceName: service,
 	})
 
