@@ -20,7 +20,7 @@ require (
 	github.com/gobuffalo/envy v1.6.4
 	github.com/gobuffalo/gocraft-work-adapter v0.0.0-20180714213200-7d6504f1dffe
 	github.com/gobuffalo/packr v1.13.3
-	github.com/gobuffalo/suite v2.1.5+incompatible
+	github.com/gobuffalo/suite v2.1.6+incompatible
 	github.com/gobuffalo/uuid v2.0.3+incompatible
 	github.com/gocraft/work v0.5.1
 	github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b // indirect
