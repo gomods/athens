@@ -20,7 +20,7 @@ setup-dev-env:
 verify:
 	./scripts/check_gofmt.sh
 	./scripts/check_golint.sh
-	./scripts/check_deps.sh
+	# ./scripts/check_deps.sh TODO: comment back when we stop using vendor.
 	./scripts/check_conflicts.sh
 
 .PHONY: test
