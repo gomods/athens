@@ -31,10 +31,6 @@ Param(
 	[switch]$docker,
 
 	[Parameter(Mandatory=$false)]
-	[Alias("olympus-docker")]
-	[switch]$olympus_docker,
-
-	[Parameter(Mandatory=$false)]
 	[Alias("proxy-docker")]
 	[switch]$proxy_docker,
 
@@ -70,10 +66,6 @@ if ($build.IsPresent) {
 		Pop-Location
 	}
 	
-	try {
-		Push-Location $(Join-Path cmd olympus) 
-		& buffalo build
-	}
 	finally {
 		Pop-Location
 	}
@@ -118,10 +110,7 @@ if ($test.IsPresent) {
 	finally {
 		Pop-Location
 	}
-	try {
-		Push-Location $(Join-Path cmd olympus) 
-		& buffalo test
-	}
+
 	finally {
 		Pop-Location
 	}
