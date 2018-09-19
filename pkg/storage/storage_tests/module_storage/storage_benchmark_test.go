@@ -138,7 +138,7 @@ func getStores(b *testing.B) []storage.TestSuite {
 	require.NoError(b, err)
 	stores = append(stores, memStore)
 
-	minioStore, err := minio.NewTestSuite(model)
+	minioStore, err := minio.NewTestSuite(model, testConfigFile)
 	require.NoError(b, err)
 	stores = append(stores, minioStore)
 

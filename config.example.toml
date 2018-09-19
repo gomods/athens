@@ -180,7 +180,7 @@ EnableCSRFProtection = false
     [Storage.Minio]
         # Endpoint for Minio storage
         # Env override: ATHENS_MINIO_ENDPOINT
-        Endpoint = "minio.example.com"
+        Endpoint = "127.0.0.1:9000"
 
         # Access Key for Minio storage
         # Env override: ATHENS_MINIO_ACCESS_KEY_ID

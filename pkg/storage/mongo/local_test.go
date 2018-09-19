@@ -1,8 +1,23 @@
 package mongo
 
 import (
+	"testing"
+
 	"github.com/gomods/athens/pkg/config"
+	"github.com/stretchr/testify/suite"
 )
+
+type MongoTests struct {
+	suite.Suite
+}
+
+func (d *MongoTests) SetupTest() {
+	ms, err := newTestStore(testConfigFile)
+
+	d.Require().NoError(err)
+
+	ms.s.DB(ms.d).C(ms.c).RemoveAll(nil)
+}
 
 func (m *MongoTests) TestNewMongoStorage() {
 	r := m.Require()
@@ -14,4 +29,8 @@ func (m *MongoTests) TestNewMongoStorage() {
 	r.NotNil(getterSaver.d)
 	r.NotNil(getterSaver.s)
 	r.Equal(getterSaver.url, conf.Storage.Mongo.URL)
+}
+
+func TestMongoStorage(t *testing.T) {
+	suite.Run(t, new(MongoTests))
 }

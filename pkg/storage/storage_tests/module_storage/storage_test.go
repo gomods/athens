@@ -52,7 +52,7 @@ func (d *TestSuites) SetupTest() {
 	d.storages = append(d.storages, memStore)
 
 	// minio
-	minioStorage, err := minio.NewTestSuite(d.Model)
+	minioStorage, err := minio.NewTestSuite(d.Model, testConfigFile)
 	ra.NoError(err)
 	d.storages = append(d.storages, minioStorage)
 
