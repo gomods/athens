@@ -2,42 +2,34 @@ package mongo
 
 import (
 	"fmt"
-	"path/filepath"
 
-	"github.com/globalsign/mgo"
 	"github.com/gobuffalo/suite"
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/storage"
-)
-
-var (
-	testConfigFile = filepath.Join("..", "..", "..", "config.test.toml")
 )
 
 // TestSuite implements storage.TestSuite interface
 type TestSuite struct {
 	*suite.Model
 	storage *ModuleStore
+	conf    *config.MongoConfig
 }
 
 // NewTestSuite creates a common test suite
-func NewTestSuite(model *suite.Model, configFile string) (storage.TestSuite, error) {
-	ms, err := newTestStore(configFile)
+func NewTestSuite(model *suite.Model, conf *config.MongoConfig) (storage.TestSuite, error) {
+	ms, err := newTestStore(conf)
 	if err != nil {
 		return nil, err
 	}
 	return &TestSuite{
 		storage: ms,
 		Model:   model,
+		conf:    conf,
 	}, err
 }
 
-func newTestStore(configFile string) (*ModuleStore, error) {
-	conf, err := config.GetConf(configFile)
-	if err != nil {
-		return nil, err
-	}
-	mongoStore, err := NewStorage(conf.Storage.Mongo)
+func newTestStore(conf *config.MongoConfig) (*ModuleStore, error) {
+	mongoStore, err := NewStorage(conf)
 	if err != nil {
 		return nil, fmt.Errorf("Not able to connect to mongo storage: %s", err.Error())
 	}
@@ -57,17 +49,10 @@ func (ts *TestSuite) StorageHumanReadableName() string {
 
 // Cleanup tears down test
 func (ts *TestSuite) Cleanup() error {
-	conf, err := config.GetConf(testConfigFile)
+	ms, err := newTestStore(ts.conf)
 	if err != nil {
 		return err
 	}
-	if conf.Storage == nil || conf.Storage.Mongo == nil {
-		return fmt.Errorf("Invalid Mongo Storage Provided")
-	}
-	s, err := mgo.DialWithTimeout(conf.Storage.Mongo.URL, conf.Storage.Mongo.TimeoutDuration())
-	defer s.Close()
-	if err != nil {
-		return err
-	}
-	return s.DB("athens").C("modules").DropCollection()
+	_, err = ms.s.DB(ms.d).C(ms.c).RemoveAll(nil)
+	return err
 }

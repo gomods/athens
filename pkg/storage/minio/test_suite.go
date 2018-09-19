@@ -17,17 +17,13 @@ type TestSuite struct {
 }
 
 // NewTestSuite creates a common test suite
-func NewTestSuite(model *suite.Model, configFile string) (storage.TestSuite, error) {
-	conf, err := config.GetConf(configFile)
-	if err != nil {
-		return nil, err
-	}
-	minioStorage, err := newTestStore(conf.Storage.Minio)
+func NewTestSuite(model *suite.Model, conf *config.MinioConfig) (storage.TestSuite, error) {
+	minioStorage, err := newTestStore(conf)
 
 	return &TestSuite{
 		storage: minioStorage,
 		Model:   model,
-		conf:    conf.Storage.Minio,
+		conf:    conf,
 	}, err
 }
 

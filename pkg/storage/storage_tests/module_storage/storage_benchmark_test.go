@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/gobuffalo/suite"
+	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/storage"
 	"github.com/gomods/athens/pkg/storage/fs"
@@ -124,13 +125,16 @@ func BenchmarkStorageExists(b *testing.B) {
 func getStores(b *testing.B) []storage.TestSuite {
 	var stores []storage.TestSuite
 
+	conf, err := config.GetConf(testConfigFile)
+	require.NoError(b, err)
+
 	//TODO: create the instance without model or TestSuite
 	model := suite.NewModel()
 	fsStore, err := fs.NewTestSuite(model)
 	require.NoError(b, err, "couldn't create filesystem store")
 	stores = append(stores, fsStore)
 
-	mongoStore, err := mongo.NewTestSuite(model, testConfigFile)
+	mongoStore, err := mongo.NewTestSuite(model, conf.Storage.Mongo)
 	require.NoError(b, err, "couldn't create mongo store")
 	stores = append(stores, mongoStore)
 
@@ -138,7 +142,7 @@ func getStores(b *testing.B) []storage.TestSuite {
 	require.NoError(b, err)
 	stores = append(stores, memStore)
 
-	minioStore, err := minio.NewTestSuite(model, testConfigFile)
+	minioStore, err := minio.NewTestSuite(model, conf.Storage.Minio)
 	require.NoError(b, err)
 	stores = append(stores, minioStore)
 

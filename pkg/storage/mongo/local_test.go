@@ -1,20 +1,26 @@
 package mongo
 
 import (
+	"path/filepath"
 	"testing"
 
 	"github.com/gomods/athens/pkg/config"
 	"github.com/stretchr/testify/suite"
 )
 
+var (
+	testConfigFile = filepath.Join("..", "..", "..", "config.test.toml")
+)
+
 type MongoTests struct {
 	suite.Suite
 }
 
-func (d *MongoTests) SetupTest() {
-	ms, err := newTestStore(testConfigFile)
+func (m *MongoTests) SetupTest() {
+	conf := config.GetConfLogErr(testConfigFile, m.T())
 
-	d.Require().NoError(err)
+	ms, err := newTestStore(conf.Storage.Mongo)
+	m.Require().NoError(err)
 
 	ms.s.DB(ms.d).C(ms.c).RemoveAll(nil)
 }
