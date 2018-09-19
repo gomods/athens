@@ -232,7 +232,7 @@ func TestParseExampleConfig(t *testing.T) {
 			},
 		},
 		Minio: &MinioConfig{
-			Endpoint:  "minio.example.com",
+			Endpoint:  "127.0.0.1:9000",
 			Key:       "MY_KEY",
 			Secret:    "MY_SECRET",
 			EnableSSL: true,
