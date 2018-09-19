@@ -136,13 +136,9 @@ if ($test_e2e.IsPresent) {
 }
 
 if ($docker.IsPresent) {
-	& docker build -t gomods/olympus -f cmd/olympus/Dockerfile .
 	& docker build -t gomods/proxy -f cmd/proxy/Dockerfile .
 }
 
-if ($olympus_docker.IsPresent) {
-	& docker build -t gomods/olympus -f cmd/olympus/Dockerfile .
-}
 
 if ($proxy_docker.IsPresent) {
 	& docker build -t gomods/proxy -f cmd/proxy/Dockerfile .
