@@ -66,6 +66,7 @@ func TestEnvOverrides(t *testing.T) {
 		ValidatorHook:         "testhook.io",
 		PathPrefix:            "prefix",
 		NETRCPath:             "/test/path",
+		InsecureSources:       "gitlab.internal.com,bzr.internal.com",
 	}
 
 	expOlympus := OlympusConfig{
@@ -207,6 +208,7 @@ func TestParseExampleConfig(t *testing.T) {
 		FilterOff:             true,
 		BasicAuthUser:         "",
 		BasicAuthPass:         "",
+		InsecureSources:       "gitlab.internal.com,bzr.internal.com",
 	}
 
 	expOlympus := &OlympusConfig{
@@ -368,6 +370,7 @@ func getEnvMap(config *Config) map[string]string {
 		envVars["ATHENS_PROXY_VALIDATOR"] = proxy.ValidatorHook
 		envVars["ATHENS_PATH_PREFIX"] = proxy.PathPrefix
 		envVars["ATHENS_NETRC_PATH"] = proxy.NETRCPath
+		envVars["PROXY_INSECURE_SOURCES"] = proxy.InsecureSources
 	}
 
 	olympus := config.Olympus

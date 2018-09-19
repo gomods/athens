@@ -13,6 +13,7 @@ type ProxyConfig struct {
 	ValidatorHook         string `envconfig:"ATHENS_PROXY_VALIDATOR"`
 	PathPrefix            string `envconfig:"ATHENS_PATH_PREFIX"`
 	NETRCPath             string `envconfig:"ATHENS_NETRC_PATH"`
+	InsecureSources       string `envconfig:"PROXY_INSECURE_SOURCES"`
 }
 
 // BasicAuth returns BasicAuthUser and BasicAuthPassword

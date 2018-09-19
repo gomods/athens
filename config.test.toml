@@ -119,6 +119,12 @@ EnableCSRFProtection = false
     # Env override: ATHENS_NETRC_PATH
     NETRCPath = ""
 
+    # INSECURE_SOURCES takes in a comma separated list of sources that will
+    # apply a -insecure flag selectively when a go get is performed
+    # This is useful for private sources that do not support a secure protocol
+    # like git+ssh, https etc.
+    InsecureSources = ""
+
 [Olympus]
     # StorageType sets the type of storage backend Olympus will use.
     # Possible values are memory, disk, mongo, postgres, sqlite, cockroach, mysql
