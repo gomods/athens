@@ -37,11 +37,7 @@ test-e2e:
 	./scripts/test_e2e.sh
 
 .PHONY: docker
-docker: olympus-docker proxy-docker
-
-.PHONY: olympus-docker
-olympus-docker:
-	docker build -t gomods/olympus -f cmd/olympus/Dockerfile .
+docker: proxy-docker
 
 .PHONY: proxy-docker
 proxy-docker:
