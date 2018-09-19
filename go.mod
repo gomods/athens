@@ -24,6 +24,7 @@ require (
 	github.com/gobuffalo/uuid v2.0.3+incompatible
 	github.com/gocraft/work v0.5.1
 	github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b // indirect
+	github.com/golang/lint v0.0.0-20180702182130-06c8688daad7 // indirect
 	github.com/golang/protobuf v1.2.0 // indirect
 	github.com/gomodule/redigo v2.0.0+incompatible
 	github.com/google/go-cmp v0.2.0
@@ -62,8 +63,10 @@ require (
 	github.com/unrolled/secure v0.0.0-20180618144512-8287f3899c8e
 	go.opencensus.io v0.15.0
 	go.uber.org/atomic v1.3.2 // indirect
+	golang.org/x/lint v0.0.0-20180702182130-06c8688daad7 // indirect
 	golang.org/x/sync v0.0.0-20180314180146-1d60e4601c6f
 	golang.org/x/text v0.3.0 // indirect
+	golang.org/x/tools v0.0.0-20180911133044-677d2ff680c1 // indirect
 	google.golang.org/api v0.0.0-20180829000535-087779f1d2c9
 	google.golang.org/genproto v0.0.0-20180817151627-c66870c02cf8 // indirect
 	google.golang.org/grpc v1.14.0 // indirect
