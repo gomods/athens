@@ -87,9 +87,10 @@ func Dummy(fs afero.Fs, repoRoot string) error {
 func getSources(goBinaryName string, fs afero.Fs, gopath, repoRoot, module, version string) error {
 	const op errors.Op = "module.getSources"
 	uri := strings.TrimSuffix(module, "/")
-	fullURI := fmt.Sprintf("%s@%s", uri, version)
 
-	cmd := exec.Command(goBinaryName, "mod", "download", fullURI)
+	// Check the output of fullURI
+	fullURI := fmt.Sprintf("%s@%s", uri, version)
+	cmd := downloadCmd(goBinaryName, fullURI, "mod", "download")
 	cmd.Env = PrepareEnv(gopath)
 	cmd.Dir = repoRoot
 	o, err := cmd.CombinedOutput()
@@ -114,6 +115,11 @@ func getSources(goBinaryName string, fs afero.Fs, gopath, repoRoot, module, vers
 	}
 
 	return nil
+}
+
+func downloadCmd(goBinaryName string, fullURI string, args ...string) *exec.Cmd {
+	args = append(args, fullURI)
+	return exec.Command(goBinaryName, args...)
 }
 
 // PrepareEnv will return all the appropriate
