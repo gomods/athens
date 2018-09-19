@@ -3,6 +3,7 @@ package mongo
 import (
 	"fmt"
 
+	"github.com/globalsign/mgo"
 	"github.com/gobuffalo/suite"
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/storage"
@@ -49,10 +50,10 @@ func (ts *TestSuite) StorageHumanReadableName() string {
 
 // Cleanup tears down test
 func (ts *TestSuite) Cleanup() error {
-	ms, err := newTestStore(ts.conf)
+	s, err := mgo.DialWithTimeout(ts.conf.URL, ts.conf.TimeoutDuration())
 	if err != nil {
-		return err
+		return nil
 	}
-	_, err = ms.s.DB(ms.d).C(ms.c).RemoveAll(nil)
-	return err
+	defer s.Close()
+	return s.DB(ts.storage.d).C(ts.storage.c).DropCollection()
 }

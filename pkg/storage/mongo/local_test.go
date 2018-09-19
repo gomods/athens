@@ -19,10 +19,8 @@ type MongoTests struct {
 func (m *MongoTests) SetupTest() {
 	conf := config.GetConfLogErr(testConfigFile, m.T())
 
-	ms, err := newTestStore(conf.Storage.Mongo)
+	_, err := newTestStore(conf.Storage.Mongo)
 	m.Require().NoError(err)
-
-	ms.s.DB(ms.d).C(ms.c).RemoveAll(nil)
 }
 
 func (m *MongoTests) TestNewMongoStorage() {
