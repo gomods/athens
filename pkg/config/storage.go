@@ -4,11 +4,11 @@ import validator "gopkg.in/go-playground/validator.v9"
 
 // StorageConfig provides configs for various storage backends
 type StorageConfig struct {
-	CDN   *CDNConfig   `validate:""`
-	Disk  *DiskConfig  `validate:""`
-	GCP   *GCPConfig   `validate:""`
-	Minio *MinioConfig `validate:""`
-	Mongo *MongoConfig `validate:""`
+	CDN   *CDNConfig
+	Disk  *DiskConfig
+	GCP   *GCPConfig
+	Minio *MinioConfig
+	Mongo *MongoConfig
 }
 
 func setStorageTimeouts(s *StorageConfig, defaultTimeout int) {
