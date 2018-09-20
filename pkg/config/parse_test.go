@@ -351,6 +351,7 @@ func getEnvMap(config *Config) map[string]string {
 		"ATHENS_FILTER_FILE":            config.FilterFile,
 		"ATHENS_TIMEOUT":                strconv.Itoa(config.Timeout),
 		"ATHENS_ENABLE_CSRF_PROTECTION": strconv.FormatBool(config.EnableCSRFProtection),
+		"ATHENS_TRACE_EXPORTER":         config.TraceExporterURL,
 	}
 
 	proxy := config.Proxy
