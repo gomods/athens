@@ -12,11 +12,3 @@ LastModifierEmail: "hello@robloranger.ca"
 # New Contributors
 
 The following guide is designed to help contributors new to open source.
-
-TODO: the following points should be made into one or more pages.
-- https://www.youtube.com/watch?v=bgSDcTyysRc
-- using github
->    http://kbroman.org/github_tutorial/pages/fork.html
-- using remotes
-- creating pull requests
-- best practices re: working on github. i.e. commenting interest on an issue.
