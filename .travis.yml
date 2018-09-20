@@ -23,7 +23,7 @@ before_script:
   - chmod +x minio && nohup ./minio server . &
 
 script:
-  - make verify test-unit test-e2e
+  - make test-unit test-e2e
 
 after_success:
   - if [ "${CODE_COV}" == "1" ]; then
