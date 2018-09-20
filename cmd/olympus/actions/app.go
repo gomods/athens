@@ -14,7 +14,6 @@ import (
 	"github.com/gobuffalo/gocraft-work-adapter"
 	"github.com/gobuffalo/packr"
 	"github.com/gocraft/work"
-	"github.com/gomods/athens/pkg/cdn/metadata/azurecdn"
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/download"
 	"github.com/gomods/athens/pkg/eventlog"
@@ -132,13 +131,6 @@ func App(conf *config.Config) (*buffalo.App, error) {
 		csrfMiddleware := csrf.New
 		app.Use(csrfMiddleware)
 	}
-
-	// TODO: parameterize the GoGet getter here.
-	//
-	// Defaulting to Azure for now
-	app.Use(GoGet(azurecdn.Metadata{
-		// TODO: initialize the azurecdn.Storage struct here
-	}))
 
 	// Setup and use translations:
 	if T, err = i18n.New(packr.NewBox("../locales"), "en-US"); err != nil {

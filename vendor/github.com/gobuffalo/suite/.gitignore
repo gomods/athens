@@ -27,3 +27,5 @@ generated/
 bin/*
 gin-bin
 .gitcookies
+go.mod
+go.sum

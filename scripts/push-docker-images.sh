@@ -35,13 +35,9 @@ fi
 REPO_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." >/dev/null && pwd )/"
 
 docker build -t ${REGISTRY}proxy:${VERSION} -f ${REPO_DIR}cmd/proxy/Dockerfile ${REPO_DIR}
-docker build -t ${REGISTRY}olympus:${VERSION} -f ${REPO_DIR}cmd/olympus/Dockerfile ${REPO_DIR}
 
 # Apply the mutable tag to the immutable version
 docker tag ${REGISTRY}proxy:${VERSION} ${REGISTRY}proxy:${MUTABLE_TAG}
-docker tag ${REGISTRY}olympus:${VERSION} ${REGISTRY}olympus:${MUTABLE_TAG}
 
 docker push ${REGISTRY}proxy:${VERSION}
 docker push ${REGISTRY}proxy:${MUTABLE_TAG}
-docker push ${REGISTRY}olympus:${VERSION}
-docker push ${REGISTRY}olympus:${MUTABLE_TAG}

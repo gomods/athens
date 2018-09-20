@@ -69,6 +69,8 @@ github.com/gobuffalo/pop v0.0.0-20180810203029-9f8bf0c11920 h1:O4TZPudnJq5ic4v/l
 github.com/gobuffalo/pop v0.0.0-20180810203029-9f8bf0c11920/go.mod h1:rYdFIDMO4v9I4SK6BQ3q+vnd5HlQnTtlY/ANF7wKzGM=
 github.com/gobuffalo/suite v2.1.5+incompatible h1:u3fPfi47UUm656kCvXNm4R9L0Rn8tN0SYFW4F51lVhE=
 github.com/gobuffalo/suite v2.1.5+incompatible/go.mod h1:VCaZ8EgrnJKbt0QGkrEKIMsJlWFxMXWYSHXqjH2UJJE=
+github.com/gobuffalo/suite v2.1.6+incompatible h1:yeDu7Yak32Rd4+ddj0i6lSk+0HTZsJ/lZDJfUa7T1t0=
+github.com/gobuffalo/suite v2.1.6+incompatible/go.mod h1:VCaZ8EgrnJKbt0QGkrEKIMsJlWFxMXWYSHXqjH2UJJE=
 github.com/gobuffalo/tags v2.0.6+incompatible h1:ROoAxfy9HW4i0plbJ+vw8whEs8J1KWpFJRa7CHRPb4M=
 github.com/gobuffalo/tags v2.0.6+incompatible/go.mod h1:9XmhOkyaB7UzvuY4UoZO4s67q8/xRMVJEaakauVQYeY=
 github.com/gobuffalo/uuid v2.0.0+incompatible/go.mod h1:ErhIzkRhm0FtRuiE/PeORqcw4cVi1RtSpnwYrxuvkfE=
