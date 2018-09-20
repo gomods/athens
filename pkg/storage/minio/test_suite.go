@@ -1,7 +1,10 @@
 package minio
 
 import (
+	"fmt"
+
 	"github.com/gobuffalo/suite"
+	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/storage"
 	minio "github.com/minio/minio-go"
 )
@@ -9,26 +12,28 @@ import (
 // TestSuite implements storage.TestSuite interface
 type TestSuite struct {
 	*suite.Model
-	storage                                            storage.Backend
-	endpoint, accessKeyID, secretAccessKey, bucketName string
+	storage storage.Backend
+	conf    *config.MinioConfig
 }
 
 // NewTestSuite creates a common test suite
-func NewTestSuite(model *suite.Model) (storage.TestSuite, error) {
-	endpoint := "127.0.0.1:9000"
-	bucketName := "gomods"
-	accessKeyID := "minio"
-	secretAccessKey := "minio123"
-	minioStorage, err := NewStorage(endpoint, accessKeyID, secretAccessKey, bucketName, false)
+func NewTestSuite(model *suite.Model, conf *config.MinioConfig) (storage.TestSuite, error) {
+	minioStorage, err := newTestStore(conf)
 
 	return &TestSuite{
-		storage:         minioStorage,
-		Model:           model,
-		endpoint:        endpoint,
-		bucketName:      bucketName,
-		accessKeyID:     accessKeyID,
-		secretAccessKey: secretAccessKey,
+		storage: minioStorage,
+		Model:   model,
+		conf:    conf,
 	}, err
+}
+
+func newTestStore(conf *config.MinioConfig) (storage.Backend, error) {
+	minioStore, err := NewStorage(conf)
+	if err != nil {
+		return nil, fmt.Errorf("Not able to connect to minio storage: %s", err.Error())
+	}
+
+	return minioStore, nil
 }
 
 // Storage retrieves initialized storage backend
@@ -43,13 +48,13 @@ func (ts *TestSuite) StorageHumanReadableName() string {
 
 // Cleanup tears down test
 func (ts *TestSuite) Cleanup() error {
-	minioClient, _ := minio.New(ts.endpoint, ts.accessKeyID, ts.secretAccessKey, false)
+	minioClient, _ := minio.New(ts.conf.Endpoint, ts.conf.Key, ts.conf.Secret, ts.conf.EnableSSL)
 	doneCh := make(chan struct{})
 	defer close(doneCh)
-	objectCh := minioClient.ListObjectsV2(ts.bucketName, "", true, doneCh)
+	objectCh := minioClient.ListObjectsV2(ts.conf.Bucket, "", true, doneCh)
 	for object := range objectCh {
 		//TODO: could return multi error and clean other objects
-		if err := minioClient.RemoveObject(ts.bucketName, object.Key); err != nil {
+		if err := minioClient.RemoveObject(ts.conf.Bucket, object.Key); err != nil {
 			return err
 		}
 	}

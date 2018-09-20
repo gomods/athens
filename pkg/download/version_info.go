@@ -3,7 +3,6 @@ package download
 import (
 	"net/http"
 
-	"github.com/bketelsen/buffet"
 	"github.com/gobuffalo/buffalo"
 	"github.com/gobuffalo/buffalo/render"
 	"github.com/gomods/athens/pkg/errors"
@@ -15,11 +14,9 @@ const PathVersionInfo = "/{module:.+}/@v/{version}.info"
 
 // VersionInfoHandler implements GET baseURL/module/@v/version.info
 func VersionInfoHandler(dp Protocol, lggr log.Entry, eng *render.Engine) buffalo.Handler {
-	const op errors.Op = "download.versionInfoHandler"
+	const op errors.Op = "download.VersionInfoHandler"
 	return func(c buffalo.Context) error {
-		sp := buffet.SpanFromContext(c).SetOperationName("versionInfoHandler")
-		defer sp.Finish()
-		mod, ver, err := getModuleParams(op, c)
+		mod, ver, err := getModuleParams(c, op)
 		if err != nil {
 			lggr.SystemErr(err)
 			return c.Render(errors.Kind(err), nil)

@@ -29,7 +29,7 @@ func (d *DeleteTests) TearDownTest() {
 func (d *DeleteTests) TestDeleteTimeout() {
 	r := d.Require()
 
-	err := Delete(context.Background(), "mx", "1.1.1", delWithTimeout)
+	err := Delete(context.Background(), "mx", "1.1.1", delWithTimeout, time.Second)
 
 	r.Error(err, "deleter returned at least one error")
 	r.Contains(err.Error(), "deleting mx.1.1.1.info failed: context deadline exceeded")
@@ -40,7 +40,7 @@ func (d *DeleteTests) TestDeleteTimeout() {
 func (d *DeleteTests) TestDeleteError() {
 	r := d.Require()
 
-	err := Delete(context.Background(), "mx", "1.1.1", delWithErr)
+	err := Delete(context.Background(), "mx", "1.1.1", delWithErr, time.Second)
 
 	r.Error(err, "deleter returned at least one error")
 	r.Contains(err.Error(), "some err")

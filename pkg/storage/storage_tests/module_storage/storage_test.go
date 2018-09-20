@@ -10,17 +10,24 @@ package modulestorage
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"io/ioutil"
+	"math/rand"
+	"path/filepath"
 	"testing"
-	"time"
 
 	"github.com/gobuffalo/suite"
+	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/storage"
 	"github.com/gomods/athens/pkg/storage/fs"
 	"github.com/gomods/athens/pkg/storage/mem"
 	"github.com/gomods/athens/pkg/storage/minio"
 	"github.com/gomods/athens/pkg/storage/mongo"
+)
+
+var (
+	testConfigFile = filepath.Join("..", "..", "..", "..", "config.test.toml")
 )
 
 type TestSuites struct {
@@ -36,6 +43,9 @@ type TestSuites struct {
 func (d *TestSuites) SetupTest() {
 	ra := d.Require()
 
+	conf, err := config.GetConf(testConfigFile)
+	ra.NoError(err)
+
 	// file system
 	fsTests, err := fs.NewTestSuite(d.Model)
 	ra.NoError(err)
@@ -47,12 +57,12 @@ func (d *TestSuites) SetupTest() {
 	d.storages = append(d.storages, memStore)
 
 	// minio
-	minioStorage, err := minio.NewTestSuite(d.Model)
+	minioStorage, err := minio.NewTestSuite(d.Model, conf.Storage.Minio)
 	ra.NoError(err)
 	d.storages = append(d.storages, minioStorage)
 
 	// mongo
-	mongoStore, err := mongo.NewTestSuite(d.Model)
+	mongoStore, err := mongo.NewTestSuite(d.Model, conf.Storage.Mongo)
 	ra.NoError(err)
 	d.storages = append(d.storages, mongoStore)
 
@@ -61,7 +71,6 @@ func (d *TestSuites) SetupTest() {
 	d.mod = []byte("123")
 	d.zip = []byte("456")
 	d.info = []byte("789")
-
 }
 
 func TestModuleStorages(t *testing.T) {
@@ -106,9 +115,9 @@ func (d *TestSuites) testKindNotFound(ts storage.TestSuite) {
 	r.Error(err, hrn)
 	r.Equal(errors.KindNotFound, errors.Kind(err), hrn)
 
-	_, err = s.List(ctx, mod)
-	r.Error(err, hrn)
-	r.Equal(errors.KindNotFound, errors.Kind(err), hrn)
+	vs, err := s.List(ctx, mod)
+	r.NoError(err)
+	r.Equal(0, len(vs))
 
 	_, err = s.Zip(ctx, mod, ver)
 	r.Error(err, hrn)
@@ -153,7 +162,7 @@ func (d *TestSuites) testGetSaveListRoundTrip(ts storage.TestSuite) {
 
 func (d *TestSuites) testDelete(ts storage.TestSuite) {
 	r := d.Require()
-	version := "delete" + time.Now().String()
+	version := fmt.Sprintf("%s%d", "delete", rand.Int())
 	err := ts.Storage().Save(context.Background(), d.module, version, d.mod, bytes.NewReader(d.zip), d.info)
 	r.NoError(err)
 

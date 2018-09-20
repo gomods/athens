@@ -5,7 +5,7 @@ import (
 
 	"github.com/globalsign/mgo"
 	"github.com/gobuffalo/suite"
-	"github.com/gomods/athens/pkg/config/env"
+	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/storage"
 )
 
@@ -13,24 +13,24 @@ import (
 type TestSuite struct {
 	*suite.Model
 	storage *ModuleStore
+	conf    *config.MongoConfig
 }
 
 // NewTestSuite creates a common test suite
-func NewTestSuite(model *suite.Model) (storage.TestSuite, error) {
-	ms, err := newTestStore()
+func NewTestSuite(model *suite.Model, conf *config.MongoConfig) (storage.TestSuite, error) {
+	ms, err := newTestStore(conf)
 	if err != nil {
 		return nil, err
 	}
 	return &TestSuite{
 		storage: ms,
 		Model:   model,
+		conf:    conf,
 	}, err
 }
 
-func newTestStore() (*ModuleStore, error) {
-	muri := env.MongoConnectionString()
-	certPath := env.MongoCertPath()
-	mongoStore, err := NewStorageWithCert(muri, certPath)
+func newTestStore(conf *config.MongoConfig) (*ModuleStore, error) {
+	mongoStore, err := NewStorage(conf)
 	if err != nil {
 		return nil, fmt.Errorf("Not able to connect to mongo storage: %s", err.Error())
 	}
@@ -50,12 +50,10 @@ func (ts *TestSuite) StorageHumanReadableName() string {
 
 // Cleanup tears down test
 func (ts *TestSuite) Cleanup() error {
-	muri := env.MongoConnectionString()
-	timeout := env.MongoConnectionTimeoutSecWithDefault(1)
-	s, err := mgo.DialWithTimeout(muri, timeout)
-	defer s.Close()
+	s, err := mgo.DialWithTimeout(ts.conf.URL, ts.conf.TimeoutDuration())
 	if err != nil {
-		return err
+		return nil
 	}
-	return s.DB("athens").C("modules").DropCollection()
+	defer s.Close()
+	return s.DB(ts.storage.d).C(ts.storage.c).DropCollection()
 }

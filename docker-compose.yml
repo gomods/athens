@@ -3,7 +3,7 @@ services:
   redis:
     image: redis:alpine
     command: ["redis-server", "--appendonly", "yes"]
-    ports: 
+    ports:
       - "6379:6379"
   mongo:
     image: mongo:3.7.9-jessie
@@ -13,7 +13,7 @@ services:
     image: minio/minio:latest
     command: server /data
     ports:
-      - "9000:9000"
+      - "9001:9000"
     environment:
       MINIO_ACCESS_KEY: minio
       MINIO_SECRET_KEY: minio123
