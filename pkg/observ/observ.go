@@ -26,8 +26,16 @@ func RegisterTraceExporter(URL, service, ENV string) (*(jaeger.Exporter), error)
 	}
 
 	je, err := jaeger.NewExporter(jaeger.Options{
-		Endpoint:    URL,
-		ServiceName: service,
+		Endpoint: URL,
+		Process: jaeger.Process{
+			ServiceName: service,
+			Tags: []jaeger.Tag{
+				// IP Tag ensures Jaeger's clock isn't skewed.
+				// If/when we have traces across different servers,
+				// we should make this IP dynamic.
+				jaeger.StringTag("ip", "127.0.0.1"),
+			},
+		},
 	})
 
 	if err != nil {
