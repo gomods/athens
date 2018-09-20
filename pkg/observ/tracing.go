@@ -59,7 +59,14 @@ func Tracer(service string) buffalo.MiddlewareFunc {
 				requestAttrs(ctx.Request())...,
 			)
 
-			return next(&observabilityContext{Context: ctx, spanCtx: spanCtx})
+			handler := next(&observabilityContext{Context: ctx, spanCtx: spanCtx})
+
+			resp, ok := ctx.Response().(*buffalo.Response)
+			if ok {
+				span.SetStatus(trace.Status{Code: int32(resp.Status)})
+			}
+
+			return handler
 		}
 	}
 }
