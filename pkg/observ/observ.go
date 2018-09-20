@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"github.com/gobuffalo/buffalo"
-	"github.com/gomods/athens/pkg/config/env"
 	"github.com/gomods/athens/pkg/errors"
 	"go.opencensus.io/exporter/jaeger"
 	"go.opencensus.io/trace"
@@ -20,16 +19,23 @@ type observabilityContext struct {
 // RegisterTraceExporter returns a jaeger exporter for exporting traces to opencensus.
 // It should in the future have a nice sampling rate defined
 // TODO: Extend beyond jaeger
-func RegisterTraceExporter(service, ENV string) (*(jaeger.Exporter), error) {
+func RegisterTraceExporter(URL, service, ENV string) (*(jaeger.Exporter), error) {
 	const op errors.Op = "RegisterTracer"
-	collectorEndpointURI := env.TraceExporterURL()
-	if collectorEndpointURI == "" {
+	if URL == "" {
 		return nil, errors.E(op, "Exporter URL is empty. Traces won't be exported")
 	}
 
 	je, err := jaeger.NewExporter(jaeger.Options{
-		Endpoint:    collectorEndpointURI,
-		ServiceName: service,
+		Endpoint: URL,
+		Process: jaeger.Process{
+			ServiceName: service,
+			Tags: []jaeger.Tag{
+				// IP Tag ensures Jaeger's clock isn't skewed.
+				// If/when we have traces across different servers,
+				// we should make this IP dynamic.
+				jaeger.StringTag("ip", "127.0.0.1"),
+			},
+		},
 	})
 
 	if err != nil {
