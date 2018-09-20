@@ -128,7 +128,7 @@ EnableCSRFProtection = false
     NETRCPath = ""
 
     # TraceExporterURL is the URL to which Athens populates distributed tracing 
-    # information such as Jaegar. 
+    # information such as Jaeger. 
     # Env override: ATHENS_TRACE_EXPORTER
     TraceExporterURL = ""
 
