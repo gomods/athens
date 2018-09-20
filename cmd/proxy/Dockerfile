@@ -18,7 +18,7 @@ FROM alpine
 ENV GO111MODULE=on
 
 COPY --from=builder /bin/app /bin/app
-COPY --from=builder /go/src/github.com/gomods/athens/config.test.toml /config/config.toml
+COPY --from=builder /go/src/github.com/gomods/athens/config.example.toml /config/config.toml
 COPY --from=builder /go/src/github.com/gomods/athens/cmd/proxy/locales /go/src/github.com/gomods/athens/cmd/proxy/locales
 COPY --from=builder /go/src/github.com/gomods/athens/cmd/proxy/assets /go/src/github.com/gomods/athens/cmd/proxy/assets
 COPY --from=builder /usr/local/go/bin/go /bin/go

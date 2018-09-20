@@ -180,25 +180,20 @@ EnableCSRFProtection = false
     [Storage.Minio]
         # Endpoint for Minio storage
         # Env override: ATHENS_MINIO_ENDPOINT
-        Endpoint = "minio.example.com"
-
+        Endpoint = "127.0.0.1:9001"
         # Access Key for Minio storage
         # Env override: ATHENS_MINIO_ACCESS_KEY_ID
-        Key = "MY_KEY"
-
+        Key = "minio"
         # Secret Key for Minio storage
         # Env override: ATHENS_MINIO_SECRET_ACCESS_KEY
-        Secret = "MY_SECRET"
-
+        Secret = "minio123"
         # Timeout for networks calls made to Minio in seconds
         # Defaults to Global Timeout
         Timeout = 300
-
         # Enable SSL for Minio connections
         # Defaults to true
         # Env override: ATHENS_MINIO_USE_SSL
-        EnableSSL = true
-
+        EnableSSL = false
         # Minio Bucket to use for storage
         # Defaults to gomods
         # Env override: ATHENS_MINIO_BUCKET_NAME
