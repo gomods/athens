@@ -69,7 +69,6 @@ Timeout = 300
 # Env override: ATHENS_ENABLE_CSRF_PROTECTION
 EnableCSRFProtection = false
 
-
 [Proxy]
     # StorageType sets the type of storage backend the proxy will use.
     # Possible values are memory, disk, mongo, gcp, minio
@@ -127,6 +126,11 @@ EnableCSRFProtection = false
     # .cache directory in the Go image).
     # Env override: ATHENS_NETRC_PATH
     NETRCPath = ""
+
+    # TraceExporterURL is the URL to which Athens populates distributed tracing 
+    # information such as Jaeger. 
+    # Env override: ATHENS_TRACE_EXPORTER
+    TraceExporterURL = ""
 
 [Olympus]
     # StorageType sets the type of storage backend Olympus will use.
