@@ -257,12 +257,13 @@ github.com/stretchr/testify/assert
 github.com/technosophos/moniker
 # github.com/unrolled/secure v0.0.0-20180618144512-8287f3899c8e
 github.com/unrolled/secure
-# go.opencensus.io v0.15.0
+# go.opencensus.io v0.17.0
 go.opencensus.io/exporter/jaeger
 go.opencensus.io/trace
 go.opencensus.io/exporter/jaeger/internal/gen-go/jaeger
 go.opencensus.io/internal
 go.opencensus.io/trace/internal
+go.opencensus.io/trace/tracestate
 go.opencensus.io
 go.opencensus.io/plugin/ochttp
 go.opencensus.io/trace/propagation
@@ -278,7 +279,7 @@ golang.org/x/crypto/ssh/terminal
 golang.org/x/crypto/blowfish
 golang.org/x/crypto/argon2
 golang.org/x/crypto/blake2b
-# golang.org/x/net v0.0.0-20180811021610-c39426892332
+# golang.org/x/net v0.0.0-20180906233101-161cd47e91fd
 golang.org/x/net/context
 golang.org/x/net/http/httpguts
 golang.org/x/net/html
@@ -298,7 +299,7 @@ golang.org/x/oauth2/jwt
 # golang.org/x/sync v0.0.0-20180314180146-1d60e4601c6f
 golang.org/x/sync/errgroup
 golang.org/x/sync/semaphore
-# golang.org/x/sys v0.0.0-20180814072032-4e1fef560951
+# golang.org/x/sys v0.0.0-20180909124046-d0be0721c37e
 golang.org/x/sys/unix
 golang.org/x/sys/windows
 golang.org/x/sys/cpu
@@ -307,7 +308,7 @@ golang.org/x/text/transform
 golang.org/x/text/unicode/norm
 golang.org/x/text/secure/bidirule
 golang.org/x/text/unicode/bidi
-# google.golang.org/api v0.0.0-20180829000535-087779f1d2c9
+# google.golang.org/api v0.0.0-20180910000450-7ca32eb868bf
 google.golang.org/api/googleapi
 google.golang.org/api/iterator
 google.golang.org/api/support/bundler
@@ -330,7 +331,7 @@ google.golang.org/appengine/internal/base
 google.golang.org/appengine/internal/datastore
 google.golang.org/appengine/internal/log
 google.golang.org/appengine/internal/remote_api
-# google.golang.org/genproto v0.0.0-20180817151627-c66870c02cf8
+# google.golang.org/genproto v0.0.0-20180831171423-11092d34479b
 google.golang.org/genproto/googleapis/iam/v1
 google.golang.org/genproto/googleapis/rpc/code
 google.golang.org/genproto/googleapis/api/annotations
