@@ -14,7 +14,7 @@ import (
 // NewValidationMiddleware builds a middleware function that performs validation checks by calling
 // an external webhook
 func NewValidationMiddleware(entry log.Entry, validatorHook string) buffalo.MiddlewareFunc {
-	const op errors.Op = "actions.ValidationMiddleware"
+	const op errors.Op = "actions.NewValidationMiddleware"
 
 	return func(next buffalo.Handler) buffalo.Handler {
 		return func(c buffalo.Context) error {
