@@ -10,14 +10,14 @@ COPY . .
 
 RUN apk update && \ 
 	apk add --no-cache bash && \
-	GO111MODULE=on CGO_ENABLED=0 go build -mod=vendor -o /bin/app ./cmd/proxy && \
+	GO111MODULE=on CGO_ENABLED=0 go build -mod=vendor -o /bin/athens-proxy ./cmd/proxy && \
 	./scripts/create_default_config.sh
 
 FROM alpine
 
 ENV GO111MODULE=on
 
-COPY --from=builder /bin/app /bin/app
+COPY --from=builder /bin/athens-proxy /bin/athens-proxy
 COPY --from=builder /go/src/github.com/gomods/athens/config.example.toml /config/config.toml
 COPY --from=builder /go/src/github.com/gomods/athens/cmd/proxy/locales /go/src/github.com/gomods/athens/cmd/proxy/locales
 COPY --from=builder /go/src/github.com/gomods/athens/cmd/proxy/assets /go/src/github.com/gomods/athens/cmd/proxy/assets
@@ -31,4 +31,4 @@ ENV GO_ENV=production
 
 EXPOSE 3000
 
-ENTRYPOINT ["app", "-config_file=/config/config.toml"]
+CMD ["athens-proxy", "-config_file=/config/config.toml"]
