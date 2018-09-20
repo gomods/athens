@@ -1,6 +1,7 @@
 ---
 title: "Using Git"
 date: 2018-09-20T13:58:51-07:00
+weight: 1
 LastModifiedDisplayName: "Robbie"
 LastModifiedEmail: "hello@robloranger.ca"
 ---
