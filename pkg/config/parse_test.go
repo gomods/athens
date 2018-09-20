@@ -10,7 +10,7 @@ import (
 	"github.com/google/go-cmp/cmp/cmpopts"
 )
 
-const exampleConfigPath = "../../config.example.toml"
+const exampleConfigPath = "../../config.dev.toml"
 
 func compareConfigs(parsedConf *Config, expConf *Config, t *testing.T) {
 	opts := cmpopts.IgnoreTypes(StorageConfig{}, ProxyConfig{}, OlympusConfig{})
@@ -232,10 +232,10 @@ func TestParseExampleConfig(t *testing.T) {
 			},
 		},
 		Minio: &MinioConfig{
-			Endpoint:  "minio.example.com",
-			Key:       "MY_KEY",
-			Secret:    "MY_SECRET",
-			EnableSSL: true,
+			Endpoint:  "127.0.0.1:9001",
+			Key:       "minio",
+			Secret:    "minio123",
+			EnableSSL: false,
 			Bucket:    "gomods",
 			TimeoutConf: TimeoutConf{
 				Timeout: globalTimeout,
@@ -351,6 +351,7 @@ func getEnvMap(config *Config) map[string]string {
 		"ATHENS_FILTER_FILE":            config.FilterFile,
 		"ATHENS_TIMEOUT":                strconv.Itoa(config.Timeout),
 		"ATHENS_ENABLE_CSRF_PROTECTION": strconv.FormatBool(config.EnableCSRFProtection),
+		"ATHENS_TRACE_EXPORTER":         config.TraceExporterURL,
 	}
 
 	proxy := config.Proxy

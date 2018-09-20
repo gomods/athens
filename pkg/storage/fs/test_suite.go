@@ -16,20 +16,20 @@ type TestSuite struct {
 
 // NewTestSuite creates a common test suite
 func NewTestSuite(model *suite.Model) (storage.TestSuite, error) {
-	memFs := afero.NewOsFs()
-	r, err := afero.TempDir(memFs, "", "athens-fs-storage-tests")
+	osFs := afero.NewOsFs()
+	r, err := afero.TempDir(osFs, "", "athens-fs-storage-tests")
 	if err != nil {
 		return nil, err
 	}
 
-	fsStore, err := NewStorage(r, memFs)
+	fsStore, err := NewStorage(r, osFs)
 	if err != nil {
 		return nil, err
 	}
 
 	return &TestSuite{
 		Model:   model,
-		fs:      memFs,
+		fs:      osFs,
 		rootDir: r,
 		storage: fsStore,
 	}, nil

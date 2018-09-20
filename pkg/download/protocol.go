@@ -105,7 +105,7 @@ func (p *protocol) Info(ctx context.Context, mod, ver string) ([]byte, error) {
 	defer span.End()
 	info, err := p.s.Info(ctx, mod, ver)
 	if errors.IsNotFoundErr(err) {
-		err = p.stasher.Stash(mod, ver)
+		err = p.stasher.Stash(ctx, mod, ver)
 		if err != nil {
 			return nil, errors.E(op, err)
 		}
@@ -124,7 +124,7 @@ func (p *protocol) GoMod(ctx context.Context, mod, ver string) ([]byte, error) {
 	defer span.End()
 	goMod, err := p.s.GoMod(ctx, mod, ver)
 	if errors.IsNotFoundErr(err) {
-		err = p.stasher.Stash(mod, ver)
+		err = p.stasher.Stash(ctx, mod, ver)
 		if err != nil {
 			return nil, errors.E(op, err)
 		}
@@ -143,7 +143,7 @@ func (p *protocol) Zip(ctx context.Context, mod, ver string) (io.ReadCloser, err
 	defer span.End()
 	zip, err := p.s.Zip(ctx, mod, ver)
 	if errors.IsNotFoundErr(err) {
-		err = p.stasher.Stash(mod, ver)
+		err = p.stasher.Stash(ctx, mod, ver)
 		if err != nil {
 			return nil, errors.E(op, err)
 		}

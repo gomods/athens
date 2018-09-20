@@ -78,6 +78,7 @@ func App(conf *config.Config) (*buffalo.App, error) {
 		SessionName: "_athens_session",
 		Logger:      blggr,
 		Addr:        conf.Proxy.Port,
+		WorkerOff:   true,
 	})
 	if prefix := conf.Proxy.PathPrefix; prefix != "" {
 		// certain Ingress Controllers (such as GCP Load Balancer)
@@ -89,7 +90,7 @@ func App(conf *config.Config) (*buffalo.App, error) {
 	}
 
 	// Register exporter to export traces
-	exporter, err := observ.RegisterTraceExporter(Service, ENV)
+	exporter, err := observ.RegisterTraceExporter(conf.TraceExporterURL, Service, ENV)
 	if err != nil {
 		lggr.SystemErr(err)
 	} else {
