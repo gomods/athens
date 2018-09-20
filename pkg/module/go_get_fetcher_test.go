@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"os"
 
 	"github.com/gobuffalo/envy"
 	"github.com/spf13/afero"
@@ -72,4 +73,27 @@ func ExampleFetcher() {
 	// Do something with versionData
 	fmt.Println(string(versionData.Mod))
 	// Output: module github.com/arschles/assert
+}
+
+func (s *ModuleSuite) Test_downloadCmd() {
+	r := s.Require()
+	os.Setenv("PROXY_INSECURE_SOURCES", "")
+
+	notInsecureCmd := downloadCmd("go", "github.com/arschles/assert", "mod", "download")
+	for _, arg := range notInsecureCmd.Args {
+		r.True(arg != "-insecure")
+	}
+
+	os.Setenv("PROXY_INSECURE_SOURCES", "github.com")
+	insecureCmd := downloadCmd("go", "github.com/arschles/assert", "mod", "download")
+	var insecureFlag bool
+	for _, arg := range insecureCmd.Args {
+		if arg == "-insecure" {
+			insecureFlag = true
+			break
+		}
+	}
+
+	r.True(insecureFlag == true)
+
 }

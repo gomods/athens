@@ -118,6 +118,22 @@ func getSources(goBinaryName string, fs afero.Fs, gopath, repoRoot, module, vers
 }
 
 func downloadCmd(goBinaryName string, fullURI string, args ...string) *exec.Cmd {
+	insecureSources := strings.Split(os.Getenv("PROXY_INSECURE_SOURCES"), ",")
+	modSource := strings.Split(fullURI, "/")[0]
+	insecureFlag := false
+
+	for _, source := range insecureSources {
+		if modSource == source {
+			insecureFlag = true
+			break
+		}
+	}
+
+	if insecureFlag {
+		args = append([]string{"-insecure"}, args...)
+		fmt.Println(args)
+	}
+
 	args = append(args, fullURI)
 	return exec.Command(goBinaryName, args...)
 }
