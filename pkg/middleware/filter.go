@@ -14,7 +14,7 @@ import (
 // NewFilterMiddleware builds a middleware function that implements the filters configured in
 // the filter file.
 func NewFilterMiddleware(mf *module.Filter, olympusEndpoint string) buffalo.MiddlewareFunc {
-	const op errors.Op = "actions.FilterMiddleware"
+	const op errors.Op = "actions.NewFilterMiddleware"
 
 	return func(next buffalo.Handler) buffalo.Handler {
 		return func(c buffalo.Context) error {
