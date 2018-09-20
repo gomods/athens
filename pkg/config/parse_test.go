@@ -232,10 +232,10 @@ func TestParseExampleConfig(t *testing.T) {
 			},
 		},
 		Minio: &MinioConfig{
-			Endpoint:  "minio.example.com",
-			Key:       "MY_KEY",
-			Secret:    "MY_SECRET",
-			EnableSSL: true,
+			Endpoint:  "127.0.0.1:9001",
+			Key:       "minio",
+			Secret:    "minio123",
+			EnableSSL: false,
 			Bucket:    "gomods",
 			TimeoutConf: TimeoutConf{
 				Timeout: globalTimeout,
