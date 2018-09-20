@@ -17,8 +17,7 @@ WORKDIR $GOPATH/src/github.com/gomods/athens
 ADD . .
 
 RUN cd cmd/olympus && buffalo build -s -o /bin/app
-RUN scripts/create_default_config.sh
-COPY config.toml /bin/config.toml
+COPY config.dev.toml /bin/config.toml
 
 FROM alpine
 RUN apk add --no-cache bash

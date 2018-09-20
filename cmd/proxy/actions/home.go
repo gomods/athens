@@ -5,5 +5,5 @@ import (
 )
 
 func proxyHomeHandler(c buffalo.Context) error {
-	return c.Render(200, proxy.HTML("index.html"))
+	return c.Render(200, proxy.JSON("Welcome to The Athen Proxy"))
 }
