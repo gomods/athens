@@ -1,6 +1,7 @@
 package stash
 
 import (
+	"context"
 	"fmt"
 	"sync"
 	"testing"
@@ -19,7 +20,7 @@ func TestSingleFlight(t *testing.T) {
 	var eg errgroup.Group
 	for i := 0; i < 5; i++ {
 		eg.Go(func() error {
-			return s.Stash("mod", "ver")
+			return s.Stash(context.Background(), "mod", "ver")
 		})
 	}
 
@@ -30,7 +31,7 @@ func TestSingleFlight(t *testing.T) {
 
 	for i := 0; i < 5; i++ {
 		eg.Go(func() error {
-			return s.Stash("mod", "ver")
+			return s.Stash(context.Background(), "mod", "ver")
 		})
 	}
 	err = eg.Wait()
@@ -49,7 +50,7 @@ type mockSFStasher struct {
 	num int
 }
 
-func (ms *mockSFStasher) Stash(mod, ver string) error {
+func (ms *mockSFStasher) Stash(ctx context.Context, mod, ver string) error {
 	time.Sleep(time.Millisecond * 100) // allow for second requests to come in.
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
