@@ -64,12 +64,13 @@ func Tracer(service string) buffalo.MiddlewareFunc {
 
 			handler := next(&observabilityContext{Context: ctx, spanCtx: spanCtx})
 
+			// Add request attributes
 			span.AddAttributes(
 				requestAttrs(ctx.Request())...,
 			)
 
-			resp, ok := ctx.Response().(*buffalo.Response)
-			if ok {
+			// SetSpan Status from response
+			if resp, ok := ctx.Response().(*buffalo.Response); ok {
 				span.SetStatus(ochttp.TraceStatus(resp.Status, ""))
 				span.AddAttributes(trace.Int64Attribute("http.status_code", int64(resp.Status)))
 			}
