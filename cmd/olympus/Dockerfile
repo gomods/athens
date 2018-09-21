@@ -17,7 +17,7 @@ WORKDIR $GOPATH/src/github.com/gomods/athens
 ADD . .
 
 RUN cd cmd/olympus && buffalo build -s -o /bin/app
-COPY config.dev.toml /bin/config.toml
+COPY config.dev.toml /config/config.toml
 
 FROM alpine
 RUN apk add --no-cache bash
@@ -26,7 +26,7 @@ RUN apk add --no-cache ca-certificates
 WORKDIR /bin/
 
 COPY --from=builder /bin/app .
-COPY --from=builder /bin/config.toml .
+COPY --from=builder /config/config.toml .
 
 # Comment out to run the binary in "production" mode:
 # ENV GO_ENV=production
@@ -38,4 +38,4 @@ EXPOSE 3000
 
 # Comment out to run the migrations before running the binary:
 # CMD /bin/app migrate; /bin/app
-CMD exec /bin/app -config_file=config.toml
+CMD exec /bin/app -config_file=/config/config.toml
