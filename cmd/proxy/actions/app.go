@@ -77,7 +77,7 @@ func App(conf *config.Config) (*buffalo.App, error) {
 	// Register exporter to export traces
 	exporter, err := observ.RegisterTraceExporter(conf.TraceExporterURL, Service, ENV)
 	if err != nil {
-		lggr.SystemErr(err)
+		lggr.Infof("%s", err)
 	} else {
 		defer exporter.Flush()
 		app.Use(observ.Tracer(Service))
