@@ -29,6 +29,7 @@ teardown () {
 
   clearGoModCache
   pkill athens-proxy || true
+  rm $REPO_DIR/cmd/proxy/athens-proxy
   rm -fr ${TMPDIR}
   popd 2> /dev/null || true
 }
