@@ -63,7 +63,7 @@ possible, all criticism should be considered constructive.
 
 > If you feel like it is
 > not, please do not hesitate to reach out to one of the maintainers. We take our
-> code of conduct very seriously.
+> [code of conduct](https://www.contributor-covenant.org) very seriously.
 
 Most likely one or more contributors and maintainers will leave a review on your
 pull request. You can discuss the changes requested in the pull request itself,

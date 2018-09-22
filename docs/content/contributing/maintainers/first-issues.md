@@ -28,7 +28,7 @@ information to fulfill the below template.
 
 ### New to Athens?
 
-If your new to the project, and you haven't already, please take some time to
+If you are new to the project, and you haven't already, please take some time to
 read our [contribution docs](https://docs.gomods.io/contributing).
 
 ### What needs to be done?
@@ -44,6 +44,6 @@ has been experimented with already.
 
 #### New To Open Source
 
-If your new to open source, using git or GitHub, or just want some workflow
+If you are new to open source, using git or GitHub, or just want some workflow
 tips, head over to our [new contributor guide](https://docs.gomods.io/contributing/new).
 
