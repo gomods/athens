@@ -8,10 +8,7 @@ WORKDIR $GOPATH/src/github.com/gomods/athens
 
 COPY . .
 
-RUN apk update && \ 
-	apk add --no-cache bash && \
-	GO111MODULE=on CGO_ENABLED=0 go build -mod=vendor -o /bin/athens-proxy ./cmd/proxy && \
-	./scripts/create_default_config.sh
+RUN GO111MODULE=on CGO_ENABLED=0 go build -mod=vendor -o /bin/athens-proxy ./cmd/proxy
 
 FROM alpine
 
@@ -19,8 +16,6 @@ ENV GO111MODULE=on
 
 COPY --from=builder /bin/athens-proxy /bin/athens-proxy
 COPY --from=builder /go/src/github.com/gomods/athens/config.dev.toml /config/config.toml
-COPY --from=builder /go/src/github.com/gomods/athens/cmd/proxy/locales /go/src/github.com/gomods/athens/cmd/proxy/locales
-COPY --from=builder /go/src/github.com/gomods/athens/cmd/proxy/assets /go/src/github.com/gomods/athens/cmd/proxy/assets
 COPY --from=builder /usr/local/go/bin/go /bin/go
 
 RUN apk update &&  \
