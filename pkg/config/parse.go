@@ -14,20 +14,21 @@ import (
 // Config provides configuration values for all components
 type Config struct {
 	TimeoutConf
-	GoEnv                string         `validate:"required" envconfig:"GO_ENV"`
-	GoBinary             string         `validate:"required" envconfig:"GO_BINARY_PATH"`
-	GoGetWorkers         int            `validate:"required" envconfig:"ATHENS_GOGET_WORKERS"`
-	ProtocolWorkers      int            `validate:"required" envconfig:"ATHENS_PROTOCOL_WORKERS"`
-	LogLevel             string         `validate:"required" envconfig:"ATHENS_LOG_LEVEL"`
-	BuffaloLogLevel      string         `validate:"required" envconfig:"BUFFALO_LOG_LEVEL"`
-	MaxConcurrency       int            `validate:"required" envconfig:"ATHENS_MAX_CONCURRENCY"`
-	MaxWorkerFails       uint           `validate:"required" envconfig:"ATHENS_MAX_WORKER_FAILS"`
-	CloudRuntime         string         `validate:"required" envconfig:"ATHENS_CLOUD_RUNTIME"`
-	FilterFile           string         `validate:"required" envconfig:"ATHENS_FILTER_FILE"`
-	EnableCSRFProtection bool           `envconfig:"ATHENS_ENABLE_CSRF_PROTECTION"`
-	Proxy                *ProxyConfig   `validate:""`
-	Olympus              *OlympusConfig `validate:""`
-	Storage              *StorageConfig `validate:""`
+	GoEnv                string `validate:"required" envconfig:"GO_ENV"`
+	GoBinary             string `validate:"required" envconfig:"GO_BINARY_PATH"`
+	GoGetWorkers         int    `validate:"required" envconfig:"ATHENS_GOGET_WORKERS"`
+	ProtocolWorkers      int    `validate:"required" envconfig:"ATHENS_PROTOCOL_WORKERS"`
+	LogLevel             string `validate:"required" envconfig:"ATHENS_LOG_LEVEL"`
+	BuffaloLogLevel      string `validate:"required" envconfig:"BUFFALO_LOG_LEVEL"`
+	MaxConcurrency       int    `envconfig:"ATHENS_MAX_CONCURRENCY"`  // only used by Olympus. TODO: remove.
+	MaxWorkerFails       uint   `envconfig:"ATHENS_MAX_WORKER_FAILS"` // only used by Olympus. TODO: remove.
+	CloudRuntime         string `validate:"required" envconfig:"ATHENS_CLOUD_RUNTIME"`
+	FilterFile           string `envconfig:"ATHENS_FILTER_FILE"`
+	EnableCSRFProtection bool   `envconfig:"ATHENS_ENABLE_CSRF_PROTECTION"`
+	TraceExporterURL     string `envconfig:"ATHENS_TRACE_EXPORTER"`
+	Proxy                *ProxyConfig
+	Olympus              *OlympusConfig `validate:"-"` // ignoring validation until Olympus is up.
+	Storage              *StorageConfig
 }
 
 // ParseConfigFile parses the given file into an athens config struct

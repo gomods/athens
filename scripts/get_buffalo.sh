@@ -21,6 +21,6 @@ true)
 	rm -r $TMPDIR
 	;;
 *)
-	go get github.com/gobuffalo/buffalo/buffalo
+	GO111MODULE=off go get github.com/gobuffalo/buffalo/buffalo
 	;;
 esac

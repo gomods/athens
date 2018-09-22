@@ -10,12 +10,14 @@ package modulestorage
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"io/ioutil"
+	"math/rand"
 	"path/filepath"
 	"testing"
-	"time"
 
 	"github.com/gobuffalo/suite"
+	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/storage"
 	"github.com/gomods/athens/pkg/storage/fs"
@@ -25,7 +27,7 @@ import (
 )
 
 var (
-	testConfigFile = filepath.Join("..", "..", "..", "..", "config.test.toml")
+	testConfigFile = filepath.Join("..", "..", "..", "..", "config.dev.toml")
 )
 
 type TestSuites struct {
@@ -41,6 +43,9 @@ type TestSuites struct {
 func (d *TestSuites) SetupTest() {
 	ra := d.Require()
 
+	conf, err := config.GetConf(testConfigFile)
+	ra.NoError(err)
+
 	// file system
 	fsTests, err := fs.NewTestSuite(d.Model)
 	ra.NoError(err)
@@ -52,12 +57,12 @@ func (d *TestSuites) SetupTest() {
 	d.storages = append(d.storages, memStore)
 
 	// minio
-	minioStorage, err := minio.NewTestSuite(d.Model)
+	minioStorage, err := minio.NewTestSuite(d.Model, conf.Storage.Minio)
 	ra.NoError(err)
 	d.storages = append(d.storages, minioStorage)
 
 	// mongo
-	mongoStore, err := mongo.NewTestSuite(d.Model, testConfigFile)
+	mongoStore, err := mongo.NewTestSuite(d.Model, conf.Storage.Mongo)
 	ra.NoError(err)
 	d.storages = append(d.storages, mongoStore)
 
@@ -157,7 +162,7 @@ func (d *TestSuites) testGetSaveListRoundTrip(ts storage.TestSuite) {
 
 func (d *TestSuites) testDelete(ts storage.TestSuite) {
 	r := d.Require()
-	version := "delete" + time.Now().String()
+	version := fmt.Sprintf("%s%d", "delete", rand.Int())
 	err := ts.Storage().Save(context.Background(), d.module, version, d.mod, bytes.NewReader(d.zip), d.info)
 	r.NoError(err)
 

@@ -4,7 +4,8 @@ import (
 	"strings"
 )
 
-// IsRepoNotFoundErr checks if a repo has been found or not and reports an error accordingly
+// IsRepoNotFoundErr returns true if the Go command line
+// hints at a repository not found.
 func IsRepoNotFoundErr(err error) bool {
 	return strings.Contains(err.Error(), "remote: Repository not found")
 }
