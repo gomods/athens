@@ -7,6 +7,7 @@ import (
 	"github.com/gobuffalo/buffalo"
 	"github.com/gomods/athens/pkg/errors"
 	"go.opencensus.io/exporter/jaeger"
+	"go.opencensus.io/plugin/ochttp"
 	"go.opencensus.io/trace"
 )
 
@@ -61,11 +62,20 @@ func Tracer(service string) buffalo.MiddlewareFunc {
 				trace.WithSpanKind(trace.SpanKindClient))
 			defer span.End()
 
+			handler := next(&observabilityContext{Context: ctx, spanCtx: spanCtx})
+
+			// Add request attributes
 			span.AddAttributes(
 				requestAttrs(ctx.Request())...,
 			)
 
-			return next(&observabilityContext{Context: ctx, spanCtx: spanCtx})
+			// SetSpan Status from response
+			if resp, ok := ctx.Response().(*buffalo.Response); ok {
+				span.SetStatus(ochttp.TraceStatus(resp.Status, ""))
+				span.AddAttributes(trace.Int64Attribute("http.status_code", int64(resp.Status)))
+			}
+
+			return handler
 		}
 	}
 }
