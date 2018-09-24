@@ -134,8 +134,7 @@ func downloadCmd(goBinaryName string, fullURI string, args ...string) *exec.Cmd 
 	}
 
 	if insecureFlag {
-		args = append([]string{"-insecure"}, args...)
-		fmt.Println(args)
+		args = append(args, "-insencure")
 	}
 
 	args = append(args, fullURI)
