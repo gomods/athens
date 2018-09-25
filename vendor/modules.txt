@@ -259,20 +259,20 @@ github.com/technosophos/moniker
 github.com/unrolled/secure
 # go.opencensus.io v0.17.0
 go.opencensus.io/exporter/jaeger
+go.opencensus.io/plugin/ochttp
 go.opencensus.io/trace
 go.opencensus.io/exporter/jaeger/internal/gen-go/jaeger
-go.opencensus.io/internal
-go.opencensus.io/trace/internal
-go.opencensus.io/trace/tracestate
-go.opencensus.io
-go.opencensus.io/plugin/ochttp
-go.opencensus.io/trace/propagation
 go.opencensus.io/plugin/ochttp/propagation/b3
 go.opencensus.io/stats
 go.opencensus.io/stats/view
 go.opencensus.io/tag
+go.opencensus.io/trace/propagation
+go.opencensus.io/internal
+go.opencensus.io/trace/internal
+go.opencensus.io/trace/tracestate
 go.opencensus.io/stats/internal
 go.opencensus.io/internal/tagencoding
+go.opencensus.io
 # golang.org/x/crypto v0.0.0-20180808211826-de0752318171
 golang.org/x/crypto/bcrypt
 golang.org/x/crypto/ssh/terminal

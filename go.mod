@@ -7,8 +7,6 @@ require (
 	github.com/Azure/azure-storage-blob-go v0.0.0-20180727221336-197d1c0aea1b
 	github.com/BurntSushi/toml v0.3.0
 	github.com/aws/aws-sdk-go v1.15.24
-	github.com/bketelsen/buffet v0.1.5 // indirect
-	github.com/codahale/hdrhistogram v0.0.0-20161010025455-3a0bb77429bd // indirect
 	github.com/codegangsta/negroni v0.3.0 // indirect
 	github.com/fatih/color v1.7.0
 	github.com/globalsign/mgo v0.0.0-20180828104044-6f9f54af1356
@@ -39,7 +37,6 @@ require (
 	github.com/mitchellh/go-homedir v1.0.0
 	github.com/onsi/ginkgo v1.6.0 // indirect
 	github.com/onsi/gomega v1.4.1 // indirect
-	github.com/opentracing/opentracing-go v1.0.2 // indirect
 	github.com/robfig/cron v0.0.0-20180505203441-b41be1df6967 // indirect
 	github.com/rs/cors v1.5.0
 	github.com/sirupsen/logrus v1.0.6
@@ -48,12 +45,8 @@ require (
 	github.com/spf13/afero v1.1.1
 	github.com/stretchr/testify v1.2.2
 	github.com/technosophos/moniker v0.0.0-20180509230615-a5dbd03a2245
-	github.com/uber-go/atomic v1.3.2 // indirect
-	github.com/uber/jaeger-client-go v2.14.0+incompatible // indirect
-	github.com/uber/jaeger-lib v1.5.0 // indirect
 	github.com/unrolled/secure v0.0.0-20180618144512-8287f3899c8e
 	go.opencensus.io v0.17.0
-	go.uber.org/atomic v1.3.2 // indirect
 	golang.org/x/sync v0.0.0-20180314180146-1d60e4601c6f
 	google.golang.org/api v0.0.0-20180910000450-7ca32eb868bf
 	gopkg.in/airbrake/gobrake.v2 v2.0.9 // indirect
