@@ -4,6 +4,6 @@
 # Ensure that the tools needed to build locally are present
 set -xeuo pipefail
 
-go get github.com/golang/lint/golint
+GO111MODULE=off go get github.com/golang/lint/golint
 
 ./scripts/get_buffalo.sh

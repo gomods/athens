@@ -1,7 +1,10 @@
 package stash
 
 import (
+	"context"
+
 	"github.com/gomods/athens/pkg/errors"
+	"github.com/gomods/athens/pkg/observ"
 )
 
 type withpool struct {
@@ -37,12 +40,14 @@ func (s *withpool) listen() {
 	}
 }
 
-func (s *withpool) Stash(mod, ver string) error {
+func (s *withpool) Stash(ctx context.Context, mod, ver string) error {
 	const op errors.Op = "stash.Pool"
+	ctx, span := observ.StartSpan(ctx, op.String())
+	defer span.End()
 	var err error
 	done := make(chan struct{}, 1)
 	s.jobCh <- func() {
-		err = s.s.Stash(mod, ver)
+		err = s.s.Stash(ctx, mod, ver)
 		close(done)
 	}
 	<-done
