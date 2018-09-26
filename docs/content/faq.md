@@ -74,7 +74,7 @@ proper authentication.
 Right now, we have structured logs for proxy. Along with that, we have added tracing to help developers identify critical code paths and debug latency issues. While there is no setup required for logs, tracing requires some installation. We currently store our trace exports using [Jaeger](https://www.jaegertracing.io/). Further support for other exporters is in progress.  To try out tracing, do the following:
 
 - Set the environment to development (otherwise traces will be sampled)
-- Run `docker-compose up -d` from `cmd/proxy`
+- Run `docker-compose up -d` that is found in the athens source root directory to initialize the services required
 - Run the walkthrough tutorial
 - Open `http://localhost:16686/search`
 
