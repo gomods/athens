@@ -78,5 +78,5 @@ Right now, we have structured logs for proxy. Along with that, we have added tra
 - Run the walkthrough tutorial
 - Open `http://localhost:16686/search`
 
-Observability is not a hard requirement for the proxy. So, if the infrastructure is not properly set up, they will fail with an information log.
+Observability is not a hard requirement for the proxy. So, if the infrastructure is not properly set up, they will fail with an information log. For eg. if Jaeger is not running / if the wrong URL to the exporter is provided, proxy will continue to run. However, it will not collect any traces or metrics (when the exporter backend is unavailable).
 
