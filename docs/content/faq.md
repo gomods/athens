@@ -68,3 +68,14 @@ the meta tags using the standard authentication mechanisms supported by `go`.
 Therefore, if `go` before v1.11 worked for you, then go 1.11+ with GOPROXY
 should work as well, provided that the Athens proxy host is configured with the 
 proper authentication.
+
+## Is there support for monitoring and observability for Proxy?
+
+Right now, we have structured logs for proxy. Along with that, we have added tracing to help developers identify critical code paths and debug latency issues. While there is no setup required for logs, tracing requires some installation. The current exporter that we store our exports are through Jaeger. Further support for other backend are in progress. To try out tracing, do the following:
+
+- Set the environment to development (otherwise traces will be sampled)
+- Run `docker-compose up -d` from `cmd/proxy`
+- Run the walkthrough tutorial
+- Open `http://localhost:16686/search`
+
+
