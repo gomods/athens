@@ -25,7 +25,7 @@ const (
 )
 
 var (
-	testConfigFile = filepath.Join("..", "..", "config.test.toml")
+	testConfigFile = filepath.Join("..", "..", "config.dev.toml")
 )
 
 func middlewareFilterApp(filterFile, olympusEndpoint string) *buffalo.App {

@@ -21,7 +21,7 @@ before_script:
   - make setup-dev-env
   - wget "https://dl.minio.io/server/minio/release/linux-amd64/minio"
   # moving from the default port 9000 so it doesn't conflich with other services (i.e. vscode extensions server)
-  # we also need to change it in travis because the tests are using the config.test.toml where port 9001 is used
+  # we also need to change it in travis because the tests are using the config.dev.toml where port 9001 is used
   - chmod +x minio && nohup ./minio server --address ":9001" . &
 
 script:

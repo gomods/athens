@@ -15,7 +15,7 @@ import (
 )
 
 var (
-	testConfigFile = filepath.Join("..", "..", "..", "config.test.toml")
+	testConfigFile = filepath.Join("..", "..", "..", "config.dev.toml")
 )
 
 type ActionSuite struct {
