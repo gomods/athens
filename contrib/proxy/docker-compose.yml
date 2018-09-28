@@ -1,0 +1,22 @@
+version: '3'
+services:
+  proxy:
+    image: gomods/proxy
+    depends_on:
+      - redis
+    ports:
+      - "3000:3000"
+    environment:
+      - "ATHENS_STORAGE_TYPE=disk"
+      - "ATHENS_DISK_STORAGE_ROOT=/usr"
+    networks:
+      - main
+  redis:
+    image: redis:alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "6379:6379"
+    networks:
+      - main
+networks:
+  main:

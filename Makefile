@@ -47,6 +47,11 @@ proxy-docker:
 docker-push: docker
 	./scripts/push-docker-images.sh
 
+.PHONY: proxy-docker
+proxy-docker:
+	docker build -t gomods/proxy -f cmd/proxy/Dockerfile .
+
+.PHONY: bench
 bench:
 	./scripts/benchmark.sh
 
