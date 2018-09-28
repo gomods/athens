@@ -10,7 +10,7 @@ import (
 	"github.com/google/go-cmp/cmp/cmpopts"
 )
 
-const exampleConfigPath = "../../config.example.toml"
+const exampleConfigPath = "../../config.dev.toml"
 
 func compareConfigs(parsedConf *Config, expConf *Config, t *testing.T) {
 	opts := cmpopts.IgnoreTypes(StorageConfig{}, ProxyConfig{}, OlympusConfig{})
@@ -57,7 +57,6 @@ func TestEnvOverrides(t *testing.T) {
 	expProxy := ProxyConfig{
 		StorageType:           "minio",
 		OlympusGlobalEndpoint: "mytikas.gomods.io",
-		RedisQueueAddress:     ":6380",
 		Port:                  ":7000",
 		FilterOff:             false,
 		BasicAuthUser:         "testuser",
@@ -202,7 +201,6 @@ func TestParseExampleConfig(t *testing.T) {
 	expProxy := &ProxyConfig{
 		StorageType:           "memory",
 		OlympusGlobalEndpoint: "http://localhost:3001",
-		RedisQueueAddress:     ":6379",
 		Port:                  ":3000",
 		FilterOff:             true,
 		BasicAuthUser:         "",
@@ -234,10 +232,10 @@ func TestParseExampleConfig(t *testing.T) {
 			},
 		},
 		Minio: &MinioConfig{
-			Endpoint:  "minio.example.com",
-			Key:       "MY_KEY",
-			Secret:    "MY_SECRET",
-			EnableSSL: true,
+			Endpoint:  "127.0.0.1:9001",
+			Key:       "minio",
+			Secret:    "minio123",
+			EnableSSL: false,
 			Bucket:    "gomods",
 			TimeoutConf: TimeoutConf{
 				Timeout: globalTimeout,
@@ -353,6 +351,7 @@ func getEnvMap(config *Config) map[string]string {
 		"ATHENS_FILTER_FILE":            config.FilterFile,
 		"ATHENS_TIMEOUT":                strconv.Itoa(config.Timeout),
 		"ATHENS_ENABLE_CSRF_PROTECTION": strconv.FormatBool(config.EnableCSRFProtection),
+		"ATHENS_TRACE_EXPORTER":         config.TraceExporterURL,
 	}
 
 	proxy := config.Proxy
@@ -360,7 +359,6 @@ func getEnvMap(config *Config) map[string]string {
 		envVars["ATHENS_STORAGE_TYPE"] = proxy.StorageType
 		envVars["OLYMPUS_GLOBAL_ENDPOINT"] = proxy.OlympusGlobalEndpoint
 		envVars["PORT"] = proxy.Port
-		envVars["ATHENS_REDIS_QUEUE_ADDRESS"] = proxy.RedisQueueAddress
 		envVars["PROXY_FILTER_OFF"] = strconv.FormatBool(proxy.FilterOff)
 		envVars["BASIC_AUTH_USER"] = proxy.BasicAuthUser
 		envVars["BASIC_AUTH_PASS"] = proxy.BasicAuthPass

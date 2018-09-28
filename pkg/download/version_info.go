@@ -14,7 +14,7 @@ const PathVersionInfo = "/{module:.+}/@v/{version}.info"
 
 // VersionInfoHandler implements GET baseURL/module/@v/version.info
 func VersionInfoHandler(dp Protocol, lggr log.Entry, eng *render.Engine) buffalo.Handler {
-	const op errors.Op = "download.versionInfoHandler"
+	const op errors.Op = "download.VersionInfoHandler"
 	return func(c buffalo.Context) error {
 		mod, ver, err := getModuleParams(c, op)
 		if err != nil {

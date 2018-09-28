@@ -31,10 +31,6 @@ Param(
 	[switch]$docker,
 
 	[Parameter(Mandatory=$false)]
-	[Alias("olympus-docker")]
-	[switch]$olympus_docker,
-
-	[Parameter(Mandatory=$false)]
 	[Alias("proxy-docker")]
 	[switch]$proxy_docker,
 
@@ -70,10 +66,6 @@ if ($build.IsPresent) {
 		Pop-Location
 	}
 	
-	try {
-		Push-Location $(Join-Path cmd olympus) 
-		& buffalo build
-	}
 	finally {
 		Pop-Location
 	}
@@ -107,7 +99,6 @@ if ($alldeps.IsPresent) {
 if ($dev.IsPresent) {
 	& docker-compose -p athensdev up -d mongo
 	& docker-compose -p athensdev up -d redis
-	execScript "create_default_config.ps1"
 }
 
 if ($test.IsPresent) {
@@ -118,10 +109,7 @@ if ($test.IsPresent) {
 	finally {
 		Pop-Location
 	}
-	try {
-		Push-Location $(Join-Path cmd olympus) 
-		& buffalo test
-	}
+
 	finally {
 		Pop-Location
 	}
@@ -136,13 +124,9 @@ if ($test_e2e.IsPresent) {
 }
 
 if ($docker.IsPresent) {
-	& docker build -t gomods/olympus -f cmd/olympus/Dockerfile .
 	& docker build -t gomods/proxy -f cmd/proxy/Dockerfile .
 }
 
-if ($olympus_docker.IsPresent) {
-	& docker build -t gomods/olympus -f cmd/olympus/Dockerfile .
-}
 
 if ($proxy_docker.IsPresent) {
 	& docker build -t gomods/proxy -f cmd/proxy/Dockerfile .
