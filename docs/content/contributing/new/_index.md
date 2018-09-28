@@ -2,8 +2,6 @@
 title: "New Contributors"
 date: 2018-09-02T12:13:00-07:00
 chapter: true
-LastModifierDisplayName: "Robbie"
-LastModifierEmail: "hello@robloranger.ca"
 
 ---
 

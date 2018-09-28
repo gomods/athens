@@ -1,9 +1,7 @@
 ---
 title: "Maintainers"
-date: 2018-09-01T19:30:50-07:00
+date: 2018-09-28T10:40:50-07:00
 chapter: true
-LastModifiedDisplayName: "Robbie"
-LastModifiedEmail: "hello@robloranger.ca"
 
 ---
 
@@ -11,7 +9,7 @@ LastModifiedEmail: "hello@robloranger.ca"
 
 # Maintainers
 
-These pages outline both the duties and processes for project maintainers. We
+These pages outline the responsibilities for project maintainers. We
 want all community members to understand why we make the decisions we do, and
 what sort of templates or guides we follow.
 
