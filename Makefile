@@ -20,7 +20,7 @@ setup-dev-env:
 verify:
 	./scripts/check_gofmt.sh
 	./scripts/check_golint.sh
-	./scripts/check_deps.sh
+	# ./scripts/check_deps.sh TODO: comment back when we stop using vendor.
 	./scripts/check_conflicts.sh
 
 .PHONY: test
@@ -37,11 +37,7 @@ test-e2e:
 	./scripts/test_e2e.sh
 
 .PHONY: docker
-docker: olympus-docker proxy-docker
-
-.PHONY: olympus-docker
-olympus-docker:
-	docker build -t gomods/olympus -f cmd/olympus/Dockerfile .
+docker: proxy-docker
 
 .PHONY: proxy-docker
 proxy-docker:
@@ -67,7 +63,6 @@ alldeps:
 dev:
 	docker-compose -p athensdev up -d mongo
 	docker-compose -p athensdev up -d redis
-	./scripts/create_default_config.sh
 
 .PHONY: down
 down:

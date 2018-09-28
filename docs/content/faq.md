@@ -4,7 +4,7 @@ description: Frequently Asked Questions
 menu: shortcuts
 ---
 
-## Is Athens just a proxy? A registry?
+### Is Athens just a proxy? A registry?
 
 _TL;DR We've discovered that "registry" doesn't describe what we're trying to do here. The term "global proxy pool" is probably a better description, but it's still an open question._
 
@@ -18,7 +18,7 @@ We're purposefully building this project - and working with the toolchain folks 
 
 So, if you look back to "architecture" above, there are a few discrete "things" involved in this system we're building. The term "proxy" describes what it's trying to do fairly well. But there are other things going on too. The term "global proxy pool" covers everything in the global, federated system.
 
-## Does Athens integrate with the go toolchain?
+### Does Athens integrate with the go toolchain?
 
 Athens is currently supported by the Go 1.11 toolchain via the [download protocol](/intro/protocol/).
 
@@ -26,7 +26,7 @@ For the TL;DR of the protocol, it's a REST API that lets the go toolchain (i.e. 
 
 Athens is a server that implements the protocol. Both it, the protocol and the toolchain (as you almost certainly know) is open source.
 
-## Is Athens a centralized registry?
+### Is Athens a centralized registry?
 
 We have in mind an architecture that:
 
@@ -34,7 +34,7 @@ We have in mind an architecture that:
 - Is run by many companies, likely under a foundation
 - Allows proxies (i.e. the Athens proxy) to use it, if they want, to serve go modules that live on public VCSs
 
-## Are the packages served by Athens immutable?
+### Are the packages served by Athens immutable?
 
 _TL;DR Athens does store code in CDNs and has the option to store code in other persistent datastores._
 
@@ -55,7 +55,7 @@ currently coordinating with hosting providers on these questions.
 
 One final note - we use "caching" in lots of our docs, and that's technically wrong because no data is evicted or expires. We'll need to update that terminology.
 
-## Can the proxy authenticate to private repositories?
+### Can the proxy authenticate to private repositories?
 
 _tldr: yes, with proper authentication configuration defined on the Athens proxy host._
 
@@ -68,3 +68,15 @@ the meta tags using the standard authentication mechanisms supported by `go`.
 Therefore, if `go` before v1.11 worked for you, then go 1.11+ with GOPROXY
 should work as well, provided that the Athens proxy host is configured with the 
 proper authentication.
+
+### Is there support for monitoring and observability for Proxy?
+
+Right now, we have structured logs for proxy. Along with that, we have added tracing to help developers identify critical code paths and debug latency issues. While there is no setup required for logs, tracing requires some installation. We currently store our trace exports using [Jaeger](https://www.jaegertracing.io/). Further support for other exporters is in progress.  To try out tracing, do the following:
+
+- Set the environment to development (otherwise traces will be sampled)
+- Run `docker-compose up -d` that is found in the athens source root directory to initialize the services required
+- Run the walkthrough tutorial
+- Open `http://localhost:16686/search`
+
+Observability is not a hard requirement for the proxy. So, if the infrastructure is not properly set up, they will fail with an information log. For eg. if Jaeger is not running / if the wrong URL to the exporter is provided, proxy will continue to run. However, it will not collect any traces or metrics (when the exporter backend is unavailable).
+

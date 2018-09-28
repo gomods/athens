@@ -27,7 +27,7 @@ type ModuleStore struct {
 // NewStorage returns a connected Mongo backed storage
 // that satisfies the Backend interface.
 func NewStorage(conf *config.MongoConfig) (*ModuleStore, error) {
-	const op errors.Op = "fs.NewStorage"
+	const op errors.Op = "mongo.NewStorage"
 	if conf == nil {
 		return nil, errors.E(op, "No Mongo Configuration provided")
 	}
