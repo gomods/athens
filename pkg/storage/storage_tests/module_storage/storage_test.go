@@ -47,22 +47,22 @@ func (d *TestSuites) SetupTest() {
 	ra.NoError(err)
 
 	// file system
-	fsTests, err := fs.NewTestSuite(d.Model)
+	fsTests, err := fs.NewTestSuite()
 	ra.NoError(err)
 	d.storages = append(d.storages, fsTests)
 
 	// mem
-	memStore, err := mem.NewTestSuite(d.Model)
+	memStore, err := mem.NewTestSuite()
 	ra.NoError(err)
 	d.storages = append(d.storages, memStore)
 
 	// minio
-	minioStorage, err := minio.NewTestSuite(d.Model, conf.Storage.Minio)
+	minioStorage, err := minio.NewTestSuite(conf.Storage.Minio)
 	ra.NoError(err)
 	d.storages = append(d.storages, minioStorage)
 
 	// mongo
-	mongoStore, err := mongo.NewTestSuite(d.Model, conf.Storage.Mongo)
+	mongoStore, err := mongo.NewTestSuite(conf.Storage.Mongo)
 	ra.NoError(err)
 	d.storages = append(d.storages, mongoStore)
 

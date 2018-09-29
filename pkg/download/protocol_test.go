@@ -27,7 +27,10 @@ var (
 
 func getDP(t *testing.T) Protocol {
 	t.Helper()
-	conf := config.GetConfLogErr(testConfigPath, t)
+	conf, err := config.GetConf(testConfigPath)
+	if err != nil {
+		t.Fatalf("Unable to parse config file: %s", err.Error())
+	}
 	goBin := conf.GoBinary
 	fs := afero.NewOsFs()
 	mf, err := module.NewGoGetFetcher(goBin, fs)
