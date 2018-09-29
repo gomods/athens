@@ -3,7 +3,6 @@ package minio
 import (
 	"fmt"
 
-	"github.com/gobuffalo/suite"
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/storage"
 	minio "github.com/minio/minio-go"
@@ -11,18 +10,16 @@ import (
 
 // TestSuite implements storage.TestSuite interface
 type TestSuite struct {
-	*suite.Model
 	storage storage.Backend
 	conf    *config.MinioConfig
 }
 
 // NewTestSuite creates a common test suite
-func NewTestSuite(model *suite.Model, conf *config.MinioConfig) (storage.TestSuite, error) {
+func NewTestSuite(conf *config.MinioConfig) (storage.TestSuite, error) {
 	minioStorage, err := newTestStore(conf)
 
 	return &TestSuite{
 		storage: minioStorage,
-		Model:   model,
 		conf:    conf,
 	}, err
 }

@@ -4,27 +4,24 @@ import (
 	"fmt"
 
 	"github.com/globalsign/mgo"
-	"github.com/gobuffalo/suite"
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/storage"
 )
 
 // TestSuite implements storage.TestSuite interface
 type TestSuite struct {
-	*suite.Model
 	storage *ModuleStore
 	conf    *config.MongoConfig
 }
 
 // NewTestSuite creates a common test suite
-func NewTestSuite(model *suite.Model, conf *config.MongoConfig) (storage.TestSuite, error) {
+func NewTestSuite(conf *config.MongoConfig) (storage.TestSuite, error) {
 	ms, err := newTestStore(conf)
 	if err != nil {
 		return nil, err
 	}
 	return &TestSuite{
 		storage: ms,
-		Model:   model,
 		conf:    conf,
 	}, err
 }
