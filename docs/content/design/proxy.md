@@ -70,3 +70,23 @@ Private module filters are string globs that tell the proxy what is a private mo
 ### Exclude Lists for Public Modules
 
 Exclude lists for public modules are also globs that tell the proxy what modules it should never download from the registry. For example, the string `github.com/arschles/**` tells the proxy to always return `404 Not Found` to clients.
+
+## Authenticate private repositories via .netrc
+
+1. Create folder netrc
+2. Create netrc/root.netrc
+3. Add content to root.netrc
+
+	`machine <ip or fqdn>`
+
+  	`login <username>`
+	
+  	`password <user password>`
+
+4. save root.netrc
+5. Mount local directory to the container 
+
+	`-v ${PWD}/netrc:/netrc`
+6. Set environment property on container for netrc
+
+	`-e NETRC=/netrc/root.netrc`
