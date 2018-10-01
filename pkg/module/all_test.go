@@ -10,8 +10,8 @@ import (
 
 const (
 	// these values need to point to a real repository that has a tag
-	repoURI = "github.com/arschles/assert"
-	version = "v1.0.0"
+	repoURI = "github.com/NYTimes/gizmo"
+	version = "v0.1.4"
 )
 
 type ModuleSuite struct {

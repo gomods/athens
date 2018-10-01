@@ -3,6 +3,7 @@ package module
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
 	"os"
 	"os/exec"
@@ -12,7 +13,6 @@ import (
 
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/observ"
-	"github.com/gomods/athens/pkg/paths"
 	"github.com/gomods/athens/pkg/storage"
 	"github.com/spf13/afero"
 )
@@ -20,6 +20,18 @@ import (
 type goGetFetcher struct {
 	fs           afero.Fs
 	goBinaryName string
+}
+
+type goModule struct {
+	Path     string // module path
+	Version  string // module version
+	Error    string // error loading module
+	Info     string // absolute path to cached .info file
+	GoMod    string // absolute path to cached .mod file
+	Zip      string // absolute path to cached .zip file
+	Dir      string // absolute path to cached source root directory
+	Sum      string // checksum for path, version (as in go.sum)
+	GoModSum string // checksum for go.mod (as in go.sum)
 }
 
 // NewGoGetFetcher creates fetcher which uses go get tool to fetch modules
@@ -59,14 +71,36 @@ func (g *goGetFetcher) Fetch(ctx context.Context, mod, ver string) (*storage.Ver
 		return nil, errors.E(op, err)
 	}
 
-	err = getSources(g.goBinaryName, g.fs, goPathRoot, modPath, mod, ver)
+	m, err := downloadModule(g.goBinaryName, g.fs, goPathRoot, modPath, mod, ver)
 	if err != nil {
 		ClearFiles(g.fs, goPathRoot)
 		return nil, errors.E(op, err)
 	}
 
-	dr := newDiskRef(g.fs, goPathRoot, mod, ver)
-	return dr.Read()
+	var storageVer storage.Version
+	info, err := afero.ReadFile(g.fs, m.Info)
+	if err != nil {
+		return nil, errors.E(op, err)
+	}
+	storageVer.Info = info
+
+	gomod, err := afero.ReadFile(g.fs, m.GoMod)
+	if err != nil {
+		return nil, errors.E(op, err)
+	}
+	storageVer.Mod = gomod
+
+	zip, err := g.fs.Open(m.Zip)
+	if err != nil {
+		return nil, errors.E(op, err)
+	}
+	// note: don't close zip here so that the caller can read directly from disk.
+	//
+	// if we close, then the caller will panic, and the alternative to make this work is
+	// that we read into memory and return an io.ReadCloser that reads out of memory
+	storageVer.Zip = &zipReadCloser{zip, g.fs, goPathRoot}
+
+	return &storageVer, nil
 }
 
 // Dummy Hacky thing makes vgo not to complain
@@ -86,38 +120,39 @@ func Dummy(fs afero.Fs, repoRoot string) error {
 	return nil
 }
 
-// given a filesystem, gopath, repository root, module and version, runs 'vgo get'
+// given a filesystem, gopath, repository root, module and version, runs 'go mod download -json'
 // on module@version from the repoRoot with GOPATH=gopath, and returns a non-nil error if anything went wrong.
-func getSources(goBinaryName string, fs afero.Fs, gopath, repoRoot, module, version string) error {
-	const op errors.Op = "module.getSources"
+func downloadModule(goBinaryName string, fs afero.Fs, gopath, repoRoot, module, version string) (*goModule, error) {
+	const op errors.Op = "module.downloadModule"
 	uri := strings.TrimSuffix(module, "/")
 	fullURI := fmt.Sprintf("%s@%s", uri, version)
 
-	cmd := exec.Command(goBinaryName, "mod", "download", fullURI)
+	cmd := exec.Command(goBinaryName, "mod", "download", "-json", fullURI)
 	cmd.Env = PrepareEnv(gopath)
 	cmd.Dir = repoRoot
-	o, err := cmd.CombinedOutput()
+	stdout := &bytes.Buffer{}
+	stderr := &bytes.Buffer{}
+	cmd.Stdout = stdout
+	cmd.Stderr = stderr
+	err := cmd.Run()
 	if err != nil {
-		errMsg := fmt.Sprintf("%v : %s", err, o)
+		err = fmt.Errorf("%v: %s", err, stderr)
 		// github quota exceeded
-		if isLimitHit(o) {
-			return errors.E(op, errMsg, errors.KindRateLimit)
+		if isLimitHit(err.Error()) {
+			return nil, errors.E(op, err, errors.KindRateLimit)
 		}
-		// another error in the output
-		return errors.E(op, errMsg)
-	}
-	// make sure the expected files exist
-	encmod, err := paths.EncodePath(module)
-	if err != nil {
-		return errors.E(op, err)
-	}
-	packagePath := getPackagePath(gopath, encmod)
-	err = checkFiles(fs, packagePath, version)
-	if err != nil {
-		return errors.E(op, err)
+		return nil, errors.E(op, err)
 	}
 
-	return nil
+	var m goModule
+	if err = json.NewDecoder(stdout).Decode(&m); err != nil {
+		return nil, errors.E(op, err)
+	}
+	if m.Error != "" {
+		return nil, errors.E(op, m.Error)
+	}
+
+	return &m, nil
 }
 
 // PrepareEnv will return all the appropriate
@@ -146,25 +181,8 @@ func PrepareEnv(gopath string) []string {
 	return cmdEnv
 }
 
-func checkFiles(fs afero.Fs, path, version string) error {
-	const op errors.Op = "module.checkFiles"
-	if _, err := fs.Stat(filepath.Join(path, version+".mod")); err != nil {
-		return errors.E(op, fmt.Sprintf("%s.mod not found in %s", version, path))
-	}
-
-	if _, err := fs.Stat(filepath.Join(path, version+".zip")); err != nil {
-		return errors.E(op, fmt.Sprintf("%s.mod not found in %s", version, path))
-	}
-
-	if _, err := fs.Stat(filepath.Join(path, version+".info")); err != nil {
-		return errors.E(op, fmt.Sprintf("%s.mod not found in %s", version, path))
-	}
-
-	return nil
-}
-
-func isLimitHit(o []byte) bool {
-	return bytes.Contains(o, []byte("403 response from api.github.com"))
+func isLimitHit(o string) bool {
+	return strings.Contains(o, "403 response from api.github.com")
 }
 
 // getRepoDirName takes a raw repository URI and a version and creates a directory name that the
@@ -172,11 +190,6 @@ func isLimitHit(o []byte) bool {
 func getRepoDirName(repoURI, version string) string {
 	escapedURI := strings.Replace(repoURI, "/", "-", -1)
 	return fmt.Sprintf("%s-%s", escapedURI, version)
-}
-
-// getPackagePath returns the path to the module cache given the gopath and module name
-func getPackagePath(gopath, module string) string {
-	return filepath.Join(gopath, "pkg", "mod", "cache", "download", module, "@v")
 }
 
 func validGoBinary(name string) error {
