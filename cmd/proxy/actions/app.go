@@ -64,6 +64,7 @@ func App(conf *config.Config) (*buffalo.App, error) {
 		Logger:      blggr,
 		Addr:        conf.Proxy.Port,
 		WorkerOff:   true,
+		Host:        "http://127.0.0.1" + conf.Proxy.Port,
 	})
 	if prefix := conf.Proxy.PathPrefix; prefix != "" {
 		// certain Ingress Controllers (such as GCP Load Balancer)

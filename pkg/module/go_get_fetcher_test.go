@@ -2,11 +2,9 @@ package module
 
 import (
 	"context"
-	"fmt"
 	"io/ioutil"
-	"log"
+	"runtime"
 
-	"github.com/gobuffalo/envy"
 	"github.com/spf13/afero"
 	"github.com/stretchr/testify/assert"
 )
@@ -25,7 +23,11 @@ func (s *ModuleSuite) TestGoGetFetcherError() {
 	fetcher, err := NewGoGetFetcher("invalidpath", afero.NewOsFs())
 
 	assert.Nil(s.T(), fetcher)
-	assert.EqualError(s.T(), err, "exec: \"invalidpath\": executable file not found in $PATH")
+	if runtime.GOOS == "windows" {
+		assert.EqualError(s.T(), err, "exec: \"invalidpath\": executable file not found in %PATH%")
+	} else {
+		assert.EqualError(s.T(), err, "exec: \"invalidpath\": executable file not found in $PATH")
+	}
 }
 
 func (s *ModuleSuite) TestGoGetFetcherFetch() {
@@ -46,30 +48,6 @@ func (s *ModuleSuite) TestGoGetFetcherFetch() {
 	r.NoError(err)
 	r.True(len(zipBytes) > 0)
 
-	// close the version's zip file (which also cleans up the underlying diskref's GOPATH) and expect it to fail again
+	// close the version's zip file (which also cleans up the underlying GOPATH) and expect it to fail again
 	r.NoError(ver.Zip.Close())
-}
-
-func ExampleFetcher() {
-	repoURI := "github.com/arschles/assert"
-	version := "v1.0.0"
-	goBinaryName := envy.Get("GO_BINARY_PATH", "go")
-	fetcher, err := NewGoGetFetcher(goBinaryName, afero.NewOsFs())
-	if err != nil {
-		log.Fatal(err)
-	}
-	versionData, err := fetcher.Fetch(ctx, repoURI, version)
-	// handle errors if any
-	if err != nil {
-		return
-	}
-	// Close the handle to versionData.Zip once done
-	// This will also handle cleanup so it's important to call Close
-	defer versionData.Zip.Close()
-	if err != nil {
-		return
-	}
-	// Do something with versionData
-	fmt.Println(string(versionData.Mod))
-	// Output: module github.com/arschles/assert
 }

@@ -65,7 +65,6 @@ func App(conf *config.Config) (*buffalo.App, error) {
 	// ENV is used to help switch settings based on where the
 	// application is being run. Default is "development".
 	ENV := conf.GoEnv
-	port := conf.Olympus.Port
 
 	storage, err := GetStorage(conf.Olympus.StorageType, conf.Storage)
 	if err != nil {
@@ -105,7 +104,8 @@ func App(conf *config.Config) (*buffalo.App, error) {
 	blggr := log.Buffalo(bLogLvl)
 
 	app := buffalo.New(buffalo.Options{
-		Addr: port,
+		Addr: conf.Olympus.Port,
+		Host: "http://127.0.0.1" + conf.Proxy.Port,
 		Env:  ENV,
 		PreWares: []buffalo.PreWare{
 			cors.Default().Handler,
