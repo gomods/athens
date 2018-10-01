@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/gobuffalo/suite"
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/storage"
@@ -129,20 +128,19 @@ func getStores(b *testing.B) []storage.TestSuite {
 	require.NoError(b, err)
 
 	//TODO: create the instance without model or TestSuite
-	model := suite.NewModel()
-	fsStore, err := fs.NewTestSuite(model)
+	fsStore, err := fs.NewTestSuite()
 	require.NoError(b, err, "couldn't create filesystem store")
 	stores = append(stores, fsStore)
 
-	mongoStore, err := mongo.NewTestSuite(model, conf.Storage.Mongo)
+	mongoStore, err := mongo.NewTestSuite(conf.Storage.Mongo)
 	require.NoError(b, err, "couldn't create mongo store")
 	stores = append(stores, mongoStore)
 
-	memStore, err := mem.NewTestSuite(model)
+	memStore, err := mem.NewTestSuite()
 	require.NoError(b, err)
 	stores = append(stores, memStore)
 
-	minioStore, err := minio.NewTestSuite(model, conf.Storage.Minio)
+	minioStore, err := minio.NewTestSuite(conf.Storage.Minio)
 	require.NoError(b, err)
 	stores = append(stores, minioStore)
 
