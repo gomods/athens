@@ -122,7 +122,7 @@ func Dummy(fs afero.Fs, repoRoot string) error {
 
 // given a filesystem, gopath, repository root, module and version, runs 'go mod download -json'
 // on module@version from the repoRoot with GOPATH=gopath, and returns a non-nil error if anything went wrong.
-func downloadModule(goBinaryName string, fs afero.Fs, gopath, repoRoot, module, version string) (*goModule, error) {
+func downloadModule(goBinaryName string, fs afero.Fs, gopath, repoRoot, module, version string) (goModule, error) {
 	const op errors.Op = "module.downloadModule"
 	uri := strings.TrimSuffix(module, "/")
 	fullURI := fmt.Sprintf("%s@%s", uri, version)
@@ -139,20 +139,20 @@ func downloadModule(goBinaryName string, fs afero.Fs, gopath, repoRoot, module, 
 		err = fmt.Errorf("%v: %s", err, stderr)
 		// github quota exceeded
 		if isLimitHit(err.Error()) {
-			return nil, errors.E(op, err, errors.KindRateLimit)
+			return goModule{}, errors.E(op, err, errors.KindRateLimit)
 		}
-		return nil, errors.E(op, err)
+		return goModule{}, errors.E(op, err)
 	}
 
 	var m goModule
 	if err = json.NewDecoder(stdout).Decode(&m); err != nil {
-		return nil, errors.E(op, err)
+		return goModule{}, errors.E(op, err)
 	}
 	if m.Error != "" {
-		return nil, errors.E(op, m.Error)
+		return goModule{}, errors.E(op, m.Error)
 	}
 
-	return &m, nil
+	return m, nil
 }
 
 // PrepareEnv will return all the appropriate
