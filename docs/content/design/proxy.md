@@ -73,9 +73,7 @@ Exclude lists for public modules are also globs that tell the proxy what modules
 
 ## Authenticate private repositories via .netrc
 
-1. Create folder netrc
-2. Create netrc/root.netrc
-3. Add content to root.netrc
+1. Create a .netrc file that looks like the following:
 
 	`machine <ip or fqdn>`
 
@@ -83,10 +81,9 @@ Exclude lists for public modules are also globs that tell the proxy what modules
 	
   	`password <user password>`
 
-4. save root.netrc
-5. Mount local directory to the container 
+2. Tell Athens through an environment variable the location of that file
 
-	`-v ${PWD}/netrc:/netrc`
-6. Set environment property on container for netrc
+	`NETRC=<location/to/.netrc>`
 
-	`-e NETRC=/netrc/root.netrc`
+3. Athens will copy the file into the home directory. Alternatively, if the host of the Athens server already has a .netrc file in the home directory, then authentication should work out of the box.
+
