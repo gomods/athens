@@ -31,6 +31,10 @@ spec:
         - name: ATHENS_MONGO_CONNECTION_STRING
           value: {{ .Values.storage.mongo.url | quote }}
         {{- end }}
+        {{- if .Values.netrc }}
+        - name: ATHENS_NETRC_PATH
+          value: {{ /etc/netrc }}
+        {{ -end}}
         # TODO: re-enable when workers are used
         #- name: ATHENS_REDIS_QUEUE_ADDRESS
         #  value: {{ .Values.redis.address | quote }}
@@ -41,6 +45,11 @@ spec:
         - name: storage-volume
           mountPath: {{ .Values.storage.disk.storageRoot | quote }}
         {{- end }}
+        {{- if .Values.netrc}}
+        - name: netrc
+          mountPath: "/etc/netrc"
+          readOnly: true
+        {{- end }}
       volumes:
       - name: storage-volume
       {{- if .Values.storage.disk.persistence.enabled }}
@@ -49,3 +58,7 @@ spec:
       {{- else }}
         emptyDir: {}
       {{- end }}
+      {{- if .Values.netrc}}
+      - name: netrc
+        secret:
+          secretName: netrcsecret
