@@ -70,3 +70,20 @@ Private module filters are string globs that tell the proxy what is a private mo
 ### Exclude Lists for Public Modules
 
 Exclude lists for public modules are also globs that tell the proxy what modules it should never download from the registry. For example, the string `github.com/arschles/**` tells the proxy to always return `404 Not Found` to clients.
+
+## Authenticate private repositories via .netrc
+
+1. Create a .netrc file that looks like the following:
+
+	`machine <ip or fqdn>`
+
+  	`login <username>`
+	
+  	`password <user password>`
+
+2. Tell Athens through an environment variable the location of that file
+
+	`NETRC=<location/to/.netrc>`
+
+3. Athens will copy the file into the home directory. Alternatively, if the host of the Athens server already has a .netrc file in the home directory, then authentication should work out of the box.
+
