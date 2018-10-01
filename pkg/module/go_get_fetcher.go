@@ -23,15 +23,15 @@ type goGetFetcher struct {
 }
 
 type goModule struct {
-	Path     string // module path
-	Version  string // module version
-	Error    string // error loading module
-	Info     string // absolute path to cached .info file
-	GoMod    string // absolute path to cached .mod file
-	Zip      string // absolute path to cached .zip file
-	Dir      string // absolute path to cached source root directory
-	Sum      string // checksum for path, version (as in go.sum)
-	GoModSum string // checksum for go.mod (as in go.sum)
+	Path     string `json:"path"`     // module path
+	Version  string `json:"version"`  // module version
+	Error    string `json:"error"`    // error loading module
+	Info     string `json:"info"`     // absolute path to cached .info file
+	GoMod    string `json:"goMod"`    // absolute path to cached .mod file
+	Zip      string `json:"zip"`      // absolute path to cached .zip file
+	Dir      string `json:"dir"`      // absolute path to cached source root directory
+	Sum      string `json:"sum"`      // checksum for path, version (as in go.sum)
+	GoModSum string `json:"goModSum"` // checksum for go.mod (as in go.sum)
 }
 
 // NewGoGetFetcher creates fetcher which uses go get tool to fetch modules
