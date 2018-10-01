@@ -17,15 +17,21 @@ type MongoTests struct {
 }
 
 func (m *MongoTests) SetupTest() {
-	conf := config.GetConfLogErr(testConfigFile, m.T())
+	conf, err := config.GetConf(testConfigFile)
+	if err != nil {
+		m.T().Fatalf("Unable to parse config file: %s", err.Error())
+	}
 
-	_, err := newTestStore(conf.Storage.Mongo)
+	_, err = newTestStore(conf.Storage.Mongo)
 	m.Require().NoError(err)
 }
 
 func (m *MongoTests) TestNewMongoStorage() {
 	r := m.Require()
-	conf := config.GetConfLogErr(testConfigFile, m.T())
+	conf, err := config.GetConf(testConfigFile)
+	if err != nil {
+		m.T().Fatalf("Unable to parse config file: %s", err.Error())
+	}
 	getterSaver, err := NewStorage(conf.Storage.Mongo)
 
 	r.NoError(err)

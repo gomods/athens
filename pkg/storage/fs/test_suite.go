@@ -1,21 +1,19 @@
 package fs
 
 import (
-	"github.com/gobuffalo/suite"
 	"github.com/gomods/athens/pkg/storage"
 	"github.com/spf13/afero"
 )
 
 // TestSuite implements storage.TestSuite interface
 type TestSuite struct {
-	*suite.Model
 	storage storage.Backend
 	fs      afero.Fs
 	rootDir string
 }
 
 // NewTestSuite creates a common test suite
-func NewTestSuite(model *suite.Model) (storage.TestSuite, error) {
+func NewTestSuite() (storage.TestSuite, error) {
 	osFs := afero.NewOsFs()
 	r, err := afero.TempDir(osFs, "", "athens-fs-storage-tests")
 	if err != nil {
@@ -28,7 +26,6 @@ func NewTestSuite(model *suite.Model) (storage.TestSuite, error) {
 	}
 
 	return &TestSuite{
-		Model:   model,
 		fs:      osFs,
 		rootDir: r,
 		storage: fsStore,
