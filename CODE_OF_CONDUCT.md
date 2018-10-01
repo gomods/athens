@@ -55,7 +55,7 @@ further defined and clarified by project maintainers.
 ## Enforcement
 
 Instances of abusive, harassing, or otherwise unacceptable behavior may be
-reported by contacting Aaron Schlesinger (`@arschles`) directly in the [Gophers Slack](https://gophers.slack.com/). All
+reported to the project team via email - Carolyn Van Slyck (`me@carolynvanslyck.com`) - or via direct message in the [Gophers Slack](https://gophers.slack.com) - Aaron Schlesinger (`@arschles`), Carolyn Van Slyck (`@carolynvs`). All
 complaints will be reviewed and investigated and will result in a response that
 is deemed necessary and appropriate to the circumstances. The project team is
 obligated to maintain confidentiality with regard to the reporter of an incident.
