@@ -85,7 +85,7 @@ Exclude lists for public modules are also globs that tell the proxy what modules
 
 	`ATHENS_NETRC_PATH=<location/to/.netrc>`
 
-3. Athens will copy the file into the home directory. Alternatively, if the host of the Athens server already has a .netrc file in the home directory, then authentication should work out of the box.
+3. Athens will copy the file into the home directory and override whatever .netrc file is in home directory. Alternatively, if the host of the Athens server already has a .netrc file in the home directory, then authentication should work out of the box.
 
 ## Authenticate Mercurial private repositories via .hgrc
 
@@ -95,5 +95,5 @@ Exclude lists for public modules are also globs that tell the proxy what modules
 
 	`ATHENS_HGRC_PATH=<location/to/.hgrc>`
 
-3. Athens will copy the file into the home directory. Alternatively, if the host of the Athens server already has a .hgrc file in the home directory, then authentication should work out of the box.
+3. Athens will copy the file into the home directory and override whatever .hgrc file is in home directory. Alternatively, if the host of the Athens server already has a .hgrc file in the home directory, then authentication should work out of the box.
 
