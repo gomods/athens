@@ -53,7 +53,10 @@ func newTestFilter(filterFile string) *module.Filter {
 func Test_FilterMiddleware(t *testing.T) {
 	r := require.New(t)
 
-	conf := config.GetConfLogErr(testConfigFile, t)
+	conf, err := config.GetConf(testConfigFile)
+	if err != nil {
+		t.Fatalf("Unable to parse config file: %s", err.Error())
+	}
 	if conf.Proxy == nil {
 		t.Fatalf("No Proxy configuration in test config")
 	}

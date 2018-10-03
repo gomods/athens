@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"path/filepath"
 	"runtime"
-	"testing"
 
 	"github.com/BurntSushi/toml"
 	"github.com/kelseyhightower/envconfig"
@@ -98,15 +97,4 @@ func GetConf(path string) (*Config, error) {
 		return nil, fmt.Errorf("Unable to parse test config file: %s", err.Error())
 	}
 	return conf, nil
-}
-
-// GetConfLogErr is similar to GetConf, except it logs a failure for the calling test
-// if any errors are encountered
-func GetConfLogErr(path string, t *testing.T) *Config {
-	c, err := GetConf(path)
-	if err != nil {
-		t.Fatalf("Unable to parse config file: %s", err.Error())
-		return nil
-	}
-	return c
 }
