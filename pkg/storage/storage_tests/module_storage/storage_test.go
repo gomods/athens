@@ -79,6 +79,9 @@ func TestModuleStorages(t *testing.T) {
 
 func (d *TestSuites) TestStorages() {
 	for _, store := range d.storages {
+		// start the test with a clean store
+		store.Cleanup()
+
 		d.testNotFound(store)
 		d.testKindNotFound(store)
 		d.testGetSaveListRoundTrip(store)
