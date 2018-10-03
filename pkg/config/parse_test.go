@@ -64,7 +64,8 @@ func TestEnvOverrides(t *testing.T) {
 		ForceSSL:              true,
 		ValidatorHook:         "testhook.io",
 		PathPrefix:            "prefix",
-		NETRCPath:             "/test/path",
+		NETRCPath:             "/test/path/.netrc",
+		HGRCPath:              "/test/path/.hgrc",
 	}
 
 	expOlympus := OlympusConfig{
@@ -366,6 +367,7 @@ func getEnvMap(config *Config) map[string]string {
 		envVars["ATHENS_PROXY_VALIDATOR"] = proxy.ValidatorHook
 		envVars["ATHENS_PATH_PREFIX"] = proxy.PathPrefix
 		envVars["ATHENS_NETRC_PATH"] = proxy.NETRCPath
+		envVars["ATHENS_HGRC_PATH"] = proxy.HGRCPath
 	}
 
 	olympus := config.Olympus

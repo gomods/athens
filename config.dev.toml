@@ -127,6 +127,15 @@ EnableCSRFProtection = false
     # Env override: ATHENS_NETRC_PATH
     NETRCPath = ""
 
+    # HGRCPath tells you where the .hgrc path initially resides.
+    # This is so that you can mount the .hgrc file to a secret location
+    # in the fs system and then move it ~/.hgrc. In certain deployments
+    # like Kubernetes, we can't mount directly to ~ because it would then
+    # clean out whatever is already there as part of the image (such as
+    # .cache directory in the Go image).
+    # Env override: ATHENS_HGRC_PATH
+    HGRCPath = ""
+
     # TraceExporterURL is the URL to which Athens populates distributed tracing 
     # information such as Jaeger. 
     # Env override: ATHENS_TRACE_EXPORTER_URL

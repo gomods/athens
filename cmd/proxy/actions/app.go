@@ -41,7 +41,11 @@ func App(conf *config.Config) (*buffalo.App, error) {
 
 	// mount .netrc to home dir
 	// to have access to private repos.
-	initializeNETRC(conf.Proxy.NETRCPath)
+	initializeAuthFile(conf.Proxy.NETRCPath)
+
+	// mount .hgrc to home dir
+	// to have access to private repos.
+	initializeAuthFile(conf.Proxy.HGRCPath)
 
 	logLvl, err := logrus.ParseLevel(conf.LogLevel)
 	if err != nil {
@@ -75,20 +79,20 @@ func App(conf *config.Config) (*buffalo.App, error) {
 		app = app.Group(prefix)
 	}
 
-	// Register exporter for exporting traces from opencensus
-	// The error from the RetriveTracer would be nil if the tracer was specified by the user.
-	exporter, err := observ.RetrieveTracer(conf.TraceExporter)
+	// RegisterExporter will register an exporter where we will export our traces to.
+	// The error from the RegisterExporter would be nil if the tracer was specified by
+	// the user and the trace exporter was created successfully.
+	// RegisterExporter returns the function that all traces are flushed to the exporter
+	// and the exporter needs to be stopped. The function should be called when the exporter
+	// is no longer needed.
+	flushTraces, err := observ.RegisterExporter(conf.TraceExporter,
+		conf.TraceExporterURL,
+		Service, ENV)
 	if err != nil {
 		lggr.Infof("%s", err)
 	} else {
-		// The error, 'err' triggers whenever there is a problem Registering the Tracer
-		err = exporter.RegisterTraceExporter(conf.TraceExporterURL, Service, ENV)
-		if err != nil {
-			lggr.Infof("%s", err)
-		} else {
-			defer exporter.Flush()
-			app.Use(observ.Tracer(Service))
-		}
+		defer flushTraces()
+		app.Use(observ.Tracer(Service))
 	}
 
 	// Automatically redirect to SSL
