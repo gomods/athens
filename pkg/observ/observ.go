@@ -27,10 +27,16 @@ func RegisterExporter(TraceExporter, URL, service, ENV string) (func(), error) {
 	switch TraceExporter {
 	case "jaeger":
 		ex, err := registerJaegerExporter(URL, service, ENV)
-		return ex.Flush, errors.E(op, err)
+		if err != nil {
+			return nil, errors.E(op, err)
+		}
+		return ex.Flush, nil
 	case "datadog":
 		ex, err := registerDatadogExporter(URL, service, ENV)
-		return ex.Stop, errors.E(op, err)
+		if err != nil {
+			return nil, errors.E(op, err)
+		}
+		return ex.Stop, nil
 	case "":
 		return nil, errors.E(op, "Exporter not specified. Traces won't be exported")
 	default:
