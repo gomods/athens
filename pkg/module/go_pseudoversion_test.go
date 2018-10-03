@@ -8,7 +8,10 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var localCtx = context.Background()
+var (
+	localCtx = context.Background()
+	mod      = "github.com/arschles/assert"
+)
 
 func TestIsVersion(t *testing.T) {
 	// Testing the regex
@@ -17,14 +20,18 @@ func TestIsVersion(t *testing.T) {
 	assert.False(t, IsModVersion("v248dadf4e9068a0b3e79f02ed0a610d935de5302"))
 }
 
-func TestPseudoversion(t *testing.T) {
-	mod := "github.com/arschles/assert"
-	version := "v1.0.0"
+func TestRealVersion(t *testing.T) {
 	goBinaryPath := envy.Get("GO_BINARY_PATH", "go")
-
-	v, err := PseudoVersionFromHash(localCtx, goBinaryPath, mod, version)
+	v, err := PseudoVersionFromHash(localCtx, goBinaryPath, mod, "v1.0.0")
 	assert.NoError(t, err)
 	assert.Equal(t, v, version)
+}
 
-	"fc2da9844984ce5093111298174706e14d4c0c47"
+func TestPseudoFromHash(t *testing.T) {
+	version := "fc2da9844984ce5093111298174706e14d4c0c47"
+	goBinaryPath := envy.Get("GO_BINARY_PATH", "go")
+	v, err := PseudoVersionFromHash(localCtx, goBinaryPath, mod, version)
+	assert.NoError(t, err)
+	assert.Equal(t, "v0.0.0-20160620175154-fc2da9844984", v)
+
 }

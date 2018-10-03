@@ -4,12 +4,15 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"os"
 	"os/exec"
+	"path/filepath"
 	"regexp"
 	"strings"
 
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/observ"
+	"github.com/spf13/afero"
 )
 
 type goListResult struct {
@@ -32,9 +35,20 @@ func PseudoVersionFromHash(ctx context.Context, gobinary, mod, ver string) (stri
 	fullURI := fmt.Sprintf("%s@%s", uri, ver)
 
 	cmd := exec.Command(gobinary, "list", "-m", "-json", fullURI)
-	cmd.Env = PrepareEnv(".")
 
-	o, err := cmd.CombinedOutput()
+	fs := afero.NewOsFs()
+	tmpRoot, err := afero.TempDir(fs, "", "golist")
+	sourcePath := filepath.Join(tmpRoot, "src")
+	modPath := filepath.Join(sourcePath, getRepoDirName(mod, ver))
+	fs.MkdirAll(modPath, os.ModeDir|os.ModePerm)
+	Dummy(fs, modPath)
+
+	cmd.Env = PrepareEnv(tmpRoot)
+	cmd.Dir = modPath
+
+	o, err := cmd.Output()
+	fmt.Printf(string(o))
+
 	if err != nil {
 		return "", errors.E(op, err)
 	}
