@@ -79,6 +79,9 @@ func TestModuleStorages(t *testing.T) {
 
 func (d *TestSuites) TestStorages() {
 	for _, store := range d.storages {
+		// start the test with a clean store
+		store.Cleanup()
+
 		d.testNotFound(store)
 		d.testKindNotFound(store)
 		d.testGetSaveListRoundTrip(store)
@@ -86,8 +89,7 @@ func (d *TestSuites) TestStorages() {
 		d.testDelete(store)
 
 		// TODO: more tests to come
-
-		store.Cleanup()
+		d.Require().NoError(store.Cleanup())
 	}
 }
 
@@ -158,6 +160,7 @@ func (d *TestSuites) testGetSaveListRoundTrip(ts storage.TestSuite) {
 	zipContent, err := ioutil.ReadAll(zip)
 	r.NoError(err, hrn)
 	r.Equal(d.zip, zipContent, hrn)
+	r.NoError(zip.Close())
 }
 
 func (d *TestSuites) testDelete(ts storage.TestSuite) {
