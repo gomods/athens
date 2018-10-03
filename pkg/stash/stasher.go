@@ -33,8 +33,8 @@ func New(f module.Fetcher, s storage.Backend, wrappers ...Wrapper) Stasher {
 }
 
 type stasher struct {
-	f module.Fetcher
-	s storage.Backend
+	fetcher module.Fetcher
+	storage storage.Backend
 }
 
 func (s *stasher) Stash(ctx context.Context, mod, ver string) error {
@@ -52,7 +52,7 @@ func (s *stasher) Stash(ctx context.Context, mod, ver string) error {
 		return errors.E(op, err)
 	}
 	defer v.Zip.Close()
-	err = s.s.Save(ctx, mod, ver, v.Mod, v.Zip, v.Info)
+	err = s.storage.Save(ctx, mod, ver, v.Mod, v.Zip, v.Info)
 	if err != nil {
 		return errors.E(op, err)
 	}
@@ -61,7 +61,7 @@ func (s *stasher) Stash(ctx context.Context, mod, ver string) error {
 
 func (s *stasher) fetchModule(ctx context.Context, mod, ver string) (*storage.Version, error) {
 	const op errors.Op = "stasher.fetchModule"
-	v, err := s.f.Fetch(ctx, mod, ver)
+	v, err := s.fetcher.Fetch(ctx, mod, ver)
 	if err != nil {
 		return nil, errors.E(op, err)
 	}

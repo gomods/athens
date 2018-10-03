@@ -127,6 +127,14 @@ EnableCSRFProtection = false
     # Env override: ATHENS_NETRC_PATH
     NETRCPath = ""
 
+    # GithubToken can be used instead of a NETRCPath to authenticate 
+    # the proxy to your own private repos on github. This makes it 
+    # easier for users and for platforms like GAE to only be provided
+    # a Github token instead of a .netrc file. Internally, the proxy 
+    # just create a .netrc file for you. 
+    # Env override: ATHENS_GITHUB_TOKEN
+    GithubToken = ""
+
     # HGRCPath tells you where the .hgrc path initially resides.
     # This is so that you can mount the .hgrc file to a secret location
     # in the fs system and then move it ~/.hgrc. In certain deployments
@@ -137,9 +145,14 @@ EnableCSRFProtection = false
     HGRCPath = ""
 
     # TraceExporterURL is the URL to which Athens populates distributed tracing 
-    # information such as Jaeger. 
-    # Env override: ATHENS_TRACE_EXPORTER
+    # information such as Jaeger. In Stackdriver, use this as the GCP ProjectID.
+    # Env override: ATHENS_TRACE_EXPORTER_URL
     TraceExporterURL = ""
+
+    # TraceExporter is the service to which the data collected by OpenCensus can be exported to.
+    # Possible values are: jaeger, datadog, and stackdriver.
+    # Env overide: ATHENS_TRACE_EXPORTER
+    TraceExporter = "" 
 
 [Olympus]
     # StorageType sets the type of storage backend Olympus will use.

@@ -6,9 +6,32 @@ date: 2018-02-11T16:52:23-05:00
 <img src="/banner.png" width="600" alt="Athens Logo"/>
 
 
-## Welcome to Athens
+## Athens is a Server for Your Go Packages
 
-Athens is the name of the combined project that includes a global registry for [Go Modules](https://github.com/golang/go/wiki/Modules) and a stand-alone proxy server that can be deployed on-premise to storage and control available Go modules for your organization.
+Welcome, Gophers! We're looking forward to introducing you to Athens.. 
+
+On this site, we document Athens in detail. We'll teach you what it does, why it matters, what you can do with it, and how you can run it yourself. Below is a brief summary for you.
+
+#### What Does Athens Do?
+
+Athens provides a server for [Go Modules](https://github.com/golang/go/wiki/Modules) that you can run. It serves public code and your private code for you, so you don't have to pull directly from a version control system (VCS) like GitHub or GitLab
+
+#### Why Does it Matter?
+
+Previously, the Go community has had lots of problems with libraries disappearing or changing without warning. If someone changes their library, your app can break overnight - oh no! Athens solves these problems by copying code from VCS's into _immutable_ storage.
+
+#### How Do I Use It?
+
+Athens is easy to run yourself. We give you a few options:
+
+- You can run it as a binary on your system
+    - Instructions coming soon for this
+- You can run it as a [Docker](https://www.docker.com/) image (see [here](./install/shared-team-instance/) for how to do that)
+- You can run it on [Kubernetes](https://kubernetes.io) (see [here](./install/install-on-kubernetes/) for how to do that)
+
+We also run an experimental server for public use, so you can get started with Athens without even installing it. For details, see [here](./public_proxy).
+
+**Sound good to you? Read on to learn more!**
 
 ## Try out Athens
 
@@ -61,7 +84,7 @@ proxy was run in the background, you should also see output from Athens indicati
 
 This should give you an overview of what using Athens is like!
 
-##  Next Steps
+## Next Steps
 * If you are interested
 in what is happening between the proxy and the Go Modules feature, the [Walkthrough](/walkthrough)
 explores this in greater depth.
