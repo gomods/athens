@@ -85,7 +85,7 @@ We all strive to write nice and readable code which can be understood by every p
 
 # Code of Conduct
 
-This project follows the [Contributor Covenant](https://www.contributor-covenant.org/) (English version [here](https://www.contributor-covenant.org/version/1/4/code-of-conduct)) code of conduct.
+This project follows the [Contributor Covenant](https://www.contributor-covenant.org/) (English version [here](./CODE_OF_CONDUCT.md)) code of conduct.
 
 If you have concerns, notice a code of conduct violation, or otherwise would like to talk about something
 related to this code of conduct, please reach out to me, Aaron Schlesinger on the [Gophers Slack](https://gophers.slack.com/). My username is `arschles`. Note that in the future, we will be expanding the
