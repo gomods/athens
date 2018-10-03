@@ -21,7 +21,10 @@ type S3Tests struct {
 
 func Test_ActionSuite(t *testing.T) {
 	uploaderMock := newUploaderMock()
-	conf := config.GetConfLogErr(testConfigFile, t)
+	conf, err := config.GetConf(testConfigFile)
+	if err != nil {
+		t.Fatalf("Unable to parse config file: %s", err.Error())
+	}
 	if conf.Storage == nil || conf.Storage.CDN == nil {
 		t.Fatalf("Invalid CDN Config provided")
 	}

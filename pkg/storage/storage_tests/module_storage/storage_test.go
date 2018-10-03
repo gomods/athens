@@ -47,22 +47,22 @@ func (d *TestSuites) SetupTest() {
 	ra.NoError(err)
 
 	// file system
-	fsTests, err := fs.NewTestSuite(d.Model)
+	fsTests, err := fs.NewTestSuite()
 	ra.NoError(err)
 	d.storages = append(d.storages, fsTests)
 
 	// mem
-	memStore, err := mem.NewTestSuite(d.Model)
+	memStore, err := mem.NewTestSuite()
 	ra.NoError(err)
 	d.storages = append(d.storages, memStore)
 
 	// minio
-	minioStorage, err := minio.NewTestSuite(d.Model, conf.Storage.Minio)
+	minioStorage, err := minio.NewTestSuite(conf.Storage.Minio)
 	ra.NoError(err)
 	d.storages = append(d.storages, minioStorage)
 
 	// mongo
-	mongoStore, err := mongo.NewTestSuite(d.Model, conf.Storage.Mongo)
+	mongoStore, err := mongo.NewTestSuite(conf.Storage.Mongo)
 	ra.NoError(err)
 	d.storages = append(d.storages, mongoStore)
 
@@ -79,6 +79,9 @@ func TestModuleStorages(t *testing.T) {
 
 func (d *TestSuites) TestStorages() {
 	for _, store := range d.storages {
+		// start the test with a clean store
+		store.Cleanup()
+
 		d.testNotFound(store)
 		d.testKindNotFound(store)
 		d.testGetSaveListRoundTrip(store)
@@ -86,8 +89,7 @@ func (d *TestSuites) TestStorages() {
 		d.testDelete(store)
 
 		// TODO: more tests to come
-
-		store.Cleanup()
+		d.Require().NoError(store.Cleanup())
 	}
 }
 
@@ -158,6 +160,7 @@ func (d *TestSuites) testGetSaveListRoundTrip(ts storage.TestSuite) {
 	zipContent, err := ioutil.ReadAll(zip)
 	r.NoError(err, hrn)
 	r.Equal(d.zip, zipContent, hrn)
+	r.NoError(zip.Close())
 }
 
 func (d *TestSuites) testDelete(ts storage.TestSuite) {

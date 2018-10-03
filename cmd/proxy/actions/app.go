@@ -41,7 +41,11 @@ func App(conf *config.Config) (*buffalo.App, error) {
 
 	// mount .netrc to home dir
 	// to have access to private repos.
-	initializeNETRC(conf.Proxy.NETRCPath)
+	initializeAuthFile(conf.Proxy.NETRCPath)
+
+	// mount .hgrc to home dir
+	// to have access to private repos.
+	initializeAuthFile(conf.Proxy.HGRCPath)
 
 	logLvl, err := logrus.ParseLevel(conf.LogLevel)
 	if err != nil {
@@ -64,6 +68,7 @@ func App(conf *config.Config) (*buffalo.App, error) {
 		Logger:      blggr,
 		Addr:        conf.Proxy.Port,
 		WorkerOff:   true,
+		Host:        "http://127.0.0.1" + conf.Proxy.Port,
 	})
 	if prefix := conf.Proxy.PathPrefix; prefix != "" {
 		// certain Ingress Controllers (such as GCP Load Balancer)

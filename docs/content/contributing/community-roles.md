@@ -1,6 +1,7 @@
 ---
 title: "Participating in the Athens Community"
 date: 2018-08-24T17:01:56-07:00
+weight: 1
 ---
 
 Absolutely everyone is welcome to join our community at any time! We

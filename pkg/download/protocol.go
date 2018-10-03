@@ -29,7 +29,7 @@ type Protocol interface {
 	Zip(ctx context.Context, mod, ver string) (io.ReadCloser, error)
 }
 
-// Wrapper helps extend the main stasher's functionality with addons.
+// Wrapper helps extend the main protocol's functionality with addons.
 type Wrapper func(Protocol) Protocol
 
 // Opts specifies download protocol options to avoid long func signature.
