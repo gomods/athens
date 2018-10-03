@@ -129,8 +129,12 @@ EnableCSRFProtection = false
 
     # TraceExporterURL is the URL to which Athens populates distributed tracing 
     # information such as Jaeger. 
-    # Env override: ATHENS_TRACE_EXPORTER
+    # Env override: ATHENS_TRACE_EXPORTER_URL
     TraceExporterURL = ""
+
+    # TraceExporter is the service to which the data collected by OpenCensus can be exported to
+    # Env overide: ATHENS_TRACE_EXPORTER
+    TraceExporter = "" 
 
 [Olympus]
     # StorageType sets the type of storage backend Olympus will use.

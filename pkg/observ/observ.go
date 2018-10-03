@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 
+	datadog "github.com/DataDog/opencensus-go-exporter-datadog"
 	"github.com/gobuffalo/buffalo"
 	"github.com/gomods/athens/pkg/errors"
 	"go.opencensus.io/exporter/jaeger"
@@ -17,16 +18,62 @@ type observabilityContext struct {
 	spanCtx context.Context
 }
 
-// RegisterTraceExporter returns a jaeger exporter for exporting traces to opencensus.
-// It should in the future have a nice sampling rate defined
-// TODO: Extend beyond jaeger
-func RegisterTraceExporter(URL, service, ENV string) (*(jaeger.Exporter), error) {
+// jaegerTraceExporter is used to hold the trace exporter for Jaeger
+type jaegerTraceExporter struct {
+	exporter (*(jaeger.Exporter))
+}
+
+// datadogTraceExporter is used to hold the trace exporter for Datadog
+type datadogTraceExporter struct {
+	exporter (*(datadog.Exporter))
+}
+
+// Exporter might be a JaejerExporter, DataDogExporter, etc
+// All Exporters *must* implement these two functions.
+// Flush method stops the trace exporter, this method needs to be
+// called for most of the TraceExporters using opencensus
+type Exporter interface {
+	RegisterTraceExporter(URL, service, ENV string) error
+	Flush()
+}
+
+// RetrieveTracer determines the type of TraceExporter service for exporting traces from opencensus
+// User can choose from multiple tracing services (datadog, jaegar)
+// TODO: Extend beyond jaeger and datadog
+func RetrieveTracer(TraceExporter string) (Exporter, error) {
+
 	const op errors.Op = "RegisterTracer"
+
+	switch TraceExporter {
+	case "jaeger":
+		return jaegerTraceExporter{}, nil
+	case "datadog":
+		return datadogTraceExporter{}, nil
+	default:
+		return nil, errors.E(op, "Exporter not specified. Traces won't be exported")
+	}
+}
+
+func (j jaegerTraceExporter) Flush() {
+	j.exporter.Flush()
+}
+
+func (d datadogTraceExporter) Flush() {
+	d.exporter.Stop()
+}
+
+// RegisterTraceExporter creates a jaeger exporter for exporting traces to opencensus.
+// Currently uses the 'TraceExporter' variable in the config file.
+// It should in the future have a nice sampling rate defined
+func (j jaegerTraceExporter) RegisterTraceExporter(URL, service, ENV string) error {
+	const op errors.Op = "RegisterTracer"
+
 	if URL == "" {
-		return nil, errors.E(op, "Exporter URL is empty. Traces won't be exported")
+		return errors.E(op, "Exporter URL is empty. Traces won't be exported")
 	}
 
-	je, err := jaeger.NewExporter(jaeger.Options{
+	var err error
+	j.exporter, err = jaeger.NewExporter(jaeger.Options{
 		Endpoint: URL,
 		Process: jaeger.Process{
 			ServiceName: service,
@@ -40,16 +87,37 @@ func RegisterTraceExporter(URL, service, ENV string) (*(jaeger.Exporter), error)
 	})
 
 	if err != nil {
-		return nil, errors.E(op, err)
+		return errors.E(op, err)
 	}
 
 	// And now finally register it as a Trace Exporter
-	trace.RegisterExporter(je)
+	trace.RegisterExporter(j.exporter)
 	if ENV == "development" {
 		trace.ApplyConfig(trace.Config{DefaultSampler: trace.AlwaysSample()})
 	}
 
-	return je, nil
+	return nil
+}
+
+// RegisterDatadogTracerExporter creates a datadog exporter.
+func (d datadogTraceExporter) RegisterTraceExporter(URL, service, ENV string) error {
+
+	d.exporter = datadog.NewExporter(
+		datadog.Options{
+			TraceAddr: URL,
+			Service:   service,
+		})
+
+	trace.RegisterExporter(d.exporter)
+
+	// For demoing purposes, always sample. In a production application, you should
+	// configure this to a trace.ProbabilitySampler set at the desired
+	// probability.
+	if ENV == "development" {
+		trace.ApplyConfig(trace.Config{DefaultSampler: trace.AlwaysSample()})
+	}
+	return nil
+
 }
 
 // Tracer is a middleware that starts a span from the top of a buffalo context

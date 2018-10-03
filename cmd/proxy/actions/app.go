@@ -75,13 +75,20 @@ func App(conf *config.Config) (*buffalo.App, error) {
 		app = app.Group(prefix)
 	}
 
-	// Register exporter to export traces
-	exporter, err := observ.RegisterTraceExporter(conf.TraceExporterURL, Service, ENV)
+	// Register exporter for exporting traces from opencensus
+	// The error from the RetriveTracer would be nil if the tracer was specified by the user.
+	exporter, err := observ.RetrieveTracer(conf.TraceExporter)
 	if err != nil {
 		lggr.Infof("%s", err)
 	} else {
-		defer exporter.Flush()
-		app.Use(observ.Tracer(Service))
+		// The error, 'err' triggers whenever there is a problem Registering the Tracer
+		err = exporter.RegisterTraceExporter(conf.TraceExporterURL, Service, ENV)
+		if err != nil {
+			lggr.Infof("%s", err)
+		} else {
+			defer exporter.Flush()
+			app.Use(observ.Tracer(Service))
+		}
 	}
 
 	// Automatically redirect to SSL
