@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"sync"
 	"testing"
@@ -226,6 +227,11 @@ var modTests = []modTest{
 	},
 }
 
+func rmNewLine(input string) string {
+	re := regexp.MustCompile(`\r?\n`)
+	return re.ReplaceAllString(input, "")
+}
+
 func TestGoMod(t *testing.T) {
 	dp := getDP(t)
 	ctx := context.Background()
@@ -238,8 +244,9 @@ func TestGoMod(t *testing.T) {
 			if tc.err {
 				t.Skip()
 			}
-			expected := getGoldenFile(t, tc.name)
-			require.Equal(t, string(expected), string(mod))
+			expected := rmNewLine(string(getGoldenFile(t, tc.name)))
+			res := rmNewLine(string(mod))
+			require.Equal(t, expected, res)
 		})
 	}
 }
