@@ -8,8 +8,7 @@ env:
   global:
     - PATH=${PATH}:./bin
     - GO_ENV=test
-    - MINIO_ACCESS_KEY=minio
-    - MINIO_SECRET_KEY=minio123
+    - ATHENS_MINIO_ENDPOINT=127.0.0.1:9001
     - CODE_COV=1
     - ATHENS_DIR=${GOPATH}/src/github.com/gomods/athens
     - REGISTRY=gomods/

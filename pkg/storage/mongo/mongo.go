@@ -37,8 +37,8 @@ func NewStorage(conf *config.MongoConfig) (*ModuleStore, error) {
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
-	return ms, nil
 
+	return ms, nil
 }
 
 func (m *ModuleStore) connect() error {
@@ -50,6 +50,10 @@ func (m *ModuleStore) connect() error {
 		return errors.E(op, err)
 	}
 
+	return m.initDatabase()
+}
+
+func (m *ModuleStore) initDatabase() error {
 	// TODO: database and collection as env vars, or params to New()? together with user/mongo
 	m.d = "athens"
 	m.c = "modules"
