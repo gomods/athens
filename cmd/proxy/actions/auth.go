@@ -45,3 +45,17 @@ func initializeAuthFile(path string) {
 		log.Fatalf("could not write to file: %v", err)
 	}
 }
+
+// netrcFromToken takes a github token and creates a .netrc
+// file for you, overriding whatever might be already there.
+func netrcFromToken(tok string) {
+	fileContent := fmt.Sprintf("machine github.com login %s\n", tok)
+	hdir, err := homedir.Dir()
+	if err != nil {
+		log.Fatalf("netrcFromToken: could not get homedir: %v", err)
+	}
+	rcp := filepath.Join(hdir, ".netrc")
+	if err := ioutil.WriteFile(rcp, []byte(fileContent), 0600); err != nil {
+		log.Fatalf("netrcFromToken: could not write to file: %v", err)
+	}
+}
