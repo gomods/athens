@@ -90,7 +90,7 @@ This will deploy a single Athens instance in the `default` namespace with `disk`
 
 ### Give Athens access to private repositories via Github Token
 1. Create a token at https://github.com/settings/tokens
-2. Provide the token to the proxy either through the config.toml file or by setting the ATHENS_GITHUB_TOKEN environment variable.
+2. Provide the token to the proxy either through the config.toml file or by setting the `ATHENS_GITHUB_TOKEN` environment variable.
 
 ### Storage Providers
 
