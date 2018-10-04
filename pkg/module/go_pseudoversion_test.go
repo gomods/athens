@@ -36,5 +36,12 @@ func TestPseudoFromHash(t *testing.T) {
 	v, err := PseudoVersionFromHash(localCtx, fs, goBinaryPath, mod, version)
 	assert.NoError(t, err)
 	assert.Equal(t, "v0.0.0-20160620175154-fc2da9844984", v)
+}
 
+func TestInvalidHash(t *testing.T) {
+	version := "asdasdasdasdada"
+	goBinaryPath := envy.Get("GO_BINARY_PATH", "go")
+	fs := afero.NewOsFs()
+	_, err := PseudoVersionFromHash(localCtx, fs, goBinaryPath, mod, version)
+	assert.Error(t, err)
 }
