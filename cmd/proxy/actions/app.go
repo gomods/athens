@@ -95,9 +95,12 @@ func App(conf *config.Config) (*buffalo.App, error) {
 	// RegisterExporter returns the function that all traces are flushed to the exporter
 	// and the exporter needs to be stopped. The function should be called when the exporter
 	// is no longer needed.
-	flushTraces, err := observ.RegisterExporter(conf.TraceExporter,
+	flushTraces, err := observ.RegisterExporter(
+		conf.TraceExporter,
 		conf.TraceExporterURL,
-		Service, ENV)
+		Service,
+		ENV,
+	)
 	if err != nil {
 		lggr.Infof("%s", err)
 	} else {
