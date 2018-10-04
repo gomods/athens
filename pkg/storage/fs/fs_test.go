@@ -10,7 +10,7 @@ import (
 )
 
 func TestBackend(t *testing.T) {
-	fs := afero.NewOsFs()
+	fs := afero.NewMemMapFs()
 	b := getStorage(t, fs)
 	compliance.RunTests(t, b, b.clear)
 	fs.RemoveAll(b.rootDir)
