@@ -4,14 +4,16 @@ date: 2018-09-20T15:38:01-07:00
 weight: 2
 ---
 
-The Go ecosystem has always been federated and completely open. Anyone with a GitHub or GitLab (or any other supported VCS) account can effortlessly provide a library with just a `git push` (or similar). No extra accounts to create or credentials to set up. 
+The Go ecosystem has always been federated and completely open. Anyone with a GitHub or GitLab (or any other supported VCS) account can effortlessly provide a library with just a `git push` (or similar). No extra accounts to create or credentials to set up.
+
+## Federation
 
 We feel that Athens should keep the community federated and open, and nobody should have to change their workflow when they're building apps and libraries. So, to make sure the community can stay federated and open, we've made it easy to install Athens for everyone so that:
 
 - Anyone can run their own full-featured mirror, public or private
 - Any organization can run their own private mirror, so they can manage their private code just as they would their public code
 
-## How to Install Athens
+## Where to Go from Here
 
 To make sure it's easy to install, we try to provide as many ways as possible to install and run Athens:
 
