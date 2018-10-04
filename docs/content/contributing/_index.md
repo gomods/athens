@@ -1,8 +1,7 @@
 ---
-title: "Contributing"
+title: "Contributing to Athens"
 date: 2018-09-01T19:30:42-07:00
-chapter: true
-weight: 4
+weight: 3
 
 ---
 

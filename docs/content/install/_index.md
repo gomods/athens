@@ -1,7 +1,7 @@
 ---
 title: "Installing Athens"
 date: 2018-09-20T15:38:01-07:00
-weight: 3
+weight: 2
 ---
 
 The Go ecosystem has always been federated and completely open. Anyone with a GitHub or GitLab (or any other supported VCS) account can effortlessly provide a library with just a `git push` (or similar). No extra accounts to create or credentials to set up. 
