@@ -25,10 +25,11 @@ Previously, the Go community has had lots of problems with libraries disappearin
 Athens is easy to run yourself. We give you a few options:
 
 - You can run it as a binary on your system
+    - Instructions coming soon for this
 - You can run it as a [Docker](https://www.docker.com/) image (see [here](http://localhost:1313/install/shared-team-instance/) for how to do that)
 - You can run it on [Kubernetes](https://kubernetes.io) (see [here](http://localhost:1313/install/install-on-kubernetes/) for how to do that)
 
-We also run an experimental server for public use, so you can get started with Athens without even installing it.
+We also run an experimental server for public use, so you can get started with Athens without even installing it. For details, see [here](./public_proxy).
 
 **Sound good to you? Read on to learn more!**
 
