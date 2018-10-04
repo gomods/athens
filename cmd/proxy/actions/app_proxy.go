@@ -18,6 +18,7 @@ func addProxyRoutes(
 	goBin string,
 	goGetWorkers int,
 	protocolWorkers int,
+	fs afero.Fs
 ) error {
 	app.GET("/", proxyHomeHandler)
 	app.GET("/healthz", healthHandler)
@@ -44,7 +45,6 @@ func addProxyRoutes(
 	// 2. The singleflight passes the stash to its parent: stashpool.
 	// 3. The stashpool manages limiting concurrent requests and passes them to stash.
 	// 4. The plain stash.New just takes a request from upstream and saves it into storage.
-	fs := afero.NewOsFs()
 	mf, err := module.NewGoGetFetcher(goBin, fs)
 	if err != nil {
 		return err

@@ -16,6 +16,7 @@ import (
 	"github.com/gomods/athens/pkg/observ"
 	"github.com/rs/cors"
 	"github.com/sirupsen/logrus"
+	"github.com/spf13/afero"
 	"github.com/unrolled/secure"
 )
 
@@ -136,12 +137,15 @@ func App(conf *config.Config) (*buffalo.App, error) {
 		app.Use(mw.LogEntryMiddleware(mw.NewValidationMiddleware, lggr, vHook))
 	}
 
+	fs := afero.NewOsFs()
+	app.Use(mw.NewPseudoversionMiddleware(fs, conf.GoBinary))
+
 	user, pass, ok := conf.Proxy.BasicAuth()
 	if ok {
 		app.Use(basicAuth(user, pass))
 	}
 
-	if err := addProxyRoutes(app, store, lggr, conf.GoBinary, conf.GoGetWorkers, conf.ProtocolWorkers); err != nil {
+	if err := addProxyRoutes(app, store, lggr, conf.GoBinary, conf.GoGetWorkers, conf.ProtocolWorkers, fs); err != nil {
 		err = fmt.Errorf("error adding proxy routes (%s)", err)
 		return nil, err
 	}

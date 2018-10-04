@@ -23,7 +23,7 @@ func PseudoVersionFromHash(ctx context.Context, fs afero.Fs, gobinary, mod, ver 
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 
-	if IsModVersion(ver) {
+	if IsSemVersion(ver) {
 		return ver, nil
 	}
 
@@ -54,8 +54,8 @@ func PseudoVersionFromHash(ctx context.Context, fs afero.Fs, gobinary, mod, ver 
 	return r.Version, nil
 }
 
-// IsModVersion tells whether the passed string respects the semantic version pattern
-func IsModVersion(ver string) bool {
+// IsSemVersion tells whether the passed string respects the semantic version pattern
+func IsSemVersion(ver string) bool {
 	res, _ := regexp.Match("v\\d+\\.\\d+.\\d+", []byte(ver))
 	return res
 }
