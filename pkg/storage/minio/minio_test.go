@@ -23,6 +23,9 @@ func (s *storageImpl) clear() error {
 	defer close(doneCh)
 	objectCh := s.minioClient.ListObjectsV2(s.bucketName, "", true, doneCh)
 	for object := range objectCh {
+		if object.Err != nil {
+			return object.Err
+		}
 		if err := s.minioClient.RemoveObject(s.bucketName, object.Key); err != nil {
 			return err
 		}
