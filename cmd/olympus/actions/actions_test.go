@@ -23,6 +23,7 @@ type ActionSuite struct {
 }
 
 func Test_ActionSuite(t *testing.T) {
+	t.SkipNow() // Olympus to be removed.
 	conf, err := config.GetConf(testConfigFile)
 	if err != nil {
 		t.Fatalf("Unable to parse config file: %s", err.Error())
