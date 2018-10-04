@@ -2,6 +2,7 @@ package actions
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/gobuffalo/buffalo"
 	"github.com/gobuffalo/buffalo/middleware"
@@ -37,6 +38,15 @@ func App(conf *config.Config) (*buffalo.App, error) {
 	if err != nil {
 		err = fmt.Errorf("error getting storage configuration (%s)", err)
 		return nil, err
+	}
+
+	if conf.Proxy.GithubToken != "" {
+		if conf.Proxy.NETRCPath != "" {
+			fmt.Println("Cannot provide both GithubToken and NETRCPath. Only provide one.")
+			os.Exit(1)
+		}
+
+		netrcFromToken(conf.Proxy.GithubToken)
 	}
 
 	// mount .netrc to home dir
