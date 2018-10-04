@@ -10,7 +10,7 @@ date: 2018-02-11T16:52:23-05:00
 
 Welcome, Gophers! We're looking forward to introducing you to Athens.. 
 
-On this site, we document Athens in detail. We'll teach you what it does, why it matters, what you can do with it, and how you can run it yourself. Here's a short summary for you:
+On this site, we document Athens in detail. We'll teach you what it does, why it matters, what you can do with it, and how you can run it yourself. Below is a brief summary for you.
 
 #### What does Athens do?
 
