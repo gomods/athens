@@ -16,6 +16,10 @@ github.com/Azure/azure-pipeline-go/pipeline
 github.com/Azure/azure-storage-blob-go/2017-07-29/azblob
 # github.com/BurntSushi/toml v0.3.0
 github.com/BurntSushi/toml
+# github.com/DataDog/datadog-go v0.0.0-20180822151419-281ae9f2d895
+github.com/DataDog/datadog-go/statsd
+# github.com/DataDog/opencensus-go-exporter-datadog v0.0.0-20180917103902-e6c7f767dc57
+github.com/DataDog/opencensus-go-exporter-datadog
 # github.com/ajg/form v0.0.0-20160802194845-cc2954064ec9
 github.com/ajg/form
 # github.com/aws/aws-sdk-go v1.15.24
@@ -220,6 +224,8 @@ github.com/nicksnyder/go-i18n/i18n/translation
 github.com/nicksnyder/go-i18n/i18n/bundle
 # github.com/pelletier/go-toml v1.2.0
 github.com/pelletier/go-toml
+# github.com/philhofer/fwd v1.0.0
+github.com/philhofer/fwd
 # github.com/pkg/errors v0.8.0
 github.com/pkg/errors
 # github.com/pmezard/go-difflib v1.0.0
@@ -255,23 +261,25 @@ github.com/stretchr/testify/require
 github.com/stretchr/testify/assert
 # github.com/technosophos/moniker v0.0.0-20180509230615-a5dbd03a2245
 github.com/technosophos/moniker
+# github.com/tinylib/msgp v1.0.2
+github.com/tinylib/msgp/msgp
 # github.com/unrolled/secure v0.0.0-20180618144512-8287f3899c8e
 github.com/unrolled/secure
 # go.opencensus.io v0.17.0
 go.opencensus.io/exporter/jaeger
 go.opencensus.io/plugin/ochttp
 go.opencensus.io/trace
+go.opencensus.io/stats/view
+go.opencensus.io/tag
 go.opencensus.io/exporter/jaeger/internal/gen-go/jaeger
 go.opencensus.io/plugin/ochttp/propagation/b3
 go.opencensus.io/stats
-go.opencensus.io/stats/view
-go.opencensus.io/tag
 go.opencensus.io/trace/propagation
 go.opencensus.io/internal
 go.opencensus.io/trace/internal
 go.opencensus.io/trace/tracestate
-go.opencensus.io/stats/internal
 go.opencensus.io/internal/tagencoding
+go.opencensus.io/stats/internal
 go.opencensus.io
 # golang.org/x/crypto v0.0.0-20180808211826-de0752318171
 golang.org/x/crypto/bcrypt
@@ -363,6 +371,8 @@ google.golang.org/grpc/resolver/passthrough
 google.golang.org/grpc/stats
 google.golang.org/grpc/tap
 google.golang.org/grpc/balancer/base
+# gopkg.in/DataDog/dd-trace-go.v1 v1.3.0
+gopkg.in/DataDog/dd-trace-go.v1/ddtrace/ext
 # gopkg.in/go-playground/validator.v9 v9.20.2
 gopkg.in/go-playground/validator.v9
 # gopkg.in/russross/blackfriday.v1 v1.5.1

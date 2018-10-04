@@ -6,6 +6,8 @@ require (
 	github.com/Azure/azure-pipeline-go v0.0.0-20180607212504-7571e8eb0876 // indirect
 	github.com/Azure/azure-storage-blob-go v0.0.0-20180727221336-197d1c0aea1b
 	github.com/BurntSushi/toml v0.3.0
+	github.com/DataDog/datadog-go v0.0.0-20180822151419-281ae9f2d895 // indirect
+	github.com/DataDog/opencensus-go-exporter-datadog v0.0.0-20180917103902-e6c7f767dc57
 	github.com/aws/aws-sdk-go v1.15.24
 	github.com/codegangsta/negroni v0.3.0 // indirect
 	github.com/fatih/color v1.7.0
@@ -22,7 +24,7 @@ require (
 	github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b // indirect
 	github.com/gomodule/redigo v2.0.0+incompatible
 	github.com/google/go-cmp v0.2.0
-	github.com/google/martian v2.0.0-beta.2+incompatible // indirect
+	github.com/google/martian v2.1.0+incompatible // indirect
 	github.com/googleapis/gax-go v2.0.0+incompatible // indirect
 	github.com/gopherjs/gopherjs v0.0.0-20180825215210-0210a2f0f73c // indirect
 	github.com/hashicorp/go-multierror v1.0.0
@@ -37,6 +39,7 @@ require (
 	github.com/mitchellh/go-homedir v1.0.0
 	github.com/onsi/ginkgo v1.6.0 // indirect
 	github.com/onsi/gomega v1.4.1 // indirect
+	github.com/philhofer/fwd v1.0.0 // indirect
 	github.com/robfig/cron v0.0.0-20180505203441-b41be1df6967 // indirect
 	github.com/rs/cors v1.5.0
 	github.com/sirupsen/logrus v1.0.6
@@ -45,10 +48,12 @@ require (
 	github.com/spf13/afero v1.1.1
 	github.com/stretchr/testify v1.2.2
 	github.com/technosophos/moniker v0.0.0-20180509230615-a5dbd03a2245
+	github.com/tinylib/msgp v1.0.2 // indirect
 	github.com/unrolled/secure v0.0.0-20180618144512-8287f3899c8e
 	go.opencensus.io v0.17.0
 	golang.org/x/sync v0.0.0-20180314180146-1d60e4601c6f
 	google.golang.org/api v0.0.0-20180910000450-7ca32eb868bf
+	gopkg.in/DataDog/dd-trace-go.v1 v1.3.0 // indirect
 	gopkg.in/airbrake/gobrake.v2 v2.0.9 // indirect
 	gopkg.in/fsnotify.v1 v1.4.7 // indirect
 	gopkg.in/gemnasium/logrus-airbrake-hook.v2 v2.1.2 // indirect
