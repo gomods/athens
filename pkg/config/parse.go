@@ -24,7 +24,8 @@ type Config struct {
 	CloudRuntime         string `validate:"required" envconfig:"ATHENS_CLOUD_RUNTIME"`
 	FilterFile           string `envconfig:"ATHENS_FILTER_FILE"`
 	EnableCSRFProtection bool   `envconfig:"ATHENS_ENABLE_CSRF_PROTECTION"`
-	TraceExporterURL     string `envconfig:"ATHENS_TRACE_EXPORTER"`
+	TraceExporterURL     string `envconfig:"ATHENS_TRACE_EXPORTER_URL"`
+	TraceExporter        string `envconfig:"ATHENS_TRACE_EXPORTER"`
 	Proxy                *ProxyConfig
 	Olympus              *OlympusConfig `validate:"-"` // ignoring validation until Olympus is up.
 	Storage              *StorageConfig

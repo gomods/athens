@@ -79,12 +79,19 @@ func App(conf *config.Config) (*buffalo.App, error) {
 		app = app.Group(prefix)
 	}
 
-	// Register exporter to export traces
-	exporter, err := observ.RegisterTraceExporter(conf.TraceExporterURL, Service, ENV)
+	// RegisterExporter will register an exporter where we will export our traces to.
+	// The error from the RegisterExporter would be nil if the tracer was specified by
+	// the user and the trace exporter was created successfully.
+	// RegisterExporter returns the function that all traces are flushed to the exporter
+	// and the exporter needs to be stopped. The function should be called when the exporter
+	// is no longer needed.
+	flushTraces, err := observ.RegisterExporter(conf.TraceExporter,
+		conf.TraceExporterURL,
+		Service, ENV)
 	if err != nil {
 		lggr.Infof("%s", err)
 	} else {
-		defer exporter.Flush()
+		defer flushTraces()
 		app.Use(observ.Tracer(Service))
 	}
 
