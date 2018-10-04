@@ -6,9 +6,31 @@ date: 2018-02-11T16:52:23-05:00
 <img src="/banner.png" width="600" alt="Athens Logo"/>
 
 
-## Welcome to Athens
+## Athens is a server for your Go packages
 
-Athens is the name of the combined project that includes a global registry for [Go Modules](https://github.com/golang/go/wiki/Modules) and a stand-alone proxy server that can be deployed on-premise to storage and control available Go modules for your organization.
+Welcome, Gophers! We're looking forward to introducing you to Athens.. 
+
+On this site, we document Athens in detail. We'll teach you what it does, why it matters, what you can do with it, and how you can run it yourself. Here's a short summary for you:
+
+#### What does Athens do?
+
+Athens provides a server for [Go Modules](https://github.com/golang/go/wiki/Modules)  that you can run. It serves public code and your private code for you, so you don't have to pull directly from a version control system (VCS) like GitHub or GitLab
+
+#### Why does it matter?
+
+Previously, the Go community has had lots of problems with libraries disappearing or changing without warning. If someone changes their library, your app can break overnight - oh no! Athens solves these problems by copying code from VCS's into _immutable_ storage.
+
+#### How do I use it?
+
+Athens is easy to run yourself. We give you a few options:
+
+- You can run it as a binary on your system
+- You can run it as a [Docker](https://www.docker.com/) image (see [here](http://localhost:1313/install/shared-team-instance/) for how to do that)
+- You can run it on [Kubernetes](https://kubernetes.io) (see [here](http://localhost:1313/install/install-on-kubernetes/) for how to do that)
+
+We also run an experimental server for public use, so you can get started with Athens without even installing it.
+
+**Sound good to you? Read on to learn more!**
 
 ## Try out Athens
 
