@@ -137,11 +137,12 @@ EnableCSRFProtection = false
     HGRCPath = ""
 
     # TraceExporterURL is the URL to which Athens populates distributed tracing 
-    # information such as Jaeger. 
+    # information such as Jaeger. In Stackdriver, use this as the GCP ProjectID.
     # Env override: ATHENS_TRACE_EXPORTER_URL
     TraceExporterURL = ""
 
-    # TraceExporter is the service to which the data collected by OpenCensus can be exported to
+    # TraceExporter is the service to which the data collected by OpenCensus can be exported to.
+    # Possible values are: jaeger, datadog, and stackdriver.
     # Env overide: ATHENS_TRACE_EXPORTER
     TraceExporter = "" 
 
