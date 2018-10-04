@@ -58,15 +58,9 @@ func (g *goGetFetcher) Fetch(ctx context.Context, mod, ver string) (*storage.Ver
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
-	sourcePath := filepath.Join(goPathRoot, "src")
-	modPath := filepath.Join(sourcePath, getRepoDirName(mod, ver))
-	if err := g.fs.MkdirAll(modPath, os.ModeDir|os.ModePerm); err != nil {
-		ClearFiles(g.fs, goPathRoot)
-		return nil, errors.E(op, err)
-	}
 
-	// setup the module with barebones stuff
-	if err := Dummy(g.fs, modPath); err != nil {
+	modPath, err := setupModRepo(g.fs, goPathRoot, mod, ver)
+	if err != nil {
 		ClearFiles(g.fs, goPathRoot)
 		return nil, errors.E(op, err)
 	}
@@ -103,6 +97,21 @@ func (g *goGetFetcher) Fetch(ctx context.Context, mod, ver string) (*storage.Ver
 	return &storageVer, nil
 }
 
+func setupModRepo(fs afero.Fs, goPathRoot, mod, ver string) (string, error) {
+	const op errors.Op = "goGetFetcher.setupModRepo"
+	sourcePath := filepath.Join(goPathRoot, "src")
+	modPath := filepath.Join(sourcePath, getRepoDirName(mod, ver))
+	if err := fs.MkdirAll(modPath, os.ModeDir|os.ModePerm); err != nil {
+		return "", errors.E(op, err)
+	}
+
+	// setup the module with barebones stuff
+	if err := Dummy(fs, modPath); err != nil {
+		return "", errors.E(op, err)
+	}
+	return modPath, nil
+}
+
 // Dummy Hacky thing makes vgo not to complain
 func Dummy(fs afero.Fs, repoRoot string) error {
 	const op errors.Op = "module.Dummy"
@@ -124,8 +133,7 @@ func Dummy(fs afero.Fs, repoRoot string) error {
 // on module@version from the repoRoot with GOPATH=gopath, and returns a non-nil error if anything went wrong.
 func downloadModule(goBinaryName string, fs afero.Fs, gopath, repoRoot, module, version string) (goModule, error) {
 	const op errors.Op = "module.downloadModule"
-	uri := strings.TrimSuffix(module, "/")
-	fullURI := fmt.Sprintf("%s@%s", uri, version)
+	fullURI := getVersionURI(module, version)
 
 	cmd := exec.Command(goBinaryName, "mod", "download", "-json", fullURI)
 	cmd.Env = PrepareEnv(gopath)
@@ -200,4 +208,10 @@ func validGoBinary(name string) error {
 		return errors.E(op, err)
 	}
 	return nil
+}
+
+func getVersionURI(mod, ver string) string {
+	uri := strings.TrimSuffix(mod, "/")
+	return fmt.Sprintf("%s@%s", uri, ver)
+
 }

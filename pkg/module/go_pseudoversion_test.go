@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/gobuffalo/envy"
+	"github.com/spf13/afero"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -22,7 +23,8 @@ func TestIsVersion(t *testing.T) {
 
 func TestRealVersion(t *testing.T) {
 	goBinaryPath := envy.Get("GO_BINARY_PATH", "go")
-	v, err := PseudoVersionFromHash(localCtx, goBinaryPath, mod, "v1.0.0")
+	fs := afero.NewOsFs()
+	v, err := PseudoVersionFromHash(localCtx, fs, goBinaryPath, mod, "v1.0.0")
 	assert.NoError(t, err)
 	assert.Equal(t, v, version)
 }
@@ -30,7 +32,8 @@ func TestRealVersion(t *testing.T) {
 func TestPseudoFromHash(t *testing.T) {
 	version := "fc2da9844984ce5093111298174706e14d4c0c47"
 	goBinaryPath := envy.Get("GO_BINARY_PATH", "go")
-	v, err := PseudoVersionFromHash(localCtx, goBinaryPath, mod, version)
+	fs := afero.NewOsFs()
+	v, err := PseudoVersionFromHash(localCtx, fs, goBinaryPath, mod, version)
 	assert.NoError(t, err)
 	assert.Equal(t, "v0.0.0-20160620175154-fc2da9844984", v)
 

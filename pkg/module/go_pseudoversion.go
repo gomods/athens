@@ -3,12 +3,8 @@ package module
 import (
 	"context"
 	"encoding/json"
-	"fmt"
-	"os"
 	"os/exec"
-	"path/filepath"
 	"regexp"
-	"strings"
 
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/observ"
@@ -22,7 +18,7 @@ type goListResult struct {
 }
 
 // PseudoVersionFromHash returns the go mod pseudoversion associated to the given commit hash used as version
-func PseudoVersionFromHash(ctx context.Context, gobinary, mod, ver string) (string, error) {
+func PseudoVersionFromHash(ctx context.Context, fs afero.Fs, gobinary, mod, ver string) (string, error) {
 	const op errors.Op = "goGetFetcher.PseudoVersionFromHash"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
@@ -31,24 +27,21 @@ func PseudoVersionFromHash(ctx context.Context, gobinary, mod, ver string) (stri
 		return ver, nil
 	}
 
-	uri := strings.TrimSuffix(mod, "/")
-	fullURI := fmt.Sprintf("%s@%s", uri, ver)
-
+	fullURI := getVersionURI(mod, ver)
 	cmd := exec.Command(gobinary, "list", "-m", "-json", fullURI)
 
-	fs := afero.NewOsFs()
-	tmpRoot, err := afero.TempDir(fs, "", "golist")
-	sourcePath := filepath.Join(tmpRoot, "src")
-	modPath := filepath.Join(sourcePath, getRepoDirName(mod, ver))
-	fs.MkdirAll(modPath, os.ModeDir|os.ModePerm)
-	Dummy(fs, modPath)
+	tmpRoot, err := afero.TempDir(fs, "", "pseudover")
+	modPath, err := setupModRepo(fs, tmpRoot, mod, ver)
+	defer ClearFiles(fs, tmpRoot)
+
+	if err != nil {
+		return "", errors.E(op, err)
+	}
 
 	cmd.Env = PrepareEnv(tmpRoot)
 	cmd.Dir = modPath
 
 	o, err := cmd.Output()
-	fmt.Printf(string(o))
-
 	if err != nil {
 		return "", errors.E(op, err)
 	}
