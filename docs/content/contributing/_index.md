@@ -25,4 +25,4 @@ If you're familiar with Git and GitHub basics, read [how to participate in the A
 
 If you're new to Git and GitHub, check out our [guide for new contributors to open source](./new), and then go on to that how to participate document I mentioned above.
 
-Finally, if you are an existing maintainer of the project, we have some documentation written for you at [./maintainers](./maintainers).
+Finally, if you are a new maintainer of the project, we have some documentation written for you at [./maintainers](./maintainers).
