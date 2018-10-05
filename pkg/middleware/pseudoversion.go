@@ -21,8 +21,9 @@ func NewPseudoversionMiddleware(lggr *log.Logger, fs afero.Fs, gobin string) buf
 	return func(next buffalo.Handler) buffalo.Handler {
 		return func(c buffalo.Context) error {
 			// TODO this can be changed once we figure out how to propagate the same
-			// log entry down to all the middlewares. As for now it does not make any sense to have another
-			// wrapper to the middleware because the two middleware will have two log entries.
+			// log entry down to all the middlewares (see https://github.com/gomods/athens/issues/537).
+			// Given the current status it does not make any sense to have another LogEntry wrapper
+			// to the middleware because the two middlewares will have two log entries in any case.
 			entry := logEntryFromContext(c, lggr)
 			mod, err := paths.GetModule(c)
 			if err != nil {
