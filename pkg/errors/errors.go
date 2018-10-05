@@ -50,6 +50,10 @@ func (e Error) Error() string {
 // forms a more readable stack trace.
 type Op string
 
+func (o Op) String() string {
+	return string(o)
+}
+
 // M represents a module in an error
 // this is so that we can distinguish
 // a module from a regular error string or version.

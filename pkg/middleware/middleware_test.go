@@ -5,41 +5,45 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"path/filepath"
 	"testing"
 
-	"github.com/bketelsen/buffet"
 	"github.com/gobuffalo/buffalo"
-	"github.com/gomods/athens/pkg/config/env"
+	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/log"
 	"github.com/gomods/athens/pkg/module"
 	"github.com/markbates/willie"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
-	"github.com/uber/jaeger-client-go/config"
 )
 
 // Avoid import cycle.
-const pathList = "/{module:.+}/@v/list"
-const pathVersionInfo = "/{module:.+}/@v/{version}.info"
+const (
+	pathList        = "/{module:.+}/@v/list"
+	pathVersionInfo = "/{module:.+}/@v/{version}.info"
+)
 
-func middlewareFilterApp() *buffalo.App {
+var (
+	testConfigFile = filepath.Join("..", "..", "config.dev.toml")
+)
+
+func middlewareFilterApp(filterFile, olympusEndpoint string) *buffalo.App {
 	h := func(c buffalo.Context) error {
 		return c.Render(200, nil)
 	}
 
 	a := buffalo.New(buffalo.Options{})
-	mf := newTestFilter()
-	a.Use(NewFilterMiddleware(mf))
-	initializeTracing(a)
+	mf := newTestFilter(filterFile)
+	a.Use(NewFilterMiddleware(mf, olympusEndpoint))
 
 	a.GET(pathList, h)
 	a.GET(pathVersionInfo, h)
 	return a
 }
 
-func newTestFilter() *module.Filter {
-	f := module.NewFilter()
+func newTestFilter(filterFile string) *module.Filter {
+	f := module.NewFilter(filterFile)
 	f.AddRule("github.com/gomods/athens/", module.Include)
 	f.AddRule("github.com/athens-artifacts/no-tags", module.Exclude)
 	f.AddRule("github.com/athens-artifacts", module.Direct)
@@ -49,12 +53,20 @@ func newTestFilter() *module.Filter {
 func Test_FilterMiddleware(t *testing.T) {
 	r := require.New(t)
 
-	w := willie.New(middlewareFilterApp())
+	conf, err := config.GetConf(testConfigFile)
+	if err != nil {
+		t.Fatalf("Unable to parse config file: %s", err.Error())
+	}
+	if conf.Proxy == nil {
+		t.Fatalf("No Proxy configuration in test config")
+	}
+	app := middlewareFilterApp(conf.FilterFile, conf.Proxy.OlympusGlobalEndpoint)
+	w := willie.New(app)
 
 	// Public, expects to be redirected to olympus
 	res := w.Request("/github.com/gomods/athens/@v/list").Get()
 	r.Equal(303, res.Code)
-	r.Equal(env.GetOlympusEndpoint()+"/github.com/gomods/athens/@v/list", res.HeaderMap.Get("Location"))
+	r.Equal(conf.Proxy.OlympusGlobalEndpoint+"/github.com/gomods/athens/@v/list", res.HeaderMap.Get("Location"))
 
 	// Excluded, expects a 403
 	res = w.Request("/github.com/athens-artifacts/no-tags/@v/list").Get()
@@ -72,7 +84,6 @@ func hookFilterApp(hook string) *buffalo.App {
 
 	a := buffalo.New(buffalo.Options{})
 	a.Use(LogEntryMiddleware(NewValidationMiddleware, log.New("none", logrus.DebugLevel), hook))
-	initializeTracing(a)
 
 	a.GET(pathList, h)
 	a.GET(pathVersionInfo, h)
@@ -154,12 +165,4 @@ func (suite *HookTestsSuite) TestHookUnexpectedError() {
 	res := suite.w.Request("/github.com/athens-artifacts/happy-path/@v/v1.0.0.info").Get()
 	r.True(suite.mock.invoked)
 	r.Equal(http.StatusInternalServerError, res.Code)
-}
-
-func initializeTracing(app *buffalo.App) {
-	var cfg config.Configuration
-	tracer, _, _ := cfg.New(
-		"athens.proxy",
-	)
-	app.Use(buffet.OpenTracing(tracer))
 }

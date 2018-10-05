@@ -1,16 +1,28 @@
 package main
 
 import (
-	"fmt"
+	"flag"
 	"log"
+	"path/filepath"
 
-	"github.com/gobuffalo/buffalo"
 	"github.com/gomods/athens/cmd/olympus/actions"
-	"github.com/gomods/athens/pkg/storage"
+	"github.com/gomods/athens/pkg/config"
+)
+
+var (
+	configFile = flag.String("config_file", filepath.Join("..", "..", "config.dev.toml"), "The path to the config file")
 )
 
 func main() {
-	app, err := setupApp()
+	flag.Parse()
+	if configFile == nil {
+		log.Fatal("Invalid config file path provided")
+	}
+	conf, err := config.ParseConfigFile(*configFile)
+	if err != nil {
+		log.Fatal(err)
+	}
+	app, err := actions.App(conf)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -18,35 +30,4 @@ func main() {
 	if err := app.Serve(); err != nil {
 		log.Fatal(err)
 	}
-}
-
-func setupApp() (*buffalo.App, error) {
-	storage, err := getStorage()
-	if err != nil {
-		log.Fatalf("error creating storage (%s)", err)
-	}
-	eLog, err := actions.GetEventLog()
-	if err != nil {
-		log.Fatalf("error creating eventlog (%s)", err)
-	}
-	cacheMissesLog, err := actions.NewCacheMissesLog()
-	if err != nil {
-		log.Fatalf("error creating cachemisses log (%s)", err)
-	}
-
-	config := actions.AppConfig{
-		Storage:        storage,
-		EventLog:       eLog,
-		CacheMissesLog: cacheMissesLog,
-	}
-
-	return actions.App(&config)
-}
-
-func getStorage() (storage.Backend, error) {
-	storage, err := actions.GetStorage()
-	if err != nil {
-		return nil, fmt.Errorf("error creating storage (%s)", err)
-	}
-	return storage, nil
 }

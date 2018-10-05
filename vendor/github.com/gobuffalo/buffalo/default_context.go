@@ -7,7 +7,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
-	"runtime"
+	"reflect"
 	"sort"
 	"strings"
 	"time"
@@ -15,7 +15,6 @@ import (
 	"github.com/gobuffalo/buffalo/binding"
 	"github.com/gobuffalo/buffalo/render"
 	"github.com/gobuffalo/pop"
-	"github.com/gorilla/websocket"
 	"github.com/pkg/errors"
 )
 
@@ -174,19 +173,35 @@ func (d *DefaultContext) Error(status int, err error) error {
 	return HTTPError{Status: status, Cause: errors.WithStack(err)}
 }
 
-// Websocket is deprecated, and will be removed in v0.12.0. Use github.com/gorilla/websocket directly instead.
-func (d *DefaultContext) Websocket() (*websocket.Conn, error) {
-	warningMsg := "Websocket is deprecated, and will be removed in v0.12.0. Use github.com/gorilla/websocket directly instead."
-	_, file, no, ok := runtime.Caller(1)
-	if ok {
-		warningMsg = fmt.Sprintf("%s Called from %s:%d", warningMsg, file, no)
-	}
-	return defaultUpgrader.Upgrade(d.Response(), d.Request(), nil)
-}
+var mapType = reflect.ValueOf(map[string]interface{}{}).Type()
 
 // Redirect a request with the given status to the given URL.
 func (d *DefaultContext) Redirect(status int, url string, args ...interface{}) error {
 	d.Flash().persist(d.Session())
+
+	if strings.HasSuffix(url, "Path()") {
+		if len(args) > 1 {
+			return errors.WithStack(errors.Errorf("you must pass only a map[string]interface{} to a route path: %T", args))
+		}
+		var m map[string]interface{}
+		if len(args) == 1 {
+			rv := reflect.Indirect(reflect.ValueOf(args[0]))
+			if !rv.Type().ConvertibleTo(mapType) {
+				return errors.WithStack(errors.Errorf("you must pass only a map[string]interface{} to a route path: %T", args))
+			}
+			m = rv.Convert(mapType).Interface().(map[string]interface{})
+		}
+		h, ok := d.Value(strings.TrimSuffix(url, "()")).(RouteHelperFunc)
+		if !ok {
+			return errors.WithStack(errors.Errorf("could not find a route helper named %s", url))
+		}
+		url, err := h(m)
+		if err != nil {
+			return errors.WithStack(err)
+		}
+		http.Redirect(d.Response(), d.Request(), string(url), status)
+		return nil
+	}
 
 	if len(args) > 0 {
 		url = fmt.Sprintf(url, args...)
@@ -227,9 +242,4 @@ func (d *DefaultContext) File(name string) (binding.File, error) {
 		return bf, errors.WithStack(err)
 	}
 	return bf, nil
-}
-
-var defaultUpgrader = websocket.Upgrader{
-	ReadBufferSize:  1024,
-	WriteBufferSize: 1024,
 }

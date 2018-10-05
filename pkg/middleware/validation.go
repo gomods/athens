@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/bketelsen/buffet"
 	"github.com/gobuffalo/buffalo"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/log"
@@ -15,13 +14,10 @@ import (
 // NewValidationMiddleware builds a middleware function that performs validation checks by calling
 // an external webhook
 func NewValidationMiddleware(entry log.Entry, validatorHook string) buffalo.MiddlewareFunc {
-	const op errors.Op = "actions.ValidationMiddleware"
+	const op errors.Op = "actions.NewValidationMiddleware"
 
 	return func(next buffalo.Handler) buffalo.Handler {
 		return func(c buffalo.Context) error {
-			sp := buffet.SpanFromContext(c).SetOperationName("validationMiddleware")
-			defer sp.Finish()
-
 			mod, err := paths.GetModule(c)
 
 			if err != nil {

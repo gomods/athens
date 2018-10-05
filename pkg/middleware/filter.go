@@ -5,9 +5,7 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/bketelsen/buffet"
 	"github.com/gobuffalo/buffalo"
-	"github.com/gomods/athens/pkg/config/env"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/module"
 	"github.com/gomods/athens/pkg/paths"
@@ -15,14 +13,11 @@ import (
 
 // NewFilterMiddleware builds a middleware function that implements the filters configured in
 // the filter file.
-func NewFilterMiddleware(mf *module.Filter) buffalo.MiddlewareFunc {
-	const op errors.Op = "actions.FilterMiddleware"
+func NewFilterMiddleware(mf *module.Filter, olympusEndpoint string) buffalo.MiddlewareFunc {
+	const op errors.Op = "actions.NewFilterMiddleware"
 
 	return func(next buffalo.Handler) buffalo.Handler {
 		return func(c buffalo.Context) error {
-			sp := buffet.SpanFromContext(c).SetOperationName("filterMiddleware")
-			defer sp.Finish()
-
 			mod, err := paths.GetModule(c)
 
 			if err != nil {
@@ -46,7 +41,7 @@ func NewFilterMiddleware(mf *module.Filter) buffalo.MiddlewareFunc {
 				return next(c)
 			case module.Include:
 				// TODO : spin up cache filling worker and serve the request using the cache
-				newURL := redirectToOlympusURL(c.Request().URL)
+				newURL := redirectToOlympusURL(olympusEndpoint, c.Request().URL)
 				return c.Redirect(http.StatusSeeOther, newURL)
 			}
 
@@ -59,6 +54,6 @@ func isPseudoVersion(version string) bool {
 	return strings.HasPrefix(version, "v0.0.0-")
 }
 
-func redirectToOlympusURL(u *url.URL) string {
-	return strings.TrimSuffix(env.GetOlympusEndpoint(), "/") + u.Path
+func redirectToOlympusURL(olympusEndpoint string, u *url.URL) string {
+	return strings.TrimSuffix(olympusEndpoint, "/") + u.Path
 }

@@ -1,6 +1,12 @@
+# Welcome To Athens, Gophers!
+
 ![Athens Banner](./docs/static/banner.png)
 
-# Welcome Gophers!
+[![Open Source Helpers](https://www.codetriage.com/gomods/athens/badges/users.svg)](https://www.codetriage.com/gomods/athens)
+[![Build Status](https://travis-ci.org/gomods/athens.svg?branch=master)](https://travis-ci.org/gomods/athens)
+[![codecov](https://codecov.io/gh/gomods/athens/branch/master/graph/badge.svg)](https://codecov.io/gh/gomods/athens)
+[![GoDoc](https://godoc.org/github.com/gomods/athens?status.svg)](https://godoc.org/github.com/gomods/athens)
+[![Go Report Card](https://goreportcard.com/badge/github.com/gomods/athens)](https://goreportcard.com/report/github.com/gomods/athens)
 
 Welcome to the Athens project! We're building all things Go package repository in here.
 
@@ -10,11 +16,6 @@ Welcome to the Athens project! We're building all things Go package repository i
 See our documentation site [https://docs.gomods.io](https://docs.gomods.io) for more details on the project.
 
 # Project Status
-
-[![Build Status](https://travis-ci.org/gomods/athens.svg?branch=master)](https://travis-ci.org/gomods/athens)
-[![codecov](https://codecov.io/gh/gomods/athens/branch/master/graph/badge.svg)](https://codecov.io/gh/gomods/athens)
-[![GoDoc](https://godoc.org/github.com/gomods/athens?status.svg)](https://godoc.org/github.com/gomods/athens)
-[![Go Report Card](https://goreportcard.com/badge/github.com/gomods/athens)](https://goreportcard.com/report/github.com/gomods/athens)
 
 Project Athens is in a very early alpha release and everything might change.
 Don't run it in production, but do play around with it and [contribute](#contributing)
@@ -84,7 +85,7 @@ We all strive to write nice and readable code which can be understood by every p
 
 # Code of Conduct
 
-This project follows the [Contributor Covenant](https://www.contributor-covenant.org/) (English version [here](https://www.contributor-covenant.org/version/1/4/code-of-conduct)) code of conduct.
+This project follows the [Contributor Covenant](https://www.contributor-covenant.org/) (English version [here](./CODE_OF_CONDUCT.md)) code of conduct.
 
 If you have concerns, notice a code of conduct violation, or otherwise would like to talk about something
 related to this code of conduct, please reach out to me, Aaron Schlesinger on the [Gophers Slack](https://gophers.slack.com/). My username is `arschles`. Note that in the future, we will be expanding the

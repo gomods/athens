@@ -5,24 +5,20 @@ import (
 	"strings"
 
 	"github.com/gomods/athens/pkg/errors"
-	opentracing "github.com/opentracing/opentracing-go"
+	"github.com/gomods/athens/pkg/observ"
 )
 
 // List implements the (./pkg/storage).Lister interface
 // It returns a list of versions, if any, for a given module
 func (s *Storage) List(ctx context.Context, module string) ([]string, error) {
 	const op errors.Op = "gcp.List"
-	sp, ctx := opentracing.StartSpanFromContext(ctx, "storage.gcp.List")
-	defer sp.Finish()
+	ctx, span := observ.StartSpan(ctx, op.String())
+	defer span.End()
 	paths, err := s.bucket.List(ctx, module)
 	if err != nil {
 		return nil, errors.E(op, err, errors.M(module))
 	}
-	versions := extractVersions(paths)
-	if len(versions) < 1 {
-		return nil, errors.E(op, "empty versions list", errors.M(module), errors.KindNotFound)
-	}
-	return versions, nil
+	return extractVersions(paths), nil
 }
 
 func extractVersions(paths []string) []string {
