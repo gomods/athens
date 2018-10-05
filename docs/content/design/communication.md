@@ -6,18 +6,18 @@ date: 2018-02-11T15:57:56-05:00
 ## Communication flow
 
 This is the story of a time long ago. A time of myth and legend when the ancient Gods were petty and cruel and they plagued build with irreproducibility.
-Only one project dared to challenge their power...Athens. Athens possessed a strength the world had never seen. Filling its cache.
+Only one project dared to challenge their power...Athens. Athens possessed a strength the world had never seen. Filling its storage.
 
 ### Clean plate
 
-At the beginning, there's theoretical state when a cache of proxy is empty.
+At the beginning, there's theoretical state when a storage of proxy is empty.
 
 When User makes a request at this ancient time, it works as described on the flow below.
 
 - User contacts proxy asking for module M, version v1.0
 - Proxy checks whether or not it has this module in its storage. It does not.
 - The proxy asks the underlying VCS (e.g github.com) for a module.
-- After it receives all the bits, it stores it into its own cache and serves it to the User.
+- After it receives all the bits, it stores it into its own storage and serves it to the User.
 - User receives module and is happy.
 
 The whole process is synchronous.
