@@ -40,10 +40,13 @@ func New(s3Conf *config.S3Config, cdnConf *config.CDNConfig) (*Storage, error) {
 
 	awsConfig := &aws.Config{
 		Credentials:      credentials.NewStaticCredentials(s3Conf.Key, s3Conf.Secret, s3Conf.Token),
-		Endpoint:         aws.String(s3Conf.Endpoint),
 		Region:           aws.String(s3Conf.Region),
 		DisableSSL:       aws.Bool(s3Conf.DisableSSL),
 		S3ForcePathStyle: aws.Bool(s3Conf.ForcePathStyle),
+	}
+
+	if s3Conf.Endpoint != "" {
+		awsConfig.Endpoint = aws.String(s3Conf.Endpoint)
 	}
 
 	// create a session

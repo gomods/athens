@@ -247,15 +247,15 @@ EnableCSRFProtection = false
     [Storage.S3]
         # Access Key for S3 storage
         # Env override: AWS_REGION
-        Region = "us-east-1"
+        Region = ""
 
         # Access Key for S3 storage
         # Env override: AWS_ACCESS_KEY_ID
-        Key = "minio"
+        Key = ""
 
         # Secret Key for S3 storage
         # Env override: AWS_SECRET_ACCESS_KEY
-        Secret = "minio123"
+        Secret = ""
 
         # Session Token for S3 storage
         # Env override: AWS_SESSION_TOKEN
@@ -268,18 +268,4 @@ EnableCSRFProtection = false
         # S3 Bucket to use for storage
         # Defaults to gomods
         # Env override: ATHENS_S3_BUCKET_NAME
-        Bucket = "gomods"
-
-        # Endpoint for S3 storage
-        # Env override: ATHENS_S3_ENDPOINT
-        Endpoint = "127.0.0.1:9001"
-
-        # Disable SSL for AWS connections
-        # Env override: ATHENS_S3_DISABLE_SSL
-        DisableSSL = true
-
-        # Force path style for AWS connections
-        # More info: http://docs.aws.amazon.com/AmazonS3/latest/dev/VirtualHosting.html
-        # Env override: ATHENS_S3_FORCE_PATH_STYLE
-        ForcePathStyle = true
-
+        Bucket = ""
