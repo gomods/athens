@@ -305,59 +305,6 @@ func TestParseExampleConfig(t *testing.T) {
 	restoreEnv(envVarBackup)
 }
 
-// TestConfigOverridesDefault validates that a value provided by the config is not overwritten during parsing
-func TestConfigOverridesDefault(t *testing.T) {
-
-	// set values to anything but defaults
-	config := &Config{
-		TimeoutConf: TimeoutConf{
-			Timeout: 1,
-		},
-		Storage: &StorageConfig{
-			Minio: &MinioConfig{
-				Bucket:    "notgomods",
-				EnableSSL: false,
-				TimeoutConf: TimeoutConf{
-					Timeout: 42,
-				},
-			},
-		},
-	}
-
-	// should be identical to config above
-	expConfig := &Config{
-		TimeoutConf: config.TimeoutConf,
-		Storage: &StorageConfig{
-			Minio: &MinioConfig{
-				Bucket:      config.Storage.Minio.Bucket,
-				EnableSSL:   config.Storage.Minio.EnableSSL,
-				TimeoutConf: config.Storage.Minio.TimeoutConf,
-			},
-		},
-	}
-
-	// unset all environment variables
-	envVars := getEnvMap(&Config{})
-	envVarBackup := map[string]string{}
-	for k := range envVars {
-		oldVal := os.Getenv(k)
-		envVarBackup[k] = oldVal
-		os.Unsetenv(k)
-	}
-
-	envOverride(config)
-
-	if config.Timeout != expConfig.Timeout {
-		t.Errorf("Default timeout is overriding specified timeout")
-	}
-
-	if !cmp.Equal(config.Storage.Minio, expConfig.Storage.Minio) {
-		t.Errorf("Default Minio config is overriding specified config")
-	}
-
-	restoreEnv(envVarBackup)
-}
-
 func getEnvMap(config *Config) map[string]string {
 
 	envVars := map[string]string{
