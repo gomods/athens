@@ -1,9 +1,9 @@
 ---
 title: "From VCS to the User"
-date: 2018-02-11T16:57:56-05:00
+date: 2018-02-11T15:56:56-05:00
 ---
 
-You read about proxy, communication and then opened a codebase and thought to yourself: This is not so simple as described in the docs.
+You read about proxy, communication and then opened a codebase and thought to yourself: This is not as simple as described in the docs.
 
 If you feel lost how modules get from VCS to the user, which components it needs to visit on its way at which point it gets stored, read on my friend.
 
@@ -11,7 +11,7 @@ From [Communication](./communication.md) you know, that when a module is not bac
 
 ## Components
 
-Let's start with describing all the components you will see along the way. There's no better way how to get a clear picture of the connected part than with a picture.
+Let's start with describing all the components you will see along the way. There's no better way to get a clear picture of the connected part than with a clear picture.
 
 ![Architecture chart of components](/from-vcs-to-user.png)
 
