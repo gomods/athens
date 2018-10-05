@@ -29,7 +29,7 @@ func TestRealVersion(t *testing.T) {
 	fs := afero.NewOsFs()
 	v, err := PseudoVersionFromHash(localCtx, fs, goBinaryPath, mod, "v1.0.0")
 	r.NoError(err)
-	r.Equal(v, version)
+	r.Equal(v, "v1.0.0")
 }
 
 func TestPseudoFromHash(t *testing.T) {
