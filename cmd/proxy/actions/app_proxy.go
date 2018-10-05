@@ -18,7 +18,7 @@ func addProxyRoutes(
 	goBin string,
 	goGetWorkers int,
 	protocolWorkers int,
-	fs afero.Fs
+	fs afero.Fs,
 ) error {
 	app.GET("/", proxyHomeHandler)
 	app.GET("/healthz", healthHandler)
