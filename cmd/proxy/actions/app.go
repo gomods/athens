@@ -141,7 +141,7 @@ func App(conf *config.Config) (*buffalo.App, error) {
 	// TODO This middleware is a workaround in place for
 	// https://github.com/golang/go/issues/27947
 	// Once it's fixed the middleware can be removed
-	app.Use(mw.NewPseudoversionMiddleware(fs, conf.GoBinary))
+	app.Use(mw.NewPseudoversionMiddleware(lggr, fs, conf.GoBinary))
 
 	user, pass, ok := conf.Proxy.BasicAuth()
 	if ok {

@@ -5,7 +5,9 @@ import (
 
 	"github.com/gobuffalo/buffalo"
 	"github.com/gobuffalo/envy"
+	"github.com/gomods/athens/pkg/log"
 	"github.com/markbates/willie"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/afero"
 	"github.com/stretchr/testify/require"
 )
@@ -17,8 +19,8 @@ func middlewarePseudoverApp(fs afero.Fs) *buffalo.App {
 
 	a := buffalo.New(buffalo.Options{})
 	goBinaryPath := envy.Get("GO_BINARY_PATH", "go")
-
-	a.Use(NewPseudoversionMiddleware(fs, goBinaryPath))
+	lggr := log.New("none", logrus.DebugLevel)
+	a.Use(NewPseudoversionMiddleware(lggr, fs, goBinaryPath))
 	a.GET(pathList, h)
 	a.GET(pathVersionInfo, h)
 	return a
