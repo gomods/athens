@@ -11,7 +11,9 @@ import (
 	"github.com/spf13/afero"
 )
 
-// NewPseudoversionMiddleware builds a middleware function that implements
+// NewPseudoversionMiddleware builds a middleware function that detects if the asked version
+// is a hash and translates it into the mapped pseudoversion. It implements a workaround
+// for https://github.com/golang/go/issues/27947
 func NewPseudoversionMiddleware(fs afero.Fs, gobin string) buffalo.MiddlewareFunc {
 	const op errors.Op = "actions.NewFilterMiddleware"
 

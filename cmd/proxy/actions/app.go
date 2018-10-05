@@ -138,6 +138,9 @@ func App(conf *config.Config) (*buffalo.App, error) {
 	}
 
 	fs := afero.NewOsFs()
+	// TODO This middleware is a workaround in place for
+	// https://github.com/golang/go/issues/27947
+	// Once it's fixed the middleware can be removed
 	app.Use(mw.NewPseudoversionMiddleware(fs, conf.GoBinary))
 
 	user, pass, ok := conf.Proxy.BasicAuth()
