@@ -54,7 +54,7 @@ func New(opts *Opts, wrappers ...Wrapper) Protocol {
 }
 
 type protocol struct {
-	s       storage.Backend
+	storage storage.Backend
 	stasher stash.Stasher
 	lister  UpstreamLister
 }
@@ -64,7 +64,7 @@ func (p *protocol) List(ctx context.Context, mod string) ([]string, error) {
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 
-	strList, sErr := p.s.List(ctx, mod)
+	strList, sErr := p.storage.List(ctx, mod)
 	// if we got an unexpected storage err then we can not guarantee that the end result contains all versions
 	// a tag or repo could have been deleted
 	if sErr != nil {
@@ -103,13 +103,13 @@ func (p *protocol) Info(ctx context.Context, mod, ver string) ([]byte, error) {
 	const op errors.Op = "protocol.Info"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
-	info, err := p.s.Info(ctx, mod, ver)
+	info, err := p.storage.Info(ctx, mod, ver)
 	if errors.IsNotFoundErr(err) {
 		err = p.stasher.Stash(ctx, mod, ver)
 		if err != nil {
 			return nil, errors.E(op, err)
 		}
-		info, err = p.s.Info(ctx, mod, ver)
+		info, err = p.storage.Info(ctx, mod, ver)
 	}
 	if err != nil {
 		return nil, errors.E(op, err)
@@ -122,13 +122,13 @@ func (p *protocol) GoMod(ctx context.Context, mod, ver string) ([]byte, error) {
 	const op errors.Op = "protocol.GoMod"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
-	goMod, err := p.s.GoMod(ctx, mod, ver)
+	goMod, err := p.storage.GoMod(ctx, mod, ver)
 	if errors.IsNotFoundErr(err) {
 		err = p.stasher.Stash(ctx, mod, ver)
 		if err != nil {
 			return nil, errors.E(op, err)
 		}
-		goMod, err = p.s.GoMod(ctx, mod, ver)
+		goMod, err = p.storage.GoMod(ctx, mod, ver)
 	}
 	if err != nil {
 		return nil, errors.E(op, err)
@@ -141,13 +141,13 @@ func (p *protocol) Zip(ctx context.Context, mod, ver string) (io.ReadCloser, err
 	const op errors.Op = "protocol.Zip"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
-	zip, err := p.s.Zip(ctx, mod, ver)
+	zip, err := p.storage.Zip(ctx, mod, ver)
 	if errors.IsNotFoundErr(err) {
 		err = p.stasher.Stash(ctx, mod, ver)
 		if err != nil {
 			return nil, errors.E(op, err)
 		}
-		zip, err = p.s.Zip(ctx, mod, ver)
+		zip, err = p.storage.Zip(ctx, mod, ver)
 	}
 	if err != nil {
 		return nil, errors.E(op, err)
