@@ -16,14 +16,14 @@ import (
 // response to both the first and the second client.
 func WithSingleflight(s Stasher) Stasher {
 	sf := &withsf{}
-	sf.s = s
+	sf.stasher = s
 	sf.subs = map[string][]chan error{}
 
 	return sf
 }
 
 type withsf struct {
-	s Stasher
+	stasher Stasher
 
 	mu   sync.Mutex
 	subs map[string][]chan error
@@ -31,7 +31,7 @@ type withsf struct {
 
 func (s *withsf) process(ctx context.Context, mod, ver string) {
 	mv := config.FmtModVer(mod, ver)
-	err := s.s.Stash(ctx, mod, ver)
+	err := s.stasher.Stash(ctx, mod, ver)
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	for _, ch := range s.subs[mv] {
