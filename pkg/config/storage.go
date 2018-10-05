@@ -9,6 +9,7 @@ type StorageConfig struct {
 	GCP   *GCPConfig
 	Minio *MinioConfig
 	Mongo *MongoConfig
+	S3    *S3Config
 }
 
 func setStorageTimeouts(s *StorageConfig, defaultTimeout int) {
@@ -26,6 +27,9 @@ func setStorageTimeouts(s *StorageConfig, defaultTimeout int) {
 	}
 	if s.Mongo != nil && s.Mongo.Timeout == 0 {
 		s.Mongo.Timeout = defaultTimeout
+	}
+	if s.S3 != nil && s.S3.Timeout == 0 {
+		s.S3.Timeout = defaultTimeout
 	}
 }
 
@@ -61,6 +65,12 @@ func deleteInvalidStorageConfigs(s *StorageConfig) {
 	if s.Mongo != nil {
 		if err := validate.Struct(s.Mongo); err != nil {
 			s.Mongo = nil
+		}
+	}
+
+	if s.S3 != nil {
+		if err := validate.Struct(s.S3); err != nil {
+			s.S3 = nil
 		}
 	}
 }

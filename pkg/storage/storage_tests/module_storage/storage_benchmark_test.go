@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"github.com/gomods/athens/pkg/storage/s3"
 	"testing"
 
 	"github.com/gomods/athens/pkg/config"
@@ -143,6 +144,10 @@ func getStores(b *testing.B) []storage.TestSuite {
 	minioStore, err := minio.NewTestSuite(conf.Storage.Minio)
 	require.NoError(b, err)
 	stores = append(stores, minioStore)
+
+	s3Store, err := s3.NewTestSuite(conf.Storage.S3, conf.Storage.CDN)
+	require.NoError(b, err)
+	stores = append(stores, s3Store)
 
 	return stores
 }

@@ -150,6 +150,16 @@ func TestStorageEnvOverrides(t *testing.T) {
 				Timeout: globalTimeout,
 			},
 		},
+		S3: &S3Config{
+			Region:         "s3Region",
+			Key:            "s3Key",
+			Secret:         "s3Secret",
+			Token:          "s3Token",
+			Bucket:         "s3Bucket",
+			Endpoint:       "s3Endpoint",
+			DisableSSL:     true,
+			ForcePathStyle: true,
+		},
 	}
 	envVars := getEnvMap(&Config{Storage: expStorage})
 	envVarBackup := map[string]string{}
@@ -186,6 +196,7 @@ func TestParseExampleConfig(t *testing.T) {
 				EnableSSL: false,
 			},
 			Mongo: &MongoConfig{},
+			S3:    &S3Config{},
 		},
 	}
 	// unset all environment variables
@@ -248,6 +259,16 @@ func TestParseExampleConfig(t *testing.T) {
 			TimeoutConf: TimeoutConf{
 				Timeout: globalTimeout,
 			},
+		},
+		S3: &S3Config{
+			Region:         "us-east-1",
+			Key:            "minio",
+			Secret:         "minio123",
+			Token:          "",
+			Bucket:         "gomods",
+			Endpoint:       "127.0.0.1:9001",
+			DisableSSL:     true,
+			ForcePathStyle: true,
 		},
 	}
 
@@ -398,6 +419,16 @@ func getEnvMap(config *Config) map[string]string {
 		if storage.Mongo != nil {
 			envVars["ATHENS_MONGO_STORAGE_URL"] = storage.Mongo.URL
 			envVars["ATHENS_MONGO_CERT_PATH"] = storage.Mongo.CertPath
+		}
+		if storage.Mongo != nil {
+			envVars["AWS_REGION"] = storage.S3.Region
+			envVars["AWS_ACCESS_KEY_ID"] = storage.S3.Key
+			envVars["AWS_SECRET_ACCESS_KEY"] = storage.S3.Secret
+			envVars["AWS_SESSION_TOKEN"] = storage.S3.Token
+			envVars["ATHENS_S3_BUCKET_NAME"] = storage.S3.Bucket
+			envVars["ATHENS_S3_ENDPOINT_ADDRESS"] = storage.S3.Endpoint
+			envVars["ATHENS_S3_DISABLE_SSL"] = strconv.FormatBool(storage.S3.DisableSSL)
+			envVars["ATHENS_S3_FORCE_PATH_STYLE"] = strconv.FormatBool(storage.S3.ForcePathStyle)
 		}
 	}
 	return envVars

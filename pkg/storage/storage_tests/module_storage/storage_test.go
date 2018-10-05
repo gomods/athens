@@ -11,6 +11,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"github.com/gomods/athens/pkg/storage/s3"
 	"io/ioutil"
 	"math/rand"
 	"path/filepath"
@@ -65,6 +66,11 @@ func (d *TestSuites) SetupTest() {
 	mongoStore, err := mongo.NewTestSuite(conf.Storage.Mongo)
 	ra.NoError(err)
 	d.storages = append(d.storages, mongoStore)
+
+	// s3
+	s3Store, err := s3.NewTestSuite(conf.Storage.S3, conf.Storage.CDN)
+	ra.NoError(err)
+	d.storages = append(d.storages, s3Store)
 
 	d.module = "testmodule"
 	d.version = "v1.0.0"
