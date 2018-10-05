@@ -6,7 +6,7 @@ import (
 
 	"github.com/gobuffalo/envy"
 	"github.com/spf13/afero"
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 var (
@@ -15,33 +15,38 @@ var (
 )
 
 func TestIsVersion(t *testing.T) {
+	r := require.New(t)
+
 	// Testing the regex
-	assert.True(t, IsModVersion("v1.0.0"))
-	assert.True(t, IsModVersion("v12.345.6789"))
-	assert.False(t, IsModVersion("v248dadf4e9068a0b3e79f02ed0a610d935de5302"))
+	r.True(IsSemVersion("v1.0.0"))
+	r.True(IsSemVersion("v12.345.6789"))
+	r.False(IsSemVersion("v248dadf4e9068a0b3e79f02ed0a610d935de5302"))
 }
 
 func TestRealVersion(t *testing.T) {
+	r := require.New(t)
 	goBinaryPath := envy.Get("GO_BINARY_PATH", "go")
 	fs := afero.NewOsFs()
 	v, err := PseudoVersionFromHash(localCtx, fs, goBinaryPath, mod, "v1.0.0")
-	assert.NoError(t, err)
-	assert.Equal(t, v, version)
+	r.NoError(err)
+	r.Equal(v, version)
 }
 
 func TestPseudoFromHash(t *testing.T) {
+	r := require.New(t)
 	version := "fc2da9844984ce5093111298174706e14d4c0c47"
 	goBinaryPath := envy.Get("GO_BINARY_PATH", "go")
 	fs := afero.NewOsFs()
 	v, err := PseudoVersionFromHash(localCtx, fs, goBinaryPath, mod, version)
-	assert.NoError(t, err)
-	assert.Equal(t, "v0.0.0-20160620175154-fc2da9844984", v)
+	r.NoError(err)
+	r.Equal("v0.0.0-20160620175154-fc2da9844984", v)
 }
 
 func TestInvalidHash(t *testing.T) {
+	r := require.New(t)
 	version := "asdasdasdasdada"
 	goBinaryPath := envy.Get("GO_BINARY_PATH", "go")
 	fs := afero.NewOsFs()
 	_, err := PseudoVersionFromHash(localCtx, fs, goBinaryPath, mod, version)
-	assert.Error(t, err)
+	r.Error(err)
 }
