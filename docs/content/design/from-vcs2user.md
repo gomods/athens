@@ -1,5 +1,5 @@
 ---
-title: "From VCS to User"
+title: "From VCS to the User"
 date: 2018-02-11T16:57:56-05:00
 ---
 
