@@ -6,21 +6,21 @@ date: 2018-02-11T16:52:23-05:00
 <img src="/banner.png" width="600" alt="Athens Logo"/>
 
 
-## Athens is a server for your Go packages
+## Athens is a Server for Your Go Packages
 
 Welcome, Gophers! We're looking forward to introducing you to Athens.. 
 
 On this site, we document Athens in detail. We'll teach you what it does, why it matters, what you can do with it, and how you can run it yourself. Below is a brief summary for you.
 
-#### What does Athens do?
+#### What Does Athens Do?
 
 Athens provides a server for [Go Modules](https://github.com/golang/go/wiki/Modules) that you can run. It serves public code and your private code for you, so you don't have to pull directly from a version control system (VCS) like GitHub or GitLab
 
-#### Why does it matter?
+#### Why Does it Matter?
 
 Previously, the Go community has had lots of problems with libraries disappearing or changing without warning. If someone changes their library, your app can break overnight - oh no! Athens solves these problems by copying code from VCS's into _immutable_ storage.
 
-#### How do I use it?
+#### How Do I Use It?
 
 Athens is easy to run yourself. We give you a few options:
 
@@ -84,7 +84,7 @@ proxy was run in the background, you should also see output from Athens indicati
 
 This should give you an overview of what using Athens is like!
 
-##  Next Steps
+## Next Steps
 * If you are interested
 in what is happening between the proxy and the Go Modules feature, the [Walkthrough](/walkthrough)
 explores this in greater depth.
