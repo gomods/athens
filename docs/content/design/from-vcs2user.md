@@ -7,7 +7,7 @@ You read about proxy, communication and then opened a codebase and thought to yo
 
 If you feel lost how modules get from VCS to the user, which components it needs to visit on its way at which point it gets stored, read on my friend.
 
-From [Communication](./communication.md) you know, that when a module is not backed up in the storage it gets downloaded from VCS (such as github.com) and then it is served to the user. You also know that this whole process is synchronous. But when you open a code you see module fetchers, download protocol stashers and you struggle to figure out what's what and how they differ. It's complicated, but it's not once you know what's going on.
+From [Communication](/design/communication/) you know, that when a module is not backed up in the storage it gets downloaded from VCS (such as github.com) and then it is served to the user. You also know that this whole process is synchronous. But when you open a code you see module fetchers, download protocol stashers and you struggle to figure out what's what and how they differ. It's complicated, but it's not once you know what's going on.
 
 ## Components
 
@@ -18,6 +18,7 @@ Let's start with describing all the components you will see along the way. There
 As you can see there is a lot of layers and wrappers. Let's start from the innermost as it is the first thing you will see in the code.
 
 The two innermost components are:
+
 - Storage and
 - Fetcher
 
@@ -46,6 +47,7 @@ Fetch(ctx context.Context, mod, ver string) (*storage.Version, error)
 *_fetch function_
 
 Then Fetcher:
+
 - creates a temp directory using an injected FileSystem
 - in this temp dir, it constructs barebone go project so `Go CLI` can be used.
 - invokes `go module download {module}`
@@ -64,6 +66,7 @@ New(f module.Fetcher, s storage.Backend, wrappers ...Wrapper) Stasher
 *_stasher.go_
 
 As you can see in `pkg/stash/stasher.go` it does not really do much:
+
 - invokes Fetcher to get module bits
 - stores the bits using a `storage`
 
