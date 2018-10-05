@@ -7,6 +7,6 @@ Describe the issue you have been trying to solve.
 
 Mention briefly how you have applied the fix.
 
-Fixes #[]
+Fixes #123
 
 **Mention the issue number it fixes or add the details of the changes if it doesn't has a specific issue.**
