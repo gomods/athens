@@ -1,5 +1,5 @@
 ---
-title: Try out!
+title: Try it out!
 description: How to see Athens in action 
 menu: shortcuts
 ---
@@ -33,7 +33,7 @@ export GOPROXY=http://127.0.0.1:3000
 ```powershell
 $env:GO111MODULE = "on"
 $env:GOPROXY = "http://127.0.0.1:3000"
-```
+``@ma`
 
 
 Now, when you build and run this example application, **go** will fetch dependencies via Athens!
