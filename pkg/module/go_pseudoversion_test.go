@@ -11,7 +11,7 @@ import (
 
 var (
 	localCtx = context.Background()
-	mod      = "github.com/arschles/assert"
+	mod      = "github.com/athens-artifacts/no-tags"
 )
 
 func TestIsVersion(t *testing.T) {
@@ -34,12 +34,12 @@ func TestRealVersion(t *testing.T) {
 
 func TestPseudoFromHash(t *testing.T) {
 	r := require.New(t)
-	version := "fc2da9844984ce5093111298174706e14d4c0c47"
+	version := "1a540c5d67ab9b13099b229d10362c6ad96c462d"
 	goBinaryPath := envy.Get("GO_BINARY_PATH", "go")
 	fs := afero.NewOsFs()
 	v, err := PseudoVersionFromHash(localCtx, fs, goBinaryPath, mod, version)
 	r.NoError(err)
-	r.Equal("v0.0.0-20160620175154-fc2da9844984", v)
+	r.Equal("v0.0.0-20180803171426-1a540c5d67ab", v)
 }
 
 func TestInvalidHash(t *testing.T) {

@@ -38,11 +38,11 @@ func Test_FilterPseudoversion(t *testing.T) {
 	r.Equal(200, res.Code)
 
 	// Hash, expects redirect to pseudover
-	res = w.Request("/github.com/arschles/assert/@v/fc2da9844984ce5093111298174706e14d4c0c47.info").Get()
+	res = w.Request("/github.com/athens-artifacts/no-tags/@v/1a540c5d67ab9b13099b229d10362c6ad96c462d.info").Get()
 	r.Equal(303, res.Code)
-	r.Equal("/github.com/arschles/assert/@v/v0.0.0-20160620175154-fc2da9844984.info", res.HeaderMap.Get("Location"))
+	r.Equal("/github.com/athens-artifacts/no-tags/@v/v0.0.0-20180803171426-1a540c5d67ab.info", res.HeaderMap.Get("Location"))
 
 	// Normal version, no redirect
-	res = w.Request("/github.com/arschles/assert/@v/v1.0.0.info").Get()
+	res = w.Request("/github.com/athens-artifacts/maturelib/@v/v2.0.0.info").Get()
 	r.Equal(200, res.Code)
 }
