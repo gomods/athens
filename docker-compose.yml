@@ -17,9 +17,9 @@ services:
     environment:
       MINIO_ACCESS_KEY: minio
       MINIO_SECRET_KEY: minio123
-  datadag:
+  datadog:
     environment:
-      - DD_API_KEY
+      - DD_API_KEY=
       - DD_LOG_LEVEL=trace
       - DD_APM_ENABLED=true
     image:
