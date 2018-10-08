@@ -19,7 +19,7 @@ type goListResult struct {
 
 // PseudoVersionFromHash returns the go mod pseudoversion associated to the given commit hash used as version
 func PseudoVersionFromHash(ctx context.Context, fs afero.Fs, gobinary, mod, ver string) (string, error) {
-	const op errors.Op = "goGetFetcher.PseudoVersionFromHash"
+	const op errors.Op = "module.PseudoVersionFromHash"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 
