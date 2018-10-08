@@ -12,6 +12,7 @@ type ProxyConfig struct {
 	ValidatorHook         string `envconfig:"ATHENS_PROXY_VALIDATOR"`
 	PathPrefix            string `envconfig:"ATHENS_PATH_PREFIX"`
 	NETRCPath             string `envconfig:"ATHENS_NETRC_PATH"`
+	GithubToken           string `envconfig:"ATHENS_GITHUB_TOKEN"`
 	HGRCPath              string `envconfig:"ATHENS_HGRC_PATH"`
 }
 
