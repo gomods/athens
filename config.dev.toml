@@ -58,7 +58,7 @@ MaxWorkerFails = 5
 # Env override: ATHENS_FILTER_FILE
 FilterFile = "filter.conf"
 
-# Timeout is the timeout for external network calls in seconds 
+# Timeout is the timeout for external network calls in seconds
 # This value is used as the default for storage backends if they don't specify timeouts
 # Defaults to 300
 # Env override: ATHENS_TIMEOUT
@@ -127,11 +127,11 @@ EnableCSRFProtection = false
     # Env override: ATHENS_NETRC_PATH
     NETRCPath = ""
 
-    # GithubToken can be used instead of a NETRCPath to authenticate 
-    # the proxy to your own private repos on github. This makes it 
+    # GithubToken can be used instead of a NETRCPath to authenticate
+    # the proxy to your own private repos on github. This makes it
     # easier for users and for platforms like GAE to only be provided
-    # a Github token instead of a .netrc file. Internally, the proxy 
-    # just create a .netrc file for you. 
+    # a Github token instead of a .netrc file. Internally, the proxy
+    # just create a .netrc file for you.
     # Env override: ATHENS_GITHUB_TOKEN
     GithubToken = ""
 
@@ -144,7 +144,7 @@ EnableCSRFProtection = false
     # Env override: ATHENS_HGRC_PATH
     HGRCPath = ""
 
-    # TraceExporterURL is the URL to which Athens populates distributed tracing 
+    # TraceExporterURL is the URL to which Athens populates distributed tracing
     # information such as Jaeger. In Stackdriver, use this as the GCP ProjectID.
     # Env override: ATHENS_TRACE_EXPORTER_URL
     TraceExporterURL = ""
@@ -152,7 +152,7 @@ EnableCSRFProtection = false
     # TraceExporter is the service to which the data collected by OpenCensus can be exported to.
     # Possible values are: jaeger, datadog, and stackdriver.
     # Env overide: ATHENS_TRACE_EXPORTER
-    TraceExporter = "" 
+    TraceExporter = ""
 
 [Olympus]
     # StorageType sets the type of storage backend Olympus will use.
@@ -186,7 +186,7 @@ EnableCSRFProtection = false
         Timeout = 300
 
     [Storage.Disk]
-        # RootPath is the Athens Disk Root folder 
+        # RootPath is the Athens Disk Root folder
         # Env override: ATHENS_DISK_STORAGE_ROOT
         RootPath = "/path/on/disk"
 
@@ -224,7 +224,7 @@ EnableCSRFProtection = false
         # Defaults to true
         # Env override: ATHENS_MINIO_USE_SSL
         EnableSSL = false
-        
+
         # Minio Bucket to use for storage
         # Defaults to gomods
         # Env override: ATHENS_MINIO_BUCKET_NAME
