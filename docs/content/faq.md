@@ -71,7 +71,7 @@ proper authentication.
 
 ### Is there support for monitoring and observability for Proxy?
 
-Right now, we have structured logs for proxy. Along with that, we have added tracing to help developers identify critical code paths and debug latency issues. While there is no setup required for logs, tracing requires some installation. We currently store our trace exports using [Jaeger](https://www.jaegertracing.io/), GCP Stackdriver & Datadog (untested). Further support for other exporters is in progress.  
+Right now, we have structured logs for proxy. Along with that, we have added tracing to help developers identify critical code paths and debug latency issues. While there is no setup required for logs, tracing requires some installation. We currently support exporting traces with [Jaeger](https://www.jaegertracing.io/), [GCP Stackdriver](https://cloud.google.com/stackdriver/) & [Datadog](https://docs.datadoghq.com/tracing/) (untested). Further support for other exporters is in progress.
 
 To try out tracing with Jaeger, do the following:
 
