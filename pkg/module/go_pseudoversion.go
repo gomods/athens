@@ -8,6 +8,7 @@ import (
 
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/observ"
+	"github.com/gomods/athens/pkg/paths"
 	"github.com/spf13/afero"
 )
 
@@ -27,7 +28,7 @@ func PseudoVersionFromHash(ctx context.Context, fs afero.Fs, gobinary, mod, ver 
 		return ver, nil
 	}
 
-	fullURI := getVersionURI(mod, ver)
+	fullURI := paths.FmtModVer(mod, ver)
 	cmd := exec.Command(gobinary, "list", "-m", "-json", fullURI)
 
 	tmpRoot, err := afero.TempDir(fs, "", "pseudover")

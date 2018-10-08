@@ -19,6 +19,12 @@ func DecodePath(encoding string) (path string, err error) {
 	return path, nil
 }
 
+// FmtModVer is a helper function that can take
+// pkg/a/b and v2.3.1 and returns pkg/a/b@v2.3.1
+func FmtModVer(mod, ver string) string {
+	return fmt.Sprintf("%s@%s", mod, ver)
+}
+
 // Ripped from cmd/go
 func decodeString(encoding string) (string, bool) {
 	var buf []byte

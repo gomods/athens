@@ -4,9 +4,9 @@ import (
 	"context"
 	"sync"
 
-	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/observ"
+	"github.com/gomods/athens/pkg/paths"
 )
 
 // WithSingleflight returns a singleflight stasher.
@@ -30,7 +30,7 @@ type withsf struct {
 }
 
 func (s *withsf) process(ctx context.Context, mod, ver string) {
-	mv := config.FmtModVer(mod, ver)
+	mv := paths.FmtModVer(mod, ver)
 	err := s.s.Stash(ctx, mod, ver)
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -45,7 +45,7 @@ func (s *withsf) Stash(ctx context.Context, mod, ver string) error {
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 
-	mv := config.FmtModVer(mod, ver)
+	mv := paths.FmtModVer(mod, ver)
 	s.mu.Lock()
 	subCh := make(chan error, 1)
 	_, inFlight := s.subs[mv]

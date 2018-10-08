@@ -13,6 +13,7 @@ import (
 
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/observ"
+	"github.com/gomods/athens/pkg/paths"
 	"github.com/gomods/athens/pkg/storage"
 	"github.com/spf13/afero"
 )
@@ -133,7 +134,7 @@ func Dummy(fs afero.Fs, repoRoot string) error {
 // on module@version from the repoRoot with GOPATH=gopath, and returns a non-nil error if anything went wrong.
 func downloadModule(goBinaryName string, fs afero.Fs, gopath, repoRoot, module, version string) (goModule, error) {
 	const op errors.Op = "module.downloadModule"
-	fullURI := getVersionURI(module, version)
+	fullURI := paths.FmtModVer(module, version)
 
 	cmd := exec.Command(goBinaryName, "mod", "download", "-json", fullURI)
 	cmd.Env = PrepareEnv(gopath)
@@ -208,10 +209,4 @@ func validGoBinary(name string) error {
 		return errors.E(op, err)
 	}
 	return nil
-}
-
-func getVersionURI(mod, ver string) string {
-	uri := strings.TrimSuffix(mod, "/")
-	return fmt.Sprintf("%s@%s", uri, ver)
-
 }

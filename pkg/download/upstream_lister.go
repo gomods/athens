@@ -7,9 +7,9 @@ import (
 	"os/exec"
 	"time"
 
-	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/module"
+	"github.com/gomods/athens/pkg/paths"
 	"github.com/gomods/athens/pkg/storage"
 	"github.com/spf13/afero"
 )
@@ -46,7 +46,7 @@ func (l *vcsLister) List(mod string) (*storage.RevInfo, []string, error) {
 	cmd := exec.Command(
 		l.goBinPath,
 		"list", "-m", "-versions", "-json",
-		config.FmtModVer(mod, "latest"),
+		paths.FmtModVer(mod, "latest"),
 	)
 	cmd.Dir = hackyPath
 	stdout := &bytes.Buffer{}
