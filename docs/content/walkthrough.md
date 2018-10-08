@@ -87,7 +87,7 @@ for a short period of time, as you will quickly run out of memory and the storag
 doesn't persist between restarts.
 
 ### With Docker
-In order to run Athens localy in our dev machine with Docker (proxy enabled), we need first to create a directory that will store the persitant modules.
+In order to run the Athens Proxy using docker, we need first to create a directory that will store the persitant modules.
 In the example below, the new directory is named `athens-storage` and is located in our userspace (i.e. `$HOME`). 
 Then we need to set the `ATHENS_STORAGE_TYPE` and `ATHENS_DISK_STORAGE_ROOT` environment variables when we run the Docker container.
 
