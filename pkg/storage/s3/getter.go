@@ -30,8 +30,9 @@ func (s *Storage) Info(ctx context.Context, module, version string) ([]byte, err
 	if err != nil {
 		return nil, errors.E(op, err, errors.M(module), errors.V(version))
 	}
+	defer infoReader.Close()
+
 	infoBytes, err := ioutil.ReadAll(infoReader)
-	infoReader.Close()
 	if err != nil {
 		return nil, errors.E(op, err, errors.M(module), errors.V(version))
 	}
@@ -55,8 +56,9 @@ func (s *Storage) GoMod(ctx context.Context, module, version string) ([]byte, er
 	if err != nil {
 		return nil, errors.E(op, err, errors.M(module), errors.V(version))
 	}
+	defer modReader.Close()
+
 	modBytes, err := ioutil.ReadAll(modReader)
-	modReader.Close()
 	if err != nil {
 		return nil, errors.E(op, fmt.Errorf("could not get new reader for mod file: %s", err), errors.M(module), errors.V(version))
 	}

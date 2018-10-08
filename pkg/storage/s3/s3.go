@@ -14,7 +14,7 @@ import (
 	"github.com/gomods/athens/pkg/errors"
 )
 
-// Storage implements (./pkg/storage).Saver and
+// Storage implements (./pkg/storage).Backend and
 // also provides a function to fetch the location of a module
 // Storage uses amazon aws go SDK which expects these env variables
 // - AWS_REGION 			- region for this storage, e.g 'us-west-2'
