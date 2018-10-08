@@ -52,7 +52,9 @@ more and more with other contributors.
 
 [Brian Ketelsen](https://twitter.com/bketelsen) created an awesome video on
 making your first open source pull request, for an overview of the process go
-[watch that now](https://www.youtube.com/watch?v=bgSDcTyysRc).
+[watch that now](https://www.youtube.com/watch?v=bgSDcTyysRc). There's also a
+[great video series](https://egghead.io/courses/how-to-contribute-to-an-open-source-project-on-github)
+on contributing to an Open Source project by [Kent C. Dodds](https://twitter.com/kentcdodds).
 
 When we receive a new pull request, it may take time for a maintainer or other
 contributor to get to it, but when we do a few things will happen.
