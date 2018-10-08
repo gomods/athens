@@ -97,7 +97,7 @@ func (m *ModuleStore) newSession(timeout time.Duration) (*mgo.Session, error) {
 			return nil, fmt.Errorf("failed to parse certificate from: %s", m.certPath)
 		}
 
-		// tlsConfig.InsecureSkipVerify = true
+		tlsConfig.InsecureSkipVerify = true
 		tlsConfig.ClientCAs = roots
 
 		dialInfo.DialServer = func(addr *mgo.ServerAddr) (net.Conn, error) {
