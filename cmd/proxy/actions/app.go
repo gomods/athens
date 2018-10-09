@@ -2,6 +2,7 @@ package actions
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/gobuffalo/buffalo"
 	"github.com/gobuffalo/buffalo/middleware"
@@ -39,9 +40,22 @@ func App(conf *config.Config) (*buffalo.App, error) {
 		return nil, err
 	}
 
+	if conf.Proxy.GithubToken != "" {
+		if conf.Proxy.NETRCPath != "" {
+			fmt.Println("Cannot provide both GithubToken and NETRCPath. Only provide one.")
+			os.Exit(1)
+		}
+
+		netrcFromToken(conf.Proxy.GithubToken)
+	}
+
 	// mount .netrc to home dir
 	// to have access to private repos.
-	initializeNETRC(conf.Proxy.NETRCPath)
+	initializeAuthFile(conf.Proxy.NETRCPath)
+
+	// mount .hgrc to home dir
+	// to have access to private repos.
+	initializeAuthFile(conf.Proxy.HGRCPath)
 
 	logLvl, err := logrus.ParseLevel(conf.LogLevel)
 	if err != nil {
@@ -64,6 +78,7 @@ func App(conf *config.Config) (*buffalo.App, error) {
 		Logger:      blggr,
 		Addr:        conf.Proxy.Port,
 		WorkerOff:   true,
+		Host:        "http://127.0.0.1" + conf.Proxy.Port,
 	})
 	if prefix := conf.Proxy.PathPrefix; prefix != "" {
 		// certain Ingress Controllers (such as GCP Load Balancer)
@@ -74,12 +89,22 @@ func App(conf *config.Config) (*buffalo.App, error) {
 		app = app.Group(prefix)
 	}
 
-	// Register exporter to export traces
-	exporter, err := observ.RegisterTraceExporter(conf.TraceExporterURL, Service, ENV)
+	// RegisterExporter will register an exporter where we will export our traces to.
+	// The error from the RegisterExporter would be nil if the tracer was specified by
+	// the user and the trace exporter was created successfully.
+	// RegisterExporter returns the function that all traces are flushed to the exporter
+	// and the exporter needs to be stopped. The function should be called when the exporter
+	// is no longer needed.
+	flushTraces, err := observ.RegisterExporter(
+		conf.TraceExporter,
+		conf.TraceExporterURL,
+		Service,
+		ENV,
+	)
 	if err != nil {
 		lggr.Infof("%s", err)
 	} else {
-		defer exporter.Flush()
+		defer flushTraces()
 		app.Use(observ.Tracer(Service))
 	}
 
