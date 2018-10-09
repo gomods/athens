@@ -57,15 +57,15 @@ func TestEnvOverrides(t *testing.T) {
 	expProxy := ProxyConfig{
 		StorageType:           "minio",
 		OlympusGlobalEndpoint: "mytikas.gomods.io",
-		Port:                  ":7000",
-		FilterOff:             false,
-		BasicAuthUser:         "testuser",
-		BasicAuthPass:         "testpass",
-		ForceSSL:              true,
-		ValidatorHook:         "testhook.io",
-		PathPrefix:            "prefix",
-		NETRCPath:             "/test/path/.netrc",
-		HGRCPath:              "/test/path/.hgrc",
+		Port:          ":7000",
+		FilterOff:     false,
+		BasicAuthUser: "testuser",
+		BasicAuthPass: "testpass",
+		ForceSSL:      true,
+		ValidatorHook: "testhook.io",
+		PathPrefix:    "prefix",
+		NETRCPath:     "/test/path/.netrc",
+		HGRCPath:      "/test/path/.hgrc",
 	}
 
 	expOlympus := OlympusConfig{
@@ -202,10 +202,10 @@ func TestParseExampleConfig(t *testing.T) {
 	expProxy := &ProxyConfig{
 		StorageType:           "memory",
 		OlympusGlobalEndpoint: "http://localhost:3001",
-		Port:                  ":3000",
-		FilterOff:             true,
-		BasicAuthUser:         "",
-		BasicAuthPass:         "",
+		Port:          ":3000",
+		FilterOff:     true,
+		BasicAuthUser: "",
+		BasicAuthPass: "",
 	}
 
 	expOlympus := &OlympusConfig{
@@ -248,6 +248,7 @@ func TestParseExampleConfig(t *testing.T) {
 			TimeoutConf: TimeoutConf{
 				Timeout: globalTimeout,
 			},
+			InsecureConn: false,
 		},
 	}
 
@@ -345,6 +346,7 @@ func getEnvMap(config *Config) map[string]string {
 		if storage.Mongo != nil {
 			envVars["ATHENS_MONGO_STORAGE_URL"] = storage.Mongo.URL
 			envVars["ATHENS_MONGO_CERT_PATH"] = storage.Mongo.CertPath
+			envVars["ATHENS_MONGO_INSECURE"] = strconv.FormatBool(storage.Mongo.InsecureConn)
 		}
 	}
 	return envVars
