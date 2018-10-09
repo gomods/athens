@@ -81,10 +81,9 @@ func (m *ModuleStore) newSession(timeout time.Duration, insecure bool) (*mgo.Ses
 	dialInfo.Timeout = timeout
 
 	if m.certPath != "" {
-		if insecure == true {
-			tlsConfig.InsecureSkipVerify = true
-		}
 
+		// Sets only when the env var is setup in config.dev.toml
+		tlsConfig.InsecureSkipVerify = insecure
 		var roots *x509.CertPool
 		// See if there is a system cert pool
 		roots, err = x509.SystemCertPool()
