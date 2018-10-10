@@ -2,6 +2,7 @@
 title: "Maintainers"
 date: 2018-09-28T10:40:50-07:00
 chapter: true
+weight: 3
 
 ---
 

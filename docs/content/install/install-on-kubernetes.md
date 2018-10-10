@@ -155,3 +155,18 @@ By default, the chart will install Athens with a replica count of 1. To change t
 ```console
 helm install ./charts/proxy -n athens --set replicaCount=3
 ```
+
+### .netrc file support
+
+A `.netrc` file can be shared as a secret to allow the access to private modules.
+The secret must be created from a `netrc` file using the following command (the name of the file **must** be netrc):
+
+```console
+kubectl create secret generic netrcsecret --from-file=./netrc
+```
+
+In order to instruct athens to fetch and use the secret, `netrc.enabled` flag must be set to true:
+
+```console
+helm install ./charts/proxy -n athens --set netrc.enabled=true
+```
