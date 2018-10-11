@@ -59,19 +59,21 @@ One final note - we use "caching" in lots of our docs, and that's technically wr
 
 _tldr: yes, with proper authentication configuration defined on the Athens proxy host._
 
-When the GOPROXY environment variable is set on the client-side, the go 1.11+ cli 
-does not attempt to request the meta tags, via a request that looks like `https://example.org/pkg/foo?go-get=1`. 
+When the GOPROXY environment variable is set on the client-side, the go 1.11+ cli
+does not attempt to request the meta tags, via a request that looks like `https://example.org/pkg/foo?go-get=1`.
 
-Internally Athens uses `go get` under the hood (`go mod download` to be exact) 
-without the GOPROXY environment variable set so that `go` will in turn request 
-the meta tags using the standard authentication mechanisms supported by `go`. 
+Internally Athens uses `go get` under the hood (`go mod download` to be exact)
+without the GOPROXY environment variable set so that `go` will in turn request
+the meta tags using the standard authentication mechanisms supported by `go`.
 Therefore, if `go` before v1.11 worked for you, then go 1.11+ with GOPROXY
-should work as well, provided that the Athens proxy host is configured with the 
+should work as well, provided that the Athens proxy host is configured with the
 proper authentication.
 
 ### Is there support for monitoring and observability for Proxy?
 
-Right now, we have structured logs for proxy. Along with that, we have added tracing to help developers identify critical code paths and debug latency issues. While there is no setup required for logs, tracing requires some installation. We currently store our trace exports using [Jaeger](https://www.jaegertracing.io/). Further support for other exporters is in progress.  To try out tracing, do the following:
+Right now, we have structured logs for proxy. Along with that, we have added tracing to help developers identify critical code paths and debug latency issues. While there is no setup required for logs, tracing requires some installation. We currently support exporting traces with [Jaeger](https://www.jaegertracing.io/), [GCP Stackdriver](https://cloud.google.com/stackdriver/) & [Datadog](https://docs.datadoghq.com/tracing/) (untested). Further support for other exporters is in progress.
+
+To try out tracing with Jaeger, do the following:
 
 - Set the environment to development (otherwise traces will be sampled)
 - Run `docker-compose up -d` that is found in the athens source root directory to initialize the services required
