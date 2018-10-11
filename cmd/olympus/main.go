@@ -10,7 +10,7 @@ import (
 )
 
 var (
-	configFile = flag.String("config_file", filepath.Join("..", "..", "config.toml"), "The path to the config file")
+	configFile = flag.String("config_file", filepath.Join("..", "..", "config.dev.toml"), "The path to the config file")
 )
 
 func main() {
