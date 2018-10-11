@@ -14,6 +14,7 @@ Athens is the name of the combined project that includes a global registry for [
 * If you are interested
 in what is happening between the proxy and the Go Modules feature, the [Walkthrough](/walkthrough)
 explores this in greater depth.
+* Join the [weekly development meeting](/contributing/community/developer-meetings/)! It's a great way to meet folks working on the project, ask questions or just hang out. All are welcome to join and participate.
 * For more detailed information on how to run Athens in production, check out our other documentation (coming soon!!).
 
 ---
