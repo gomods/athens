@@ -25,6 +25,8 @@ Importantly, a proxy is not intended to be a complete mirror of an upstream regi
 
 ### Registry - Olympus
 
+Note: Olympus is currently not implemented
+
 The Athens registry is a Go package registry service that is hosted globally across multiple cloud providers. The global deployment will have a DNS name (i.e. registry.golang.org) that round-robins across each cloud deployment.
 
 The role of Olympus is to provide up-to-date module metadata & code.
