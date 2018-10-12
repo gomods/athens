@@ -5,7 +5,7 @@ amazon s3 storage bucket.
 Configuration
 
 Environment variables:
-	AWS_REGION 				// region for this storage, e.g 'us-west-2'
+	AWS_REGION				// region for this storage, e.g 'us-west-2'
 	AWS_ACCESS_KEY_ID
 	AWS_SECRET_ACCESS_KEY
 	AWS_SESSION_TOKEN		// [optional]
