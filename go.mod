@@ -47,7 +47,6 @@ require (
 	github.com/smartystreets/goconvey v0.0.0-20180222194500-ef6db91d284a // indirect
 	github.com/spf13/afero v1.1.1
 	github.com/stretchr/testify v1.2.2
-	github.com/technosophos/moniker v0.0.0-20180509230615-a5dbd03a2245
 	github.com/tinylib/msgp v1.0.2 // indirect
 	github.com/unrolled/secure v0.0.0-20180618144512-8287f3899c8e
 	go.opencensus.io v0.17.0
