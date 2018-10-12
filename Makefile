@@ -1,7 +1,6 @@
 .PHONY: build
 build:
 	cd cmd/proxy && buffalo build
-	cd cmd/olympus && buffalo build
 
 .PHONY: run
 run: build
@@ -26,7 +25,6 @@ verify:
 .PHONY: test
 test:
 	cd cmd/proxy && buffalo test
-	cd cmd/olympus && buffalo test
 
 .PHONY: test-unit
 test-unit:

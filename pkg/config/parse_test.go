@@ -13,7 +13,7 @@ import (
 const exampleConfigPath = "../../config.dev.toml"
 
 func compareConfigs(parsedConf *Config, expConf *Config, t *testing.T) {
-	opts := cmpopts.IgnoreTypes(StorageConfig{}, ProxyConfig{}, OlympusConfig{})
+	opts := cmpopts.IgnoreTypes(StorageConfig{}, ProxyConfig{})
 	eq := cmp.Equal(parsedConf, expConf, opts)
 	if !eq {
 		t.Errorf("Parsed Example configuration did not match expected values. Expected: %+v. Actual: %+v", expConf, parsedConf)
@@ -21,10 +21,6 @@ func compareConfigs(parsedConf *Config, expConf *Config, t *testing.T) {
 	eq = cmp.Equal(parsedConf.Proxy, expConf.Proxy)
 	if !eq {
 		t.Errorf("Parsed Example Proxy configuration did not match expected values. Expected: %+v. Actual: %+v", expConf.Proxy, parsedConf.Proxy)
-	}
-	eq = cmp.Equal(parsedConf.Olympus, expConf.Olympus)
-	if !eq {
-		t.Errorf("Parsed Example Olympus configuration did not match expected values. Expected: %+v. Actual: %+v", expConf.Olympus, parsedConf.Olympus)
 	}
 	compareStorageConfigs(parsedConf.Storage, expConf.Storage, t)
 }
@@ -55,24 +51,17 @@ func compareStorageConfigs(parsedStorage *StorageConfig, expStorage *StorageConf
 func TestEnvOverrides(t *testing.T) {
 
 	expProxy := ProxyConfig{
-		StorageType:           "minio",
-		OlympusGlobalEndpoint: "mytikas.gomods.io",
-		Port:                  ":7000",
-		FilterOff:             false,
-		BasicAuthUser:         "testuser",
-		BasicAuthPass:         "testpass",
-		ForceSSL:              true,
-		ValidatorHook:         "testhook.io",
-		PathPrefix:            "prefix",
-		NETRCPath:             "/test/path/.netrc",
-		HGRCPath:              "/test/path/.hgrc",
-	}
-
-	expOlympus := OlympusConfig{
-		StorageType:       "minio",
-		RedisQueueAddress: ":6381",
-		Port:              ":7000",
-		WorkerType:        "memory",
+		StorageType:    "minio",
+		GlobalEndpoint: "mytikas.gomods.io",
+		Port:           ":7000",
+		FilterOff:      false,
+		BasicAuthUser:  "testuser",
+		BasicAuthPass:  "testpass",
+		ForceSSL:       true,
+		ValidatorHook:  "testhook.io",
+		PathPrefix:     "prefix",
+		NETRCPath:      "/test/path/.netrc",
+		HGRCPath:       "/test/path/.hgrc",
 	}
 
 	expConf := &Config{
@@ -82,8 +71,6 @@ func TestEnvOverrides(t *testing.T) {
 		LogLevel:        "info",
 		BuffaloLogLevel: "info",
 		GoBinary:        "go11",
-		MaxConcurrency:  4,
-		MaxWorkerFails:  10,
 		CloudRuntime:    "gcp",
 		FilterFile:      "filter2.conf",
 		TimeoutConf: TimeoutConf{
@@ -91,7 +78,6 @@ func TestEnvOverrides(t *testing.T) {
 		},
 		EnableCSRFProtection: true,
 		Proxy:                &expProxy,
-		Olympus:              &expOlympus,
 		Storage:              &StorageConfig{},
 	}
 
@@ -176,8 +162,7 @@ func TestParseExampleConfig(t *testing.T) {
 
 	// initialize all struct pointers so we get all applicable env variables
 	emptyConf := &Config{
-		Proxy:   &ProxyConfig{},
-		Olympus: &OlympusConfig{},
+		Proxy: &ProxyConfig{},
 		Storage: &StorageConfig{
 			CDN:  &CDNConfig{},
 			Disk: &DiskConfig{},
@@ -200,19 +185,12 @@ func TestParseExampleConfig(t *testing.T) {
 	globalTimeout := 300
 
 	expProxy := &ProxyConfig{
-		StorageType:           "memory",
-		OlympusGlobalEndpoint: "http://localhost:3001",
-		Port:                  ":3000",
-		FilterOff:             true,
-		BasicAuthUser:         "",
-		BasicAuthPass:         "",
-	}
-
-	expOlympus := &OlympusConfig{
-		StorageType:       "memory",
-		RedisQueueAddress: ":6379",
-		Port:              ":3001",
-		WorkerType:        "redis",
+		StorageType:    "memory",
+		GlobalEndpoint: "http://localhost:3001",
+		Port:           ":3000",
+		FilterOff:      true,
+		BasicAuthUser:  "",
+		BasicAuthPass:  "",
 	}
 
 	expStorage := &StorageConfig{
@@ -258,8 +236,6 @@ func TestParseExampleConfig(t *testing.T) {
 		GoBinary:        "go",
 		GoGetWorkers:    30,
 		ProtocolWorkers: 30,
-		MaxConcurrency:  4,
-		MaxWorkerFails:  5,
 		CloudRuntime:    "none",
 		FilterFile:      "filter.conf",
 		TimeoutConf: TimeoutConf{
@@ -267,7 +243,6 @@ func TestParseExampleConfig(t *testing.T) {
 		},
 		EnableCSRFProtection: false,
 		Proxy:                expProxy,
-		Olympus:              expOlympus,
 		Storage:              expStorage,
 	}
 
@@ -294,8 +269,6 @@ func getEnvMap(config *Config) map[string]string {
 		"ATHENS_LOG_LEVEL":              config.LogLevel,
 		"BUFFALO_LOG_LEVEL":             config.BuffaloLogLevel,
 		"ATHENS_CLOUD_RUNTIME":          config.CloudRuntime,
-		"ATHENS_MAX_CONCURRENCY":        strconv.Itoa(config.MaxConcurrency),
-		"ATHENS_MAX_WORKER_FAILS":       strconv.FormatUint(uint64(config.MaxWorkerFails), 10),
 		"ATHENS_FILTER_FILE":            config.FilterFile,
 		"ATHENS_TIMEOUT":                strconv.Itoa(config.Timeout),
 		"ATHENS_ENABLE_CSRF_PROTECTION": strconv.FormatBool(config.EnableCSRFProtection),
@@ -305,7 +278,7 @@ func getEnvMap(config *Config) map[string]string {
 	proxy := config.Proxy
 	if proxy != nil {
 		envVars["ATHENS_STORAGE_TYPE"] = proxy.StorageType
-		envVars["OLYMPUS_GLOBAL_ENDPOINT"] = proxy.OlympusGlobalEndpoint
+		envVars["ATHENS_GLOBAL_ENDPOINT"] = proxy.GlobalEndpoint
 		envVars["PORT"] = proxy.Port
 		envVars["PROXY_FILTER_OFF"] = strconv.FormatBool(proxy.FilterOff)
 		envVars["BASIC_AUTH_USER"] = proxy.BasicAuthUser
@@ -315,12 +288,6 @@ func getEnvMap(config *Config) map[string]string {
 		envVars["ATHENS_PATH_PREFIX"] = proxy.PathPrefix
 		envVars["ATHENS_NETRC_PATH"] = proxy.NETRCPath
 		envVars["ATHENS_HGRC_PATH"] = proxy.HGRCPath
-	}
-
-	olympus := config.Olympus
-	if olympus != nil {
-		envVars["OLYMPUS_BACKGROUND_WORKER_TYPE"] = olympus.WorkerType
-		envVars["OLYMPUS_REDIS_QUEUE_ADDRESS"] = olympus.RedisQueueAddress
 	}
 
 	storage := config.Storage

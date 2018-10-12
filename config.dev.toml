@@ -44,16 +44,6 @@ BuffaloLogLevel = "debug"
 # Env override: ATHENS_CLOUD_RUNTIME
 CloudRuntime = "none"
 
-# MaxConcurrency sets maximum level of concurrency
-# Defaults to number of cores if not specified.
-# Env override: ATHENS_MAX_CONCURRENCY
-MaxConcurrency = 4
-
-# The maximum number of failures for jobs submitted to buffalo workers
-# Defaults to 5.
-# Env override: ATHENS_MAX_WORKER_FAILS
-MaxWorkerFails = 5
-
 # The filename for the include exclude filter. Defaults to 'filter.conf'
 # Env override: ATHENS_FILTER_FILE
 FilterFile = "filter.conf"
@@ -80,9 +70,9 @@ EnableCSRFProtection = false
     # Env override: PORT
     Port = ":3000"
 
-    # The endpoint for Olympus in case of a proxy cache miss
-    # Env override: OLYMPUS_GLOBAL_ENDPOINT
-    OlympusGlobalEndpoint = "http://localhost:3001"
+    # The endpoint for a package registry in case of a proxy cache miss
+    # Env override: ATHENS_GLOBAL_ENDPOINT
+    GlobalEndpoint = "http://localhost:3001"
 
     # Redis queue for buffalo workers
     # Defaults to ":6379"
@@ -154,28 +144,8 @@ EnableCSRFProtection = false
     # Env overide: ATHENS_TRACE_EXPORTER
     TraceExporter = ""
 
-[Olympus]
-    # StorageType sets the type of storage backend Olympus will use.
-    # Possible values are memory, disk, mongo, postgres, sqlite, cockroach, mysql
-    # Defaults to memory
-    # Env override: ATHENS_STORAGE_TYPE
-    StorageType = "memory"
-
-    # Port sets the port olympus listens on
-    # Env override: PORT
-    Port = ":3001"
-    # Background worker type. Possible values are memory and redis
-    # Defaults to redis
-    # Env override: OLYMPUS_BACKGROUND_WORKER_TYPE
-    WorkerType = "redis"
-
-    # Redis queue for buffalo workers
-    # Defaults to ":6379"
-    # Env override: OLYMPUS_REDIS_QUEUE_ADDRESS
-    RedisQueueAddress = ":6379"
-
 [Storage]
-    # Only storage backends that are specified in Proxy.StorageType or Olympus.StorageType are required here
+    # Only storage backends that are specified in Proxy.StorageType are required here
     [Storage.CDN]
         # Endpoint for CDN storage
         # Env override: CDN_ENDPOINT
