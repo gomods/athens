@@ -80,7 +80,14 @@ func (m *ModuleStore) newSession(timeout time.Duration) (*mgo.Session, error) {
 	dialInfo.Timeout = timeout
 
 	if m.certPath != "" {
-		roots := x509.NewCertPool()
+		var roots *x509.CertPool
+		// See if there is a system cert pool
+		roots, err = x509.SystemCertPool()
+		if err != nil {
+			// If there is no system cert pool, create a new one
+			roots = x509.NewCertPool()
+		}
+
 		cert, err := ioutil.ReadFile(m.certPath)
 		if err != nil {
 			return nil, err
