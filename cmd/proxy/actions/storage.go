@@ -55,9 +55,6 @@ func GetStorage(storageType string, storageConfig *config.StorageConfig) (storag
 		if storageConfig.S3 == nil {
 			return nil, errors.E(op, "Invalid S3 Storage Configuration")
 		}
-		if storageConfig.CDN == nil {
-			return nil, errors.E(op, "Invalid CDN Storage Configuration")
-		}
 		return s3.New(storageConfig.S3, storageConfig.CDN)
 	default:
 		return nil, fmt.Errorf("storage type %s is unknown", storageType)

@@ -2,6 +2,7 @@ package s3
 
 import (
 	"context"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/gomods/athens/pkg/errors"
@@ -24,7 +25,7 @@ func (s *Storage) Delete(ctx context.Context, module, version string) error {
 		return errors.E(op, errors.M(module), errors.V(version), errors.KindNotFound)
 	}
 
-	return modupl.Delete(ctx, module, version, s.remove, s.cdnConf.TimeoutDuration())
+	return modupl.Delete(ctx, module, version, s.remove, s.s3Conf.TimeoutDuration())
 }
 
 func (s *Storage) remove(ctx context.Context, path string) error {

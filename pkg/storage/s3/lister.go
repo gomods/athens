@@ -2,10 +2,10 @@ package s3
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/s3"
 	"strings"
 
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/observ"
 )
@@ -36,6 +36,10 @@ func extractVersions(objects []*s3.Object) []string {
 	for _, o := range objects {
 		if strings.HasSuffix(*o.Key, ".info") {
 			segments := strings.Split(*o.Key, "/")
+
+			if len(segments) <= 0 {
+				continue
+			}
 			// version should be last segment w/ .info suffix
 			last := segments[len(segments)-1]
 			version := strings.TrimSuffix(last, ".info")

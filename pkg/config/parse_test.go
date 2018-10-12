@@ -151,14 +151,11 @@ func TestStorageEnvOverrides(t *testing.T) {
 			},
 		},
 		S3: &S3Config{
-			Region:         "s3Region",
-			Key:            "s3Key",
-			Secret:         "s3Secret",
-			Token:          "s3Token",
-			Bucket:         "s3Bucket",
-			Endpoint:       "s3Endpoint",
-			DisableSSL:     true,
-			ForcePathStyle: true,
+			Region: "s3Region",
+			Key:    "s3Key",
+			Secret: "s3Secret",
+			Token:  "s3Token",
+			Bucket: "s3Bucket",
 		},
 	}
 	envVars := getEnvMap(&Config{Storage: expStorage})
@@ -261,14 +258,11 @@ func TestParseExampleConfig(t *testing.T) {
 			},
 		},
 		S3: &S3Config{
-			Region:         "us-east-1",
-			Key:            "minio",
-			Secret:         "minio123",
-			Token:          "",
-			Bucket:         "gomods",
-			Endpoint:       "127.0.0.1:9001",
-			DisableSSL:     true,
-			ForcePathStyle: true,
+			Region: "us-east-1",
+			Key:    "minio",
+			Secret: "minio123",
+			Token:  "",
+			Bucket: "gomods",
 		},
 	}
 
@@ -367,7 +361,7 @@ func getEnvMap(config *Config) map[string]string {
 			envVars["ATHENS_MONGO_STORAGE_URL"] = storage.Mongo.URL
 			envVars["ATHENS_MONGO_CERT_PATH"] = storage.Mongo.CertPath
 		}
-		if storage.Mongo != nil {
+		if storage.S3 != nil {
 			envVars["AWS_REGION"] = storage.S3.Region
 			envVars["AWS_ACCESS_KEY_ID"] = storage.S3.Key
 			envVars["AWS_SECRET_ACCESS_KEY"] = storage.S3.Secret

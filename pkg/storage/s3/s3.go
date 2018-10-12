@@ -2,12 +2,12 @@ package s3
 
 import (
 	"fmt"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/credentials"
-	"github.com/aws/aws-sdk-go/service/s3/s3iface"
 	"net/url"
 
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/s3/s3iface"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager/s3manageriface"
 	"github.com/gomods/athens/pkg/config"
@@ -27,11 +27,12 @@ type Storage struct {
 	baseURI  *url.URL
 	uploader s3manageriface.UploaderAPI
 	s3API    s3iface.S3API
+	s3Conf   *config.S3Config
 	cdnConf  *config.CDNConfig
 }
 
 // New creates a new AWS S3 CDN saver
-func New(s3Conf *config.S3Config, cdnConf *config.CDNConfig) (*Storage, error) {
+func New(s3Conf *config.S3Config, cdnConf *config.CDNConfig, options ...func(*aws.Config)) (*Storage, error) {
 	const op errors.Op = "s3.New"
 	u, err := url.Parse(fmt.Sprintf("http://%s.s3.amazonaws.com", s3Conf.Bucket))
 	if err != nil {
@@ -39,14 +40,12 @@ func New(s3Conf *config.S3Config, cdnConf *config.CDNConfig) (*Storage, error) {
 	}
 
 	awsConfig := &aws.Config{
-		Credentials:      credentials.NewStaticCredentials(s3Conf.Key, s3Conf.Secret, s3Conf.Token),
-		Region:           aws.String(s3Conf.Region),
-		DisableSSL:       aws.Bool(s3Conf.DisableSSL),
-		S3ForcePathStyle: aws.Bool(s3Conf.ForcePathStyle),
+		Credentials: credentials.NewStaticCredentials(s3Conf.Key, s3Conf.Secret, s3Conf.Token),
+		Region:      aws.String(s3Conf.Region),
 	}
 
-	if s3Conf.Endpoint != "" {
-		awsConfig.Endpoint = aws.String(s3Conf.Endpoint)
+	for _, o := range options {
+		o(awsConfig)
 	}
 
 	// create a session
@@ -62,6 +61,7 @@ func New(s3Conf *config.S3Config, cdnConf *config.CDNConfig) (*Storage, error) {
 		s3API:    uploader.S3,
 		baseURI:  u,
 		cdnConf:  cdnConf,
+		s3Conf:   s3Conf,
 	}, nil
 }
 
@@ -72,5 +72,8 @@ func New(s3Conf *config.S3Config, cdnConf *config.CDNConfig) (*Storage, error) {
 //
 //	<meta name="go-import" content="gomods.com/athens mod BaseURL()">
 func (s Storage) BaseURL() *url.URL {
+	if s.cdnConf == nil {
+		return s.baseURI
+	}
 	return s.cdnConf.CDNEndpointWithDefault(s.baseURI)
 }
