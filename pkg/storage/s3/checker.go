@@ -28,8 +28,7 @@ func (s *Storage) Exists(ctx context.Context, module, version string) (bool, err
 		Key:    aws.String(pkgName),
 	}
 
-	_, err := s.s3API.HeadObjectWithContext(ctx, hoParams)
-	if err != nil {
+	if _, err := s.s3API.HeadObjectWithContext(ctx, hoParams); err != nil {
 		if err.(awserr.Error).Code() == s3ErrorCodeNotFound {
 			return false, nil
 		}

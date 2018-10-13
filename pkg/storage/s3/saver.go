@@ -37,9 +37,10 @@ func (s *Storage) upload(ctx context.Context, path, contentType string, stream i
 		Body:        stream,
 		ContentType: aws.String(contentType),
 	}
-	_, err := s.uploader.UploadWithContext(ctx, upParams)
-	if err != nil {
+
+	if _, err := s.uploader.UploadWithContext(ctx, upParams); err != nil {
 		return errors.E(op, err)
 	}
+
 	return nil
 }

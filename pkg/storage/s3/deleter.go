@@ -37,8 +37,7 @@ func (s *Storage) remove(ctx context.Context, path string) error {
 		Key:    aws.String(path),
 	}
 
-	_, err := s.s3API.DeleteObjectWithContext(ctx, delParams)
-	if err != nil {
+	if _, err := s.s3API.DeleteObjectWithContext(ctx, delParams); err != nil {
 		return errors.E(op, err, errors.M(path))
 	}
 
