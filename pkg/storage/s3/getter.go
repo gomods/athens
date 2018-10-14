@@ -98,7 +98,7 @@ func (s *Storage) open(ctx context.Context, path string) (io.ReadCloser, error) 
 
 	goo, err := s.s3API.GetObjectWithContext(ctx, getParams)
 	if err != nil {
-		return nil, errors.E(op, err, errors.M(path))
+		return nil, errors.E(op, err)
 	}
 
 	return goo.Body, nil

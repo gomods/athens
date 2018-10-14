@@ -34,7 +34,7 @@ type Storage struct {
 // New creates a new AWS S3 CDN saver
 func New(s3Conf *config.S3Config, cdnConf *config.CDNConfig, options ...func(*aws.Config)) (*Storage, error) {
 	const op errors.Op = "s3.New"
-	u, err := url.Parse(fmt.Sprintf("http://%s.s3.amazonaws.com", s3Conf.Bucket))
+	u, err := url.Parse(fmt.Sprintf("https://%s.s3.amazonaws.com", s3Conf.Bucket))
 	if err != nil {
 		return nil, errors.E(op, err)
 	}

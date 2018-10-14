@@ -247,15 +247,15 @@ EnableCSRFProtection = false
     [Storage.S3]
         # Access Key for S3 storage
         # Env override: AWS_REGION
-        Region = ""
+        Region = "MY_AWS_REGION"
 
         # Access Key for S3 storage
         # Env override: AWS_ACCESS_KEY_ID
-        Key = ""
+        Key = "MY_AWS_ACCESS_KEY_ID"
 
         # Secret Key for S3 storage
         # Env override: AWS_SECRET_ACCESS_KEY
-        Secret = ""
+        Secret = "MY_AWS_SECRET_ACCESS_KEY"
 
         # Session Token for S3 storage
         # Env override: AWS_SESSION_TOKEN
@@ -268,4 +268,4 @@ EnableCSRFProtection = false
         # S3 Bucket to use for storage
         # Defaults to gomods
         # Env override: ATHENS_S3_BUCKET_NAME
-        Bucket = ""
+        Bucket = "MY_S3_BUCKET_NAME"

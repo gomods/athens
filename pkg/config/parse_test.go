@@ -50,6 +50,10 @@ func compareStorageConfigs(parsedStorage *StorageConfig, expStorage *StorageConf
 	if !eq {
 		t.Errorf("Parsed Example Storage configuration did not match expected values. Expected: %+v. Actual: %+v", expStorage.GCP, parsedStorage.GCP)
 	}
+	eq = cmp.Equal(parsedStorage.S3, expStorage.S3)
+	if !eq {
+		t.Errorf("Parsed Example Storage configuration did not match expected values. Expected: %+v. Actual: %+v", expStorage.S3, parsedStorage.S3)
+	}
 }
 
 func TestEnvOverrides(t *testing.T) {
@@ -156,6 +160,9 @@ func TestStorageEnvOverrides(t *testing.T) {
 			Secret: "s3Secret",
 			Token:  "s3Token",
 			Bucket: "s3Bucket",
+			TimeoutConf: TimeoutConf{
+				Timeout: globalTimeout,
+			},
 		},
 	}
 	envVars := getEnvMap(&Config{Storage: expStorage})
@@ -258,11 +265,14 @@ func TestParseExampleConfig(t *testing.T) {
 			},
 		},
 		S3: &S3Config{
-			Region: "us-east-1",
-			Key:    "minio",
-			Secret: "minio123",
+			Region: "MY_AWS_REGION",
+			Key:    "MY_AWS_ACCESS_KEY_ID",
+			Secret: "MY_AWS_SECRET_ACCESS_KEY",
 			Token:  "",
-			Bucket: "gomods",
+			Bucket: "MY_S3_BUCKET_NAME",
+			TimeoutConf: TimeoutConf{
+				Timeout: globalTimeout,
+			},
 		},
 	}
 
