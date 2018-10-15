@@ -401,7 +401,7 @@ func Test_checkFilePerms(t *testing.T) {
 			true,
 		},
 		{
-			"should  have an error when at least 1 file has wrong permissions",
+			"should have an error when at least 1 file has wrong permissions",
 			args{
 				[]string{f2.Name(), f1.Name()},
 			},
