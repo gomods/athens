@@ -263,6 +263,7 @@ func TestParseExampleConfig(t *testing.T) {
 			TimeoutConf: TimeoutConf{
 				Timeout: globalTimeout,
 			},
+			InsecureConn: false,
 		},
 		S3: &S3Config{
 			Region: "MY_AWS_REGION",
@@ -370,6 +371,7 @@ func getEnvMap(config *Config) map[string]string {
 		if storage.Mongo != nil {
 			envVars["ATHENS_MONGO_STORAGE_URL"] = storage.Mongo.URL
 			envVars["ATHENS_MONGO_CERT_PATH"] = storage.Mongo.CertPath
+			envVars["ATHENS_MONGO_INSECURE"] = strconv.FormatBool(storage.Mongo.InsecureConn)
 		}
 		if storage.S3 != nil {
 			envVars["AWS_REGION"] = storage.S3.Region
