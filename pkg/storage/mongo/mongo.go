@@ -21,6 +21,7 @@ type ModuleStore struct {
 	c        string // collection
 	url      string
 	certPath string
+	insecure bool // Only to be used for development instances
 	timeout  time.Duration
 }
 
@@ -45,7 +46,7 @@ func (m *ModuleStore) connect() error {
 	const op errors.Op = "mongo.connect"
 
 	var err error
-	m.s, err = m.newSession(m.timeout)
+	m.s, err = m.newSession(m.timeout, m.insecure)
 	if err != nil {
 		return errors.E(op, err)
 	}
@@ -69,7 +70,7 @@ func (m *ModuleStore) initDatabase() error {
 	return c.EnsureIndex(index)
 }
 
-func (m *ModuleStore) newSession(timeout time.Duration) (*mgo.Session, error) {
+func (m *ModuleStore) newSession(timeout time.Duration, insecure bool) (*mgo.Session, error) {
 	tlsConfig := &tls.Config{}
 
 	dialInfo, err := mgo.ParseURL(m.url)
@@ -80,6 +81,8 @@ func (m *ModuleStore) newSession(timeout time.Duration) (*mgo.Session, error) {
 	dialInfo.Timeout = timeout
 
 	if m.certPath != "" {
+		// Sets only when the env var is setup in config.dev.toml
+		tlsConfig.InsecureSkipVerify = insecure
 		var roots *x509.CertPool
 		// See if there is a system cert pool
 		roots, err = x509.SystemCertPool()
@@ -97,7 +100,6 @@ func (m *ModuleStore) newSession(timeout time.Duration) (*mgo.Session, error) {
 			return nil, fmt.Errorf("failed to parse certificate from: %s", m.certPath)
 		}
 
-		tlsConfig.InsecureSkipVerify = true
 		tlsConfig.ClientCAs = roots
 
 		dialInfo.DialServer = func(addr *mgo.ServerAddr) (net.Conn, error) {
