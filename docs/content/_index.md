@@ -7,17 +7,23 @@ date: 2018-02-11T16:52:23-05:00
 
 ## Athens is a Server for Your Go Packages
 
-Welcome, Gophers! We're looking forward to introducing you to Athens.. 
+Welcome, Gophers! We're looking forward to introducing you to Athens..
 
 On this site, we document Athens in detail. We'll teach you what it does, why it matters, what you can do with it, and how you can run it yourself. Below is a brief summary for you.
 
 #### What Does Athens Do?
 
-Athens provides a server for [Go Modules](https://github.com/golang/go/wiki/Modules) that you can run. It serves public code and your private code for you, so you don't have to pull directly from a version control system (VCS) like GitHub or GitLab
+Athens provides a server for [Go Modules](https://github.com/golang/go/wiki/Modules) that you can run. It serves public code and your private code for you, so you don't have to pull directly from a version control system (VCS) like GitHub or GitLab.
 
 #### Why Does it Matter?
 
-Previously, the Go community has had lots of problems with libraries disappearing or changing without warning. If someone changes their library, your app can break overnight - oh no! Athens solves these problems by copying code from VCS's into _immutable_ storage.
+Previously, the Go community has had lots of problems with libraries disappearing or changing without warning. It's easy for package maintainers to make changes to their code that can break yours - and much of the time it's an accident! Could your build break if one of your dependencies did this?
+
+- Commit `abdef` was deleted
+- Tag `v0.1.0` was force pushed
+- The repository was deleted altogether
+
+ Since your app's dependencies come directly from GitHub, any of those above cases can happen to you and your builds can break when they do - oh no! Athens solves these problems by copying code from VCS's into _immutable_ storage.
 
 #### How Do I Use It?
 
