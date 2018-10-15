@@ -1,6 +1,7 @@
 package config
 
 import (
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -359,5 +360,59 @@ func restoreEnv(envVars map[string]string) {
 		} else {
 			os.Unsetenv(k)
 		}
+	}
+}
+
+func Test_checkFilePerms(t *testing.T) {
+	f1, err := ioutil.TempFile(os.TempDir(), "prefix-")
+	if err != nil {
+		t.FailNow()
+	}
+	defer os.Remove(f1.Name())
+	err = os.Chmod(f1.Name(), 0777)
+
+	f2, err := ioutil.TempFile(os.TempDir(), "prefix-")
+	if err != nil {
+		t.FailNow()
+	}
+	defer os.Remove(f2.Name())
+	err = os.Chmod(f2.Name(), 0600)
+
+	type args struct {
+		files []string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{
+			"should not have an error on empty file name",
+			args{
+				[]string{"", f2.Name()},
+			},
+			false,
+		},
+		{
+			"should have an error if all the files have incorrect permissions",
+			args{
+				[]string{f1.Name(), f1.Name(), f1.Name()},
+			},
+			true,
+		},
+		{
+			"should  have an error when at least 1 file has wrong permissions",
+			args{
+				[]string{f2.Name(), f1.Name()},
+			},
+			true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := checkFilePerms(tt.args.files...); (err != nil) != tt.wantErr {
+				t.Errorf("checkFilePerms() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
 	}
 }

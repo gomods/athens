@@ -2,10 +2,12 @@ package config
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 	"runtime"
 
 	"github.com/BurntSushi/toml"
+	"github.com/gomods/athens/pkg/errors"
 	"github.com/kelseyhightower/envconfig"
 	validator "gopkg.in/go-playground/validator.v9"
 )
@@ -37,6 +39,11 @@ func ParseConfigFile(configFile string) (*Config, error) {
 	var config Config
 	// attempt to read the given config file
 	if _, err := toml.DecodeFile(configFile, &config); err != nil {
+		return nil, err
+	}
+
+	// Check file perms from config
+	if err := checkFilePerms(config.FilterFile); err != nil {
 		return nil, err
 	}
 
@@ -98,4 +105,25 @@ func GetConf(path string) (*Config, error) {
 		return nil, fmt.Errorf("Unable to parse test config file: %s", err.Error())
 	}
 	return conf, nil
+}
+
+// checkFilePerms given a list of files
+func checkFilePerms(files ...string) error {
+	const op = "config.checkFilePerms"
+
+	for _, f := range files {
+		if f == "" {
+			continue
+		}
+		fInfo, err := os.Lstat(f)
+		if err != nil {
+			return errors.E(op, err)
+		}
+
+		if fInfo.Mode() != 0600 {
+			return errors.E(op, f+" should have 0660 as permission")
+		}
+	}
+
+	return nil
 }
