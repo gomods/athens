@@ -226,6 +226,7 @@ func TestParseExampleConfig(t *testing.T) {
 			TimeoutConf: TimeoutConf{
 				Timeout: globalTimeout,
 			},
+			InsecureConn: false,
 		},
 	}
 
@@ -312,6 +313,7 @@ func getEnvMap(config *Config) map[string]string {
 		if storage.Mongo != nil {
 			envVars["ATHENS_MONGO_STORAGE_URL"] = storage.Mongo.URL
 			envVars["ATHENS_MONGO_CERT_PATH"] = storage.Mongo.CertPath
+			envVars["ATHENS_MONGO_INSECURE"] = strconv.FormatBool(storage.Mongo.InsecureConn)
 		}
 	}
 	return envVars
