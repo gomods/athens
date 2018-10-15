@@ -115,6 +115,15 @@ func checkFilePerms(files ...string) error {
 		if f == "" {
 			continue
 		}
+
+		// TODO: Remove opening a file
+		// There is a subtle bug in the filter module which ignores the filter file if it does not find it.
+		// This check can be removed once that has been fixed
+		_, err := os.Open(f)
+		if err != nil {
+			continue
+		}
+
 		fInfo, err := os.Lstat(f)
 		if err != nil {
 			return errors.E(op, err)
