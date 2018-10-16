@@ -51,6 +51,10 @@ func compareStorageConfigs(parsedStorage *StorageConfig, expStorage *StorageConf
 	if !eq {
 		t.Errorf("Parsed Example Storage configuration did not match expected values. Expected: %+v. Actual: %+v", expStorage.GCP, parsedStorage.GCP)
 	}
+	eq = cmp.Equal(parsedStorage.S3, expStorage.S3)
+	if !eq {
+		t.Errorf("Parsed Example Storage configuration did not match expected values. Expected: %+v. Actual: %+v", expStorage.S3, parsedStorage.S3)
+	}
 }
 
 func TestEnvOverrides(t *testing.T) {
@@ -151,6 +155,16 @@ func TestStorageEnvOverrides(t *testing.T) {
 				Timeout: globalTimeout,
 			},
 		},
+		S3: &S3Config{
+			Region: "s3Region",
+			Key:    "s3Key",
+			Secret: "s3Secret",
+			Token:  "s3Token",
+			Bucket: "s3Bucket",
+			TimeoutConf: TimeoutConf{
+				Timeout: globalTimeout,
+			},
+		},
 	}
 	envVars := getEnvMap(&Config{Storage: expStorage})
 	envVarBackup := map[string]string{}
@@ -187,6 +201,7 @@ func TestParseExampleConfig(t *testing.T) {
 				EnableSSL: false,
 			},
 			Mongo: &MongoConfig{},
+			S3:    &S3Config{},
 		},
 	}
 	// unset all environment variables
@@ -250,6 +265,16 @@ func TestParseExampleConfig(t *testing.T) {
 				Timeout: globalTimeout,
 			},
 			InsecureConn: false,
+		},
+		S3: &S3Config{
+			Region: "MY_AWS_REGION",
+			Key:    "MY_AWS_ACCESS_KEY_ID",
+			Secret: "MY_AWS_SECRET_ACCESS_KEY",
+			Token:  "",
+			Bucket: "MY_S3_BUCKET_NAME",
+			TimeoutConf: TimeoutConf{
+				Timeout: globalTimeout,
+			},
 		},
 	}
 
@@ -348,6 +373,13 @@ func getEnvMap(config *Config) map[string]string {
 			envVars["ATHENS_MONGO_STORAGE_URL"] = storage.Mongo.URL
 			envVars["ATHENS_MONGO_CERT_PATH"] = storage.Mongo.CertPath
 			envVars["ATHENS_MONGO_INSECURE"] = strconv.FormatBool(storage.Mongo.InsecureConn)
+		}
+		if storage.S3 != nil {
+			envVars["AWS_REGION"] = storage.S3.Region
+			envVars["AWS_ACCESS_KEY_ID"] = storage.S3.Key
+			envVars["AWS_SECRET_ACCESS_KEY"] = storage.S3.Secret
+			envVars["AWS_SESSION_TOKEN"] = storage.S3.Token
+			envVars["ATHENS_S3_BUCKET_NAME"] = storage.S3.Bucket
 		}
 	}
 	return envVars
