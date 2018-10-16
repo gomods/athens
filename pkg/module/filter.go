@@ -119,8 +119,13 @@ func (f *Filter) getAssociatedRule(path ...string) FilterRule {
 }
 
 func (f *Filter) initFromConfig() error {
-	lines, err := getConfigLines(f.filePath)
+	// Do not return an error if the file path is empty
+	// Do not attempt to parse it as well.
+	if f.filePath == "" {
+		return nil
+	}
 
+	lines, err := getConfigLines(f.filePath)
 	if err != nil {
 		return err
 	}
