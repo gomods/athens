@@ -2,7 +2,9 @@
 
 ## SVN private repositories
 
-1. Subversion creates an authentication structure in ~/.subversion/auth/svn.simple/\<hash\>
+1. Subversion creates an authentication structure in 
+        
+        ~/.subversion/auth/svn.simple/\<hash\>
 
 2. In order to properly create the authentication file for your SVN servers you will need to authenticate to them and let svn build out the proper hashed files.
 	
