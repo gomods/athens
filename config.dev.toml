@@ -61,7 +61,7 @@ EnableCSRFProtection = false
 
 [Proxy]
     # StorageType sets the type of storage backend the proxy will use.
-    # Possible values are memory, disk, mongo, gcp, minio
+    # Possible values are memory, disk, mongo, gcp, minio, s3
     # Defaults to memory
     # Env override: ATHENS_STORAGE_TYPE
     StorageType = "memory"
@@ -219,3 +219,29 @@ EnableCSRFProtection = false
         # Should be used for testing or development only
         # Env override: ATHENS_MONGO_INSECURE
         Insecure = false
+        
+    [Storage.S3]
+        # Access Key for S3 storage
+        # Env override: AWS_REGION
+        Region = "MY_AWS_REGION"
+
+        # Access Key for S3 storage
+        # Env override: AWS_ACCESS_KEY_ID
+        Key = "MY_AWS_ACCESS_KEY_ID"
+
+        # Secret Key for S3 storage
+        # Env override: AWS_SECRET_ACCESS_KEY
+        Secret = "MY_AWS_SECRET_ACCESS_KEY"
+
+        # Session Token for S3 storage
+        # Env override: AWS_SESSION_TOKEN
+        Token = ""
+
+        # Timeout for networks calls made to S3 in seconds
+        # Defaults to Global Timeout
+        Timeout = 300
+
+        # S3 Bucket to use for storage
+        # Defaults to gomods
+        # Env override: ATHENS_S3_BUCKET_NAME
+        Bucket = "MY_S3_BUCKET_NAME"
