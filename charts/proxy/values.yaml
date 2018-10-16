@@ -53,3 +53,14 @@ netrc:
 #  username: 
 #  password:
 #  host:
+
+jaeger:
+  ## Type of service; valid values are "ClusterIP", "LoadBalancer", and "NodePort".
+  type: ClusterIP
+  image:
+    repository: jaegertracing/all-in-one
+    tag: latest
+  enabled: true
+  # you must set this on the command line when you run 'helm install'
+  # for example, you need to run 'helm install --set jaeger.url=myurl ...'
+  url: "SET THIS ON THE COMMAND LINE"
