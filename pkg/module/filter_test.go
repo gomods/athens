@@ -1,10 +1,11 @@
 package module
 
 import (
+	"io/ioutil"
+	"os"
 	"path/filepath"
 	"testing"
 
-	"github.com/gomods/athens/pkg/config"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -22,8 +23,11 @@ func Test_Filter(t *testing.T) {
 
 func (t *FilterTests) Test_IgnoreSimple() {
 	r := t.Require()
-	conf := GetConfLogErr(testConfigFile, t.T())
-	f := NewFilter(conf.FilterFile)
+
+	filter := tempFilterFile(t.T())
+	defer os.Remove(filter)
+
+	f, _ := NewFilter(filter)
 	f.AddRule("github.com/a/b", Exclude)
 
 	r.Equal(Include, f.Rule("github.com/a"))
@@ -35,8 +39,11 @@ func (t *FilterTests) Test_IgnoreSimple() {
 
 func (t *FilterTests) Test_IgnoreParentAllowChildren() {
 	r := t.Require()
-	conf := GetConfLogErr(testConfigFile, t.T())
-	f := NewFilter(conf.FilterFile)
+
+	filter := tempFilterFile(t.T())
+	defer os.Remove(filter)
+
+	f, _ := NewFilter(filter)
 	f.AddRule("github.com/a/b", Exclude)
 	f.AddRule("github.com/a/b/c", Include)
 
@@ -50,8 +57,10 @@ func (t *FilterTests) Test_IgnoreParentAllowChildren() {
 func (t *FilterTests) Test_OnlyAllowed() {
 	r := t.Require()
 
-	conf := GetConfLogErr(testConfigFile, t.T())
-	f := NewFilter(conf.FilterFile)
+	filter := tempFilterFile(t.T())
+	defer os.Remove(filter)
+
+	f, _ := NewFilter(filter)
 	f.AddRule("github.com/a/b", Include)
 	f.AddRule("", Exclude)
 
@@ -65,8 +74,10 @@ func (t *FilterTests) Test_OnlyAllowed() {
 func (t *FilterTests) Test_Direct() {
 	r := t.Require()
 
-	conf := GetConfLogErr(testConfigFile, t.T())
-	f := NewFilter(conf.FilterFile)
+	filter := tempFilterFile(t.T())
+	defer os.Remove(filter)
+
+	f, _ := NewFilter(filter)
 	f.AddRule("github.com/a/b/c", Exclude)
 	f.AddRule("github.com/a/b", Direct)
 	f.AddRule("github.com/a", Include)
@@ -77,13 +88,10 @@ func (t *FilterTests) Test_Direct() {
 	r.Equal(Exclude, f.Rule("github.com/a/b/c/d"))
 }
 
-// GetConfLogErr is similar to GetConf, except it logs a failure for the calling test
-// if any errors are encountered
-func GetConfLogErr(path string, t *testing.T) *config.Config {
-	c, err := config.GetConf(path)
+func tempFilterFile(t *testing.T) (path string) {
+	filter, err := ioutil.TempFile(os.TempDir(), "filter-")
 	if err != nil {
-		t.Fatalf("Unable to parse config file: %s", err.Error())
-		return nil
+		t.FailNow()
 	}
-	return c
+	return filter.Name()
 }

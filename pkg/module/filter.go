@@ -29,16 +29,18 @@ type Filter struct {
 //   -
 //   + github.com/a
 // will exclude all items from communication except github.com/a
-func NewFilter(filterFilePath string) *Filter {
+func NewFilter(filterFilePath string) (*Filter, error) {
 	rn := newRule(Default)
 	modFilter := Filter{
 		filePath: filterFilePath,
 	}
 	modFilter.root = rn
 
-	modFilter.initFromConfig()
-
-	return &modFilter
+	err := modFilter.initFromConfig()
+	if err != nil {
+		return nil, err
+	}
+	return &modFilter, nil
 }
 
 // AddRule adds rule for specified path
@@ -116,11 +118,11 @@ func (f *Filter) getAssociatedRule(path ...string) FilterRule {
 	return f.root.rule
 }
 
-func (f *Filter) initFromConfig() {
+func (f *Filter) initFromConfig() error {
 	lines, err := getConfigLines(f.filePath)
 
-	if err != nil || len(lines) == 0 {
-		return
+	if err != nil {
+		return err
 	}
 
 	for _, line := range lines {
@@ -151,6 +153,7 @@ func (f *Filter) initFromConfig() {
 		path := strings.TrimSpace(split[1])
 		f.AddRule(path, rule)
 	}
+	return nil
 }
 
 func getPathSegments(path string) []string {

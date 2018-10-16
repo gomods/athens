@@ -127,7 +127,10 @@ func App(conf *config.Config) (*buffalo.App, error) {
 	}
 
 	if !conf.Proxy.FilterOff {
-		mf := module.NewFilter(conf.FilterFile)
+		mf, err := module.NewFilter(conf.FilterFile)
+		if err != nil {
+			lggr.Fatal(err)
+		}
 		app.Use(mw.NewFilterMiddleware(mf, conf.Proxy.OlympusGlobalEndpoint))
 	}
 

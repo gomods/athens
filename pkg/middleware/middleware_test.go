@@ -3,8 +3,10 @@ package middleware
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"path/filepath"
 	"testing"
 
@@ -43,7 +45,7 @@ func middlewareFilterApp(filterFile, olympusEndpoint string) *buffalo.App {
 }
 
 func newTestFilter(filterFile string) *module.Filter {
-	f := module.NewFilter(filterFile)
+	f, _ := module.NewFilter(filterFile)
 	f.AddRule("github.com/gomods/athens/", module.Include)
 	f.AddRule("github.com/athens-artifacts/no-tags", module.Exclude)
 	f.AddRule("github.com/athens-artifacts", module.Direct)
@@ -53,6 +55,12 @@ func newTestFilter(filterFile string) *module.Filter {
 func Test_FilterMiddleware(t *testing.T) {
 	r := require.New(t)
 
+	filter, err := ioutil.TempFile(os.TempDir(), "filter-")
+	if err != nil {
+		t.FailNow()
+	}
+	defer os.Remove(filter.Name())
+
 	conf, err := config.GetConf(testConfigFile)
 	if err != nil {
 		t.Fatalf("Unable to parse config file: %s", err.Error())
@@ -60,7 +68,7 @@ func Test_FilterMiddleware(t *testing.T) {
 	if conf.Proxy == nil {
 		t.Fatalf("No Proxy configuration in test config")
 	}
-	app := middlewareFilterApp(conf.FilterFile, conf.Proxy.OlympusGlobalEndpoint)
+	app := middlewareFilterApp(filter.Name(), conf.Proxy.OlympusGlobalEndpoint)
 	w := willie.New(app)
 
 	// Public, expects to be redirected to olympus
