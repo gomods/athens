@@ -5,10 +5,10 @@ import (
 	"os"
 
 	"github.com/gobuffalo/buffalo"
-	"github.com/gobuffalo/buffalo/middleware"
-	"github.com/gobuffalo/buffalo/middleware/csrf"
-	"github.com/gobuffalo/buffalo/middleware/ssl"
 	"github.com/gobuffalo/buffalo/render"
+	csrf "github.com/gobuffalo/mw-csrf"
+	forcessl "github.com/gobuffalo/mw-forcessl"
+	paramlogger "github.com/gobuffalo/mw-paramlogger"
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/log"
 	mw "github.com/gomods/athens/pkg/middleware"
@@ -109,13 +109,13 @@ func App(conf *config.Config) (*buffalo.App, error) {
 	}
 
 	// Automatically redirect to SSL
-	app.Use(ssl.ForceSSL(secure.Options{
+	app.Use(forcessl.Middleware(secure.Options{
 		SSLRedirect:     conf.Proxy.ForceSSL,
 		SSLProxyHeaders: map[string]string{"X-Forwarded-Proto": "https"},
 	}))
 
 	if ENV == "development" {
-		app.Use(middleware.ParameterLogger)
+		app.Use(paramlogger.ParameterLogger)
 	}
 
 	initializeAuth(app)

@@ -20,9 +20,9 @@ require (
 	github.com/gobuffalo/buffalo-plugins v1.2.0 // indirect
 	github.com/gobuffalo/envy v1.6.5
 	github.com/gobuffalo/fizz v1.0.12 // indirect
-	github.com/gobuffalo/genny v0.0.0-20181017142616-0ee1b753300e // indirect
 	github.com/gobuffalo/gocraft-work-adapter v0.0.0-20180714213200-7d6504f1dffe
 	github.com/gobuffalo/packr v1.13.7
+	github.com/gobuffalo/release v1.0.41 // indirect
 	github.com/gobuffalo/suite v2.1.6+incompatible
 	github.com/gocraft/work v0.5.1
 	github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b // indirect
@@ -36,6 +36,7 @@ require (
 	github.com/jackc/pgx v3.2.0+incompatible // indirect
 	github.com/jtolds/gls v4.2.1+incompatible // indirect
 	github.com/kelseyhightower/envconfig v1.3.0
+	github.com/kr/pty v1.1.3 // indirect
 	github.com/markbates/goth v1.46.0
 	github.com/markbates/grift v1.0.4
 	github.com/markbates/willie v1.0.9
@@ -56,6 +57,7 @@ require (
 	github.com/unrolled/secure v0.0.0-20181005190816-ff9db2ff917f
 	go.opencensus.io v0.17.0
 	golang.org/x/sync v0.0.0-20180314180146-1d60e4601c6f
+	golang.org/x/tools v0.0.0-20181017151246-e94054f4104a // indirect
 	google.golang.org/api v0.0.0-20180910000450-7ca32eb868bf
 	gopkg.in/DataDog/dd-trace-go.v1 v1.3.0 // indirect
 	gopkg.in/go-playground/assert.v1 v1.2.1 // indirect
