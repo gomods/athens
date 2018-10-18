@@ -10,8 +10,17 @@ To quickly see Athens in action, follow these steps:
 
 First, make sure you have [Go 1.11 installed](https://gophersource.com/setup/),
 that GOPATH/bin is on your path, and that you have enabled the [Go
-Modules](https://github.com/golang/go/wiki/Modules) feature by exporting
-GO111MODULE=on.
+Modules](https://github.com/golang/go/wiki/Modules) feature.
+
+**Bash**
+```bash
+export GO111MODULE=on
+```
+
+**PowerShell**
+```powershell
+$env:GO111MODULE = "on"
+```
 
 Next, use git and Go to install and run the Athens proxy in a background process.
 
