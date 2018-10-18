@@ -1,7 +1,7 @@
 ---
 title: "The Design of Athens"
 date: 2018-09-20T15:37:49-07:00
-weight: 4
+weight: 5
 ---
 
 This section of the documentation details the design of Athens. You can read the code and ask plenty of questions (which we're always happy to answer!), but we want to take some time here to give you a head start by describing how Athens is designed in words and diagrams, rather than code.
