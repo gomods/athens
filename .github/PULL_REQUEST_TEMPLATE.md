@@ -7,6 +7,10 @@ Describe the issue you have been trying to solve.
 
 Mention briefly how you have applied the fix.
 
-**Fixes issue:  #[]**
+**Mention the issue number it fixes or add the details of the changes if it doesn't has a specific issue.**
 
-Mention the issue number it fixes or add the details of the changes if it doesn't has a specific issue.
+Fixes #
+
+<!-- 
+example: Fixes #123
+-->
