@@ -51,7 +51,6 @@ bench:
 .PHONY: alldeps
 alldeps:
 	docker-compose -p athensdev up -d mongo
-	docker-compose -p athensdev up -d redis
 	docker-compose -p athensdev up -d minio
 	docker-compose -p athensdev up -d jaeger
 	echo "sleeping for a bit to wait for the DB to come up"
@@ -60,7 +59,6 @@ alldeps:
 .PHONY: dev
 dev:
 	docker-compose -p athensdev up -d mongo
-	docker-compose -p athensdev up -d redis
 
 .PHONY: down
 down:
