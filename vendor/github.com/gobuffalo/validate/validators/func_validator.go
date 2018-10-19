@@ -2,9 +2,9 @@ package validators
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/gobuffalo/validate"
-	"github.com/markbates/going/defaults"
 )
 
 type FuncValidator struct {
@@ -16,7 +16,9 @@ type FuncValidator struct {
 
 func (f *FuncValidator) IsValid(verrs *validate.Errors) {
 	// for backwards compatability
-	f.Name = defaults.String(f.Name, f.Field)
+	if strings.TrimSpace(f.Name) == "" {
+		f.Name = f.Field
+	}
 	if !f.Fn() {
 		verrs.Add(GenerateKey(f.Name), fmt.Sprintf(f.Message, f.Field))
 	}

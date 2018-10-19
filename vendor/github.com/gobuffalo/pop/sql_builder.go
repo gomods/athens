@@ -2,12 +2,12 @@ package pop
 
 import (
 	"fmt"
-	"log"
 	"regexp"
 	"strings"
 	"sync"
 
 	"github.com/gobuffalo/pop/columns"
+	"github.com/gobuffalo/pop/logging"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -79,7 +79,7 @@ func (sq *sqlBuilder) compile() {
 				sq.sql = sq.buildPaginationClauses(sq.Query.RawSQL.Fragment)
 			} else {
 				if sq.Query.Paginator != nil {
-					log.Println("Warning: Query already contains pagination")
+					log(logging.Warn, "Query already contains pagination")
 				}
 				sq.sql = sq.Query.RawSQL.Fragment
 			}
@@ -187,8 +187,8 @@ func (sq *sqlBuilder) buildOrderClauses(sql string) string {
 	if len(oc) > 0 {
 		orderSQL := oc.Join(", ")
 		if regexpMatchNames.MatchString(orderSQL) {
-			warningMsg := fmt.Sprintf("Warning: Order clause(s) contains invalid characters: %s", orderSQL)
-			log.Println(warningMsg)
+			warningMsg := fmt.Sprintf("Order clause(s) contains invalid characters: %s", orderSQL)
+			log(logging.Warn, warningMsg)
 			return sql
 		}
 
@@ -209,8 +209,9 @@ func (sq *sqlBuilder) buildPaginationClauses(sql string) string {
 	return sql
 }
 
+// columnCache is used to prevent columns rebuilding.
 var columnCache = map[string]columns.Columns{}
-var columnCacheMutex = sync.Mutex{}
+var columnCacheMutex = sync.RWMutex{}
 
 func (sq *sqlBuilder) buildColumns() columns.Columns {
 	tableName := sq.Model.TableName()
@@ -219,11 +220,11 @@ func (sq *sqlBuilder) buildColumns() columns.Columns {
 		asName = strings.Replace(tableName, ".", "_", -1)
 	}
 	acl := len(sq.AddColumns)
-	if acl <= 0 {
-		columnCacheMutex.Lock()
+	if acl == 0 {
+		columnCacheMutex.RLock()
 		cols, ok := columnCache[tableName]
-		columnCacheMutex.Unlock()
-		//if alias is different, remake columns
+		columnCacheMutex.RUnlock()
+		// if alias is the same, don't remake columns
 		if ok && cols.TableAlias == asName {
 			return cols
 		}

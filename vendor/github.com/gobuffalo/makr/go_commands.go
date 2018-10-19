@@ -6,18 +6,39 @@ import (
 	"github.com/gobuffalo/envy"
 )
 
+func turnOffMods(fn func()) {
+	gm := envy.Get("GO111MODULE", "off")
+	defer func() {
+		if err := envy.MustSet("GO111MODULE", gm); err != nil {
+			panic(err)
+		}
+	}()
+	if err := envy.MustSet("GO111MODULE", "off"); err != nil {
+		panic(err)
+	}
+	fn()
+}
+
 // GoInstall compiles and installs packages and dependencies
 func GoInstall(pkg string, opts ...string) *exec.Cmd {
-	args := append([]string{"install"}, opts...)
-	args = append(args, pkg)
-	return exec.Command(envy.Get("GO_BIN", "go"), args...)
+	var cmd *exec.Cmd
+	turnOffMods(func() {
+		args := append([]string{"install"}, opts...)
+		args = append(args, pkg)
+		cmd = exec.Command(envy.Get("GO_BIN", "go"), args...)
+	})
+	return cmd
 }
 
 // GoGet downloads and installs packages and dependencies
 func GoGet(pkg string, opts ...string) *exec.Cmd {
-	args := append([]string{"get"}, opts...)
-	args = append(args, pkg)
-	return exec.Command(envy.Get("GO_BIN", "go"), args...)
+	var cmd *exec.Cmd
+	turnOffMods(func() {
+		args := append([]string{"get"}, opts...)
+		args = append(args, pkg)
+		cmd = exec.Command(envy.Get("GO_BIN", "go"), args...)
+	})
+	return cmd
 }
 
 // GoFmt is command that will use `goimports` if available,

@@ -26,3 +26,5 @@ generated/
 .vendor/
 bin/*
 gin-bin
+go.mod
+go.sum

@@ -35,10 +35,12 @@ func (p *SQLite) CreateTable(t fizz.Table) (string, error) {
 	for _, c := range t.Columns {
 		if c.Primary {
 			switch strings.ToLower(c.ColType) {
-			case "integer":
+			case "integer", "int":
 				s = fmt.Sprintf("\"%s\" INTEGER PRIMARY KEY AUTOINCREMENT", c.Name)
 			case "uuid", "string":
 				s = fmt.Sprintf("\"%s\" TEXT PRIMARY KEY", c.Name)
+			default:
+				return "", errors.Errorf("can not use %s as a primary key", c.ColType)
 			}
 		} else {
 			s = p.buildColumn(c)
@@ -123,7 +125,7 @@ func (p *SQLite) ChangeColumn(t fizz.Table) (string, error) {
 
 func (p *SQLite) AddColumn(t fizz.Table) (string, error) {
 	if len(t.Columns) == 0 {
-		return "", errors.New("Not enough columns supplied!")
+		return "", errors.New("not enough columns supplied")
 	}
 	c := t.Columns[0]
 
@@ -140,7 +142,7 @@ func (p *SQLite) AddColumn(t fizz.Table) (string, error) {
 
 func (p *SQLite) DropColumn(t fizz.Table) (string, error) {
 	if len(t.Columns) < 1 {
-		return "", errors.New("Not enough columns supplied!")
+		return "", errors.New("not enough columns supplied")
 	}
 
 	tableInfo, err := p.Schema.TableInfo(t.Name)
@@ -196,7 +198,7 @@ func (p *SQLite) DropColumn(t fizz.Table) (string, error) {
 
 func (p *SQLite) RenameColumn(t fizz.Table) (string, error) {
 	if len(t.Columns) < 2 {
-		return "", errors.New("Not enough columns supplied!")
+		return "", errors.New("not enough columns supplied")
 	}
 
 	tableInfo, err := p.Schema.TableInfo(t.Name)

@@ -18,23 +18,26 @@ git.apache.org/thrift.git/lib/go/thrift
 github.com/Azure/azure-pipeline-go/pipeline
 # github.com/Azure/azure-storage-blob-go v0.0.0-20180727221336-197d1c0aea1b
 github.com/Azure/azure-storage-blob-go/2017-07-29/azblob
-# github.com/BurntSushi/toml v0.3.0
+# github.com/BurntSushi/toml v0.3.1
 github.com/BurntSushi/toml
 # github.com/DataDog/datadog-go v0.0.0-20180822151419-281ae9f2d895
 github.com/DataDog/datadog-go/statsd
 # github.com/DataDog/opencensus-go-exporter-datadog v0.0.0-20180917103902-e6c7f767dc57
 github.com/DataDog/opencensus-go-exporter-datadog
-# github.com/ajg/form v0.0.0-20160802194845-cc2954064ec9
+# github.com/ajg/form v0.0.0-20160822230020-523a5da1a92f
 github.com/ajg/form
 # github.com/aws/aws-sdk-go v1.15.24
 github.com/aws/aws-sdk-go/aws
-github.com/aws/aws-sdk-go/aws/session
-github.com/aws/aws-sdk-go/service/s3/s3manager
-github.com/aws/aws-sdk-go/service/s3/s3manager/s3manageriface
 github.com/aws/aws-sdk-go/aws/awserr
 github.com/aws/aws-sdk-go/aws/credentials
+github.com/aws/aws-sdk-go/aws/session
+github.com/aws/aws-sdk-go/service/s3
+github.com/aws/aws-sdk-go/service/s3/s3iface
+github.com/aws/aws-sdk-go/service/s3/s3manager
+github.com/aws/aws-sdk-go/service/s3/s3manager/s3manageriface
 github.com/aws/aws-sdk-go/aws/endpoints
 github.com/aws/aws-sdk-go/internal/sdkio
+github.com/aws/aws-sdk-go/internal/shareddefaults
 github.com/aws/aws-sdk-go/aws/client
 github.com/aws/aws-sdk-go/aws/corehandlers
 github.com/aws/aws-sdk-go/aws/credentials/stscreds
@@ -42,34 +45,31 @@ github.com/aws/aws-sdk-go/aws/csm
 github.com/aws/aws-sdk-go/aws/defaults
 github.com/aws/aws-sdk-go/aws/request
 github.com/aws/aws-sdk-go/aws/awsutil
-github.com/aws/aws-sdk-go/service/s3
-github.com/aws/aws-sdk-go/service/s3/s3iface
-github.com/aws/aws-sdk-go/aws/ec2metadata
-github.com/aws/aws-sdk-go/internal/shareddefaults
 github.com/aws/aws-sdk-go/aws/client/metadata
-github.com/aws/aws-sdk-go/internal/sdkrand
-github.com/aws/aws-sdk-go/service/sts
-github.com/aws/aws-sdk-go/aws/credentials/ec2rolecreds
-github.com/aws/aws-sdk-go/aws/credentials/endpointcreds
 github.com/aws/aws-sdk-go/aws/signer/v4
 github.com/aws/aws-sdk-go/private/protocol
 github.com/aws/aws-sdk-go/private/protocol/eventstream
 github.com/aws/aws-sdk-go/private/protocol/eventstream/eventstreamapi
 github.com/aws/aws-sdk-go/private/protocol/rest
 github.com/aws/aws-sdk-go/private/protocol/restxml
-github.com/aws/aws-sdk-go/internal/sdkuri
+github.com/aws/aws-sdk-go/aws/ec2metadata
+github.com/aws/aws-sdk-go/internal/sdkrand
+github.com/aws/aws-sdk-go/service/sts
+github.com/aws/aws-sdk-go/aws/credentials/ec2rolecreds
+github.com/aws/aws-sdk-go/aws/credentials/endpointcreds
 github.com/aws/aws-sdk-go/private/protocol/query
 github.com/aws/aws-sdk-go/private/protocol/xml/xmlutil
+github.com/aws/aws-sdk-go/internal/sdkuri
 github.com/aws/aws-sdk-go/private/protocol/query/queryutil
-# github.com/cockroachdb/cockroach-go v0.0.0-20180212155653-59c0560478b7
+# github.com/cockroachdb/cockroach-go v0.0.0-20181001143604-e0a95dfd547c
 github.com/cockroachdb/cockroach-go/crdb
 # github.com/davecgh/go-spew v1.1.1
 github.com/davecgh/go-spew/spew
-# github.com/dustin/go-humanize v0.0.0-20180713052910-9f541cc9db5d
+# github.com/dustin/go-humanize v1.0.0
 github.com/dustin/go-humanize
 # github.com/fatih/color v1.7.0
 github.com/fatih/color
-# github.com/fatih/structs v1.0.0
+# github.com/fatih/structs v1.1.0
 github.com/fatih/structs
 # github.com/fsnotify/fsnotify v1.4.7
 github.com/fsnotify/fsnotify
@@ -88,7 +88,7 @@ github.com/go-playground/locales/currency
 github.com/go-playground/universal-translator
 # github.com/go-sql-driver/mysql v1.4.0
 github.com/go-sql-driver/mysql
-# github.com/gobuffalo/buffalo v0.12.6
+# github.com/gobuffalo/buffalo v0.13.0
 github.com/gobuffalo/buffalo
 github.com/gobuffalo/buffalo/middleware
 github.com/gobuffalo/buffalo/middleware/csrf
@@ -98,45 +98,76 @@ github.com/gobuffalo/buffalo/render
 github.com/gobuffalo/buffalo/worker
 github.com/gobuffalo/buffalo/binding
 github.com/gobuffalo/buffalo/servers
-# github.com/gobuffalo/envy v1.6.4
+github.com/gobuffalo/buffalo/meta
+# github.com/gobuffalo/buffalo-plugins v1.2.0
+github.com/gobuffalo/buffalo-plugins/plugins
+github.com/gobuffalo/buffalo-plugins/plugins/plugdeps
+# github.com/gobuffalo/buffalo-pop v1.0.5
+github.com/gobuffalo/buffalo-pop/pop/popmw
+github.com/gobuffalo/buffalo-pop/pop
+# github.com/gobuffalo/envy v1.6.5
 github.com/gobuffalo/envy
-# github.com/gobuffalo/fizz v1.0.7
+# github.com/gobuffalo/events v1.0.7
+github.com/gobuffalo/events
+# github.com/gobuffalo/fizz v1.0.12
 github.com/gobuffalo/fizz
 github.com/gobuffalo/fizz/translators
-# github.com/gobuffalo/github_flavored_markdown v1.0.0
+# github.com/gobuffalo/flect v0.0.0-20181007231023-ae7ed6bfe683
+github.com/gobuffalo/flect
+github.com/gobuffalo/flect/name
+# github.com/gobuffalo/genny v0.0.0-20181017142616-0ee1b753300e
+github.com/gobuffalo/genny/movinglater/gotools/gomods
+github.com/gobuffalo/genny
+# github.com/gobuffalo/github_flavored_markdown v1.0.5
 github.com/gobuffalo/github_flavored_markdown
+github.com/gobuffalo/github_flavored_markdown/internal/russross/blackfriday
 # github.com/gobuffalo/gocraft-work-adapter v0.0.0-20180714213200-7d6504f1dffe
 github.com/gobuffalo/gocraft-work-adapter
-# github.com/gobuffalo/makr v1.1.1
+# github.com/gobuffalo/makr v1.1.5
 github.com/gobuffalo/makr
-# github.com/gobuffalo/packr v1.13.3
+# github.com/gobuffalo/mapi v1.0.1
+github.com/gobuffalo/mapi
+# github.com/gobuffalo/mw-contenttype v0.0.0-20180802152300-74f5a47f4d56
+github.com/gobuffalo/mw-contenttype
+# github.com/gobuffalo/mw-csrf v0.0.0-20180802151833-446ff26e108b
+github.com/gobuffalo/mw-csrf
+# github.com/gobuffalo/mw-forcessl v0.0.0-20180802152810-73921ae7a130
+github.com/gobuffalo/mw-forcessl
+# github.com/gobuffalo/mw-i18n v0.0.0-20180802152014-e3060b7e13d6
+github.com/gobuffalo/mw-i18n
+# github.com/gobuffalo/mw-paramlogger v0.0.0-20181005191442-d6ee392ec72e
+github.com/gobuffalo/mw-paramlogger
+# github.com/gobuffalo/packr v1.13.7
 github.com/gobuffalo/packr
-# github.com/gobuffalo/plush v0.0.0-20180810170812-274552812256
+# github.com/gobuffalo/plush v3.7.20+incompatible
 github.com/gobuffalo/plush
 github.com/gobuffalo/plush/ast
 github.com/gobuffalo/plush/parser
 github.com/gobuffalo/plush/token
 github.com/gobuffalo/plush/lexer
-# github.com/gobuffalo/pop v0.0.0-20180810203029-9f8bf0c11920
+# github.com/gobuffalo/pop v4.8.4+incompatible
 github.com/gobuffalo/pop
 github.com/gobuffalo/pop/nulls
 github.com/gobuffalo/pop/associations
 github.com/gobuffalo/pop/columns
 github.com/gobuffalo/pop/fix
+github.com/gobuffalo/pop/logging
 # github.com/gobuffalo/suite v2.1.6+incompatible
 github.com/gobuffalo/suite
 github.com/gobuffalo/suite/fix
-# github.com/gobuffalo/tags v2.0.6+incompatible
+# github.com/gobuffalo/tags v2.0.11+incompatible
 github.com/gobuffalo/tags
 github.com/gobuffalo/tags/form
 github.com/gobuffalo/tags/form/bootstrap
 # github.com/gobuffalo/uuid v2.0.3+incompatible
 github.com/gobuffalo/uuid
-# github.com/gobuffalo/validate v2.0.0+incompatible
+# github.com/gobuffalo/validate v2.0.3+incompatible
 github.com/gobuffalo/validate
 github.com/gobuffalo/validate/validators
-# github.com/gobuffalo/x v0.0.0-20180117215853-11ca13c05abd
+# github.com/gobuffalo/x v0.0.0-20181007152206-913e47c59ca7
+github.com/gobuffalo/x/defaults
 github.com/gobuffalo/x/httpx
+github.com/gobuffalo/x/randx
 # github.com/gocraft/work v0.5.1
 github.com/gocraft/work
 # github.com/golang/protobuf v1.2.0
@@ -166,52 +197,66 @@ github.com/gorilla/context
 github.com/gorilla/mux
 # github.com/gorilla/securecookie v1.1.1
 github.com/gorilla/securecookie
-# github.com/gorilla/sessions v1.1.1
+# github.com/gorilla/sessions v1.1.3
 github.com/gorilla/sessions
 # github.com/hashicorp/errwrap v1.0.0
 github.com/hashicorp/errwrap
 # github.com/hashicorp/go-multierror v1.0.0
 github.com/hashicorp/go-multierror
+# github.com/jackc/pgx v3.2.0+incompatible
+github.com/jackc/pgx
+github.com/jackc/pgx/internal/sanitize
+github.com/jackc/pgx/pgio
+github.com/jackc/pgx/pgproto3
+github.com/jackc/pgx/pgtype
+github.com/jackc/pgx/chunkreader
 # github.com/jmespath/go-jmespath v0.0.0-20160202185014-0b12d6b521d8
 github.com/jmespath/go-jmespath
 # github.com/jmoiron/sqlx v0.0.0-20180614180643-0dae4fefe7c0
 github.com/jmoiron/sqlx
 github.com/jmoiron/sqlx/reflectx
-# github.com/joho/godotenv v1.2.0
+# github.com/joho/godotenv v1.3.0
 github.com/joho/godotenv
+# github.com/karrick/godirwalk v1.7.3
+github.com/karrick/godirwalk
+# github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51
+github.com/kballard/go-shellquote
 # github.com/kelseyhightower/envconfig v1.3.0
 github.com/kelseyhightower/envconfig
-# github.com/lib/pq v0.0.0-20180523175426-90697d60dd84
+# github.com/konsorten/go-windows-terminal-sequences v1.0.1
+github.com/konsorten/go-windows-terminal-sequences
+# github.com/lib/pq v1.0.0
 github.com/lib/pq
 github.com/lib/pq/oid
-# github.com/markbates/going v1.0.1
+# github.com/markbates/going v1.0.2
 github.com/markbates/going/defaults
 github.com/markbates/going/randx
-github.com/markbates/going/wait
 # github.com/markbates/goth v1.46.0
 github.com/markbates/goth
 github.com/markbates/goth/gothic
 github.com/markbates/goth/providers/github
-# github.com/markbates/grift v1.0.1
+# github.com/markbates/grift v1.0.4
 github.com/markbates/grift/grift
 # github.com/markbates/hmax v1.0.0
 github.com/markbates/hmax
-# github.com/markbates/inflect v1.0.0
+# github.com/markbates/inflect v1.0.1
 github.com/markbates/inflect
-# github.com/markbates/refresh v1.4.1
+# github.com/markbates/oncer v0.0.0-20181014194634-05fccaae8fc4
+github.com/markbates/oncer
+# github.com/markbates/refresh v1.4.10
 github.com/markbates/refresh/refresh/web
 github.com/markbates/refresh/refresh
 # github.com/markbates/sigtx v1.0.0
 github.com/markbates/sigtx
-# github.com/markbates/willie v1.0.6
+# github.com/markbates/willie v1.0.9
 github.com/markbates/willie
 # github.com/mattn/go-colorable v0.0.9
 github.com/mattn/go-colorable
-# github.com/mattn/go-isatty v0.0.3
+# github.com/mattn/go-isatty v0.0.4
 github.com/mattn/go-isatty
 # github.com/mattn/go-sqlite3 v1.9.0
 github.com/mattn/go-sqlite3
-# github.com/microcosm-cc/bluemonday v1.0.0
+# github.com/microcosm-cc/bluemonday v1.0.1
 github.com/microcosm-cc/bluemonday
 # github.com/minio/minio-go v6.0.5+incompatible
 github.com/minio/minio-go
@@ -222,7 +267,7 @@ github.com/minio/minio-go/pkg/s3utils
 github.com/minio/minio-go/pkg/set
 # github.com/mitchellh/go-homedir v1.0.0
 github.com/mitchellh/go-homedir
-# github.com/monoculum/formam v0.0.0-20170619223434-99ca9dcbaca6
+# github.com/monoculum/formam v0.0.0-20180901015400-4e68be1d79ba
 github.com/monoculum/formam
 # github.com/nicksnyder/go-i18n v1.10.0
 github.com/nicksnyder/go-i18n/i18n
@@ -253,24 +298,22 @@ github.com/shurcooL/highlight_go
 github.com/shurcooL/octicon
 # github.com/shurcooL/sanitized_anchor_name v0.0.0-20170918181015-86672fcb3f95
 github.com/shurcooL/sanitized_anchor_name
-# github.com/sirupsen/logrus v1.0.6
+# github.com/sirupsen/logrus v1.1.1
 github.com/sirupsen/logrus
 # github.com/sourcegraph/annotate v0.0.0-20160123013949-f4cad6c6324d
 github.com/sourcegraph/annotate
 # github.com/sourcegraph/syntaxhighlight v0.0.0-20170531221838-bd320f5d308e
 github.com/sourcegraph/syntaxhighlight
-# github.com/spf13/afero v1.1.1
+# github.com/spf13/afero v1.1.2
 github.com/spf13/afero
 github.com/spf13/afero/mem
 # github.com/stretchr/testify v1.2.2
-github.com/stretchr/testify/suite
 github.com/stretchr/testify/require
+github.com/stretchr/testify/suite
 github.com/stretchr/testify/assert
-# github.com/technosophos/moniker v0.0.0-20180509230615-a5dbd03a2245
-github.com/technosophos/moniker
 # github.com/tinylib/msgp v1.0.2
 github.com/tinylib/msgp/msgp
-# github.com/unrolled/secure v0.0.0-20180618144512-8287f3899c8e
+# github.com/unrolled/secure v0.0.0-20181005190816-ff9db2ff917f
 github.com/unrolled/secure
 # go.opencensus.io v0.17.0
 go.opencensus.io/exporter/jaeger
@@ -289,13 +332,13 @@ go.opencensus.io/trace/tracestate
 go.opencensus.io/stats/internal
 go.opencensus.io/internal/tagencoding
 go.opencensus.io/plugin/ocgrpc
-# golang.org/x/crypto v0.0.0-20180808211826-de0752318171
+# golang.org/x/crypto v0.0.0-20181015023909-0c41d7ab0a0e
 golang.org/x/crypto/bcrypt
 golang.org/x/crypto/ssh/terminal
 golang.org/x/crypto/blowfish
 golang.org/x/crypto/argon2
 golang.org/x/crypto/blake2b
-# golang.org/x/net v0.0.0-20180906233101-161cd47e91fd
+# golang.org/x/net v0.0.0-20181011144130-49bb7cea24b1
 golang.org/x/net/context
 golang.org/x/net/http/httpguts
 golang.org/x/net/html
@@ -315,7 +358,7 @@ golang.org/x/oauth2/jwt
 # golang.org/x/sync v0.0.0-20180314180146-1d60e4601c6f
 golang.org/x/sync/errgroup
 golang.org/x/sync/semaphore
-# golang.org/x/sys v0.0.0-20180909124046-d0be0721c37e
+# golang.org/x/sys v0.0.0-20181011152604-fa43e7bc11ba
 golang.org/x/sys/unix
 golang.org/x/sys/windows
 golang.org/x/sys/cpu
@@ -337,7 +380,7 @@ google.golang.org/api/internal
 google.golang.org/api/gensupport
 google.golang.org/api/googleapi/transport
 google.golang.org/api/transport/grpc
-# google.golang.org/appengine v1.1.0
+# google.golang.org/appengine v1.2.0
 google.golang.org/appengine
 google.golang.org/appengine/urlfetch
 google.golang.org/appengine/cloudsql
@@ -395,7 +438,5 @@ google.golang.org/grpc/balancer/base
 gopkg.in/DataDog/dd-trace-go.v1/ddtrace/ext
 # gopkg.in/go-playground/validator.v9 v9.20.2
 gopkg.in/go-playground/validator.v9
-# gopkg.in/russross/blackfriday.v1 v1.5.1
-gopkg.in/russross/blackfriday.v1
 # gopkg.in/yaml.v2 v2.2.1
 gopkg.in/yaml.v2

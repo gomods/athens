@@ -80,7 +80,9 @@ s := secure.New(secure.Options{
     CustomBrowserXssValue: "1; report=https://example.com/xss-report", // CustomBrowserXssValue allows the X-XSS-Protection header value to be set with a custom value. This overrides the BrowserXssFilter option. Default is "".
     ContentSecurityPolicy: "default-src 'self'", // ContentSecurityPolicy allows the Content-Security-Policy header value to be set with a custom value. Default is "". Passing a template string will replace `$NONCE` with a dynamic nonce value of 16 bytes for each request which can be later retrieved using the Nonce function.
     PublicKey: `pin-sha256="base64+primary=="; pin-sha256="base64+backup=="; max-age=5184000; includeSubdomains; report-uri="https://www.example.com/hpkp-report"`, // PublicKey implements HPKP to prevent MITM attacks with forged certificates. Default is "".
-    ReferrerPolicy: "same-origin" // ReferrerPolicy allows the Referrer-Policy header with the value to be set with a custom value. Default is "".
+    ReferrerPolicy: "same-origin", // ReferrerPolicy allows the Referrer-Policy header with the value to be set with a custom value. Default is "".
+    FeaturePolicy: "vibrate 'none';", // FeaturePolicy allows the Feature-Policy header with the value to be set with a custom value. Default is "".
+    ExpectCTHeader: `enforce, max-age=30, report-uri="https://www.example.com/ct-report"`,
 
     IsDevelopment: true, // This will cause the AllowedHosts, SSLRedirect, and STSSeconds/STSIncludeSubdomains options to be ignored during development. When deploying to production, be sure to set this to false.
 })
@@ -112,7 +114,9 @@ l := secure.New(secure.Options{
     BrowserXssFilter: false,
     ContentSecurityPolicy: "",
     PublicKey: "",
-    ReferrerPolicy: ""
+    ReferrerPolicy: "",
+    FeaturePolicy: "",
+    ExpectCTHeader: "",
     IsDevelopment: false,
 })
 ~~~
@@ -356,28 +360,4 @@ func main() {
 
     n.Run("127.0.0.1:3000")
 }
-~~~
-
-## Nginx
-If you would like to add the above security rules directly to your [Nginx](http://wiki.nginx.org/Main) configuration, everything is below:
-~~~
-# Allowed Hosts:
-if ($host !~* ^(example.com|ssl.example.com)$ ) {
-    return 500;
-}
-
-# SSL Redirect:
-server {
-    listen      80;
-    server_name example.com ssl.example.com;
-    return 301 https://ssl.example.com$request_uri;
-}
-
-# Headers to be added:
-add_header Strict-Transport-Security "max-age=315360000";
-add_header X-Frame-Options "DENY";
-add_header X-Content-Type-Options "nosniff";
-add_header X-XSS-Protection "1; mode=block";
-add_header Content-Security-Policy "default-src 'self'";
-add_header Public-Key-Pins 'pin-sha256="base64+primary=="; pin-sha256="base64+backup=="; max-age=5184000; includeSubdomains; report-uri="https://www.example.com/hpkp-report"';
 ~~~
