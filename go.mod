@@ -21,6 +21,9 @@ require (
 	github.com/gobuffalo/envy v1.6.5
 	github.com/gobuffalo/fizz v1.0.12 // indirect
 	github.com/gobuffalo/gocraft-work-adapter v0.0.0-20180714213200-7d6504f1dffe
+	github.com/gobuffalo/mw-csrf v0.0.0-20180802151833-446ff26e108b
+	github.com/gobuffalo/mw-forcessl v0.0.0-20180802152810-73921ae7a130
+	github.com/gobuffalo/mw-paramlogger v0.0.0-20181005191442-d6ee392ec72e
 	github.com/gobuffalo/packr v1.13.7
 	github.com/gobuffalo/release v1.0.41 // indirect
 	github.com/gobuffalo/suite v2.1.6+incompatible
