@@ -26,7 +26,7 @@ func BenchmarkBackend(b *testing.B) {
 }
 
 func getStorage(tb testing.TB) *ModuleStore {
-	url := os.Getenv("ATHENS_MONGO_URL")
+	url := os.Getenv("ATHENS_MONGO_STORAGE_URL")
 	if url == "" {
 		tb.SkipNow()
 	}

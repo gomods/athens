@@ -8,33 +8,43 @@ menu: shortcuts
 
 To quickly see Athens in action, follow these steps:
 
-First, make sure you have [Go 1.11 installed](https://gophersource.com/setup/) and that GOPATH/bin is on your path.
-
-Next, use Go to install and run the Athens proxy in a background process
-
-```console
-$ go get -u github.com/gomods/athens/cmd/proxy
-# the source is downloaded to GOPATH/src/github.com/gomods/athens/
-$ proxy &
-[1] 25243
-INFO[0000] Starting application at 127.0.0.1:3000
-```
-
-Next, you will need to enable the [Go Modules](https://github.com/golang/go/wiki/Modules)
-feature and configure Go to use the proxy!
+First, make sure you have [Go 1.11 installed](https://gophersource.com/setup/),
+that GOPATH/bin is on your path, and that you have enabled the [Go
+Modules](https://github.com/golang/go/wiki/Modules) feature.
 
 **Bash**
 ```bash
 export GO111MODULE=on
-export GOPROXY=http://127.0.0.1:3000
 ```
 
 **PowerShell**
 ```powershell
 $env:GO111MODULE = "on"
-$env:GOPROXY = "http://127.0.0.1:3000"
-``@ma`
+```
 
+Next, use git and Go to install and run the Athens proxy in a background process.
+
+```console
+$ git clone https://github.com/gomods/athens
+$ cd athens/cmd/proxy
+$ go install
+$ proxy &
+[1] 37186
+INFO[0000] Exporter not specified. Traces won't be exported
+INFO[0000] Starting application at http://127.0.0.1:3000
+```
+
+Next, you will need to configure Go to use the proxy!
+
+**Bash**
+```bash
+export GOPROXY=http://127.0.0.1:3000
+```
+
+**PowerShell**
+```powershell
+$env:GOPROXY = "http://127.0.0.1:3000"
+```
 
 Now, when you build and run this example application, **go** will fetch dependencies via Athens!
 
