@@ -11,9 +11,9 @@ import (
 	"github.com/gomods/athens/pkg/paths"
 )
 
-// NewFilterMiddleware builds a middleware function that implements the filters configured in
-// the filter file.
-func NewFilterMiddleware(mf *module.Filter, olympusEndpoint string) buffalo.MiddlewareFunc {
+// NewFilterMiddleware builds a middleware function that implements the
+// filters configured in the filter file.
+func NewFilterMiddleware(mf *module.Filter, registryEndpoint string) buffalo.MiddlewareFunc {
 	const op errors.Op = "actions.NewFilterMiddleware"
 
 	return func(next buffalo.Handler) buffalo.Handler {
@@ -41,7 +41,7 @@ func NewFilterMiddleware(mf *module.Filter, olympusEndpoint string) buffalo.Midd
 				return next(c)
 			case module.Include:
 				// TODO : spin up cache filling worker and serve the request using the cache
-				newURL := redirectToOlympusURL(olympusEndpoint, c.Request().URL)
+				newURL := redirectToRegistryURL(registryEndpoint, c.Request().URL)
 				return c.Redirect(http.StatusSeeOther, newURL)
 			}
 
@@ -54,6 +54,6 @@ func isPseudoVersion(version string) bool {
 	return strings.HasPrefix(version, "v0.0.0-")
 }
 
-func redirectToOlympusURL(olympusEndpoint string, u *url.URL) string {
-	return strings.TrimSuffix(olympusEndpoint, "/") + u.Path
+func redirectToRegistryURL(registryEndpoint string, u *url.URL) string {
+	return strings.TrimSuffix(registryEndpoint, "/") + u.Path
 }

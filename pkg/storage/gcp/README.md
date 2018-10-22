@@ -21,8 +21,7 @@ This path to this file must be set in the environment variable `ATHENS_STORAGE_G
 
 ## Athens Configuration
 
-> NOTE: Again, this is not yet implemented.
-In order to tell Olympus to use GCP storage set `ATHENS_STORAGE_TYPE` to `gcp`.
+In order to tell Proxy to use GCP storage set `ATHENS_STORAGE_TYPE` to `gcp`.
 
 # Contributing
 
