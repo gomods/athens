@@ -128,7 +128,7 @@ func App(conf *config.Config) (*buffalo.App, error) {
 
 	if !conf.Proxy.FilterOff {
 		mf := module.NewFilter(conf.FilterFile)
-		app.Use(mw.NewFilterMiddleware(mf, conf.Proxy.OlympusGlobalEndpoint))
+		app.Use(mw.NewFilterMiddleware(mf, conf.Proxy.GlobalEndpoint))
 	}
 
 	// Having the hook set means we want to use it
