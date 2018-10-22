@@ -50,13 +50,6 @@ introduction), the Athens project is made up of two components:
 1. [Package Registry](https://docs.gomods.io/design/registry/)
 2. [Edge Proxy](https://docs.gomods.io/design/proxy/)
 
-To run the registry:
-
-```console
-cd cmd/olympus
-buffalo dev
-```
-
 To run the proxy:
 
 ```console

@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"runtime"
 
 	"github.com/BurntSushi/toml"
 	"github.com/gomods/athens/pkg/errors"
@@ -21,15 +20,12 @@ type Config struct {
 	ProtocolWorkers      int    `validate:"required" envconfig:"ATHENS_PROTOCOL_WORKERS"`
 	LogLevel             string `validate:"required" envconfig:"ATHENS_LOG_LEVEL"`
 	BuffaloLogLevel      string `validate:"required" envconfig:"BUFFALO_LOG_LEVEL"`
-	MaxConcurrency       int    `envconfig:"ATHENS_MAX_CONCURRENCY"`  // only used by Olympus. TODO: remove.
-	MaxWorkerFails       uint   `envconfig:"ATHENS_MAX_WORKER_FAILS"` // only used by Olympus. TODO: remove.
 	CloudRuntime         string `validate:"required" envconfig:"ATHENS_CLOUD_RUNTIME"`
 	FilterFile           string `envconfig:"ATHENS_FILTER_FILE"`
 	EnableCSRFProtection bool   `envconfig:"ATHENS_ENABLE_CSRF_PROTECTION"`
 	TraceExporterURL     string `envconfig:"ATHENS_TRACE_EXPORTER_URL"`
 	TraceExporter        string `envconfig:"ATHENS_TRACE_EXPORTER"`
 	Proxy                *ProxyConfig
-	Olympus              *OlympusConfig `validate:"-"` // ignoring validation until Olympus is up.
 	Storage              *StorageConfig
 }
 
@@ -71,9 +67,7 @@ func ParseConfigFile(configFile string) (*Config, error) {
 }
 
 func setRuntimeDefaults(config *Config) {
-	if config.MaxConcurrency == 0 {
-		config.MaxConcurrency = runtime.NumCPU()
-	}
+	// TODO: Set defaults here
 }
 
 // envOverride uses Environment variables to override unspecified properties

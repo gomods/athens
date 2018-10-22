@@ -16,13 +16,10 @@ require (
 	github.com/go-playground/universal-translator v0.16.0 // indirect
 	github.com/gobuffalo/buffalo v0.12.6
 	github.com/gobuffalo/envy v1.6.4
-	github.com/gobuffalo/gocraft-work-adapter v0.0.0-20180714213200-7d6504f1dffe
-	github.com/gobuffalo/packr v1.13.3
+	github.com/gobuffalo/packr v1.13.3 // indirect
 	github.com/gobuffalo/suite v2.1.6+incompatible
 	github.com/gobuffalo/uuid v2.0.3+incompatible // indirect
-	github.com/gocraft/work v0.5.1
 	github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b // indirect
-	github.com/gomodule/redigo v2.0.0+incompatible
 	github.com/google/go-cmp v0.2.0
 	github.com/google/martian v2.1.0+incompatible // indirect
 	github.com/googleapis/gax-go v2.0.0+incompatible // indirect
@@ -40,14 +37,12 @@ require (
 	github.com/onsi/ginkgo v1.6.0 // indirect
 	github.com/onsi/gomega v1.4.1 // indirect
 	github.com/philhofer/fwd v1.0.0 // indirect
-	github.com/robfig/cron v0.0.0-20180505203441-b41be1df6967 // indirect
 	github.com/rs/cors v1.5.0
 	github.com/sirupsen/logrus v1.0.6
 	github.com/smartystreets/assertions v0.0.0-20180820201707-7c9eb446e3cf // indirect
 	github.com/smartystreets/goconvey v0.0.0-20180222194500-ef6db91d284a // indirect
 	github.com/spf13/afero v1.1.1
 	github.com/stretchr/testify v1.2.2
-	github.com/technosophos/moniker v0.0.0-20180509230615-a5dbd03a2245
 	github.com/tinylib/msgp v1.0.2 // indirect
 	github.com/unrolled/secure v0.0.0-20180618144512-8287f3899c8e
 	go.opencensus.io v0.17.0
