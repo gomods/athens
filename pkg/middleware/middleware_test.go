@@ -66,7 +66,7 @@ func Test_FilterMiddleware(t *testing.T) {
 	// Public, expects to be redirected to the global registry endpoint
 	res := w.Request("/github.com/gomods/athens/@v/list").Get()
 	r.Equal(303, res.Code)
-	r.Equal(conf.Proxy.GlobalEndpoint+"/github.com/gomods/athens/@v/list", res.HeaderMap.Get("Location"))
+	r.Equal(conf.Proxy.GlobalEndpoint+"/github.com/gomods/athens/@v/list/", res.HeaderMap.Get("Location"))
 
 	// Excluded, expects a 403
 	res = w.Request("/github.com/athens-artifacts/no-tags/@v/list").Get()
