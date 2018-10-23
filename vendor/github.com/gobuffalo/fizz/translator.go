@@ -1,5 +1,7 @@
 package fizz
 
+// Translator describes the common interface to define a fizz
+// to SQL translator.
 type Translator interface {
 	CreateTable(Table) (string, error)
 	DropTable(Table) (string, error)

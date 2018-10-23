@@ -1,25 +1,58 @@
 TAGS ?= "sqlite"
-INSTALL ?= install -v -tags ${TAGS} ./...
-
 GO_BIN ?= go
-GO_GET ?= $(GO_BIN) get -tags "sqlite" -v -t github.com/gobuffalo/buffalo/...
-
-ifeq ("$(GO_BIN)","vgo")
-	GO_GET = vgo version
-endif
-
-deps:
-	$(GO_BIN) install -v github.com/gobuffalo/packr/packr
 
 install: deps
 	packr
-	$(GO_GET)
-	$(GO_BIN) $(INSTALL)
-	packr clean
+	$(GO_BIN) install -tags ${TAGS} -v ./buffalo
+	make tidy
+
+tidy:
+ifeq ($(GO111MODULE),on)
+	$(GO_BIN) mod tidy
+else
+	echo skipping go mod tidy
+endif
+
+deps:
+	$(GO_BIN) get github.com/gobuffalo/release
+	$(GO_BIN) get github.com/gobuffalo/packr/packr
+	$(GO_BIN) get -tags ${TAGS} -t ./...
+	make tidy
+
+build:
+	packr
+	$(GO_BIN) build -v .
+	make tidy
 
 test:
-	$(GO_BIN) test -vet off -tags ${TAGS} ./...
+	packr
+	$(GO_BIN) test -tags ${TAGS} ./...
+	make tidy
+
+ci-deps:
+	$(GO_BIN) get github.com/gobuffalo/packr/packr
+	$(GO_BIN) get -tags ${TAGS} -t -u -v ./...
+	make tidy
 
 ci-test:
-	$(GO_BIN) test -vet off -tags ${TAGS} -race -v ./...
-	docker build .
+	docker build . --no-cache
+
+lint:
+	gometalinter --vendor ./... --deadline=1m --skip=internal
+
+update:
+	$(GO_BIN) get -u -tags ${TAGS}
+	make tidy
+	packr
+	make test
+	make install
+	make tidy
+
+release-test:
+	make test
+	make tidy
+
+release:
+	make tidy
+	release -y -f ./runtime/version.go
+	make tidy

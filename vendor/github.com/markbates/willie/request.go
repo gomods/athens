@@ -2,6 +2,7 @@ package willie
 
 import (
 	"io"
+	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -9,7 +10,6 @@ import (
 	"strings"
 
 	"github.com/ajg/form"
-	"github.com/gobuffalo/buffalo/binding"
 	"github.com/markbates/hmax"
 )
 
@@ -81,7 +81,7 @@ func toURLValues(body interface{}) url.Values {
 	for i := 0; i < rt.NumField(); i++ {
 		tf := rt.Field(i)
 		rf := rv.Field(i)
-		if _, ok := rf.Interface().(binding.File); ok {
+		if _, ok := rf.Interface().(multipart.File); ok {
 			continue
 		}
 		if n, ok := tf.Tag.Lookup("form"); ok {
