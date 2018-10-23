@@ -5,8 +5,6 @@ import (
 	"encoding/xml"
 	"strings"
 	"sync"
-
-	"github.com/markbates/going/wait"
 )
 
 // Errors holds onto all of the error messages
@@ -140,10 +138,16 @@ func (v *Errors) Keys() []string {
 func Validate(validators ...Validator) *Errors {
 	errors := NewErrors()
 
-	wait.Wait(len(validators), func(index int) {
-		validator := validators[index]
-		validator.IsValid(errors)
-	})
+	wg := &sync.WaitGroup{}
+	for i, _ := range validators {
+		wg.Add(1)
+		go func(wg *sync.WaitGroup, i int) {
+			defer wg.Done()
+			validator := validators[i]
+			validator.IsValid(errors)
+		}(wg, i)
+	}
+	wg.Wait()
 
 	return errors
 }

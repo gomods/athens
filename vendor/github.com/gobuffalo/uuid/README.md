@@ -6,6 +6,8 @@
 
 **NOTE**: This is a fork of [https://github.com/satori/go.uuid](https://github.com/satori/go.uuid). Due to [this issue](https://github.com/satori/go.uuid/issues/66) we were forced to fork. :(
 
+THIS PACKAGE IS DEPRECATED: please use github.com/gofrs/uuid instead.
+
 ## Documentation
 
 This package provides pure Go implementation of Universally Unique Identifier (UUID). Supported both creation and parsing of UUIDs.
