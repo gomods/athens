@@ -20,16 +20,12 @@ require (
 	github.com/gobuffalo/buffalo-plugins v1.2.0 // indirect
 	github.com/gobuffalo/envy v1.6.5
 	github.com/gobuffalo/fizz v1.0.12 // indirect
-	github.com/gobuffalo/gocraft-work-adapter v0.0.0-20180714213200-7d6504f1dffe
+	github.com/gobuffalo/genny v0.0.0-20181017142616-0ee1b753300e // indirect
 	github.com/gobuffalo/mw-csrf v0.0.0-20180802151833-446ff26e108b
 	github.com/gobuffalo/mw-forcessl v0.0.0-20180802152810-73921ae7a130
 	github.com/gobuffalo/mw-paramlogger v0.0.0-20181005191442-d6ee392ec72e
-	github.com/gobuffalo/packr v1.13.7
-	github.com/gobuffalo/release v1.0.41 // indirect
 	github.com/gobuffalo/suite v2.1.6+incompatible
-	github.com/gocraft/work v0.5.1
 	github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b // indirect
-	github.com/gomodule/redigo v2.0.0+incompatible
 	github.com/google/go-cmp v0.2.0
 	github.com/google/martian v2.1.0+incompatible // indirect
 	github.com/googleapis/gax-go v2.0.0+incompatible // indirect
@@ -39,15 +35,12 @@ require (
 	github.com/jackc/pgx v3.2.0+incompatible // indirect
 	github.com/jtolds/gls v4.2.1+incompatible // indirect
 	github.com/kelseyhightower/envconfig v1.3.0
-	github.com/kr/pty v1.1.3 // indirect
 	github.com/markbates/goth v1.46.0
 	github.com/markbates/grift v1.0.4
 	github.com/markbates/willie v1.0.9
 	github.com/minio/minio-go v6.0.5+incompatible
 	github.com/mitchellh/go-homedir v1.0.0
-	github.com/nicksnyder/go-i18n v1.10.0 // indirect
 	github.com/philhofer/fwd v1.0.0 // indirect
-	github.com/robfig/cron v0.0.0-20180505203441-b41be1df6967 // indirect
 	github.com/rs/cors v1.5.0
 	github.com/satori/go.uuid v1.2.0 // indirect
 	github.com/shopspring/decimal v0.0.0-20180709203117-cd690d0c9e24 // indirect
@@ -60,7 +53,6 @@ require (
 	github.com/unrolled/secure v0.0.0-20181005190816-ff9db2ff917f
 	go.opencensus.io v0.17.0
 	golang.org/x/sync v0.0.0-20180314180146-1d60e4601c6f
-	golang.org/x/tools v0.0.0-20181017151246-e94054f4104a // indirect
 	google.golang.org/api v0.0.0-20180910000450-7ca32eb868bf
 	gopkg.in/DataDog/dd-trace-go.v1 v1.3.0 // indirect
 	gopkg.in/go-playground/assert.v1 v1.2.1 // indirect

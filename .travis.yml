@@ -8,6 +8,7 @@ env:
   global:
     - PATH=${PATH}:./bin
     - GO_ENV=test
+    - ATHENS_MONGO_STORAGE_URL=mongodb://127.0.0.1:27017
     - ATHENS_MINIO_ENDPOINT=127.0.0.1:9001
     - MINIO_ACCESS_KEY=minio
     - MINIO_SECRET_KEY=minio123

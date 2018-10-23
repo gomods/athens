@@ -1,7 +1,6 @@
 .PHONY: build
 build:
 	cd cmd/proxy && buffalo build
-	cd cmd/olympus && buffalo build
 
 .PHONY: run
 run: build
@@ -26,7 +25,6 @@ verify:
 .PHONY: test
 test:
 	cd cmd/proxy && buffalo test
-	cd cmd/olympus && buffalo test
 
 .PHONY: test-unit
 test-unit:
@@ -53,7 +51,6 @@ bench:
 .PHONY: alldeps
 alldeps:
 	docker-compose -p athensdev up -d mongo
-	docker-compose -p athensdev up -d redis
 	docker-compose -p athensdev up -d minio
 	docker-compose -p athensdev up -d jaeger
 	echo "sleeping for a bit to wait for the DB to come up"
@@ -62,7 +59,6 @@ alldeps:
 .PHONY: dev
 dev:
 	docker-compose -p athensdev up -d mongo
-	docker-compose -p athensdev up -d redis
 
 .PHONY: down
 down:

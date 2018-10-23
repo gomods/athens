@@ -31,7 +31,7 @@ A clear and concise description of what you expected to happen.
  - OS: [e.g. Linux 64bit]
  - Go version :
  - Buffalo Version :
- - Olympus or proxy version :
+ - Proxy version :
 
 
 **Additional context**
