@@ -64,6 +64,7 @@ var singleToPlural = map[string]string{
 	"beau":        "beaus",
 	"bison":       "bison",
 	"bureau":      "bureaus",
+	"campus":      "campuses",
 	"château":     "châteaux",
 	"codex":       "codices",
 	"concerto":    "concertos",
@@ -140,6 +141,7 @@ func init() {
 	}
 }
 func init() {
+	AddPlural("campus", "campuses")
 	AddPlural("man", "men")
 	AddPlural("tz", "tzes")
 	AddPlural("alias", "aliases")

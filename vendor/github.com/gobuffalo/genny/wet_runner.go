@@ -28,6 +28,15 @@ func WetRunner(ctx context.Context) *Runner {
 	}
 	r.DeleteFn = os.RemoveAll
 	r.RequestFn = wetRequestFn
+	r.ChdirFn = func(path string, fn func() error) error {
+		pwd, _ := os.Getwd()
+		defer os.Chdir(pwd)
+		os.MkdirAll(path, 0755)
+		if err := os.Chdir(path); err != nil {
+			return errors.WithStack(err)
+		}
+		return fn()
+	}
 	return r
 }
 

@@ -1,6 +1,7 @@
 package name
 
 import (
+	"encoding"
 	"strings"
 
 	"github.com/gobuffalo/flect"
@@ -46,4 +47,16 @@ func (i Ident) Group() Ident {
 	last = New(last).Pluralize().Pascalize().String()
 	parts = append(parts, last)
 	return New(strings.Join(parts, ""))
+}
+
+var _ encoding.TextUnmarshaler = &Ident{}
+var _ encoding.TextMarshaler = &Ident{}
+
+func (i *Ident) UnmarshalText(data []byte) error {
+	(*i) = New(string(data))
+	return nil
+}
+
+func (i Ident) MarshalText() ([]byte, error) {
+	return []byte(i.Original), nil
 }

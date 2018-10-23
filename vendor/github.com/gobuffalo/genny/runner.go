@@ -5,13 +5,13 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
 	"sync"
 
 	"github.com/markbates/oncer"
+	"github.com/markbates/safe"
 	"github.com/pkg/errors"
 )
 
@@ -81,12 +81,14 @@ func (r *Runner) WithNew(g *Generator, err error) error {
 // Deprecated
 func (r *Runner) WithFn(fn func() (*Generator, error)) error {
 	oncer.Deprecate(5, "genny.Runner#WithFn", "")
-	g, err := fn()
-	if err != nil {
-		return errors.WithStack(err)
-	}
-	r.With(g)
-	return nil
+	return safe.RunE(func() error {
+		g, err := fn()
+		if err != nil {
+			return errors.WithStack(err)
+		}
+		r.With(g)
+		return nil
+	})
 }
 
 // Run all of the generators!
@@ -96,13 +98,22 @@ func (r *Runner) Run() error {
 	for _, g := range r.generators {
 		r.curGen = g
 		if g.Should != nil {
-			if !g.Should(r) {
+			err := safe.RunE(func() error {
+				if !g.Should(r) {
+					return io.EOF
+				}
+				return nil
+			})
+			if err != nil {
 				continue
 			}
 		}
 		err := r.Chdir(r.Root, func() error {
 			for _, fn := range g.runners {
-				if err := fn(r); err != nil {
+				err := safe.RunE(func() error {
+					return fn(r)
+				})
+				if err != nil {
 					return errors.WithStack(err)
 				}
 			}
@@ -122,7 +133,9 @@ func (r *Runner) Exec(cmd *exec.Cmd) error {
 	if r.ExecFn == nil {
 		return nil
 	}
-	return r.ExecFn(cmd)
+	return safe.RunE(func() error {
+		return r.ExecFn(cmd)
+	})
 }
 
 // File can be used inside of Generators to write files
@@ -140,12 +153,18 @@ func (r *Runner) File(f File) error {
 	}
 	r.Logger.Infof(name)
 	if r.FileFn != nil {
-		var err error
-		if f, err = r.FileFn(f); err != nil {
+		err := safe.RunE(func() error {
+			var e error
+			if f, e = r.FileFn(f); e != nil {
+				return errors.WithStack(e)
+			}
+			if s, ok := f.(io.Seeker); ok {
+				s.Seek(0, 0)
+			}
+			return nil
+		})
+		if err != nil {
 			return errors.WithStack(err)
-		}
-		if s, ok := f.(io.Seeker); ok {
-			s.Seek(0, 0)
 		}
 	}
 	f = NewFile(f.Name(), f)
@@ -172,16 +191,12 @@ func (r *Runner) Chdir(path string, fn func() error) error {
 	r.Logger.Infof("cd: %s", path)
 
 	if r.ChdirFn != nil {
-		return r.ChdirFn(path, fn)
+		return safe.RunE(func() error {
+			return r.ChdirFn(path, fn)
+		})
 	}
 
-	pwd, _ := os.Getwd()
-	defer os.Chdir(pwd)
-	os.MkdirAll(path, 0755)
-	if err := os.Chdir(path); err != nil {
-		return errors.WithStack(err)
-	}
-	if err := fn(); err != nil {
+	if err := safe.RunE(fn); err != nil {
 		return errors.WithStack(err)
 	}
 	return nil
@@ -192,7 +207,9 @@ func (r *Runner) Delete(path string) error {
 
 	defer r.Disk.Remove(path)
 	if r.DeleteFn != nil {
-		return r.DeleteFn(path)
+		return safe.RunE(func() error {
+			return r.DeleteFn(path)
+		})
 	}
 	return nil
 }
@@ -204,7 +221,7 @@ func (r *Runner) Request(req *http.Request) (*http.Response, error) {
 func (r *Runner) RequestWithClient(req *http.Request, c *http.Client) (*http.Response, error) {
 	key := fmt.Sprintf("[%s] %s\n", strings.ToUpper(req.Method), req.URL)
 	r.Logger.Infof(key)
-	store := func(res *http.Response, err error) {
+	store := func(res *http.Response, err error) (*http.Response, error) {
 		r.moot.Lock()
 		r.results.Requests = append(r.results.Requests, RequestResult{
 			Request:  req,
@@ -213,12 +230,19 @@ func (r *Runner) RequestWithClient(req *http.Request, c *http.Client) (*http.Res
 			Error:    err,
 		})
 		r.moot.Unlock()
+		return res, err
 	}
 	if r.RequestFn == nil {
-		store(nil, nil)
-		return nil, nil
+		return store(nil, nil)
 	}
-	res, err := r.RequestFn(req, c)
-	store(res, err)
-	return res, err
+	var res *http.Response
+	err := safe.RunE(func() error {
+		var e error
+		res, e = r.RequestFn(req, c)
+		if e != nil {
+			return errors.WithStack(e)
+		}
+		return nil
+	})
+	return store(res, err)
 }

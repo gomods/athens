@@ -1,6 +1,7 @@
 package flect
 
 import (
+	"encoding"
 	"regexp"
 	"strings"
 	"unicode"
@@ -83,4 +84,16 @@ func toParts(s string) []string {
 	parts = xappend(parts, x)
 
 	return parts
+}
+
+var _ encoding.TextUnmarshaler = &Ident{}
+var _ encoding.TextMarshaler = &Ident{}
+
+func (i *Ident) UnmarshalText(data []byte) error {
+	(*i) = New(string(data))
+	return nil
+}
+
+func (i Ident) MarshalText() ([]byte, error) {
+	return []byte(i.Original), nil
 }

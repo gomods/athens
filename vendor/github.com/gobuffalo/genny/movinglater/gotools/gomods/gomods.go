@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/gobuffalo/envy"
+	"github.com/markbates/safe"
 	"github.com/pkg/errors"
 )
 
@@ -25,7 +26,7 @@ func Disable(fn func() error) error {
 
 	// this ensures the defer gets called after fn()
 	// doing return fn() would have it called before
-	if err := fn(); err != nil {
+	if err := safe.RunE(fn); err != nil {
 		return errors.WithStack(err)
 	}
 	return nil

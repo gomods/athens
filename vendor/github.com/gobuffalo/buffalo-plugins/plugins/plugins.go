@@ -11,8 +11,8 @@ import (
 	"time"
 
 	"github.com/gobuffalo/buffalo-plugins/plugins/plugdeps"
-	"github.com/gobuffalo/buffalo/meta"
 	"github.com/gobuffalo/envy"
+	"github.com/gobuffalo/meta"
 	"github.com/karrick/godirwalk"
 	"github.com/markbates/oncer"
 	"github.com/sirupsen/logrus"

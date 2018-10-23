@@ -5,6 +5,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/markbates/safe"
 	"github.com/pkg/errors"
 )
 
@@ -81,7 +82,11 @@ func (m *manager) Emit(e Event) error {
 			for k, v := range e.Payload {
 				ex.Payload[k] = v
 			}
-			go l(ex)
+			go func(e Event, l Listener) {
+				safe.Run(func() {
+					l(e)
+				})
+			}(ex, l)
 		}
 	}(e)
 	return nil

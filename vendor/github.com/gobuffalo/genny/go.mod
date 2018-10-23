@@ -14,6 +14,7 @@ require (
 	github.com/konsorten/go-windows-terminal-sequences v1.0.1 // indirect
 	github.com/markbates/inflect v1.0.1 // indirect
 	github.com/markbates/oncer v0.0.0-20180924034138-723ad0170a46
+	github.com/markbates/safe v1.0.1
 	github.com/onsi/gomega v1.4.2 // indirect
 	github.com/pkg/errors v0.8.0
 	github.com/serenize/snaker v0.0.0-20171204205717-a683aaf2d516 // indirect

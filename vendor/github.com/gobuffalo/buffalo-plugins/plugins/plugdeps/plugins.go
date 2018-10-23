@@ -5,7 +5,7 @@ import (
 	"sort"
 	"sync"
 
-	toml "github.com/pelletier/go-toml"
+	"github.com/BurntSushi/toml"
 	"github.com/pkg/errors"
 )
 
@@ -33,7 +33,7 @@ func (plugs *Plugins) Decode(r io.Reader) error {
 	tp := &tomlPlugins{
 		Plugins: []Plugin{},
 	}
-	if err := toml.NewDecoder(r).Decode(tp); err != nil {
+	if _, err := toml.DecodeReader(r, tp); err != nil {
 		return errors.WithStack(err)
 	}
 	for _, p := range tp.Plugins {
@@ -47,7 +47,7 @@ func (plugs *Plugins) List() []Plugin {
 	m := map[string]Plugin{}
 	plugs.moot.RLock()
 	for _, p := range plugs.plugins {
-		m[p.String()] = p
+		m[p.key()] = p
 	}
 	plugs.moot.RUnlock()
 	var pp []Plugin
@@ -64,7 +64,7 @@ func (plugs *Plugins) List() []Plugin {
 func (plugs *Plugins) Add(pp ...Plugin) {
 	plugs.moot.Lock()
 	for _, p := range pp {
-		plugs.plugins[p.String()] = p
+		plugs.plugins[p.key()] = p
 	}
 	plugs.moot.Unlock()
 }
@@ -73,19 +73,26 @@ func (plugs *Plugins) Add(pp ...Plugin) {
 func (plugs *Plugins) Remove(pp ...Plugin) {
 	plugs.moot.Lock()
 	for _, p := range pp {
-		delete(plugs.plugins, p.String())
+		delete(plugs.plugins, p.key())
 	}
 	plugs.moot.Unlock()
 }
 
 // New returns a configured *Plugins value
 func New() *Plugins {
-	return &Plugins{
+	plugs := &Plugins{
 		plugins: map[string]Plugin{},
 		moot:    &sync.RWMutex{},
 	}
+	plugs.Add(self)
+	return plugs
 }
 
 type tomlPlugins struct {
 	Plugins []Plugin `toml:"plugin"`
+}
+
+var self = Plugin{
+	Binary: "buffalo-plugins",
+	GoGet:  "github.com/gobuffalo/buffalo-plugins",
 }

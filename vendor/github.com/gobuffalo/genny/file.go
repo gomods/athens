@@ -12,7 +12,10 @@ type File interface {
 	fmt.Stringer
 	io.Reader
 	Name() string
+	io.Writer
 }
+
+var _ io.ReadWriter = &simpleFile{}
 
 type simpleFile struct {
 	io.Reader
@@ -21,6 +24,13 @@ type simpleFile struct {
 
 func (s simpleFile) Name() string {
 	return s.name
+}
+
+func (s *simpleFile) Write(p []byte) (int, error) {
+	bb := &bytes.Buffer{}
+	i, err := bb.Write(p)
+	s.Reader = bb
+	return i, err
 }
 
 func (s *simpleFile) String() string {

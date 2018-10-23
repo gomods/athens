@@ -4,6 +4,9 @@ GO_BIN ?= go
 install:
 	packr
 	$(GO_BIN) install -v .
+ifeq ($(GO111MODULE),on)
+	$(GO_BIN) mod tidy
+endif
 
 deps:
 	$(GO_BIN) get github.com/gobuffalo/release
@@ -16,16 +19,28 @@ endif
 build:
 	packr
 	$(GO_BIN) build -v .
+ifeq ($(GO111MODULE),on)
+	$(GO_BIN) mod tidy
+endif
 
 test:
 	packr
 	$(GO_BIN) test -tags ${TAGS} ./...
+ifeq ($(GO111MODULE),on)
+	$(GO_BIN) mod tidy
+endif
 
 ci-test:
 	$(GO_BIN) test -tags ${TAGS} -race ./...
+ifeq ($(GO111MODULE),on)
+	$(GO_BIN) mod tidy
+endif
 
 lint:
 	gometalinter --vendor ./... --deadline=1m --skip=internal
+ifeq ($(GO111MODULE),on)
+	$(GO_BIN) mod tidy
+endif
 
 update:
 	$(GO_BIN) get -u -tags ${TAGS}
@@ -41,6 +56,12 @@ endif
 
 release-test:
 	$(GO_BIN) test -tags ${TAGS} -race ./...
+ifeq ($(GO111MODULE),on)
+	$(GO_BIN) mod tidy
+endif
 
 release:
 	release -y -f version.go
+ifeq ($(GO111MODULE),on)
+	$(GO_BIN) mod tidy
+endif

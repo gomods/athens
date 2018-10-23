@@ -1,6 +1,7 @@
 package genny
 
 import (
+	"github.com/markbates/safe"
 	"github.com/pkg/errors"
 )
 
@@ -19,7 +20,14 @@ func (t Transformer) Transform(f File) (File, error) {
 	if t.fn == nil {
 		return f, nil
 	}
-	f, err := t.fn(f)
+	err := safe.RunE(func() error {
+		var e error
+		f, e = t.fn(f)
+		if e != nil {
+			return errors.WithStack(e)
+		}
+		return nil
+	})
 	if err != nil {
 		return f, errors.WithStack(err)
 	}
