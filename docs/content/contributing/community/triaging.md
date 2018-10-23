@@ -51,7 +51,7 @@ Since we don't have a super huge volume of PRs, we're looking for folks to do th
 - If you see a PR that hasn't been updated in more than 10 days, write this in the PR comments and we'll come figure out what's going on (probably contact someone directly or close the PR):
     ```@gomods/maintainers this PR is really old!```
 
-If you need to prompt someone in your triage, do it by [mentioning](https://blog.github.com/2011-03-23-mention-somebody-they-re-notified/) someone on GitHub like this: `@arschles can you look at this again?`
+If you need to prompt someone in your triage, do it by [mentioning](https://blog.github.com/2011-03-23-mention-somebody-they-re-notified/) someone on GitHub like this: `@arschles can you look at this again?`. If you notice that someone has been `@mentioned` already, you can try pinging them on Slack. If you ping them, be nice and remember that they might be busy with other things though :)
 
 # How do I Sign Up?
 
