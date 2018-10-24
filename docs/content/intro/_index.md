@@ -15,3 +15,4 @@ We recommend you read this section from front to back:
 - [Athens 101](./first-content) - the basic mechanics of Athens
 - [Download Protocol](./protocol) - the fundamental way that Athens serves Go packages
 - [Components](./components) - the different moving pieces of Athens
+- [Source Code](https://github.com/gomods/athens) - the source code of Athens
