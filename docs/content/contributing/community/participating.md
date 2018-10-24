@@ -95,7 +95,7 @@ decisions)
 contributors, and other maintainers to review)
 - Help foster a safe and welcoming environment for all project participants.
 This will include enforcing our code of conduct. We adhere to the [Contributor
-Covenant](https://www.contributor-covenant.org), if you haven't read it yet you can do so [here](https://www.contributor-covenant.org/version/1/4/code-of-conduct)(english version).
+Covenant](https://www.contributor-covenant.org), if you haven't read it yet you can do so [here](https://www.contributor-covenant.org/version/1/4/code-of-conduct) (english version).
 
 ## How to Become a Maintainer
 
