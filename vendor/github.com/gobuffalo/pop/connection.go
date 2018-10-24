@@ -10,11 +10,10 @@ import (
 	"github.com/pkg/errors"
 )
 
-// Connections contains all of the available connections
+// Connections contains all available connections
 var Connections = map[string]*Connection{}
 
-// Connection represents all of the necessary details for
-// talking with a datastore
+// Connection represents all necessary details to talk with a datastore
 type Connection struct {
 	ID          string
 	Store       store
@@ -85,7 +84,7 @@ func Connect(e string) (*Connection, error) {
 	e = defaults.String(e, "development")
 	c := Connections[e]
 	if c == nil {
-		return c, errors.Errorf("Could not find connection named %s!", e)
+		return c, errors.Errorf("could not find connection named %s", e)
 	}
 	err := c.Open()
 	return c, errors.Wrapf(err, "couldn't open connection for %s", e)

@@ -8,6 +8,7 @@ import (
 
 	"github.com/gobuffalo/fizz"
 	"github.com/gobuffalo/pop/columns"
+	"github.com/gobuffalo/pop/logging"
 	"github.com/gobuffalo/uuid"
 	"github.com/jmoiron/sqlx"
 	"github.com/pkg/errors"
@@ -44,7 +45,7 @@ func genericCreate(s store, model *Model, cols columns.Columns) error {
 		var id int64
 		w := cols.Writeable()
 		query := fmt.Sprintf("INSERT INTO %s (%s) VALUES (%s)", model.TableName(), w.String(), w.SymbolizedString())
-		Log(query)
+		log(logging.SQL, query)
 		res, err := s.NamedExec(query, model.Value)
 		if err != nil {
 			return errors.WithStack(err)
@@ -72,7 +73,7 @@ func genericCreate(s store, model *Model, cols columns.Columns) error {
 		w := cols.Writeable()
 		w.Add("id")
 		query := fmt.Sprintf("INSERT INTO %s (%s) VALUES (%s)", model.TableName(), w.String(), w.SymbolizedString())
-		Log(query)
+		log(logging.SQL, query)
 		stmt, err := s.PrepareNamed(query)
 		if err != nil {
 			return errors.WithStack(err)
@@ -90,8 +91,8 @@ func genericCreate(s store, model *Model, cols columns.Columns) error {
 }
 
 func genericUpdate(s store, model *Model, cols columns.Columns) error {
-	stmt := fmt.Sprintf("UPDATE %s SET %s where %s", model.TableName(), cols.Writeable().UpdateString(), model.whereID())
-	Log(stmt)
+	stmt := fmt.Sprintf("UPDATE %s SET %s WHERE %s", model.TableName(), cols.Writeable().UpdateString(), model.whereNamedID())
+	log(logging.SQL, stmt, model.ID())
 	_, err := s.NamedExec(stmt, model.Value)
 	if err != nil {
 		return errors.WithStack(err)
@@ -101,16 +102,16 @@ func genericUpdate(s store, model *Model, cols columns.Columns) error {
 
 func genericDestroy(s store, model *Model) error {
 	stmt := fmt.Sprintf("DELETE FROM %s WHERE %s", model.TableName(), model.whereID())
-	err := genericExec(s, stmt)
+	err := genericExec(s, stmt, model.ID())
 	if err != nil {
 		return errors.WithStack(err)
 	}
 	return nil
 }
 
-func genericExec(s store, stmt string) error {
-	Log(stmt)
-	_, err := s.Exec(stmt)
+func genericExec(s store, stmt string, args ...interface{}) error {
+	log(logging.SQL, stmt, args...)
+	_, err := s.Exec(stmt, args...)
 	if err != nil {
 		return errors.WithStack(err)
 	}
@@ -119,7 +120,7 @@ func genericExec(s store, stmt string) error {
 
 func genericSelectOne(s store, model *Model, query Query) error {
 	sql, args := query.ToSQL(model)
-	Log(sql, args...)
+	log(logging.SQL, sql, args...)
 	err := s.Get(model.Value, sql, args...)
 	if err != nil {
 		return errors.WithStack(err)
@@ -129,7 +130,7 @@ func genericSelectOne(s store, model *Model, query Query) error {
 
 func genericSelectMany(s store, models *Model, query Query) error {
 	sql, args := query.ToSQL(models)
-	Log(sql, args...)
+	log(logging.SQL, sql, args...)
 	err := s.Select(models.Value, sql, args...)
 	if err != nil {
 		return errors.WithStack(err)
@@ -152,7 +153,7 @@ func genericLoadSchema(deets *ConnectionDetails, migrationURL string, r io.Reade
 	}
 
 	if len(contents) == 0 {
-		fmt.Printf("schema is empty for %s, skipping\n", deets.Database)
+		log(logging.Info, "schema is empty for %s, skipping", deets.Database)
 		return nil
 	}
 
@@ -161,6 +162,6 @@ func genericLoadSchema(deets *ConnectionDetails, migrationURL string, r io.Reade
 		return errors.WithMessage(err, fmt.Sprintf("unable to load schema for %s", deets.Database))
 	}
 
-	fmt.Printf("loaded schema for %s\n", deets.Database)
+	log(logging.Info, "loaded schema for %s", deets.Database)
 	return nil
 }

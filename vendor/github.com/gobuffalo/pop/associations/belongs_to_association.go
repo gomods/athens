@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"reflect"
 
+	"github.com/gobuffalo/flect"
+	"github.com/gobuffalo/pop/columns"
 	"github.com/gobuffalo/pop/nulls"
 )
 
@@ -14,9 +16,12 @@ type belongsToAssociation struct {
 	ownerType  reflect.Type
 	ownerID    reflect.Value
 	fkID       string
+	primaryID  string
 	ownedModel interface{}
 	*associationSkipable
 	*associationComposite
+
+	primaryTableID string
 }
 
 func init() {
@@ -25,6 +30,11 @@ func init() {
 
 func belongsToAssociationBuilder(p associationParams) (Association, error) {
 	fval := p.modelValue.FieldByName(p.field.Name)
+	primaryIDField := "ID"
+	if p.popTags.Find("primary_id").Value != "" {
+		primaryIDField = p.popTags.Find("primary_id").Value
+	}
+
 	ownerIDField := fmt.Sprintf("%s%s", p.field.Name, "ID")
 	if p.popTags.Find("fk_id").Value != "" {
 		ownerIDField = p.popTags.Find("fk_id").Value
@@ -40,17 +50,34 @@ func belongsToAssociationBuilder(p associationParams) (Association, error) {
 	if fieldIsNil(f) || isZero(f.Interface()) {
 		skipped = true
 	}
+	//associated model
+	ownerPrimaryTableField := "id"
+	if primaryIDField != "ID" {
+		ownerModel := reflect.Indirect(fval)
+		ownerPrimaryField, found := ownerModel.Type().FieldByName(primaryIDField)
+		if !found {
+			return nil, fmt.Errorf("there is no primary field '%s' defined in model '%s'", primaryIDField, ownerModel.Type())
+		}
+		ownerPrimaryTags := columns.TagsFor(ownerPrimaryField)
+		if dbField := ownerPrimaryTags.Find("db").Value; dbField == "" {
+			ownerPrimaryTableField = flect.Underscore(ownerPrimaryField.Name) //autodetect without db tag
+		} else {
+			ownerPrimaryTableField = dbField
+		}
+	}
 
 	return &belongsToAssociation{
 		ownerModel: fval,
 		ownerType:  fval.Type(),
 		ownerID:    f,
 		fkID:       ownerIDField,
+		primaryID:  primaryIDField,
 		ownedModel: p.model,
 		associationSkipable: &associationSkipable{
 			skipped: skipped,
 		},
 		associationComposite: &associationComposite{innerAssociations: p.innerAssociations},
+		primaryTableID:       ownerPrimaryTableField,
 	}, nil
 }
 
@@ -73,7 +100,7 @@ func (b *belongsToAssociation) Interface() interface{} {
 // Constraint returns the content for a where clause, and the args
 // needed to execute it.
 func (b *belongsToAssociation) Constraint() (string, []interface{}) {
-	return "id = ?", []interface{}{b.ownerID.Interface()}
+	return fmt.Sprintf("%s = ?", b.primaryTableID), []interface{}{b.ownerID.Interface()}
 }
 
 func (b *belongsToAssociation) BeforeInterface() interface{} {

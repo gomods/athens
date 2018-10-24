@@ -53,7 +53,6 @@ func (c *Columns) Add(names ...string) []*Column {
 		}
 
 		col = c.Cols[xs[0]]
-		//fmt.Printf("column: %v, col: %v, xs: %v, ss: %v\n", xs[0], col, xs, ss)
 		if col == nil {
 			if ss == "" {
 				ss = xs[0]

@@ -26,7 +26,5 @@ generated/
 .vendor/
 bin/*
 gin-bin
-.vscode/
-cover.out
-vendor/
 .idea/
+go.*

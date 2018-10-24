@@ -89,7 +89,7 @@ func (p *Cockroach) RenameTable(t []fizz.Table) (string, error) {
 
 func (p *Cockroach) ChangeColumn(t fizz.Table) (string, error) {
 	if len(t.Columns) == 0 {
-		return "", errors.New("Not enough columns supplied!")
+		return "", errors.New("not enough columns supplied")
 	}
 	c := t.Columns[0]
 
@@ -130,7 +130,7 @@ func (p *Cockroach) ChangeColumn(t fizz.Table) (string, error) {
 
 func (p *Cockroach) AddColumn(t fizz.Table) (string, error) {
 	if len(t.Columns) == 0 {
-		return "", errors.New("Not enough columns supplied!")
+		return "", errors.New("not enough columns supplied")
 	}
 	c := t.Columns[0]
 	s := fmt.Sprintf("ALTER TABLE \"%s\" ADD COLUMN %s;COMMIT TRANSACTION;BEGIN TRANSACTION;", t.Name, p.buildAddColumn(c))
@@ -155,7 +155,7 @@ func (p *Cockroach) AddColumn(t fizz.Table) (string, error) {
 
 func (p *Cockroach) DropColumn(t fizz.Table) (string, error) {
 	if len(t.Columns) == 0 {
-		return "", errors.New("Not enough columns supplied!")
+		return "", errors.New("not enough columns supplied")
 	}
 	c := t.Columns[0]
 	p.Schema.DeleteColumn(t.Name, c.Name)
@@ -164,7 +164,7 @@ func (p *Cockroach) DropColumn(t fizz.Table) (string, error) {
 
 func (p *Cockroach) RenameColumn(t fizz.Table) (string, error) {
 	if len(t.Columns) < 2 {
-		return "", errors.New("Not enough columns supplied!")
+		return "", errors.New("not enough columns supplied")
 	}
 
 	oc := t.Columns[0]

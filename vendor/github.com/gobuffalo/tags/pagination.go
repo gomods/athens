@@ -221,17 +221,19 @@ func extractBaseOptions(opts Options) (string, string, int) {
 
 func pageLI(text string, page int, path string, pagination Paginator) (*Tag, error) {
 
-	lio := Options{
-		"class": "page-item",
-	}
+	classes := []string{"page-item"}
 
 	if page == pagination.Page {
-		lio["class"] = strings.Join([]string{lio["class"].(string), "active"}, " ")
+		classes = append(classes, "active")
 	}
 
-	li := New("li", lio)
+	li := New("li", Options{})
+	defer func() {
+		li.Options["class"] = strings.Join(classes, " ")
+	}()
+
 	if page == 0 || page > pagination.TotalPages {
-		li.Options["class"] = strings.Join([]string{lio["class"].(string), "disabled"}, " ")
+		classes = append(classes, "disabled")
 		li.Append(New("span", Options{
 			"body":  text,
 			"class": "page-link",
