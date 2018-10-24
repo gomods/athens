@@ -80,9 +80,8 @@ func TestEnvOverrides(t *testing.T) {
 		TimeoutConf: TimeoutConf{
 			Timeout: 30,
 		},
-		EnableCSRFProtection: true,
-		Proxy:                &expProxy,
-		Storage:              &StorageConfig{},
+		Proxy:   &expProxy,
+		Storage: &StorageConfig{},
 	}
 
 	envVars := getEnvMap(expConf)
@@ -267,9 +266,8 @@ func TestParseExampleConfig(t *testing.T) {
 		TimeoutConf: TimeoutConf{
 			Timeout: 300,
 		},
-		EnableCSRFProtection: false,
-		Proxy:                expProxy,
-		Storage:              expStorage,
+		Proxy:   expProxy,
+		Storage: expStorage,
 	}
 
 	absPath, err := filepath.Abs(exampleConfigPath)
@@ -288,17 +286,16 @@ func TestParseExampleConfig(t *testing.T) {
 func getEnvMap(config *Config) map[string]string {
 
 	envVars := map[string]string{
-		"GO_ENV":                        config.GoEnv,
-		"GO_BINARY_PATH":                config.GoBinary,
-		"ATHENS_GOGET_WORKERS":          strconv.Itoa(config.GoGetWorkers),
-		"ATHENS_PROTOCOL_WORKERS":       strconv.Itoa(config.ProtocolWorkers),
-		"ATHENS_LOG_LEVEL":              config.LogLevel,
-		"BUFFALO_LOG_LEVEL":             config.BuffaloLogLevel,
-		"ATHENS_CLOUD_RUNTIME":          config.CloudRuntime,
-		"ATHENS_FILTER_FILE":            config.FilterFile,
-		"ATHENS_TIMEOUT":                strconv.Itoa(config.Timeout),
-		"ATHENS_ENABLE_CSRF_PROTECTION": strconv.FormatBool(config.EnableCSRFProtection),
-		"ATHENS_TRACE_EXPORTER":         config.TraceExporterURL,
+		"GO_ENV":                  config.GoEnv,
+		"GO_BINARY_PATH":          config.GoBinary,
+		"ATHENS_GOGET_WORKERS":    strconv.Itoa(config.GoGetWorkers),
+		"ATHENS_PROTOCOL_WORKERS": strconv.Itoa(config.ProtocolWorkers),
+		"ATHENS_LOG_LEVEL":        config.LogLevel,
+		"BUFFALO_LOG_LEVEL":       config.BuffaloLogLevel,
+		"ATHENS_CLOUD_RUNTIME":    config.CloudRuntime,
+		"ATHENS_FILTER_FILE":      config.FilterFile,
+		"ATHENS_TIMEOUT":          strconv.Itoa(config.Timeout),
+		"ATHENS_TRACE_EXPORTER":   config.TraceExporterURL,
 	}
 
 	proxy := config.Proxy

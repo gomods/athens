@@ -54,11 +54,6 @@ FilterFile = "filter.conf"
 # Env override: ATHENS_TIMEOUT
 Timeout = 300
 
-# EnableCSRFProtection determines whether to enable CSRF protection.
-# Defaults to false
-# Env override: ATHENS_ENABLE_CSRF_PROTECTION
-EnableCSRFProtection = false
-
 [Proxy]
     # StorageType sets the type of storage backend the proxy will use.
     # Possible values are memory, disk, mongo, gcp, minio, s3
