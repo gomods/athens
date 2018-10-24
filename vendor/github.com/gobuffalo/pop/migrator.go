@@ -9,6 +9,7 @@ import (
 	"text/tabwriter"
 	"time"
 
+	"github.com/gobuffalo/pop/logging"
 	"github.com/pkg/errors"
 )
 
@@ -99,7 +100,7 @@ func (m Migrator) Up() error {
 			if err != nil {
 				return errors.WithStack(err)
 			}
-			fmt.Printf("> %s\n", mi.Name)
+			log(logging.Info, "> %s", mi.Name)
 		}
 		return nil
 	})
@@ -142,7 +143,7 @@ func (m Migrator) Down(step int) error {
 				return err
 			}
 
-			fmt.Printf("< %s\n", mi.Name)
+			log(logging.Info, "< %s", mi.Name)
 		}
 		return nil
 	})
@@ -241,8 +242,8 @@ func (m Migrator) exec(fn func() error) error {
 func printTimer(timerStart time.Time) {
 	diff := time.Since(timerStart).Seconds()
 	if diff > 60 {
-		fmt.Printf("\n%.4f minutes\n", diff/60)
+		log(logging.Info, "%.4f minutes", diff/60)
 	} else {
-		fmt.Printf("\n%.4f seconds\n", diff)
+		log(logging.Info, "%.4f seconds", diff)
 	}
 }

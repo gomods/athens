@@ -1,5 +1,13 @@
 package fizz
 
+import (
+	"encoding/json"
+	"fmt"
+	"sort"
+	"strings"
+)
+
+// Deprecated: Fizz won't force you to have an ID field now.
 var INT_ID_COL = Column{
 	Name:    "id",
 	Primary: true,
@@ -7,6 +15,7 @@ var INT_ID_COL = Column{
 	Options: Options{},
 }
 
+// Deprecated: Fizz won't force you to have an ID field now.
 var UUID_ID_COL = Column{
 	Name:    "id",
 	Primary: true,
@@ -22,6 +31,29 @@ type Column struct {
 	ColType string
 	Primary bool
 	Options map[string]interface{}
+}
+
+func (c Column) String() string {
+	if c.Primary || c.Options != nil {
+		var opts map[string]interface{}
+		if c.Options == nil {
+			opts = make(map[string]interface{}, 0)
+		} else {
+			opts = c.Options
+		}
+		if c.Primary {
+			opts["primary"] = true
+		}
+
+		o := make([]string, 0, len(opts))
+		for k, v := range opts {
+			vv, _ := json.Marshal(v)
+			o = append(o, fmt.Sprintf("%s: %s", k, string(vv)))
+		}
+		sort.SliceStable(o, func(i, j int) bool { return o[i] < o[j] })
+		return fmt.Sprintf(`t.Column("%s", "%s", {%s})`, c.Name, c.ColType, strings.Join(o, ", "))
+	}
+	return fmt.Sprintf(`t.Column("%s", "%s")`, c.Name, c.ColType)
 }
 
 func (f fizzer) ChangeColumn(table, name, ctype string, options Options) {

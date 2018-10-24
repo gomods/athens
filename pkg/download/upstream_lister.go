@@ -14,7 +14,8 @@ import (
 	"github.com/spf13/afero"
 )
 
-// UpstreamLister retrieves a list o available module versions from upstream i.e. VCS, Olympus
+// UpstreamLister retrieves a list o available module versions from upstream
+// i.e. VCS, and a Storage backend.
 type UpstreamLister interface {
 	List(mod string) (*storage.RevInfo, []string, error)
 }

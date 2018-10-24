@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/gobuffalo/pop/columns"
+	"github.com/markbates/oncer"
 )
 
 // If a field match with the regexp, it will be considered as a valid field definition.
@@ -29,7 +30,7 @@ var associationBuilders = map[string]associationBuilder{}
 //
 // Deprecated: use ForStruct instead.
 func AssociationsForStruct(s interface{}, fields ...string) (Associations, error) {
-	fmt.Println(`Warning: AssociationsForStruct is deprecated, and will be removed in a future version. Please use ForStruct instead.`)
+	oncer.Deprecate(0, "associations.AssociationsForStruct", "Use associations.ForStruct instead.")
 	return ForStruct(s, fields...)
 }
 

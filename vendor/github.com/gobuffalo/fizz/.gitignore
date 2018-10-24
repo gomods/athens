@@ -20,15 +20,10 @@ solr/
 .jhw-cache/
 jhw.*
 *.sublime*
-.idea
 node_modules/
 dist/
 generated/
+.vendor/
 bin/*
 gin-bin
-*.sqlite
-tsoda
-migrations/schema.sql
-.grifter/
-cockroach-data/
-vendor/
+.idea/

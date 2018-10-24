@@ -4,4 +4,12 @@ if (!(Test-Path env:GO_ENV)) {$env:GO_ENV = "test"}
 if (!(Test-Path env:ATHENS_MINIO_ENDPOINT)) {$env:ATHENS_MINIO_ENDPOINT = "127.0.0.1:9001"}
 if (!(Test-Path env:ATHENS_MONGO_STORAGE_URL)) {$env:ATHENS_MONGO_STORAGE_URL = "mongodb://127.0.0.1:27017"}
 
+if (!(Test-Path env:ATHENS_MINIO_ENDPOINT)) {
+    $env:ATHENS_MINIO_ENDPOINT = "127.0.0.1:9001"
+}
+
+if (!(Test-Path env:ATHENS_MONGO_STORAGE_URL)) {
+    $env:ATHENS_MONGO_STORAGE_URL = "mongodb://127.0.0.1:27017"
+}
+
 & go test -mod=vendor -race -coverprofile cover.out -covermode atomic ./...

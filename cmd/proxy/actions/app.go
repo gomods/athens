@@ -5,10 +5,9 @@ import (
 	"os"
 
 	"github.com/gobuffalo/buffalo"
-	"github.com/gobuffalo/buffalo/middleware"
-	"github.com/gobuffalo/buffalo/middleware/csrf"
-	"github.com/gobuffalo/buffalo/middleware/ssl"
 	"github.com/gobuffalo/buffalo/render"
+	forcessl "github.com/gobuffalo/mw-forcessl"
+	paramlogger "github.com/gobuffalo/mw-paramlogger"
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/log"
 	mw "github.com/gomods/athens/pkg/middleware"
@@ -109,26 +108,20 @@ func App(conf *config.Config) (*buffalo.App, error) {
 	}
 
 	// Automatically redirect to SSL
-	app.Use(ssl.ForceSSL(secure.Options{
+	app.Use(forcessl.Middleware(secure.Options{
 		SSLRedirect:     conf.Proxy.ForceSSL,
 		SSLProxyHeaders: map[string]string{"X-Forwarded-Proto": "https"},
 	}))
 
 	if ENV == "development" {
-		app.Use(middleware.ParameterLogger)
+		app.Use(paramlogger.ParameterLogger)
 	}
 
 	initializeAuth(app)
-	// Protect against CSRF attacks. https://www.owasp.org/index.php/Cross-Site_Request_Forgery_(CSRF)
-	// Remove to disable this.
-	if conf.EnableCSRFProtection {
-		csrfMiddleware := csrf.New
-		app.Use(csrfMiddleware)
-	}
 
 	if !conf.Proxy.FilterOff {
 		mf := module.NewFilter(conf.FilterFile)
-		app.Use(mw.NewFilterMiddleware(mf, conf.Proxy.OlympusGlobalEndpoint))
+		app.Use(mw.NewFilterMiddleware(mf, conf.Proxy.GlobalEndpoint))
 	}
 
 	// Having the hook set means we want to use it

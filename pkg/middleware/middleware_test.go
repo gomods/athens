@@ -28,14 +28,14 @@ var (
 	testConfigFile = filepath.Join("..", "..", "config.dev.toml")
 )
 
-func middlewareFilterApp(filterFile, olympusEndpoint string) *buffalo.App {
+func middlewareFilterApp(filterFile, registryEndpoint string) *buffalo.App {
 	h := func(c buffalo.Context) error {
 		return c.Render(200, nil)
 	}
 
 	a := buffalo.New(buffalo.Options{})
 	mf := newTestFilter(filterFile)
-	a.Use(NewFilterMiddleware(mf, olympusEndpoint))
+	a.Use(NewFilterMiddleware(mf, registryEndpoint))
 
 	a.GET(pathList, h)
 	a.GET(pathVersionInfo, h)
@@ -60,16 +60,19 @@ func Test_FilterMiddleware(t *testing.T) {
 	if conf.Proxy == nil {
 		t.Fatalf("No Proxy configuration in test config")
 	}
-	app := middlewareFilterApp(conf.FilterFile, conf.Proxy.OlympusGlobalEndpoint)
+	app := middlewareFilterApp(conf.FilterFile, conf.Proxy.GlobalEndpoint)
 	w := willie.New(app)
 
-	// Public, expects to be redirected to olympus
-	res := w.Request("/github.com/gomods/athens/@v/list").Get()
-	r.Equal(303, res.Code)
-	r.Equal(conf.Proxy.OlympusGlobalEndpoint+"/github.com/gomods/athens/@v/list", res.HeaderMap.Get("Location"))
+	// Public, expects to be redirected to the global registry endpoint, with and without a trailing slash
+	paths := []string{"/github.com/gomods/athens/@v/list/", "/github.com/gomods/athens/@v/list"}
+	for _, path := range paths {
+		res := w.Request(path).Get()
+		r.Equal(303, res.Code)
+		r.Equal(conf.Proxy.GlobalEndpoint+"/github.com/gomods/athens/@v/list/", res.HeaderMap.Get("Location"))
+	}
 
 	// Excluded, expects a 403
-	res = w.Request("/github.com/athens-artifacts/no-tags/@v/list").Get()
+	res := w.Request("/github.com/athens-artifacts/no-tags/@v/list").Get()
 	r.Equal(403, res.Code)
 
 	// Private, the proxy is working and returns a 200

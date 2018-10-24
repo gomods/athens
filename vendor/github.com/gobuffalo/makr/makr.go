@@ -113,8 +113,14 @@ func (g *Generator) Fmt(rootPath string) {
 func chdir(path string, fn func() error) error {
 	pwd, _ := os.Getwd()
 	defer os.Chdir(pwd)
-	os.Chdir(path)
-	return fn()
+	os.MkdirAll(path, 0755)
+	if err := os.Chdir(path); err != nil {
+		return errors.WithStack(err)
+	}
+	if err := fn(); err != nil {
+		return errors.WithStack(err)
+	}
+	return nil
 }
 
 var nullShould = func(data Data) bool {

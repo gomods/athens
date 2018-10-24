@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"reflect"
 
+	"github.com/gobuffalo/flect"
 	"github.com/gobuffalo/pop/nulls"
-	"github.com/markbates/inflect"
 )
 
 // hasManyAssociation is the implementation for the has_many
@@ -78,7 +78,7 @@ func (a *hasManyAssociation) Interface() interface{} {
 // Constraint returns the content for a where clause, and the args
 // needed to execute it.
 func (a *hasManyAssociation) Constraint() (string, []interface{}) {
-	tn := inflect.Underscore(a.ownerName)
+	tn := flect.Underscore(a.ownerName)
 	condition := fmt.Sprintf("%s_id = ?", tn)
 	if a.fkID != "" {
 		condition = fmt.Sprintf("%s = ?", a.fkID)
