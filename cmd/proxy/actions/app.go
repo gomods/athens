@@ -6,7 +6,6 @@ import (
 
 	"github.com/gobuffalo/buffalo"
 	"github.com/gobuffalo/buffalo/render"
-	csrf "github.com/gobuffalo/mw-csrf"
 	forcessl "github.com/gobuffalo/mw-forcessl"
 	paramlogger "github.com/gobuffalo/mw-paramlogger"
 	"github.com/gomods/athens/pkg/config"
@@ -119,12 +118,6 @@ func App(conf *config.Config) (*buffalo.App, error) {
 	}
 
 	initializeAuth(app)
-	// Protect against CSRF attacks. https://www.owasp.org/index.php/Cross-Site_Request_Forgery_(CSRF)
-	// Remove to disable this.
-	if conf.EnableCSRFProtection {
-		csrfMiddleware := csrf.New
-		app.Use(csrfMiddleware)
-	}
 
 	if !conf.Proxy.FilterOff {
 		mf := module.NewFilter(conf.FilterFile)
