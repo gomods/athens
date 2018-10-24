@@ -54,7 +54,6 @@ function execScript($name) {
 if ($setup_dev_env.IsPresent) {
 	execScript "get_dev_tools.ps1"
 	& docker-compose -p athensdev up -d mongo
-	& docker-compose -p athensdev up -d redis
 }
 
 if ($build.IsPresent) {
@@ -89,7 +88,6 @@ if ($verify.IsPresent) {
 
 if ($alldeps.IsPresent) {
 	& docker-compose -p athensdev up -d mongo
-	& docker-compose -p athensdev up -d redis
 	& docker-compose -p athensdev up -d minio
 	& docker-compose -p athensdev up -d jaeger
 	Write-Host "sleeping for a bit to wait for the DB to come up"
@@ -98,7 +96,6 @@ if ($alldeps.IsPresent) {
 
 if ($dev.IsPresent) {
 	& docker-compose -p athensdev up -d mongo
-	& docker-compose -p athensdev up -d redis
 }
 
 if ($test.IsPresent) {
