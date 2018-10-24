@@ -1,6 +1,26 @@
 language: go
 
-go:
-  - 1.8.x
-  - 1.9.x
-  - master
+sudo: false
+
+matrix:
+  include:
+  - go: "1.9.x"
+  - go: "1.10.x"
+  - go: "1.11.x"
+    env:
+      - GO111MODULE=off
+  - go: "1.11.x"
+    env:
+      - GO111MODULE=on
+  - go: "tip"
+    env:
+      - GO111MODULE=off
+  - go: "tip"
+    env:
+      - GO111MODULE=on
+  allow_failures:
+    - go: "tip"
+
+install: make deps
+
+script: make ci-test

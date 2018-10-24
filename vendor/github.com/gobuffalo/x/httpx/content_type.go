@@ -4,11 +4,12 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/markbates/going/defaults"
+	"github.com/gobuffalo/x/defaults"
 )
 
 func ContentType(req *http.Request) string {
 	ct := defaults.String(req.Header.Get("Content-Type"), req.Header.Get("Accept"))
+	ct = strings.TrimSpace(ct)
 	var cts []string
 	if strings.Contains(ct, ",") {
 		cts = strings.Split(ct, ",")
@@ -21,6 +22,9 @@ func ContentType(req *http.Request) string {
 			continue
 		}
 		return strings.ToLower(c)
+	}
+	if ct == "*/*" {
+		return ""
 	}
 	return ct
 }
