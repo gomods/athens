@@ -56,11 +56,10 @@ If you're not ready to contribute code yet, there are plenty of other great ways
 - Come to our [weekly development meetings](https://docs.google.com/document/d/1xpvgmR1Fq4iy1j975Tb4H_XjeXUQUOAvn0FximUzvIk/edit#)! They are a great way to meet folks, ask questions, find some stuff to work on, or just hang out if you want to. Just like with this project, absolutely everyone is welcome to join and participate in those
 - Get familiar with the system. There's lots to read about. Here are some places to start:
     - [Gentle Introduction to the Project](https://medium.com/@arschles/project-athens-c80606497ce1) - the basics of why we started this project
-    - [The Download Protocol](https://medium.com/@arschles/project-athens-the-download-protocol-2b346926a818) - the core API that the registry and proxies implement and CLIs use to download packages
-    - [Registry Design](https://docs.gomods.io/design/registry/) - what the registry is and how it works
+    - [The Download Protocol](https://medium.com/@arschles/project-athens-the-download-protocol-2b346926a818) - the core API that the proxy implements and the `go` CLI uses to download packages
     - [Proxy Design](https://docs.gomods.io/design/proxy/) - what the proxy is and how it works
-    - [vgo wiki](https://github.com/golang/go/wiki/vgo) - context and details on how Go dependency management works in general
-    - ["Go and Versioning"](https://research.swtch.com/vgo) - long papers on Go dependency management details, internals, etc...
+    - [Go modules wiki](https://github.com/golang/go/wiki/Modules) - context and details on how Go dependency management works in general
+    - ["Go and Versioning"](https://research.swtch.com/vgo) - long articles on Go dependency management details, internals, etc...
 
 # Built on the Shoulders of Giants
 
