@@ -147,6 +147,9 @@ func (dec Decoder) init() error {
 		dec.values = v
 		dec.curr = dec.main
 		if err := dec.analyzePath(); err != nil {
+			if dec.curr.Kind() == reflect.Struct && dec.opts.IgnoreUnknownKeys {
+				continue
+			}
 			return err
 		}
 	}
@@ -476,6 +479,10 @@ func (dec *Decoder) decode() error {
 			return newError(fmt.Errorf("not supported type for field \"%v\" in path \"%v\". Maybe you should to include it the UnmarshalText interface or register it using custom type?", dec.field, dec.path))
 		}
 	default:
+		if dec.opts.IgnoreUnknownKeys {
+			return nil
+		}
+
 		return newError(fmt.Errorf("not supported type for field \"%v\" in path \"%v\"", dec.field, dec.path))
 	}
 
@@ -490,12 +497,13 @@ func (dec *Decoder) findStructField() error {
 	num := dec.curr.NumField()
 	for i := 0; i < num; i++ {
 		field := dec.curr.Type().Field(i)
-		tag := field.Tag.Get(dec.opts.TagName)
-		if tag == "-" {
-			// skip this field
-			return nil
-		}
+
 		if field.Name == dec.field {
+			tag := field.Tag.Get(dec.opts.TagName)
+			if tag == "-" {
+				// skip this field
+				return nil
+			}
 			// check if the field's name is equal
 			dec.curr = dec.curr.Field(i)
 			return nil

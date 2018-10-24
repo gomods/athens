@@ -1,4 +1,4 @@
-FROM golang:1.7
+FROM golang:1.11
 
 RUN echo $GOPATH
 RUN mkdir -p $GOPATH/src/github.com/gobuffalo/pop

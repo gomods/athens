@@ -5,8 +5,8 @@ import (
 	"reflect"
 	"time"
 
+	"github.com/gobuffalo/flect"
 	"github.com/gobuffalo/uuid"
-	"github.com/markbates/inflect"
 )
 
 type manyToManyAssociation struct {
@@ -17,6 +17,7 @@ type manyToManyAssociation struct {
 	owner               interface{}
 	fkID                string
 	orderBy             string
+	primaryID           string
 	*associationSkipable
 	*associationComposite
 }
@@ -38,6 +39,7 @@ func init() {
 			manyToManyTableName: p.popTags.Find("many_to_many").Value,
 			fkID:                p.popTags.Find("fk_id").Value,
 			orderBy:             p.popTags.Find("order_by").Value,
+			primaryID:           p.popTags.Find("primary_id").Value,
 			associationSkipable: &associationSkipable{
 				skipped: skipped,
 			},
@@ -70,19 +72,23 @@ func (m *manyToManyAssociation) Interface() interface{} {
 // Constraint returns the content for a where clause, and the args
 // needed to execute it.
 func (m *manyToManyAssociation) Constraint() (string, []interface{}) {
-	modelColumnID := fmt.Sprintf("%s%s", inflect.Underscore(m.model.Type().Name()), "_id")
+	modelColumnID := fmt.Sprintf("%s%s", flect.Underscore(m.model.Type().Name()), "_id")
 
 	var columnFieldID string
 	i := reflect.Indirect(m.fieldValue)
 	if i.Kind() == reflect.Slice || i.Kind() == reflect.Array {
 		t := i.Type().Elem()
-		columnFieldID = fmt.Sprintf("%s%s", inflect.Underscore(t.Name()), "_id")
+		columnFieldID = fmt.Sprintf("%s%s", flect.Underscore(t.Name()), "_id")
 	} else {
-		columnFieldID = fmt.Sprintf("%s%s", inflect.Underscore(i.Type().Name()), "_id")
+		columnFieldID = fmt.Sprintf("%s%s", flect.Underscore(i.Type().Name()), "_id")
 	}
 
 	if m.fkID != "" {
 		columnFieldID = m.fkID
+	}
+
+	if m.primaryID != "" {
+		modelColumnID = m.primaryID
 	}
 
 	subQuery := fmt.Sprintf("select %s from %s where %s = ?", columnFieldID, m.manyToManyTableName, modelColumnID)
@@ -109,14 +115,14 @@ func (m *manyToManyAssociation) BeforeSetup() error {
 func (m *manyToManyAssociation) Statements() []AssociationStatement {
 	statements := []AssociationStatement{}
 
-	modelColumnID := fmt.Sprintf("%s%s", inflect.Underscore(m.model.Type().Name()), "_id")
+	modelColumnID := fmt.Sprintf("%s%s", flect.Underscore(m.model.Type().Name()), "_id")
 	var columnFieldID string
 	i := reflect.Indirect(m.fieldValue)
 	if i.Kind() == reflect.Slice || i.Kind() == reflect.Array {
 		t := i.Type().Elem()
-		columnFieldID = fmt.Sprintf("%s%s", inflect.Underscore(t.Name()), "_id")
+		columnFieldID = fmt.Sprintf("%s%s", flect.Underscore(t.Name()), "_id")
 	} else {
-		columnFieldID = fmt.Sprintf("%s%s", inflect.Underscore(i.Type().Name()), "_id")
+		columnFieldID = fmt.Sprintf("%s%s", flect.Underscore(i.Type().Name()), "_id")
 	}
 
 	for i := 0; i < m.fieldValue.Len(); i++ {

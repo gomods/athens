@@ -32,3 +32,5 @@ migrations/schema.sql
 .grifter/
 cockroach-data/
 vendor/
+go.mod
+go.sum

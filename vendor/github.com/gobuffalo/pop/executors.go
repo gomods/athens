@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/gobuffalo/pop/columns"
+	"github.com/gobuffalo/pop/logging"
 	"github.com/gobuffalo/uuid"
 	"github.com/gobuffalo/validate"
 )
@@ -20,7 +21,7 @@ func (c *Connection) Reload(model interface{}) error {
 func (q *Query) Exec() error {
 	return q.Connection.timeFunc("Exec", func() error {
 		sql, args := q.ToSQL(nil)
-		Log(sql, args...)
+		log(logging.SQL, sql, args...)
 		_, err := q.Connection.Store.Exec(sql, args...)
 		return err
 	})
@@ -32,7 +33,7 @@ func (q *Query) ExecWithCount() (int, error) {
 	count := int64(0)
 	return int(count), q.Connection.timeFunc("Exec", func() error {
 		sql, args := q.ToSQL(nil)
-		Log(sql, args...)
+		log(logging.SQL, sql, args...)
 		result, err := q.Connection.Store.Exec(sql, args...)
 		if err != nil {
 			return err
@@ -109,9 +110,10 @@ func (c *Connection) Create(model interface{}, excludeColumns ...string) error {
 				return err
 			}
 
-			cols := columns.ForStructWithAlias(m.Value, m.TableName(), m.As)
+			tn := m.TableName()
+			cols := columns.ForStructWithAlias(m.Value, tn, m.As)
 
-			if sm.TableName() == m.TableName() {
+			if tn == sm.TableName() {
 				cols.Remove(excludeColumns...)
 			}
 
@@ -160,10 +162,11 @@ func (c *Connection) Update(model interface{}, excludeColumns ...string) error {
 				return err
 			}
 
-			cols := columns.ForStructWithAlias(model, m.TableName(), m.As)
+			tn := m.TableName()
+			cols := columns.ForStructWithAlias(model, tn, m.As)
 			cols.Remove("id", "created_at")
 
-			if m.TableName() == sm.TableName() {
+			if tn == sm.TableName() {
 				cols.Remove(excludeColumns...)
 			}
 

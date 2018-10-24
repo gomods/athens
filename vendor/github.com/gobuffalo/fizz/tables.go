@@ -1,6 +1,7 @@
 package fizz
 
 import (
+	"bytes"
 	"fmt"
 	"strings"
 
@@ -14,6 +15,17 @@ type Table struct {
 	Indexes     []Index
 	ForeignKeys []ForeignKey
 	Options     map[string]interface{}
+}
+
+func (t Table) String() string {
+	var buff bytes.Buffer
+
+	buff.WriteString(fmt.Sprintf("create_table(\"%s\") {\n", t.Name))
+	for _, c := range t.Columns {
+		buff.WriteString(fmt.Sprintf("\t%s\n", c.String()))
+	}
+	buff.WriteString("}")
+	return buff.String()
 }
 
 func (t *Table) DisableTimestamps() {
@@ -103,18 +115,6 @@ func (f fizzer) CreateTable(name string, opts map[string]interface{}, help plush
 		if _, err := help.BlockWith(ctx); err != nil {
 			return errors.WithStack(err)
 		}
-	}
-
-	var foundPrimary bool
-	for _, c := range t.Columns {
-		if c.Primary {
-			foundPrimary = true
-			break
-		}
-	}
-
-	if !foundPrimary {
-		t.Columns = append([]Column{INT_ID_COL}, t.Columns...)
 	}
 
 	if enabled, exists := t.Options["timestamps"]; !exists || enabled == true {

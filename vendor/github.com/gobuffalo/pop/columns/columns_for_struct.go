@@ -1,8 +1,9 @@
 package columns
 
 import (
-	"fmt"
 	"reflect"
+
+	"github.com/markbates/oncer"
 )
 
 // ColumnsForStruct returns a Columns instance for
@@ -10,7 +11,7 @@ import (
 //
 // Deprecated: use ForStruct instead.
 func ColumnsForStruct(s interface{}, tableName string) (columns Columns) {
-	fmt.Println(`Warning: ColumnsForStruct is deprecated, and will be removed in a future version. Please use ForStruct instead.`)
+	oncer.Deprecate(0, "columns.ColumnsForStruct", "Use columns.ForStruct instead.")
 	return ForStruct(s, tableName)
 }
 
@@ -19,7 +20,7 @@ func ColumnsForStruct(s interface{}, tableName string) (columns Columns) {
 //
 // Deprecated: use ForStructWithAlias instead.
 func ColumnsForStructWithAlias(s interface{}, tableName string, tableAlias string) (columns Columns) {
-	fmt.Println(`Warning: ColumnsForStructWithAlias is deprecated, and will be removed in a future version. Please use ForStructWithAlias instead.`)
+	oncer.Deprecate(0, "columns.ColumnsForStructWithAlias", "Use columns.ForStructWithAlias instead.")
 	return ForStructWithAlias(s, tableName, tableAlias)
 }
 
