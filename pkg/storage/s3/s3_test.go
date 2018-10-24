@@ -1,6 +1,7 @@
 package s3
 
 import (
+	"context"
 	"testing"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -21,7 +22,8 @@ func BenchmarkBackend(b *testing.B) {
 }
 
 func (s *Storage) clear() error {
-	objects, err := s.s3API.ListObjects(&s3.ListObjectsInput{Bucket: aws.String(s.bucket)})
+	ctx, _ := context.WithTimeout(context.Background(), s.s3Conf.TimeoutDuration())
+	objects, err := s.s3API.ListObjectsWithContext(ctx, &s3.ListObjectsInput{Bucket: aws.String(s.bucket)})
 	if err != nil {
 		return err
 	}
@@ -32,7 +34,7 @@ func (s *Storage) clear() error {
 			Key:    o.Key,
 		}
 
-		_, err := s.s3API.DeleteObject(delParams)
+		_, err := s.s3API.DeleteObjectWithContext(ctx, delParams)
 		if err != nil {
 			return err
 		}
@@ -41,7 +43,8 @@ func (s *Storage) clear() error {
 }
 
 func (s *Storage) createBucket() error {
-	if _, err := s.s3API.CreateBucket(&s3.CreateBucketInput{Bucket: aws.String(s.bucket)}); err != nil {
+	ctx, _ := context.WithTimeout(context.Background(), s.s3Conf.TimeoutDuration())
+	if _, err := s.s3API.CreateBucketWithContext(ctx, &s3.CreateBucketInput{Bucket: aws.String(s.bucket)}); err != nil {
 		if aerr, ok := err.(awserr.Error); ok {
 			switch aerr.Code() {
 			case s3.ErrCodeBucketAlreadyOwnedByYou:
@@ -56,7 +59,7 @@ func (s *Storage) createBucket() error {
 		}
 	}
 
-	if err := s.s3API.WaitUntilBucketExists(&s3.HeadBucketInput{Bucket: aws.String(s.bucket)}); err != nil {
+	if err := s.s3API.WaitUntilBucketExistsWithContext(ctx, &s3.HeadBucketInput{Bucket: aws.String(s.bucket)}); err != nil {
 		return err
 	}
 
