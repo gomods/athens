@@ -12,19 +12,18 @@ import (
 // Config provides configuration values for all components
 type Config struct {
 	TimeoutConf
-	GoEnv                string `validate:"required" envconfig:"GO_ENV"`
-	GoBinary             string `validate:"required" envconfig:"GO_BINARY_PATH"`
-	GoGetWorkers         int    `validate:"required" envconfig:"ATHENS_GOGET_WORKERS"`
-	ProtocolWorkers      int    `validate:"required" envconfig:"ATHENS_PROTOCOL_WORKERS"`
-	LogLevel             string `validate:"required" envconfig:"ATHENS_LOG_LEVEL"`
-	BuffaloLogLevel      string `validate:"required" envconfig:"BUFFALO_LOG_LEVEL"`
-	CloudRuntime         string `validate:"required" envconfig:"ATHENS_CLOUD_RUNTIME"`
-	FilterFile           string `envconfig:"ATHENS_FILTER_FILE"`
-	EnableCSRFProtection bool   `envconfig:"ATHENS_ENABLE_CSRF_PROTECTION"`
-	TraceExporterURL     string `envconfig:"ATHENS_TRACE_EXPORTER_URL"`
-	TraceExporter        string `envconfig:"ATHENS_TRACE_EXPORTER"`
-	Proxy                *ProxyConfig
-	Storage              *StorageConfig
+	GoEnv            string `validate:"required" envconfig:"GO_ENV"`
+	GoBinary         string `validate:"required" envconfig:"GO_BINARY_PATH"`
+	GoGetWorkers     int    `validate:"required" envconfig:"ATHENS_GOGET_WORKERS"`
+	ProtocolWorkers  int    `validate:"required" envconfig:"ATHENS_PROTOCOL_WORKERS"`
+	LogLevel         string `validate:"required" envconfig:"ATHENS_LOG_LEVEL"`
+	BuffaloLogLevel  string `validate:"required" envconfig:"BUFFALO_LOG_LEVEL"`
+	CloudRuntime     string `validate:"required" envconfig:"ATHENS_CLOUD_RUNTIME"`
+	FilterFile       string `envconfig:"ATHENS_FILTER_FILE"`
+	TraceExporterURL string `envconfig:"ATHENS_TRACE_EXPORTER_URL"`
+	TraceExporter    string `envconfig:"ATHENS_TRACE_EXPORTER"`
+	Proxy            *ProxyConfig
+	Storage          *StorageConfig
 }
 
 // ParseConfigFile parses the given file into an athens config struct
