@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/storage/compliance"
@@ -21,7 +22,7 @@ func BenchmarkBackend(b *testing.B) {
 }
 
 func (s *Storage) clear() error {
-	ctx := context.TODO()
+	ctx, _ := context.WithTimeout(context.Background(), s.s3Conf.TimeoutDuration())
 	objects, err := s.s3API.ListObjectsWithContext(ctx, &s3.ListObjectsInput{Bucket: aws.String(s.bucket)})
 	if err != nil {
 		return err
@@ -41,6 +42,30 @@ func (s *Storage) clear() error {
 	return nil
 }
 
+func (s *Storage) createBucket() error {
+	ctx, _ := context.WithTimeout(context.Background(), s.s3Conf.TimeoutDuration())
+	if _, err := s.s3API.CreateBucketWithContext(ctx, &s3.CreateBucketInput{Bucket: aws.String(s.bucket)}); err != nil {
+		if aerr, ok := err.(awserr.Error); ok {
+			switch aerr.Code() {
+			case s3.ErrCodeBucketAlreadyOwnedByYou:
+				return nil
+			case s3.ErrCodeBucketAlreadyExists:
+				return nil
+			default:
+				return aerr
+			}
+		} else {
+			return err
+		}
+	}
+
+	if err := s.s3API.WaitUntilBucketExistsWithContext(ctx, &s3.HeadBucketInput{Bucket: aws.String(s.bucket)}); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func getStorage(t testing.TB) *Storage {
 	options := func(conf *aws.Config) {
 		conf.Endpoint = aws.String("127.0.0.1:9001")
@@ -51,7 +76,7 @@ func getStorage(t testing.TB) *Storage {
 		&config.S3Config{
 			Key:    "minio",
 			Secret: "minio123",
-			Bucket: "gomods",
+			Bucket: "gomodsaws",
 			Region: "us-west-1",
 			TimeoutConf: config.TimeoutConf{
 				Timeout: 300,
@@ -62,6 +87,10 @@ func getStorage(t testing.TB) *Storage {
 	)
 
 	if err != nil {
+		t.Fatal(err)
+	}
+
+	if err = backend.createBucket(); err != nil {
 		t.Fatal(err)
 	}
 
