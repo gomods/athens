@@ -15,7 +15,6 @@ require (
 	github.com/go-playground/universal-translator v0.16.0 // indirect
 	github.com/gobuffalo/buffalo v0.13.1
 	github.com/gobuffalo/envy v1.6.5
-	github.com/gobuffalo/mw-csrf v0.0.0-20180802151833-446ff26e108b
 	github.com/gobuffalo/mw-forcessl v0.0.0-20180802152810-73921ae7a130
 	github.com/gobuffalo/mw-paramlogger v0.0.0-20181005191442-d6ee392ec72e
 	github.com/gobuffalo/suite v2.1.6+incompatible
