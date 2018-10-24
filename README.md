@@ -9,39 +9,29 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/gomods/athens)](https://goreportcard.com/report/github.com/gomods/athens)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com)
 
-Welcome to the Athens project! We're building all things Go package repository in here.
-
-1. [Package Registry](https://docs.gomods.io/design/registry/)
-2. [Edge Proxy](https://docs.gomods.io/design/proxy/)
+Welcome to the Athens project! We are a proxy server for the [Go Modules download API](https://docs.gomods.io/intro/protocol/).
 
 See our documentation site [https://docs.gomods.io](https://docs.gomods.io) for more details on the project.
 
 # Project Status
 
-Project Athens is in a very early alpha release and everything might change.
-Don't run it in production, but do play around with it and [contribute](#contributing)
-when you can!
+Project Athens is in alpha. Things might change, so we recommend that you don't run it for production workloads. We have organizations that are testing it internally, and there is an experimental public proxy server running.
+
+We encourage you to [test it out](https://docs.gomods.io/install/) and [contribute](#contributing) when you can!
 
 # More Details Please!
 
-Although the project is in development, here's where we're going:
+Although the project is alpha, here's where we're going:
 
-The package registry and the edge proxy both implement the [vgo download protocol](https://medium.com/@arschles/project-athens-the-download-protocol-2b346926a818), but each one
-is intended for different purposes.
+The proxy implements the [Go modules download protocol](https://docs.gomods.io/intro/protocol/).
 
-The registry will be hosted globally, and will be "always on" for folks. Anyone will be able to
-configure their machine to do a `go get` (right now, it's a `vgo get`) and have it request
-packages from the registry.
+There is currently an experimental public proxy, and we have plans to host a more stable public proxy with more guarantees. We also have a community of folks who are testing Athens inside their organizations, as an "internal proxy." In either deployment, users set their `GOPROXY` environment variable to point to the Athens proxy of their choice. At that point, `go get`, `go build`, and `go build`s will use the proxy to download dependencies as necessary.
 
-On the other hand, the registry will only host _public_ code. If you have private code, the
-edge proxy is your jam. The proxy will store your private code for you, in your database
-of choice. It will be designed to also cache packages from the registry, subject to
-an exclude list.
+Athens proxies are highly configurable, so they can work for lots of different deployments. For example, public proxies can store code in cloud databases and CDNs, while internal "enterprise" deployments can use disk-based (i.e. NFS) storage.
 
 # Development
 
-See [DEVELOPMENT.md](./DEVELOPMENT.md) for details on how to set up your development environment
-and start contributing code.
+See [DEVELOPMENT.md](./DEVELOPMENT.md) for details on how to set up your development environment and start contributing code.
 
 Speaking of contributing, read on!
 
