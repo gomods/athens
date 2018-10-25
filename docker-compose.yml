@@ -19,6 +19,12 @@ services:
       context: .
       dockerfile: Dockerfile.test
     command: ["./scripts/test_e2e.sh"]
+  azurite:
+    image: arafato/azurite:2.6.5
+    ports:
+      - 10000:10000
+    environment:
+      executable: blob
   mongo:
     image: mongo:3.7.9-jessie
     ports:
