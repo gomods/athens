@@ -11,5 +11,5 @@ if (!(Test-Path env:ATHENS_MINIO_ENDPOINT)) {
 if (!(Test-Path env:ATHENS_MONGO_STORAGE_URL)) {
     $env:ATHENS_MONGO_STORAGE_URL = "mongodb://127.0.0.1:27017"
 }
-
+$env:GO111MODULE="on"
 & go test -mod=vendor -race -coverprofile cover.out -covermode atomic ./...
