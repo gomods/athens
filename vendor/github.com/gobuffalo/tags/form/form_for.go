@@ -4,6 +4,8 @@ import (
 	"database/sql/driver"
 	"fmt"
 	"reflect"
+	"regexp"
+	"strconv"
 	"strings"
 	"sync"
 
@@ -12,6 +14,8 @@ import (
 	"github.com/gobuffalo/validate"
 	"github.com/markbates/inflect"
 )
+
+var arrayFieldRegExp = regexp.MustCompile("^([A-Za-z0-9]+)\\[(\\d+)\\]$")
 
 //FormFor is a form made for a struct
 type FormFor struct {
@@ -136,7 +140,7 @@ func (f FormFor) RadioButtonTag(field string, opts tags.Options) *tags.Tag {
 }
 
 //SelectTag creates a select tag for a specified struct field and loads options from the options opject
-func (f FormFor) SelectTag(field string, opts tags.Options) *SelectTag {
+func (f FormFor) SelectTag(field string, opts tags.Options) *tags.Tag {
 	f.buildOptions(field, opts)
 	return f.Form.SelectTag(opts)
 }
@@ -186,16 +190,33 @@ func (f FormFor) value(field string) interface{} {
 
 	if fn.IsValid() == false {
 		dots := strings.Split(field, ".")
-		if len(dots) == 1 {
+
+		if len(dots) == 1 && !arrayFieldRegExp.Match([]byte(dots[0])) {
 			if !strings.HasSuffix(field, "ID") {
 				return f.value(field + "ID")
 			}
 			return ""
 		}
+
+		matches := arrayFieldRegExp.FindStringSubmatch(dots[0])
+		if len(matches) != 0 {
+			dots[0] = matches[1]
+		}
+
 		fn = f.reflection.FieldByName(dots[0])
+
 		if fn.IsValid() {
-			ff := NewFormFor(fn.Interface(), f.Options)
-			return ff.value(strings.Join(dots[1:], "."))
+			fn = reflect.Indirect(fn)
+
+			if fn.Kind() == reflect.Slice || fn.Kind() == reflect.Array {
+				index, _ := strconv.Atoi(matches[2])
+				fn = reflect.Indirect(fn.Index(index))
+			}
+
+			if fn.Kind() == reflect.Struct {
+				ff := NewFormFor(fn.Interface(), f.Options)
+				return ff.value(strings.Join(dots[1:], "."))
+			}
 		}
 	}
 

@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"reflect"
 
+	"github.com/gobuffalo/flect"
 	"github.com/gobuffalo/pop/nulls"
-	"github.com/markbates/inflect"
 )
 
 type hasOneAssociation struct {
@@ -62,7 +62,7 @@ func (h *hasOneAssociation) Interface() interface{} {
 // Constraint returns the content for a where clause, and the args
 // needed to execute it.
 func (h *hasOneAssociation) Constraint() (string, []interface{}) {
-	tn := inflect.Underscore(h.ownerName)
+	tn := flect.Underscore(h.ownerName)
 	condition := fmt.Sprintf("%s_id = ?", tn)
 	if h.fkID != "" {
 		condition = fmt.Sprintf("%s = ?", h.fkID)

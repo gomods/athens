@@ -21,7 +21,7 @@ if err != nil {
 ```go
 // Get golang.org/x/tools/cmd/goimports package, update it if it's already in GOPATH.
 g := makr.New()
-g.Add(makr.GoGet("golang.org/x/tools/cmd/goimports", "-u"))
+g.Add(makr.NewCommand(makr.GoGet("golang.org/x/tools/cmd/goimports", "-u")))
 err = g.Run(".", makr.Data{})
 if err != nil {
     // Error!

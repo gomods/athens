@@ -20,8 +20,11 @@ const (
 	xssProtectionHeader  = "X-XSS-Protection"
 	xssProtectionValue   = "1; mode=block"
 	cspHeader            = "Content-Security-Policy"
+	cspReportOnlyHeader  = "Content-Security-Policy-Report-Only"
 	hpkpHeader           = "Public-Key-Pins"
 	referrerPolicyHeader = "Referrer-Policy"
+	featurePolicyHeader  = "Feature-Policy"
+	expectCTHeader       = "Expect-CT"
 
 	ctxSecureHeaderKey = secureCtxKey("SecureResponseHeader")
 	cspNonceSize       = 16
@@ -61,6 +64,8 @@ type Options struct {
 	STSPreload bool
 	// ContentSecurityPolicy allows the Content-Security-Policy header value to be set with a custom value. Default is "".
 	ContentSecurityPolicy string
+	// ContentSecurityPolicyReportOnly allows the Content-Security-Policy-Report-Only header value to be set with a custom value. Default is "".
+	ContentSecurityPolicyReportOnly string
 	// CustomBrowserXssValue allows the X-XSS-Protection header value to be set with a custom value. This overrides the BrowserXssFilter option. Default is "".
 	CustomBrowserXssValue string // nolint: golint
 	// Passing a template string will replace `$NONCE` with a dynamic nonce value of 16 bytes for each request which can be later retrieved using the Nonce function.
@@ -71,6 +76,8 @@ type Options struct {
 	PublicKey string
 	// ReferrerPolicy allows sites to control when browsers will pass the Referer header to other sites. Default is "".
 	ReferrerPolicy string
+	// FeaturePolicy allows to selectively enable and disable use of various browser features and APIs. Default is "".
+	FeaturePolicy string
 	// SSLHost is the host name that is used to redirect http requests to https. Default is "", which indicates to use the same host.
 	SSLHost string
 	// AllowedHosts is a list of fully qualified domain names that are allowed. Default is empty list, which allows any and all host names.
@@ -84,6 +91,8 @@ type Options struct {
 	SSLProxyHeaders map[string]string
 	// STSSeconds is the max-age of the Strict-Transport-Security header. Default is 0, which would NOT include the header.
 	STSSeconds int64
+	// ExpectCTHeader allows the Expect-CT header value to be set with a custom value. Default is "".
+	ExpectCTHeader string
 }
 
 // Secure is a middleware that helps setup a few basic security features. A single secure.Options struct can be
@@ -208,7 +217,7 @@ func (s *Secure) Process(w http.ResponseWriter, r *http.Request) error {
 	if responseHeader != nil {
 		for key, values := range responseHeader {
 			for _, value := range values {
-				w.Header().Add(key, value)
+				w.Header().Set(key, value)
 			}
 		}
 	}
@@ -343,9 +352,28 @@ func (s *Secure) processRequest(w http.ResponseWriter, r *http.Request) (http.He
 		}
 	}
 
+	// Content Security Policy Report Only header.
+	if len(s.opt.ContentSecurityPolicyReportOnly) > 0 {
+		if s.opt.nonceEnabled {
+			responseHeader.Set(cspReportOnlyHeader, fmt.Sprintf(s.opt.ContentSecurityPolicyReportOnly, CSPNonce(r.Context())))
+		} else {
+			responseHeader.Set(cspReportOnlyHeader, s.opt.ContentSecurityPolicyReportOnly)
+		}
+	}
+
 	// Referrer Policy header.
 	if len(s.opt.ReferrerPolicy) > 0 {
 		responseHeader.Set(referrerPolicyHeader, s.opt.ReferrerPolicy)
+	}
+
+	// Feature Policy header.
+	if len(s.opt.FeaturePolicy) > 0 {
+		responseHeader.Set(featurePolicyHeader, s.opt.FeaturePolicy)
+	}
+
+	// Expect-CT header.
+	if len(s.opt.ExpectCTHeader) > 0 {
+		responseHeader.Set(expectCTHeader, s.opt.ExpectCTHeader)
 	}
 
 	return responseHeader, nil
