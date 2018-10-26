@@ -12,7 +12,7 @@ A registry is generally run by one entity, is one logical server that provides a
 
 That's most definitely not what we in the Athens community are going for, and that would harm our community if we did go down that path.
 
-First and foremost, Athens is an _implementation_ of the [Go Modules download API](./intro/protocol). Not only does the standard Go toolchain support any implementation of that API, the proxy is designed to talk to any other server that implements that API as well. That allows Athens to talk to other proxies in the community. 
+First and foremost, Athens is an _implementation_ of the [Go Modules download API](./intro/protocol). Not only does the standard Go toolchain support any implementation of that API, the Athens proxy is designed to talk to any other server that implements that API as well. That allows Athens to talk to other proxies in the community. 
 
 Finally, we're purposefully building this project - and working with the toolchain folks - in a way that everyone who wants to write a proxy can participate.
 
@@ -42,7 +42,7 @@ To repeat, "datastore" means a CDN (we currently have support for Google Cloud S
 
 One final note - we use "caching" in lots of our docs, and that's technically wrong because no data is evicted or expires. We'll need to update that terminology.
 
-### Can the proxy authenticate to private repositories?
+### Can the Athens proxy authenticate to private repositories?
 
 _TL;DR: yes, with proper authentication configuration defined on the Athens proxy host._
 
@@ -67,5 +67,5 @@ To try out tracing with Jaeger, do the following:
 - Run the walkthrough tutorial
 - Open `http://localhost:16686/search`
 
-Observability is not a hard requirement for the proxy. So, if the infrastructure is not properly set up, they will fail with an information log. For eg. if Jaeger is not running / if the wrong URL to the exporter is provided, proxy will continue to run. However, it will not collect any traces or metrics (when the exporter backend is unavailable).
+Observability is not a hard requirement for the Athens proxy. So, if the infrastructure is not properly set up, they will fail with an information log. For eg. if Jaeger is not running / if the wrong URL to the exporter is provided, proxy will continue to run. However, it will not collect any traces or metrics (when the exporter backend is unavailable).
 

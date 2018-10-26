@@ -5,14 +5,14 @@ date: 2018-02-11T15:59:56-05:00
 
 ## The Athens Proxy
 
-The proxy has two primary use cases:
+The Athens proxy has two primary use cases:
 
 - Internal deployments
 - Public mirror deployments
 
-This document details features of the proxy that you can use to achieve either use case.
+This document details features of the Athens proxy that you can use to achieve either use case.
 
-## The Role of the Proxy
+## The Role of the Athens proxy
 
 We intend proxies to be deployed primarily inside of enterprises to:
 
@@ -24,11 +24,11 @@ Importantly, a proxy is not intended to be a complete _mirror_ of an upstream pr
 
 ## Cache Misses
 
-When a user requests a module `MxV1` from a proxy and the proxy doesn't have `MxV1` in its cache, it first determines whether `MxV1` is private or not private.
+When a user requests a module `MxV1` from a proxy and the Athens proxy doesn't have `MxV1` in its cache, it first determines whether `MxV1` is private or not private.
 
 If it's private, it immediately does a cache fill operation from the internal VCS.
 
-If it's not private, the proxy consults its exclude list for non-private modules (see below). If `MxV1` is on the exclude list, the proxy returns 404 and does nothing else. If `MxV1` is not on the exclude list, the proxy executes the following algorithm:
+If it's not private, the Athens proxy consults its exclude list for non-private modules (see below). If `MxV1` is on the exclude list, the Athens proxy returns 404 and does nothing else. If `MxV1` is not on the exclude list, the Athens proxy executes the following algorithm:
 
 ```
 upstreamDetails := lookUpstream(MxV1)
@@ -47,18 +47,18 @@ _In a later version of the project, we may implement an event stream on proxies 
 
 ## Exclude Lists and Private Module Filters
 
-To accommodate private (i.e. enterprise) deployments, the proxy maintains two important access control mechanisms:
+To accommodate private (i.e. enterprise) deployments, the Athens proxy maintains two important access control mechanisms:
 
 - Private module filters
 - Exclude lists for public modules
 
 ### Private Module Filters
 
-Private module filters are string globs that tell the proxy what is a private module. For example, the string `github.internal.com/**` tells the proxy:
+Private module filters are string globs that tell the Athens proxy what is a private module. For example, the string `github.internal.com/**` tells the Athens proxy:
 
 - To never make requests to the public internet (i.e. to upstream proxies) regarding this module
 - To download module code (in its cache filling mechanism) from the VCS at `github.internal.com`
 
 ### Exclude Lists for Public Modules
 
-Exclude lists for public modules are also globs that tell the proxy what modules it should never download from any upstream proxy. For example, the string `github.com/arschles/**` tells the proxy to always return `404 Not Found` to clients.
+Exclude lists for public modules are also globs that tell the Athens proxy what modules it should never download from any upstream proxy. For example, the string `github.com/arschles/**` tells the Athens proxy to always return `404 Not Found` to clients.
