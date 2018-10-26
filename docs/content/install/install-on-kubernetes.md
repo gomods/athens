@@ -4,7 +4,7 @@ description: Installing an Athens Instance on Kubernetes
 weight: 1
 ---
 
-When you follow the instructions in the [Walkthrough](/walkthrough), you end up with an Athens Proxy that uses in-memory storage. This is only suitable for trying out the proxy for a short period of time, as you will quickly run out of memory and Athens won't persist modules between restarts. In order to run a more production-like proxy, you may with to run Athens on a [Kubernetes](https://kubernetes.io/) cluster. To aid in deployment of the Athens proxy on Kubernetes, a [Helm](https://www.helm.sh/) chart has been provided. This guide will walk you through installing Athens on a Kubernetes cluster using Helm.
+When you follow the instructions in the [Walkthrough](/walkthrough), you end up with an Athens Proxy that uses in-memory storage. This is only suitable for trying out the Athens proxy for a short period of time, as you will quickly run out of memory and Athens won't persist modules between restarts. In order to run a more production-like proxy, you may with to run Athens on a [Kubernetes](https://kubernetes.io/) cluster. To aid in deployment of the Athens proxy on Kubernetes, a [Helm](https://www.helm.sh/) chart has been provided. This guide will walk you through installing Athens on a Kubernetes cluster using Helm.
 
 * [Prerequisites](#prerequisites)
 * [Configure Helm](#configure-helm)
@@ -91,7 +91,7 @@ This will deploy a single Athens instance in the `default` namespace with `disk`
 
 ### Give Athens access to private repositories via Github Token (Optional)
 1. Create a token at https://github.com/settings/tokens
-2. Provide the token to the proxy either through the config.toml file or by setting the `ATHENS_GITHUB_TOKEN` environment variable.
+2. Provide the token to the Athens proxy either through the config.toml file or by setting the `ATHENS_GITHUB_TOKEN` environment variable.
 
 ### Storage Providers
 
@@ -121,7 +121,7 @@ helm install ./charts/proxy -n athens --set storage.type=mongo --set storage.mon
 
 ### Kuberentes Service
 
-By default, a Kubernetes `ClusterIP` service is created for the Athens proxy. "ClusterIP" is sufficient in the case when the Proxy will be used from within the cluster. To expose Athens outside of the cluster, consider using a "NodePort" or "LoadBalancer" service. This can be changed by setting the `service.type` value when installing the chart. For example, to deploy Athens using a NodePort service, the following command could be used:
+By default, a Kubernetes `ClusterIP` service is created for the Athens proxy. "ClusterIP" is sufficient in the case when the Athens proxy will be used from within the cluster. To expose Athens outside of the cluster, consider using a "NodePort" or "LoadBalancer" service. This can be changed by setting the `service.type` value when installing the chart. For example, to deploy Athens using a NodePort service, the following command could be used:
 
 ```console
 helm install ./charts/proxy -n athens --set service.type=NodePort

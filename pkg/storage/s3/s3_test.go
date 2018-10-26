@@ -22,7 +22,9 @@ func BenchmarkBackend(b *testing.B) {
 }
 
 func (s *Storage) clear() error {
-	ctx, _ := context.WithTimeout(context.Background(), s.s3Conf.TimeoutDuration())
+	ctx, cancel := context.WithTimeout(context.Background(), s.s3Conf.TimeoutDuration())
+	defer cancel()
+
 	objects, err := s.s3API.ListObjectsWithContext(ctx, &s3.ListObjectsInput{Bucket: aws.String(s.bucket)})
 	if err != nil {
 		return err
@@ -43,27 +45,26 @@ func (s *Storage) clear() error {
 }
 
 func (s *Storage) createBucket() error {
-	ctx, _ := context.WithTimeout(context.Background(), s.s3Conf.TimeoutDuration())
+	ctx, cancel := context.WithTimeout(context.Background(), s.s3Conf.TimeoutDuration())
+	defer cancel()
+
 	if _, err := s.s3API.CreateBucketWithContext(ctx, &s3.CreateBucketInput{Bucket: aws.String(s.bucket)}); err != nil {
-		if aerr, ok := err.(awserr.Error); ok {
-			switch aerr.Code() {
-			case s3.ErrCodeBucketAlreadyOwnedByYou:
-				return nil
-			case s3.ErrCodeBucketAlreadyExists:
-				return nil
-			default:
-				return aerr
-			}
-		} else {
+		aerr, ok := err.(awserr.Error)
+		if !ok {
 			return err
+		}
+
+		switch aerr.Code() {
+		case s3.ErrCodeBucketAlreadyOwnedByYou:
+			return nil
+		case s3.ErrCodeBucketAlreadyExists:
+			return nil
+		default:
+			return aerr
 		}
 	}
 
-	if err := s.s3API.WaitUntilBucketExistsWithContext(ctx, &s3.HeadBucketInput{Bucket: aws.String(s.bucket)}); err != nil {
-		return err
-	}
-
-	return nil
+	return s.s3API.WaitUntilBucketExistsWithContext(ctx, &s3.HeadBucketInput{Bucket: aws.String(s.bucket)})
 }
 
 func getStorage(t testing.TB) *Storage {
