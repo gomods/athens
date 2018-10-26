@@ -71,10 +71,7 @@ func setRuntimeDefaults(config *Config) {
 
 // envOverride uses Environment variables to override unspecified properties
 func envOverride(config *Config) error {
-	if err := envconfig.Process("athens", config); err != nil {
-		return err
-	}
-	return nil
+	return envconfig.Process("athens", config)
 }
 
 func validateConfig(c Config) error {
@@ -118,7 +115,7 @@ func checkFilePerms(files ...string) error {
 		}
 
 		if fInfo.Mode() != 0600 {
-			return errors.E(op, f+" should have 0660 as permission")
+			return errors.E(op, f+" should have 0600 as permission")
 		}
 	}
 
