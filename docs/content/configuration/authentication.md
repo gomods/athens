@@ -19,7 +19,7 @@ weight: 1
 		Username: test
 		Password for 'test':
 
-3. Once we've properly authenticated we want to share the .subversion directory with the proxy server in order to reuse those credentials.  Below we're setting it as a volume on our proxy container.
+3. Once we've properly authenticated we want to share the .subversion directory with the Athens proxy server in order to reuse those credentials.  Below we're setting it as a volume on our proxy container.
 
     **Bash**
 
@@ -142,7 +142,7 @@ weight: 1
        user=proxyuser1
        password=proxypass1
 
-5. Once we've properly setup our authentication we want to share the bazaar configuration directory with the proxy server in order to reuse those credentials.  Below we're setting it as a volume on our proxy container.
+5. Once we've properly setup our authentication we want to share the bazaar configuration directory with the Athens proxy server in order to reuse those credentials.  Below we're setting it as a volume on our proxy container.
 
     **Bash**
 

@@ -34,7 +34,7 @@ INFO[0000] Exporter not specified. Traces won't be exported
 INFO[0000] Starting application at http://127.0.0.1:3000
 ```
 
-Next, you will need to configure Go to use the proxy!
+Next, you will need to configure Go to use the Athens proxy!
 
 **Bash**
 ```bash
