@@ -3,6 +3,7 @@ package actions
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/errors"
@@ -12,6 +13,7 @@ import (
 	"github.com/gomods/athens/pkg/storage/mem"
 	"github.com/gomods/athens/pkg/storage/minio"
 	"github.com/gomods/athens/pkg/storage/mongo"
+	"github.com/gomods/athens/pkg/storage/multi"
 	"github.com/gomods/athens/pkg/storage/s3"
 	"github.com/spf13/afero"
 )
@@ -19,6 +21,22 @@ import (
 // GetStorage returns storage backend based on env configuration
 func GetStorage(storageType string, storageConfig *config.StorageConfig) (storage.Backend, error) {
 	const op errors.Op = "actions.GetStorage"
+	if strings.Contains(storageType, "-") {
+		storageTypes := strings.Split(storageType, "-")
+		storages := make([]storage.Backend, 0, len(storageTypes))
+
+		for _, st := range storageTypes {
+			s, e := GetStorage(st, storageConfig)
+			if e != nil {
+				return nil, e
+			}
+
+			storages = append(storages, s)
+		}
+
+		return multi.NewStorage(storages)
+	}
+
 	switch storageType {
 	case "memory":
 		return mem.NewStorage()
