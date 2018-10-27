@@ -1,7 +1,6 @@
 .PHONY: build
 build:
 	cd cmd/proxy && buffalo build
-	cd cmd/olympus && buffalo build
 
 .PHONY: run
 run: build
@@ -20,13 +19,12 @@ setup-dev-env:
 verify:
 	./scripts/check_gofmt.sh
 	./scripts/check_golint.sh
-	# ./scripts/check_deps.sh TODO: comment back when we stop using vendor.
+	./scripts/check_deps.sh
 	./scripts/check_conflicts.sh
 
 .PHONY: test
 test:
 	cd cmd/proxy && buffalo test
-	cd cmd/olympus && buffalo test
 
 .PHONY: test-unit
 test-unit:

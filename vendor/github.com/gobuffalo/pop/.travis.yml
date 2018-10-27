@@ -1,27 +1,16 @@
-language: go
-
 dist: trusty
-
 sudo: required
-
-go:
-  - 1.8
-  - 1.9
-  - "1.10"
-  - tip
+language: go
 
 install:
   - go get -t -v ./...
+  - go build -v -tags sqlite -o tsoda ./soda
 
 before_script:
-  - go get -u github.com/alecthomas/gometalinter
-  - gometalinter --install
-  - go build -v -tags sqlite -o tsoda ./soda
   - ./tsoda create -e $SODA_DIALECT
   - ./tsoda migrate -e $SODA_DIALECT
 
 script:
-#  - gometalinter --vendor --deadline=5m ./...
   - go test -tags sqlite ./... -v
 
 global_env:
@@ -29,22 +18,70 @@ global_env:
   - MYSQL_PASSWORD=""
   - POSTGRES_PASSWORD=""
 
-env:
-  - SODA_DIALECT="postgres"
-  - SODA_DIALECT="mysql_travis"
-  - SODA_DIALECT="sqlite"
+.mysql: &mysql
+  services:
+    - mysql
+  addons:
+    apt:
+      sources:
+        - mysql-5.7-trusty
+      packages:
+        - mysql-server
 
-services:
-  - mysql
+.postgres: &postgres
+  addons:
+    postgresql: "9.5"
 
-addons:
-  postgresql: "9.5"
-  apt:
-    sources:
-      - mysql-5.7-trusty
-    packages:
-      - mysql-server
+# TODO: MariaDB builds
+.mariadb: &mariadb
+  addons:
+    mariadb: '10.0'
 
 matrix:
+  include:
+    - dist: trusty
+      go: 1.9
+      env: SODA_DIALECT="postgres"
+      <<: *postgres
+    - dist: trusty
+      go: 1.9
+      env: SODA_DIALECT="mysql_travis"
+      <<: *mysql
+    - dist: trusty
+      go: 1.9
+      env: SODA_DIALECT="sqlite"
+    - dist: trusty
+      go: "1.10"
+      env: SODA_DIALECT="postgres"
+      <<: *postgres
+    - dist: trusty
+      go: "1.10"
+      env: SODA_DIALECT="mysql_travis"
+      <<: *mysql
+    - dist: trusty
+      go: "1.10"
+      env: SODA_DIALECT="sqlite"
+    - dist: trusty
+      go: "1.11"
+      env: SODA_DIALECT="postgres"
+      <<: *postgres
+    - dist: trusty
+      go: "1.11"
+      env: SODA_DIALECT="mysql_travis"
+      <<: *mysql
+    - dist: trusty
+      go: "1.11"
+      env: SODA_DIALECT="sqlite"
+    - dist: trusty
+      go: "tip"
+      env: SODA_DIALECT="postgres"
+      <<: *postgres
+    - dist: trusty
+      go: "tip"
+      env: SODA_DIALECT="mysql_travis"
+      <<: *mysql
+    - dist: trusty
+      go: "tip"
+      env: SODA_DIALECT="sqlite"
   allow_failures:
     - go: 'tip'

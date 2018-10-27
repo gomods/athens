@@ -1,7 +1,6 @@
 package pop
 
 import (
-	"fmt"
 	"net/url"
 	"regexp"
 	"strconv"
@@ -10,6 +9,7 @@ import (
 
 	_mysql "github.com/go-sql-driver/mysql"
 	"github.com/markbates/going/defaults"
+	"github.com/markbates/oncer"
 	"github.com/pkg/errors"
 )
 
@@ -117,14 +117,16 @@ func (cd *ConnectionDetails) Finalize() error {
 	case "sqlite", "sqlite3":
 		cd.Dialect = "sqlite3"
 	default:
-		return errors.Errorf("Unknown dialect %s!", cd.Dialect)
+		return errors.Errorf("unknown dialect %s", cd.Dialect)
 	}
 	return nil
 }
 
-// Parse is deprecated! Please use `ConnectionDetails.Finalize()` instead!
+// Parse cleans up the connection details by normalizing names,
+// filling in default values, etc...
+// Deprecated: use ConnectionDetails.Finalize() instead.
 func (cd *ConnectionDetails) Parse(port string) error {
-	fmt.Println("[POP] ConnectionDetails#Parse(port string) has been deprecated!")
+	oncer.Deprecate(0, "pop.ConnectionDetails#Parse", "pop.ConnectionDetails#Finalize")
 	return cd.Finalize()
 }
 

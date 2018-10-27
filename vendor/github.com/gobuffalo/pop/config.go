@@ -9,10 +9,15 @@ import (
 	"text/template"
 
 	"github.com/gobuffalo/envy"
+	"github.com/gobuffalo/pop/logging"
 	"github.com/pkg/errors"
 
 	"gopkg.in/yaml.v2"
 )
+
+// ErrConfigFileNotFound is returned when the pop config file can't be found,
+// after looking for it.
+var ErrConfigFileNotFound = errors.New("unable to find pop config file")
 
 var lookupPaths = []string{"", "./config", "/config", "../", "../config", "../..", "../../config"}
 
@@ -20,6 +25,8 @@ var lookupPaths = []string{"", "./config", "/config", "../", "../config", "../..
 var ConfigName = "database.yml"
 
 func init() {
+	SetLogger(defaultLogger)
+
 	ap := os.Getenv("APP_PATH")
 	if ap != "" {
 		AddLookupPaths(ap)
@@ -28,7 +35,14 @@ func init() {
 	if ap != "" {
 		AddLookupPaths(ap)
 	}
-	LoadConfigFile()
+	if err := LoadConfigFile(); err != nil {
+		// this is debug because there are a lot of cases where
+		// this being logged as an error is causes problems
+		// buffalo plugins, for one
+		// also, it's ok to not always have a config file, like
+		// in a new project where one hasn't be generated
+		log(logging.Debug, "Unable to load config file: %v", err)
+	}
 }
 
 // LoadConfigFile loads a POP config file from the configured lookup paths
@@ -38,7 +52,7 @@ func LoadConfigFile() error {
 		return errors.WithStack(err)
 	}
 	Connections = map[string]*Connection{}
-	Log("Loading config file from %s\n", path)
+	log(logging.Debug, "Loading config file from %s", path)
 	f, err := os.Open(path)
 	if err != nil {
 		return errors.WithStack(err)
@@ -64,7 +78,7 @@ func findConfigPath() (string, error) {
 			return path, err
 		}
 	}
-	return "", errors.New("tried to load pop configuration file, but couldn't find it")
+	return "", ErrConfigFileNotFound
 }
 
 // LoadFrom reads a configuration from the reader and sets up the connections
@@ -102,7 +116,8 @@ func LoadFrom(r io.Reader) error {
 	for n, d := range deets {
 		con, err := NewConnection(d)
 		if err != nil {
-			return err
+			log(logging.Warn, "unable to load connection %s: %v", n, err)
+			continue
 		}
 		Connections[n] = con
 	}

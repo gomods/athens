@@ -1,6 +1,6 @@
 # Development Guide for Athens
 
-Both the registry and the proxy are written using the [Buffalo](https://gobuffalo.io/) framework. We chose
+The proxy is built on the [Buffalo](https://gobuffalo.io/) framework. We chose
 this framework to make it as straightforward as possible to get your development environment up and running.
 
 You'll need Buffalo [v0.12.4](https://github.com/gobuffalo/buffalo/releases/tag/v0.12.4) or later to get started on Athens,
@@ -26,8 +26,7 @@ or whichever binary you want to use with athens
 
 # Services that Athens Needs
 
-Both the proxy and the registry rely on several services (i.e. databases, etc...) to function
-properly. We use [Docker](http://docker.com/) images to configure and run those services.
+Athens relies on several services (i.e. databases, etc...) to function properly. We use [Docker](http://docker.com/) images to configure and run those services.
 
 If you're not familiar with Docker, that's ok. In the spirit of Buffalo, we've tried to make
 it easy to get up and running:
@@ -42,36 +41,22 @@ If you want to stop everything at any time, run `make down`.
 
 Note that `make dev` only runs the minimum amount of dependencies needed for things to work. If you'd like to run all the possible dependencies run `make alldeps` or directly the services available in the `docker-compose.yml` file. Keep in mind, though, that `make alldeps` does not start up Athens or Oympus, but **only** their dependencies.
 
-# Run the Proxy or the Registry
+# Run the Proxy
 
-As you know from reading the [README](./README.md) (if you didn't read the whole thing, that's ok. Just read the
-introduction), the Athens project is made up of two components:
-
-1. [Package Registry](https://docs.gomods.io/design/registry/)
-2. [Edge Proxy](https://docs.gomods.io/design/proxy/)
-
-To run the registry:
-
-```console
-cd cmd/olympus
-buffalo dev
-```
-
-To run the proxy:
+After you've set up your dependencies, the `buffalo` CLI makes it easy to launch the proxy: 
 
 ```console
 cd cmd/proxy
 buffalo dev
 ```
 
-After either `buffalo dev` command, you'll see some console output like:
+After `buffalo dev` starts up, you'll see some console output like:
 
 ```console
 Starting application at 127.0.0.1:3000
 ```
 
-And you'll be up and running. As you edit and save code, the `buffalo dev` command will notice and automatically
-re-compile and restart the server.
+And you'll be up and running. As you edit and save code, the `buffalo dev` command will notice and automatically re-compile and restart the server. That makes your life a little easier!
 
 # Run unit tests
 
