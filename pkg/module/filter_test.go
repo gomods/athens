@@ -27,7 +27,8 @@ func (t *FilterTests) Test_IgnoreSimple() {
 	filter := tempFilterFile(t.T())
 	defer os.Remove(filter)
 
-	f, _ := NewFilter(filter)
+	f, err := NewFilter(filter)
+	r.NoError(err)
 	f.AddRule("github.com/a/b", Exclude)
 
 	r.Equal(Include, f.Rule("github.com/a"))
@@ -43,7 +44,8 @@ func (t *FilterTests) Test_IgnoreParentAllowChildren() {
 	filter := tempFilterFile(t.T())
 	defer os.Remove(filter)
 
-	f, _ := NewFilter(filter)
+	f, err := NewFilter(filter)
+	r.NoError(err)
 	f.AddRule("github.com/a/b", Exclude)
 	f.AddRule("github.com/a/b/c", Include)
 
@@ -60,7 +62,8 @@ func (t *FilterTests) Test_OnlyAllowed() {
 	filter := tempFilterFile(t.T())
 	defer os.Remove(filter)
 
-	f, _ := NewFilter(filter)
+	f, err := NewFilter(filter)
+	r.NoError(err)
 	f.AddRule("github.com/a/b", Include)
 	f.AddRule("", Exclude)
 
@@ -77,7 +80,8 @@ func (t *FilterTests) Test_Direct() {
 	filter := tempFilterFile(t.T())
 	defer os.Remove(filter)
 
-	f, _ := NewFilter(filter)
+	f, err := NewFilter(filter)
+	r.NoError(err)
 	f.AddRule("github.com/a/b/c", Exclude)
 	f.AddRule("github.com/a/b", Direct)
 	f.AddRule("github.com/a", Include)
