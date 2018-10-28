@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -122,7 +121,6 @@ type HookTestsSuite struct {
 }
 
 func (suite *HookTestsSuite) SetupSuite() {
-	fmt.Println("setup")
 	suite.server = httptest.NewServer(&suite.mock)
 	suite.w = willie.New(hookFilterApp(suite.server.URL))
 }
