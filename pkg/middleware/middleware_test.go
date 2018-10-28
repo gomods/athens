@@ -68,7 +68,7 @@ func Test_FilterMiddleware(t *testing.T) {
 	if conf.Proxy == nil {
 		t.Fatalf("No Proxy configuration in test config")
 	}
-	app := middlewareFilterApp(conf.FilterFile, conf.Proxy.GlobalEndpoint)
+	app := middlewareFilterApp(filter.Name(), conf.Proxy.GlobalEndpoint)
 	w := willie.New(app)
 
 	// Public, expects to be redirected to the global registry endpoint, with and without a trailing slash
