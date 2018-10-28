@@ -29,26 +29,32 @@ var (
 	testConfigFile = filepath.Join("..", "..", "config.dev.toml")
 )
 
-func middlewareFilterApp(filterFile, registryEndpoint string) *buffalo.App {
+func middlewareFilterApp(filterFile, registryEndpoint string) (*buffalo.App, error) {
 	h := func(c buffalo.Context) error {
 		return c.Render(200, nil)
 	}
 
 	a := buffalo.New(buffalo.Options{})
-	mf := newTestFilter(filterFile)
+	mf, err := newTestFilter(filterFile)
+	if err != nil {
+		return nil, err
+	}
 	a.Use(NewFilterMiddleware(mf, registryEndpoint))
 
 	a.GET(pathList, h)
 	a.GET(pathVersionInfo, h)
-	return a
+	return a, nil
 }
 
-func newTestFilter(filterFile string) *module.Filter {
-	f, _ := module.NewFilter(filterFile)
+func newTestFilter(filterFile string) (*module.Filter, error) {
+	f, err := module.NewFilter(filterFile)
+	if err != nil {
+		return nil, err
+	}
 	f.AddRule("github.com/gomods/athens/", module.Include)
 	f.AddRule("github.com/athens-artifacts/no-tags", module.Exclude)
 	f.AddRule("github.com/athens-artifacts", module.Direct)
-	return f
+	return f, nil
 }
 
 func Test_FilterMiddleware(t *testing.T) {
@@ -67,7 +73,8 @@ func Test_FilterMiddleware(t *testing.T) {
 	if conf.Proxy == nil {
 		t.Fatalf("No Proxy configuration in test config")
 	}
-	app := middlewareFilterApp(filter.Name(), conf.Proxy.GlobalEndpoint)
+	app, err := middlewareFilterApp(filter.Name(), conf.Proxy.GlobalEndpoint)
+	r.NoError(err, "app should be succesfully created in the test")
 	w := willie.New(app)
 
 	// Public, expects to be redirected to the global registry endpoint, with and without a trailing slash
