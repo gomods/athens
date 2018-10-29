@@ -2,9 +2,11 @@ package config
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 
 	"github.com/BurntSushi/toml"
+	"github.com/gomods/athens/pkg/errors"
 	"github.com/kelseyhightower/envconfig"
 	validator "gopkg.in/go-playground/validator.v9"
 )
@@ -32,6 +34,11 @@ func ParseConfigFile(configFile string) (*Config, error) {
 	var config Config
 	// attempt to read the given config file
 	if _, err := toml.DecodeFile(configFile, &config); err != nil {
+		return nil, err
+	}
+
+	// Check file perms from config
+	if err := checkFilePerms(config.FilterFile); err != nil {
 		return nil, err
 	}
 
@@ -64,10 +71,7 @@ func setRuntimeDefaults(config *Config) {
 
 // envOverride uses Environment variables to override unspecified properties
 func envOverride(config *Config) error {
-	if err := envconfig.Process("athens", config); err != nil {
-		return err
-	}
-	return nil
+	return envconfig.Process("athens", config)
 }
 
 func validateConfig(c Config) error {
@@ -91,4 +95,29 @@ func GetConf(path string) (*Config, error) {
 		return nil, fmt.Errorf("Unable to parse test config file: %s", err.Error())
 	}
 	return conf, nil
+}
+
+// checkFilePerms given a list of files
+func checkFilePerms(files ...string) error {
+	const op = "config.checkFilePerms"
+
+	for _, f := range files {
+		if f == "" {
+			continue
+		}
+
+		// TODO: Do not ignore errors when a file is not found
+		// There is a subtle bug in the filter module which ignores the filter file if it does not find it.
+		// This check can be removed once that has been fixed
+		fInfo, err := os.Lstat(f)
+		if err != nil {
+			continue
+		}
+
+		if fInfo.Mode() != 0600 {
+			return errors.E(op, f+" should have 0600 as permission")
+		}
+	}
+
+	return nil
 }
