@@ -36,17 +36,8 @@ func NewFilter(filterFilePath string) (*Filter, error) {
 		return nil, nil
 	}
 
-	rn := newRule(Default)
-	modFilter := Filter{
-		filePath: filterFilePath,
-	}
-	modFilter.root = rn
+	return initFromConfig(filterFilePath)
 
-	err := modFilter.initFromConfig()
-	if err != nil {
-		return nil, err
-	}
-	return &modFilter, nil
 }
 
 // AddRule adds rule for specified path
@@ -124,11 +115,17 @@ func (f *Filter) getAssociatedRule(path ...string) FilterRule {
 	return f.root.rule
 }
 
-func (f *Filter) initFromConfig() error {
-	lines, err := getConfigLines(f.filePath)
+func initFromConfig(filePath string) (*Filter, error) {
+	lines, err := getConfigLines(filePath)
 	if err != nil {
-		return err
+		return nil, err
 	}
+
+	rn := newRule(Default)
+	f := &Filter{
+		filePath: filePath,
+	}
+	f.root = rn
 
 	for _, line := range lines {
 		split := strings.Split(strings.TrimSpace(line), " ")
@@ -158,7 +155,7 @@ func (f *Filter) initFromConfig() error {
 		path := strings.TrimSpace(split[1])
 		f.AddRule(path, rule)
 	}
-	return nil
+	return f, nil
 }
 
 func getPathSegments(path string) []string {
