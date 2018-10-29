@@ -21,6 +21,25 @@ func Test_Filter(t *testing.T) {
 	suite.Run(t, new(FilterTests))
 }
 
+func (t *FilterTests) Test_NewFilter() {
+	r := t.Require()
+	mf, err := NewFilter("")
+	r.NoError(err, "When a file name is empty string return no error")
+	r.Nil(nil, mf)
+
+	mf, err = NewFilter("nofile")
+	r.Nil(mf)
+	r.Error(err)
+
+	filter := tempFilterFile(t.T())
+	defer os.Remove(filter)
+
+	mf, err = NewFilter(filter)
+	r.Equal(filter, mf.filePath)
+	r.NoError(err)
+
+}
+
 func (t *FilterTests) Test_IgnoreSimple() {
 	r := t.Require()
 

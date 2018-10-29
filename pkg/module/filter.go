@@ -30,6 +30,12 @@ type Filter struct {
 //   + github.com/a
 // will exclude all items from communication except github.com/a
 func NewFilter(filterFilePath string) (*Filter, error) {
+	// Do not return an error if the file path is empty
+	// Do not attempt to parse it as well.
+	if filterFilePath == "" {
+		return nil, nil
+	}
+
 	rn := newRule(Default)
 	modFilter := Filter{
 		filePath: filterFilePath,
@@ -119,12 +125,6 @@ func (f *Filter) getAssociatedRule(path ...string) FilterRule {
 }
 
 func (f *Filter) initFromConfig() error {
-	// Do not return an error if the file path is empty
-	// Do not attempt to parse it as well.
-	if f.filePath == "" {
-		return nil
-	}
-
 	lines, err := getConfigLines(f.filePath)
 	if err != nil {
 		return err
