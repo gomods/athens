@@ -73,7 +73,13 @@ func Test_FilterMiddleware(t *testing.T) {
 	if conf.Proxy == nil {
 		t.Fatalf("No Proxy configuration in test config")
 	}
-	app, err := middlewareFilterApp(filter.Name(), conf.Proxy.GlobalEndpoint)
+
+	// Test with a filter file not existing
+	app, err := middlewareFilterApp("nofsfile", conf.Proxy.GlobalEndpoint)
+	r.Nil(app, "app should be nil when a file not exisiting")
+	r.Error(err, "Expected error when a file not existing on the filesystem is given")
+
+	app, err = middlewareFilterApp(filter.Name(), conf.Proxy.GlobalEndpoint)
 	r.NoError(err, "app should be succesfully created in the test")
 	w := willie.New(app)
 
