@@ -10,8 +10,8 @@ This section of the documentation details the design of Athens. You can read the
 
 We've split this section into two major sections:
 
-1. [Proxy internals](./proxy) - basics of the proxy architecture and major features
-2. [Communication flow](./communication) - how the proxy interacts with the outside world to fetch and store code, respond to user requests, and so on
+1. [Proxy internals](./proxy) - basics of the Athens proxy architecture and major features
+2. [Communication flow](./communication) - how the Athens proxy interacts with the outside world to fetch and store code, respond to user requests, and so on
 
 ## How to Read this Section
 

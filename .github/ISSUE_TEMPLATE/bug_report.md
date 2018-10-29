@@ -9,7 +9,7 @@ A clear and concise description of what the bug is.
 
 
 **Error Message**
-If applicable add error message to help explain your problem or console output enclose in triple back ticks eg,
+If applicable add error message to help explain your problem or console output enclose in triple back-ticks eg,
 
 <pre>
 ```console
