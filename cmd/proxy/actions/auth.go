@@ -63,7 +63,7 @@ func netrcFromToken(tok string) {
 	}
 }
 
-func transformAuthFileName(authFileName string) string {	
+func transformAuthFileName(authFileName string) string {
 	if root := strings.TrimLeft(authFileName, "._"); root == "netrc" {
 		return getNetrcFileName()
 	}
