@@ -119,7 +119,7 @@ func App(conf *config.Config) (*buffalo.App, error) {
 
 	initializeAuth(app)
 
-	if !conf.Proxy.FilterOff {
+	if !conf.FilterOff() {
 		mf := module.NewFilter(conf.FilterFile)
 		app.Use(mw.NewFilterMiddleware(mf, conf.Proxy.GlobalEndpoint))
 	}

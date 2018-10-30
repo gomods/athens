@@ -59,7 +59,6 @@ func TestEnvOverrides(t *testing.T) {
 		StorageType:    "minio",
 		GlobalEndpoint: "mytikas.gomods.io",
 		Port:           ":7000",
-		FilterOff:      false,
 		BasicAuthUser:  "testuser",
 		BasicAuthPass:  "testpass",
 		ForceSSL:       true,
@@ -203,7 +202,6 @@ func TestParseExampleConfig(t *testing.T) {
 		StorageType:    "memory",
 		GlobalEndpoint: "http://localhost:3001",
 		Port:           ":3000",
-		FilterOff:      true,
 		BasicAuthUser:  "",
 		BasicAuthPass:  "",
 	}
@@ -304,7 +302,6 @@ func getEnvMap(config *Config) map[string]string {
 		envVars["ATHENS_STORAGE_TYPE"] = proxy.StorageType
 		envVars["ATHENS_GLOBAL_ENDPOINT"] = proxy.GlobalEndpoint
 		envVars["PORT"] = proxy.Port
-		envVars["PROXY_FILTER_OFF"] = strconv.FormatBool(proxy.FilterOff)
 		envVars["BASIC_AUTH_USER"] = proxy.BasicAuthUser
 		envVars["BASIC_AUTH_PASS"] = proxy.BasicAuthPass
 		envVars["PROXY_FORCE_SSL"] = strconv.FormatBool(proxy.ForceSSL)
@@ -410,5 +407,18 @@ func Test_checkFilePerms(t *testing.T) {
 				t.Errorf("checkFilePerms() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
+	}
+}
+
+func TestConfig_FilterOff(t *testing.T) {
+	c := &Config{}
+
+	if c.FilterOff() == false {
+		t.Errorf("Config.FilterOff() = %v, want %v", false, true)
+	}
+
+	c.FilterFile = "somefile"
+	if c.FilterOff() == true {
+		t.Errorf("Config.FilterOff() = %v, want %v", true, false)
 	}
 }
