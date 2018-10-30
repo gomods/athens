@@ -409,16 +409,3 @@ func Test_checkFilePerms(t *testing.T) {
 		})
 	}
 }
-
-func TestConfig_FilterOff(t *testing.T) {
-	c := &Config{}
-
-	if c.FilterOff() == false {
-		t.Errorf("Config.FilterOff() = %v, want %v", false, true)
-	}
-
-	c.FilterFile = "somefile"
-	if c.FilterOff() == true {
-		t.Errorf("Config.FilterOff() = %v, want %v", true, false)
-	}
-}
