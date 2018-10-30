@@ -76,7 +76,6 @@ func TestEnvOverrides(t *testing.T) {
 		BuffaloLogLevel: "info",
 		GoBinary:        "go11",
 		CloudRuntime:    "gcp",
-		FilterFile:      "filter2.conf",
 		TimeoutConf: TimeoutConf{
 			Timeout: 30,
 		},
@@ -261,7 +260,6 @@ func TestParseExampleConfig(t *testing.T) {
 		GoGetWorkers:    30,
 		ProtocolWorkers: 30,
 		CloudRuntime:    "none",
-		FilterFile:      "filter.conf",
 		TimeoutConf: TimeoutConf{
 			Timeout: 300,
 		},
@@ -292,7 +290,6 @@ func getEnvMap(config *Config) map[string]string {
 		"ATHENS_LOG_LEVEL":        config.LogLevel,
 		"BUFFALO_LOG_LEVEL":       config.BuffaloLogLevel,
 		"ATHENS_CLOUD_RUNTIME":    config.CloudRuntime,
-		"ATHENS_FILTER_FILE":      config.FilterFile,
 		"ATHENS_TIMEOUT":          strconv.Itoa(config.Timeout),
 		"ATHENS_TRACE_EXPORTER":   config.TraceExporterURL,
 	}
