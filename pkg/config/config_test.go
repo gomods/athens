@@ -59,7 +59,6 @@ func TestEnvOverrides(t *testing.T) {
 		StorageType:    "minio",
 		GlobalEndpoint: "mytikas.gomods.io",
 		Port:           ":7000",
-		FilterOff:      false,
 		BasicAuthUser:  "testuser",
 		BasicAuthPass:  "testpass",
 		ForceSSL:       true,
@@ -77,7 +76,6 @@ func TestEnvOverrides(t *testing.T) {
 		BuffaloLogLevel: "info",
 		GoBinary:        "go11",
 		CloudRuntime:    "gcp",
-		FilterFile:      "filter2.conf",
 		TimeoutConf: TimeoutConf{
 			Timeout: 30,
 		},
@@ -203,7 +201,6 @@ func TestParseExampleConfig(t *testing.T) {
 		StorageType:    "memory",
 		GlobalEndpoint: "http://localhost:3001",
 		Port:           ":3000",
-		FilterOff:      true,
 		BasicAuthUser:  "",
 		BasicAuthPass:  "",
 	}
@@ -263,7 +260,6 @@ func TestParseExampleConfig(t *testing.T) {
 		GoGetWorkers:    30,
 		ProtocolWorkers: 30,
 		CloudRuntime:    "none",
-		FilterFile:      "filter.conf",
 		TimeoutConf: TimeoutConf{
 			Timeout: 300,
 		},
@@ -294,7 +290,6 @@ func getEnvMap(config *Config) map[string]string {
 		"ATHENS_LOG_LEVEL":        config.LogLevel,
 		"BUFFALO_LOG_LEVEL":       config.BuffaloLogLevel,
 		"ATHENS_CLOUD_RUNTIME":    config.CloudRuntime,
-		"ATHENS_FILTER_FILE":      config.FilterFile,
 		"ATHENS_TIMEOUT":          strconv.Itoa(config.Timeout),
 		"ATHENS_TRACE_EXPORTER":   config.TraceExporterURL,
 	}
@@ -304,7 +299,6 @@ func getEnvMap(config *Config) map[string]string {
 		envVars["ATHENS_STORAGE_TYPE"] = proxy.StorageType
 		envVars["ATHENS_GLOBAL_ENDPOINT"] = proxy.GlobalEndpoint
 		envVars["PORT"] = proxy.Port
-		envVars["PROXY_FILTER_OFF"] = strconv.FormatBool(proxy.FilterOff)
 		envVars["BASIC_AUTH_USER"] = proxy.BasicAuthUser
 		envVars["BASIC_AUTH_PASS"] = proxy.BasicAuthPass
 		envVars["PROXY_FORCE_SSL"] = strconv.FormatBool(proxy.ForceSSL)

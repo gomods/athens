@@ -206,6 +206,5 @@ func getConfigLines(filterFile string) ([]string, error) {
 		// then we should not send all the lines that have been read
 		return []string{}, err
 	}
-
-	return lines, nil
+	return lines, f.Close()
 }
