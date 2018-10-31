@@ -2,6 +2,7 @@ package module
 
 import (
 	"bufio"
+	"fmt"
 	"os"
 	"strings"
 
@@ -116,6 +117,7 @@ func (f *Filter) getAssociatedRule(path ...string) FilterRule {
 }
 
 func initFromConfig(filePath string) (*Filter, error) {
+	const op errors.Op = "module.initFromConfig"
 	lines, err := getConfigLines(filePath)
 	if err != nil {
 		return nil, err
@@ -127,10 +129,21 @@ func initFromConfig(filePath string) (*Filter, error) {
 	}
 	f.root = rn
 
-	for _, line := range lines {
-		split := strings.Split(strings.TrimSpace(line), " ")
-		if len(split) > 2 {
+	for idx, line := range lines {
+
+		// Ignore newline
+		fmt.Println(idx, line, strings.Split(line, " "))
+		if len(line) == 0 {
 			continue
+		}
+		if len(line) > 0 && line[0] == '#' {
+			continue
+		}
+
+		split := strings.Split(line, " ")
+		if len(split) > 2 {
+			// TODO: will be a nice ux for user to know which line was the invalid file found in
+			return nil, errors.E(op, "1Invalid configuration found in filter file")
 		}
 
 		ruleSign := strings.TrimSpace(split[0])
@@ -143,9 +156,8 @@ func initFromConfig(filePath string) (*Filter, error) {
 		case "D":
 			rule = Direct
 		default:
-			continue
+			return nil, errors.E(op, "Invalid configuration found in filter file at line")
 		}
-
 		// is root config
 		if len(split) == 1 {
 			f.AddRule("", rule)
@@ -161,11 +173,9 @@ func initFromConfig(filePath string) (*Filter, error) {
 func getPathSegments(path string) []string {
 	path = strings.TrimSpace(path)
 	path = strings.Trim(path, pathSeparator)
-
 	if path == "" {
 		return []string{}
 	}
-
 	return strings.Split(path, pathSeparator)
 }
 
@@ -173,7 +183,6 @@ func newRule(r FilterRule) ruleNode {
 	rn := ruleNode{}
 	rn.next = make(map[string]ruleNode)
 	rn.rule = r
-
 	return rn
 }
 
@@ -186,16 +195,9 @@ func getConfigLines(filterFile string) ([]string, error) {
 	}
 
 	scanner := bufio.NewScanner(f)
-
 	var lines []string
 	for scanner.Scan() {
-		line := scanner.Text()
-		line = strings.TrimSpace(line)
-		if len(line) == 0 {
-			continue
-		}
-
-		lines = append(lines, line)
+		lines = append(lines, strings.TrimSpace(scanner.Text()))
 	}
 
 	err = f.Close()
