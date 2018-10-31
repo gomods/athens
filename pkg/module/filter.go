@@ -29,16 +29,15 @@ type Filter struct {
 //   -
 //   + github.com/a
 // will exclude all items from communication except github.com/a
-func NewFilter(filterFilePath string) *Filter {
-	rn := newRule(Default)
-	modFilter := Filter{
-		filePath: filterFilePath,
+func NewFilter(filterFilePath string) (*Filter, error) {
+	// Do not return an error if the file path is empty
+	// Do not attempt to parse it as well.
+	if filterFilePath == "" {
+		return nil, nil
 	}
-	modFilter.root = rn
 
-	modFilter.initFromConfig()
+	return initFromConfig(filterFilePath)
 
-	return &modFilter
 }
 
 // AddRule adds rule for specified path
@@ -116,12 +115,17 @@ func (f *Filter) getAssociatedRule(path ...string) FilterRule {
 	return f.root.rule
 }
 
-func (f *Filter) initFromConfig() {
-	lines, err := getConfigLines(f.filePath)
-
-	if err != nil || len(lines) == 0 {
-		return
+func initFromConfig(filePath string) (*Filter, error) {
+	lines, err := getConfigLines(filePath)
+	if err != nil {
+		return nil, err
 	}
+
+	rn := newRule(Default)
+	f := &Filter{
+		filePath: filePath,
+	}
+	f.root = rn
 
 	for _, line := range lines {
 		split := strings.Split(strings.TrimSpace(line), " ")
@@ -151,6 +155,7 @@ func (f *Filter) initFromConfig() {
 		path := strings.TrimSpace(split[1])
 		f.AddRule(path, rule)
 	}
+	return f, nil
 }
 
 func getPathSegments(path string) []string {
@@ -179,7 +184,6 @@ func getConfigLines(filterFile string) ([]string, error) {
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
-	defer f.Close()
 
 	scanner := bufio.NewScanner(f)
 
@@ -193,6 +197,5 @@ func getConfigLines(filterFile string) ([]string, error) {
 
 		lines = append(lines, line)
 	}
-
-	return lines, nil
+	return lines, f.Close()
 }
