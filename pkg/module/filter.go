@@ -2,8 +2,8 @@ package module
 
 import (
 	"bufio"
-	"fmt"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/gomods/athens/pkg/errors"
@@ -132,7 +132,6 @@ func initFromConfig(filePath string) (*Filter, error) {
 	for idx, line := range lines {
 
 		// Ignore newline
-		fmt.Println(idx, line, strings.Split(line, " "))
 		if len(line) == 0 {
 			continue
 		}
@@ -142,8 +141,7 @@ func initFromConfig(filePath string) (*Filter, error) {
 
 		split := strings.Split(line, " ")
 		if len(split) > 2 {
-			// TODO: will be a nice ux for user to know which line was the invalid file found in
-			return nil, errors.E(op, "1Invalid configuration found in filter file")
+			return nil, errors.E(op, "Invalid configuration found in filter file at line "+strconv.Itoa(idx+1))
 		}
 
 		ruleSign := strings.TrimSpace(split[0])
@@ -156,7 +154,7 @@ func initFromConfig(filePath string) (*Filter, error) {
 		case "D":
 			rule = Direct
 		default:
-			return nil, errors.E(op, "Invalid configuration found in filter file at line")
+			return nil, errors.E(op, "Invalid configuration found in filter file at line at line "+strconv.Itoa(idx+1))
 		}
 		// is root config
 		if len(split) == 1 {
