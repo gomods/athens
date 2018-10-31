@@ -32,12 +32,21 @@ if [[ "${MUTABLE_TAG:-}" == "" ]]; then
     fi
 fi
 
+echo "Building Athens image for registry ${REGISTRY}"
+echo "Version ${VERSION}"
+echo "Mutable tag ${MUTABLE_TAG}"
+
 REPO_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." >/dev/null && pwd )/"
 
+echo "docker build -t ${REGISTRY}proxy:${VERSION} -f ${REPO_DIR}cmd/proxy/Dockerfile ${REPO_DIR}"
 docker build -t ${REGISTRY}proxy:${VERSION} -f ${REPO_DIR}cmd/proxy/Dockerfile ${REPO_DIR}
 
 # Apply the mutable tag to the immutable version
+echo "docker tag ${REGISTRY}proxy:${VERSION} ${REGISTRY}proxy:${MUTABLE_TAG}"
 docker tag ${REGISTRY}proxy:${VERSION} ${REGISTRY}proxy:${MUTABLE_TAG}
 
+echo "docker push ${REGISTRY}proxy:${VERSION}"
 docker push ${REGISTRY}proxy:${VERSION}
+
+echo "docker push ${REGISTRY}proxy:${MUTABLE_TAG}"
 docker push ${REGISTRY}proxy:${MUTABLE_TAG}
