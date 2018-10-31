@@ -53,6 +53,18 @@ func compareStorageConfigs(parsedStorage *StorageConfig, expStorage *StorageConf
 	}
 }
 
+func TestPortDefaultsCorrectly(t *testing.T) {
+	conf := &Config{}
+	err := envOverride(conf)
+	if err != nil {
+		t.Fatalf("Env override failed: %v", err)
+	}
+	expPort := ":3000"
+	if conf.Proxy.Port != expPort {
+		t.Errorf("Port was incorrect. Got: %s, want: %s", conf.Proxy.Port, expPort)
+	}
+}
+
 func TestEnvOverrides(t *testing.T) {
 
 	expProxy := ProxyConfig{
