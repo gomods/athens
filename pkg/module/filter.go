@@ -197,13 +197,5 @@ func getConfigLines(filterFile string) ([]string, error) {
 
 		lines = append(lines, line)
 	}
-
-	err = f.Close()
-	if err != nil {
-		// lines can have been read but if the file does not close properly
-		// then we should not send all the lines that have been read
-		return []string{}, err
-	}
-
-	return lines, nil
+	return lines, f.Close()
 }
