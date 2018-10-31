@@ -303,7 +303,7 @@ func getEnvMap(config *Config) map[string]string {
 	if proxy != nil {
 		envVars["ATHENS_STORAGE_TYPE"] = proxy.StorageType
 		envVars["ATHENS_GLOBAL_ENDPOINT"] = proxy.GlobalEndpoint
-		envVars["PORT"] = proxy.Port
+		envVars["ATHENS_PORT"] = proxy.Port
 		envVars["PROXY_FILTER_OFF"] = strconv.FormatBool(proxy.FilterOff)
 		envVars["BASIC_AUTH_USER"] = proxy.BasicAuthUser
 		envVars["BASIC_AUTH_PASS"] = proxy.BasicAuthPass
