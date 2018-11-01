@@ -139,6 +139,7 @@ func TestStorageEnvOverrides(t *testing.T) {
 			Secret:    "minioSecret",
 			EnableSSL: false,
 			Bucket:    "minioBucket",
+			Region:    "us-west-1",
 			TimeoutConf: TimeoutConf{
 				Timeout: globalTimeout,
 			},
@@ -240,6 +241,7 @@ func TestParseExampleConfig(t *testing.T) {
 			Secret:    "minio123",
 			EnableSSL: false,
 			Bucket:    "gomods",
+			Region:    "",
 			TimeoutConf: TimeoutConf{
 				Timeout: globalTimeout,
 			},
@@ -337,6 +339,7 @@ func getEnvMap(config *Config) map[string]string {
 			envVars["ATHENS_MINIO_ACCESS_KEY_ID"] = storage.Minio.Key
 			envVars["ATHENS_MINIO_SECRET_ACCESS_KEY"] = storage.Minio.Secret
 			envVars["ATHENS_MINIO_USE_SSL"] = strconv.FormatBool(storage.Minio.EnableSSL)
+			envVars["ATHENS_MINIO_REGION"] = storage.Minio.Region
 			envVars["ATHENS_MINIO_BUCKET_NAME"] = storage.Minio.Bucket
 		}
 		if storage.Mongo != nil {
