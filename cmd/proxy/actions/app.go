@@ -128,8 +128,14 @@ func App(conf *config.Config) (*buffalo.App, error) {
 	}
 
 	// Having the hook set means we want to use it
+<<<<<<< HEAD
 	if vHook := conf.ValidatorHook; vHook != "" {
 		app.Use(mw.LogEntryMiddleware(mw.NewValidationMiddleware, lggr, vHook))
+=======
+	if vHook := conf.Proxy.ValidatorHook; vHook != "" {
+		app.Use(mw.LogEntryMiddleware(lggr))
+		app.Use(mw.NewValidationMiddleware(vHook))
+>>>>>>> replace LogEntryMiddleware and add NoOpLogger
 	}
 
 	user, pass, ok := conf.BasicAuth()

@@ -8,17 +8,15 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/sirupsen/logrus"
-
-	"github.com/stretchr/testify/assert"
-
 	"github.com/gobuffalo/buffalo"
 	"github.com/gomods/athens/pkg/log"
+	"github.com/sirupsen/logrus"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestLogContext(t *testing.T) {
 	h := func(c buffalo.Context) error {
-		e := log.EntryFromContext(c, &log.Logger{})
+		e := log.EntryFromContext(c)
 		e.Infof("test")
 		return nil
 	}
@@ -30,7 +28,7 @@ func TestLogContext(t *testing.T) {
 	lggr := log.New("", logrus.DebugLevel)
 	lggr.Out = &buf
 
-	a.Use(LogContextMiddleware(lggr))
+	a.Use(LogEntryMiddleware(lggr))
 
 	w := httptest.NewRecorder()
 	r, _ := http.NewRequest("GET", "/test", nil)
