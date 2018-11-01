@@ -154,7 +154,7 @@ func initFromConfig(filePath string) (*Filter, error) {
 		case "D":
 			rule = Direct
 		default:
-			return nil, errors.E(op, "Invalid configuration found in filter file at line at line "+strconv.Itoa(idx+1))
+			return nil, errors.E(op, "Invalid configuration found in filter file at line "+strconv.Itoa(idx+1))
 		}
 		// is root config
 		if len(split) == 1 {
