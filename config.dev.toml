@@ -46,7 +46,7 @@ CloudRuntime = "none"
 
 # The filename for the include exclude filter. Defaults to 'filter.conf'
 # Env override: ATHENS_FILTER_FILE
-FilterFile = "filter.conf"
+FilterFile = ""
 
 # Timeout is the timeout for external network calls in seconds
 # This value is used as the default for storage backends if they don't specify timeouts
@@ -74,11 +74,6 @@ Timeout = 300
     # Defaults to ":6379"
     # Env override: ATHENS_REDIS_QUEUE_ADDRESS
     RedisQueueAddress = ":6379"
-
-    # Flag to turn off Proxy Filter middleware
-    # Defaults to true
-    # Env override: PROXY_FILTER_OFF
-    FilterOff = true
 
     # Username for basic auth
     # Env override: BASIC_AUTH_USER
