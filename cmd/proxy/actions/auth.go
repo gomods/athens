@@ -6,6 +6,8 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"runtime"
+	"strings"
 
 	"github.com/gobuffalo/buffalo"
 	"github.com/markbates/goth"
@@ -40,7 +42,8 @@ func initializeAuthFile(path string) {
 		log.Fatalf("could not get homedir: %v", err)
 	}
 
-	rcp := filepath.Join(hdir, filepath.Base(path))
+	fileName := transformAuthFileName(filepath.Base(path))
+	rcp := filepath.Join(hdir, fileName)
 	if err := ioutil.WriteFile(rcp, fileBts, 0600); err != nil {
 		log.Fatalf("could not write to file: %v", err)
 	}
@@ -54,8 +57,22 @@ func netrcFromToken(tok string) {
 	if err != nil {
 		log.Fatalf("netrcFromToken: could not get homedir: %v", err)
 	}
-	rcp := filepath.Join(hdir, ".netrc")
+	rcp := filepath.Join(hdir, getNetrcFileName())
 	if err := ioutil.WriteFile(rcp, []byte(fileContent), 0600); err != nil {
 		log.Fatalf("netrcFromToken: could not write to file: %v", err)
 	}
+}
+
+func transformAuthFileName(authFileName string) string {
+	if root := strings.TrimLeft(authFileName, "._"); root == "netrc" {
+		return getNetrcFileName()
+	}
+	return authFileName
+}
+
+func getNetrcFileName() string {
+	if runtime.GOOS == "windows" {
+		return "_netrc"
+	}
+	return ".netrc"
 }
