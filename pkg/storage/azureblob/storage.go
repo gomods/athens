@@ -1,7 +1,6 @@
 package azureblob
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"io"
@@ -9,9 +8,16 @@ import (
 
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/errors"
-	"github.com/gomods/athens/pkg/observ"
-	moduploader "github.com/gomods/athens/pkg/storage/module"
 )
+
+
+func (s *Storage) Exists(ctx context.Context, module string, version string) (bool, error) {
+	panic("not implemented")
+}
+
+func (s *Storage) Delete(ctx context.Context, module string, vsn string) error {
+	panic("not implemented")
+}
 
 type client interface {
 	UploadWithContext(ctx context.Context, path, contentType string, content io.Reader) error
@@ -54,19 +60,4 @@ func newWithClient(accountName, cl client, cdnConf *config.CDNConfig) (*Storage,
 //	<meta name="go-import" content="gomods.com/athens mod BaseURL()">
 func (s Storage) BaseURL() *url.URL {
 	return s.cdnConf.CDNEndpointWithDefault(s.baseURI)
-}
-
-// Save implements the (github.com/gomods/athens/pkg/storage).Saver interface.
-func (s *Storage) Save(ctx context.Context, module, version string, mod []byte, zip io.Reader, info []byte) error {
-	const op errors.Op = "azureblob.Save"
-	ctx, span := observ.StartSpan(ctx, op.String())
-	defer span.End()
-	err := moduploader.Upload(ctx, module, version, bytes.NewReader(info), bytes.NewReader(mod), zip, s.cl.UploadWithContext, s.cdnConf.TimeoutDuration())
-	// TODO: take out lease on the /list file and add the version to it
-	//
-	// Do that only after module source+metadata is uploaded
-	if err != nil {
-		return errors.E(op, err, errors.M(module), errors.V(version))
-	}
-	return nil
 }
