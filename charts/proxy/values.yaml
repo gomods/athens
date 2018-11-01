@@ -46,14 +46,6 @@ netrc:
   # if enabled, it expects to find the content of a valid .netrc file imported as a secret named netrcsecret
   enabled: false
 
-# Worker is disabled right now. When it's turned on, we can use helm dependencies to start this up!
-#redis:
-#  useEmbedded: false
-#  address: ":6379"
-#  username: 
-#  password:
-#  host:
-
 jaeger:
   ## Type of service; valid values are "ClusterIP", "LoadBalancer", and "NodePort".
   type: ClusterIP
