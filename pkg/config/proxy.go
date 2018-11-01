@@ -5,7 +5,6 @@ type ProxyConfig struct {
 	StorageType    string `validate:"required" envconfig:"ATHENS_STORAGE_TYPE"`
 	GlobalEndpoint string `envconfig:"ATHENS_GLOBAL_ENDPOINT"` // This feature is not yet implemented
 	Port           string `envconfig:"ATHENS_PORT" default:":3000"`
-	FilterOff      bool   `validate:"required" envconfig:"PROXY_FILTER_OFF"`
 	BasicAuthUser  string `envconfig:"BASIC_AUTH_USER"`
 	BasicAuthPass  string `envconfig:"BASIC_AUTH_PASS"`
 	ForceSSL       bool   `envconfig:"PROXY_FORCE_SSL"`
