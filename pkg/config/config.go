@@ -28,6 +28,11 @@ type Config struct {
 	Storage          *StorageConfig
 }
 
+// FilterOff returns true if the FilterFile is empty
+func (c *Config) FilterOff() bool {
+	return c.FilterFile == ""
+}
+
 // ParseConfigFile parses the given file into an athens config struct
 func ParseConfigFile(configFile string) (*Config, error) {
 
