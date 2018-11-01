@@ -24,8 +24,27 @@ type Config struct {
 	FilterFile       string `envconfig:"ATHENS_FILTER_FILE"`
 	TraceExporterURL string `envconfig:"ATHENS_TRACE_EXPORTER_URL"`
 	TraceExporter    string `envconfig:"ATHENS_TRACE_EXPORTER"`
-	Proxy            *ProxyConfig
+	StorageType      string `validate:"required" envconfig:"ATHENS_STORAGE_TYPE"`
+	GlobalEndpoint   string `envconfig:"ATHENS_GLOBAL_ENDPOINT"` // This feature is not yet implemented
+	Port             string `envconfig:"ATHENS_PORT" default:":3000"`
+	BasicAuthUser    string `envconfig:"BASIC_AUTH_USER"`
+	BasicAuthPass    string `envconfig:"BASIC_AUTH_PASS"`
+	ForceSSL         bool   `envconfig:"PROXY_FORCE_SSL"`
+	ValidatorHook    string `envconfig:"ATHENS_PROXY_VALIDATOR"`
+	PathPrefix       string `envconfig:"ATHENS_PATH_PREFIX"`
+	NETRCPath        string `envconfig:"ATHENS_NETRC_PATH"`
+	GithubToken      string `envconfig:"ATHENS_GITHUB_TOKEN"`
+	HGRCPath         string `envconfig:"ATHENS_HGRC_PATH"`
 	Storage          *StorageConfig
+}
+
+// BasicAuth returns BasicAuthUser and BasicAuthPassword
+// and ok if neither of them are empty
+func (c *Config) BasicAuth() (user, pass string, ok bool) {
+	user = c.BasicAuthUser
+	pass = c.BasicAuthPass
+	ok = user != "" && pass != ""
+	return user, pass, ok
 }
 
 // FilterOff returns true if the FilterFile is empty
