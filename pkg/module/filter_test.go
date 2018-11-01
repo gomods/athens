@@ -111,6 +111,26 @@ func (t *FilterTests) Test_Direct() {
 	r.Equal(Exclude, f.Rule("github.com/a/b/c/d"))
 }
 
+func (t *FilterTests) Test_initFromConfig() {
+	r := t.Require()
+	filterFile := tempFilterFile(t.T())
+	defer os.Remove(filterFile)
+
+	goodInput := []byte("+ github.com/a/b\n\n# some comment\n- github.com/c/d\n\nD github.com/x")
+	ioutil.WriteFile(filterFile, goodInput, 0644)
+
+	f, err := initFromConfig(filterFile)
+	r.NotNil(f)
+	r.NoError(err)
+
+	badInput := []byte("+ github.com/a/b\n\n# some comment\n\n- github.com/c/d\n\nD github.com/x\nsome_random_line")
+	ioutil.WriteFile(filterFile, badInput, 0644)
+	f, err = initFromConfig(filterFile)
+	r.Nil(f)
+	r.Error(err)
+
+}
+
 func tempFilterFile(t *testing.T) (path string) {
 	filter, err := ioutil.TempFile(os.TempDir(), "filter-")
 	if err != nil {

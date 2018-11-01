@@ -70,11 +70,6 @@ Timeout = 300
     # Env override: ATHENS_GLOBAL_ENDPOINT
     GlobalEndpoint = "http://localhost:3001"
 
-    # Redis queue for buffalo workers
-    # Defaults to ":6379"
-    # Env override: ATHENS_REDIS_QUEUE_ADDRESS
-    RedisQueueAddress = ":6379"
-
     # Username for basic auth
     # Env override: BASIC_AUTH_USER
     BasicAuthUser = ""
