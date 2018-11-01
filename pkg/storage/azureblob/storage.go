@@ -1,4 +1,4 @@
-package azurecdn
+package azureblob
 
 import (
 	"bytes"
@@ -27,7 +27,7 @@ type Storage struct {
 
 // New creates a new azure CDN saver
 func New(accountName, accountKey, containerName string, cdnConf *config.CDNConfig) (*Storage, error) {
-	const op errors.Op = "azurecdn.New"
+	const op errors.Op = "azureblob.New"
 	u, err := url.Parse(fmt.Sprintf("https://%s.blob.core.windows.net", accountName))
 	if err != nil {
 		return nil, errors.E(op, err)
@@ -38,7 +38,7 @@ func New(accountName, accountKey, containerName string, cdnConf *config.CDNConfi
 
 // newWithClient creates a new azure CDN saver
 func newWithClient(accountName, cl client, cdnConf *config.CDNConfig) (*Storage, error) {
-	const op errors.Op = "azurecdn.newWithClient"
+	const op errors.Op = "azureblob.newWithClient"
 	u, err := url.Parse(fmt.Sprintf("https://%s.blob.core.windows.net", accountName))
 	if err != nil {
 		return nil, errors.E(op, err)
@@ -58,7 +58,7 @@ func (s Storage) BaseURL() *url.URL {
 
 // Save implements the (github.com/gomods/athens/pkg/storage).Saver interface.
 func (s *Storage) Save(ctx context.Context, module, version string, mod []byte, zip io.Reader, info []byte) error {
-	const op errors.Op = "azurecdn.Save"
+	const op errors.Op = "azureblob.Save"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 	err := moduploader.Upload(ctx, module, version, bytes.NewReader(info), bytes.NewReader(mod), zip, s.cl.UploadWithContext, s.cdnConf.TimeoutDuration())

@@ -1,4 +1,4 @@
-package azurecdn
+package azureblob
 
 import (
 	"context"
@@ -28,7 +28,7 @@ func newBlobStoreClient(accountURL *url.URL, accountName, accountKey, containerN
 }
 
 func (c *azureBlobStoreClient) UploadWithContext(ctx context.Context, path, contentType string, content io.Reader) error {
-	const op errors.Op = "azurecdn.UploadWithContext"
+	const op errors.Op = "azureblob.UploadWithContext"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 	blobURL := c.containerURL.NewBlockBlobURL(path)
