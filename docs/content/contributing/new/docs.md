@@ -16,3 +16,4 @@ Contributing to docs is just as important, if not more important than, writing c
 
 The Hugo server will run on http://localhost:1313 and it will automatically watch your files and update the website every time you make a change. 
 
+Alternatively you can run our custom docker image as outlined [here](https://github.com/gomods/athens/blob/master/DEVELOPMENT.md#run-the-docs)
