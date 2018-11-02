@@ -119,6 +119,8 @@ func App(conf *config.Config) (*buffalo.App, error) {
 
 	initializeAuth(app)
 
+	app.Use(mw.LogEntryMiddleware(lggr))
+
 	if !conf.FilterOff() {
 		mf, err := module.NewFilter(conf.FilterFile)
 		if err != nil {
@@ -129,7 +131,6 @@ func App(conf *config.Config) (*buffalo.App, error) {
 
 	// Having the hook set means we want to use it
 	if vHook := conf.ValidatorHook; vHook != "" {
-		app.Use(mw.LogEntryMiddleware(lggr))
 		app.Use(mw.NewValidationMiddleware(vHook))
 	}
 
