@@ -1,6 +1,7 @@
 ---
 title: "Download protocol"
 date: 2018-02-11T16:58:56-05:00
+weight: 3
 ---
 
 Athens builds on top of Go CLI which specifies a set of endpoints with which it communicates with external proxies providing modules. This set of endpoints we call _Download Protocol_
