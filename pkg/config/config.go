@@ -71,9 +71,6 @@ func ParseConfigFile(configFile string) (*Config, error) {
 		return nil, err
 	}
 
-	// set default values
-	setRuntimeDefaults(&config)
-
 	// If not defined, set storage timeouts to global timeout
 	setStorageTimeouts(config.Storage, config.Timeout)
 
@@ -87,10 +84,6 @@ func ParseConfigFile(configFile string) (*Config, error) {
 		return nil, err
 	}
 	return &config, nil
-}
-
-func setRuntimeDefaults(config *Config) {
-	// TODO: Set defaults here
 }
 
 // envOverride uses Environment variables to override unspecified properties
