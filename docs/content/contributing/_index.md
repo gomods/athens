@@ -2,6 +2,7 @@
 title: "Contributing to Athens"
 date: 2018-09-01T19:30:42-07:00
 weight: 4
+
 ---
 
 Welcome, Gopher! We're really glad you're considering contributing to Athens. We'd like to briefly introduce you to our community before you get started.
