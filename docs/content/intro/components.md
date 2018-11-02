@@ -1,6 +1,7 @@
 ---
 title: "Components"
 date: 2018-02-11T16:57:56-05:00
+weight: 5
 ---
 
 From a very high-level view, we recognize 4 major components of the system.
