@@ -11,8 +11,8 @@ Go Modules is still behind an experimental flag and therefore it's important to 
 
 #### What Athens can do well _now_ 
 
-- Athens will work well within your CI/CD system that installs your modules without needing a vendor folder.
-- Athens will work well inside your own company without exposing it to unlimited public traffic. 
+- Athens works will within a CI/CD system that installs your modules without needing a vendor folder.
+- Athens works well inside your own company without exposing it to unlimited public traffic. 
 
 ### Known Limitations
 
