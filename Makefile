@@ -8,7 +8,7 @@ run: build
 
 .PHONY: docs
 docs:
-	cd docs && hugo
+	docker build -t gomods/hugo -f docs/Dockerfile .
 
 .PHONY: setup-dev-env
 setup-dev-env:
@@ -54,7 +54,7 @@ alldeps:
 	docker-compose -p athensdev up -d minio
 	docker-compose -p athensdev up -d jaeger
 	echo "sleeping for a bit to wait for the DB to come up"
-	sleep 5	
+	sleep 5
 
 .PHONY: dev
 dev:
