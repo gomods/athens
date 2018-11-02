@@ -79,6 +79,9 @@ func App(conf *config.Config) (*buffalo.App, error) {
 		WorkerOff:   true,
 		Host:        "http://127.0.0.1" + conf.Port,
 	})
+
+	app.Use(mw.LogEntryMiddleware(lggr))
+
 	if prefix := conf.PathPrefix; prefix != "" {
 		// certain Ingress Controllers (such as GCP Load Balancer)
 		// can not send custom headers and therefore if the proxy
@@ -118,8 +121,6 @@ func App(conf *config.Config) (*buffalo.App, error) {
 	}
 
 	initializeAuth(app)
-
-	app.Use(mw.LogEntryMiddleware(lggr))
 
 	if !conf.FilterOff() {
 		mf, err := module.NewFilter(conf.FilterFile)
