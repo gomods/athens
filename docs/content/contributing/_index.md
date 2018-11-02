@@ -2,7 +2,6 @@
 title: "Contributing to Athens"
 date: 2018-09-01T19:30:42-07:00
 weight: 4
-
 ---
 
 Welcome, Gopher! We're really glad you're considering contributing to Athens. We'd like to briefly introduce you to our community before you get started.
@@ -21,7 +20,7 @@ We have some hard-and-fast rules in our community, like our [Code of Conduct](ht
 
 We hope you like what you see, and we'd love for you to get involved.
 
-If you're familiar with Git and GitHub basics, read [how to participate in the Athens community](./community-roles) to learn about how we organize ourselves and how to get started.
+If you're familiar with Git and GitHub basics, read [how to participate in the Athens community](./community/participating) to learn about how we organize ourselves and how to get started.
 
 If you're new to Git and GitHub, check out our [guide for new contributors to open source](./new), and then go on to that how to participate document I mentioned above.
 
