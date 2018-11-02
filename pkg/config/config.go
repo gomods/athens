@@ -74,11 +74,6 @@ func ParseConfigFile(configFile string) (*Config, error) {
 	// If not defined, set storage timeouts to global timeout
 	setStorageTimeouts(config.Storage, config.Timeout)
 
-	// delete invalid storage backend configs
-	// envconfig initializes *all* struct pointers, even if there are no corresponding defaults or env variables
-	// this method prunes all such invalid configurations
-	deleteInvalidStorageConfigs(config.Storage)
-
 	// validate all required fields have been populated
 	if err := validateConfig(config); err != nil {
 		return nil, err
@@ -91,13 +86,30 @@ func envOverride(config *Config) error {
 	return envconfig.Process("athens", config)
 }
 
-func validateConfig(c Config) error {
+func validateConfig(config Config) error {
 	validate := validator.New()
-	err := validate.Struct(c)
+	err := validate.StructExcept(config, "Storage")
 	if err != nil {
 		return err
 	}
-	return nil
+	switch config.StorageType {
+	case "memory":
+		return nil
+	case "mongo":
+		return validate.Struct(config.Storage.Mongo)
+	case "disk":
+		return validate.Struct(config.Storage.Disk)
+	case "minio":
+		return validate.Struct(config.Storage.Minio)
+	case "gcp":
+		return validate.Struct(config.Storage.GCP)
+	case "s3":
+		return validate.Struct(config.Storage.S3)
+	case "Azure":
+		return validate.Struct(config.Storage.Azure)
+	default:
+		return fmt.Errorf("storage type %s is unknown", config.StorageType)
+	}
 }
 
 // GetConf accepts the path to a file, constructs an absolute path to the file,
