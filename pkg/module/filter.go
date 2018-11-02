@@ -3,6 +3,7 @@ package module
 import (
 	"bufio"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/gomods/athens/pkg/errors"
@@ -29,16 +30,15 @@ type Filter struct {
 //   -
 //   + github.com/a
 // will exclude all items from communication except github.com/a
-func NewFilter(filterFilePath string) *Filter {
-	rn := newRule(Default)
-	modFilter := Filter{
-		filePath: filterFilePath,
+func NewFilter(filterFilePath string) (*Filter, error) {
+	// Do not return an error if the file path is empty
+	// Do not attempt to parse it as well.
+	if filterFilePath == "" {
+		return nil, nil
 	}
-	modFilter.root = rn
 
-	modFilter.initFromConfig()
+	return initFromConfig(filterFilePath)
 
-	return &modFilter
 }
 
 // AddRule adds rule for specified path
@@ -116,17 +116,32 @@ func (f *Filter) getAssociatedRule(path ...string) FilterRule {
 	return f.root.rule
 }
 
-func (f *Filter) initFromConfig() {
-	lines, err := getConfigLines(f.filePath)
-
-	if err != nil || len(lines) == 0 {
-		return
+func initFromConfig(filePath string) (*Filter, error) {
+	const op errors.Op = "module.initFromConfig"
+	lines, err := getConfigLines(filePath)
+	if err != nil {
+		return nil, err
 	}
 
-	for _, line := range lines {
-		split := strings.Split(strings.TrimSpace(line), " ")
-		if len(split) > 2 {
+	rn := newRule(Default)
+	f := &Filter{
+		filePath: filePath,
+	}
+	f.root = rn
+
+	for idx, line := range lines {
+
+		// Ignore newline
+		if len(line) == 0 {
 			continue
+		}
+		if len(line) > 0 && line[0] == '#' {
+			continue
+		}
+
+		split := strings.Split(line, " ")
+		if len(split) > 2 {
+			return nil, errors.E(op, "Invalid configuration found in filter file at the line "+strconv.Itoa(idx+1))
 		}
 
 		ruleSign := strings.TrimSpace(split[0])
@@ -139,9 +154,8 @@ func (f *Filter) initFromConfig() {
 		case "D":
 			rule = Direct
 		default:
-			continue
+			return nil, errors.E(op, "Invalid configuration found in filter file at the line "+strconv.Itoa(idx+1))
 		}
-
 		// is root config
 		if len(split) == 1 {
 			f.AddRule("", rule)
@@ -151,16 +165,15 @@ func (f *Filter) initFromConfig() {
 		path := strings.TrimSpace(split[1])
 		f.AddRule(path, rule)
 	}
+	return f, nil
 }
 
 func getPathSegments(path string) []string {
 	path = strings.TrimSpace(path)
 	path = strings.Trim(path, pathSeparator)
-
 	if path == "" {
 		return []string{}
 	}
-
 	return strings.Split(path, pathSeparator)
 }
 
@@ -168,7 +181,6 @@ func newRule(r FilterRule) ruleNode {
 	rn := ruleNode{}
 	rn.next = make(map[string]ruleNode)
 	rn.rule = r
-
 	return rn
 }
 
@@ -179,20 +191,12 @@ func getConfigLines(filterFile string) ([]string, error) {
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
-	defer f.Close()
 
 	scanner := bufio.NewScanner(f)
-
 	var lines []string
 	for scanner.Scan() {
-		line := scanner.Text()
-		line = strings.TrimSpace(line)
-		if len(line) == 0 {
-			continue
-		}
-
-		lines = append(lines, line)
+		lines = append(lines, strings.TrimSpace(scanner.Text()))
 	}
 
-	return lines, nil
+	return lines, f.Close()
 }

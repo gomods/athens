@@ -1,6 +1,7 @@
 package config
 
 import (
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -13,14 +14,10 @@ import (
 const exampleConfigPath = "../../config.dev.toml"
 
 func compareConfigs(parsedConf *Config, expConf *Config, t *testing.T) {
-	opts := cmpopts.IgnoreTypes(StorageConfig{}, ProxyConfig{})
+	opts := cmpopts.IgnoreTypes(StorageConfig{})
 	eq := cmp.Equal(parsedConf, expConf, opts)
 	if !eq {
 		t.Errorf("Parsed Example configuration did not match expected values. Expected: %+v. Actual: %+v", expConf, parsedConf)
-	}
-	eq = cmp.Equal(parsedConf.Proxy, expConf.Proxy)
-	if !eq {
-		t.Errorf("Parsed Example Proxy configuration did not match expected values. Expected: %+v. Actual: %+v", expConf.Proxy, parsedConf.Proxy)
 	}
 	compareStorageConfigs(parsedConf.Storage, expConf.Storage, t)
 }
@@ -52,22 +49,19 @@ func compareStorageConfigs(parsedStorage *StorageConfig, expStorage *StorageConf
 	}
 }
 
-func TestEnvOverrides(t *testing.T) {
-
-	expProxy := ProxyConfig{
-		StorageType:    "minio",
-		GlobalEndpoint: "mytikas.gomods.io",
-		Port:           ":7000",
-		FilterOff:      false,
-		BasicAuthUser:  "testuser",
-		BasicAuthPass:  "testpass",
-		ForceSSL:       true,
-		ValidatorHook:  "testhook.io",
-		PathPrefix:     "prefix",
-		NETRCPath:      "/test/path/.netrc",
-		HGRCPath:       "/test/path/.hgrc",
+func TestPortDefaultsCorrectly(t *testing.T) {
+	conf := &Config{}
+	err := envOverride(conf)
+	if err != nil {
+		t.Fatalf("Env override failed: %v", err)
 	}
+	expPort := ":3000"
+	if conf.Port != expPort {
+		t.Errorf("Port was incorrect. Got: %s, want: %s", conf.Port, expPort)
+	}
+}
 
+func TestEnvOverrides(t *testing.T) {
 	expConf := &Config{
 		GoEnv:           "production",
 		GoGetWorkers:    10,
@@ -76,12 +70,20 @@ func TestEnvOverrides(t *testing.T) {
 		BuffaloLogLevel: "info",
 		GoBinary:        "go11",
 		CloudRuntime:    "gcp",
-		FilterFile:      "filter2.conf",
 		TimeoutConf: TimeoutConf{
 			Timeout: 30,
 		},
-		Proxy:   &expProxy,
-		Storage: &StorageConfig{},
+		StorageType:    "minio",
+		GlobalEndpoint: "mytikas.gomods.io",
+		Port:           ":7000",
+		BasicAuthUser:  "testuser",
+		BasicAuthPass:  "testpass",
+		ForceSSL:       true,
+		ValidatorHook:  "testhook.io",
+		PathPrefix:     "prefix",
+		NETRCPath:      "/test/path/.netrc",
+		HGRCPath:       "/test/path/.hgrc",
+		Storage:        &StorageConfig{},
 	}
 
 	envVars := getEnvMap(expConf)
@@ -175,7 +177,6 @@ func TestParseExampleConfig(t *testing.T) {
 
 	// initialize all struct pointers so we get all applicable env variables
 	emptyConf := &Config{
-		Proxy: &ProxyConfig{},
 		Storage: &StorageConfig{
 			CDN:  &CDNConfig{},
 			Disk: &DiskConfig{},
@@ -197,15 +198,6 @@ func TestParseExampleConfig(t *testing.T) {
 	}
 
 	globalTimeout := 300
-
-	expProxy := &ProxyConfig{
-		StorageType:    "memory",
-		GlobalEndpoint: "http://localhost:3001",
-		Port:           ":3000",
-		FilterOff:      true,
-		BasicAuthUser:  "",
-		BasicAuthPass:  "",
-	}
 
 	expStorage := &StorageConfig{
 		CDN: &CDNConfig{
@@ -262,12 +254,15 @@ func TestParseExampleConfig(t *testing.T) {
 		GoGetWorkers:    30,
 		ProtocolWorkers: 30,
 		CloudRuntime:    "none",
-		FilterFile:      "filter.conf",
 		TimeoutConf: TimeoutConf{
 			Timeout: 300,
 		},
-		Proxy:   expProxy,
-		Storage: expStorage,
+		StorageType:    "memory",
+		GlobalEndpoint: "http://localhost:3001",
+		Port:           ":3000",
+		BasicAuthUser:  "",
+		BasicAuthPass:  "",
+		Storage:        expStorage,
 	}
 
 	absPath, err := filepath.Abs(exampleConfigPath)
@@ -293,25 +288,20 @@ func getEnvMap(config *Config) map[string]string {
 		"ATHENS_LOG_LEVEL":        config.LogLevel,
 		"BUFFALO_LOG_LEVEL":       config.BuffaloLogLevel,
 		"ATHENS_CLOUD_RUNTIME":    config.CloudRuntime,
-		"ATHENS_FILTER_FILE":      config.FilterFile,
 		"ATHENS_TIMEOUT":          strconv.Itoa(config.Timeout),
 		"ATHENS_TRACE_EXPORTER":   config.TraceExporterURL,
 	}
 
-	proxy := config.Proxy
-	if proxy != nil {
-		envVars["ATHENS_STORAGE_TYPE"] = proxy.StorageType
-		envVars["ATHENS_GLOBAL_ENDPOINT"] = proxy.GlobalEndpoint
-		envVars["PORT"] = proxy.Port
-		envVars["PROXY_FILTER_OFF"] = strconv.FormatBool(proxy.FilterOff)
-		envVars["BASIC_AUTH_USER"] = proxy.BasicAuthUser
-		envVars["BASIC_AUTH_PASS"] = proxy.BasicAuthPass
-		envVars["PROXY_FORCE_SSL"] = strconv.FormatBool(proxy.ForceSSL)
-		envVars["ATHENS_PROXY_VALIDATOR"] = proxy.ValidatorHook
-		envVars["ATHENS_PATH_PREFIX"] = proxy.PathPrefix
-		envVars["ATHENS_NETRC_PATH"] = proxy.NETRCPath
-		envVars["ATHENS_HGRC_PATH"] = proxy.HGRCPath
-	}
+	envVars["ATHENS_STORAGE_TYPE"] = config.StorageType
+	envVars["ATHENS_GLOBAL_ENDPOINT"] = config.GlobalEndpoint
+	envVars["ATHENS_PORT"] = config.Port
+	envVars["BASIC_AUTH_USER"] = config.BasicAuthUser
+	envVars["BASIC_AUTH_PASS"] = config.BasicAuthPass
+	envVars["PROXY_FORCE_SSL"] = strconv.FormatBool(config.ForceSSL)
+	envVars["ATHENS_PROXY_VALIDATOR"] = config.ValidatorHook
+	envVars["ATHENS_PATH_PREFIX"] = config.PathPrefix
+	envVars["ATHENS_NETRC_PATH"] = config.NETRCPath
+	envVars["ATHENS_HGRC_PATH"] = config.HGRCPath
 
 	storage := config.Storage
 	if storage != nil {
@@ -355,5 +345,59 @@ func restoreEnv(envVars map[string]string) {
 		} else {
 			os.Unsetenv(k)
 		}
+	}
+}
+
+func Test_checkFilePerms(t *testing.T) {
+	f1, err := ioutil.TempFile(os.TempDir(), "prefix-")
+	if err != nil {
+		t.FailNow()
+	}
+	defer os.Remove(f1.Name())
+	err = os.Chmod(f1.Name(), 0777)
+
+	f2, err := ioutil.TempFile(os.TempDir(), "prefix-")
+	if err != nil {
+		t.FailNow()
+	}
+	defer os.Remove(f2.Name())
+	err = os.Chmod(f2.Name(), 0600)
+
+	type args struct {
+		files []string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{
+			"should not have an error on empty file name",
+			args{
+				[]string{"", f2.Name()},
+			},
+			false,
+		},
+		{
+			"should have an error if all the files have incorrect permissions",
+			args{
+				[]string{f1.Name(), f1.Name(), f1.Name()},
+			},
+			true,
+		},
+		{
+			"should have an error when at least 1 file has wrong permissions",
+			args{
+				[]string{f2.Name(), f1.Name()},
+			},
+			true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := checkFilePerms(tt.args.files...); (err != nil) != tt.wantErr {
+				t.Errorf("checkFilePerms() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
 	}
 }

@@ -1,3 +1,8 @@
+---
+title: "How To Contribute"
+date: 2018-10-30T17:48:51-07:00
+weight: 3
+---
 # Development Guide for Athens
 
 The proxy is built on the [Buffalo](https://gobuffalo.io/) framework. We chose
@@ -70,17 +75,4 @@ then you can run the unit tests:
 
 ```console
 make test-unit
-```
-
-# Run the docs
-
-To get started with developing the docs we provide a docker image which you can use from within the `/docs` directory. It should work on all platforms. To get it up and running:
-
-```
-docker run -it --rm \
-        --name hugo-server \
-        -p 1313:1313 \
-        -v $(PWD):/src:cached \
-        gomods/hugo
-        
 ```

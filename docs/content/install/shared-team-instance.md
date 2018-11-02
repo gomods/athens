@@ -4,7 +4,7 @@ description: Installing an Athens Instance For Your Development Team
 weight: 2
 ---
 
-When you follow the instructions in the [Walkthrough](/walkthrough), you end up with an Athens Proxy that uses in-memory storage. This is only suitable for trying out the proxy for a short period of time, as you will quickly run out of memory and Athens won't persist modules between restarts. This guide will help you get Athens running in a more suitable manner for scenarios like providing an instance for your development team to share.
+When you follow the instructions in the [Walkthrough](/walkthrough), you end up with an Athens Proxy that uses in-memory storage. This is only suitable for trying out the Athens proxy for a short period of time, as you will quickly run out of memory and Athens won't persist modules between restarts. This guide will help you get Athens running in a more suitable manner for scenarios like providing an instance for your development team to share.
 
 We will use Docker to run the Athens proxy, so first make sure you have Docker [installed](https://docs.docker.com/install/).
 

@@ -1,6 +1,7 @@
 ---
 title: "Components"
 date: 2018-02-11T16:57:56-05:00
+weight: 5
 ---
 
 From a very high-level view, we recognize 4 major components of the system.
@@ -21,4 +22,4 @@ We intend proxies to be deployed primarily inside of enterprises to:
 * Exclude access to public modules
 * Cache public modules
 
-Importantly, a proxy is not intended to be a complete mirror of an upstream registry. For public modules, its role is to cache and provide access control.
+Importantly, a proxy is not intended to be a complete mirror of an upstream proxy. For public modules, its role is to cache and provide access control.
