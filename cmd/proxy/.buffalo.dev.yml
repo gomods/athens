@@ -16,6 +16,6 @@ included_extensions:
 build_path: tmp
 build_delay: 200ns
 binary_name: athens-build
-command_flags: []
+command_flags: ["--config_file","../../config.toml"]
 enable_colors: true
 log_name: buffalo

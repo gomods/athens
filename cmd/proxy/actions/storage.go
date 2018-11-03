@@ -7,6 +7,7 @@ import (
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/storage"
+	"github.com/gomods/athens/pkg/storage/azureblob"
 	"github.com/gomods/athens/pkg/storage/fs"
 	"github.com/gomods/athens/pkg/storage/gcp"
 	"github.com/gomods/athens/pkg/storage/mem"
@@ -56,6 +57,11 @@ func GetStorage(storageType string, storageConfig *config.StorageConfig) (storag
 			return nil, errors.E(op, "Invalid S3 Storage Configuration")
 		}
 		return s3.New(storageConfig.S3, storageConfig.CDN)
+	case "azureblob":
+		if storageConfig.AzureBlob == nil {
+			return nil, errors.E(op, "Invalid Azure Blob Configuration")
+		}
+		return azureblob.New(storageConfig.AzureBlob, storageConfig.CDN)
 	default:
 		return nil, fmt.Errorf("storage type %s is unknown", storageType)
 	}

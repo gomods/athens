@@ -23,7 +23,7 @@ type Storage struct {
 }
 
 // New creates a new azureblob saver
-func New(azblobConf config.AzureBlobConf, cdnConf *config.CDNConfig) (*Storage, error) {
+func New(azblobConf *config.AzureBlobConfig, cdnConf *config.CDNConfig) (*Storage, error) {
 	const op errors.Op = "azureblob.New"
 	u, err := url.Parse(fmt.Sprintf("https://%s.blob.core.windows.net", azblobConf.AccountName))
 	if err != nil {
