@@ -11,13 +11,6 @@ import (
 )
 
 
-func (s *Storage) Exists(ctx context.Context, module string, version string) (bool, error) {
-	panic("not implemented")
-}
-
-func (s *Storage) Delete(ctx context.Context, module string, vsn string) error {
-	panic("not implemented")
-}
 
 type client interface {
 	UploadWithContext(ctx context.Context, path, contentType string, content io.Reader) error
