@@ -33,16 +33,6 @@ func New(azblobConf config.AzureBlobConf, cdnConf *config.CDNConfig) (*Storage, 
 	return &Storage{cl: cl, baseURI: u, cdnConf: cdnConf}, nil
 }
 
-// newWithClient creates a new azure CDN saver
-func newWithClient(accountName, cl client, cdnConf *config.CDNConfig) (*Storage, error) {
-	const op errors.Op = "azureblob.newWithClient"
-	u, err := url.Parse(fmt.Sprintf("https://%s.blob.core.windows.net", accountName))
-	if err != nil {
-		return nil, errors.E(op, err)
-	}
-	return &Storage{cl: cl, baseURI: u, cdnConf: cdnConf}, nil
-}
-
 // BaseURL returns the base URL that stores all modules. It can be used
 // in the "meta" tag redirect response to vgo.
 //
