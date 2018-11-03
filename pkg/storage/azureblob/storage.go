@@ -10,8 +10,6 @@ import (
 	"github.com/gomods/athens/pkg/errors"
 )
 
-
-
 type client interface {
 	UploadWithContext(ctx context.Context, path, contentType string, content io.Reader) error
 }
@@ -24,14 +22,14 @@ type Storage struct {
 	cdnConf *config.CDNConfig
 }
 
-// New creates a new azure CDN saver
-func New(accountName, accountKey, containerName string, cdnConf *config.CDNConfig) (*Storage, error) {
+// New creates a new azureblob saver
+func New(azblobConf config.AzureBlobConf, cdnConf *config.CDNConfig) (*Storage, error) {
 	const op errors.Op = "azureblob.New"
-	u, err := url.Parse(fmt.Sprintf("https://%s.blob.core.windows.net", accountName))
+	u, err := url.Parse(fmt.Sprintf("https://%s.blob.core.windows.net", azblobConf.AccountName))
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
-	cl := newBlobStoreClient(u, accountName, accountKey, containerName)
+	cl := newBlobStoreClient(u, azblobConf.AccountName, azblobConf.AccountKey, azblobConf.ContainerName)
 	return &Storage{cl: cl, baseURI: u, cdnConf: cdnConf}, nil
 }
 
