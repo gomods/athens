@@ -230,3 +230,12 @@ Timeout = 300
         # Defaults to gomods
         # Env override: ATHENS_S3_BUCKET_NAME
         Bucket = "MY_S3_BUCKET_NAME"
+   [Storage.AzureBlob]
+   	# Storage Account name for Azure Blob
+	AccountName = "AZURE_BLOB_ACCOUNT_NAME"
+
+	# Account Key to use with the storage account
+	AccountKey = "AZURE_BLOB_ACCOUNT_KEY"
+
+	# Name of container in the blob storage
+	ContainerName = "AZURE_BLOB_CONTAINER_NAME"
