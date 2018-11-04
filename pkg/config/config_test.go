@@ -223,7 +223,6 @@ func TestParseExampleConfig(t *testing.T) {
 			Secret:    "minio123",
 			EnableSSL: false,
 			Bucket:    "gomods",
-			Region:    "",
 			TimeoutConf: TimeoutConf{
 				Timeout: globalTimeout,
 			},
