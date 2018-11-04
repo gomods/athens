@@ -56,6 +56,11 @@ Therefore, if `go` before v1.11 worked for you, then go 1.11+ with GOPROXY
 should work as well, provided that the Athens proxy host is configured with the
 proper authentication.
 
+### Can I _NOT_ cache certain respositories in my private cache?
+
+Yes, this is possible. The proxy provides a configuration file that will allow users to specify which modules have to be cached or not. The [filtering modules configuration](/configuration/filter/) provides details about the configuration file and how to exclude certain modules.
+
+
 ### Is there support for monitoring and observability for Proxy?
 
 Right now, we have structured logs for proxy. Along with that, we have added tracing to help developers identify critical code paths and debug latency issues. While there is no setup required for logs, tracing requires some installation. We currently support exporting traces with [Jaeger](https://www.jaegertracing.io/), [GCP Stackdriver](https://cloud.google.com/stackdriver/) & [Datadog](https://docs.datadoghq.com/tracing/) (untested). Further support for other exporters is in progress.
