@@ -44,6 +44,6 @@ func NewFilterMiddleware(mf *module.Filter, upstreamEndpoint string) buffalo.Mid
 	}
 }
 
-func redirectToUpstreamURL(registryEndpoint string, u *url.URL) string {
-	return strings.TrimSuffix(registryEndpoint, "/") + u.Path
+func redirectToUpstreamURL(upstreamEndpoint string, u *url.URL) string {
+	return strings.TrimSuffix(upstreamEndpoint, "/") + u.Path
 }

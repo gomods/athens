@@ -119,11 +119,6 @@ func App(conf *config.Config) (*buffalo.App, error) {
 
 	initializeAuth(app)
 
-	// Having the hook set means we want to use it
-	if vHook := conf.ValidatorHook; vHook != "" {
-		app.Use(mw.LogEntryMiddleware(mw.NewValidationMiddleware, lggr, vHook))
-	}
-
 	user, pass, ok := conf.BasicAuth()
 	if ok {
 		app.Use(basicAuth(user, pass))
@@ -135,6 +130,11 @@ func App(conf *config.Config) (*buffalo.App, error) {
 			lggr.Fatal(err)
 		}
 		app.Use(mw.NewFilterMiddleware(mf, conf.GlobalEndpoint))
+	}
+
+	// Having the hook set means we want to use it
+	if vHook := conf.ValidatorHook; vHook != "" {
+		app.Use(mw.LogEntryMiddleware(mw.NewValidationMiddleware, lggr, vHook))
 	}
 
 	if err := addProxyRoutes(app, store, lggr, conf.GoBinary, conf.GoGetWorkers, conf.ProtocolWorkers); err != nil {
