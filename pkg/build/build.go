@@ -2,7 +2,7 @@
 // The details are set using ldflags.
 //
 // The ldflags can be set either manually:
-// `go build -ldflags "-X github.com/gomods/athens/pkg/build.commitSHA=$(git rev-list -1 HEAD) -X github.com/gomods/athens/pkg/build.version=$(git describe --tags) -X github.com/gomods/athens/pkg/build.buildDate$(date -u +%Y-%m-%d-%H:%M:%S-%Z)"`
+// `go build -ldflags "-X github.com/gomods/athens/pkg/build.commitSHA=$(git rev-list -1 HEAD) -X github.com/gomods/athens/pkg/build.version=$(git describe --tags) -X github.com/gomods/athens/pkg/build.buildDate=$(date -u +%Y-%m-%d-%H:%M:%S-%Z)"`
 //
 // or using the build script in ./scripts.
 package build
