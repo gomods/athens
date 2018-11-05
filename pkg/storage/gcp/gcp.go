@@ -19,7 +19,6 @@ type Storage struct {
 	baseURI      *url.URL
 	closeStorage func() error
 	projectID    string
-	cdnConf      *config.CDNConfig
 	timeout      time.Duration
 }
 
@@ -31,7 +30,7 @@ type Storage struct {
 // to the path of your service account file. If you're running on GCP (e.g. AppEngine),
 // credentials will be automatically provided.
 // See https://cloud.google.com/docs/authentication/getting-started.
-func New(ctx context.Context, gcpConf *config.GCPConfig, cdnConf *config.CDNConfig) (*Storage, error) {
+func New(ctx context.Context, gcpConf *config.GCPConfig) (*Storage, error) {
 	const op errors.Op = "gcp.New"
 	storage, err := storage.NewClient(ctx)
 	if err != nil {
@@ -52,7 +51,6 @@ func New(ctx context.Context, gcpConf *config.GCPConfig, cdnConf *config.CDNConf
 		bucket:       &bkt,
 		baseURI:      u,
 		closeStorage: storage.Close,
-		cdnConf:      cdnConf,
 		timeout:      gcpConf.TimeoutDuration(),
 	}, nil
 }
@@ -66,24 +64,13 @@ func bucketExistsErr(err error) bool {
 	return apiErr.Code == http.StatusConflict
 }
 
-func newWithBucket(bkt Bucket, uri *url.URL, timeout time.Duration, cdnConf *config.CDNConfig) *Storage {
+func newWithBucket(bkt Bucket, uri *url.URL, timeout time.Duration) *Storage {
 	return &Storage{
 		bucket:       bkt,
 		baseURI:      uri,
 		closeStorage: func() error { return nil },
 		timeout:      timeout,
-		cdnConf:      cdnConf,
 	}
-}
-
-// BaseURL returns the base URL that stores all modules. It can be used
-// in the "meta" tag redirect response to vgo.
-//
-// For example:
-//
-//	<meta name="go-import" content="gomods.com/athens mod BaseURL()">
-func (s *Storage) BaseURL() *url.URL {
-	return s.cdnConf.CDNEndpointWithDefault(s.baseURI)
 }
 
 // Close calls the underlying storage client's close method
