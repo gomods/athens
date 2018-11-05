@@ -117,15 +117,7 @@ func App(conf *config.Config) (*buffalo.App, error) {
 		app.Use(paramlogger.ParameterLogger)
 	}
 
-	initializeAuth(app)
-
-	if !conf.FilterOff() {
-		mf, err := module.NewFilter(conf.FilterFile)
-		if err != nil {
-			lggr.Fatal(err)
-		}
-		app.Use(mw.NewFilterMiddleware(mf, conf.GlobalEndpoint))
-	}
+	initializeAuth(app)	
 
 	// Having the hook set means we want to use it
 	if vHook := conf.ValidatorHook; vHook != "" {
@@ -135,6 +127,14 @@ func App(conf *config.Config) (*buffalo.App, error) {
 	user, pass, ok := conf.BasicAuth()
 	if ok {
 		app.Use(basicAuth(user, pass))
+	}
+
+	if !conf.FilterOff() {
+		mf, err := module.NewFilter(conf.FilterFile)
+		if err != nil {
+			lggr.Fatal(err)
+		}
+		app.Use(mw.NewFilterMiddleware(mf, conf.GlobalEndpoint))
 	}
 
 	if err := addProxyRoutes(app, store, lggr, conf.GoBinary, conf.GoGetWorkers, conf.ProtocolWorkers); err != nil {

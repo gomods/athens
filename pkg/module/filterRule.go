@@ -4,12 +4,13 @@ package module
 type FilterRule int
 
 const (
-	// Default filter rule does not alter default behavior
+	// Default filter rule does not alter default/parent behavior
 	Default FilterRule = iota
-	// Include filter rule includes package and its children from communication
+	// Include treats modules the usual way
+	// Used for reverting Exclude of parent path
 	Include
 	// Exclude filter rule excludes package and its children from communication
 	Exclude
-	// Direct filter rule forces the package to be fetched directly from the vcs
+	// Direct filter rule forces the package to be fetched directly from upstream proxy
 	Direct
 )
