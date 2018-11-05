@@ -83,7 +83,6 @@ func getStorage(t testing.TB) *Storage {
 				Timeout: 300,
 			},
 		},
-		nil,
 		options,
 	)
 

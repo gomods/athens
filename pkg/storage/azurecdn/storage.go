@@ -1,4 +1,4 @@
-package azurecdn
+package azure
 
 import (
 	"bytes"
@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/url"
 
+	"github.com/Azure/azure-storage-blob-go/2017-07-29/azblob"
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/observ"
@@ -17,56 +18,78 @@ type client interface {
 	UploadWithContext(ctx context.Context, path, contentType string, content io.Reader) error
 }
 
+type azureBlobStoreClient struct {
+	containerURL *azblob.ContainerURL
+}
+
+func newBlobStoreClient(accountURL *url.URL, accountName, accountKey, containerName string) *azureBlobStoreClient {
+	cred := azblob.NewSharedKeyCredential(accountName, accountKey)
+	pipe := azblob.NewPipeline(cred, azblob.PipelineOptions{})
+	serviceURL := azblob.NewServiceURL(*accountURL, pipe)
+	// rules on container names:
+	// https://docs.microsoft.com/en-us/rest/api/storageservices/naming-and-referencing-containers--blobs--and-metadata#container-names
+	//
+	// This container must exist
+	containerURL := serviceURL.NewContainerURL(containerName)
+	cl := &azureBlobStoreClient{containerURL: &containerURL}
+	return cl
+}
+
 // Storage implements (github.com/gomods/athens/pkg/storage).Saver and
 // also provides a function to fetch the location of a module
 type Storage struct {
-	cl      client
-	baseURI *url.URL
-	cdnConf *config.CDNConfig
+	cl   client
+	conf *config.AzureConfig
 }
 
-// New creates a new azure CDN saver
-func New(accountName, accountKey, containerName string, cdnConf *config.CDNConfig) (*Storage, error) {
-	const op errors.Op = "azurecdn.New"
-	u, err := url.Parse(fmt.Sprintf("https://%s.blob.core.windows.net", accountName))
+// New creates a new azure blobs storage saver
+func New(conf *config.AzureConfig) (*Storage, error) {
+	const op errors.Op = "azure.New"
+	u, err := url.Parse(fmt.Sprintf("https://%s.blob.core.windows.net", conf.AccountName))
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
-	cl := newBlobStoreClient(u, accountName, accountKey, containerName)
-	return &Storage{cl: cl, baseURI: u, cdnConf: cdnConf}, nil
-}
-
-// newWithClient creates a new azure CDN saver
-func newWithClient(accountName, cl client, cdnConf *config.CDNConfig) (*Storage, error) {
-	const op errors.Op = "azurecdn.newWithClient"
-	u, err := url.Parse(fmt.Sprintf("https://%s.blob.core.windows.net", accountName))
-	if err != nil {
-		return nil, errors.E(op, err)
-	}
-	return &Storage{cl: cl, baseURI: u, cdnConf: cdnConf}, nil
-}
-
-// BaseURL returns the base URL that stores all modules. It can be used
-// in the "meta" tag redirect response to vgo.
-//
-// For example:
-//
-//	<meta name="go-import" content="gomods.com/athens mod BaseURL()">
-func (s Storage) BaseURL() *url.URL {
-	return s.cdnConf.CDNEndpointWithDefault(s.baseURI)
+	cl := newBlobStoreClient(u, conf.AccountName, conf.AccountKey, conf.ContainerName)
+	return &Storage{cl: cl, conf: conf}, nil
 }
 
 // Save implements the (github.com/gomods/athens/pkg/storage).Saver interface.
 func (s *Storage) Save(ctx context.Context, module, version string, mod []byte, zip io.Reader, info []byte) error {
-	const op errors.Op = "azurecdn.Save"
+	const op errors.Op = "azure.Save"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
-	err := moduploader.Upload(ctx, module, version, bytes.NewReader(info), bytes.NewReader(mod), zip, s.cl.UploadWithContext, s.cdnConf.TimeoutDuration())
-	// TODO: take out lease on the /list file and add the version to it
-	//
-	// Do that only after module source+metadata is uploaded
+	err := moduploader.Upload(ctx, module, version, bytes.NewReader(info), bytes.NewReader(mod), zip, s.cl.UploadWithContext, s.conf.TimeoutDuration())
 	if err != nil {
 		return errors.E(op, err, errors.M(module), errors.V(version))
+	}
+	return nil
+}
+
+func (c *azureBlobStoreClient) UploadWithContext(ctx context.Context, path, contentType string, content io.Reader) error {
+	const op errors.Op = "azure.UploadWithContext"
+	ctx, span := observ.StartSpan(ctx, op.String())
+	defer span.End()
+	blobURL := c.containerURL.NewBlockBlobURL(path)
+	emptyMeta := map[string]string{}
+	emptyBlobAccessCond := azblob.BlobAccessConditions{}
+	httpHeaders := func(contentType string) azblob.BlobHTTPHeaders {
+		return azblob.BlobHTTPHeaders{
+			ContentType: contentType,
+		}
+	}
+	bufferSize := 1 * 1024 * 1024 // Size of the rotating buffers that are used when uploading
+	maxBuffers := 3               // Number of rotating buffers that are used when uploading
+
+	uploadStreamOpts := azblob.UploadStreamToBlockBlobOptions{
+		BufferSize:       bufferSize,
+		MaxBuffers:       maxBuffers,
+		BlobHTTPHeaders:  httpHeaders(contentType),
+		Metadata:         emptyMeta,
+		AccessConditions: emptyBlobAccessCond,
+	}
+	_, err := azblob.UploadStreamToBlockBlob(ctx, content, blobURL, uploadStreamOpts)
+	if err != nil {
+		return errors.E(op, err)
 	}
 	return nil
 }
