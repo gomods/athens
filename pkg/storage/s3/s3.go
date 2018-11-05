@@ -28,11 +28,10 @@ type Storage struct {
 	uploader s3manageriface.UploaderAPI
 	s3API    s3iface.S3API
 	s3Conf   *config.S3Config
-	cdnConf  *config.CDNConfig
 }
 
 // New creates a new AWS S3 CDN saver
-func New(s3Conf *config.S3Config, cdnConf *config.CDNConfig, options ...func(*aws.Config)) (*Storage, error) {
+func New(s3Conf *config.S3Config, options ...func(*aws.Config)) (*Storage, error) {
 	const op errors.Op = "s3.New"
 	u, err := url.Parse(fmt.Sprintf("https://%s.s3.amazonaws.com", s3Conf.Bucket))
 	if err != nil {
@@ -60,20 +59,6 @@ func New(s3Conf *config.S3Config, cdnConf *config.CDNConfig, options ...func(*aw
 		uploader: uploader,
 		s3API:    uploader.S3,
 		baseURI:  u,
-		cdnConf:  cdnConf,
 		s3Conf:   s3Conf,
 	}, nil
-}
-
-// BaseURL returns the base URL that stores all modules. It can be used
-// in the "meta" tag redirect response to vgo.
-//
-// For example:
-//
-//	<meta name="go-import" content="gomods.com/athens mod BaseURL()">
-func (s Storage) BaseURL() *url.URL {
-	if s.cdnConf == nil {
-		return s.baseURI
-	}
-	return s.cdnConf.CDNEndpointWithDefault(s.baseURI)
 }
