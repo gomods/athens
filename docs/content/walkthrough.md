@@ -29,7 +29,7 @@ The 🦁 says rawr!
 ```
 
 The end result of running this command is that Go downloaded the package source and packaged
-it into a module, saving it in the Go Modules cache.
+it into a module, saving it in the Go Modules local storage.
 
 Now that we have seen Go Modules in action without the Athens proxy, let's take a look at
 how the Athens proxy changes the workflow and the output.
@@ -38,8 +38,8 @@ how the Athens proxy changes the workflow and the output.
 Using the most simple installation possible, let's walk through how to use the
 Athens proxy, and figure out what is happening at each step.
 
-Before moving on, let's clear our Go Modules cache so that we can see the Athens proxy
-in action without any caches populated:
+Before moving on, let's clear our Go Modules local files so that we can see the Athens proxy
+in action without any modules locally populated:
 
 **Bash**
 ```bash
@@ -165,7 +165,7 @@ proxy was run in the background, you should also see output from Athens indicati
 Let's break down what is happening here:
 
 1. Before Go runs our code, it detects that our code depends on the **github.com/athens-artifacts/samplelib** package
-   which is not present in the Go Modules cache.
+   which is not present in the Go Modules local storage.
 1. At this point the Go Modules feature comes into play because we have it enabled.
     Instead of looking in the GOPATH for the package, Go reads our **go.mod** file
     and sees that we want a particular version of that package, v1.0.0.
@@ -175,15 +175,15 @@ Let's break down what is happening here:
     
     require github.com/athens-artifacts/samplelib v1.0.0
     ```
-1. Go first checks for **github.com/athens-artifacts/samplelib@v1.0.0** in the Go Modules cache,
-    located in GOPATH/pkg/mod. If that version of the package is already cached,
+1. Go first checks for **github.com/athens-artifacts/samplelib@v1.0.0** in the Go Modules local storage,
+    located in GOPATH/pkg/mod. If that version of the package is already local storage,
     then Go will use it and stop looking. But since this is our first time
-    running this, our cache is empty and Go keeps looking.
+    running this, our local storage is empty and Go keeps looking.
 1. Go requests **github.com/athens-artifacts/samplelib@v1.0.0** from our proxy because
     it is set in the GOPROXY environment variable.
 1. The Athens proxy checks its own storage (in this case is in-memory) for the package and doesn't find it. So it
     retrieves it from github.com and then saves it for subsequent requests.
-1. Go downloads the module zip and puts it in the Go Modules cache
+1. Go downloads the module zip and puts it in the Go Modules local storage
     GOPATH/pkg/mod.
 1. Go will use the module and build our application!
 
@@ -195,7 +195,7 @@ The 🦁 says rawr!
 ```
 
 No additional output is printed because Go found **github.com/athens-artifacts/samplelib@v1.0.0** in the Go Module
-cache and did not need to request it from the Athens proxy.
+local storage and did not need to request it from the Athens proxy.
 
 Lastly, quitting from the Athens proxy. This cannot be done directly because we are starting the Athens proxy in the background, thus we must kill it by finding it's process ID and killing it manually.
 
