@@ -33,13 +33,14 @@ It allows for `#` to add comments and new lines are skipped. Anything else would
 # This is a comment
 
 
-E github.com/manugupt1/athens
-I github.com/gomods/walkthrough
+- github.com/azure
++ github.com/azure/azure-sdk-for-go
 
 # get golang tools directly
 D golang.org/x/tools
 </pre>
 
+In the above example, `golang.org/x/tools` is fetched directly from the VCS. All the modules from from `github.com/azure` are ignored except `github.com/azure/azure-sdk-for-go`
 
 ### Adding a default mode 
 
