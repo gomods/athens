@@ -120,7 +120,7 @@ When Athens is restarted, it will serve the module from this location without re
 docker rm -f athens-proxy
 ```
 
-Now, we need to clear the local Go modules cache. This is needed so that your local Go command line tool will re-download the module from Athens. The following commands will clear the local module cache:
+Now, we need to clear the local Go modules storage. This is needed so that your local Go command line tool will re-download the module from Athens. The following commands will clear the local module storage:
 
 **Bash**
 ```bash
