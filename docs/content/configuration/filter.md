@@ -19,11 +19,10 @@ These settings can be done by creating a configuration file which can be pointed
 
 ### Writing the configuration file
 
-Every line of the configration can start either with a
+Every line of the configuration can start either with a
 
 * `+` denoting that the module has to be included by the proxy,
 * `-` denoting that the module does not have to be included in the proxy
-    * In the case that the module is not cached in the local proxy and has the module cached in global proxy, it will fetch from the global proxy
 * `D` denoting that the module has to be fetched directly from the source
 
 It allows for `#` to add comments and new lines are skipped. Anything else would result in an error
