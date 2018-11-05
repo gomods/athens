@@ -7,33 +7,39 @@
 // or using the build script in ./scripts.
 package build
 
-import "fmt"
+import (
+	"encoding/json"
+	"fmt"
+)
+
+// Details represents known data for a given build
+type Details struct {
+	Version string
+	Commit  string
+	Date    string
+}
 
 var commitSHA, version, buildDate string
 
 // InfoString returns build details as a string with formatting
 // suitable for console output.
+//
+// i.e.
+// Build Details:
+//         Version:        v0.1.0-155-g1a20f8b
+//         Commit SHA:     1a20f8b6a36136183f8533ae850a582716bbd577
+//         Date:           2018-11-05-14:33:14-UTC
 func InfoString() string {
 	return fmt.Sprintf("Build Details:\n\tVersion:\t%s\n\tCommit SHA:\t%s\n\tDate:\t\t%s", version, commitSHA, buildDate)
 }
 
-// JSON returns a JSON thing for use in server response bodies
-func JSON() string {
-	// TODO
-	return ""
-}
-
-// Commit returns the build's commit hash
-func Commit() string {
-	return commitSHA
-}
-
-// Version returns the build's version string
-func Version() string {
-	return version
-}
-
-// Date returns the formatted date the binary was built
-func Date() string {
-	return buildDate
+// JSON returns build details JSON object as a slice of byte
+// for use in server response bodies
+func JSON() ([]byte, error) {
+	out := Details{
+		Version: version,
+		Commit:  commitSHA,
+		Date:    buildDate,
+	}
+	return json.Marshal(out)
 }

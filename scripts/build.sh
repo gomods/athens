@@ -12,4 +12,4 @@ importPath="github.com/gomods/athens/pkg/build"
 export GO111MODULE=on
 export CGO_ENABLED=0 
 
-exec go build -mod=vendor -ldflags "-X $importPath.commitSHA=$commit -X $importPath.version=$version -X $importPath.buildDate=$date" -o athens-proxy ./cmd/proxy
+exec go build -mod=vendor -ldflags "-X $importPath.commitSHA=$commit -X $importPath.version=$version -X $importPath.buildDate=$date" -o /bin/athens-proxy ./cmd/proxy
