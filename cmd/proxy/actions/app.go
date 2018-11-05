@@ -137,6 +137,10 @@ func App(conf *config.Config) (*buffalo.App, error) {
 		app.Use(basicAuth(user, pass))
 	}
 
+	if conf.GlobalEndpoint != "" {
+		app.Use(mw.NewUpstreamRedirectMiddleware(conf.GlobalEndpoint))
+	}
+
 	if err := addProxyRoutes(app, store, lggr, conf.GoBinary, conf.GoGetWorkers, conf.ProtocolWorkers); err != nil {
 		err = fmt.Errorf("error adding proxy routes (%s)", err)
 		return nil, err
