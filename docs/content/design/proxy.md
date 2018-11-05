@@ -18,15 +18,15 @@ We intend proxies to be deployed primarily inside of enterprises to:
 
 - Host private modules
 - Exclude access to public modules
-- Cache public modules
+- Store public modules
 
-Importantly, a proxy is not intended to be a complete _mirror_ of an upstream proxy. For public modules, its role is to cache and provide access control.
+Importantly, a proxy is not intended to be a complete _mirror_ of an upstream proxy. For public modules, its role is to store the modules locally and provide access control.
 
-## Cache Misses
+## What happens when a public module is not stored?
 
-When a user requests a module `MxV1` from a proxy and the Athens proxy doesn't have `MxV1` in its cache, it first determines whether `MxV1` is private or not private.
+When a user requests a module `MxV1` from a proxy and the Athens proxy doesn't have `MxV1` in its store, it first determines whether `MxV1` is private or not private.
 
-If it's private, it immediately does a cache fill operation from the internal VCS.
+If it's private, it immediately stores the module into the proxy storage from the internal VCS.
 
 If it's not private, the Athens proxy consults its exclude list for non-private modules (see below). If `MxV1` is on the exclude list, the Athens proxy returns 404 and does nothing else. If `MxV1` is not on the exclude list, the Athens proxy executes the following algorithm:
 
@@ -57,7 +57,7 @@ To accommodate private (i.e. enterprise) deployments, the Athens proxy maintains
 Private module filters are string globs that tell the Athens proxy what is a private module. For example, the string `github.internal.com/**` tells the Athens proxy:
 
 - To never make requests to the public internet (i.e. to upstream proxies) regarding this module
-- To download module code (in its cache filling mechanism) from the VCS at `github.internal.com`
+- To download module code (in its store mechanism) from the VCS at `github.internal.com`
 
 ### Exclude Lists for Public Modules
 
