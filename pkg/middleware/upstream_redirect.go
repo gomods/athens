@@ -12,7 +12,8 @@ func NewUpstreamRedirectMiddleware(upstreamEndpoint string) buffalo.MiddlewareFu
 	return func(next buffalo.Handler) buffalo.Handler {
 		return func(c buffalo.Context) error {
 			result := next(c)
-			if errors.Kind(result) == errors.KindNotFound && upstreamEndpoint != "" {
+			e, ok := result.(buffalo.HTTPError)
+			if ok && e.Status == errors.KindNotFound && upstreamEndpoint != "" {
 				newURL := redirectToRegistryURL(upstreamEndpoint, c.Request().URL)
 				return c.Redirect(http.StatusSeeOther, newURL)
 			}

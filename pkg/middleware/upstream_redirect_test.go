@@ -3,32 +3,34 @@ package middleware
 import (
 	"io/ioutil"
 	"net/http"
-	"net/http/httptest"
 	"strings"
 	"testing"
 
 	"github.com/gobuffalo/buffalo"
 	"github.com/gomods/athens/pkg/errors"
+	"github.com/markbates/willie"
 )
 
 func TestUpstreamRedirect(t *testing.T) {
-	h := func(c buffalo.Context) error { return errors.E("", errors.KindNotFound) }
+	h := func(c buffalo.Context) error {
+		return c.Error(errors.KindNotFound, nil)
+	}
+	expected := "1.2.3.5"
+
 	a := buffalo.New(buffalo.Options{})
+	a.Use(NewUpstreamRedirectMiddleware(expected))
 	a.GET("/test", h)
 
-	expected := "1.2.3.5"
-	a.Use(NewUpstreamRedirectMiddleware(expected))
+	w := willie.New(a)
+	r := w.Request("/test").Get()
 
-	w := httptest.NewRecorder()
-	r, _ := http.NewRequest("GET", "/test", nil)
-	a.ServeHTTP(w, r)
-
-	actualStatus := w.Result().StatusCode
-	if actualStatus != http.StatusSeeOther {
-		t.Fatalf("Expected status see other got %v", actualStatus)
+	actualStatus := r.Code
+	expectedStatus := http.StatusSeeOther
+	if actualStatus != expectedStatus {
+		t.Fatalf("Expected status '%v' got '%v'", expectedStatus, actualStatus)
 	}
 
-	body, err := ioutil.ReadAll(w.Result().Body)
+	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		t.Fatalf("Failed to read redirect uri '%v'", err)
 	}
@@ -40,19 +42,19 @@ func TestUpstreamRedirect(t *testing.T) {
 }
 
 func TestUpstreamRedirectNoUpstream(t *testing.T) {
-	h := func(c buffalo.Context) error { return errors.E("", errors.KindNotFound) }
+	h := func(c buffalo.Context) error {
+		return c.Render(errors.KindNotFound, nil)
+	}
 	a := buffalo.New(buffalo.Options{})
+	a.Use(NewUpstreamRedirectMiddleware(""))
 	a.GET("/test", h)
 
-	expected := ""
-	a.Use(NewUpstreamRedirectMiddleware(expected))
+	w := willie.New(a)
+	r := w.Request("/test").Get()
 
-	w := httptest.NewRecorder()
-	r, _ := http.NewRequest("GET", "/test", nil)
-	a.ServeHTTP(w, r)
-
-	actualStatus := w.Result().StatusCode
-	if actualStatus != http.StatusInternalServerError {
-		t.Fatalf("Expected status see other got %v", actualStatus)
+	actualStatus := r.Code
+	expectedStatus := http.StatusNotFound
+	if actualStatus != expectedStatus {
+		t.Fatalf("Expected status '%v' got '%v'", expectedStatus, actualStatus)
 	}
 }
