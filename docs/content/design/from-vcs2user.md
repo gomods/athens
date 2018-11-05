@@ -47,7 +47,9 @@ Then the `Fetcher`:
 - in this temp dir, it constructs _dummy_ go project consisting of simple `main.go` and `go.mod` so the `go` CLI can be used.
 - invokes `go mod download -json {module}`
 
-This command downloads the module into the storage. Once the download is completed, the `Fetch` function reads the module bits from stroage and returns them to the caller. The exact path of module files is returned by `go mod` as part of `JSON` response.
+This command downloads the module into the storage. Once the download is completed, 
+- the `Fetch` function reads the module bits from stroage and returns them to the caller. 
+- The exact path of module files is returned by `go mod` as part of `JSON` response.
 
 ### Stash
 As it is important for us to keep components small and readable, we did not want to bloat `Fetcher` with storing functionality. For storing modules into a storage we use `Stash`er. This is the single responsibility of a simple Stasher.
