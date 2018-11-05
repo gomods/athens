@@ -20,6 +20,6 @@ We intend proxies to be deployed primarily inside of enterprises to:
 
 * Host private modules
 * Exclude access to public modules
-* Cache public modules
+* Store public modules
 
-Importantly, a proxy is not intended to be a complete mirror of an upstream proxy. For public modules, its role is to cache and provide access control.
+Importantly, a proxy is not intended to be a complete mirror of an upstream proxy. For public modules, its role is to store and provide access control.
