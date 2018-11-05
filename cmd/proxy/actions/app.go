@@ -117,7 +117,7 @@ func App(conf *config.Config) (*buffalo.App, error) {
 		app.Use(paramlogger.ParameterLogger)
 	}
 
-	initializeAuth(app)	
+	initializeAuth(app)
 
 	// Having the hook set means we want to use it
 	if vHook := conf.ValidatorHook; vHook != "" {
