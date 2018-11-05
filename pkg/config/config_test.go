@@ -19,15 +19,10 @@ func compareConfigs(parsedConf *Config, expConf *Config, t *testing.T) {
 	if !eq {
 		t.Errorf("Parsed Example configuration did not match expected values. Expected: %+v. Actual: %+v", expConf, parsedConf)
 	}
-	compareStorageConfigs(parsedConf.Storage, expConf.Storage, t)
 }
 
 func compareStorageConfigs(parsedStorage *StorageConfig, expStorage *StorageConfig, t *testing.T) {
-	eq := cmp.Equal(parsedStorage.CDN, expStorage.CDN)
-	if !eq {
-		t.Errorf("Parsed Example Storage configuration did not match expected values. Expected: %+v. Actual: %+v", expStorage.CDN, parsedStorage.CDN)
-	}
-	eq = cmp.Equal(parsedStorage.Mongo, expStorage.Mongo)
+	eq := cmp.Equal(parsedStorage.Mongo, expStorage.Mongo)
 	if !eq {
 		t.Errorf("Parsed Example Storage configuration did not match expected values. Expected: %+v. Actual: %+v", expStorage.Mongo, parsedStorage.Mongo)
 	}
@@ -98,22 +93,13 @@ func TestEnvOverrides(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Env override failed: %v", err)
 	}
-	deleteInvalidStorageConfigs(conf.Storage)
-
 	compareConfigs(conf, expConf, t)
 	restoreEnv(envVarBackup)
 }
 
 func TestStorageEnvOverrides(t *testing.T) {
-
 	globalTimeout := 300
 	expStorage := &StorageConfig{
-		CDN: &CDNConfig{
-			Endpoint: "cdnEndpoint",
-			TimeoutConf: TimeoutConf{
-				Timeout: globalTimeout,
-			},
-		},
 		Disk: &DiskConfig{
 			RootPath: "/my/root/path",
 		},
@@ -165,8 +151,6 @@ func TestStorageEnvOverrides(t *testing.T) {
 		t.Fatalf("Env override failed: %v", err)
 	}
 	setStorageTimeouts(conf.Storage, globalTimeout)
-	deleteInvalidStorageConfigs(conf.Storage)
-
 	compareStorageConfigs(conf.Storage, expStorage, t)
 	restoreEnv(envVarBackup)
 }
@@ -178,7 +162,6 @@ func TestParseExampleConfig(t *testing.T) {
 	// initialize all struct pointers so we get all applicable env variables
 	emptyConf := &Config{
 		Storage: &StorageConfig{
-			CDN:  &CDNConfig{},
 			Disk: &DiskConfig{},
 			GCP:  &GCPConfig{},
 			Minio: &MinioConfig{
@@ -200,12 +183,6 @@ func TestParseExampleConfig(t *testing.T) {
 	globalTimeout := 300
 
 	expStorage := &StorageConfig{
-		CDN: &CDNConfig{
-			Endpoint: "cdn.example.com",
-			TimeoutConf: TimeoutConf{
-				Timeout: globalTimeout,
-			},
-		},
 		Disk: &DiskConfig{
 			RootPath: "/path/on/disk",
 		},
@@ -305,9 +282,6 @@ func getEnvMap(config *Config) map[string]string {
 
 	storage := config.Storage
 	if storage != nil {
-		if storage.CDN != nil {
-			envVars["CDN_ENDPOINT"] = storage.CDN.Endpoint
-		}
 		if storage.Disk != nil {
 			envVars["ATHENS_DISK_STORAGE_ROOT"] = storage.Disk.RootPath
 		}
