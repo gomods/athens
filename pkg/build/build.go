@@ -13,8 +13,8 @@ import (
 
 // Details represents known data for a given build
 type Details struct {
-	Version string
-	Date    string
+	Version string `json:"version,omitempty"`
+	Date    string `json:"date,omitempty"`
 }
 
 var version, buildDate string
