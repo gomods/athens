@@ -56,9 +56,9 @@ Therefore, if `go` before v1.11 worked for you, then go 1.11+ with GOPROXY
 should work as well, provided that the Athens proxy host is configured with the
 proper authentication.
 
-### Can I _NOT_ cache certain respositories in the proxy?
+### Can I blacklist cache certain modules with the proxy?
 
-Yes, this is possible. The proxy provides a configuration file that will allow users to specify which modules have to be cached or not. The [filtering modules configuration](/configuration/filter/) provides details about the configuration file and how to exclude certain modules.
+Yes, this is possible. The proxy provides a configuration file that will allow users to specify which modules have to be blacklisted or not. In addition to that, the proxy can be configured to fetch certain modules from an upstream proxy / version control system. The [filtering modules configuration](/configuration/filter/) provides details about the configuration file and how to exclude certain modules.
 
 
 ### Is there support for monitoring and observability for Proxy?
