@@ -5,7 +5,6 @@ import (
 	"github.com/gobuffalo/buffalo/render"
 	"github.com/gomods/athens/pkg/log"
 	"github.com/gomods/athens/pkg/middleware"
-	"github.com/sirupsen/logrus"
 )
 
 // ProtocolHandler is a function that takes all that it needs to return
@@ -26,12 +25,7 @@ type HandlerOpts struct {
 // This is like a middleware minus the context magic.
 func LogEntryHandler(ph ProtocolHandler, opts *HandlerOpts) buffalo.Handler {
 	return func(c buffalo.Context) error {
-		req := c.Request()
-		ent := opts.Logger.WithFields(logrus.Fields{
-			"http-method": req.Method,
-			"http-path":   req.URL.Path,
-			"http-url":    req.URL.String(),
-		})
+		ent := log.EntryFromContext(c)
 		handler := ph(opts.Protocol, ent, opts.Engine)
 
 		return handler(c)
