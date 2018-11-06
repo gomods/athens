@@ -51,9 +51,9 @@ func newTestFilter(filterFile string) (*module.Filter, error) {
 	if err != nil {
 		return nil, err
 	}
-	f.AddRule("github.com/gomods/athens/", module.Include)
+	f.AddRule("github.com/gomods/athens/", module.Direct)
 	f.AddRule("github.com/athens-artifacts/no-tags", module.Exclude)
-	f.AddRule("github.com/athens-artifacts", module.Direct)
+	f.AddRule("github.com/athens-artifacts", module.Include)
 	return f, nil
 }
 

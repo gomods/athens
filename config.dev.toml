@@ -185,6 +185,10 @@ TraceExporter = ""
         # Env override: ATHENS_MINIO_BUCKET_NAME
         Bucket = "gomods"
 
+        # Region for Minio storage
+        # Env override: ATHENS_MINIO_REGION
+        Region = ""
+
     [Storage.Mongo]
         # Full URL for mongo storage
         # Env override: ATHENS_MONGO_STORAGE_URL
