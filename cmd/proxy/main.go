@@ -14,7 +14,7 @@ import (
 
 var (
 	configFile = flag.String("config_file", filepath.Join("..", "..", "config.dev.toml"), "The path to the config file")
-	version    = flag.Bool("version", true, "Print version information and exit")
+	version    = flag.Bool("version", false, "Print version information and exit")
 )
 
 func main() {
