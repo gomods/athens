@@ -2,17 +2,9 @@
 #
 # build.sh runs a few commands to generate build time details
 # which are stored in variables in ./pkg/build
-
-# Use the travis variables when available because travis clones different than what is on a local dev machine
-# VERSION = the tag if present, otherwise the short commit hash
-# BRANCH = the current branch, empty if not on a branch
-if [[ "${TRAVIS-}" == "true" ]]; then
-    VERSION=${TRAVIS_TAG:-${TRAVIS_COMMIT::7}}
-else
-    TAG=$(git describe --tags --exact-match 2> /dev/null || true)
-    COMMIT=$(git rev-parse --short=7 HEAD)
-    VERSION=${VERSION:-${TAG:-${COMMIT}}}
-fi
+# VERSION is expected to be set already, this is passed as a
+# build argument during the call to `docker build` in
+# push-docker-images.sh
 
 DATE=$(date -u +%Y-%m-%d-%H:%M:%S-%Z)
 
