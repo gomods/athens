@@ -4,14 +4,10 @@ description: Configuring modules that are stored on the proxy
 weight: 1
 ---
 
-It is very easy to exclude certain modules to be cached in the proxy. There are two ways in which the proxy can be configured.
+The proxy supports the following three use cases
 
-1. When a single instance of the proxy that does not point to a global proxy.
-2. When a single instance of the proxy also points to a global proxy.
-
-A user may either want to 
-1. Fetch a module directly from the source
-2. Fetch a module from the global proxy 
+1. Fetches a module directly from the source (vcs / upstream proxy)
+2. Blacklist a particular module 
 3. Include a module in the local proxy.
 
 These settings can be done by creating a configuration file which can be pointed by setting either
@@ -21,9 +17,9 @@ These settings can be done by creating a configuration file which can be pointed
 
 Every line of the configuration can start either with a
 
-* `+` denoting that the module has to be included by the proxy,
-* `-` denoting that the module does not have to be included in the proxy
-* `D` denoting that the module has to be fetched directly from the source
+* `+` denoting that the module has to be included by the proxy
+* `D` denoting that the module has to be fetched directly from the source (VCS) or an upstream proxy
+* `-` denoting that the module is blacklisted and will not be fetched into the proxy or from the source
 
 It allows for `#` to add comments and new lines are skipped. Anything else would result in an error
 
@@ -40,7 +36,7 @@ It allows for `#` to add comments and new lines are skipped. Anything else would
 D golang.org/x/tools
 </pre>
 
-In the above example, `golang.org/x/tools` is fetched directly from the VCS. All the modules from from `github.com/azure` are ignored except `github.com/azure/azure-sdk-for-go`
+In the above example, `golang.org/x/tools` is fetched directly from the VCS. All the modules from from `github.com/azure` are blacklisted except `github.com/azure/azure-sdk-for-go`
 
 ### Adding a default mode 
 
@@ -53,3 +49,5 @@ D
 - github.com/manugupt1/athens
 + github.com/gomods/athens
 </pre>
+
+In the above example, all the modules are fetched directly from the source. `github.com/manugupt1/athens` is blacklisted and `github.com/gomods/athens` is stored in the proxy storage.
