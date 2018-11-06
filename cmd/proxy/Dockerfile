@@ -8,7 +8,7 @@ WORKDIR $GOPATH/src/github.com/gomods/athens
 
 COPY . .
 
-RUN GO111MODULE=on CGO_ENABLED=0 go build -mod=vendor -o /bin/athens-proxy ./cmd/proxy
+RUN ./scripts/build.sh
 
 FROM alpine
 
