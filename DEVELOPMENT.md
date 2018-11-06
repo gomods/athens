@@ -87,3 +87,11 @@ docker run -it --rm \
         gomods/hugo
         
 ```
+
+# Linting 
+
+In our CI/CD pass, we use golint, so feel free to install and run it locally beforehand: 
+
+```
+go get golang.org/x/lint/golint
+```
