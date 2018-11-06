@@ -6,7 +6,7 @@ weight: 1
 
 The proxy supports the following three use cases
 
-1. Fetches a module directly from the source (vcs / upstream proxy)
+1. Fetches a module directly from the source (upstream proxy)
 2. Blacklist a particular module 
 3. Include a module in the local proxy.
 
@@ -18,7 +18,7 @@ These settings can be done by creating a configuration file which can be pointed
 Every line of the configuration can start either with a
 
 * `+` denoting that the module has to be included by the proxy
-* `D` denoting that the module has to be fetched directly from the source (VCS) or an upstream proxy
+* `D` denoting that the module has to be fetched directly from an upstream proxy
 * `-` denoting that the module is blacklisted and will not be fetched into the proxy or from the source
 
 It allows for `#` to add comments and new lines are skipped. Anything else would result in an error
@@ -36,7 +36,7 @@ It allows for `#` to add comments and new lines are skipped. Anything else would
 D golang.org/x/tools
 </pre>
 
-In the above example, `golang.org/x/tools` is fetched directly from the VCS. All the modules from from `github.com/azure` are blacklisted except `github.com/azure/azure-sdk-for-go`
+In the above example, `golang.org/x/tools` is fetched directly from the upstream proxy. All the modules from from `github.com/azure` are blacklisted except `github.com/azure/azure-sdk-for-go`
 
 ### Adding a default mode 
 
