@@ -11,10 +11,8 @@ import (
 
 	"github.com/gobuffalo/buffalo"
 	"github.com/gomods/athens/pkg/config"
-	"github.com/gomods/athens/pkg/log"
 	"github.com/gomods/athens/pkg/module"
 	"github.com/markbates/willie"
-	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 )
@@ -103,7 +101,7 @@ func hookFilterApp(hook string) *buffalo.App {
 	}
 
 	a := buffalo.New(buffalo.Options{})
-	a.Use(LogEntryMiddleware(NewValidationMiddleware, log.New("none", logrus.DebugLevel), hook))
+	a.Use(NewValidationMiddleware(hook))
 
 	a.GET(pathList, h)
 	a.GET(pathVersionInfo, h)
