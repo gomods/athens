@@ -4,8 +4,7 @@ The proxy is built on the [Buffalo](https://gobuffalo.io/) framework. We chose
 this framework to make it as straightforward as possible to get your development environment up and running.
 However, **you do not need to install buffalo to run Athens**. 
 
-Buffalo provides nice features like a file watcher for your server, so if you'd like to install Buffalo, download [v0.12.4](https://github.com/gobuffalo/buffalo/releases/tag/v0.12.4) or later to get started on Athens,
-so be sure to download the CLI and put it into your `PATH`.
+Buffalo provides nice features like a file watcher for your server, so if you'd like to install Buffalo, download [v0.12.4](https://github.com/gobuffalo/buffalo/releases/tag/v0.12.4) or later to get started on Athens and be sure to download the CLI and put it into your `PATH`.
 
 Athens uses [Go Modules](https://golang.org/cmd/go/#hdr-Modules__module_versions__and_more) for dependency management. You will need Go [v1.11](https://golang.org/dl) or later to get started on Athens.
 
