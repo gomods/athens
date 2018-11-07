@@ -20,6 +20,7 @@ steps:
     robocopy "$env:system_defaultWorkingDirectory\" "$env:modulePath\" /E /Z /ZB /R:5 /W:5 /TBD /NP /V /XD "$env:GOPATH"
     Write-Host "##vso[task.prependpath]$env:GOBIN"
     Write-Host "##vso[task.prependpath]$env:GOROOT\bin"
+    exit ($LastExitCode -band 24)
   displayName: 'Set up the Go workspace'
 
 - script: |
