@@ -40,8 +40,6 @@ It's virtually impossible to ensure immutable builds when source code comes from
 
 To repeat, "datastore" means a CDN (we currently have support for Google Cloud Storage, Azure Blob Storage and AWS S3) or another datastore (we have support for MongoDB, disk and some others).
 
-One final note - we use "caching" in lots of our docs, and that's technically wrong because no data is evicted or expires. We'll need to update that terminology.
-
 ### Can the Athens proxy authenticate to private repositories?
 
 _TL;DR: yes, with proper authentication configuration defined on the Athens proxy host._

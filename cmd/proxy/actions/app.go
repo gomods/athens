@@ -79,6 +79,9 @@ func App(conf *config.Config) (*buffalo.App, error) {
 		WorkerOff:   true,
 		Host:        "http://127.0.0.1" + conf.Port,
 	})
+
+	app.Use(mw.LogEntryMiddleware(lggr))
+
 	if prefix := conf.PathPrefix; prefix != "" {
 		// certain Ingress Controllers (such as GCP Load Balancer)
 		// can not send custom headers and therefore if the proxy
@@ -119,6 +122,11 @@ func App(conf *config.Config) (*buffalo.App, error) {
 
 	initializeAuth(app)
 
+	user, pass, ok := conf.BasicAuth()
+	if ok {
+		app.Use(basicAuth(user, pass))
+	}
+
 	if !conf.FilterOff() {
 		mf, err := module.NewFilter(conf.FilterFile)
 		if err != nil {
@@ -129,12 +137,7 @@ func App(conf *config.Config) (*buffalo.App, error) {
 
 	// Having the hook set means we want to use it
 	if vHook := conf.ValidatorHook; vHook != "" {
-		app.Use(mw.LogEntryMiddleware(mw.NewValidationMiddleware, lggr, vHook))
-	}
-
-	user, pass, ok := conf.BasicAuth()
-	if ok {
-		app.Use(basicAuth(user, pass))
+		app.Use(mw.NewValidationMiddleware(vHook))
 	}
 
 	if err := addProxyRoutes(app, store, lggr, conf.GoBinary, conf.GoGetWorkers, conf.ProtocolWorkers); err != nil {

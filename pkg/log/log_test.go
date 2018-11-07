@@ -7,9 +7,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/require"
-
 	"github.com/sirupsen/logrus"
+	"github.com/stretchr/testify/require"
 )
 
 type input struct {
@@ -89,4 +88,9 @@ func TestCloudLogger(t *testing.T) {
 			require.Equal(t, expected, out, "expected the logged entry to match the testCase output")
 		})
 	}
+}
+
+func TestNoOpLogger(t *testing.T) {
+	l := NoOpLogger()
+	require.NotPanics(t, func() { l.Infof("test") })
 }
