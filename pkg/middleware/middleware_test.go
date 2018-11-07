@@ -11,10 +11,8 @@ import (
 
 	"github.com/gobuffalo/buffalo"
 	"github.com/gomods/athens/pkg/config"
-	"github.com/gomods/athens/pkg/log"
 	"github.com/gomods/athens/pkg/module"
 	"github.com/markbates/willie"
-	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 )
@@ -51,9 +49,9 @@ func newTestFilter(filterFile string) (*module.Filter, error) {
 	if err != nil {
 		return nil, err
 	}
-	f.AddRule("github.com/gomods/athens/", module.Include)
+	f.AddRule("github.com/gomods/athens/", module.Direct)
 	f.AddRule("github.com/athens-artifacts/no-tags", module.Exclude)
-	f.AddRule("github.com/athens-artifacts", module.Direct)
+	f.AddRule("github.com/athens-artifacts", module.Include)
 	return f, nil
 }
 
@@ -70,16 +68,13 @@ func Test_FilterMiddleware(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Unable to parse config file: %s", err.Error())
 	}
-	if conf.Proxy == nil {
-		t.Fatalf("No Proxy configuration in test config")
-	}
 
 	// Test with a filter file not existing
-	app, err := middlewareFilterApp("nofsfile", conf.Proxy.GlobalEndpoint)
+	app, err := middlewareFilterApp("nofsfile", conf.GlobalEndpoint)
 	r.Nil(app, "app should be nil when a file not exisiting")
 	r.Error(err, "Expected error when a file not existing on the filesystem is given")
 
-	app, err = middlewareFilterApp(filter.Name(), conf.Proxy.GlobalEndpoint)
+	app, err = middlewareFilterApp(filter.Name(), conf.GlobalEndpoint)
 	r.NoError(err, "app should be succesfully created in the test")
 	w := willie.New(app)
 
@@ -88,7 +83,7 @@ func Test_FilterMiddleware(t *testing.T) {
 	for _, path := range paths {
 		res := w.Request(path).Get()
 		r.Equal(303, res.Code)
-		r.Equal(conf.Proxy.GlobalEndpoint+"/github.com/gomods/athens/@v/list/", res.HeaderMap.Get("Location"))
+		r.Equal(conf.GlobalEndpoint+"/github.com/gomods/athens/@v/list/", res.HeaderMap.Get("Location"))
 	}
 
 	// Excluded, expects a 403
@@ -106,7 +101,7 @@ func hookFilterApp(hook string) *buffalo.App {
 	}
 
 	a := buffalo.New(buffalo.Options{})
-	a.Use(LogEntryMiddleware(NewValidationMiddleware, log.New("none", logrus.DebugLevel), hook))
+	a.Use(NewValidationMiddleware(hook))
 
 	a.GET(pathList, h)
 	a.GET(pathVersionInfo, h)

@@ -12,7 +12,7 @@ A registry is generally run by one entity, is one logical server that provides a
 
 That's most definitely not what we in the Athens community are going for, and that would harm our community if we did go down that path.
 
-First and foremost, Athens is an _implementation_ of the [Go Modules download API](./intro/protocol). Not only does the standard Go toolchain support any implementation of that API, the Athens proxy is designed to talk to any other server that implements that API as well. That allows Athens to talk to other proxies in the community. 
+First and foremost, Athens is an _implementation_ of the [Go Modules download API](/intro/protocol). Not only does the standard Go toolchain support any implementation of that API, the Athens proxy is designed to talk to any other server that implements that API as well. That allows Athens to talk to other proxies in the community. 
 
 Finally, we're purposefully building this project - and working with the toolchain folks - in a way that everyone who wants to write a proxy can participate.
 
@@ -39,8 +39,6 @@ It's virtually impossible to ensure immutable builds when source code comes from
 1. Athens serves `github.com/my/module@v1` from its datastore forever
 
 To repeat, "datastore" means a CDN (we currently have support for Google Cloud Storage, Azure Blob Storage and AWS S3) or another datastore (we have support for MongoDB, disk and some others).
-
-One final note - we use "caching" in lots of our docs, and that's technically wrong because no data is evicted or expires. We'll need to update that terminology.
 
 ### Can the Athens proxy authenticate to private repositories?
 

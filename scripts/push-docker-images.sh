@@ -22,7 +22,7 @@ fi
 if [[ "${MUTABLE_TAG:-}" == "" ]]; then
     # tagged builds
     if [[ "$VERSION" =~ ^v[0-9]+\.[0-9]+\.[0-9]+ ]]; then
-        MUTABLE_TAG="latest"
+        MUTABLE_TAG="stable"
     # master build
     elif [[ "$BRANCH" == "master" ]]; then
         MUTABLE_TAG="canary"

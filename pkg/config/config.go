@@ -24,8 +24,32 @@ type Config struct {
 	FilterFile       string `envconfig:"ATHENS_FILTER_FILE"`
 	TraceExporterURL string `envconfig:"ATHENS_TRACE_EXPORTER_URL"`
 	TraceExporter    string `envconfig:"ATHENS_TRACE_EXPORTER"`
-	Proxy            *ProxyConfig
+	StorageType      string `validate:"required" envconfig:"ATHENS_STORAGE_TYPE"`
+	GlobalEndpoint   string `envconfig:"ATHENS_GLOBAL_ENDPOINT"` // This feature is not yet implemented
+	Port             string `envconfig:"ATHENS_PORT" default:":3000"`
+	BasicAuthUser    string `envconfig:"BASIC_AUTH_USER"`
+	BasicAuthPass    string `envconfig:"BASIC_AUTH_PASS"`
+	ForceSSL         bool   `envconfig:"PROXY_FORCE_SSL"`
+	ValidatorHook    string `envconfig:"ATHENS_PROXY_VALIDATOR"`
+	PathPrefix       string `envconfig:"ATHENS_PATH_PREFIX"`
+	NETRCPath        string `envconfig:"ATHENS_NETRC_PATH"`
+	GithubToken      string `envconfig:"ATHENS_GITHUB_TOKEN"`
+	HGRCPath         string `envconfig:"ATHENS_HGRC_PATH"`
 	Storage          *StorageConfig
+}
+
+// BasicAuth returns BasicAuthUser and BasicAuthPassword
+// and ok if neither of them are empty
+func (c *Config) BasicAuth() (user, pass string, ok bool) {
+	user = c.BasicAuthUser
+	pass = c.BasicAuthPass
+	ok = user != "" && pass != ""
+	return user, pass, ok
+}
+
+// FilterOff returns true if the FilterFile is empty
+func (c *Config) FilterOff() bool {
+	return c.FilterFile == ""
 }
 
 // ParseConfigFile parses the given file into an athens config struct
@@ -47,16 +71,8 @@ func ParseConfigFile(configFile string) (*Config, error) {
 		return nil, err
 	}
 
-	// set default values
-	setRuntimeDefaults(&config)
-
 	// If not defined, set storage timeouts to global timeout
 	setStorageTimeouts(config.Storage, config.Timeout)
-
-	// delete invalid storage backend configs
-	// envconfig initializes *all* struct pointers, even if there are no corresponding defaults or env variables
-	// this method prunes all such invalid configurations
-	deleteInvalidStorageConfigs(config.Storage)
 
 	// validate all required fields have been populated
 	if err := validateConfig(config); err != nil {
@@ -65,22 +81,35 @@ func ParseConfigFile(configFile string) (*Config, error) {
 	return &config, nil
 }
 
-func setRuntimeDefaults(config *Config) {
-	// TODO: Set defaults here
-}
-
 // envOverride uses Environment variables to override unspecified properties
 func envOverride(config *Config) error {
 	return envconfig.Process("athens", config)
 }
 
-func validateConfig(c Config) error {
+func validateConfig(config Config) error {
 	validate := validator.New()
-	err := validate.Struct(c)
+	err := validate.StructExcept(config, "Storage")
 	if err != nil {
 		return err
 	}
-	return nil
+	switch config.StorageType {
+	case "memory":
+		return nil
+	case "mongo":
+		return validate.Struct(config.Storage.Mongo)
+	case "disk":
+		return validate.Struct(config.Storage.Disk)
+	case "minio":
+		return validate.Struct(config.Storage.Minio)
+	case "gcp":
+		return validate.Struct(config.Storage.GCP)
+	case "s3":
+		return validate.Struct(config.Storage.S3)
+	case "azure":
+		return validate.Struct(config.Storage.Azure)
+	default:
+		return fmt.Errorf("storage type %s is unknown", config.StorageType)
+	}
 }
 
 // GetConf accepts the path to a file, constructs an absolute path to the file,

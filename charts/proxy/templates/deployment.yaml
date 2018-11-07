@@ -41,10 +41,6 @@ spec:
         - name: ATHENS_TRACE_EXPORTER
           value: "jaeger"
         {{- end }}
-        # TODO: re-enable when workers are used
-        # SPACES of template must be fixed back while re-enabling
-        #- name: ATHENS_REDIS_QUEUE_ADDRESS
-        #  value: { { .Values.redis.address | quote } }
         ports:
         - containerPort: 3000
         {{- if eq .Values.storage.type "disk" }}

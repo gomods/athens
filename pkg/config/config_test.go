@@ -14,24 +14,15 @@ import (
 const exampleConfigPath = "../../config.dev.toml"
 
 func compareConfigs(parsedConf *Config, expConf *Config, t *testing.T) {
-	opts := cmpopts.IgnoreTypes(StorageConfig{}, ProxyConfig{})
+	opts := cmpopts.IgnoreTypes(StorageConfig{})
 	eq := cmp.Equal(parsedConf, expConf, opts)
 	if !eq {
 		t.Errorf("Parsed Example configuration did not match expected values. Expected: %+v. Actual: %+v", expConf, parsedConf)
 	}
-	eq = cmp.Equal(parsedConf.Proxy, expConf.Proxy)
-	if !eq {
-		t.Errorf("Parsed Example Proxy configuration did not match expected values. Expected: %+v. Actual: %+v", expConf.Proxy, parsedConf.Proxy)
-	}
-	compareStorageConfigs(parsedConf.Storage, expConf.Storage, t)
 }
 
 func compareStorageConfigs(parsedStorage *StorageConfig, expStorage *StorageConfig, t *testing.T) {
-	eq := cmp.Equal(parsedStorage.CDN, expStorage.CDN)
-	if !eq {
-		t.Errorf("Parsed Example Storage configuration did not match expected values. Expected: %+v. Actual: %+v", expStorage.CDN, parsedStorage.CDN)
-	}
-	eq = cmp.Equal(parsedStorage.Mongo, expStorage.Mongo)
+	eq := cmp.Equal(parsedStorage.Mongo, expStorage.Mongo)
 	if !eq {
 		t.Errorf("Parsed Example Storage configuration did not match expected values. Expected: %+v. Actual: %+v", expStorage.Mongo, parsedStorage.Mongo)
 	}
@@ -53,22 +44,19 @@ func compareStorageConfigs(parsedStorage *StorageConfig, expStorage *StorageConf
 	}
 }
 
-func TestEnvOverrides(t *testing.T) {
-
-	expProxy := ProxyConfig{
-		StorageType:    "minio",
-		GlobalEndpoint: "mytikas.gomods.io",
-		Port:           ":7000",
-		FilterOff:      false,
-		BasicAuthUser:  "testuser",
-		BasicAuthPass:  "testpass",
-		ForceSSL:       true,
-		ValidatorHook:  "testhook.io",
-		PathPrefix:     "prefix",
-		NETRCPath:      "/test/path/.netrc",
-		HGRCPath:       "/test/path/.hgrc",
+func TestPortDefaultsCorrectly(t *testing.T) {
+	conf := &Config{}
+	err := envOverride(conf)
+	if err != nil {
+		t.Fatalf("Env override failed: %v", err)
 	}
+	expPort := ":3000"
+	if conf.Port != expPort {
+		t.Errorf("Port was incorrect. Got: %s, want: %s", conf.Port, expPort)
+	}
+}
 
+func TestEnvOverrides(t *testing.T) {
 	expConf := &Config{
 		GoEnv:           "production",
 		GoGetWorkers:    10,
@@ -77,12 +65,20 @@ func TestEnvOverrides(t *testing.T) {
 		BuffaloLogLevel: "info",
 		GoBinary:        "go11",
 		CloudRuntime:    "gcp",
-		FilterFile:      "filter2.conf",
 		TimeoutConf: TimeoutConf{
 			Timeout: 30,
 		},
-		Proxy:   &expProxy,
-		Storage: &StorageConfig{},
+		StorageType:    "minio",
+		GlobalEndpoint: "mytikas.gomods.io",
+		Port:           ":7000",
+		BasicAuthUser:  "testuser",
+		BasicAuthPass:  "testpass",
+		ForceSSL:       true,
+		ValidatorHook:  "testhook.io",
+		PathPrefix:     "prefix",
+		NETRCPath:      "/test/path/.netrc",
+		HGRCPath:       "/test/path/.hgrc",
+		Storage:        &StorageConfig{},
 	}
 
 	envVars := getEnvMap(expConf)
@@ -97,22 +93,13 @@ func TestEnvOverrides(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Env override failed: %v", err)
 	}
-	deleteInvalidStorageConfigs(conf.Storage)
-
 	compareConfigs(conf, expConf, t)
 	restoreEnv(envVarBackup)
 }
 
 func TestStorageEnvOverrides(t *testing.T) {
-
 	globalTimeout := 300
 	expStorage := &StorageConfig{
-		CDN: &CDNConfig{
-			Endpoint: "cdnEndpoint",
-			TimeoutConf: TimeoutConf{
-				Timeout: globalTimeout,
-			},
-		},
 		Disk: &DiskConfig{
 			RootPath: "/my/root/path",
 		},
@@ -129,6 +116,7 @@ func TestStorageEnvOverrides(t *testing.T) {
 			Secret:    "minioSecret",
 			EnableSSL: false,
 			Bucket:    "minioBucket",
+			Region:    "us-west-1",
 			TimeoutConf: TimeoutConf{
 				Timeout: globalTimeout,
 			},
@@ -164,8 +152,6 @@ func TestStorageEnvOverrides(t *testing.T) {
 		t.Fatalf("Env override failed: %v", err)
 	}
 	setStorageTimeouts(conf.Storage, globalTimeout)
-	deleteInvalidStorageConfigs(conf.Storage)
-
 	compareStorageConfigs(conf.Storage, expStorage, t)
 	restoreEnv(envVarBackup)
 }
@@ -176,9 +162,7 @@ func TestParseExampleConfig(t *testing.T) {
 
 	// initialize all struct pointers so we get all applicable env variables
 	emptyConf := &Config{
-		Proxy: &ProxyConfig{},
 		Storage: &StorageConfig{
-			CDN:  &CDNConfig{},
 			Disk: &DiskConfig{},
 			GCP:  &GCPConfig{},
 			Minio: &MinioConfig{
@@ -199,22 +183,7 @@ func TestParseExampleConfig(t *testing.T) {
 
 	globalTimeout := 300
 
-	expProxy := &ProxyConfig{
-		StorageType:    "memory",
-		GlobalEndpoint: "http://localhost:3001",
-		Port:           ":3000",
-		FilterOff:      true,
-		BasicAuthUser:  "",
-		BasicAuthPass:  "",
-	}
-
 	expStorage := &StorageConfig{
-		CDN: &CDNConfig{
-			Endpoint: "cdn.example.com",
-			TimeoutConf: TimeoutConf{
-				Timeout: globalTimeout,
-			},
-		},
 		Disk: &DiskConfig{
 			RootPath: "/path/on/disk",
 		},
@@ -263,12 +232,15 @@ func TestParseExampleConfig(t *testing.T) {
 		GoGetWorkers:    30,
 		ProtocolWorkers: 30,
 		CloudRuntime:    "none",
-		FilterFile:      "filter.conf",
 		TimeoutConf: TimeoutConf{
 			Timeout: 300,
 		},
-		Proxy:   expProxy,
-		Storage: expStorage,
+		StorageType:    "memory",
+		GlobalEndpoint: "http://localhost:3001",
+		Port:           ":3000",
+		BasicAuthUser:  "",
+		BasicAuthPass:  "",
+		Storage:        expStorage,
 	}
 
 	absPath, err := filepath.Abs(exampleConfigPath)
@@ -294,31 +266,23 @@ func getEnvMap(config *Config) map[string]string {
 		"ATHENS_LOG_LEVEL":        config.LogLevel,
 		"BUFFALO_LOG_LEVEL":       config.BuffaloLogLevel,
 		"ATHENS_CLOUD_RUNTIME":    config.CloudRuntime,
-		"ATHENS_FILTER_FILE":      config.FilterFile,
 		"ATHENS_TIMEOUT":          strconv.Itoa(config.Timeout),
 		"ATHENS_TRACE_EXPORTER":   config.TraceExporterURL,
 	}
 
-	proxy := config.Proxy
-	if proxy != nil {
-		envVars["ATHENS_STORAGE_TYPE"] = proxy.StorageType
-		envVars["ATHENS_GLOBAL_ENDPOINT"] = proxy.GlobalEndpoint
-		envVars["PORT"] = proxy.Port
-		envVars["PROXY_FILTER_OFF"] = strconv.FormatBool(proxy.FilterOff)
-		envVars["BASIC_AUTH_USER"] = proxy.BasicAuthUser
-		envVars["BASIC_AUTH_PASS"] = proxy.BasicAuthPass
-		envVars["PROXY_FORCE_SSL"] = strconv.FormatBool(proxy.ForceSSL)
-		envVars["ATHENS_PROXY_VALIDATOR"] = proxy.ValidatorHook
-		envVars["ATHENS_PATH_PREFIX"] = proxy.PathPrefix
-		envVars["ATHENS_NETRC_PATH"] = proxy.NETRCPath
-		envVars["ATHENS_HGRC_PATH"] = proxy.HGRCPath
-	}
+	envVars["ATHENS_STORAGE_TYPE"] = config.StorageType
+	envVars["ATHENS_GLOBAL_ENDPOINT"] = config.GlobalEndpoint
+	envVars["ATHENS_PORT"] = config.Port
+	envVars["BASIC_AUTH_USER"] = config.BasicAuthUser
+	envVars["BASIC_AUTH_PASS"] = config.BasicAuthPass
+	envVars["PROXY_FORCE_SSL"] = strconv.FormatBool(config.ForceSSL)
+	envVars["ATHENS_PROXY_VALIDATOR"] = config.ValidatorHook
+	envVars["ATHENS_PATH_PREFIX"] = config.PathPrefix
+	envVars["ATHENS_NETRC_PATH"] = config.NETRCPath
+	envVars["ATHENS_HGRC_PATH"] = config.HGRCPath
 
 	storage := config.Storage
 	if storage != nil {
-		if storage.CDN != nil {
-			envVars["CDN_ENDPOINT"] = storage.CDN.Endpoint
-		}
 		if storage.Disk != nil {
 			envVars["ATHENS_DISK_STORAGE_ROOT"] = storage.Disk.RootPath
 		}
@@ -331,6 +295,7 @@ func getEnvMap(config *Config) map[string]string {
 			envVars["ATHENS_MINIO_ACCESS_KEY_ID"] = storage.Minio.Key
 			envVars["ATHENS_MINIO_SECRET_ACCESS_KEY"] = storage.Minio.Secret
 			envVars["ATHENS_MINIO_USE_SSL"] = strconv.FormatBool(storage.Minio.EnableSSL)
+			envVars["ATHENS_MINIO_REGION"] = storage.Minio.Region
 			envVars["ATHENS_MINIO_BUCKET_NAME"] = storage.Minio.Bucket
 		}
 		if storage.Mongo != nil {
