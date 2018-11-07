@@ -9,6 +9,7 @@ pool:
 variables:
   GOBIN:  '$(GOPATH)\bin' # Go binaries path
   GOPATH: '$(system.defaultWorkingDirectory)\gopath' # Go workspace path
+  GO111MODULE: 'on'
   modulePath: '$(GOPATH)\src\github.com\$(build.repository.name)' # Path to the module's code
 
 steps:
@@ -21,6 +22,7 @@ steps:
   displayName: 'Set up the Go workspace'
 
 - powershell: |
-    go build .
+    go build -mod=vendor ./cmd/proxy
+    go test -mod=vendor -race ./...
   workingDirectory: '$(modulePath)'
-  displayName: 'Print version'
+  displayName: 'Build & test proxy'

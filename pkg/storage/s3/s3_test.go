@@ -2,6 +2,7 @@ package s3
 
 import (
 	"context"
+	"os"
 	"testing"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -68,8 +69,13 @@ func (s *Storage) createBucket() error {
 }
 
 func getStorage(t testing.TB) *Storage {
+	url := os.Getenv("ATHENS_MINIO_ENDPOINT")
+	if url == "" {
+		t.SkipNow()
+	}
+
 	options := func(conf *aws.Config) {
-		conf.Endpoint = aws.String("127.0.0.1:9001")
+		conf.Endpoint = aws.String(url)
 		conf.DisableSSL = aws.Bool(true)
 		conf.S3ForcePathStyle = aws.Bool(true)
 	}
