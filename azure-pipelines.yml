@@ -8,7 +8,6 @@ pool:
 
 variables:
   GOBIN:  '$(GOPATH)\bin' # Go binaries path
-  GOROOT: 'C:\go' # Go installation path
   GOPATH: '$(system.defaultWorkingDirectory)\gopath' # Go workspace path
   modulePath: '$(GOPATH)\src\github.com\$(build.repository.name)' # Path to the module's code
 
@@ -19,7 +18,6 @@ steps:
     mkdir "$env:modulePath"
     robocopy "$env:system_defaultWorkingDirectory\" "$env:modulePath\" /E /Z /ZB /R:5 /W:5 /TBD /NP /V /XD "$env:GOPATH"
     Write-Host "##vso[task.prependpath]$env:GOBIN"
-    Write-Host "##vso[task.prependpath]$env:GOROOT\bin"
     exit ($LastExitCode -band 24)
   displayName: 'Set up the Go workspace'
 
