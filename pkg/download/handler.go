@@ -19,10 +19,10 @@ type HandlerOpts struct {
 	Engine   *render.Engine
 }
 
-// LogEntryHandler constructs a log.Entry out of the given
-// *log.Logger so that it applies default fields to every single
-// incoming request without having to do those in every single handler.
-// This is like a middleware minus the context magic.
+// LogEntryHandler pulls a log entry from the buffalo context. Thanks to the
+// LogEntryMiddleware, we should have a log entry stored in the context for each
+// request with request-specific fields. This will grab the entry and pass it to
+// the protocol handlers
 func LogEntryHandler(ph ProtocolHandler, opts *HandlerOpts) buffalo.Handler {
 	return func(c buffalo.Context) error {
 		ent := log.EntryFromContext(c)
