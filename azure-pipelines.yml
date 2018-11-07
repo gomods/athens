@@ -17,8 +17,7 @@ steps:
     mkdir "$env:GOBIN"
     mkdir "$env:GOPATH\pkg"
     mkdir "$env:modulePath"
-    Copy-Item "$env:system_defaultWorkingDirectory" -Destination "$env:modulePath" -Recurse
-    Remove-Item "$env:modulePath\gopath" -Force -Recurse
+    robocopy "$env:system_defaultWorkingDirectory\" "$env:modulePath\" /E /Z /ZB /R:5 /W:5 /TBD /NP /V /XD "$env:GOPATH"
     Write-Host "##vso[task.prependpath]$env:GOBIN"
     Write-Host "##vso[task.prependpath]$env:GOROOT\bin"
   displayName: 'Set up the Go workspace'
