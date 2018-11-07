@@ -56,9 +56,13 @@ Therefore, if `go` before v1.11 worked for you, then go 1.11+ with GOPROXY
 should work as well, provided that the Athens proxy host is configured with the
 proper authentication.
 
-### Can I blacklist / fetch certain modules from an upstream proxy?
+### Can I exclude a module completely?
 
-Yes, this is possible. The proxy provides a configuration file that will allow users to specify which modules have to be blacklisted or not. In addition to that, the proxy can be configured to fetch certain modules from an upstream proxy. The [filtering modules configuration](/configuration/filter/) provides details about the configuration file and how to exclude certain modules.
+Yes, this is possible. The proxy provides a configuration file that will allow users to specify which modules that should not be fetched at all. The [filtering modules configuration](/configuration/filter/) provides details about the configuration file and how to exclude certain modules.
+
+### Can I specify that a module is fetched from an upstream proxy and not stored locally?
+
+Yes, this is possible. Refer to the [filtering modules configuration](/configuration/filter/) provides details about the configuration file and how to exclude certain modules.
 
 
 ### Is there support for monitoring and observability for Proxy?
