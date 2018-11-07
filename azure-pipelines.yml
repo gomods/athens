@@ -17,11 +17,10 @@ steps:
     mkdir "$env:GOPATH\pkg"
     mkdir "$env:modulePath"
     robocopy "$env:system_defaultWorkingDirectory\" "$env:modulePath\" /E /Z /ZB /R:5 /W:5 /TBD /NP /V /XD "$env:GOPATH"
-    Write-Host "##vso[task.prependpath]$env:GOBIN"
     exit ($LastExitCode -band 24)
   displayName: 'Set up the Go workspace'
 
-- script: |
-    go version
+- powershell: |
+    go build .
   workingDirectory: '$(modulePath)'
   displayName: 'Print version'
