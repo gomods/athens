@@ -19,10 +19,9 @@ Previously, the Go community has had lots of problems with libraries disappearin
 
  This way, you don't need to upload anything manually to Athens storage. The first time Go asks Athens for a dependency, Athens will go get it from VCS (github, bitbucket etc). But once that module has been retrieved, it will be forever persisted in its storage backend and will never go back to VCS or that same version again. This is how Athens achieves module immutability. Keep in mind, you are in charge of that storage backend. 
 
-
 ### Logic 
 
-The fact that the Go command line can now ping _your own_ server to download dependencies, that means you can program whatever logic you want around providing such dependencies. Things like Access Control (discussed below), adding custom versions, custom forks, custom packages etc. 
+The fact that the Go command line can now ping _your own_ server to download dependencies, that means you can program whatever logic you want around providing such dependencies. Things like Access Control (discussed below), adding custom versions, custom forks, and custom packages. 
 
 
 ### Performance 
@@ -31,4 +30,8 @@ Downloading stored dependencies from Athens is _significantly_ faster than downl
 
 ### Access Control 
 
-Worse than packages disappeaing, packages can be malicious. Therefore, you can make sure that no program inside your company or team will ever install github.com/some-user/malicious-package. This is because Go will come to your server and ask for that same exact package, and instead of fetching it from github, you can just return a 500 to the Go command line causing the build to fail. With Athens, you can achieve this through the [filter file](/configuration/filter.md). 
+Worse than packages disappearing, packages can be malicious. To make sure no such malicious is ever installed by your team or company, you can have your proxy server return a 500 when the Go command line asks for an excluded module. This will cause the build to fail because expects a 200 HTTP response code. With Athens, you can achieve this through the [filter file](/configuration/filter.md). 
+
+
+### No Vendor Directory
+With immutability, performance, and a robust proxy server, there's no longer an absolute need for each repository to have its vendor directory checked in to its version control. The go.sum file ensures that no package is manipulated after the first install. Furthermore, your CI/CD can install all of your dependencies on every build with little time. 
