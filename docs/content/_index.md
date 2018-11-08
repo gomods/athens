@@ -15,6 +15,10 @@ On this site, we document Athens in detail. We'll teach you what it does, why it
 
 Athens provides a server for [Go Modules](https://github.com/golang/go/wiki/Modules) that you can run. It serves public code and your private code for you, so you don't have to pull directly from a version control system (VCS) like GitHub or GitLab.
 
+#### Why does it matter? 
+
+There are many reasons why you'd want a proxy server such as security and performance. [Take a look](/intro/why) at a few of them
+
 #### How Do I Use It?
 
 Athens is easy to run yourself. We give you a few options:

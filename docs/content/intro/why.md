@@ -26,12 +26,12 @@ The fact that the Go command line can now ping _your own_ server to download dep
 
 ### Performance 
 
-Downloading stored dependencies from Athens is _significantly_ faster than downloading dependencies from Version Control Systems. This is because `go get` by default uses VCS to download modules such as `git clone`, while `go get` with GOPROXY enabled will use HTTP to download zip archives. THerefore, depending on your computer and internet connection speed, it takes 10 seconds to download the CockroachDB source tree as a zip file from GitHub but almost four minutes to git clone it. 
+Downloading stored dependencies from Athens is _significantly_ faster than downloading dependencies from Version Control Systems. This is because `go get` by default uses VCS to download modules such as `git clone`, while `go get` with GOPROXY enabled will use HTTP to download zip archives. Therefore, depending on your computer and internet connection speed, it takes 10 seconds to download the CockroachDB source tree as a zip file from GitHub but almost four minutes to git clone it. 
 
 ### Access Control 
 
 Worse than packages disappearing, packages can be malicious. To make sure no such malicious package is ever installed by your team or company, you can have your proxy server return a 500 when the Go command line asks for an excluded module. This will cause the build to fail because Go expects a 200 HTTP response code. With Athens, you can achieve this through the [filter file](/configuration/filter.md). 
 
 
-### No Vendor Directory
+### Vendor Directory Becomes Optional
 With immutability, performance, and a robust proxy server, there's no longer an absolute need for each repository to have its vendor directory checked in to its version control. The go.sum file ensures that no package is manipulated after the first install. Furthermore, your CI/CD can install all of your dependencies on every build with little time. 
