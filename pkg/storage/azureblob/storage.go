@@ -12,6 +12,8 @@ import (
 
 type client interface {
 	UploadWithContext(ctx context.Context, path, contentType string, content io.Reader) error
+	BlobExists(ctx context.Context, path string) (bool, error)
+	ReadBlob(ctx context.Context, path string) (io.ReadCloser, error)
 }
 
 // Storage implements (github.com/gomods/athens/pkg/storage).Saver and

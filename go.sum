@@ -8,6 +8,7 @@ github.com/Azure/azure-pipeline-go v0.0.0-20180607212504-7571e8eb0876 h1:3c3mGlh
 github.com/Azure/azure-pipeline-go v0.0.0-20180607212504-7571e8eb0876/go.mod h1:XA1kFWRVhSK+KNFiOhfv83Fv8L9achrP7OxIzeTn1Yg=
 github.com/Azure/azure-storage-blob-go v0.0.0-20180727221336-197d1c0aea1b h1:7cOe9XtL/0qFd/jb0whfm5NoRmhEcVU3bZ65zUZUz54=
 github.com/Azure/azure-storage-blob-go v0.0.0-20180727221336-197d1c0aea1b/go.mod h1:x2mtS6O3mnMEZOJp7d7oldh8IvatBrMfReiyQ+cKgKY=
+github.com/Azure/azure-storage-blob-go v0.0.0-20181023070848-cf01652132cc h1:BElWmFfsryQD72OcovStKpkIcd4e9ozSkdsTNQDSHGk=
 github.com/BurntSushi/toml v0.3.1 h1:WXkYYl6Yr3qBf1K79EBnL4mak0OimBfB0XUf9Vl28OQ=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/DataDog/datadog-go v0.0.0-20180822151419-281ae9f2d895 h1:dmc/C8bpE5VkQn65PNbbyACDC8xw8Hpp/NEurdPmQDQ=

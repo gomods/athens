@@ -27,10 +27,34 @@ func newBlobStoreClient(accountURL *url.URL, accountName, accountKey, containerN
 	return cl
 }
 
+func (c *azureBlobStoreClient) BlobExists(ctx context.Context, path string) (bool, error) {
+	blobURL := c.containerURL.NewBlockBlobURL(path)
+	_, err := blobURL.GetProperties(ctx, azblob.BlobAccessConditions{})
+	if err != nil {
+		serr := err.(azblob.StorageError)
+		if (serr.Response().StatusCode == 404) && (serr.ServiceCode() == azblob.ServiceCodeBlobNotFound) {
+			return false, nil
+		}
+		return false, err
+	}
+	return true, nil
+
+}
+
+func (c *azureBlobStoreClient) ReadBlob(ctx context.Context, path string) (io.ReadCloser, error) {
+	blobURL := c.containerURL.NewBlockBlobURL(path)
+	downloadResponse, err := blobURL.Download(ctx, 0, 0, azblob.BlobAccessConditions{}, false)
+	if err != nil {
+		return nil, err
+	}
+	return downloadResponse.Body(azblob.RetryReaderOptions{}), nil
+}
+
 func (c *azureBlobStoreClient) UploadWithContext(ctx context.Context, path, contentType string, content io.Reader) error {
 	const op errors.Op = "azureblob.UploadWithContext"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
+
 	blobURL := c.containerURL.NewBlockBlobURL(path)
 	emptyMeta := map[string]string{}
 	emptyBlobAccessCond := azblob.BlobAccessConditions{}
