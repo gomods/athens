@@ -44,7 +44,7 @@ BuffaloLogLevel = "debug"
 # Env override: ATHENS_CLOUD_RUNTIME
 CloudRuntime = "none"
 
-# The filename for the include exclude filter. Defaults to 'filter.conf'
+# The filename for the include exclude filter.
 # Env override: ATHENS_FILTER_FILE
 FilterFile = ""
 
