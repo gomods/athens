@@ -3,8 +3,6 @@
 //
 // The ldflags can be set manually for testing locally:
 // `go build -ldflags "-X github.com/gomods/athens/pkg/build.version=$(git describe --tags) -X github.com/gomods/athens/pkg/build.buildDate=$(date -u +%Y-%m-%d-%H:%M:%S-%Z)"`
-//
-// or using the build script in ./scripts.
 package build
 
 import (
