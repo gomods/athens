@@ -1,9 +1,26 @@
 version: '3'
 services:
+  dev:
+    build:
+      context: .
+      dockerfile: cmd/proxy/Dockerfile
+    environment:
+      - ATHENS_MONGO_STORAGE_URL=mongodb://127.0.0.1:27017
+      - TIMEOUT=2
+      # - ATHENS_STORAGE_TYPE=mongo
+      - ATHENS_STORAGE_TYPE=memory
+    ports:
+      - 3000:3000
+    depends_on:
+      - mongo
+    networks:
+      - mongo
   mongo:
     image: mongo:3.7.9-jessie
     ports:
       - 27017:27017
+    networks:
+      - mongo
   minio:
     image: minio/minio:latest
     command: server /data
@@ -33,3 +50,7 @@ services:
       - 6832:6832/udp
       - 5778:5778
       - 16686:16686
+networks:
+  mongo:
+    driver: bridge
+    internal: true
