@@ -28,4 +28,4 @@ ENV GO_ENV=production
 
 EXPOSE 3000
 
-CMD ["athens-proxy", "config_file=/config/config.toml"]
+CMD ["athens-proxy", "-config_file=/config/config.toml"]
