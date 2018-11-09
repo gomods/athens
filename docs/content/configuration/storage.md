@@ -32,8 +32,7 @@ This storage don't need any specific configuration and it's also used by default
     
 ## Disk
 
-This storage type is the same as memory but allows to set location of root folder where data should be stored. 
-To properly configure it you need to include in config file:
+Disk storage allows modules to be stored on a file system. The location on disk where modules will be stored can be configured.
 
 ##### config:
 
