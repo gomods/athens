@@ -40,3 +40,10 @@ func (l *Logger) WithFields(fields map[string]interface{}) Entry {
 
 	return &entry{e}
 }
+
+// NoOpLogger provides a Logger that does nothing
+func NoOpLogger() *Logger {
+	return &Logger{
+		Logger: &logrus.Logger{},
+	}
+}
