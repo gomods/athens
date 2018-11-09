@@ -15,15 +15,9 @@ On this site, we document Athens in detail. We'll teach you what it does, why it
 
 Athens provides a server for [Go Modules](https://github.com/golang/go/wiki/Modules) that you can run. It serves public code and your private code for you, so you don't have to pull directly from a version control system (VCS) like GitHub or GitLab.
 
-#### Why Does it Matter?
+#### Why does it matter? 
 
-Previously, the Go community has had lots of problems with libraries disappearing or changing without warning. It's easy for package maintainers to make changes to their code that can break yours - and much of the time it's an accident! Could your build break if one of your dependencies did this?
-
-- Commit `abdef` was deleted
-- Tag `v0.1.0` was force pushed
-- The repository was deleted altogether
-
- Since your app's dependencies come directly from GitHub, any of those above cases can happen to you and your builds can break when they do - oh no! Athens solves these problems by copying code from VCS's into _immutable_ storage.
+There are many reasons why you'd want a proxy server such as security and performance. [Take a look](/intro/why) at a few of them
 
 #### How Do I Use It?
 
