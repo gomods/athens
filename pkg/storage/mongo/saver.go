@@ -3,6 +3,7 @@ package mongo
 import (
 	"context"
 	"io"
+	"fmt"
 
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/observ"
