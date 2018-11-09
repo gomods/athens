@@ -8,7 +8,9 @@ WORKDIR $GOPATH/src/github.com/gomods/athens
 
 COPY . .
 
-RUN ./scripts/build.sh
+ARG VERSION="Not Specified"
+
+RUN GO111MODULE=on CGO_ENABLED=0 go build -mod=vendor -ldflags "-X github.com/gomods/athens/pkg/build.version=$VERSION -X github.com/gomods/athens/pkg/build.buildDate=$(date -u +%Y-%m-%d-%H:%M:%S-%Z)" -o /bin/athens-proxy ./cmd/proxy
 
 FROM alpine
 
@@ -26,4 +28,4 @@ ENV GO_ENV=production
 
 EXPOSE 3000
 
-CMD ["athens-proxy", "-config_file=/config/config.toml"]
+CMD ["athens-proxy", "-version"]
