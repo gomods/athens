@@ -11,7 +11,7 @@ import (
 
 type XML struct {
 	URL     string
-	handler *handler
+	handler *Handler
 	Headers map[string]string
 }
 

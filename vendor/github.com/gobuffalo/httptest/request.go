@@ -15,7 +15,7 @@ import (
 
 type Request struct {
 	URL      string
-	handler  *handler
+	handler  *Handler
 	Headers  map[string]string
 	Username string
 	Password string

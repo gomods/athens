@@ -25,14 +25,14 @@ type encodable interface {
 	Encode() string
 }
 
-type handler struct {
+type Handler struct {
 	http.Handler
 	Cookies    string
 	Headers    map[string]string
 	HmaxSecret string
 }
 
-func (w *handler) HTML(u string, args ...interface{}) *Request {
+func (w *Handler) HTML(u string, args ...interface{}) *Request {
 	hs := map[string]string{}
 	for key, val := range w.Headers {
 		hs[key] = val
@@ -44,12 +44,12 @@ func (w *handler) HTML(u string, args ...interface{}) *Request {
 	}
 }
 
-func (w *handler) JSON(u string, args ...interface{}) *JSON {
+func (w *Handler) JSON(u string, args ...interface{}) *JSON {
 	hs := map[string]string{}
 	for key, val := range w.Headers {
 		hs[key] = val
 	}
-	hs["Content-Type"] = "application/json"
+	hs["Accept"] = "application/json"
 	return &JSON{
 		URL:     fmt.Sprintf(u, args...),
 		handler: w,
@@ -57,12 +57,12 @@ func (w *handler) JSON(u string, args ...interface{}) *JSON {
 	}
 }
 
-func (w *handler) XML(u string, args ...interface{}) *XML {
+func (w *Handler) XML(u string, args ...interface{}) *XML {
 	hs := map[string]string{}
 	for key, val := range w.Headers {
 		hs[key] = val
 	}
-	hs["Content-Type"] = "application/xml"
+	hs["Accept"] = "application/xml"
 	return &XML{
 		URL:     fmt.Sprintf(u, args...),
 		handler: w,
@@ -70,8 +70,8 @@ func (w *handler) XML(u string, args ...interface{}) *XML {
 	}
 }
 
-func New(h http.Handler) *handler {
-	return &handler{
+func New(h http.Handler) *Handler {
+	return &Handler{
 		Handler: h,
 		Headers: map[string]string{},
 	}
