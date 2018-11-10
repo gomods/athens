@@ -39,7 +39,7 @@ docker: proxy-docker
 
 .PHONY: proxy-docker
 proxy-docker:
-	docker build -t gomods/proxy -f cmd/proxy/Dockerfile .
+	docker build --build-arg VERSION=itWorks -t gomods/proxy -f cmd/proxy/Dockerfile .
 
 .PHONY: docker-push
 docker-push: docker

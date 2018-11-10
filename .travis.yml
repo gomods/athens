@@ -27,7 +27,7 @@ before_script:
   - chmod +x minio && nohup ./minio server --address ":9001" . &
 
 script:
-  - make verify test-unit test-e2e
+  - make proxy-docker verify test-unit test-e2e
 
 after_success:
   - if [ "${CODE_COV}" == "1" ]; then
