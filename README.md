@@ -37,6 +37,11 @@ Speaking of contributing, read on!
 
 # Contributing
 
+|<img src="docs/static/meeting-icon.svg" alt="Developer Meetings" width="20" height="20" />Developer Meetings|
+|------------------|
+|We hold weekly developer meetings on a Thursday, to join them, watch previous meeting recordings or find more information, please see [the docs](https://docs.gomods.io/contributing/community/developer-meetings/). Absolutely everyone is invited to attend these, suggest topics, and participate!|
+</br>
+
 This project is early and there's plenty of interesting and challenging work to do.
 
 If you find a bug or want to fix a bug, we :heart: PRs and issues! If you see an issue
