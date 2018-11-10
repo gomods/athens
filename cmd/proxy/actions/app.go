@@ -8,7 +8,7 @@ import (
 	"github.com/gobuffalo/buffalo/render"
 	forcessl "github.com/gobuffalo/mw-forcessl"
 	paramlogger "github.com/gobuffalo/mw-paramlogger"
-	"github.com/gobuffalo/x/sessions"
+	sessions "github.com/gobuffalo/x/sessions"
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/log"
 	mw "github.com/gomods/athens/pkg/middleware"
