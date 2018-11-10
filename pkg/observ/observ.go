@@ -34,7 +34,7 @@ func RegisterExporter(traceExporter, URL, service, ENV string) (func(), error) {
 	case "stackdriver":
 		return registerStackdriverExporter(URL, ENV)
 	case "appinsights":
-		return registerAppInsightsExporter(URL, ENV)
+		return registerAppInsightsExporter(URL, service, ENV)
 	case "":
 		return nil, errors.E(op, "Exporter not specified. Traces won't be exported")
 	default:
@@ -98,7 +98,7 @@ func registerStackdriverExporter(projectID, ENV string) (func(), error) {
 	return ex.Flush, nil
 }
 
-func registerAppInsightsExporter(svcName, endpoint, ENV string) (func(), error) {
+func registerAppInsightsExporter(endpoint, svcName, ENV string) (func(), error) {
 	const op errors.Op = "registerAppInsightsExporter"
 	ex, err := ocagent.NewExporter(
 		ocagent.WithInsecure(),
