@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"contrib.go.opencensus.io/exporter/stackdriver"
+	"contrib.go.opencensus.io/exporter/ocagent"
 	datadog "github.com/DataDog/opencensus-go-exporter-datadog"
 	"github.com/gobuffalo/buffalo"
 	"github.com/gomods/athens/pkg/errors"
@@ -32,6 +33,8 @@ func RegisterExporter(traceExporter, URL, service, ENV string) (func(), error) {
 		return registerDatadogExporter(URL, service, ENV)
 	case "stackdriver":
 		return registerStackdriverExporter(URL, ENV)
+	case "appinsights":
+		return registerAppInsightsExporter(URL, ENV)
 	case "":
 		return nil, errors.E(op, "Exporter not specified. Traces won't be exported")
 	default:
@@ -92,6 +95,20 @@ func registerStackdriverExporter(projectID, ENV string) (func(), error) {
 		return nil, errors.E(op, err)
 	}
 	traceRegisterExporter(ex, ENV)
+	return ex.Flush, nil
+}
+
+func registerAppInsightsExporter(svcName, endpoint, ENV string) (func(), error) {
+	const op errors.Op = "registerAppInsightsExporter"
+	ex, err := ocagent.NewExporter(
+		ocagent.WithInsecure(),
+		ocagent.WithServiceName(svcName),
+		ocagent.WithAddress(endpoint),
+	)
+	traceRegisterExporter(ex, ENV)
+	if err != nil {
+		return nil, errors.E(op, err)
+	}
 	return ex.Flush, nil
 }
 

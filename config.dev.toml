@@ -125,7 +125,7 @@ HGRCPath = ""
 TraceExporterURL = ""
 
 # TraceExporter is the service to which the data collected by OpenCensus can be exported to.
-# Possible values are: jaeger, datadog, and stackdriver.
+# Possible values are: jaeger, datadog, stackdriver and appinsights.
 # Env overide: ATHENS_TRACE_EXPORTER
 TraceExporter = ""
 
