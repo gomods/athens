@@ -15,7 +15,7 @@ func (s *Storage) Save(ctx context.Context, module, version string, mod []byte, 
 	const op errors.Op = "azureblob.Save"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
-	
+
 	err := moduploader.Upload(ctx, module, version, bytes.NewReader(info), bytes.NewReader(mod), zip, s.cl.UploadWithContext, s.cdnConf.TimeoutDuration())
 	// TODO: take out lease on the /list file and add the version to it
 	//

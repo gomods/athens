@@ -15,7 +15,7 @@ require (
 	github.com/globalsign/mgo v0.0.0-20180828104044-6f9f54af1356
 	github.com/go-playground/locales v0.12.1 // indirect
 	github.com/go-playground/universal-translator v0.16.0 // indirect
-	github.com/gobuffalo/buffalo v0.13.3
+	github.com/gobuffalo/buffalo v0.13.4
 	github.com/gobuffalo/envy v1.6.7
 	github.com/gobuffalo/mw-forcessl v0.0.0-20180802152810-73921ae7a130
 	github.com/gobuffalo/mw-paramlogger v0.0.0-20181005191442-d6ee392ec72e
@@ -49,8 +49,9 @@ require (
 	github.com/unrolled/secure v0.0.0-20181022170031-4b6b7cf51606
 	go.opencensus.io v0.17.0
 	golang.org/x/sync v0.0.0-20180314180146-1d60e4601c6f
-	golang.org/x/tools v0.0.0-20181102223251-96e9e165b75e // indirect
+	golang.org/x/sys v0.0.0-20181031143558-9b800f95dbbc // indirect
 	google.golang.org/api v0.0.0-20180910000450-7ca32eb868bf
+	google.golang.org/appengine v1.3.0 // indirect
 	gopkg.in/DataDog/dd-trace-go.v1 v1.3.0 // indirect
 	gopkg.in/go-playground/assert.v1 v1.2.1 // indirect
 	gopkg.in/go-playground/validator.v9 v9.20.2

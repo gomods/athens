@@ -36,10 +36,12 @@ func (s *Storage) Info(ctx context.Context, module string, version string) ([]by
 	return infoBytes, nil
 }
 
+// GoMod implements the (./pkg/storage).Getter interface
 func (s *Storage) GoMod(ctx context.Context, module string, vsn string) ([]byte, error) {
 	panic("not implemented")
 }
 
+// Zip implements the (./pkg/storage).Getter interface
 func (s *Storage) Zip(ctx context.Context, module string, vsn string) (io.ReadCloser, error) {
 	panic("not implemented")
 }
