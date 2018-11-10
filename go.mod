@@ -27,10 +27,8 @@ require (
 	github.com/hashicorp/go-multierror v1.0.0
 	github.com/jtolds/gls v4.2.1+incompatible // indirect
 	github.com/kelseyhightower/envconfig v1.3.0
-	github.com/kr/pty v1.1.3 // indirect
 	github.com/markbates/goth v1.46.0
 	github.com/markbates/grift v1.0.4
-	github.com/markbates/willie v1.0.9
 	github.com/minio/minio-go v6.0.5+incompatible
 	github.com/mitchellh/go-homedir v1.0.0
 	github.com/philhofer/fwd v1.0.0 // indirect
