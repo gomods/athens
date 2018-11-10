@@ -44,7 +44,7 @@ BuffaloLogLevel = "debug"
 # Env override: ATHENS_CLOUD_RUNTIME
 CloudRuntime = "none"
 
-# The filename for the include exclude filter. Defaults to 'filter.conf'
+# The filename for the include exclude filter.
 # Env override: ATHENS_FILTER_FILE
 FilterFile = ""
 
@@ -54,81 +54,80 @@ FilterFile = ""
 # Env override: ATHENS_TIMEOUT
 Timeout = 300
 
-[Proxy]
-    # StorageType sets the type of storage backend the proxy will use.
-    # Possible values are memory, disk, mongo, gcp, minio, s3
-    # Defaults to memory
-    # Env override: ATHENS_STORAGE_TYPE
-    StorageType = "memory"
+# StorageType sets the type of storage backend the proxy will use.
+# Possible values are memory, disk, mongo, gcp, minio, s3
+# Defaults to memory
+# Env override: ATHENS_STORAGE_TYPE
+StorageType = "memory"
 
-    # Port sets the port the proxy listens on
-    # Env override: PORT
-    Port = ":3000"
+# Port sets the port the proxy listens on
+# Env override: PORT
+Port = ":3000"
 
-    # The endpoint for a package registry in case of a proxy cache miss
-    # NOTE: Currently no registries have been implemented
-    # Env override: ATHENS_GLOBAL_ENDPOINT
-    GlobalEndpoint = "http://localhost:3001"
+# The endpoint for a package registry in case of a proxy cache miss
+# NOTE: Currently no registries have been implemented
+# Env override: ATHENS_GLOBAL_ENDPOINT
+GlobalEndpoint = "http://localhost:3001"
 
-    # Username for basic auth
-    # Env override: BASIC_AUTH_USER
-    BasicAuthUser = ""
+# Username for basic auth
+# Env override: BASIC_AUTH_USER
+BasicAuthUser = ""
 
-    # Password for basic auth
-    # Env override: BASIC_AUTH_PASS
-    BasicAuthPass = ""
+# Password for basic auth
+# Env override: BASIC_AUTH_PASS
+BasicAuthPass = ""
 
-    # Set to true to force an SSL redirect
-    # Env override: PROXY_FORCE_SSL
-    ForceSSL = false
+# Set to true to force an SSL redirect
+# Env override: PROXY_FORCE_SSL
+ForceSSL = false
 
-    # ValidatorHook specifies the endpoint to validate modules against
-    # Not used if left blank or not specified
-    # Env override: ATHENS_PROXY_VALIDATOR
-    ValidatorHook = ""
+# ValidatorHook specifies the endpoint to validate modules against
+# Not used if left blank or not specified
+# Env override: ATHENS_PROXY_VALIDATOR
+ValidatorHook = ""
 
-    # PathPrefix specifies whether the Proxy
-    # should have a basepath. Certain proxies and services
-    # are distinguished based on subdomain, while others are based
-    # on path prefixes.
-    # Env override: ATHENS_PATH_PREFIX
-    PathPrefix = ""
+# PathPrefix specifies whether the Proxy
+# should have a basepath. Certain proxies and services
+# are distinguished based on subdomain, while others are based
+# on path prefixes.
+# Env override: ATHENS_PATH_PREFIX
+PathPrefix = ""
 
-    # NETRCPath tells you where the .netrc path initially resides.
-    # This is so that you can mount the .netrc file to a secret location
-    # in the fs system and then move it ~/.netrc. In certain deployments
-    # like Kubernetes, we can't mount directly to ~ because it would then
-    # clean out whatever is already there as part of the image (such as
-    # .cache directory in the Go image).
-    # Env override: ATHENS_NETRC_PATH
-    NETRCPath = ""
+# NETRCPath tells you where the .netrc path initially resides.
+# This is so that you can mount the .netrc file to a secret location
+# in the fs system and then move it ~/.netrc. In certain deployments
+# like Kubernetes, we can't mount directly to ~ because it would then
+# clean out whatever is already there as part of the image (such as
+# .cache directory in the Go image).
+# Env override: ATHENS_NETRC_PATH
+NETRCPath = ""
 
-    # GithubToken can be used instead of a NETRCPath to authenticate
-    # the proxy to your own private repos on github. This makes it
-    # easier for users and for platforms like GAE to only be provided
-    # a Github token instead of a .netrc file. Internally, the proxy
-    # just create a .netrc file for you.
-    # Env override: ATHENS_GITHUB_TOKEN
-    GithubToken = ""
+# GithubToken can be used instead of a NETRCPath to authenticate
+# the proxy to your own private repos on github. This makes it
+# easier for users and for platforms like GAE to only be provided
+# a Github token instead of a .netrc file. Internally, the proxy
+# just create a .netrc file for you.
+# Env override: ATHENS_GITHUB_TOKEN
+GithubToken = ""
 
-    # HGRCPath tells you where the .hgrc path initially resides.
-    # This is so that you can mount the .hgrc file to a secret location
-    # in the fs system and then move it ~/.hgrc. In certain deployments
-    # like Kubernetes, we can't mount directly to ~ because it would then
-    # clean out whatever is already there as part of the image (such as
-    # .cache directory in the Go image).
-    # Env override: ATHENS_HGRC_PATH
-    HGRCPath = ""
+# HGRCPath tells you where the .hgrc path initially resides.
+# This is so that you can mount the .hgrc file to a secret location
+# in the fs system and then move it ~/.hgrc. In certain deployments
+# like Kubernetes, we can't mount directly to ~ because it would then
+# clean out whatever is already there as part of the image (such as
+# .cache directory in the Go image).
+# Env override: ATHENS_HGRC_PATH
+HGRCPath = ""
 
-    # TraceExporterURL is the URL to which Athens populates distributed tracing
-    # information such as Jaeger. In Stackdriver, use this as the GCP ProjectID.
-    # Env override: ATHENS_TRACE_EXPORTER_URL
-    TraceExporterURL = ""
+# TraceExporterURL is the URL to which Athens populates distributed tracing
+# information such as Jaeger. In Stackdriver, use this as the GCP ProjectID.
+# Env override: ATHENS_TRACE_EXPORTER_URL
+TraceExporterURL = ""
 
-    # TraceExporter is the service to which the data collected by OpenCensus can be exported to.
-    # Possible values are: jaeger, datadog, and stackdriver.
-    # Env overide: ATHENS_TRACE_EXPORTER
-    TraceExporter = ""
+# TraceExporter is the service to which the data collected by OpenCensus can be exported to.
+# Possible values are: jaeger, datadog, and stackdriver.
+# Env overide: ATHENS_TRACE_EXPORTER
+TraceExporter = ""
 
 [Storage]
     # Only storage backends that are specified in Proxy.StorageType are required here
@@ -185,6 +184,10 @@ Timeout = 300
         # Defaults to gomods
         # Env override: ATHENS_MINIO_BUCKET_NAME
         Bucket = "gomods"
+
+        # Region for Minio storage
+        # Env override: ATHENS_MINIO_REGION
+        Region = ""
 
     [Storage.Mongo]
         # Full URL for mongo storage

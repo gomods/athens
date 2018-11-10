@@ -33,28 +33,28 @@ func App(conf *config.Config) (*buffalo.App, error) {
 	// ENV is used to help switch settings based on where the
 	// application is being run. Default is "development".
 	ENV := conf.GoEnv
-	store, err := GetStorage(conf.Proxy.StorageType, conf.Storage)
+	store, err := GetStorage(conf.StorageType, conf.Storage)
 	if err != nil {
 		err = fmt.Errorf("error getting storage configuration (%s)", err)
 		return nil, err
 	}
 
-	if conf.Proxy.GithubToken != "" {
-		if conf.Proxy.NETRCPath != "" {
+	if conf.GithubToken != "" {
+		if conf.NETRCPath != "" {
 			fmt.Println("Cannot provide both GithubToken and NETRCPath. Only provide one.")
 			os.Exit(1)
 		}
 
-		netrcFromToken(conf.Proxy.GithubToken)
+		netrcFromToken(conf.GithubToken)
 	}
 
 	// mount .netrc to home dir
 	// to have access to private repos.
-	initializeAuthFile(conf.Proxy.NETRCPath)
+	initializeAuthFile(conf.NETRCPath)
 
 	// mount .hgrc to home dir
 	// to have access to private repos.
-	initializeAuthFile(conf.Proxy.HGRCPath)
+	initializeAuthFile(conf.HGRCPath)
 
 	logLvl, err := logrus.ParseLevel(conf.LogLevel)
 	if err != nil {
@@ -75,11 +75,14 @@ func App(conf *config.Config) (*buffalo.App, error) {
 		},
 		SessionName: "_athens_session",
 		Logger:      blggr,
-		Addr:        conf.Proxy.Port,
+		Addr:        conf.Port,
 		WorkerOff:   true,
-		Host:        "http://127.0.0.1" + conf.Proxy.Port,
+		Host:        "http://127.0.0.1" + conf.Port,
 	})
-	if prefix := conf.Proxy.PathPrefix; prefix != "" {
+
+	app.Use(mw.LogEntryMiddleware(lggr))
+
+	if prefix := conf.PathPrefix; prefix != "" {
 		// certain Ingress Controllers (such as GCP Load Balancer)
 		// can not send custom headers and therefore if the proxy
 		// is running behind a prefix as well as some authentication
@@ -109,7 +112,7 @@ func App(conf *config.Config) (*buffalo.App, error) {
 
 	// Automatically redirect to SSL
 	app.Use(forcessl.Middleware(secure.Options{
-		SSLRedirect:     conf.Proxy.ForceSSL,
+		SSLRedirect:     conf.ForceSSL,
 		SSLProxyHeaders: map[string]string{"X-Forwarded-Proto": "https"},
 	}))
 
@@ -119,22 +122,22 @@ func App(conf *config.Config) (*buffalo.App, error) {
 
 	initializeAuth(app)
 
+	user, pass, ok := conf.BasicAuth()
+	if ok {
+		app.Use(basicAuth(user, pass))
+	}
+
 	if !conf.FilterOff() {
 		mf, err := module.NewFilter(conf.FilterFile)
 		if err != nil {
 			lggr.Fatal(err)
 		}
-		app.Use(mw.NewFilterMiddleware(mf, conf.Proxy.GlobalEndpoint))
+		app.Use(mw.NewFilterMiddleware(mf, conf.GlobalEndpoint))
 	}
 
 	// Having the hook set means we want to use it
-	if vHook := conf.Proxy.ValidatorHook; vHook != "" {
-		app.Use(mw.LogEntryMiddleware(mw.NewValidationMiddleware, lggr, vHook))
-	}
-
-	user, pass, ok := conf.Proxy.BasicAuth()
-	if ok {
-		app.Use(basicAuth(user, pass))
+	if vHook := conf.ValidatorHook; vHook != "" {
+		app.Use(mw.NewValidationMiddleware(vHook))
 	}
 
 	if err := addProxyRoutes(app, store, lggr, conf.GoBinary, conf.GoGetWorkers, conf.ProtocolWorkers); err != nil {

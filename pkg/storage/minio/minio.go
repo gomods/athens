@@ -18,21 +18,22 @@ func (s *storageImpl) versionLocation(module, version string) string {
 	return fmt.Sprintf("%s/%s", module, version)
 }
 
-// NewStorage returns a new ListerSaver implementation that stores
-// everything under rootDir
+// NewStorage returns a connected Minio or DigitalOcean Spaces storage
+// that implements storage.Backend
 func NewStorage(conf *config.MinioConfig) (storage.Backend, error) {
 	const op errors.Op = "minio.NewStorage"
 	endpoint := conf.Endpoint
 	accessKeyID := conf.Key
 	secretAccessKey := conf.Secret
 	bucketName := conf.Bucket
+	region := conf.Region
 	useSSL := conf.EnableSSL
 	minioClient, err := minio.New(endpoint, accessKeyID, secretAccessKey, useSSL)
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
 
-	err = minioClient.MakeBucket(bucketName, "")
+	err = minioClient.MakeBucket(bucketName, region)
 	if err != nil {
 		// Check to see if we already own this bucket
 		exists, err := minioClient.BucketExists(bucketName)

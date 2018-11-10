@@ -13,7 +13,7 @@ import (
 
 // NewValidationMiddleware builds a middleware function that performs validation checks by calling
 // an external webhook
-func NewValidationMiddleware(entry log.Entry, validatorHook string) buffalo.MiddlewareFunc {
+func NewValidationMiddleware(validatorHook string) buffalo.MiddlewareFunc {
 	const op errors.Op = "actions.NewValidationMiddleware"
 
 	return func(next buffalo.Handler) buffalo.Handler {
@@ -32,6 +32,7 @@ func NewValidationMiddleware(entry log.Entry, validatorHook string) buffalo.Midd
 			if version != "" {
 				valid, err := validate(validatorHook, mod, version)
 				if err != nil {
+					entry := log.EntryFromContext(c)
 					entry.SystemErr(err)
 					return c.Render(http.StatusInternalServerError, nil)
 				}

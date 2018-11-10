@@ -12,7 +12,7 @@ A registry is generally run by one entity, is one logical server that provides a
 
 That's most definitely not what we in the Athens community are going for, and that would harm our community if we did go down that path.
 
-First and foremost, Athens is an _implementation_ of the [Go Modules download API](./intro/protocol). Not only does the standard Go toolchain support any implementation of that API, the Athens proxy is designed to talk to any other server that implements that API as well. That allows Athens to talk to other proxies in the community. 
+First and foremost, Athens is an _implementation_ of the [Go Modules download API](/intro/protocol). Not only does the standard Go toolchain support any implementation of that API, the Athens proxy is designed to talk to any other server that implements that API as well. That allows Athens to talk to other proxies in the community. 
 
 Finally, we're purposefully building this project - and working with the toolchain folks - in a way that everyone who wants to write a proxy can participate.
 
@@ -40,8 +40,6 @@ It's virtually impossible to ensure immutable builds when source code comes from
 
 To repeat, "datastore" means a CDN (we currently have support for Google Cloud Storage, Azure Blob Storage and AWS S3) or another datastore (we have support for MongoDB, disk and some others).
 
-One final note - we use "caching" in lots of our docs, and that's technically wrong because no data is evicted or expires. We'll need to update that terminology.
-
 ### Can the Athens proxy authenticate to private repositories?
 
 _TL;DR: yes, with proper authentication configuration defined on the Athens proxy host._
@@ -55,6 +53,15 @@ the meta tags using the standard authentication mechanisms supported by `go`.
 Therefore, if `go` before v1.11 worked for you, then go 1.11+ with GOPROXY
 should work as well, provided that the Athens proxy host is configured with the
 proper authentication.
+
+### Can I exclude a module completely?
+
+Yes, this is possible. The proxy provides a configuration file that will allow users to specify which modules that should not be fetched at all. The [filtering modules configuration](/configuration/filter/) provides details about the configuration file and how to exclude certain modules.
+
+### Can I specify that a module is fetched from an upstream proxy and not stored locally?
+
+Yes, this is possible. Refer to the [filtering modules configuration](/configuration/filter/) provides details about the configuration file and how to exclude certain modules.
+
 
 ### Is there support for monitoring and observability for Proxy?
 
