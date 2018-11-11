@@ -3,6 +3,7 @@ package azureblob
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"io"
 
 	"github.com/gomods/athens/pkg/errors"
@@ -12,7 +13,8 @@ import (
 
 // Save implements the (github.com/gomods/athens/pkg/storage).Saver interface.
 func (s *Storage) Save(ctx context.Context, module, version string, mod []byte, zip io.Reader, info []byte) error {
-	const op errors.Op = "azure.Save"
+	fmt.Printf("Saving %v\n", module)
+	const op errors.Op = "azureblob.Save"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 	err := moduploader.Upload(ctx, module, version, bytes.NewReader(info), bytes.NewReader(mod), zip, s.cl.UploadWithContext, s.conf.TimeoutDuration())

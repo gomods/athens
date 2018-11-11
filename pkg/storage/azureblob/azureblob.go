@@ -53,20 +53,24 @@ func New(conf *config.AzureBlobConfig) (*Storage, error) {
 	return &Storage{cl: cl, conf: conf}, nil
 }
 
+// BlobExists checks if a particular blob exists in the container
 func (c *azureBlobStoreClient) BlobExists(ctx context.Context, path string) (bool, error) {
+	// TODO: Any better way of doing this ?
 	blobURL := c.containerURL.NewBlockBlobURL(path)
 	_, err := blobURL.GetProperties(ctx, azblob.BlobAccessConditions{})
 	if err != nil {
 		serr := err.(azblob.StorageError)
-		if (serr.Response().StatusCode == 404) && (serr.ServiceCode() == azblob.ServiceCodeBlobNotFound) {
+		if serr.Response().StatusCode == 404 {
 			return false, nil
 		}
+
 		return false, err
 	}
 	return true, nil
 
 }
 
+// ReadBlob returns an io.ReadCloser for the contents of a blob
 func (c *azureBlobStoreClient) ReadBlob(ctx context.Context, path string) (io.ReadCloser, error) {
 	blobURL := c.containerURL.NewBlockBlobURL(path)
 	downloadResponse, err := blobURL.Download(ctx, 0, 0, azblob.BlobAccessConditions{}, false)
@@ -76,6 +80,7 @@ func (c *azureBlobStoreClient) ReadBlob(ctx context.Context, path string) (io.Re
 	return downloadResponse.Body(azblob.RetryReaderOptions{}), nil
 }
 
+// UploadWithContext uploads a blob to the container
 func (c *azureBlobStoreClient) UploadWithContext(ctx context.Context, path, contentType string, content io.Reader) error {
 	const op errors.Op = "azure.UploadWithContext"
 	ctx, span := observ.StartSpan(ctx, op.String())

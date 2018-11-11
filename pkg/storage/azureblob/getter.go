@@ -2,6 +2,7 @@ package azureblob
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"io/ioutil"
 
@@ -38,10 +39,16 @@ func (s *Storage) Info(ctx context.Context, module string, version string) ([]by
 
 // GoMod implements the (./pkg/storage).Getter interface
 func (s *Storage) GoMod(ctx context.Context, module string, vsn string) ([]byte, error) {
-	panic("not implemented")
+	const op errors.Op = "azureblob.GoMod"
+	ctx, span := observ.StartSpan(ctx, op.String())
+	defer span.End()
+	return []byte{}, errors.E(op, fmt.Errorf("Not Implemented"), errors.M(module))
 }
 
 // Zip implements the (./pkg/storage).Getter interface
 func (s *Storage) Zip(ctx context.Context, module string, vsn string) (io.ReadCloser, error) {
-	panic("not implemented")
+	const op errors.Op = "azureblob.Zip"
+	ctx, span := observ.StartSpan(ctx, op.String())
+	defer span.End()
+	return nil, errors.E(op, fmt.Errorf("Not Implemented"), errors.M(module))
 }
