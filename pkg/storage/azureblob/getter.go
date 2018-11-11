@@ -66,9 +66,22 @@ func (s *Storage) GoMod(ctx context.Context, module string, version string) ([]b
 }
 
 // Zip implements the (./pkg/storage).Getter interface
-func (s *Storage) Zip(ctx context.Context, module string, vsn string) (io.ReadCloser, error) {
+func (s *Storage) Zip(ctx context.Context, module string, version string) (io.ReadCloser, error) {
 	const op errors.Op = "azureblob.Zip"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
-	return nil, errors.E(op, fmt.Errorf("Not Implemented"), errors.M(module))
+	exists, err := s.Exists(ctx, module, version)
+	if err != nil {
+		return nil, errors.E(op, err, errors.M(module), errors.V(version))
+	}
+	if !exists {
+		return nil, errors.E(op, errors.M(module), errors.V(version), errors.KindNotFound)
+	}
+
+	zipReader, err := s.cl.ReadBlob(ctx, config.PackageVersionedName(module, version, "zip"))
+	if err != nil {
+		return nil, errors.E(op, err, errors.M(module), errors.V(version))
+	}
+
+	return zipReader, nil
 }
