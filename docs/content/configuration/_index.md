@@ -1,7 +1,6 @@
 ---
 title: "Configuring Athens"
 date: 2018-10-16T12:14:01-07:00
-chapter: true
 weight: 3
 ---
 
