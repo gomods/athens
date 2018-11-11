@@ -38,11 +38,31 @@ func (s *Storage) Info(ctx context.Context, module string, version string) ([]by
 }
 
 // GoMod implements the (./pkg/storage).Getter interface
-func (s *Storage) GoMod(ctx context.Context, module string, vsn string) ([]byte, error) {
+func (s *Storage) GoMod(ctx context.Context, module string, version string) ([]byte, error) {
 	const op errors.Op = "azureblob.GoMod"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
-	return []byte{}, errors.E(op, fmt.Errorf("Not Implemented"), errors.M(module))
+
+	exists, err := s.Exists(ctx, module, version)
+	if err != nil {
+		return nil, errors.E(op, err, errors.M(module), errors.V(version))
+	}
+	if !exists {
+		return nil, errors.E(op, errors.M(module), errors.V(version), errors.KindNotFound)
+	}
+
+	modReader, err := s.cl.ReadBlob(ctx, config.PackageVersionedName(module, version, "mod"))
+	if err != nil {
+		return nil, errors.E(op, err, errors.M(module), errors.V(version))
+	}
+	defer modReader.Close()
+
+	modBytes, err := ioutil.ReadAll(modReader)
+	if err != nil {
+		return nil, errors.E(op, fmt.Errorf("could not get new reader for mod file: %s", err), errors.M(module), errors.V(version))
+	}
+
+	return modBytes, nil
 }
 
 // Zip implements the (./pkg/storage).Getter interface
