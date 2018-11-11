@@ -8,7 +8,7 @@ WORKDIR $GOPATH/src/github.com/gomods/athens
 
 COPY . .
 
-ARG VERSION="Not Specified"
+ARG VERSION="unset"
 
 RUN DATE="$(date -u +%Y-%m-%d-%H:%M:%S-%Z)" && GO111MODULE=on CGO_ENABLED=0 go build -mod=vendor -ldflags "-X github.com/gomods/athens/pkg/build.version=$VERSION -X github.com/gomods/athens/pkg/build.buildDate=$DATE" -o /bin/athens-proxy ./cmd/proxy
 
