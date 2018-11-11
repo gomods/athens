@@ -327,7 +327,7 @@ func restoreEnv(envVars map[string]string) {
 
 func invalidPerm() os.FileMode {
 	if runtime.GOOS == "windows" {
-		return 02
+		return 0600
 	}
 	return 0777
 }
