@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime"
 
 	"github.com/BurntSushi/toml"
 	"github.com/gomods/athens/pkg/errors"
@@ -143,9 +144,17 @@ func checkFilePerms(files ...string) error {
 			continue
 		}
 
-		if fInfo.Mode() != 0600 {
-			return errors.E(op, f+" should have 0600 as permission")
+		if runtime.GOOS == "windows" {
+			if fInfo.Mode() != 0600 {
+				return errors.E(op, f+" should have 0600 as permission")
+			}
+		} else {
+			// Assume unix based system (MacOS and Linux)
+			if fInfo.Mode() != 0600 {
+				return errors.E(op, f+" should have 0600 as permission")
+			}
 		}
+
 	}
 
 	return nil
