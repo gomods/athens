@@ -1,7 +1,7 @@
 version: '3'
 services:
   mongo:
-    image: 4.1.5-windowsservercore
+    image: mongo:4.1.5-windowsservercore
     ports:
       - 27017:27017
   minio:
