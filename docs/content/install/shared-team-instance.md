@@ -189,5 +189,5 @@ Notice that the timestamps given have not changed.
 
 Next Steps:
 
-* Run the Athens Proxy on Kubernetes with Helm. [Coming Soon]
-* Explore best practices for running Athens in Production. [Coming Soon/Help Wanted](https://github.com/gomods/athens/issues/531)
+* [Run the Athens Proxy on Kubernetes with Helm](/install/install-on-kubernetes)
+* Explore best practices for running Athens in Production. [Coming Soon](https://github.com/gomods/athens/issues/531)
