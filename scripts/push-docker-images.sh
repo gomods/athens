@@ -18,11 +18,11 @@ else
     BRANCH=${BRANCH:-$(git symbolic-ref -q --short HEAD || echo "")}
 fi
 
-# MUTABLE_TAG is the docker image tag that we will reuse between pushes, it is not a stable tag like a commit hash or tag.
+# MUTABLE_TAG is the docker image tag that we will reuse between pushes, it is not an immutable tag like a commit hash or tag.
 if [[ "${MUTABLE_TAG:-}" == "" ]]; then
     # tagged builds
     if [[ "$VERSION" =~ ^v[0-9]+\.[0-9]+\.[0-9]+ ]]; then
-        MUTABLE_TAG="stable"
+        MUTABLE_TAG="latest"
     # master build
     elif [[ "$BRANCH" == "master" ]]; then
         MUTABLE_TAG="canary"
