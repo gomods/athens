@@ -15,7 +15,7 @@ const (
 
 func (v *storageImpl) Exists(ctx context.Context, module, version string) (bool, error) {
 	const op errors.Op = "minio.Exists"
-	ctx, span := observ.StartSpan(ctx, op.String())
+	_, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 	versionedPath := v.versionLocation(module, version)
 	modPath := fmt.Sprintf("%s/go.mod", versionedPath)
