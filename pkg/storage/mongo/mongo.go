@@ -32,9 +32,9 @@ func NewStorage(conf *config.MongoConfig, timeout time.Duration) (*ModuleStore, 
 	if conf == nil {
 		return nil, errors.E(op, "No Mongo Configuration provided")
 	}
-	ms := &ModuleStore{url: conf.URL, certPath: conf.CertPath, timeout: timeout}
+	ms := &ModuleStore{url: conf.URL, certPath: conf.CertPath, timeout: conf.TimeoutDuration()}
 
-	err := ms.connect()
+	err := ms.connect(conf)
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
@@ -42,11 +42,12 @@ func NewStorage(conf *config.MongoConfig, timeout time.Duration) (*ModuleStore, 
 	return ms, nil
 }
 
-func (m *ModuleStore) connect() error {
+func (m *ModuleStore) connect(conf *config.MongoConfig) error {
 	const op errors.Op = "mongo.connect"
 
 	var err error
-	m.s, err = m.newSession(m.timeout, m.insecure)
+	m.s, err = m.newSession(m.timeout, m.insecure, conf)
+
 	if err != nil {
 		return errors.E(op, err)
 	}
@@ -55,8 +56,6 @@ func (m *ModuleStore) connect() error {
 }
 
 func (m *ModuleStore) initDatabase() error {
-	// TODO: database and collection as env vars, or params to New()? together with user/mongo
-	m.d = "athens"
 	m.c = "modules"
 
 	index := mgo.Index{
@@ -69,7 +68,7 @@ func (m *ModuleStore) initDatabase() error {
 	return c.EnsureIndex(index)
 }
 
-func (m *ModuleStore) newSession(timeout time.Duration, insecure bool) (*mgo.Session, error) {
+func (m *ModuleStore) newSession(timeout time.Duration, insecure bool, conf *config.MongoConfig) (*mgo.Session, error) {
 	tlsConfig := &tls.Config{}
 
 	dialInfo, err := mgo.ParseURL(m.url)
@@ -78,6 +77,12 @@ func (m *ModuleStore) newSession(timeout time.Duration, insecure bool) (*mgo.Ses
 	}
 
 	dialInfo.Timeout = timeout
+
+	if dialInfo.Database != "" {
+		m.d = dialInfo.Database
+	} else {
+		m.d = conf.DefaultDBName
+	}
 
 	if m.certPath != "" {
 		// Sets only when the env var is setup in config.dev.toml

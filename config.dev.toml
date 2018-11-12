@@ -181,9 +181,13 @@ TraceExporterURL = "http://localhost:14268"
         Region = ""
 
     [Storage.Mongo]
-        # Full URL for mongo storage
+        # Full connection string for mongo storage
         # Env override: ATHENS_MONGO_STORAGE_URL
         URL = "mongodb://127.0.0.1:27017"
+
+        # Sets default database name for mongo storage if not set by URL
+        # Env override: ATHENS_MONGO_DEFAULT_DATABASE
+        DefaultDBName = "athens"
 
         # Path to certificate to use for the mongo connection
         # Env override: ATHENS_MONGO_CERT_PATH
