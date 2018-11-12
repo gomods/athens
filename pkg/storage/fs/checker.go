@@ -11,7 +11,7 @@ import (
 
 func (v *storageImpl) Exists(ctx context.Context, module, version string) (bool, error) {
 	const op errors.Op = "fs.Exists"
-	ctx, span := observ.StartSpan(ctx, op.String())
+	_, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 	versionedPath := v.versionLocation(module, version)
 	exists, err := afero.Exists(v.filesystem, filepath.Join(versionedPath, "go.mod"))
