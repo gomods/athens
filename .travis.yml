@@ -27,7 +27,7 @@ before_script:
   - chmod +x minio && nohup ./minio server --address ":9001" . &
 
 script:
-  - make verify test-unit test-e2e
+  - make verify test-unit test-e2e docker
 
 after_success:
   - if [ "${CODE_COV}" == "1" ]; then
@@ -50,6 +50,6 @@ deploy:
     script: curl -sL https://git.io/goreleaser | bash
     on:
       repo: gomods/athens
-      tags: true 
+      tags: true
       condition: $GORELEASER_ON = 1
       condition: $GO111MODULE = on
