@@ -34,10 +34,10 @@ fi
 
 REPO_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." >/dev/null && pwd )/"
 
-docker build --build-arg VERSION=${VERSION} -t ${REGISTRY}proxy:${VERSION} -f ${REPO_DIR}cmd/proxy/Dockerfile ${REPO_DIR}
+docker build --build-arg VERSION=${VERSION} -t ${REGISTRY}athens:${VERSION} -f ${REPO_DIR}cmd/proxy/Dockerfile ${REPO_DIR}
 
 # Apply the mutable tag to the immutable version
-docker tag ${REGISTRY}proxy:${VERSION} ${REGISTRY}proxy:${MUTABLE_TAG}
+docker tag ${REGISTRY}athens:${VERSION} ${REGISTRY}athens:${MUTABLE_TAG}
 
-docker push ${REGISTRY}proxy:${VERSION}
-docker push ${REGISTRY}proxy:${MUTABLE_TAG}
+docker push ${REGISTRY}athens:${VERSION}
+docker push ${REGISTRY}athens:${MUTABLE_TAG}
