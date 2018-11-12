@@ -23,7 +23,8 @@ steps:
 
 - powershell: |
     docker-compose -f docker-compose.win.yml -p athensdev up -d mongo
-    docker-compose -f docker-compose.win.yml -p athensdev up -d minio
+    Invoke-WebRequest -Uri "https://dl.minio.io/server/minio/release/windows-amd64/minio.exe" -OutFile "minio.exe"
+    Start-Process -NoNewWindow minio.exe server --address ":9001" .
     go build -mod=vendor ./cmd/proxy
     go test -mod=vendor -race ./...
   env:
