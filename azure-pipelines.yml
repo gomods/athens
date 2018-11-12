@@ -22,8 +22,8 @@ steps:
   displayName: 'Set up the Go workspace'
 
 - powershell: |
-    docker-compose -p athensdev up -d mongo
-    docker-compose -p athensdev up -d minio
+    docker-compose -f docker-compose.win.yml -p athensdev up -d mongo
+    docker-compose -f docker-compose.win.yml -p athensdev up -d minio
     go build -mod=vendor ./cmd/proxy
     go test -mod=vendor -race ./...
   env:

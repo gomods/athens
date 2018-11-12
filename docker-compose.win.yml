@@ -1,0 +1,39 @@
+version: '3'
+services:
+  mongo:
+    image: mongo:3.7.9-jessie
+    ports:
+      - 27017:27017
+  minio:
+    image: minio/minio:latest
+    command: server /data
+    ports:
+      - "9001:9000"
+    environment:
+      MINIO_ACCESS_KEY: minio
+      MINIO_SECRET_KEY: minio123
+  datadog:
+    environment:
+      - DD_API_KEY=
+      - DD_LOG_LEVEL=trace
+      - DD_APM_ENABLED=true
+    image:
+      datadog/agent:latest
+    ports:
+      - 8126:8126
+  jaeger:
+    environment:
+      - COLLECTOR_ZIPKIN_HTTP_PORT=9441
+    image: jaegertracing/all-in-one:latest
+    ports:
+      - 14268:14268
+      - 9411:9411
+      - 5775:5775/udp
+      - 6831:6831/udp
+      - 6832:6832/udp
+      - 5778:5778
+      - 16686:16686
+networks:
+  default:
+    external:
+      name: nat
