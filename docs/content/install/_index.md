@@ -17,7 +17,7 @@ We feel that Athens should keep the community federated and open, and nobody sho
 
 To make sure it's easy to install, we try to provide as many ways as possible to install and run Athens:
 
-- It's written in Go, so we provide a self-contained binary. You can configure and run the binary on your machine(s) 
+- It's written in Go, so we provide a self-contained binary. You can configure and run the binary on your machine(s)
     - Instructions on how to run directly from the binary are coming soon
-- We provide a [Docker image](https://hub.docker.com/r/gomods/proxy/) and [instructions on how to run it](./shared-team-instance)
+- We provide a [Docker image](https://hub.docker.com/r/gomods/athens/) and [instructions on how to run it](./shared-team-instance)
 - We provide [Kubernetes](https://kubernetes.io) [Helm Charts](https://helm.sh) with [instructions on how to run Athens on Kubernetes](./install-on-kubernetes)
