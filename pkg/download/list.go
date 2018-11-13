@@ -1,6 +1,7 @@
 package download
 
 import (
+	"context"
 	"net/http"
 	"strings"
 
@@ -9,6 +10,7 @@ import (
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/log"
 	"github.com/gomods/athens/pkg/paths"
+	"github.com/gorilla/mux"
 )
 
 // PathList URL.
@@ -32,4 +34,27 @@ func ListHandler(dp Protocol, lggr log.Entry, eng *render.Engine) buffalo.Handle
 
 		return c.Render(http.StatusOK, eng.String(strings.Join(versions, "\n")))
 	}
+}
+
+// ListHandlerBasic implements GET baseURL/module/@v/list as a basic http.HandlerFunc
+// wrapping it as a buffalo handler
+func ListHandlerBasic(dp Protocol, lggr log.Entry, eng *render.Engine) buffalo.Handler {
+	const op errors.Op = "download.ListHandler"
+	return buffalo.WrapHandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+		mod, err := paths.GetModuleFromMap(mux.Vars(r))
+		if err != nil {
+			lggr.SystemErr(errors.E(op, err))
+			w.WriteHeader(http.StatusInternalServerError)
+		}
+
+		versions, err := dp.List(context.Background(), mod)
+		if err != nil {
+			lggr.SystemErr(errors.E(op, err))
+			w.WriteHeader(errors.Kind(err))
+			w.Write([]byte(errors.KindText(err)))
+		}
+
+		w.Write([]byte(strings.Join(versions, "\n")))
+	})
 }

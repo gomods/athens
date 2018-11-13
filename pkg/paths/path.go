@@ -17,6 +17,18 @@ func GetModule(c buffalo.Context) (string, error) {
 	return DecodePath(module)
 }
 
+// GetModuleFromMap gets a module from the path params, passed as a map
+func GetModuleFromMap(params map[string]string) (string, error) {
+	const op errors.Op = "paths.GetModule"
+
+	module, ok := params["module"]
+	if module == "" || !ok {
+		return "", errors.E(op, "missing module parameter")
+	}
+
+	return DecodePath(module)
+}
+
 // GetVersion gets the version from the path of a ?go-get=1 request
 func GetVersion(c buffalo.Context) (string, error) {
 	const op errors.Op = "paths.GetVersion"

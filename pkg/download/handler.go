@@ -41,7 +41,7 @@ func RegisterHandlers(app *buffalo.App, opts *HandlerOpts) {
 	}
 	noCacheMw := middleware.CacheControl("no-cache, no-store, must-revalidate")
 
-	listHandler := LogEntryHandler(ListHandler, opts)
+	listHandler := LogEntryHandler(ListHandlerBasic, opts)
 	app.GET(PathList, noCacheMw(listHandler))
 
 	latestHandler := LogEntryHandler(LatestHandler, opts)
