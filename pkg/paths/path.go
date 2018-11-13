@@ -1,8 +1,11 @@
 package paths
 
 import (
+	"net/http"
+
 	"github.com/gobuffalo/buffalo"
 	"github.com/gomods/athens/pkg/errors"
+	"github.com/gorilla/mux"
 )
 
 // GetModule gets the module from the path of a ?go-get=1 request
@@ -17,11 +20,11 @@ func GetModule(c buffalo.Context) (string, error) {
 	return DecodePath(module)
 }
 
-// GetModuleFromMap gets a module from the path params, passed as a map
-func GetModuleFromMap(params map[string]string) (string, error) {
+// GetModuleFromRequest gets a module from the path of an http.Request
+func GetModuleFromRequest(r *http.Request) (string, error) {
 	const op errors.Op = "paths.GetModule"
 
-	module, ok := params["module"]
+	module, ok := mux.Vars(r)["module"]
 	if module == "" || !ok {
 		return "", errors.E(op, "missing module parameter")
 	}

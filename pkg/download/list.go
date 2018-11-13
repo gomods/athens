@@ -10,7 +10,6 @@ import (
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/log"
 	"github.com/gomods/athens/pkg/paths"
-	"github.com/gorilla/mux"
 )
 
 // PathList URL.
@@ -42,17 +41,18 @@ func ListHandlerBasic(dp Protocol, lggr log.Entry, eng *render.Engine) buffalo.H
 	const op errors.Op = "download.ListHandler"
 	return buffalo.WrapHandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
-		mod, err := paths.GetModuleFromMap(mux.Vars(r))
+		mod, err := paths.GetModuleFromRequest(r)
 		if err != nil {
 			lggr.SystemErr(errors.E(op, err))
 			w.WriteHeader(http.StatusInternalServerError)
+			return
 		}
 
 		versions, err := dp.List(context.Background(), mod)
 		if err != nil {
 			lggr.SystemErr(errors.E(op, err))
-			w.WriteHeader(errors.Kind(err))
-			w.Write([]byte(errors.KindText(err)))
+			http.Error(w, errors.KindText(err), errors.Kind(err))
+			return
 		}
 
 		w.Write([]byte(strings.Join(versions, "\n")))
