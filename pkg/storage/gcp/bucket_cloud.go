@@ -70,3 +70,25 @@ func (b *gcpBucket) Exists(ctx context.Context, path string) (bool, error) {
 
 	return true, nil
 }
+
+func (b *gcpBucket) Catalog(ctx context.Context, token string, elementNum int) ([]string, string, error) {
+	const op errors.Op = "gcpBucket.Catalog"
+
+	it := b.Objects(ctx, nil)
+	it.PageInfo().Token = token
+	it.PageInfo().MaxSize = elementNum
+
+	res := []string{}
+	for {
+		attrs, err := it.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			return nil, "", errors.E(op, err)
+		}
+		res = append(res, attrs.Name)
+	}
+
+	return res, it.PageInfo().Token, nil
+}
