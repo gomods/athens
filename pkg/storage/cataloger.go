@@ -1,15 +1,14 @@
 package storage
 
-import "context"
+import (
+	"context"
 
-type ModVer struct {
-	Module  string
-	Version string
-}
+	"github.com/gomods/athens/pkg/paths"
+)
 
-// Lister is the interface that lists versions of a specific baseURL & module
+// Cataloger is the interface that lists all the modules and version contained in the storage
 type Cataloger interface {
-	// List gets all the versions for the given baseURL & module.
+	// Catalog gets all the modules / versions.
 	// It returns ErrNotFound if the module isn't found
-	Catalog(ctx context.Context, token string, elements int) ([]ModVer, string, error)
+	Catalog(ctx context.Context, token string, elements int) ([]paths.AllPathParams, string, error)
 }

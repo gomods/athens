@@ -4,23 +4,27 @@ import (
 	"context"
 	"strings"
 
+	"github.com/gomods/athens/pkg/paths"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/observ"
-	"github.com/gomods/athens/pkg/storage"
 )
 
 // Catalog implements the (./pkg/storage).Cataloger interface
 // It returns a list of modules and versions contained in the storage
-func (s *Storage) Catalog(ctx context.Context, token string, elements int) ([]storage.ModVer, string, error) {
+func (s *Storage) Catalog(ctx context.Context, token string, elements int) ([]paths.AllPathParams, string, error) {
 	const op errors.Op = "s3.Catalog"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 
+	maxKeys := int64(elements)
+
 	lsParams := &s3.ListObjectsInput{
-		Bucket: aws.String(s.bucket),
-		Marker: &token,
+		Bucket:  aws.String(s.bucket),
+		Marker:  &token,
+		MaxKeys: &maxKeys,
 	}
 
 	loo, err := s.s3API.ListObjectsWithContext(ctx, lsParams)
@@ -32,9 +36,9 @@ func (s *Storage) Catalog(ctx context.Context, token string, elements int) ([]st
 	return res, resToken, nil
 }
 
-func fetchModsAndVersions(objects []*s3.Object, elementsNum int) ([]storage.ModVer, string) {
+func fetchModsAndVersions(objects []*s3.Object, elementsNum int) ([]paths.AllPathParams, string) {
 	count := 0
-	var res []storage.ModVer
+	var res []paths.AllPathParams
 	var token = ""
 
 	for _, o := range objects {
@@ -47,7 +51,7 @@ func fetchModsAndVersions(objects []*s3.Object, elementsNum int) ([]storage.ModV
 			module := segments[0]
 			last := segments[len(segments)-1]
 			version := strings.TrimSuffix(last, ".info")
-			res = append(res, storage.ModVer{module, version})
+			res = append(res, paths.AllPathParams{module, version})
 			count++
 		}
 

@@ -4,31 +4,32 @@ import (
 	"context"
 	"strings"
 
+	"github.com/gomods/athens/pkg/paths"
+
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/observ"
-	"github.com/gomods/athens/pkg/storage"
 )
 
 // Catalog implements the (./pkg/storage).Catalog interface
 // It returns a list of versions, if any, for a given module
-func (s *Storage) Catalog(ctx context.Context, token string, elements int) ([]storage.ModVer, string, error) {
+func (s *Storage) Catalog(ctx context.Context, token string, elements int) ([]paths.AllPathParams, string, error) {
 	const op errors.Op = "gcp.Catalog"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
-	paths, token, err := s.bucket.Catalog(ctx, token, elements)
+	catalog, token, err := s.bucket.Catalog(ctx, token, elements)
 	if err != nil {
 		return nil, "", errors.E(op, err)
 	}
-	res, resToken := fetchModsAndVersions(paths, elements)
+	res, resToken := fetchModsAndVersions(catalog, elements)
 	return res, resToken, nil
 }
 
-func fetchModsAndVersions(paths []string, elementsNum int) ([]storage.ModVer, string) {
+func fetchModsAndVersions(catalog []string, elementsNum int) ([]paths.AllPathParams, string) {
 	count := 0
-	var res []storage.ModVer
+	var res []paths.AllPathParams
 	var token = ""
 
-	for _, p := range paths {
+	for _, p := range catalog {
 		if strings.HasSuffix(p, ".info") {
 			segments := strings.Split(p, "/")
 
@@ -38,7 +39,7 @@ func fetchModsAndVersions(paths []string, elementsNum int) ([]storage.ModVer, st
 			module := segments[0]
 			last := segments[len(segments)-1]
 			version := strings.TrimSuffix(last, ".info")
-			res = append(res, storage.ModVer{module, version})
+			res = append(res, paths.AllPathParams{module, version})
 			count++
 		}
 

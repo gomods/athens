@@ -4,6 +4,8 @@ import (
 	"context"
 	"io"
 
+	"github.com/gomods/athens/pkg/paths"
+
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/observ"
 	"github.com/gomods/athens/pkg/stash"
@@ -27,6 +29,9 @@ type Protocol interface {
 
 	// Zip implements GET /{module}/@v/{version}.zip
 	Zip(ctx context.Context, mod, ver string) (io.ReadCloser, error)
+
+	// Catalog implements GET /catalog
+	Catalog(ctx context.Context, token string, limit int) ([]paths.AllPathParams, error)
 }
 
 // Wrapper helps extend the main protocol's functionality with addons.
