@@ -64,7 +64,7 @@ if ($build.IsPresent) {
 	finally {
 		Pop-Location
 	}
-	
+
 	finally {
 		Pop-Location
 	}
@@ -76,7 +76,7 @@ if ($run.IsPresent) {
 }
 
 if ($docs.IsPresent) {
-	Set-Location docs 
+	Set-Location docs
 	& hugo
 }
 
@@ -121,12 +121,12 @@ if ($test_e2e.IsPresent) {
 }
 
 if ($docker.IsPresent) {
-	& docker build -t gomods/proxy -f cmd/proxy/Dockerfile .
+	& docker build -t gomods/athens -f cmd/proxy/Dockerfile .
 }
 
 
 if ($proxy_docker.IsPresent) {
-	& docker build -t gomods/proxy -f cmd/proxy/Dockerfile .
+	& docker build -t gomods/athens -f cmd/proxy/Dockerfile .
 }
 
 if ($bench.IsPresent) {
@@ -136,4 +136,3 @@ if ($bench.IsPresent) {
 if ($down.IsPresent) {
 	& docker-compose -p athensdev down -v
 }
-
