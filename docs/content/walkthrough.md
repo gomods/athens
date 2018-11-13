@@ -101,7 +101,7 @@ docker run -d -v $ATHENS_STORAGE:/var/lib/athens \
    --name athens-proxy \
    --restart always \
    -p 3000:3000 \
-   gomods/proxy:latest
+   gomods/athens:latest
 ```
 
 **PowerShell**
@@ -114,7 +114,7 @@ docker run -d -v "$($env:ATHENS-STORAGE):/var/lib/athens" `
    --name athens-proxy `
    --restart always `
    -p 3000:3000 `
-   gomods/proxy:latest
+   gomods/athens:latest
 ```
 
 Next, you will need to enable the [Go Modules](https://github.com/golang/go/wiki/Modules)

@@ -8,12 +8,12 @@ weight: 1
 
 ## SVN private repositories
 
-1. Subversion creates an authentication structure in 
-        
+1. Subversion creates an authentication structure in
+
         ~/.subversion/auth/svn.simple/<hash>
 
 2. In order to properly create the authentication file for your SVN servers you will need to authenticate to them and let svn build out the proper hashed files.
-	
+
 		$ svn list http://<domain:port>/svn/<somerepo>
 		Authentication realm: <http://<domain> Subversion Repository
 		Username: test
@@ -34,7 +34,7 @@ weight: 1
       --name athens-proxy \
       --restart always \
       -p 3000:3000 \
-      gomods/proxy:latest
+      gomods/athens:latest
     ```
 
     **PowerShell**
@@ -50,7 +50,7 @@ weight: 1
       --name athens-proxy `
       --restart always `
       -p 3000:3000 `
-      gomods/proxy:latest
+      gomods/athens:latest
     ```
 
 ## Bazaar(bzr) private repositories
@@ -58,18 +58,18 @@ weight: 1
 1. Bazaaar config files are located in
 
   - Unix
-       
+
         ~/.bazaar/
   - Windows
-        
+
         C:\Documents and Settings\<username>\Application Data\Bazaar\2.0
 
   - You can check your location using
-  
+
         bzr version
 
 2. There are 3 typical configuration files
-   
+
   - bazaar.conf
     - default config options
   - locations.conf
@@ -83,12 +83,12 @@ weight: 1
   - [header] this denotes a section header
   - section options reside in a header section and contain an option name an equals sign and a value
     - EXAMPLE:
-        
+
           [DEFAULT]
           email = John Doe <jdoe@isp.com>
 
 4. Authentication Configuration
-   
+
      Allows one to specify credentials for remote servers.
      This can be used for all the supported transports and any part of bzr that requires authentication(smtp for example).
      The syntax obeys the same rules as the others except for the option policies which don't apply.
@@ -157,7 +157,7 @@ weight: 1
       --name athens-proxy \
       --restart always \
       -p 3000:3000 \
-      gomods/proxy:latest
+      gomods/athens:latest
     ```
 
     **PowerShell**
@@ -173,6 +173,5 @@ weight: 1
       --name athens-proxy `
       --restart always `
       -p 3000:3000 `
-      gomods/proxy:latest
+      gomods/athens:latest
     ```
-
