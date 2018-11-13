@@ -75,7 +75,7 @@ func Test_FilterMiddleware(t *testing.T) {
 	r.Error(err, "Expected error when a file not existing on the filesystem is given")
 
 	app, err = middlewareFilterApp(filter.Name(), conf.GlobalEndpoint)
-	r.NoError(err, "app should be succesfully created in the test")
+	r.NoError(err, "app should be successfully created in the test")
 	w := willie.New(app)
 
 	// Public, expects to be redirected to the global registry endpoint, with and without a trailing slash
