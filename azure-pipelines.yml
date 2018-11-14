@@ -22,17 +22,21 @@ steps:
   displayName: 'Set up the Go workspace'
 
 - powershell: |
-    Get-NetNat | Remove-NetNat -Confirm:$false
-    docker-compose -f docker-compose.windows.yml -p athensdev up -d mongo
-    $env:ATHENS_MONGO_STORAGE_URL="$((Get-NetIPConfiguration "vEthernet (HNS Internal NIC)" | Select -ExpandProperty  IPv4Address).IPv4Address):27017"
-    echo "ATHENS_MONGO_STORAGE_URL = $env:ATHENS_MONGO_STORAGE_URL"
     [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+    Invoke-WebRequest -Uri "https://fastdl.mongodb.org/win32/mongodb-win32-x86_64-2008plus-ssl-4.0.4-signed.msi" -OutFile "mongo.msi"
     Invoke-WebRequest -Uri "https://dl.minio.io/server/minio/release/windows-amd64/minio.exe" -OutFile "minio.exe"
+    Start-Process msiexec -Wait	-ArgumentList @('/i',	'mongo.msi', '/quiet', '/qn',	'INSTALLLOCATION=C:\mongodb',	'ADDLOCAL=all')
+    $env:PATH = 'C:\mongodb\bin;' + $env:PATH
+    [Environment]::SetEnvironmentVariable('PATH', $env:PATH, [EnvironmentVariableTarget]::Machine)
+    mkdir C:\data\db 
+    mkdir C:\data\configdb
+    Start-Process -NoNewWindow mongod.exe '--bind_ip_all'
     Start-Process -NoNewWindow minio.exe 'server --address ":9001" .'
     go build -mod=vendor ./cmd/proxy
     go test -mod=vendor -race ./...
   env:
     ATHENS_MINIO_ENDPOINT: "127.0.0.1:9001"
+    ATHENS_MONGO_STORAGE_URL: "127.0.0.1:27017"
     MINIO_ACCESS_KEY: "minio"
     MINIO_SECRET_KEY: "minio123"
   workingDirectory: '$(modulePath)'
