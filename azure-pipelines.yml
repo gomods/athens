@@ -48,11 +48,10 @@ steps:
   displayName: 'install & start mongo'
 
 - powershell: |
-    go build -mod=vendor ./cmd/proxy
     go test -mod=vendor -race ./...
   env:
     ATHENS_MINIO_ENDPOINT: "127.0.0.1:9001"
     ATHENS_MONGO_STORAGE_URL: "127.0.0.1:27017"
   workingDirectory: '$(modulePath)'
-  displayName: 'build & test'
+  displayName: 'run tests'
 
