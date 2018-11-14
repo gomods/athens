@@ -33,7 +33,3 @@ services:
       - 6832:6832/udp
       - 5778:5778
       - 16686:16686
-networks:
-  default:
-    external:
-      name: nat
