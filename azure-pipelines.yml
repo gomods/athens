@@ -24,9 +24,7 @@ steps:
 - powershell: |
     Get-NetNat | Remove-NetNat -Confirm:$false
     docker-compose -f docker-compose.windows.yml -p athensdev up -d mongo
-    docker inspect -f "{{.NetworkSettings}}"  athensdev_mongo_1
-    docker inspect -f "{{ .NetworkSettings.Networks.nat.IPAddress }}" athensdev_mongo_1
-    $env:ATHENS_MONGO_STORAGE_URL='$(docker inspect -f "{{ .NetworkSettings.Networks.nat.IPAddress }}" athensdev_mongo_1):27017'
+    $env:ATHENS_MONGO_STORAGE_URL='$((Get-NetIPConfiguration "vEthernet (HNS Internal NIC)" | Select -ExpandProperty  IPv4Address).IPv4Address):27017'
     [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
     Invoke-WebRequest -Uri "https://dl.minio.io/server/minio/release/windows-amd64/minio.exe" -OutFile "minio.exe"
     Start-Process -NoNewWindow minio.exe 'server --address ":9001" .'
