@@ -37,9 +37,9 @@ func ListHandler(dp Protocol, lggr log.Entry, eng *render.Engine) buffalo.Handle
 
 // ListHandlerBasic implements GET baseURL/module/@v/list as a basic http.HandlerFunc
 // wrapping it as a buffalo handler
-func ListHandlerBasic(dp Protocol, lggr log.Entry, eng *render.Engine) buffalo.Handler {
+func ListHandlerBasic(dp Protocol, lggr log.Entry, eng *render.Engine) http.HandlerFunc {
 	const op errors.Op = "download.ListHandler"
-	return buffalo.WrapHandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
 
 		mod, err := paths.GetModuleFromRequest(r)
 		if err != nil {
@@ -56,5 +56,5 @@ func ListHandlerBasic(dp Protocol, lggr log.Entry, eng *render.Engine) buffalo.H
 		}
 
 		w.Write([]byte(strings.Join(versions, "\n")))
-	})
+	}
 }

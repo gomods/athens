@@ -62,6 +62,8 @@ func addProxyRoutes(
 
 	handlerOpts := &download.HandlerOpts{Protocol: dp, Logger: l, Engine: proxy}
 	download.RegisterHandlers(app, handlerOpts)
+	// both methods are called until fully removing buffalo
+	download.RegisterHandlersV2(app.Muxer(), handlerOpts)
 
 	return nil
 }
