@@ -30,7 +30,7 @@ steps:
     [Environment]::SetEnvironmentVariable('PATH', $env:PATH, [EnvironmentVariableTarget]::Machine)
     mkdir C:\data\db 
     mkdir C:\data\configdb
-    Start-Process -NoNewWindow mongod.exe '--bind_ip_all'
+    Start-Process -NoNewWindow mongod.exe '--bind_ip_all --dbpath="C:\data\db"'
     Start-Process -NoNewWindow minio.exe 'server --address ":9001" .'
     go build -mod=vendor ./cmd/proxy
     go test -mod=vendor -race ./...
