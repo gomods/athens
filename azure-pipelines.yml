@@ -22,9 +22,10 @@ steps:
   displayName: 'set up the Go workspace'
 
 - powershell: |
-    Write-Host "download minio - start"
+    $downloadURL = "https://dl.minio.io/server/minio/release/windows-amd64/minio.exe"
+    Write-Host "download minio from $downloadURL - start"
     [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-    Invoke-WebRequest -Uri "https://dl.minio.io/server/minio/release/windows-amd64/minio.exe" -OutFile "minio.exe"
+    Invoke-WebRequest -Uri $downloadURL -OutFile "minio.exe"
     Write-Host "download minio - end"
     Start-Process -NoNewWindow minio.exe 'server --address ":9001" .'
   env:
@@ -33,9 +34,10 @@ steps:
   displayName: 'start minio'
 
 - powershell: |
-    Write-Host "download mongo - start"
+    $downloadURL = "https://fastdl.mongodb.org/win32/mongodb-win32-x86_64-2008plus-ssl-4.0.4-signed.msi"
+    Write-Host "download mongo from $downloadURL - start"
     [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-    Invoke-WebRequest -Uri "https://fastdl.mongodb.org/win32/mongodb-win32-x86_64-2008plus-ssl-4.0.4-signed.msi" -OutFile "mongo.msi"
+    Invoke-WebRequest -Uri $downloadURL -OutFile "mongo.msi"
     Write-Host "download mongo - end"
     Write-Host "install mongo - start"
     Start-Process msiexec -Wait	-ArgumentList @('/i',	'mongo.msi', '/quiet', '/qn',	'INSTALLLOCATION=C:\mongodb',	'ADDLOCAL=all')
