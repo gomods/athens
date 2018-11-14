@@ -23,15 +23,15 @@ steps:
 
 - powershell: |
     Get-NetNat | Remove-NetNat -Confirm:$false
-    docker-compose -f docker-compose.win.yml -p athensdev up -d mongo
+    docker-compose -f docker-compose.windows.yml -p athensdev up -d mongo
     [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+    $env:ATHENS_MONGO_STORAGE_URL='$(docker inspect -f "{{ .NetworkSettings.Networks.nat.IPAddress }}" athensdev_mongo_1):27017'
     Invoke-WebRequest -Uri "https://dl.minio.io/server/minio/release/windows-amd64/minio.exe" -OutFile "minio.exe"
     Start-Process -NoNewWindow minio.exe 'server --address ":9001" .'
     go build -mod=vendor ./cmd/proxy
     go test -mod=vendor -race ./...
   env:
     ATHENS_MINIO_ENDPOINT: "127.0.0.1:9001"
-    ATHENS_MONGO_STORAGE_URL: "mongodb://172.22.144.1:27017"
     MINIO_ACCESS_KEY: "minio"
     MINIO_SECRET_KEY: "minio123"
   workingDirectory: '$(modulePath)'
