@@ -19,7 +19,7 @@ func (s *Storage) Catalog(ctx context.Context, token string, elements int) ([]pa
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 
-	maxKeys := int64(elements)
+	maxKeys := int64(elements * 3) // 3 kinds of elements, aiming only at infos
 
 	lsParams := &s3.ListObjectsInput{
 		Bucket:  aws.String(s.bucket),
@@ -32,14 +32,17 @@ func (s *Storage) Catalog(ctx context.Context, token string, elements int) ([]pa
 		return nil, "", errors.E(op, err)
 	}
 
-	res, resToken := fetchModsAndVersions(loo.Contents, elements)
+	res := fetchModsAndVersions(loo.Contents, elements)
+	resToken := ""
+	if *loo.IsTruncated {
+		resToken = *loo.NextMarker
+	}
 	return res, resToken, nil
 }
 
-func fetchModsAndVersions(objects []*s3.Object, elementsNum int) ([]paths.AllPathParams, string) {
+func fetchModsAndVersions(objects []*s3.Object, elementsNum int) []paths.AllPathParams {
 	count := 0
 	var res []paths.AllPathParams
-	var token = ""
 
 	for _, o := range objects {
 		if strings.HasSuffix(*o.Key, ".info") {
@@ -60,5 +63,5 @@ func fetchModsAndVersions(objects []*s3.Object, elementsNum int) ([]paths.AllPat
 		}
 	}
 
-	return res, token
+	return res
 }

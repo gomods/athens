@@ -22,6 +22,7 @@ func RunTests(t *testing.T, b storage.Backend, clearBackend func() error) {
 	testList(t, b)
 	testDelete(t, b)
 	testGet(t, b)
+	testCatalog(t, b)
 }
 
 // testNotFound ensures that a storage Backend
@@ -118,6 +119,26 @@ func testDelete(t *testing.T, b storage.Backend) {
 	exists, err := b.Exists(ctx, modname, version)
 	require.NoError(t, err)
 	require.Equal(t, false, exists)
+}
+
+func testCatalog(t *testing.T, b storage.Backend) {
+	ctx := context.Background()
+
+	mock := getMockModule()
+	zipBts, _ := ioutil.ReadAll(mock.Zip)
+	modname := "getTestModule"
+
+	for i := 0; i < 10; i++ {
+		ver := fmt.Sprintf("v1.2.%d", i)
+		err := b.Save(ctx, modname, ver, mock.Mod, bytes.NewReader(zipBts), mock.Info)
+		require.NoError(t, err)
+
+	}
+
+	_, _, err := b.Catalog(ctx, "", 5)
+	require.NoError(t, err)
+	//require.Equal(t, zipBts, givenZipBts)
+
 }
 
 func getMockModule() *storage.Version {

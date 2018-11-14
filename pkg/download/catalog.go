@@ -23,10 +23,10 @@ func CatalogHandler(dp Protocol, lggr log.Entry, eng *render.Engine) buffalo.Han
 		limit, err := getLimitFromParam(c.Param("limit"))
 		if err != nil {
 			lggr.SystemErr(err)
-			return c.Render(500, nil)
+			return c.Render(http.StatusInternalServerError, nil)
 		}
 
-		modulesAndVersions, err := dp.Catalog(c, token, limit)
+		modulesAndVersions, newToken, err := dp.Catalog(c, token, limit)
 		if err != nil {
 			lggr.SystemErr(err)
 			return c.Render(errors.Kind(err), nil)
