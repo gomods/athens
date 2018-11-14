@@ -1,7 +1,0 @@
-version: '3'
-services:
-  mongo:
-    image: mongo:4.1.5-windowsservercore
-    ports:
-      - 27017:27017
-
