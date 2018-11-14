@@ -89,7 +89,7 @@ func (p *protocol) List(ctx context.Context, mod string) ([]string, error) {
 
 func (p *protocol) Latest(ctx context.Context, mod string) (*storage.RevInfo, error) {
 	const op errors.Op = "protocol.Latest"
-	ctx, span := observ.StartSpan(ctx, op.String())
+	_, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 	lr, _, err := p.lister.List(mod)
 	if err != nil {
