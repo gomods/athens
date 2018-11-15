@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"log"
 	"net/url"
 
 	"github.com/Azure/azure-storage-blob-go/2017-07-29/azblob"
@@ -17,7 +16,7 @@ type client interface {
 	UploadWithContext(ctx context.Context, path, contentType string, content io.Reader) error
 	BlobExists(ctx context.Context, path string) (bool, error)
 	ReadBlob(ctx context.Context, path string) (io.ReadCloser, error)
-	ListBlobs(ctx context.Context, prefix string) []string
+	ListBlobs(ctx context.Context, prefix string) ([]string,error)
 }
 
 type azureBlobStoreClient struct {
@@ -82,21 +81,22 @@ func (c *azureBlobStoreClient) ReadBlob(ctx context.Context, path string) (io.Re
 	return downloadResponse.Body(azblob.RetryReaderOptions{}), nil
 }
 
-func (c *azureBlobStoreClient) ListBlobs(ctx context.Context, prefix string) []string {
+func (c *azureBlobStoreClient) ListBlobs(ctx context.Context, prefix string) ([]string,error) {
 	var blobs []string
 	for marker := (azblob.Marker{}); marker.NotDone(); {
 		listBlob, err := c.containerURL.ListBlobsFlatSegment(ctx, marker, azblob.ListBlobsSegmentOptions{
-			Prefix: "github.com/athens-artifacts/samplelib/@v/v1.0.0.info",
+			Prefix: prefix,
 		})
 		if err != nil {
-			log.Fatal(err)
+			return nil,err
 		}
 		marker = listBlob.NextMarker
 
-		for _, blobInfo := range listBlob.Segment.BlobItems {
-			blobs = append(blobs, blobInfo)
+		for _, blob := range listBlob.Blobs.Blob{
+			blobs = append(blobs, blob.Name)
 		}
 	}
+	return blobs,nil
 }
 
 // UploadWithContext uploads a blob to the container

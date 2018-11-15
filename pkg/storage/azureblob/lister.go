@@ -1,8 +1,8 @@
 package azureblob
 
 import (
+	"strings"
 	"context"
-	"fmt"
 
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/observ"
@@ -14,5 +14,29 @@ func (s *Storage) List(ctx context.Context, module string) ([]string, error) {
 	const op errors.Op = "azureblob.List"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
-	return []string{}, errors.E(op, fmt.Errorf("Not Implemented"), errors.M(module))
+
+	blobnames,err := s.cl.ListBlobs(ctx,module)
+	if err != nil{
+		return nil, errors.E(op, err, errors.M(module))
+	}
+	return extractVersions(blobnames),nil
+}
+
+func extractVersions(blobnames []string) []string {
+	var versions []string
+
+	for _, b := range blobnames {
+		if strings.HasSuffix(b, ".info") {
+			segments := strings.Split(b, "/")
+
+			if len(segments) <= 0 {
+				continue
+			}
+			// version should be last segment w/ .info suffix
+			last := segments[len(segments)-1]
+			version := strings.TrimSuffix(last, ".info")
+			versions = append(versions, version)
+		}
+	}
+	return versions
 }
