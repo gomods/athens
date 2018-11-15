@@ -25,7 +25,7 @@ func TestLogContext(t *testing.T) {
 	a.GET("/test", h)
 
 	var buf bytes.Buffer
-	lggr := log.New("", logrus.DebugLevel, "")
+	lggr := log.New("", logrus.DebugLevel, log.DefaultTimeStampFormat)
 	lggr.Out = &buf
 
 	a.Use(LogEntryMiddleware(lggr))

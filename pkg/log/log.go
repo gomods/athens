@@ -1,8 +1,12 @@
 package log
 
 import (
+	"time"
+
 	"github.com/sirupsen/logrus"
 )
+
+const DefaultTimeStampFormat string = time.RFC3339
 
 // Logger is the main struct that any athens
 // internal service should use to communicate things.
