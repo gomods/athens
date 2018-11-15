@@ -30,7 +30,7 @@ func NewValidationMiddleware(validatorHook string) buffalo.MiddlewareFunc {
 			version, _ := paths.GetVersion(c)
 
 			if version != "" {
-				valid, err := validate(validatorHook, mod, version)
+				valid, err := validate(validatorHook, mod, version, c.Request().Header.Get("Authorization"))
 				if err != nil {
 					entry := log.EntryFromContext(c)
 					entry.SystemErr(err)
@@ -51,7 +51,7 @@ type validationParams struct {
 	Version string
 }
 
-func validate(hook, mod, ver string) (bool, error) {
+func validate(hook, mod, ver, auth string) (bool, error) {
 	const op errors.Op = "actions.validate"
 
 	toVal := &validationParams{mod, ver}
@@ -60,7 +60,17 @@ func validate(hook, mod, ver string) (bool, error) {
 		return false, errors.E(op, err)
 	}
 
-	resp, err := http.Post(hook, "application/json", bytes.NewBuffer(jsonVal))
+	req, err := http.NewRequest(http.MethodPost, hook, bytes.NewBuffer(jsonVal))
+	if err != nil {
+		return false, errors.E(op, err)
+	}
+
+	req.Header.Add("Content-Type", "application/json")
+	if auth != "" {
+		req.Header.Add("Authorization", auth)
+	}
+
+	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return false, errors.E(op, err)
 	}
