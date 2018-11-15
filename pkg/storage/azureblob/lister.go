@@ -1,8 +1,8 @@
 package azureblob
 
 import (
-	"strings"
 	"context"
+	"strings"
 
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/observ"
@@ -15,11 +15,11 @@ func (s *Storage) List(ctx context.Context, module string) ([]string, error) {
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 
-	blobnames,err := s.cl.ListBlobs(ctx,module)
-	if err != nil{
+	blobnames, err := s.cl.ListBlobs(ctx, module)
+	if err != nil {
 		return nil, errors.E(op, err, errors.M(module))
 	}
-	return extractVersions(blobnames),nil
+	return extractVersions(blobnames), nil
 }
 
 func extractVersions(blobnames []string) []string {

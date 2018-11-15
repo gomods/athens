@@ -16,8 +16,8 @@ type client interface {
 	UploadWithContext(ctx context.Context, path, contentType string, content io.Reader) error
 	BlobExists(ctx context.Context, path string) (bool, error)
 	ReadBlob(ctx context.Context, path string) (io.ReadCloser, error)
-	ListBlobs(ctx context.Context, prefix string) ([]string,error)
-	DeleteBlob(ctx context.Context,path string) error
+	ListBlobs(ctx context.Context, prefix string) ([]string, error)
+	DeleteBlob(ctx context.Context, path string) error
 }
 
 type azureBlobStoreClient struct {
@@ -82,27 +82,27 @@ func (c *azureBlobStoreClient) ReadBlob(ctx context.Context, path string) (io.Re
 	return downloadResponse.Body(azblob.RetryReaderOptions{}), nil
 }
 
-func (c *azureBlobStoreClient) ListBlobs(ctx context.Context, prefix string) ([]string,error) {
+func (c *azureBlobStoreClient) ListBlobs(ctx context.Context, prefix string) ([]string, error) {
 	var blobs []string
 	for marker := (azblob.Marker{}); marker.NotDone(); {
 		listBlob, err := c.containerURL.ListBlobsFlatSegment(ctx, marker, azblob.ListBlobsSegmentOptions{
 			Prefix: prefix,
 		})
 		if err != nil {
-			return nil,err
+			return nil, err
 		}
 		marker = listBlob.NextMarker
 
-		for _, blob := range listBlob.Blobs.Blob{
+		for _, blob := range listBlob.Blobs.Blob {
 			blobs = append(blobs, blob.Name)
 		}
 	}
-	return blobs,nil
+	return blobs, nil
 }
-func (c *azureBlobStoreClient) DeleteBlob(ctx context.Context,path string) error{
+func (c *azureBlobStoreClient) DeleteBlob(ctx context.Context, path string) error {
 	blobURL := c.containerURL.NewBlockBlobURL(path)
-	_,err :=  blobURL.Delete(ctx,azblob.DeleteSnapshotsOptionNone,azblob.BlobAccessConditions{})
-	if err != nil{
+	_, err := blobURL.Delete(ctx, azblob.DeleteSnapshotsOptionNone, azblob.BlobAccessConditions{})
+	if err != nil {
 		return err
 	}
 	return nil

@@ -1,6 +1,6 @@
 package config
 
-// AzureConfig specifies the properties required to use Azure as the storage backend
+// AzureBlobConfig specifies the properties required to use Azure as the storage backend
 type AzureBlobConfig struct {
 	TimeoutConf
 	AccountName   string `validate:"required" envconfig:"ATHENS_AZURE_ACCOUNT_NAME"`
