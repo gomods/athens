@@ -135,9 +135,15 @@ func testCatalog(t *testing.T, b storage.Backend) {
 
 	}
 
-	_, _, err := b.Catalog(ctx, "", 5)
+	res, next, err := b.Catalog(ctx, "", 5)
+	fmt.Printf("NEXT " + next)
 	require.NoError(t, err)
-	//require.Equal(t, zipBts, givenZipBts)
+	require.Equal(t, len(res), 5)
+
+	res, next, err = b.Catalog(ctx, next, 5)
+	require.NoError(t, err)
+	require.Equal(t, len(res), 5)
+	require.Equal(t, next, "")
 
 }
 

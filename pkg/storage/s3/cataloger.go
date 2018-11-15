@@ -2,6 +2,7 @@ package s3
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
 	"github.com/gomods/athens/pkg/paths"
@@ -19,49 +20,62 @@ func (s *Storage) Catalog(ctx context.Context, token string, elements int) ([]pa
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 
-	maxKeys := int64(elements * 3) // 3 kinds of elements, aiming only at infos
-
-	lsParams := &s3.ListObjectsInput{
-		Bucket:  aws.String(s.bucket),
-		Marker:  &token,
-		MaxKeys: &maxKeys,
-	}
-
-	loo, err := s.s3API.ListObjectsWithContext(ctx, lsParams)
-	if err != nil {
-		return nil, "", errors.E(op, err)
-	}
-
-	res := fetchModsAndVersions(loo.Contents, elements)
-	resToken := ""
-	if *loo.IsTruncated {
-		resToken = *loo.NextMarker
-	}
-	return res, resToken, nil
-}
-
-func fetchModsAndVersions(objects []*s3.Object, elementsNum int) []paths.AllPathParams {
-	count := 0
-	var res []paths.AllPathParams
-
-	for _, o := range objects {
-		if strings.HasSuffix(*o.Key, ".info") {
-			segments := strings.Split(*o.Key, "/")
-
-			if len(segments) <= 0 {
-				continue
-			}
-			module := segments[0]
-			last := segments[len(segments)-1]
-			version := strings.TrimSuffix(last, ".info")
-			res = append(res, paths.AllPathParams{module, version})
-			count++
+	queryToken := token
+	res := make([]paths.AllPathParams, 0)
+	for elements > 0 {
+		lsParams := &s3.ListObjectsInput{
+			Bucket: aws.String(s.bucket),
+			Marker: &queryToken,
 		}
 
-		if count == elementsNum {
+		loo, err := s.s3API.ListObjectsWithContext(ctx, lsParams)
+		if err != nil {
+			return nil, "", errors.E(op, err)
+		}
+
+		m, lastKey := fetchModsAndVersions(loo.Contents, elements)
+		res = append(res, m...)
+		queryToken = lastKey
+		elements -= len(res)
+
+		if !*loo.IsTruncated { // not truncated, there is no point in asking more
+			if elements > 0 { // it means we reached the end, no subsequent requests are necessary
+				queryToken = ""
+			}
 			break
 		}
 	}
 
-	return res
+	return res, queryToken, nil
+}
+
+func fetchModsAndVersions(objects []*s3.Object, elementsNum int) ([]paths.AllPathParams, string) {
+	res := make([]paths.AllPathParams, 0)
+	lastKey := ""
+	for _, o := range objects {
+		p, err := parseS3Key(o)
+		if err != nil {
+			continue
+		}
+		res = append(res, p)
+		lastKey = *o.Key
+
+		elementsNum--
+		if elementsNum == 0 {
+			break
+		}
+	}
+	return res, lastKey
+}
+
+func parseS3Key(o *s3.Object) (paths.AllPathParams, error) {
+	const op errors.Op = "s3.parseS3Key"
+	segments := strings.Split(*o.Key, "/")
+	if len(segments) <= 0 {
+		return paths.AllPathParams{}, errors.E(op, fmt.Errorf("invalid object key format %s", *o.Key))
+	}
+	module := segments[0]
+	last := segments[len(segments)-1]
+	version := strings.TrimSuffix(last, ".info")
+	return paths.AllPathParams{module, version}, nil
 }
