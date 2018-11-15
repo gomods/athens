@@ -60,7 +60,7 @@ func App(conf *config.Config) (*buffalo.App, error) {
 	if err != nil {
 		return nil, err
 	}
-	lggr := log.New(conf.CloudRuntime, logLvl, log.DefaultTimeStampFormat)
+	lggr := log.New(conf.CloudRuntime, logLvl)
 
 	bLogLvl, err := logrus.ParseLevel(conf.BuffaloLogLevel)
 	if err != nil {

@@ -1,14 +1,8 @@
 package log
 
 import (
-	"time"
-
 	"github.com/sirupsen/logrus"
 )
-
-// DefaultTimeStampFormat is the default timestamp format for the logger
-// RFC3339     = "2006-01-02T15:04:05Z07:00"
-const DefaultTimeStampFormat string = time.RFC3339
 
 // Logger is the main struct that any athens
 // internal service should use to communicate things.
@@ -20,15 +14,15 @@ type Logger struct {
 // environment and the cloud platform it is
 // running on. TODO: take cloud arg and env
 // to construct the correct JSON formatter.
-func New(cloudProvider string, level logrus.Level, timestampFormat string) *Logger {
+func New(cloudProvider string, level logrus.Level) *Logger {
 	l := logrus.New()
 	switch cloudProvider {
 	case "GCP":
-		l.Formatter = getGCPFormatter(timestampFormat)
+		l.Formatter = getGCPFormatter()
 	case "none":
-		l.Formatter = getDevFormatter(timestampFormat)
+		l.Formatter = getDevFormatter()
 	default:
-		l.Formatter = getDefaultFormatter(timestampFormat)
+		l.Formatter = getDefaultFormatter()
 	}
 	l.Level = level
 	return &Logger{Logger: l}
