@@ -72,6 +72,11 @@ func testList(t *testing.T, b storage.Backend) {
 		)
 		require.NoError(t, err, "Save for storage failed")
 	}
+	defer func() {
+		for _, ver := range versions {
+			b.Delete(ctx, modname, ver)
+		}
+	}()
 	retVersions, err := b.List(ctx, modname)
 	require.NoError(t, err)
 	require.Equal(t, versions, retVersions)
@@ -85,6 +90,7 @@ func testGet(t *testing.T, b storage.Backend) {
 	mock := getMockModule()
 	zipBts, _ := ioutil.ReadAll(mock.Zip)
 	b.Save(ctx, modname, ver, mock.Mod, bytes.NewReader(zipBts), mock.Info)
+	defer b.Delete(ctx, modname, ver)
 
 	info, err := b.Info(ctx, modname, ver)
 	require.NoError(t, err)
@@ -126,24 +132,31 @@ func testCatalog(t *testing.T, b storage.Backend) {
 
 	mock := getMockModule()
 	zipBts, _ := ioutil.ReadAll(mock.Zip)
-	modname := "getTestModule"
+	modname := "testCatalogModule"
 
-	for i := 0; i < 10; i++ {
-		ver := fmt.Sprintf("v1.2.%d", i)
-		err := b.Save(ctx, modname, ver, mock.Mod, bytes.NewReader(zipBts), mock.Info)
-		require.NoError(t, err)
-
+	for i := 0; i < 1005; i++ {
+		ver := fmt.Sprintf("v1.2.%03d", i)
+		b.Save(ctx, modname, ver, mock.Mod, bytes.NewReader(zipBts), mock.Info)
 	}
+	defer func() {
+		for i := 0; i < 1005; i++ {
+			ver := fmt.Sprintf("v1.2.03%d", i)
+			b.Delete(ctx, modname, ver)
+		}
+	}()
 
 	res, next, err := b.Catalog(ctx, "", 5)
-	fmt.Printf("NEXT " + next)
 	require.NoError(t, err)
 	require.Equal(t, len(res), 5)
 
-	res, next, err = b.Catalog(ctx, next, 5)
+	res, next, err = b.Catalog(ctx, next, 50)
 	require.NoError(t, err)
-	require.Equal(t, len(res), 5)
-	require.Equal(t, next, "")
+	require.Equal(t, len(res), 50)
+
+	res, next, err = b.Catalog(ctx, next, 1000)
+	require.NoError(t, err)
+	require.Equal(t, len(res), 950)
+	require.Equal(t, "", next)
 
 }
 
