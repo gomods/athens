@@ -330,14 +330,18 @@ func Test_checkFilePerms(t *testing.T) {
 		t.FailNow()
 	}
 	defer os.Remove(f1.Name())
-	err = os.Chmod(f1.Name(), 0777)
+	if err = os.Chmod(f1.Name(), 0777); err != nil {
+		t.FailNow()
+	}
 
 	f2, err := ioutil.TempFile(os.TempDir(), "prefix-")
 	if err != nil {
 		t.FailNow()
 	}
 	defer os.Remove(f2.Name())
-	err = os.Chmod(f2.Name(), 0600)
+	if err = os.Chmod(f2.Name(), 0600); err != nil {
+		t.FailNow()
+	}
 
 	type args struct {
 		files []string
