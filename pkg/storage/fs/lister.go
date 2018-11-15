@@ -11,7 +11,7 @@ import (
 
 func (l *storageImpl) List(ctx context.Context, module string) ([]string, error) {
 	const op errors.Op = "fs.List"
-	_, span := observ.StartSpan(ctx, op.String())
+	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 	loc := l.moduleLocation(module)
 	fileInfos, err := afero.ReadDir(l.filesystem, loc)

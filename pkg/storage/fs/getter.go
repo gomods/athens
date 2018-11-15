@@ -13,7 +13,7 @@ import (
 
 func (v *storageImpl) Info(ctx context.Context, module, version string) ([]byte, error) {
 	const op errors.Op = "fs.Info"
-	_, span := observ.StartSpan(ctx, op.String())
+	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 	versionedPath := v.versionLocation(module, version)
 	info, err := afero.ReadFile(v.filesystem, filepath.Join(versionedPath, version+".info"))
@@ -26,7 +26,7 @@ func (v *storageImpl) Info(ctx context.Context, module, version string) ([]byte,
 
 func (v *storageImpl) GoMod(ctx context.Context, module, version string) ([]byte, error) {
 	const op errors.Op = "fs.GoMod"
-	_, span := observ.StartSpan(ctx, op.String())
+	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 	versionedPath := v.versionLocation(module, version)
 	mod, err := afero.ReadFile(v.filesystem, filepath.Join(versionedPath, "go.mod"))
@@ -39,7 +39,7 @@ func (v *storageImpl) GoMod(ctx context.Context, module, version string) ([]byte
 
 func (v *storageImpl) Zip(ctx context.Context, module, version string) (io.ReadCloser, error) {
 	const op errors.Op = "fs.Zip"
-	_, span := observ.StartSpan(ctx, op.String())
+	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 	versionedPath := v.versionLocation(module, version)
 

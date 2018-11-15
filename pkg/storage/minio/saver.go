@@ -12,7 +12,7 @@ import (
 
 func (s *storageImpl) Save(ctx context.Context, module, vsn string, mod []byte, zip io.Reader, info []byte) error {
 	const op errors.Op = "storage.minio.Save"
-	_, span := observ.StartSpan(ctx, op.String())
+	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 	dir := s.versionLocation(module, vsn)
 	modFileName := dir + "/" + "go.mod"

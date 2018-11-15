@@ -13,7 +13,7 @@ import (
 // List lists all versions of a module
 func (s *ModuleStore) List(ctx context.Context, module string) ([]string, error) {
 	const op errors.Op = "mongo.List"
-	_, span := observ.StartSpan(ctx, op.String())
+	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 	c := s.s.DB(s.d).C(s.c)
 	result := make([]storage.Module, 0)

@@ -50,7 +50,7 @@ func NewGoGetFetcher(goBinaryName string, fs afero.Fs) (Fetcher, error) {
 // .info, .mod, and .zip files.
 func (g *goGetFetcher) Fetch(ctx context.Context, mod, ver string) (*storage.Version, error) {
 	const op errors.Op = "goGetFetcher.Fetch"
-	_, span := observ.StartSpan(ctx, op.String())
+	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 
 	// setup the GOPATH

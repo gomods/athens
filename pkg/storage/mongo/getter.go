@@ -14,7 +14,7 @@ import (
 // Info implements storage.Getter
 func (s *ModuleStore) Info(ctx context.Context, module, vsn string) ([]byte, error) {
 	const op errors.Op = "mongo.Info"
-	_, span := observ.StartSpan(ctx, op.String())
+	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 	c := s.s.DB(s.d).C(s.c)
 	result := &storage.Module{}
@@ -33,7 +33,7 @@ func (s *ModuleStore) Info(ctx context.Context, module, vsn string) ([]byte, err
 // GoMod implements storage.Getter
 func (s *ModuleStore) GoMod(ctx context.Context, module, vsn string) ([]byte, error) {
 	const op errors.Op = "mongo.GoMod"
-	_, span := observ.StartSpan(ctx, op.String())
+	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 	c := s.s.DB(s.d).C(s.c)
 	result := &storage.Module{}
@@ -52,7 +52,7 @@ func (s *ModuleStore) GoMod(ctx context.Context, module, vsn string) ([]byte, er
 // Zip implements storage.Getter
 func (s *ModuleStore) Zip(ctx context.Context, module, vsn string) (io.ReadCloser, error) {
 	const op errors.Op = "mongo.Zip"
-	_, span := observ.StartSpan(ctx, op.String())
+	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 
 	zipName := s.gridFileName(module, vsn)
