@@ -17,6 +17,7 @@ type client interface {
 	BlobExists(ctx context.Context, path string) (bool, error)
 	ReadBlob(ctx context.Context, path string) (io.ReadCloser, error)
 	ListBlobs(ctx context.Context, prefix string) ([]string,error)
+	DeleteBlob(ctx context.Context,path string) error
 }
 
 type azureBlobStoreClient struct {
@@ -97,6 +98,14 @@ func (c *azureBlobStoreClient) ListBlobs(ctx context.Context, prefix string) ([]
 		}
 	}
 	return blobs,nil
+}
+func (c *azureBlobStoreClient) DeleteBlob(ctx context.Context,path string) error{
+	blobURL := c.containerURL.NewBlockBlobURL(path)
+	_,err :=  blobURL.Delete(ctx,azblob.DeleteSnapshotsOptionNone,azblob.BlobAccessConditions{})
+	if err != nil{
+		return err
+	}
+	return nil
 }
 
 // UploadWithContext uploads a blob to the container
