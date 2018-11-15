@@ -6,6 +6,8 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+// DefaultTimeStampFormat is the default timestamp format for the logger
+// RFC3339     = "2006-01-02T15:04:05Z07:00"
 const DefaultTimeStampFormat string = time.RFC3339
 
 // Logger is the main struct that any athens
