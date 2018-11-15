@@ -334,9 +334,9 @@ func invalidPerm() os.FileMode {
 
 func correctPerm() os.FileMode {
 	if runtime.GOOS == "windows" {
-		return 0200
+		return 0400
 	}
-	return 0600
+	return 0640
 }
 
 func Test_checkFilePerms(t *testing.T) {
