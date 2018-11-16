@@ -30,7 +30,7 @@ type Storage struct {
 // to the path of your service account file. If you're running on GCP (e.g. AppEngine),
 // credentials will be automatically provided.
 // See https://cloud.google.com/docs/authentication/getting-started.
-func New(ctx context.Context, gcpConf *config.GCPConfig) (*Storage, error) {
+func New(ctx context.Context, gcpConf *config.GCPConfig, timeout time.Duration) (*Storage, error) {
 	const op errors.Op = "gcp.New"
 	storage, err := storage.NewClient(ctx)
 	if err != nil {
@@ -51,7 +51,7 @@ func New(ctx context.Context, gcpConf *config.GCPConfig) (*Storage, error) {
 		bucket:       &bkt,
 		baseURI:      u,
 		closeStorage: storage.Close,
-		timeout:      gcpConf.TimeoutDuration(),
+		timeout:      timeout,
 	}, nil
 }
 

@@ -19,6 +19,7 @@ require (
 	github.com/gobuffalo/mw-forcessl v0.0.0-20180802152810-73921ae7a130
 	github.com/gobuffalo/mw-paramlogger v0.0.0-20181005191442-d6ee392ec72e
 	github.com/gobuffalo/suite v2.1.6+incompatible
+	github.com/gobuffalo/x v0.0.0-20181007152206-913e47c59ca7
 	github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b // indirect
 	github.com/google/go-cmp v0.2.0
 	github.com/google/martian v2.1.0+incompatible // indirect
@@ -32,7 +33,6 @@ require (
 	github.com/minio/minio-go v6.0.5+incompatible
 	github.com/mitchellh/go-homedir v1.0.0
 	github.com/philhofer/fwd v1.0.0 // indirect
-	github.com/rs/cors v1.5.0
 	github.com/sirupsen/logrus v1.1.1
 	github.com/smartystreets/assertions v0.0.0-20180820201707-7c9eb446e3cf // indirect
 	github.com/smartystreets/goconvey v0.0.0-20180222194500-ef6db91d284a // indirect

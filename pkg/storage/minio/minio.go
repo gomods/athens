@@ -2,6 +2,7 @@ package minio
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/errors"
@@ -20,7 +21,7 @@ func (s *storageImpl) versionLocation(module, version string) string {
 
 // NewStorage returns a connected Minio or DigitalOcean Spaces storage
 // that implements storage.Backend
-func NewStorage(conf *config.MinioConfig) (storage.Backend, error) {
+func NewStorage(conf *config.MinioConfig, timeout time.Duration) (storage.Backend, error) {
 	const op errors.Op = "minio.NewStorage"
 	endpoint := conf.Endpoint
 	accessKeyID := conf.Key
