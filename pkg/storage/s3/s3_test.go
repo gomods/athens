@@ -22,7 +22,7 @@ func BenchmarkBackend(b *testing.B) {
 }
 
 func (s *Storage) clear() error {
-	ctx, cancel := context.WithTimeout(context.Background(), s.s3Conf.TimeoutDuration())
+	ctx, cancel := context.WithTimeout(context.Background(), s.timeout)
 	defer cancel()
 
 	objects, err := s.s3API.ListObjectsWithContext(ctx, &s3.ListObjectsInput{Bucket: aws.String(s.bucket)})
@@ -45,7 +45,7 @@ func (s *Storage) clear() error {
 }
 
 func (s *Storage) createBucket() error {
-	ctx, cancel := context.WithTimeout(context.Background(), s.s3Conf.TimeoutDuration())
+	ctx, cancel := context.WithTimeout(context.Background(), s.timeout)
 	defer cancel()
 
 	if _, err := s.s3API.CreateBucketWithContext(ctx, &s3.CreateBucketInput{Bucket: aws.String(s.bucket)}); err != nil {
@@ -79,10 +79,8 @@ func getStorage(t testing.TB) *Storage {
 			Secret: "minio123",
 			Bucket: "gomodsaws",
 			Region: "us-west-1",
-			TimeoutConf: config.TimeoutConf{
-				Timeout: 300,
-			},
 		},
+		config.GetTimeoutDuration(300),
 		options,
 	)
 
