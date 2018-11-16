@@ -15,6 +15,7 @@ require (
 	github.com/go-playground/universal-translator v0.16.0 // indirect
 	github.com/gobuffalo/buffalo v0.13.1
 	github.com/gobuffalo/envy v1.6.5
+	github.com/gobuffalo/httptest v1.0.4
 	github.com/gobuffalo/mw-forcessl v0.0.0-20180802152810-73921ae7a130
 	github.com/gobuffalo/mw-paramlogger v0.0.0-20181005191442-d6ee392ec72e
 	github.com/gobuffalo/suite v2.1.6+incompatible
@@ -27,10 +28,8 @@ require (
 	github.com/hashicorp/go-multierror v1.0.0
 	github.com/jtolds/gls v4.2.1+incompatible // indirect
 	github.com/kelseyhightower/envconfig v1.3.0
-	github.com/kr/pty v1.1.3 // indirect
 	github.com/markbates/goth v1.46.0
 	github.com/markbates/grift v1.0.4
-	github.com/markbates/willie v1.0.9
 	github.com/minio/minio-go v6.0.5+incompatible
 	github.com/mitchellh/go-homedir v1.0.0
 	github.com/philhofer/fwd v1.0.0 // indirect
