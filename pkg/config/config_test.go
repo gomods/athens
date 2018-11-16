@@ -99,7 +99,6 @@ func TestEnvOverrides(t *testing.T) {
 }
 
 func TestStorageEnvOverrides(t *testing.T) {
-	globalTimeout := 300
 	expStorage := &StorageConfig{
 		Disk: &DiskConfig{
 			RootPath: "/my/root/path",
@@ -107,9 +106,6 @@ func TestStorageEnvOverrides(t *testing.T) {
 		GCP: &GCPConfig{
 			ProjectID: "gcpproject",
 			Bucket:    "gcpbucket",
-			TimeoutConf: TimeoutConf{
-				Timeout: globalTimeout,
-			},
 		},
 		Minio: &MinioConfig{
 			Endpoint:  "minioEndpoint",
@@ -118,16 +114,10 @@ func TestStorageEnvOverrides(t *testing.T) {
 			EnableSSL: false,
 			Bucket:    "minioBucket",
 			Region:    "us-west-1",
-			TimeoutConf: TimeoutConf{
-				Timeout: globalTimeout,
-			},
 		},
 		Mongo: &MongoConfig{
 			URL:      "mongoURL",
 			CertPath: "/test/path",
-			TimeoutConf: TimeoutConf{
-				Timeout: globalTimeout,
-			},
 		},
 		S3: &S3Config{
 			Region: "s3Region",
@@ -135,9 +125,6 @@ func TestStorageEnvOverrides(t *testing.T) {
 			Secret: "s3Secret",
 			Token:  "s3Token",
 			Bucket: "s3Bucket",
-			TimeoutConf: TimeoutConf{
-				Timeout: globalTimeout,
-			},
 		},
 	}
 	envVars := getEnvMap(&Config{Storage: expStorage})
@@ -152,7 +139,6 @@ func TestStorageEnvOverrides(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Env override failed: %v", err)
 	}
-	setStorageTimeouts(conf.Storage, globalTimeout)
 	compareStorageConfigs(conf.Storage, expStorage, t)
 	restoreEnv(envVarBackup)
 }
@@ -182,8 +168,6 @@ func TestParseExampleConfig(t *testing.T) {
 		os.Unsetenv(k)
 	}
 
-	globalTimeout := 300
-
 	expStorage := &StorageConfig{
 		Disk: &DiskConfig{
 			RootPath: "/path/on/disk",
@@ -191,9 +175,6 @@ func TestParseExampleConfig(t *testing.T) {
 		GCP: &GCPConfig{
 			ProjectID: "MY_GCP_PROJECT_ID",
 			Bucket:    "MY_GCP_BUCKET",
-			TimeoutConf: TimeoutConf{
-				Timeout: globalTimeout,
-			},
 		},
 		Minio: &MinioConfig{
 			Endpoint:  "127.0.0.1:9001",
@@ -201,16 +182,10 @@ func TestParseExampleConfig(t *testing.T) {
 			Secret:    "minio123",
 			EnableSSL: false,
 			Bucket:    "gomods",
-			TimeoutConf: TimeoutConf{
-				Timeout: globalTimeout,
-			},
 		},
 		Mongo: &MongoConfig{
-			URL:      "mongodb://127.0.0.1:27017",
-			CertPath: "",
-			TimeoutConf: TimeoutConf{
-				Timeout: globalTimeout,
-			},
+			URL:          "mongodb://127.0.0.1:27017",
+			CertPath:     "",
 			InsecureConn: false,
 		},
 		S3: &S3Config{
@@ -219,9 +194,6 @@ func TestParseExampleConfig(t *testing.T) {
 			Secret: "MY_AWS_SECRET_ACCESS_KEY",
 			Token:  "",
 			Bucket: "MY_S3_BUCKET_NAME",
-			TimeoutConf: TimeoutConf{
-				Timeout: globalTimeout,
-			},
 		},
 	}
 
