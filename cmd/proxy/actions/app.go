@@ -33,7 +33,7 @@ func App(conf *config.Config) (*buffalo.App, error) {
 	// ENV is used to help switch settings based on where the
 	// application is being run. Default is "development".
 	ENV := conf.GoEnv
-	store, err := GetStorage(conf.StorageType, conf.Storage)
+	store, err := GetStorage(conf.StorageType, conf.Storage, conf.TimeoutDuration())
 	if err != nil {
 		err = fmt.Errorf("error getting storage configuration (%s)", err)
 		return nil, err

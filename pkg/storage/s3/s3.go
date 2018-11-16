@@ -3,6 +3,7 @@ package s3
 import (
 	"fmt"
 	"net/url"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
@@ -27,11 +28,11 @@ type Storage struct {
 	baseURI  *url.URL
 	uploader s3manageriface.UploaderAPI
 	s3API    s3iface.S3API
-	s3Conf   *config.S3Config
+	timeout  time.Duration
 }
 
 // New creates a new AWS S3 CDN saver
-func New(s3Conf *config.S3Config, options ...func(*aws.Config)) (*Storage, error) {
+func New(s3Conf *config.S3Config, timeout time.Duration, options ...func(*aws.Config)) (*Storage, error) {
 	const op errors.Op = "s3.New"
 	u, err := url.Parse(fmt.Sprintf("https://%s.s3.amazonaws.com", s3Conf.Bucket))
 	if err != nil {
@@ -59,6 +60,6 @@ func New(s3Conf *config.S3Config, options ...func(*aws.Config)) (*Storage, error
 		uploader: uploader,
 		s3API:    uploader.S3,
 		baseURI:  u,
-		s3Conf:   s3Conf,
+		timeout:  timeout,
 	}, nil
 }
