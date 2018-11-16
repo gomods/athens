@@ -114,6 +114,8 @@ github.com/gobuffalo/genny
 # github.com/gobuffalo/github_flavored_markdown v1.0.5
 github.com/gobuffalo/github_flavored_markdown
 github.com/gobuffalo/github_flavored_markdown/internal/russross/blackfriday
+# github.com/gobuffalo/httptest v1.0.4
+github.com/gobuffalo/httptest
 # github.com/gobuffalo/makr v1.1.5
 github.com/gobuffalo/makr
 # github.com/gobuffalo/mapi v1.0.1
