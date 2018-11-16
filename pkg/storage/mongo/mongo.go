@@ -62,7 +62,6 @@ func (m *ModuleStore) initDatabase() error {
 	index := mgo.Index{
 		Key:        []string{"base_url", "module", "version"},
 		Unique:     true,
-		DropDups:   true,
 		Background: true,
 		Sparse:     true,
 	}
