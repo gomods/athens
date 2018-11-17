@@ -134,32 +134,34 @@ func testCatalog(t *testing.T, b storage.Backend) {
 	mock := getMockModule()
 	zipBts, _ := ioutil.ReadAll(mock.Zip)
 	modname := "testCatalogModule"
-
+	fmt.Println("FEDE saving")
 	for i := 0; i < 1005; i++ {
 		ver := fmt.Sprintf("v1.2.%04d", i)
 		b.Save(ctx, modname, ver, mock.Mod, bytes.NewReader(zipBts), mock.Info)
 	}
 	defer func() {
+		fmt.Println("FEDE deleting")
+
 		for i := 0; i < 1005; i++ {
 			ver := fmt.Sprintf("v1.2.04%d", i)
 			b.Delete(ctx, modname, ver)
 		}
 	}()
 
-	allres, next, err := b.Catalog(ctx, "", 5)
+	fmt.Println("FEDE catalog 1001 first")
+	allres, next, err := b.Catalog(ctx, "", 1001)
+	fmt.Println("FEDE catalog 1001 after")
+
 	require.NoError(t, err)
-	require.Equal(t, len(allres), 5)
+	require.Equal(t, len(allres), 1001)
 
 	res, next, err := b.Catalog(ctx, next, 50)
 	allres = append(allres, res...)
 	require.NoError(t, err)
-	require.Equal(t, len(res), 50)
-
-	res, next, err = b.Catalog(ctx, next, 1000)
-	allres = append(allres, res...)
-	require.NoError(t, err)
-	require.Equal(t, len(res), 950)
+	require.Equal(t, len(res), 4)
 	require.Equal(t, "", next)
+
+	fmt.Println("FEDE sort first")
 
 	sort.Slice(allres, func(i, j int) bool {
 		if allres[i].Module == allres[j].Module {
@@ -167,6 +169,8 @@ func testCatalog(t *testing.T, b storage.Backend) {
 		}
 		return allres[i].Module < allres[j].Module
 	})
+
+	fmt.Println("FEDE sort after")
 
 	require.Equal(t, allres[0].Version, "v1.2.0000")
 	require.Equal(t, allres[1004].Version, "v1.2.1004")
