@@ -95,6 +95,10 @@ func (m *bucketMock) Exists(ctx context.Context, path string) (bool, error) {
 	return found, nil
 }
 
+func (m *bucketMock) Catalog(ctx context.Context, token string, elementNum int) ([]string, string, error) {
+	return nil, "", nil
+}
+
 func (m *bucketMock) ReadClosed() bool {
 	return (m.readLockCount == 0)
 }
