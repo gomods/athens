@@ -299,25 +299,19 @@ func restoreEnv(envVars map[string]string) {
 
 func invalidPerm() os.FileMode {
 	if runtime.GOOS == "windows" {
-		return 0600
+		return 0200
 	}
 	return 0777
 }
 
 func correctPerm() os.FileMode {
 	if runtime.GOOS == "windows" {
-		return 0400
+		return 0600
 	}
 	return 0640
 }
 
 func Test_checkFilePerms(t *testing.T) {
-	// TODO: os.Chmod(..) doesn't work on Windows as it does on Unix
-	// Skip for now
-	// issue: https://github.com/gomods/athens/issues/879
-	if runtime.GOOS == "windows" {
-		t.SkipNow()
-	}
 	f1, err := ioutil.TempFile(os.TempDir(), "prefix-")
 	if err != nil {
 		t.FailNow()

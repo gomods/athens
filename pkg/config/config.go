@@ -142,13 +142,13 @@ func checkFilePerms(files ...string) error {
 		}
 
 		if runtime.GOOS == "windows" {
-			if fInfo.Mode() != 0400 {
-				return errors.E(op, f+" should have 0400 as permission")
+			if (fInfo.Mode() & 0600) != 0600 {
+				return errors.E(op, f+" should have 0600 as permission")
 			}
 		} else {
 			// Assume unix based system (MacOS and Linux)
 			if fInfo.Mode() != 0640 {
-				return errors.E(op, f+" should have 0600 as permission")
+				return errors.E(op, f+" should have 0640 as permission")
 			}
 		}
 	}
