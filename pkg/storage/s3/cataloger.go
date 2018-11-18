@@ -19,7 +19,6 @@ func (s *Storage) Catalog(ctx context.Context, token string, elements int) ([]pa
 	const op errors.Op = "s3.Catalog"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
-	fmt.Println("FEDE asking for ", elements)
 	queryToken := token
 	res := make([]paths.AllPathParams, 0)
 	for elements > 0 {
@@ -36,7 +35,6 @@ func (s *Storage) Catalog(ctx context.Context, token string, elements int) ([]pa
 		m, lastKey := fetchModsAndVersions(loo.Contents, elements)
 		res = append(res, m...)
 		elements -= len(m)
-		fmt.Println("FEDE got ", len(m), len(res))
 		queryToken = lastKey
 
 		if !*loo.IsTruncated { // not truncated, there is no point in asking more
@@ -46,7 +44,6 @@ func (s *Storage) Catalog(ctx context.Context, token string, elements int) ([]pa
 			break
 		}
 	}
-	fmt.Println("FEDE res len ", len(res), res[0], "-", res[len(res)-1])
 	return res, queryToken, nil
 }
 
