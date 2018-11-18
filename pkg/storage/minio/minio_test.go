@@ -44,7 +44,7 @@ func getStorage(t testing.TB) *storageImpl {
 		Key:      "minio",
 		Secret:   "minio123",
 		Bucket:   "gomods",
-	})
+	}, config.GetTimeoutDuration(300))
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -72,9 +72,6 @@ func ParseConfigFile(configFile string) (*Config, error) {
 		return nil, err
 	}
 
-	// If not defined, set storage timeouts to global timeout
-	setStorageTimeouts(config.Storage, config.Timeout)
-
 	// validate all required fields have been populated
 	if err := validateConfig(config); err != nil {
 		return nil, err
