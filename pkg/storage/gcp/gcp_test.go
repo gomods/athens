@@ -3,7 +3,6 @@ package gcp
 import (
 	"bytes"
 	"context"
-
 	"io/ioutil"
 	"testing"
 	"time"
