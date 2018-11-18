@@ -3,6 +3,7 @@ package gcp
 import (
 	"context"
 	"flag"
+	"fmt"
 	"net/url"
 	"testing"
 	"time"
@@ -28,7 +29,7 @@ type GcpTests struct {
 	bucket  *bucketMock
 }
 
-var realGcp = flag.Bool("gcp", false, "tests against a real gcp instance")
+var realGcp = flag.Bool("realgcp", false, "tests against a real gcp instance")
 var project = flag.String("gcpprj", "", "the gcp project to test against")
 var bucket = flag.String("gcpbucket", "", "the gcp bucket to test against")
 
@@ -57,14 +58,22 @@ func setupMockStorage(g *GcpTests) {
 func setupRealStorage(g *GcpTests) {
 	_, err := envy.MustGet("GOOGLE_APPLICATION_CREDENTIALS")
 	if err != nil {
+		fmt.Printf("FEDE skipping")
 		g.T().Skip()
 	}
 	if *project == "" || *bucket == "" {
 		g.T().Skip()
 	}
 
+	fmt.Println("FEDE project " + *project)
+
 	g.store, err = New(context.Background(), &config.GCPConfig{TimeoutConf: config.TimeoutConf{300},
 		ProjectID: *project,
 		Bucket:    *bucket,
 	})
+
+	fmt.Println("FEDE err", err)
+
+	g.Require().NoError(err)
+	fmt.Println("FEDE store", g.store)
 }
