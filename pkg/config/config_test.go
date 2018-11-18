@@ -4,6 +4,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strconv"
 	"testing"
 
@@ -298,6 +299,12 @@ func restoreEnv(envVars map[string]string) {
 }
 
 func Test_checkFilePerms(t *testing.T) {
+	// TODO: os.Chmod(..) doesn't work on Windows as it does on Unix
+	// Skip for now
+	// issue: https://github.com/gomods/athens/issues/879
+	if runtime.GOOS == "windows" {
+		t.SkipNow()
+	}
 	f1, err := ioutil.TempFile(os.TempDir(), "prefix-")
 	if err != nil {
 		t.FailNow()
