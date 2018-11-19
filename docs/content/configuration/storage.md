@@ -24,7 +24,7 @@ This storage doesn't need any specific configuration and it's also used by defau
 
 **This storage type should only be used for development purposes!**
 
-##### Configs:
+##### Configuration:
 
     # StorageType sets the type of storage backend the proxy will use.
     # Env override: ATHENS_STORAGE_TYPE
@@ -34,7 +34,7 @@ This storage doesn't need any specific configuration and it's also used by defau
 
 Disk storage allows modules to be stored on a file system. The location on disk where modules will be stored can be configured.
 
-##### Configs:
+##### Configuration:
 
     # StorageType sets the type of storage backend the proxy will use.
     # Env override: ATHENS_STORAGE_TYPE
@@ -50,7 +50,7 @@ where `/path/on/disk` is your desired location. Also it can be set using `ATHENS
 
 This driver uses a [Mongo](https://www.mongodb.com/) server as data storage. On start this driver will create an `athens` database and `module` collection on your Mongo server.
 
-##### Configs:
+##### Configuration:
 
     # StorageType sets the type of storage backend the proxy will use.
     # Env override: ATHENS_STORAGE_TYPE
@@ -83,7 +83,7 @@ This driver uses a [Mongo](https://www.mongodb.com/) server as data storage. On 
 This driver uses [Google Object Storage](https://cloud.google.com/storage/) and assumes that you already have an `account` in it. 
 The GCP driver at start will try to create `bucket` in which Athens data will be stored.
 
-##### Configs:
+##### Configuration:
 
     # StorageType sets the type of storage backend the proxy will use.
     # Env override: ATHENS_STORAGE_TYPE
@@ -109,7 +109,7 @@ This driver is using the [AWS S3](https://aws.amazon.com/s3/) and assumes that y
 If you never used Amazon Web Services there is [quick guide](https://docs.aws.amazon.com/AmazonS3/latest/gsg/GetStartedWithS3.html) how to create `bucket` inside it.
 After this you can pass you credentials inside `config.toml` file
 
-##### Configs:
+##### Configuration:
 
     # StorageType sets the type of storage backend the proxy will use.
     # Env override: ATHENS_STORAGE_TYPE
@@ -147,7 +147,7 @@ After this you can pass you credentials inside `config.toml` file
 
 [Minio](https://www.minio.io/) is an open source object storage server. If you never used minio you can read this [quick start guide](https://docs.minio.io/) 
 
-##### Configs:
+##### Configuration:
 
     # StorageType sets the type of storage backend the proxy will use.
     # Env override: ATHENS_STORAGE_TYPE
@@ -185,7 +185,7 @@ After this you can pass you credentials inside `config.toml` file
 For Athens to communicate with [DigitalOcean Spaces](https://www.digitalocean.com/products/spaces/), we are using Minio driver because DO Spaces tries to be [fully compatible with it](https://developers.digitalocean.com/documentation/spaces/).
 Also configuration for this storage looks almost the same in our proxy as for [Minio](#minio). 
 
-##### Configs:
+##### Configuration:
 
     # StorageType sets the type of storage backend the proxy will use.
     # Env override: ATHENS_STORAGE_TYPE
