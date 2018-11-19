@@ -114,6 +114,8 @@ github.com/gobuffalo/genny
 # github.com/gobuffalo/github_flavored_markdown v1.0.5
 github.com/gobuffalo/github_flavored_markdown
 github.com/gobuffalo/github_flavored_markdown/internal/russross/blackfriday
+# github.com/gobuffalo/httptest v1.0.4
+github.com/gobuffalo/httptest
 # github.com/gobuffalo/makr v1.1.5
 github.com/gobuffalo/makr
 # github.com/gobuffalo/mapi v1.0.1
@@ -154,6 +156,7 @@ github.com/gobuffalo/uuid
 github.com/gobuffalo/validate
 github.com/gobuffalo/validate/validators
 # github.com/gobuffalo/x v0.0.0-20181007152206-913e47c59ca7
+github.com/gobuffalo/x/sessions
 github.com/gobuffalo/x/defaults
 github.com/gobuffalo/x/httpx
 github.com/gobuffalo/x/randx
@@ -265,8 +268,6 @@ github.com/philhofer/fwd
 github.com/pkg/errors
 # github.com/pmezard/go-difflib v1.0.0
 github.com/pmezard/go-difflib/difflib
-# github.com/rs/cors v1.5.0
-github.com/rs/cors
 # github.com/serenize/snaker v0.0.0-20171204205717-a683aaf2d516
 github.com/serenize/snaker
 # github.com/sergi/go-diff v1.0.0

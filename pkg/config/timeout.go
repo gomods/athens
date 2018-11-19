@@ -9,5 +9,10 @@ type TimeoutConf struct {
 
 // TimeoutDuration returns the timeout as time.duration
 func (t *TimeoutConf) TimeoutDuration() time.Duration {
-	return time.Second * time.Duration(t.Timeout)
+	return GetTimeoutDuration(t.Timeout)
+}
+
+// GetTimeoutDuration returns the timeout as time.duration
+func GetTimeoutDuration(timeout int) time.Duration {
+	return time.Second * time.Duration(timeout)
 }
