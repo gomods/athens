@@ -319,6 +319,10 @@ func Test_checkFilePerms(t *testing.T) {
 	defer os.Remove(f1.Name())
 	err = os.Chmod(f1.Name(), invalidPerm())
 
+	t.Logf("for windows invalidPerm for f1 is %s is %d and error is %s\n", f1.Name(), invalidPerm(), err)
+	stat, lstatErr := os.Lstat(f1.Name())
+	t.Logf("stat: %s, err %s", stat, lstatErr)
+
 	f2, err := ioutil.TempFile(os.TempDir(), "prefix-")
 	if err != nil {
 		t.FailNow()
