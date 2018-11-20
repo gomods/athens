@@ -298,26 +298,34 @@ func restoreEnv(envVars map[string]string) {
 	}
 }
 
-func Test_checkFilePerms(t *testing.T) {
-	// TODO: os.Chmod(..) doesn't work on Windows as it does on Unix
-	// Skip for now
-	// issue: https://github.com/gomods/athens/issues/879
+func invalidPerm() os.FileMode {
 	if runtime.GOOS == "windows" {
-		t.SkipNow()
+		return 0200
 	}
+	return 0777
+}
+
+func correctPerm() os.FileMode {
+	if runtime.GOOS == "windows" {
+		return 0600
+	}
+	return 0640
+}
+
+func Test_checkFilePerms(t *testing.T) {
 	f1, err := ioutil.TempFile(os.TempDir(), "prefix-")
 	if err != nil {
 		t.FailNow()
 	}
 	defer os.Remove(f1.Name())
-	err = os.Chmod(f1.Name(), 0777)
+	err = os.Chmod(f1.Name(), invalidPerm())
 
 	f2, err := ioutil.TempFile(os.TempDir(), "prefix-")
 	if err != nil {
 		t.FailNow()
 	}
 	defer os.Remove(f2.Name())
-	err = os.Chmod(f2.Name(), 0600)
+	err = os.Chmod(f2.Name(), correctPerm())
 
 	type args struct {
 		files []string

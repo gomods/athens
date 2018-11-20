@@ -192,7 +192,7 @@ TraceExporter = "jaeger"
         Insecure = false
         
     [Storage.S3]
-        # Access Key for S3 storage
+        # Region for S3 storage
         # Env override: AWS_REGION
         Region = "MY_AWS_REGION"
 
@@ -209,6 +209,5 @@ TraceExporter = "jaeger"
         Token = ""
 
         # S3 Bucket to use for storage
-        # Defaults to gomods
         # Env override: ATHENS_S3_BUCKET_NAME
         Bucket = "MY_S3_BUCKET_NAME"
