@@ -10,4 +10,9 @@ Here we'll cover how to configure the Athens application utilizing various confi
 ### Authentication
 There are numerous version control systems available to us as developers.  In this section we'll outline how they can be used by supplying required credentials in various formats for the Athens project.
 
- - [Authentication](https://github.com/gomods/athens/blob/master/docs/content/configuration/authentication.md)
+ - [Authentication](/configuration/authentication)
+ 
+### Storage
+In Athens we support many storage options. In this section we'll describe how they can be configured
+
+ - [Storage](/configuration/storage)
