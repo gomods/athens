@@ -76,7 +76,7 @@ make test-unit
 
 # Run the docs
 
-To get started with developing the docs we provide a docker image which you can use with the `/docs` directory. It should work on all platforms. To get it up and running:
+To get started with developing the docs we provide a docker image. This runs [Hugo](https://gohugo.io/) to render the docs. Using the docker image, we mount the `/docs` directory into the container. To get it up and running, from the project root run:
 
 ```
 make docs
@@ -86,6 +86,8 @@ docker run -it --rm \
         -v ${PWD}/docs:/src:cached \
         gomods/hugo
 ```
+
+Then open [http://localhost:1313](http://localhost:1313/).
 
 # Linting
 
