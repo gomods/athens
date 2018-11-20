@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -306,6 +307,7 @@ func invalidPerm() os.FileMode {
 
 func correctPerm() os.FileMode {
 	if runtime.GOOS == "windows" {
+		fmt.Println("select windows runtime")
 		return 0600
 	}
 	return 0640
@@ -323,15 +325,16 @@ func Test_checkFilePerms(t *testing.T) {
 	stat, lstatErr := os.Lstat(f1.Name())
 	t.Logf("f1 stat: %d, err %s", stat.Mode(), lstatErr)
 
-	stat, lstatErr = os.Lstat(f2.Name())
-	t.Logf("f2 stat: %d, err %s", stat.Mode(), lstatErr)
-
 	f2, err := ioutil.TempFile(os.TempDir(), "prefix-")
 	if err != nil {
 		t.FailNow()
 	}
+
 	defer os.Remove(f2.Name())
 	err = os.Chmod(f2.Name(), correctPerm())
+
+	stat, lstatErr = os.Lstat(f2.Name())
+	t.Logf("f2 stat: %d, err %s", stat.Mode(), lstatErr)
 
 	type args struct {
 		files []string
