@@ -323,7 +323,7 @@ func Test_checkFilePerms(t *testing.T) {
 	stat, lstatErr := os.Lstat(f1.Name())
 	t.Logf("f1 stat: %d, err %s", stat.Mode(), lstatErr)
 
-	stat, lstatErr := os.Lstat(f2.Name())
+	stat, lstatErr = os.Lstat(f2.Name())
 	t.Logf("f2 stat: %d, err %s", stat.Mode(), lstatErr)
 
 	f2, err := ioutil.TempFile(os.TempDir(), "prefix-")
