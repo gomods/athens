@@ -306,23 +306,21 @@ func Test_checkFilePerms(t *testing.T) {
 
 	f1, err := ioutil.TempFile(os.TempDir(), "prefix-")
 	if err != nil {
-		t.FailNow()
+		t.Fatalf("Cannot create 1st temp file: %s", err)
 	}
 	defer os.Remove(f1.Name())
-	err = os.Chmod(f1.Name(), 0700)
-	if err != nil {
-		t.Fatalf("%s\n", err)
+	if err = os.Chmod(f1.Name(), 0700); err != nil {
+		t.Fatalf("Cannot chmod 1st temp file: %s", err)
 	}
 
 	f2, err := ioutil.TempFile(os.TempDir(), "prefix-")
 	if err != nil {
-		t.FailNow()
+		t.Fatalf("Cannot create 2nd temp file: %s", err)
 	}
 
 	defer os.Remove(f2.Name())
-	err = os.Chmod(f2.Name(), 0640)
-	if err != nil {
-		t.Fatalf("%s\n", err)
+	if err = os.Chmod(f2.Name(), 0640); err != nil {
+		t.Fatalf("Cannot chmod 2nd temp file: %s", err)
 	}
 
 	type args struct {
