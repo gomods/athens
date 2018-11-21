@@ -298,34 +298,32 @@ func restoreEnv(envVars map[string]string) {
 	}
 }
 
-func invalidPerm() os.FileMode {
-	if runtime.GOOS == "windows" {
-		return 0200
-	}
-	return 0777
-}
-
-func correctPerm() os.FileMode {
-	if runtime.GOOS == "windows" {
-		return 0600
-	}
-	return 0640
-}
-
 func Test_checkFilePerms(t *testing.T) {
+
+	if runtime.GOOS == "windows" {
+		t.Skipf("Chmod is not supported in windows, so not possible to test. Ref: https://github.com/golang/go/blob/master/src/os/os_test.go#L1031\n")
+	}
+
 	f1, err := ioutil.TempFile(os.TempDir(), "prefix-")
 	if err != nil {
 		t.FailNow()
 	}
 	defer os.Remove(f1.Name())
-	err = os.Chmod(f1.Name(), invalidPerm())
+	err = os.Chmod(f1.Name(), 0700)
+	if err != nil {
+		t.Fatalf("%s\n", err)
+	}
 
 	f2, err := ioutil.TempFile(os.TempDir(), "prefix-")
 	if err != nil {
 		t.FailNow()
 	}
+
 	defer os.Remove(f2.Name())
-	err = os.Chmod(f2.Name(), correctPerm())
+	err = os.Chmod(f2.Name(), 0640)
+	if err != nil {
+		t.Fatalf("%s\n", err)
+	}
 
 	type args struct {
 		files []string
