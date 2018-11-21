@@ -6,7 +6,7 @@ import (
 	"io"
 	"net/url"
 
-	"github.com/Azure/azure-storage-blob-go/2017-07-29/azblob"
+	"github.com/Azure/azure-storage-blob-go/azblob"
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/observ"
@@ -24,8 +24,11 @@ type azureBlobStoreClient struct {
 	containerURL *azblob.ContainerURL
 }
 
-func newBlobStoreClient(accountURL *url.URL, accountName, accountKey, containerName string) *azureBlobStoreClient {
-	cred := azblob.NewSharedKeyCredential(accountName, accountKey)
+func newBlobStoreClient(accountURL *url.URL, accountName, accountKey, containerName string) (*azureBlobStoreClient, error) {
+	cred, err := azblob.NewSharedKeyCredential(accountName, accountKey)
+	if err != nil {
+		return nil, err
+	}
 	pipe := azblob.NewPipeline(cred, azblob.PipelineOptions{})
 	serviceURL := azblob.NewServiceURL(*accountURL, pipe)
 	// rules on container names:
@@ -34,7 +37,7 @@ func newBlobStoreClient(accountURL *url.URL, accountName, accountKey, containerN
 	// This container must exist
 	containerURL := serviceURL.NewContainerURL(containerName)
 	cl := &azureBlobStoreClient{containerURL: &containerURL}
-	return cl
+	return cl, nil
 }
 
 // Storage implements (github.com/gomods/athens/pkg/storage).Saver and
@@ -51,7 +54,10 @@ func New(conf *config.AzureBlobConfig) (*Storage, error) {
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
-	cl := newBlobStoreClient(u, conf.AccountName, conf.AccountKey, conf.ContainerName)
+	cl, err := newBlobStoreClient(u, conf.AccountName, conf.AccountKey, conf.ContainerName)
+	if err != nil {
+		return nil, err
+	}
 	return &Storage{cl: cl, conf: conf}, nil
 }
 
@@ -93,7 +99,7 @@ func (c *azureBlobStoreClient) ListBlobs(ctx context.Context, prefix string) ([]
 		}
 		marker = listBlob.NextMarker
 
-		for _, blob := range listBlob.Blobs.Blob {
+		for _, blob := range listBlob.Segment.BlobItems {
 			blobs = append(blobs, blob.Name)
 		}
 	}
