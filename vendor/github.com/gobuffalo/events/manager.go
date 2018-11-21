@@ -70,8 +70,8 @@ func (m *manager) Emit(e Event) error {
 		e.Error = errors.New(e.Kind)
 	}
 	go func(e Event) {
-		m.moot.RLock()
-		defer m.moot.RUnlock()
+		m.moot.Lock()
+		defer m.moot.Unlock()
 		for _, l := range m.listeners {
 			ex := Event{
 				Kind:    e.Kind,

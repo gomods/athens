@@ -11,6 +11,15 @@ then
   verbose="-v"
 fi
 
+function cleanup {
+  echo "Cleanup resources..."
+  docker-compose down
+  rm tsoda
+  find ./sql_scripts/sqlite -name *.sqlite* -delete
+}
+# defer cleanup, so it will be executed even after premature exit
+trap cleanup EXIT
+
 docker-compose up -d
 sleep 4 # Ensure mysql is online
 
@@ -32,8 +41,3 @@ test "postgres"
 test "cockroach"
 test "mysql"
 test "sqlite"
-
-docker-compose down
-
-rm tsoda
-find ./sql_scripts/sqlite -name *.sqlite* -delete

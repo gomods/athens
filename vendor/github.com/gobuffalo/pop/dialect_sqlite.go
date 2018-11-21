@@ -24,6 +24,7 @@ import (
 
 func init() {
 	AvailableDialects = append(AvailableDialects, "sqlite3")
+	dialectSynonyms["sqlite"] = "sqlite3"
 }
 
 var _ dialect = &sqlite{}
@@ -133,17 +134,7 @@ func (m *sqlite) FizzTranslator() fizz.Translator {
 
 func (m *sqlite) DumpSchema(w io.Writer) error {
 	cmd := exec.Command("sqlite3", m.Details().Database, ".schema")
-	log(logging.SQL, strings.Join(cmd.Args, " "))
-	cmd.Stdout = w
-	cmd.Stderr = os.Stderr
-
-	err := cmd.Run()
-	if err != nil {
-		return err
-	}
-
-	log(logging.Info, "dumped schema for %s", m.Details().Database)
-	return nil
+	return genericDumpSchema(m.Details(), cmd, w)
 }
 
 func (m *sqlite) LoadSchema(r io.Reader) error {

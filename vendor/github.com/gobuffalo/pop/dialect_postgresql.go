@@ -4,23 +4,22 @@ import (
 	"database/sql"
 	"fmt"
 	"io"
-	"os"
 	"os/exec"
-	"strings"
 	"sync"
-
-	"github.com/jmoiron/sqlx"
 
 	"github.com/gobuffalo/fizz"
 	"github.com/gobuffalo/fizz/translators"
 	"github.com/gobuffalo/pop/columns"
 	"github.com/gobuffalo/pop/logging"
+	"github.com/jmoiron/sqlx"
 	"github.com/markbates/going/defaults"
 	"github.com/pkg/errors"
 )
 
 func init() {
 	AvailableDialects = append(AvailableDialects, "postgres")
+	dialectSynonyms["postgresql"] = "postgres"
+	dialectSynonyms["pg"] = "postgres"
 }
 
 var _ dialect = &postgresql{}
@@ -32,7 +31,7 @@ type postgresql struct {
 }
 
 func (p *postgresql) Name() string {
-	return "postgresql"
+	return "postgres"
 }
 
 func (p *postgresql) Details() *ConnectionDetails {
@@ -177,17 +176,7 @@ func (p *postgresql) Lock(fn func() error) error {
 
 func (p *postgresql) DumpSchema(w io.Writer) error {
 	cmd := exec.Command("pg_dump", "-s", fmt.Sprintf("--dbname=%s", p.URL()))
-	log(logging.SQL, strings.Join(cmd.Args, " "))
-	cmd.Stdout = w
-	cmd.Stderr = os.Stderr
-
-	err := cmd.Run()
-	if err != nil {
-		return err
-	}
-
-	log(logging.Info, "dumped schema for %s", p.Details().Database)
-	return nil
+	return genericDumpSchema(p.Details(), cmd, w)
 }
 
 // LoadSchema executes a schema sql file against the configured database.
@@ -216,8 +205,8 @@ DECLARE
    _sch text;
 BEGIN
    FOR _sch, _tbl IN
-      SELECT schemaname, tablename 
-      FROM   pg_tables 
+      SELECT schemaname, tablename
+      FROM   pg_tables
       WHERE  tablename <> '%s' AND schemaname NOT IN ('pg_catalog', 'information_schema') AND tableowner = current_user
    LOOP
       --RAISE ERROR '%%',

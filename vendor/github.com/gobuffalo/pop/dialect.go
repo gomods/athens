@@ -1,10 +1,14 @@
 package pop
 
 import (
+	"bytes"
 	"encoding/gob"
 	"fmt"
 	"io"
 	"io/ioutil"
+	"os"
+	"os/exec"
+	"strings"
 
 	"github.com/gobuffalo/fizz"
 	"github.com/gobuffalo/pop/columns"
@@ -163,5 +167,28 @@ func genericLoadSchema(deets *ConnectionDetails, migrationURL string, r io.Reade
 	}
 
 	log(logging.Info, "loaded schema for %s", deets.Database)
+	return nil
+}
+
+func genericDumpSchema(deets *ConnectionDetails, cmd *exec.Cmd, w io.Writer) error {
+	log(logging.SQL, strings.Join(cmd.Args, " "))
+
+	bb := &bytes.Buffer{}
+	mw := io.MultiWriter(w, bb)
+
+	cmd.Stdout = mw
+	cmd.Stderr = os.Stderr
+
+	err := cmd.Run()
+	if err != nil {
+		return err
+	}
+
+	x := bytes.TrimSpace(bb.Bytes())
+	if len(x) == 0 {
+		return errors.Errorf("unable to dump schema for %s", deets.Database)
+	}
+
+	log(logging.Info, "dumped schema for %s", deets.Database)
 	return nil
 }

@@ -31,8 +31,6 @@ Thank you to the following **GIANTS**:
 
 * [github.com/markbates/safe](https://godoc.org/github.com/markbates/safe)
 
-* [github.com/pelletier/go-toml](https://godoc.org/github.com/pelletier/go-toml)
-
 * [github.com/pkg/errors](https://godoc.org/github.com/pkg/errors)
 
 * [github.com/sirupsen/logrus](https://godoc.org/github.com/sirupsen/logrus)

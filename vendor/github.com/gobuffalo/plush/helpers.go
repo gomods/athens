@@ -44,6 +44,7 @@ func init() {
 	Helpers.Add("truncate", truncateHelper)
 	Helpers.Add("env", envy.MustGet)
 	Helpers.Add("envOr", envy.Get)
+	Helpers.Add("partial", partialHelper)
 	Helpers.Add("raw", func(s string) template.HTML {
 		return template.HTML(s)
 	})

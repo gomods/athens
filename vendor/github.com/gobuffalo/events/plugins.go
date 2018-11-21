@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/gobuffalo/buffalo-plugins/plugins"
+	"github.com/gobuffalo/envy"
 	"github.com/markbates/oncer"
 	"github.com/markbates/safe"
 	"github.com/pkg/errors"
@@ -17,6 +18,10 @@ import (
 func LoadPlugins() error {
 	var err error
 	oncer.Do("events.LoadPlugins", func() {
+		// don't send plugins events during testing
+		if envy.Get("GO_ENV", "development") == "test" {
+			return
+		}
 		plugs, err := plugins.Available()
 		if err != nil {
 			err = errors.WithStack(err)

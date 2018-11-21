@@ -635,6 +635,11 @@ func (c *compiler) evalForExpression(node *ast.ForExpression) (interface{}, erro
 		c.ctx = octx
 	}()
 	c.ctx = octx.New()
+	// must copy all data from original (it includes application defined helpers)
+	for k, v := range octx.data {
+		c.ctx.data[k] = v
+	}
+
 	iter, err := c.evalExpression(node.Iterable)
 	if err != nil {
 		return nil, errors.WithStack(err)

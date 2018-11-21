@@ -27,3 +27,8 @@ generated/
 bin/*
 gin-bin
 .idea/
+cockroach-data/
+migrations/schema.sql
+vendor/
+sqldumps/
+sql/
