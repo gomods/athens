@@ -1,9 +1,9 @@
 TAGS ?= "sqlite"
 GO_BIN ?= go
 
-install: deps
+install:
 	packr
-	$(GO_BIN) install -tags ${TAGS} -v ./soda
+	$(GO_BIN) install -v .
 
 deps:
 	$(GO_BIN) get github.com/gobuffalo/release
@@ -40,7 +40,7 @@ ifeq ($(GO111MODULE),on)
 endif
 
 release-test:
-	./test.sh
+	$(GO_BIN) test -tags ${TAGS} -race ./...
 
 release:
-	release -y -f soda/cmd/version.go
+	release -y -f version.go

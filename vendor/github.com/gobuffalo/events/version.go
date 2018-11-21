@@ -1,3 +1,3 @@
 package events
 
-const Version = "v1.1.5"
+const Version = "v1.1.1"

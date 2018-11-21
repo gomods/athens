@@ -3,7 +3,6 @@ package buffalo
 import (
 	"fmt"
 	"net/http"
-	"net/url"
 	"os"
 	"path"
 	"reflect"
@@ -86,9 +85,7 @@ func (a *App) Mount(p string, h http.Handler) {
 func (a *App) ServeFiles(p string, root http.FileSystem) {
 	path := path.Join(a.Prefix, p)
 	a.filepaths = append(a.filepaths, path)
-
-	h := stripAsset(path, a.fileServer(root))
-	a.router.PathPrefix(path).Handler(h)
+	a.router.PathPrefix(path).Handler(http.StripPrefix(path, a.fileServer(root)))
 }
 
 func (a *App) fileServer(fs http.FileSystem) http.Handler {
@@ -285,24 +282,4 @@ func (a *App) buildRouteName(p string) string {
 
 	underscore := strings.TrimSpace(strings.Join(resultParts, "_"))
 	return inflect.CamelizeDownFirst(underscore)
-}
-
-func stripAsset(path string, h http.Handler) http.Handler {
-	if path == "" {
-		return h
-	}
-
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		up := r.URL.Path
-		up = strings.TrimPrefix(up, path)
-		up = strings.TrimSuffix(up, "/")
-		u, err := url.Parse(up)
-		if err != nil {
-			w.WriteHeader(500)
-			w.Write([]byte(err.Error()))
-			return
-		}
-		r.URL = u
-		h.ServeHTTP(w, r)
-	})
 }

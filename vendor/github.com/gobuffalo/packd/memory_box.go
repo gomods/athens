@@ -76,28 +76,7 @@ func (m *MemoryBox) FindString(path string) (string, error) {
 func (m *MemoryBox) Find(path string) ([]byte, error) {
 	res, ok := m.files.Load(path)
 	if !ok {
-
-		var b []byte
-		lpath := strings.ToLower(path)
-		err := m.Walk(func(p string, file File) error {
-			lp := strings.ToLower(p)
-			if lp != lpath {
-				return nil
-			}
-
-			res := file.String()
-			b = []byte(res)
-			m.AddString(lp, res)
-			return nil
-		})
-		if err != nil {
-			return b, os.ErrNotExist
-		}
-		if len(b) == 0 {
-			return b, os.ErrNotExist
-		}
-
-		return b, nil
+		return nil, os.ErrNotExist
 	}
 	b, ok := res.([]byte)
 	if !ok {
@@ -159,7 +138,6 @@ func (m *MemoryBox) WalkPrefix(pre string, wf WalkFunc) error {
 
 func (m *MemoryBox) Remove(path string) {
 	m.files.Delete(path)
-	m.files.Delete(strings.ToLower(path))
 }
 
 // NewMemoryBox returns a configured *MemoryBox

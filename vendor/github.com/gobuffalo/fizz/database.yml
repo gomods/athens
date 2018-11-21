@@ -4,7 +4,7 @@ mysql:
   host: {{ envOr "MYSQL_HOST" "127.0.0.1"  }}
   port: {{ envOr "MYSQL_PORT" "3306"  }}
   user: {{ envOr "MYSQL_USER"  "root"  }}
-  password: {{ envOr "MYSQL_PASSWORD" "root"  }}
+  password: {{ envOr "MYSQL_PASSWORD"  "root"  }}
 
 mysql_travis:
   dialect: "mysql"

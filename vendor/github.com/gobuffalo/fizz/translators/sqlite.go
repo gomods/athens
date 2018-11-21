@@ -384,15 +384,9 @@ func (p *SQLite) colType(c fizz.Column) string {
 		return "DATETIME"
 	case "boolean", "date":
 		return "NUMERIC"
-	case "string", "text":
+	case "string":
 		return "TEXT"
-	case "int", "integer":
-		return "INTEGER"
-	case "float":
-		return "REAL"
-	case "json":
-		return "TEXT"
-	case "blob", "[]byte":
+	case "blob":
 		return "BLOB"
 	default:
 		return c.ColType

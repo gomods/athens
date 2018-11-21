@@ -46,7 +46,6 @@ var dialectX = regexp.MustCompile(`\s+:\/\/`)
 // Finalize cleans up the connection details by normalizing names,
 // filling in default values, etc...
 func (cd *ConnectionDetails) Finalize() error {
-	cd.Dialect = normalizeSynonyms(cd.Dialect)
 	if cd.URL != "" {
 		ul := cd.URL
 		if cd.Dialect != "" {
@@ -55,7 +54,7 @@ func (cd *ConnectionDetails) Finalize() error {
 			}
 		}
 		cd.Database = cd.URL
-		if cd.Dialect != "sqlite3" {
+		if !strings.HasPrefix(cd.Dialect, "sqlite") {
 			u, err := url.Parse(ul)
 			if err != nil {
 				return errors.Wrapf(err, "couldn't parse %s", ul)
@@ -76,11 +75,13 @@ func (cd *ConnectionDetails) Finalize() error {
 		}
 
 	}
-	switch cd.Dialect {
-	case "postgres":
+	switch strings.ToLower(cd.Dialect) {
+	case "postgres", "postgresql", "pg":
+		cd.Dialect = "postgres"
 		cd.Port = defaults.String(cd.Port, "5432")
 		cd.Database = strings.TrimPrefix(cd.Database, "/")
-	case "cockroach":
+	case "cockroach", "cockroachdb", "crdb":
+		cd.Dialect = "cockroach"
 		cd.Port = defaults.String(cd.Port, "26257")
 		cd.Database = strings.TrimPrefix(cd.Database, "/")
 	case "mysql":
@@ -88,7 +89,7 @@ func (cd *ConnectionDetails) Finalize() error {
 		if cd.URL != "" {
 			cfg, err := _mysql.ParseDSN(strings.TrimPrefix(cd.URL, "mysql://"))
 			if err != nil {
-				return errors.Wrap(err, "the URL is not supported by MySQL driver")
+				return errors.Errorf("The URL is not supported by MySQL driver.")
 			}
 			cd.User = cfg.User
 			cd.Password = cfg.Passwd
@@ -113,8 +114,8 @@ func (cd *ConnectionDetails) Finalize() error {
 			cd.Port = defaults.String(cd.Port, "3306")
 			cd.Database = strings.TrimPrefix(cd.Database, "/")
 		}
-	case "sqlite3":
-		// Nothing more to do here
+	case "sqlite", "sqlite3":
+		cd.Dialect = "sqlite3"
 	default:
 		return errors.Errorf("unknown dialect %s", cd.Dialect)
 	}

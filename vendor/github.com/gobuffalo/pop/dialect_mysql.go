@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	"io"
+	"os"
 	"os/exec"
 	"strings"
 
@@ -147,7 +148,17 @@ func (m *mysql) DumpSchema(w io.Writer) error {
 	if deets.Port == "socket" {
 		cmd = exec.Command("mysqldump", "-d", "-S", deets.Host, "-u", deets.User, fmt.Sprintf("--password=%s", deets.Password), deets.Database)
 	}
-	return genericDumpSchema(deets, cmd, w)
+	log(logging.SQL, strings.Join(cmd.Args, " "))
+	cmd.Stdout = w
+	cmd.Stderr = os.Stderr
+
+	err := cmd.Run()
+	if err != nil {
+		return err
+	}
+
+	log(logging.Info, "dumped schema for %s", m.Details().Database)
+	return nil
 }
 
 // LoadSchema executes a schema sql file against the configured database.

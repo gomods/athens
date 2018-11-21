@@ -144,7 +144,6 @@ func (b Box) find(name string) (File, error) {
 	if bb, ok := b.data[name]; ok {
 		return packd.NewFile(name, bytes.NewReader(bb))
 	}
-
 	if b.directories == nil {
 		b.indexDirectories()
 	}
@@ -157,6 +156,7 @@ func (b Box) find(name string) (File, error) {
 	// Absolute name is considered as relative to the box root
 	cleanName = strings.TrimPrefix(cleanName, "/")
 
+	// Try to get the resource from the box
 	if _, ok := data[b.Path]; ok {
 		if bb, ok := data[b.Path][cleanName]; ok {
 			bb = b.decompress(bb)

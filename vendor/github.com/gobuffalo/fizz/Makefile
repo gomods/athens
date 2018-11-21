@@ -19,7 +19,7 @@ build:
 
 test:
 	packr
-	./test.sh
+	$(GO_BIN) test -tags ${TAGS} ./...
 
 ci-test:
 	$(GO_BIN) test -tags ${TAGS} -race ./...

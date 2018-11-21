@@ -1,6 +1,3 @@
-/*
-Package fizz is a common DSL for writing SQL migrations
-*/
 package fizz
 
 import (

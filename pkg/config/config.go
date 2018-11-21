@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime"
 
 	"github.com/BurntSushi/toml"
 	"github.com/gomods/athens/pkg/errors"
@@ -70,9 +71,6 @@ func ParseConfigFile(configFile string) (*Config, error) {
 	if err := envOverride(&config); err != nil {
 		return nil, err
 	}
-
-	// If not defined, set storage timeouts to global timeout
-	setStorageTimeouts(config.Storage, config.Timeout)
 
 	// validate all required fields have been populated
 	if err := validateConfig(config); err != nil {
@@ -143,8 +141,15 @@ func checkFilePerms(files ...string) error {
 			continue
 		}
 
-		if fInfo.Mode() != 0600 {
-			return errors.E(op, f+" should have 0600 as permission")
+		if runtime.GOOS == "windows" {
+			if (fInfo.Mode() & 0600) != 0600 {
+				return errors.E(op, f+" should have 0600 as permission")
+			}
+		} else {
+			// Assume unix based system (MacOS and Linux)
+			if fInfo.Mode() != 0640 {
+				return errors.E(op, f+" should have 0640 as permission")
+			}
 		}
 	}
 

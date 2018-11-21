@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strings"
 	"syscall"
 
@@ -154,6 +155,9 @@ func (a *App) processPreHandlers(res http.ResponseWriter, req *http.Request) boo
 }
 
 func (a *App) normalizePath(path string) string {
+	if filepath.Ext(path) != "" {
+		return path
+	}
 	if strings.HasSuffix(path, "/") {
 		return path
 	}

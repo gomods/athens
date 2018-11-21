@@ -1,17 +1,13 @@
 package translators
 
 import (
-	"database/sql"
 	"fmt"
 	"strings"
 
-	"github.com/blang/semver"
 	"github.com/gobuffalo/fizz"
 	"github.com/jmoiron/sqlx"
 	"github.com/pkg/errors"
 )
-
-var mysql57Version = semver.MustParse("5.7.0")
 
 type mysqlTableInfo struct {
 	Field   string      `db:"Field"`
@@ -43,27 +39,26 @@ type mysqlSchema struct {
 	Schema
 }
 
-func (p *mysqlSchema) Version() (*semver.Version, error) {
-	var version *semver.Version
+func (p *mysqlSchema) Version() (string, error) {
+	var version string
 	var err error
 
-	db, err := sql.Open("mysql", p.URL)
+	p.db, err = sqlx.Open("mysql", p.URL)
 	if err != nil {
-		return version, errors.WithMessage(err, "could not fetch MySQL version")
+		return version, err
 	}
-	defer db.Close()
+	defer p.db.Close()
 
-	res, err := db.Query("SELECT VERSION()")
+	res, err := p.db.Queryx("select VERSION()")
 	if err != nil {
-		return version, errors.WithMessage(err, "could not fetch MySQL version")
+		return version, err
 	}
-	defer res.Close()
 
 	for res.Next() {
 		err = res.Scan(&version)
-		return version, errors.WithMessage(err, "could not fetch MySQL version")
+		return version, err
 	}
-	return version, errors.New("could not fetch MySQL version")
+	return "", errors.New("could not locate MySQL version")
 }
 
 func (p *mysqlSchema) Build() error {
@@ -78,7 +73,6 @@ func (p *mysqlSchema) Build() error {
 	if err != nil {
 		return err
 	}
-	defer res.Close()
 	for res.Next() {
 		table := &fizz.Table{
 			Columns: []fizz.Column{},
