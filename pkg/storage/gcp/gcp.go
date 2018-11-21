@@ -42,9 +42,7 @@ func New(ctx context.Context, gcpConf *config.GCPConfig, timeout time.Duration) 
 		return nil, errors.E(op, err)
 	}
 	bkt := gcpBucket{storage.Bucket(bucketname)}
-	fmt.Println("FEDE bucket" + bucketname)
 	err = bkt.Create(ctx, gcpConf.ProjectID, nil)
-	fmt.Println("FEDE bucket create ", err)
 
 	if err != nil && !bucketExistsErr(err) {
 		return nil, errors.E(op, err)

@@ -134,23 +134,18 @@ func testCatalog(t *testing.T, b storage.Backend) {
 	mock := getMockModule()
 	zipBts, _ := ioutil.ReadAll(mock.Zip)
 	modname := "testCatalogModule"
-	fmt.Println("FEDE saving")
 	for i := 0; i < 1005; i++ {
 		ver := fmt.Sprintf("v1.2.%04d", i)
 		b.Save(ctx, modname, ver, mock.Mod, bytes.NewReader(zipBts), mock.Info)
 	}
 	defer func() {
-		fmt.Println("FEDE deleting")
-
 		for i := 0; i < 1005; i++ {
 			ver := fmt.Sprintf("v1.2.04%d", i)
 			b.Delete(ctx, modname, ver)
 		}
 	}()
 
-	fmt.Println("FEDE catalog 1001 first")
 	allres, next, err := b.Catalog(ctx, "", 1001)
-	fmt.Println("FEDE catalog 1001 after")
 
 	require.NoError(t, err)
 	require.Equal(t, len(allres), 1001)
@@ -161,16 +156,12 @@ func testCatalog(t *testing.T, b storage.Backend) {
 	require.Equal(t, len(res), 4)
 	require.Equal(t, "", next)
 
-	fmt.Println("FEDE sort first")
-
 	sort.Slice(allres, func(i, j int) bool {
 		if allres[i].Module == allres[j].Module {
 			return allres[i].Version < allres[j].Version
 		}
 		return allres[i].Module < allres[j].Module
 	})
-
-	fmt.Println("FEDE sort after")
 
 	require.Equal(t, allres[0].Version, "v1.2.0000")
 	require.Equal(t, allres[1004].Version, "v1.2.1004")

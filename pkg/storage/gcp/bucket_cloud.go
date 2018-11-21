@@ -2,6 +2,7 @@ package gcp
 
 import (
 	"context"
+	"fmt"
 	"io"
 
 	"cloud.google.com/go/storage"
@@ -77,6 +78,8 @@ func (b *gcpBucket) Catalog(ctx context.Context, token string, elementNum int) (
 	it := b.Objects(ctx, nil)
 	it.PageInfo().Token = token
 	it.PageInfo().MaxSize = elementNum
+
+	fmt.Println("FEDE asking for ", elementNum, "elements")
 
 	res := []string{}
 	for {

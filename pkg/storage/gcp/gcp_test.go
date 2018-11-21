@@ -3,6 +3,7 @@ package gcp
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"io/ioutil"
 	"testing"
 	"time"
@@ -50,9 +51,14 @@ func (g *GcpTests) TestSaveGetListExistsRoundTrip() {
 		r.Equal(true, exists)
 	})
 
+	g.T().Run("Delete storage", func(t *testing.T) {
+		err := g.store.Delete(g.context, g.module, g.version)
+		r.NoError(err)
+	})
+
 	g.T().Run("Resources closed", func(t *testing.T) {
-		r.Equal(true, g.bucket.ReadClosed())
-		r.Equal(true, g.bucket.WriteClosed())
+		r.Equal(true, g.BucketReadClosed())
+		r.Equal(true, g.BucketWriteClosed())
 	})
 }
 
@@ -94,4 +100,26 @@ func (g *GcpTests) TestNotFounds() {
 		r.NoError(err)
 		r.Equal(0, len(list))
 	})
+}
+
+func (g *GcpTests) TestCatalog() {
+	r := g.Require()
+	for i := 0; i < 100; i++ {
+		ver := fmt.Sprintf("v1.2.%04d", i)
+		err := g.store.Save(g.context, g.module, ver, mod, bytes.NewReader(zip), info)
+		r.NoError(err)
+	}
+	defer func() {
+		for i := 0; i < 100; i++ {
+			ver := fmt.Sprintf("v1.2.04%d", i)
+			err := g.store.Delete(g.context, g.module, ver)
+			r.NoError(err)
+		}
+	}()
+
+	allres, next, err := g.store.Catalog(g.context, "", 10)
+	r.NoError(err)
+	r.Equal(len(allres), 10)
+	r.NotEqual("", next)
+
 }

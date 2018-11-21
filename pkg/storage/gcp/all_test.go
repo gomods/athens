@@ -3,7 +3,6 @@ package gcp
 import (
 	"context"
 	"flag"
-	"fmt"
 	"net/url"
 	"testing"
 	"time"
@@ -49,6 +48,20 @@ func TestGcpStorage(t *testing.T) {
 	suite.Run(t, new(GcpTests))
 }
 
+func (g *GcpTests) BucketReadClosed() bool {
+	if g.bucket != nil {
+		return g.bucket.ReadClosed()
+	}
+	return true
+}
+
+func (g *GcpTests) BucketWriteClosed() bool {
+	if g.bucket != nil {
+		return g.bucket.WriteClosed()
+	}
+	return true
+}
+
 func setupMockStorage(g *GcpTests) {
 	g.url, _ = url.Parse("https://storage.googleapis.com/testbucket")
 	g.bucket = newBucketMock()
@@ -58,22 +71,15 @@ func setupMockStorage(g *GcpTests) {
 func setupRealStorage(g *GcpTests) {
 	_, err := envy.MustGet("GOOGLE_APPLICATION_CREDENTIALS")
 	if err != nil {
-		fmt.Printf("FEDE skipping")
 		g.T().Skip()
 	}
 	if *project == "" || *bucket == "" {
 		g.T().Skip()
 	}
 
-	fmt.Println("FEDE project " + *project)
-
 	g.store, err = New(context.Background(), &config.GCPConfig{TimeoutConf: config.TimeoutConf{300},
 		ProjectID: *project,
 		Bucket:    *bucket,
 	})
-
-	fmt.Println("FEDE err", err)
-
 	g.Require().NoError(err)
-	fmt.Println("FEDE store", g.store)
 }

@@ -2,6 +2,7 @@ package gcp
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
 	"github.com/gomods/athens/pkg/paths"
@@ -16,37 +17,50 @@ func (s *Storage) Catalog(ctx context.Context, token string, elements int) ([]pa
 	const op errors.Op = "gcp.Catalog"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
-	catalog, token, err := s.bucket.Catalog(ctx, token, elements)
-	if err != nil {
-		return nil, "", errors.E(op, err)
-	}
-	res, resToken := fetchModsAndVersions(catalog, elements)
-	return res, resToken, nil
-}
+	res := make([]paths.AllPathParams, 0)
+	var resToken string
 
-func fetchModsAndVersions(catalog []string, elementsNum int) ([]paths.AllPathParams, string) {
-	count := 0
-	var res []paths.AllPathParams
-	var token = ""
-
-	for _, p := range catalog {
-		if strings.HasSuffix(p, ".info") {
-			segments := strings.Split(p, "/")
-
-			if len(segments) <= 0 {
-				continue
-			}
-			module := segments[0]
-			last := segments[len(segments)-1]
-			version := strings.TrimSuffix(last, ".info")
-			res = append(res, paths.AllPathParams{module, version})
-			count++
+	for elements > 0 {
+		var catalog []string
+		var err error
+		catalog, resToken, err = s.bucket.Catalog(ctx, token, elements)
+		if err != nil {
+			return nil, "", errors.E(op, err)
 		}
+		pathsAndVers := fetchModsAndVersions(catalog)
+		res = append(res, pathsAndVers...)
+		elements -= len(pathsAndVers)
 
-		if count == elementsNum {
+		if resToken == "" { // meaning we reached the end
 			break
 		}
 	}
+	return res, resToken, nil
+}
 
-	return res, token
+func fetchModsAndVersions(catalog []string) []paths.AllPathParams {
+	res := make([]paths.AllPathParams, 0)
+	for _, p := range catalog {
+		if !strings.HasSuffix(p, ".info") {
+			continue
+		}
+		p, err := parseGcpKey(p)
+		if err != nil {
+			continue
+		}
+		res = append(res, p)
+	}
+	return res
+}
+
+func parseGcpKey(p string) (paths.AllPathParams, error) {
+	const op errors.Op = "gcp.parseGcpKey"
+	segments := strings.Split(p, "/")
+	if len(segments) <= 0 {
+		return paths.AllPathParams{}, errors.E(op, fmt.Errorf("invalid object key format %s", p))
+	}
+	module := segments[0]
+	last := segments[len(segments)-1]
+	version := strings.TrimSuffix(last, ".info")
+	return paths.AllPathParams{module, version}, nil
 }
