@@ -323,7 +323,7 @@ func Test_checkFilePerms(t *testing.T) {
 
 	// t.Logf("for windows invalidPerm for f1 is %s is %d and error is %s\n", f1.Name(), invalidPerm(), err)
 	stat, lstatErr := os.Lstat(f1.Name())
-	t.Logf("f1 stat: %d, err %s", stat.Mode(), lstatErr)
+	t.Logf("f1 stat: %d, err %s", stat.Mode(), stat.Mode())
 
 	f2, err := ioutil.TempFile(os.TempDir(), "prefix-")
 	if err != nil {
@@ -334,7 +334,7 @@ func Test_checkFilePerms(t *testing.T) {
 	err = os.Chmod(f2.Name(), correctPerm())
 
 	stat, lstatErr = os.Lstat(f2.Name())
-	t.Logf("f2 stat: %d, err %s", stat.Mode(), lstatErr)
+	t.Logf("f2 stat: %d, err %s", stat.Mode(), stat.Mode())
 
 	type args struct {
 		files []string
