@@ -303,7 +303,7 @@ func Test_checkFilePerms(t *testing.T) {
 		t.Skipf("Chmod is not supported in windows, so not possible to test. Ref: https://github.com/golang/go/blob/master/src/os/os_test.go#L1031\n")
 	}
 
-	f1, err := ioutil.TempFile(".", "prefix-")
+	f1, err := ioutil.TempFile(os.TempDir(), "prefix-")
 	if err != nil {
 		t.FailNow()
 	}
@@ -313,11 +313,7 @@ func Test_checkFilePerms(t *testing.T) {
 		t.Fatalf("%s\n", err)
 	}
 
-	// t.Logf("for windows invalidPerm for f1 is %s is %d and error is %s\n", f1.Name(), invalidPerm(), err)
-	stat, _ := os.Lstat(f1.Name())
-	t.Logf("f1 (%s) stat: %d, err %s", f1.Name(), stat.Mode(), stat.Mode())
-
-	f2, err := ioutil.TempFile(".", "prefix-")
+	f2, err := ioutil.TempFile(os.TempDir(), "prefix-")
 	if err != nil {
 		t.FailNow()
 	}
@@ -327,9 +323,6 @@ func Test_checkFilePerms(t *testing.T) {
 	if err != nil {
 		t.Fatalf("%s\n", err)
 	}
-
-	stat, _ = os.Lstat(f2.Name())
-	t.Logf("f2 (%s) stat: %d, err %s", f2.Name(), stat.Mode(), stat.Mode())
 
 	type args struct {
 		files []string
