@@ -298,18 +298,17 @@ func restoreEnv(envVars map[string]string) {
 }
 
 func Test_checkFilePerms(t *testing.T) {
-	// TODO: os.Chmod(..) doesn't work on Windows as it does on Unix
-	// Skip for now
-	// issue: https://github.com/gomods/athens/issues/879
+
 	if runtime.GOOS == "windows" {
-		t.SkipNow()
+		t.Skipf("Chmod is not supported in windows, so not possible to test. Ref: https://github.com/golang/go/blob/master/src/os/os_test.go#L1031\n")
 	}
+
 	f1, err := ioutil.TempFile(os.TempDir(), "prefix-")
 	if err != nil {
 		t.Fatalf("Cannot create 1st temp file: %s", err)
 	}
 	defer os.Remove(f1.Name())
-	if err = os.Chmod(f1.Name(), 0777); err != nil {
+	if err = os.Chmod(f1.Name(), 0700); err != nil {
 		t.Fatalf("Cannot chmod 1st temp file: %s", err)
 	}
 
@@ -317,8 +316,9 @@ func Test_checkFilePerms(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Cannot create 2nd temp file: %s", err)
 	}
+
 	defer os.Remove(f2.Name())
-	if err = os.Chmod(f2.Name(), 0600); err != nil {
+	if err = os.Chmod(f2.Name(), 0640); err != nil {
 		t.Fatalf("Cannot chmod 2nd temp file: %s", err)
 	}
 
