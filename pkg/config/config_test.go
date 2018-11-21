@@ -300,6 +300,7 @@ func restoreEnv(envVars map[string]string) {
 
 func invalidPerm() os.FileMode {
 	if runtime.GOOS == "windows" {
+		fmt.Println("select windows runtime on invalid Perm")
 		return 0200
 	}
 	return 0777
@@ -307,7 +308,7 @@ func invalidPerm() os.FileMode {
 
 func correctPerm() os.FileMode {
 	if runtime.GOOS == "windows" {
-		fmt.Println("select windows runtime")
+		fmt.Println("select windows runtime on Valid Perm")
 		return 0600
 	}
 	return 0640
