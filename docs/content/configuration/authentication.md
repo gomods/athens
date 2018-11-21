@@ -43,8 +43,8 @@ weight: 1
     $env:ATHENS_STORAGE = "$(Join-Path $pwd athens-storage)"
     $env:ATHENS_SVN = "$(Join-Path $pwd .subversion)"
     md -Path $env:ATHENS_STORAGE
-    docker run -d -v "$($env:ATHENS-STORAGE):/var/lib/athens" `
-      -v "$($env:ATHENS-SVN):/root/.subversion" `
+    docker run -d -v "$($env:ATHENS_STORAGE):/var/lib/athens" `
+      -v "$($env:ATHENS_SVN):/root/.subversion" `
       -e ATHENS_DISK_STORAGE_ROOT=/var/lib/athens `
       -e ATHENS_STORAGE_TYPE=disk `
       --name athens-proxy `
@@ -166,8 +166,8 @@ weight: 1
     $env:ATHENS_STORAGE = "$(Join-Path $pwd athens-storage)"
     $env:ATHENS_BZR = "$(Join-Path $pwd .bazaar)"
     md -Path $env:ATHENS_STORAGE
-    docker run -d -v "$($env:ATHENS-STORAGE):/var/lib/athens" `
-      -v "$($env:ATHENS-BZR):/root/.bazaar" `
+    docker run -d -v "$($env:ATHENS_STORAGE):/var/lib/athens" `
+      -v "$($env:ATHENS_BZR):/root/.bazaar" `
       -e ATHENS_DISK_STORAGE_ROOT=/var/lib/athens `
       -e ATHENS_STORAGE_TYPE=disk `
       --name athens-proxy `

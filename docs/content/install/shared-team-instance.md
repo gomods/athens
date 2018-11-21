@@ -150,7 +150,7 @@ docker run -d -v $ATHENS_STORAGE:/var/lib/athens \
 
 **PowerShell**
 ```console
-docker run -d -v "$($env:ATHENS-STORAGE):/var/lib/athens" `
+docker run -d -v "$($env:ATHENS_STORAGE):/var/lib/athens" `
    -e ATHENS_DISK_STORAGE_ROOT=/var/lib/athens `
    -e ATHENS_STORAGE_TYPE=disk `
    --name athens-proxy `
