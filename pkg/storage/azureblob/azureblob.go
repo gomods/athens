@@ -29,9 +29,10 @@ type azureBlobStoreClient struct {
 }
 
 func newBlobStoreClient(accountURL *url.URL, accountName, accountKey, containerName string, timeout time.Duration) (*azureBlobStoreClient, error) {
+	const op errors.Op = "azure.newBlobStoreClient"
 	cred, err := azblob.NewSharedKeyCredential(accountName, accountKey)
 	if err != nil {
-		return nil, err
+		return nil, errors.E(op, err)
 	}
 	pipe := azblob.NewPipeline(cred, azblob.PipelineOptions{})
 	serviceURL := azblob.NewServiceURL(*accountURL, pipe)
@@ -60,13 +61,14 @@ func New(conf *config.AzureBlobConfig, timeout time.Duration) (*Storage, error) 
 	}
 	cl, err := newBlobStoreClient(u, conf.AccountName, conf.AccountKey, conf.ContainerName, timeout)
 	if err != nil {
-		return nil, err
+		return nil, errors.E(op, err)
 	}
 	return &Storage{cl: cl, conf: conf}, nil
 }
 
 // BlobExists checks if a particular blob exists in the container
 func (c *azureBlobStoreClient) BlobExists(ctx context.Context, path string) (bool, error) {
+	const op errors.Op = "azure.BlobExists"
 	// TODO: Any better way of doing this ?
 	blobURL := c.containerURL.NewBlockBlobURL(path)
 	_, err := blobURL.GetProperties(ctx, azblob.BlobAccessConditions{})
@@ -75,13 +77,13 @@ func (c *azureBlobStoreClient) BlobExists(ctx context.Context, path string) (boo
 		var ok bool
 
 		if serr, ok = err.(azblob.StorageError); !ok {
-			return false, fmt.Errorf("Error in casting to azure error type")
+			return false, errors.E(op, fmt.Errorf("Error in casting to azure error type"))
 		}
 		if serr.Response().StatusCode == http.StatusNotFound {
-			return false, nil
+			return false, errors.E(op, err)
 		}
 
-		return false, err
+		return false, errors.E(op, err)
 	}
 	return true, nil
 
@@ -89,22 +91,24 @@ func (c *azureBlobStoreClient) BlobExists(ctx context.Context, path string) (boo
 
 // ReadBlob returns an io.ReadCloser for the contents of a blob
 func (c *azureBlobStoreClient) ReadBlob(ctx context.Context, path string) (io.ReadCloser, error) {
+	const op errors.Op = "azure.ReadBlob"
 	blobURL := c.containerURL.NewBlockBlobURL(path)
 	downloadResponse, err := blobURL.Download(ctx, 0, 0, azblob.BlobAccessConditions{}, false)
 	if err != nil {
-		return nil, err
+		return nil, errors.E(op, err)
 	}
 	return downloadResponse.Body(azblob.RetryReaderOptions{}), nil
 }
 
 func (c *azureBlobStoreClient) ListBlobs(ctx context.Context, prefix string) ([]string, error) {
+	const op errors.Op = "azure.ListBlobs"
 	var blobs []string
 	for marker := (azblob.Marker{}); marker.NotDone(); {
 		listBlob, err := c.containerURL.ListBlobsFlatSegment(ctx, marker, azblob.ListBlobsSegmentOptions{
 			Prefix: prefix,
 		})
 		if err != nil {
-			return nil, err
+			return nil, errors.E(op, err)
 		}
 		marker = listBlob.NextMarker
 
@@ -115,10 +119,11 @@ func (c *azureBlobStoreClient) ListBlobs(ctx context.Context, prefix string) ([]
 	return blobs, nil
 }
 func (c *azureBlobStoreClient) DeleteBlob(ctx context.Context, path string) error {
+	const op errors.Op = "azure.DeleteBlob"
 	blobURL := c.containerURL.NewBlockBlobURL(path)
 	_, err := blobURL.Delete(ctx, azblob.DeleteSnapshotsOptionNone, azblob.BlobAccessConditions{})
 	if err != nil {
-		return err
+		return errors.E(op, err)
 	}
 	return nil
 }
