@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"net/http"
 	"net/url"
 
 	"github.com/Azure/azure-storage-blob-go/azblob"
@@ -67,8 +68,13 @@ func (c *azureBlobStoreClient) BlobExists(ctx context.Context, path string) (boo
 	blobURL := c.containerURL.NewBlockBlobURL(path)
 	_, err := blobURL.GetProperties(ctx, azblob.BlobAccessConditions{})
 	if err != nil {
-		serr := err.(azblob.StorageError)
-		if serr.Response().StatusCode == 404 {
+		var serr azblob.StorageError
+		var ok bool
+
+		if serr, ok = err.(azblob.StorageError); !ok {
+			return false, fmt.Errorf("Error in casting to azure error type")
+		}
+		if serr.Response().StatusCode == http.StatusNotFound {
 			return false, nil
 		}
 
