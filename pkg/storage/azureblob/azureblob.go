@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"time"
 
 	"github.com/Azure/azure-storage-blob-go/azblob"
 	"github.com/gomods/athens/pkg/config"
@@ -19,13 +20,15 @@ type client interface {
 	ReadBlob(ctx context.Context, path string) (io.ReadCloser, error)
 	ListBlobs(ctx context.Context, prefix string) ([]string, error)
 	DeleteBlob(ctx context.Context, path string) error
+	GetTimeout() time.Duration
 }
 
 type azureBlobStoreClient struct {
 	containerURL *azblob.ContainerURL
+	timeout      time.Duration
 }
 
-func newBlobStoreClient(accountURL *url.URL, accountName, accountKey, containerName string) (*azureBlobStoreClient, error) {
+func newBlobStoreClient(accountURL *url.URL, accountName, accountKey, containerName string, timeout time.Duration) (*azureBlobStoreClient, error) {
 	cred, err := azblob.NewSharedKeyCredential(accountName, accountKey)
 	if err != nil {
 		return nil, err
@@ -37,7 +40,7 @@ func newBlobStoreClient(accountURL *url.URL, accountName, accountKey, containerN
 	//
 	// This container must exist
 	containerURL := serviceURL.NewContainerURL(containerName)
-	cl := &azureBlobStoreClient{containerURL: &containerURL}
+	cl := &azureBlobStoreClient{containerURL: &containerURL, timeout: timeout}
 	return cl, nil
 }
 
@@ -49,13 +52,13 @@ type Storage struct {
 }
 
 // New creates a new azure blobs storage saver
-func New(conf *config.AzureBlobConfig) (*Storage, error) {
+func New(conf *config.AzureBlobConfig, timeout time.Duration) (*Storage, error) {
 	const op errors.Op = "azure.New"
 	u, err := url.Parse(fmt.Sprintf("https://%s.blob.core.windows.net", conf.AccountName))
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
-	cl, err := newBlobStoreClient(u, conf.AccountName, conf.AccountKey, conf.ContainerName)
+	cl, err := newBlobStoreClient(u, conf.AccountName, conf.AccountKey, conf.ContainerName, timeout)
 	if err != nil {
 		return nil, err
 	}
@@ -148,4 +151,8 @@ func (c *azureBlobStoreClient) UploadWithContext(ctx context.Context, path, cont
 		return errors.E(op, err)
 	}
 	return nil
+}
+
+func (c *azureBlobStoreClient) GetTimeout() time.Duration {
+	return time.Second * time.Duration(c.timeout)
 }

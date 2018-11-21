@@ -60,7 +60,7 @@ func GetStorage(storageType string, storageConfig *config.StorageConfig, timeout
 		if storageConfig.AzureBlob == nil {
 			return nil, errors.E(op, "Invalid AzureBlob Storage Configuration")
 		}
-		return azureblob.New(storageConfig.AzureBlob)
+		return azureblob.New(storageConfig.AzureBlob, timeout)
 	default:
 		return nil, fmt.Errorf("storage type %s is unknown", storageType)
 	}
