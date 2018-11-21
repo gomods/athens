@@ -314,7 +314,7 @@ func correctPerm() os.FileMode {
 }
 
 func Test_checkFilePerms(t *testing.T) {
-	f1, err := ioutil.TempFile(os.TempDir(), "prefix-")
+	f1, err := ioutil.TempFile(".", "prefix-")
 	if err != nil {
 		t.FailNow()
 	}
@@ -328,7 +328,7 @@ func Test_checkFilePerms(t *testing.T) {
 	stat, _ := os.Lstat(f1.Name())
 	t.Logf("f1 stat: %d, err %s", stat.Mode(), stat.Mode())
 
-	f2, err := ioutil.TempFile(os.TempDir(), "prefix-")
+	f2, err := ioutil.TempFile(".", "prefix-")
 	if err != nil {
 		t.FailNow()
 	}
