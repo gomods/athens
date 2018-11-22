@@ -47,7 +47,7 @@ steps:
     go test -mod=vendor -race ./...
   env:
     ATHENS_MINIO_ENDPOINT: "127.0.0.1:9001"
-    ATHENS_MONGO_STORAGE_URL: "mongodb://localhost:C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==@localhost:10255?ssl=true"
+    ATHENS_MONGO_STORAGE_URL: "mongodb://localhost:C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==@localhost:10255"
   workingDirectory: '$(modulePath)'
   displayName: 'run tests'
 
