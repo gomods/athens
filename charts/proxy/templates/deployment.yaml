@@ -21,6 +21,14 @@ spec:
       - name: {{ template "fullname" . }}
         image: "{{ .Values.image.registry }}/{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         imagePullPolicy: {{ .Values.image.pullPolicy | quote }}
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 3000
+        readinessProbe:
+          httpGet:
+            path: /readiness
+            port: 3000
         env:
         - name: ATHENS_STORAGE_TYPE
           value: {{ .Values.storage.type | quote }}
