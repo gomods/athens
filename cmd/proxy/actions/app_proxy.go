@@ -21,7 +21,7 @@ func addProxyRoutes(
 ) error {
 	app.GET("/", proxyHomeHandler)
 	app.GET("/healthz", healthHandler)
-	app.GET("/readiness", getReadinessHandler(s))
+	app.GET("/readyz", getReadinessHandler(s))
 	app.GET("/version", versionHandler)
 
 	// Download Protocol

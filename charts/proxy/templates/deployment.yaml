@@ -27,7 +27,7 @@ spec:
             port: 3000
         readinessProbe:
           httpGet:
-            path: /readiness
+            path: /readyz
             port: 3000
         env:
         - name: ATHENS_STORAGE_TYPE
