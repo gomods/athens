@@ -34,8 +34,14 @@ steps:
   displayName: 'start minio'
 
 - powershell: |
-    cd "C:\Program Files\Azure Cosmos DB Emulator"
-    Start-Process -NoNewWindow CosmosDB.Emulator.exe '/NoUI /NoExplorer'
+    $emulatorBin = "C:\Program Files\Azure Cosmos DB Emulator\CosmosDB.Emulator.exe"
+    if (!(Test-Path $emulatorBin)) {
+      Write-Error "$emulatorBin not found"
+    }
+    else {
+      cd "C:\Program Files\Azure Cosmos DB Emulator"
+      Start-Process -NoNewWindow -FilePath $emulatorBin '/NoUI /NoExplorer'
+    }
   displayName: 'start cosmos db emulator'
 
 - powershell: |
