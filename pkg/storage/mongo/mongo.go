@@ -56,7 +56,7 @@ func (m *ModuleStore) connect() error {
 
 func (m *ModuleStore) initDatabase() error {
 	// TODO: database and collection as env vars, or params to New()? together with user/mongo
-	m.d = "athens"
+	m.d = "admin"
 	m.c = "modules"
 
 	index := mgo.Index{
