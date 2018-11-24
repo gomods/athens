@@ -3,7 +3,8 @@ package download
 import (
 	"net/http"
 	"strconv"
-	"strings"
+
+	"github.com/gomods/athens/pkg/paths"
 
 	"github.com/gobuffalo/buffalo"
 	"github.com/gobuffalo/buffalo/render"
@@ -13,6 +14,11 @@ import (
 
 // PathCatalog URL.
 const PathCatalog = "/catalog"
+
+type catalogRes struct {
+	ModsAndVersions []paths.AllPathParams
+	NextPageToken   string
+}
 
 // CatalogHandler implements GET baseURL/catalog
 func CatalogHandler(dp Protocol, lggr log.Entry, eng *render.Engine) buffalo.Handler {
@@ -36,8 +42,8 @@ func CatalogHandler(dp Protocol, lggr log.Entry, eng *render.Engine) buffalo.Han
 			return c.Render(errors.Kind(err), eng.JSON(errors.KindText(err)))
 		}
 
-		return c.Render(http.StatusOK, eng.String(strings.Join(modulesAndVersions, "\n")))
-
+		res := catalogRes{modulesAndVersions, newToken}
+		return c.Render(http.StatusOK, eng.JSON(res))
 	}
 }
 
