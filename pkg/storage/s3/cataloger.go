@@ -66,7 +66,6 @@ func fetchModsAndVersions(objects []*s3.Object, elementsNum int) ([]paths.AllPat
 			break
 		}
 	}
-	fmt.Println("FEDE lastkey " + lastKey)
 	return res, lastKey
 }
 

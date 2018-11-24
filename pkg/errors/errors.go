@@ -11,12 +11,12 @@ import (
 
 // Kind enums
 const (
-	KindNotFound              = http.StatusNotFound
-	KindBadRequest            = http.StatusBadRequest
-	KindUnexpected            = http.StatusInternalServerError
-	KindAlreadyExists         = http.StatusConflict
-	KindRateLimit             = http.StatusTooManyRequests
-	KindMethodNotImpllemented = iota + 700
+	KindNotFound             = http.StatusNotFound
+	KindBadRequest           = http.StatusBadRequest
+	KindUnexpected           = http.StatusInternalServerError
+	KindAlreadyExists        = http.StatusConflict
+	KindRateLimit            = http.StatusTooManyRequests
+	KindMethodNotImplemented = iota + 700
 )
 
 // Error is an Athens system error.

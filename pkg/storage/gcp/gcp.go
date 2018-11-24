@@ -37,7 +37,6 @@ func New(ctx context.Context, gcpConf *config.GCPConfig, timeout time.Duration) 
 		return nil, errors.E(op, fmt.Errorf("could not create new storage client: %s", err))
 	}
 	bucketname := gcpConf.Bucket
-	fmt.Println("FEDE bucket name " + bucketname)
 	u, err := url.Parse(fmt.Sprintf("https://storage.googleapis.com/%s", bucketname))
 	if err != nil {
 		return nil, errors.E(op, err)

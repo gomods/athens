@@ -33,6 +33,11 @@ func CatalogHandler(dp Protocol, lggr log.Entry, eng *render.Engine) buffalo.Han
 		}
 
 		modulesAndVersions, newToken, err := dp.Catalog(c, token, limit)
+
+		if errors.Kind(err) == errors.KindMethodNotImplemented {
+			return c.Render(http.StatusNotFound, nil)
+		}
+
 		if err != nil {
 			lggr.SystemErr(err)
 			return c.Render(errors.Kind(err), nil)
