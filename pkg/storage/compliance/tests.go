@@ -19,11 +19,13 @@ import (
 func RunTests(t *testing.T, b storage.Backend, clearBackend func() error) {
 	require.NoError(t, clearBackend(), "clearing backend failed")
 	defer require.NoError(t, clearBackend(), "clearning backend failed")
-	//testNotFound(t, b)
-	//testList(t, b)
-	//testDelete(t, b)
-	//testGet(t, b)
-	testCatalog(t, b)
+	testNotFound(t, b)
+	testList(t, b)
+	testDelete(t, b)
+	testGet(t, b)
+	if isCatalogImplemented(b) {
+		testCatalog(t, b)
+	}
 }
 
 // testNotFound ensures that a storage Backend
@@ -140,7 +142,7 @@ func testCatalog(t *testing.T, b storage.Backend) {
 	}
 	defer func() {
 		for i := 0; i < 1005; i++ {
-			ver := fmt.Sprintf("v1.2.04%d", i)
+			ver := fmt.Sprintf("v1.2.%04d", i)
 			b.Delete(ctx, modname, ver)
 		}
 	}()
@@ -148,12 +150,12 @@ func testCatalog(t *testing.T, b storage.Backend) {
 	allres, next, err := b.Catalog(ctx, "", 1001)
 
 	require.NoError(t, err)
-	require.Equal(t, len(allres), 1001)
+	require.Equal(t, 1001, len(allres))
 
 	res, next, err := b.Catalog(ctx, next, 50)
 	allres = append(allres, res...)
 	require.NoError(t, err)
-	require.Equal(t, len(res), 4)
+	require.Equal(t, 4, len(res))
 	require.Equal(t, "", next)
 
 	sort.Slice(allres, func(i, j int) bool {
@@ -165,7 +167,6 @@ func testCatalog(t *testing.T, b storage.Backend) {
 
 	require.Equal(t, allres[0].Version, "v1.2.0000")
 	require.Equal(t, allres[1004].Version, "v1.2.1004")
-
 }
 
 func getMockModule() *storage.Version {
@@ -174,4 +175,12 @@ func getMockModule() *storage.Version {
 		Mod:  []byte("456"),
 		Zip:  ioutil.NopCloser(bytes.NewReader([]byte("789"))),
 	}
+}
+
+func isCatalogImplemented(b storage.Backend) bool {
+	ctx := context.Background()
+	if _, _, err := b.Catalog(ctx, "", 1); errors.Kind(err) == errors.KindMethodNotImplemented {
+		return false
+	}
+	return true
 }

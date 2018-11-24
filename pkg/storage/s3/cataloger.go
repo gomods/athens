@@ -33,6 +33,7 @@ func (s *Storage) Catalog(ctx context.Context, token string, elements int) ([]pa
 		}
 
 		m, lastKey := fetchModsAndVersions(loo.Contents, elements)
+
 		res = append(res, m...)
 		elements -= len(m)
 		queryToken = lastKey
@@ -58,6 +59,7 @@ func fetchModsAndVersions(objects []*s3.Object, elementsNum int) ([]paths.AllPat
 		if err != nil {
 			continue
 		}
+
 		res = append(res, p)
 		lastKey = *o.Key
 
