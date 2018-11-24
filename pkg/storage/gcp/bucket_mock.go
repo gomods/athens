@@ -5,6 +5,8 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"sort"
+	"strconv"
 	"strings"
 	"sync"
 )
@@ -96,7 +98,33 @@ func (m *bucketMock) Exists(ctx context.Context, path string) (bool, error) {
 }
 
 func (m *bucketMock) Catalog(ctx context.Context, token string, elementNum int) ([]string, string, error) {
-	return nil, "", nil
+	keys := make([]string, 0)
+
+	m.lock.RLock()
+	defer m.lock.RUnlock()
+
+	for k := range m.db {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	from := 0
+	if token != "" {
+		var err error
+		from, err = strconv.Atoi(token)
+		if err != nil {
+			return nil, "", err
+		}
+	}
+	if from > len(keys)-1 {
+		return make([]string, 0), "", nil
+	}
+	to := from + elementNum
+	resToken := strconv.Itoa(to)
+	if to > len(keys)-1 {
+		to = len(keys) - 1
+		resToken = ""
+	}
+	return keys[from:to], resToken, nil
 }
 
 func (m *bucketMock) ReadClosed() bool {
