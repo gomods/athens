@@ -10,6 +10,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/gomods/athens/pkg/paths"
+
 	"github.com/gomods/athens/pkg/download"
 	"github.com/gomods/athens/pkg/storage"
 )
@@ -61,6 +63,9 @@ func TestPoolWrapper(t *testing.T) {
 	m.inputMod = mod
 	m.inputVer = ver
 	m.list = []string{"v0.0.0", "v0.1.0"}
+	m.catalog = []paths.AllPathParams{
+		paths.AllPathParams{"pkg", "v0.1.0"},
+	}
 	givenList, err := dp.List(ctx, mod)
 	if err != m.err {
 		t.Fatalf("expected dp.List err to be %v but got %v", m.err, err)
@@ -96,6 +101,7 @@ type mockDP struct {
 	zip      io.ReadCloser
 	inputMod string
 	inputVer string
+	catalog  []paths.AllPathParams
 }
 
 // List implements GET /{module}/@v/list
@@ -145,6 +151,11 @@ func (m *mockDP) Zip(ctx context.Context, mod, ver string) (io.ReadCloser, error
 		return nil, fmt.Errorf("expected ver input %v but got %v", m.inputVer, ver)
 	}
 	return m.zip, m.err
+}
+
+// Catalog implements GET /catalog
+func (m *mockDP) Catalog(ctx context.Context, token string, limit int) ([]paths.AllPathParams, string, error) {
+	return m.catalog, "", m.err
 }
 
 // Version is a helper method to get Info, GoMod, and Zip together.
