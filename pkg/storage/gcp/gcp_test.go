@@ -104,22 +104,28 @@ func (g *GcpTests) TestNotFounds() {
 
 func (g *GcpTests) TestCatalog() {
 	r := g.Require()
-	for i := 0; i < 100; i++ {
+	for i := 0; i < 50; i++ {
 		ver := fmt.Sprintf("v1.2.%04d", i)
 		err := g.store.Save(g.context, g.module, ver, mod, bytes.NewReader(zip), info)
 		r.NoError(err)
 	}
 	defer func() {
-		for i := 0; i < 100; i++ {
-			ver := fmt.Sprintf("v1.2.04%d", i)
+		for i := 0; i < 50; i++ {
+			ver := fmt.Sprintf("v1.2.%04d", i)
 			err := g.store.Delete(g.context, g.module, ver)
 			r.NoError(err)
 		}
 	}()
 
-	allres, next, err := g.store.Catalog(g.context, "", 10)
+	allres, nextToken, err := g.store.Catalog(g.context, "", 2)
 	r.NoError(err)
-	r.Equal(len(allres), 10)
-	r.NotEqual("", next)
+	r.Equal(len(allres), 2)
+	r.NotEqual("", nextToken)
 
+	res, nextToken, err := g.store.Catalog(g.context, nextToken, 50)
+	allres = append(allres, res...)
+	r.NoError(err)
+	r.Equal(len(allres), 50)
+	r.Equal(len(res), 48)
+	r.Equal("", nextToken)
 }

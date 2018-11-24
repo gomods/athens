@@ -2,7 +2,6 @@ package gcp
 
 import (
 	"context"
-	"fmt"
 	"io"
 
 	"cloud.google.com/go/storage"
@@ -76,22 +75,17 @@ func (b *gcpBucket) Catalog(ctx context.Context, token string, elementNum int) (
 	const op errors.Op = "gcpBucket.Catalog"
 
 	it := b.Objects(ctx, nil)
-	it.PageInfo().Token = token
-	it.PageInfo().MaxSize = elementNum
+	p := iterator.NewPager(it, elementNum, token)
 
-	fmt.Println("FEDE asking for ", elementNum, "elements")
-
-	res := []string{}
-	for {
-		attrs, err := it.Next()
-		if err == iterator.Done {
-			break
-		}
-		if err != nil {
-			return nil, "", errors.E(op, err)
-		}
-		res = append(res, attrs.Name)
+	attrs := make([]*storage.ObjectAttrs, 0)
+	nextToken, err := p.NextPage(&attrs)
+	if err != nil {
+		return nil, "", errors.E(op, err)
 	}
 
-	return res, it.PageInfo().Token, nil
+	res := []string{}
+	for _, attr := range attrs {
+		res = append(res, attr.Name)
+	}
+	return res, nextToken, nil
 }
