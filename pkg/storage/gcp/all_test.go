@@ -77,9 +77,9 @@ func setupRealStorage(g *GcpTests) {
 		g.T().Skip()
 	}
 
-	g.store, err = New(context.Background(), &config.GCPConfig{TimeoutConf: config.TimeoutConf{300},
+	g.store, err = New(context.Background(), &config.GCPConfig{
 		ProjectID: *project,
 		Bucket:    *bucket,
-	})
+	}, 300*time.Second)
 	g.Require().NoError(err)
 }
