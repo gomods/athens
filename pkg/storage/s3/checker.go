@@ -1,8 +1,6 @@
 package s3
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/service/s3"
@@ -17,7 +15,7 @@ const (
 
 // Exists implements the (./pkg/storage).Checker interface
 // returning true if the module at version exists in storage
-func (s *Storage) Exists(ctx context.Context, module, version string) (bool, error) {
+func (s *Storage) Exists(ctx observ.ProxyContext, module, version string) (bool, error) {
 	const op errors.Op = "s3.Exists"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()

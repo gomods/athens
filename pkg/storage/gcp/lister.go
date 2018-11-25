@@ -1,7 +1,6 @@
 package gcp
 
 import (
-	"context"
 	"strings"
 
 	"github.com/gomods/athens/pkg/errors"
@@ -10,7 +9,7 @@ import (
 
 // List implements the (./pkg/storage).Lister interface
 // It returns a list of versions, if any, for a given module
-func (s *Storage) List(ctx context.Context, module string) ([]string, error) {
+func (s *Storage) List(ctx observ.ProxyContext, module string) ([]string, error) {
 	const op errors.Op = "gcp.List"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()

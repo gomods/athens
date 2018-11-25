@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/gobuffalo/envy"
+	"github.com/gomods/athens/pkg/observ"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -46,11 +47,11 @@ func (u *UploadTests) TestUploadError() {
 	r.Contains(err.Error(), "some err")
 }
 
-func uplWithTimeout(ctx context.Context, path, contentType string, stream io.Reader) error {
+func uplWithTimeout(ctx observ.ProxyContext, path, contentType string, stream io.Reader) error {
 	time.Sleep(2 * time.Second)
 	return nil
 }
 
-func uplWithErr(ctx context.Context, path, contentType string, stream io.Reader) error {
+func uplWithErr(ctx observ.ProxyContext, path, contentType string, stream io.Reader) error {
 	return errors.New("some err")
 }

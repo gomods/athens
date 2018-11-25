@@ -1,7 +1,6 @@
 package minio
 
 import (
-	"context"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -12,7 +11,7 @@ import (
 	minio "github.com/minio/minio-go"
 )
 
-func (v *storageImpl) Info(ctx context.Context, module, vsn string) ([]byte, error) {
+func (v *storageImpl) Info(ctx observ.ProxyContext, module, vsn string) ([]byte, error) {
 	const op errors.Op = "minio.Info"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
@@ -29,7 +28,7 @@ func (v *storageImpl) Info(ctx context.Context, module, vsn string) ([]byte, err
 	return info, nil
 }
 
-func (v *storageImpl) GoMod(ctx context.Context, module, vsn string) ([]byte, error) {
+func (v *storageImpl) GoMod(ctx observ.ProxyContext, module, vsn string) ([]byte, error) {
 	const op errors.Op = "minio.GoMod"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
@@ -45,7 +44,7 @@ func (v *storageImpl) GoMod(ctx context.Context, module, vsn string) ([]byte, er
 
 	return mod, nil
 }
-func (v *storageImpl) Zip(ctx context.Context, module, vsn string) (io.ReadCloser, error) {
+func (v *storageImpl) Zip(ctx observ.ProxyContext, module, vsn string) (io.ReadCloser, error) {
 	const op errors.Op = "minio.Zip"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()

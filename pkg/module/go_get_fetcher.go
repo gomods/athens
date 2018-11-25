@@ -2,7 +2,6 @@ package module
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -48,7 +47,7 @@ func NewGoGetFetcher(goBinaryName string, fs afero.Fs) (Fetcher, error) {
 
 // Fetch downloads the sources from the go binary and returns the corresponding
 // .info, .mod, and .zip files.
-func (g *goGetFetcher) Fetch(ctx context.Context, mod, ver string) (*storage.Version, error) {
+func (g *goGetFetcher) Fetch(ctx observ.ProxyContext, mod, ver string) (*storage.Version, error) {
 	const op errors.Op = "goGetFetcher.Fetch"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()

@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	athenserr "github.com/gomods/athens/pkg/errors"
+	"github.com/gomods/athens/pkg/observ"
 	"github.com/gomods/athens/pkg/storage"
 	"github.com/gomods/athens/pkg/storage/mem"
 	"github.com/stretchr/testify/require"
@@ -34,7 +35,7 @@ type storageMock struct {
 	err      error
 }
 
-func (s *storageMock) List(ctx context.Context, module string) ([]string, error) {
+func (s *storageMock) List(ctx observ.ProxyContext, module string) ([]string, error) {
 	return s.versions, s.err
 }
 

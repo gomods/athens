@@ -14,6 +14,7 @@ import (
 
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/module"
+	"github.com/gomods/athens/pkg/observ"
 	"github.com/gomods/athens/pkg/stash"
 	"github.com/gomods/athens/pkg/storage"
 	"github.com/gomods/athens/pkg/storage/mem"
@@ -309,7 +310,7 @@ func TestDownloadProtocol(t *testing.T) {
 
 type mockFetcher struct{}
 
-func (m *mockFetcher) Fetch(ctx context.Context, mod, ver string) (*storage.Version, error) {
+func (m *mockFetcher) Fetch(ctx observ.ProxyContext, mod, ver string) (*storage.Version, error) {
 	bts := []byte(mod + "@" + ver)
 	return &storage.Version{
 		Mod:  bts,

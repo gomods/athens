@@ -14,6 +14,11 @@ import (
 	"go.opencensus.io/trace"
 )
 
+//ProxyContext is the publicly exposed context that we can take and implement as our own thing
+type ProxyContext interface {
+	context.Context
+}
+
 // observabilityContext is a private context that is used by the packages to start the span
 type observabilityContext struct {
 	buffalo.Context
@@ -136,7 +141,7 @@ func requestAttrs(r *http.Request) []trace.Attribute {
 
 // StartSpan takes in a Context Interface and opName and starts a span. It returns the new attached ObserverContext
 // and span
-func StartSpan(ctx context.Context, op string) (context.Context, *trace.Span) {
+func StartSpan(ctx ProxyContext, op string) (ProxyContext, *trace.Span) {
 	oCtx, ok := ctx.(*observabilityContext)
 	if ok {
 		return trace.StartSpan(oCtx.spanCtx, op)

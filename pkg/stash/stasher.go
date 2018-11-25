@@ -14,7 +14,7 @@ import (
 // Stasher has the job of taking a module
 // from an upstream entity and stashing it to a Storage Backend.
 type Stasher interface {
-	Stash(ctx context.Context, mod string, ver string) error
+	Stash(ctx observ.ProxyContext, mod string, ver string) error
 }
 
 // Wrapper helps extend the main stasher's functionality with addons.
@@ -37,7 +37,7 @@ type stasher struct {
 	storage storage.Backend
 }
 
-func (s *stasher) Stash(ctx context.Context, mod, ver string) error {
+func (s *stasher) Stash(ctx observ.ProxyContext, mod, ver string) error {
 	const op errors.Op = "stasher.Stash"
 	_, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
@@ -59,7 +59,7 @@ func (s *stasher) Stash(ctx context.Context, mod, ver string) error {
 	return nil
 }
 
-func (s *stasher) fetchModule(ctx context.Context, mod, ver string) (*storage.Version, error) {
+func (s *stasher) fetchModule(ctx observ.ProxyContext, mod, ver string) (*storage.Version, error) {
 	const op errors.Op = "stasher.fetchModule"
 	v, err := s.fetcher.Fetch(ctx, mod, ver)
 	if err != nil {

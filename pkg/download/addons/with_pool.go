@@ -1,11 +1,11 @@
 package addons
 
 import (
-	"context"
 	"io"
 
 	"github.com/gomods/athens/pkg/download"
 	"github.com/gomods/athens/pkg/errors"
+	"github.com/gomods/athens/pkg/observ"
 	"github.com/gomods/athens/pkg/storage"
 )
 
@@ -47,7 +47,7 @@ func (p *withpool) listen() {
 	}
 }
 
-func (p *withpool) List(ctx context.Context, mod string) ([]string, error) {
+func (p *withpool) List(ctx observ.ProxyContext, mod string) ([]string, error) {
 	const op errors.Op = "pool.List"
 	var vers []string
 	var err error
@@ -64,7 +64,7 @@ func (p *withpool) List(ctx context.Context, mod string) ([]string, error) {
 	return vers, nil
 }
 
-func (p *withpool) Info(ctx context.Context, mod, ver string) ([]byte, error) {
+func (p *withpool) Info(ctx observ.ProxyContext, mod, ver string) ([]byte, error) {
 	const op errors.Op = "pool.Info"
 	var info []byte
 	var err error
@@ -80,7 +80,7 @@ func (p *withpool) Info(ctx context.Context, mod, ver string) ([]byte, error) {
 	return info, nil
 }
 
-func (p *withpool) Latest(ctx context.Context, mod string) (*storage.RevInfo, error) {
+func (p *withpool) Latest(ctx observ.ProxyContext, mod string) (*storage.RevInfo, error) {
 	const op errors.Op = "pool.Latest"
 	var info *storage.RevInfo
 	var err error
@@ -96,7 +96,7 @@ func (p *withpool) Latest(ctx context.Context, mod string) (*storage.RevInfo, er
 	return info, nil
 }
 
-func (p *withpool) GoMod(ctx context.Context, mod, ver string) ([]byte, error) {
+func (p *withpool) GoMod(ctx observ.ProxyContext, mod, ver string) ([]byte, error) {
 	const op errors.Op = "pool.GoMod"
 	var goMod []byte
 	var err error
@@ -112,7 +112,7 @@ func (p *withpool) GoMod(ctx context.Context, mod, ver string) ([]byte, error) {
 	return goMod, nil
 }
 
-func (p *withpool) Zip(ctx context.Context, mod, ver string) (io.ReadCloser, error) {
+func (p *withpool) Zip(ctx observ.ProxyContext, mod, ver string) (io.ReadCloser, error) {
 	const op errors.Op = "pool.Zip"
 	var zip io.ReadCloser
 	var err error

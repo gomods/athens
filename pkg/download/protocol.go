@@ -1,7 +1,6 @@
 package download
 
 import (
-	"context"
 	"io"
 
 	"github.com/gomods/athens/pkg/errors"
@@ -14,19 +13,19 @@ import (
 // the http requests that cmd/go makes to the proxy.
 type Protocol interface {
 	// List implements GET /{module}/@v/list
-	List(ctx context.Context, mod string) ([]string, error)
+	List(ctx observ.ProxyContext, mod string) ([]string, error)
 
 	// Info implements GET /{module}/@v/{version}.info
-	Info(ctx context.Context, mod, ver string) ([]byte, error)
+	Info(ctx observ.ProxyContext, mod, ver string) ([]byte, error)
 
 	// Latest implements GET /{module}/@latest
-	Latest(ctx context.Context, mod string) (*storage.RevInfo, error)
+	Latest(ctx observ.ProxyContext, mod string) (*storage.RevInfo, error)
 
 	// GoMod implements GET /{module}/@v/{version}.mod
-	GoMod(ctx context.Context, mod, ver string) ([]byte, error)
+	GoMod(ctx observ.ProxyContext, mod, ver string) ([]byte, error)
 
 	// Zip implements GET /{module}/@v/{version}.zip
-	Zip(ctx context.Context, mod, ver string) (io.ReadCloser, error)
+	Zip(ctx observ.ProxyContext, mod, ver string) (io.ReadCloser, error)
 }
 
 // Wrapper helps extend the main protocol's functionality with addons.
@@ -59,7 +58,7 @@ type protocol struct {
 	lister  UpstreamLister
 }
 
-func (p *protocol) List(ctx context.Context, mod string) ([]string, error) {
+func (p *protocol) List(ctx observ.ProxyContext, mod string) ([]string, error) {
 	const op errors.Op = "protocol.List"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
@@ -87,7 +86,7 @@ func (p *protocol) List(ctx context.Context, mod string) ([]string, error) {
 	return union(goList, strList), nil
 }
 
-func (p *protocol) Latest(ctx context.Context, mod string) (*storage.RevInfo, error) {
+func (p *protocol) Latest(ctx observ.ProxyContext, mod string) (*storage.RevInfo, error) {
 	const op errors.Op = "protocol.Latest"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
@@ -99,7 +98,7 @@ func (p *protocol) Latest(ctx context.Context, mod string) (*storage.RevInfo, er
 	return lr, nil
 }
 
-func (p *protocol) Info(ctx context.Context, mod, ver string) ([]byte, error) {
+func (p *protocol) Info(ctx observ.ProxyContext, mod, ver string) ([]byte, error) {
 	const op errors.Op = "protocol.Info"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
@@ -118,7 +117,7 @@ func (p *protocol) Info(ctx context.Context, mod, ver string) ([]byte, error) {
 	return info, nil
 }
 
-func (p *protocol) GoMod(ctx context.Context, mod, ver string) ([]byte, error) {
+func (p *protocol) GoMod(ctx observ.ProxyContext, mod, ver string) ([]byte, error) {
 	const op errors.Op = "protocol.GoMod"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
@@ -137,7 +136,7 @@ func (p *protocol) GoMod(ctx context.Context, mod, ver string) ([]byte, error) {
 	return goMod, nil
 }
 
-func (p *protocol) Zip(ctx context.Context, mod, ver string) (io.ReadCloser, error) {
+func (p *protocol) Zip(ctx observ.ProxyContext, mod, ver string) (io.ReadCloser, error) {
 	const op errors.Op = "protocol.Zip"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()

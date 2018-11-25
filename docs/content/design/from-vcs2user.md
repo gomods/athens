@@ -37,7 +37,7 @@ _app_proxy.go_
 When a request for a new module comes, the `Fetch` function is invoked.
 
 ```go
-Fetch(ctx context.Context, mod, ver string) (*storage.Version, error)
+Fetch(ctx observ.ProxyContext, mod, ver string) (*storage.Version, error)
 ```
 _fetch function_
 

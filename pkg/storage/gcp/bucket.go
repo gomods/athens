@@ -1,21 +1,22 @@
 package gcp
 
 import (
-	"context"
 	"io"
+
+	"github.com/gomods/athens/pkg/observ"
 )
 
 // Bucket provides file operations for a Google Cloud Storage resource.
 type Bucket interface {
 	// Delete removes the file
-	Delete(ctx context.Context, path string) error
+	Delete(ctx observ.ProxyContext, path string) error
 	// Open returns a reader for a path and any error
-	Open(ctx context.Context, path string) (io.ReadCloser, error)
+	Open(ctx observ.ProxyContext, path string) (io.ReadCloser, error)
 	// Write returns a new writer for a path
 	// This writer will overwrite any existing file stored at the same path
-	Write(ctx context.Context, path string) io.WriteCloser
+	Write(ctx observ.ProxyContext, path string) io.WriteCloser
 	// List returns a slice of paths for a prefix and any error
-	List(ctx context.Context, prefix string) ([]string, error)
+	List(ctx observ.ProxyContext, prefix string) ([]string, error)
 	// Exists returns true if the file exists
-	Exists(ctx context.Context, path string) (bool, error)
+	Exists(ctx observ.ProxyContext, path string) (bool, error)
 }

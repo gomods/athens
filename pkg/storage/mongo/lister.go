@@ -1,8 +1,6 @@
 package mongo
 
 import (
-	"context"
-
 	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
 	"github.com/gomods/athens/pkg/errors"
@@ -11,7 +9,7 @@ import (
 )
 
 // List lists all versions of a module
-func (s *ModuleStore) List(ctx context.Context, module string) ([]string, error) {
+func (s *ModuleStore) List(ctx observ.ProxyContext, module string) ([]string, error) {
 	const op errors.Op = "mongo.List"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()

@@ -1,8 +1,6 @@
 package s3
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/gomods/athens/pkg/errors"
@@ -13,7 +11,7 @@ import (
 // Delete implements the (./pkg/storage).Deleter interface and
 // removes a version of a module from storage. Returning ErrNotFound
 // if the version does not exist.
-func (s *Storage) Delete(ctx context.Context, module, version string) error {
+func (s *Storage) Delete(ctx observ.ProxyContext, module, version string) error {
 	const op errors.Op = "s3.Delete"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
@@ -28,7 +26,7 @@ func (s *Storage) Delete(ctx context.Context, module, version string) error {
 	return modupl.Delete(ctx, module, version, s.remove, s.timeout)
 }
 
-func (s *Storage) remove(ctx context.Context, path string) error {
+func (s *Storage) remove(ctx observ.ProxyContext, path string) error {
 	const op errors.Op = "s3.Delete"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()

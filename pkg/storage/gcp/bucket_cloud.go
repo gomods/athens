@@ -1,11 +1,11 @@
 package gcp
 
 import (
-	"context"
 	"io"
 
 	"cloud.google.com/go/storage"
 	"github.com/gomods/athens/pkg/errors"
+	"github.com/gomods/athens/pkg/observ"
 	"google.golang.org/api/iterator"
 )
 
@@ -14,7 +14,7 @@ type gcpBucket struct {
 	*storage.BucketHandle
 }
 
-func (b *gcpBucket) Delete(ctx context.Context, path string) error {
+func (b *gcpBucket) Delete(ctx observ.ProxyContext, path string) error {
 	const op errors.Op = "gcpBucket.Delete"
 	err := b.Object(path).Delete(ctx)
 	if err != nil {
@@ -24,7 +24,7 @@ func (b *gcpBucket) Delete(ctx context.Context, path string) error {
 	return nil
 }
 
-func (b *gcpBucket) Open(ctx context.Context, path string) (io.ReadCloser, error) {
+func (b *gcpBucket) Open(ctx observ.ProxyContext, path string) (io.ReadCloser, error) {
 	const op errors.Op = "gcpBucket.Open"
 	rc, err := b.Object(path).NewReader(ctx)
 	if err != nil {
@@ -33,11 +33,11 @@ func (b *gcpBucket) Open(ctx context.Context, path string) (io.ReadCloser, error
 	return rc, nil
 }
 
-func (b *gcpBucket) Write(ctx context.Context, path string) io.WriteCloser {
+func (b *gcpBucket) Write(ctx observ.ProxyContext, path string) io.WriteCloser {
 	return b.Object(path).NewWriter(ctx)
 }
 
-func (b *gcpBucket) List(ctx context.Context, prefix string) ([]string, error) {
+func (b *gcpBucket) List(ctx observ.ProxyContext, prefix string) ([]string, error) {
 	const op errors.Op = "gcpBucket.List"
 	it := b.Objects(ctx, &storage.Query{Prefix: prefix})
 
@@ -56,7 +56,7 @@ func (b *gcpBucket) List(ctx context.Context, prefix string) ([]string, error) {
 	return res, nil
 }
 
-func (b *gcpBucket) Exists(ctx context.Context, path string) (bool, error) {
+func (b *gcpBucket) Exists(ctx observ.ProxyContext, path string) (bool, error) {
 	const op errors.Op = "gcpBucket.Exists"
 	_, err := b.Object(path).Attrs(ctx)
 

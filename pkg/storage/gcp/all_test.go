@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/gomods/athens/pkg/observ"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -17,7 +18,7 @@ var (
 
 type GcpTests struct {
 	suite.Suite
-	context context.Context
+	context observ.ProxyContext
 	module  string
 	version string
 	store   *Storage

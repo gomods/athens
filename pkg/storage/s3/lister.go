@@ -1,7 +1,6 @@
 package s3
 
 import (
-	"context"
 	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -12,7 +11,7 @@ import (
 
 // List implements the (./pkg/storage).Lister interface
 // It returns a list of versions, if any, for a given module
-func (s *Storage) List(ctx context.Context, module string) ([]string, error) {
+func (s *Storage) List(ctx observ.ProxyContext, module string) ([]string, error) {
 	const op errors.Op = "s3.List"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()

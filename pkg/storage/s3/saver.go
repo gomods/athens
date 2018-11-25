@@ -2,7 +2,6 @@ package s3
 
 import (
 	"bytes"
-	"context"
 	"io"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -13,7 +12,7 @@ import (
 )
 
 // Save implements the (github.com/gomods/athens/pkg/storage).Saver interface.
-func (s *Storage) Save(ctx context.Context, module, version string, mod []byte, zip io.Reader, info []byte) error {
+func (s *Storage) Save(ctx observ.ProxyContext, module, version string, mod []byte, zip io.Reader, info []byte) error {
 	const op errors.Op = "s3.Save"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
@@ -27,7 +26,7 @@ func (s *Storage) Save(ctx context.Context, module, version string, mod []byte, 
 	return nil
 }
 
-func (s *Storage) upload(ctx context.Context, path, contentType string, stream io.Reader) error {
+func (s *Storage) upload(ctx observ.ProxyContext, path, contentType string, stream io.Reader) error {
 	const op errors.Op = "s3.upload"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()

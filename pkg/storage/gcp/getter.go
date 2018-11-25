@@ -1,7 +1,6 @@
 package gcp
 
 import (
-	"context"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -12,7 +11,7 @@ import (
 )
 
 // Info implements Getter
-func (s *Storage) Info(ctx context.Context, module, version string) ([]byte, error) {
+func (s *Storage) Info(ctx observ.ProxyContext, module, version string) ([]byte, error) {
 	const op errors.Op = "gcp.Info"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
@@ -37,7 +36,7 @@ func (s *Storage) Info(ctx context.Context, module, version string) ([]byte, err
 }
 
 // GoMod implements Getter
-func (s *Storage) GoMod(ctx context.Context, module, version string) ([]byte, error) {
+func (s *Storage) GoMod(ctx observ.ProxyContext, module, version string) ([]byte, error) {
 	const op errors.Op = "gcp.GoMod"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
@@ -63,7 +62,7 @@ func (s *Storage) GoMod(ctx context.Context, module, version string) ([]byte, er
 }
 
 // Zip implements Getter
-func (s *Storage) Zip(ctx context.Context, module, version string) (io.ReadCloser, error) {
+func (s *Storage) Zip(ctx observ.ProxyContext, module, version string) (io.ReadCloser, error) {
 	const op errors.Op = "gcp.Zip"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()

@@ -1,7 +1,6 @@
 package fs
 
 import (
-	"context"
 	"io"
 	"os"
 	"path/filepath"
@@ -11,7 +10,7 @@ import (
 	"github.com/spf13/afero"
 )
 
-func (v *storageImpl) Info(ctx context.Context, module, version string) ([]byte, error) {
+func (v *storageImpl) Info(ctx observ.ProxyContext, module, version string) ([]byte, error) {
 	const op errors.Op = "fs.Info"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
@@ -24,7 +23,7 @@ func (v *storageImpl) Info(ctx context.Context, module, version string) ([]byte,
 	return info, nil
 }
 
-func (v *storageImpl) GoMod(ctx context.Context, module, version string) ([]byte, error) {
+func (v *storageImpl) GoMod(ctx observ.ProxyContext, module, version string) ([]byte, error) {
 	const op errors.Op = "fs.GoMod"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
@@ -37,7 +36,7 @@ func (v *storageImpl) GoMod(ctx context.Context, module, version string) ([]byte
 	return mod, nil
 }
 
-func (v *storageImpl) Zip(ctx context.Context, module, version string) (io.ReadCloser, error) {
+func (v *storageImpl) Zip(ctx observ.ProxyContext, module, version string) (io.ReadCloser, error) {
 	const op errors.Op = "fs.Zip"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()

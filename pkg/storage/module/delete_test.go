@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/gobuffalo/envy"
+	"github.com/gomods/athens/pkg/observ"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -46,11 +47,11 @@ func (d *DeleteTests) TestDeleteError() {
 	r.Contains(err.Error(), "some err")
 }
 
-func delWithTimeout(ctx context.Context, path string) error {
+func delWithTimeout(ctx observ.ProxyContext, path string) error {
 	time.Sleep(2 * time.Second)
 	return nil
 }
 
-func delWithErr(ctx context.Context, path string) error {
+func delWithErr(ctx observ.ProxyContext, path string) error {
 	return errors.New("some err")
 }

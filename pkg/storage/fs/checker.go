@@ -1,7 +1,6 @@
 package fs
 
 import (
-	"context"
 	"path/filepath"
 
 	"github.com/gomods/athens/pkg/errors"
@@ -9,7 +8,7 @@ import (
 	"github.com/spf13/afero"
 )
 
-func (v *storageImpl) Exists(ctx context.Context, module, version string) (bool, error) {
+func (v *storageImpl) Exists(ctx observ.ProxyContext, module, version string) (bool, error) {
 	const op errors.Op = "fs.Exists"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()

@@ -1,14 +1,13 @@
 package minio
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/observ"
 )
 
-func (v *storageImpl) Delete(ctx context.Context, module, version string) error {
+func (v *storageImpl) Delete(ctx observ.ProxyContext, module, version string) error {
 	const op errors.Op = "minio.Delete"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()

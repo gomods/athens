@@ -2,7 +2,6 @@ package minio
 
 import (
 	"bytes"
-	"context"
 	"io"
 
 	"github.com/gomods/athens/pkg/errors"
@@ -10,7 +9,7 @@ import (
 	minio "github.com/minio/minio-go"
 )
 
-func (s *storageImpl) Save(ctx context.Context, module, vsn string, mod []byte, zip io.Reader, info []byte) error {
+func (s *storageImpl) Save(ctx observ.ProxyContext, module, vsn string, mod []byte, zip io.Reader, info []byte) error {
 	const op errors.Op = "storage.minio.Save"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()

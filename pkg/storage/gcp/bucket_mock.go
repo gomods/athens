@@ -2,11 +2,12 @@ package gcp
 
 import (
 	"bytes"
-	"context"
 	"fmt"
 	"io"
 	"strings"
 	"sync"
+
+	"github.com/gomods/athens/pkg/observ"
 )
 
 type bucketMock struct {
@@ -49,14 +50,14 @@ func (r *bucketWriter) Write(p []byte) (int, error) {
 	return len(p), nil
 }
 
-func (m *bucketMock) Delete(ctx context.Context, path string) error {
+func (m *bucketMock) Delete(ctx observ.ProxyContext, path string) error {
 	m.lock.Lock()
 	defer m.lock.Unlock()
 	delete(m.db, path)
 	return nil
 }
 
-func (m *bucketMock) Open(ctx context.Context, path string) (io.ReadCloser, error) {
+func (m *bucketMock) Open(ctx observ.ProxyContext, path string) (io.ReadCloser, error) {
 	m.lock.RLock()
 	data, ok := m.db[path]
 	if !ok {
@@ -68,14 +69,14 @@ func (m *bucketMock) Open(ctx context.Context, path string) (io.ReadCloser, erro
 	return &bucketReader{r, m}, nil
 }
 
-func (m *bucketMock) Write(ctx context.Context, path string) io.WriteCloser {
+func (m *bucketMock) Write(ctx observ.ProxyContext, path string) io.WriteCloser {
 	m.lock.Lock()
 	m.db[path] = make([]byte, 0)
 	m.writeLockCount++
 	return &bucketWriter{m, path}
 }
 
-func (m *bucketMock) List(ctx context.Context, prefix string) ([]string, error) {
+func (m *bucketMock) List(ctx observ.ProxyContext, prefix string) ([]string, error) {
 	res := make([]string, 0)
 
 	m.lock.RLock()
@@ -88,7 +89,7 @@ func (m *bucketMock) List(ctx context.Context, prefix string) ([]string, error) 
 	return res, nil
 }
 
-func (m *bucketMock) Exists(ctx context.Context, path string) (bool, error) {
+func (m *bucketMock) Exists(ctx observ.ProxyContext, path string) (bool, error) {
 	m.lock.RLock()
 	defer m.lock.RUnlock()
 	_, found := m.db[path]

@@ -1,7 +1,6 @@
 package mongo
 
 import (
-	"context"
 	"io"
 
 	"github.com/globalsign/mgo"
@@ -12,7 +11,7 @@ import (
 )
 
 // Info implements storage.Getter
-func (s *ModuleStore) Info(ctx context.Context, module, vsn string) ([]byte, error) {
+func (s *ModuleStore) Info(ctx observ.ProxyContext, module, vsn string) ([]byte, error) {
 	const op errors.Op = "mongo.Info"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
@@ -31,7 +30,7 @@ func (s *ModuleStore) Info(ctx context.Context, module, vsn string) ([]byte, err
 }
 
 // GoMod implements storage.Getter
-func (s *ModuleStore) GoMod(ctx context.Context, module, vsn string) ([]byte, error) {
+func (s *ModuleStore) GoMod(ctx observ.ProxyContext, module, vsn string) ([]byte, error) {
 	const op errors.Op = "mongo.GoMod"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
@@ -50,7 +49,7 @@ func (s *ModuleStore) GoMod(ctx context.Context, module, vsn string) ([]byte, er
 }
 
 // Zip implements storage.Getter
-func (s *ModuleStore) Zip(ctx context.Context, module, vsn string) (io.ReadCloser, error) {
+func (s *ModuleStore) Zip(ctx observ.ProxyContext, module, vsn string) (io.ReadCloser, error) {
 	const op errors.Op = "mongo.Zip"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()

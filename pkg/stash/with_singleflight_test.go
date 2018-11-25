@@ -7,6 +7,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/gomods/athens/pkg/observ"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -50,7 +51,7 @@ type mockSFStasher struct {
 	num int
 }
 
-func (ms *mockSFStasher) Stash(ctx context.Context, mod, ver string) error {
+func (ms *mockSFStasher) Stash(ctx observ.ProxyContext, mod, ver string) error {
 	time.Sleep(time.Millisecond * 100) // allow for second requests to come in.
 	ms.mu.Lock()
 	defer ms.mu.Unlock()

@@ -1,15 +1,13 @@
 package mongo
 
 import (
-	"context"
-
 	"github.com/globalsign/mgo/bson"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/observ"
 )
 
 // Exists checks for a specific version of a module
-func (s *ModuleStore) Exists(ctx context.Context, module, vsn string) (bool, error) {
+func (s *ModuleStore) Exists(ctx observ.ProxyContext, module, vsn string) (bool, error) {
 	var op errors.Op = "mongo.Exists"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()

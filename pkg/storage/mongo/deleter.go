@@ -1,15 +1,13 @@
 package mongo
 
 import (
-	"context"
-
 	"github.com/globalsign/mgo/bson"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/observ"
 )
 
 // Delete removes a specific version of a module
-func (s *ModuleStore) Delete(ctx context.Context, module, version string) error {
+func (s *ModuleStore) Delete(ctx observ.ProxyContext, module, version string) error {
 	const op errors.Op = "mongo.Delete"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()

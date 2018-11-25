@@ -1,7 +1,6 @@
 package fs
 
 import (
-	"context"
 	"os"
 
 	"github.com/gomods/athens/pkg/errors"
@@ -9,7 +8,7 @@ import (
 	"github.com/spf13/afero"
 )
 
-func (l *storageImpl) List(ctx context.Context, module string) ([]string, error) {
+func (l *storageImpl) List(ctx observ.ProxyContext, module string) ([]string, error) {
 	const op errors.Op = "fs.List"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()

@@ -2,7 +2,6 @@ package azure
 
 import (
 	"bytes"
-	"context"
 	"fmt"
 	"io"
 	"net/url"
@@ -15,7 +14,7 @@ import (
 )
 
 type client interface {
-	UploadWithContext(ctx context.Context, path, contentType string, content io.Reader) error
+	UploadWithContext(ctx observ.ProxyContext, path, contentType string, content io.Reader) error
 }
 
 type azureBlobStoreClient struct {
@@ -54,7 +53,7 @@ func New(conf *config.AzureConfig) (*Storage, error) {
 }
 
 // Save implements the (github.com/gomods/athens/pkg/storage).Saver interface.
-func (s *Storage) Save(ctx context.Context, module, version string, mod []byte, zip io.Reader, info []byte) error {
+func (s *Storage) Save(ctx observ.ProxyContext, module, version string, mod []byte, zip io.Reader, info []byte) error {
 	const op errors.Op = "azure.Save"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
@@ -65,7 +64,7 @@ func (s *Storage) Save(ctx context.Context, module, version string, mod []byte, 
 	return nil
 }
 
-func (c *azureBlobStoreClient) UploadWithContext(ctx context.Context, path, contentType string, content io.Reader) error {
+func (c *azureBlobStoreClient) UploadWithContext(ctx observ.ProxyContext, path, contentType string, content io.Reader) error {
 	const op errors.Op = "azure.UploadWithContext"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()

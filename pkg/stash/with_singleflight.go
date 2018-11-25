@@ -1,7 +1,6 @@
 package stash
 
 import (
-	"context"
 	"sync"
 
 	"github.com/gomods/athens/pkg/config"
@@ -29,7 +28,7 @@ type withsf struct {
 	subs map[string][]chan error
 }
 
-func (s *withsf) process(ctx context.Context, mod, ver string) {
+func (s *withsf) process(ctx observ.ProxyContext, mod, ver string) {
 	mv := config.FmtModVer(mod, ver)
 	err := s.stasher.Stash(ctx, mod, ver)
 	s.mu.Lock()
@@ -40,7 +39,7 @@ func (s *withsf) process(ctx context.Context, mod, ver string) {
 	delete(s.subs, mv)
 }
 
-func (s *withsf) Stash(ctx context.Context, mod, ver string) error {
+func (s *withsf) Stash(ctx observ.ProxyContext, mod, ver string) error {
 	const op errors.Op = "singleflight.Stash"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()

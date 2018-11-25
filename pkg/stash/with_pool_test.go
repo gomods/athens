@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"testing"
+
+	"github.com/gomods/athens/pkg/observ"
 )
 
 func TestPoolWrapper(t *testing.T) {
@@ -21,7 +23,7 @@ type mockStasher struct {
 	err      error
 }
 
-func (m *mockStasher) Stash(ctx context.Context, mod, ver string) error {
+func (m *mockStasher) Stash(ctx observ.ProxyContext, mod, ver string) error {
 	if m.inputMod != mod {
 		return fmt.Errorf("expected input mod %v but got %v", m.inputMod, mod)
 	}

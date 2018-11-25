@@ -1,7 +1,6 @@
 package s3
 
 import (
-	"context"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -14,7 +13,7 @@ import (
 )
 
 // Info implements the (./pkg/storage).Getter interface
-func (s *Storage) Info(ctx context.Context, module, version string) ([]byte, error) {
+func (s *Storage) Info(ctx observ.ProxyContext, module, version string) ([]byte, error) {
 	const op errors.Op = "s3.Info"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
@@ -40,7 +39,7 @@ func (s *Storage) Info(ctx context.Context, module, version string) ([]byte, err
 }
 
 // GoMod implements the (./pkg/storage).Getter interface
-func (s *Storage) GoMod(ctx context.Context, module, version string) ([]byte, error) {
+func (s *Storage) GoMod(ctx observ.ProxyContext, module, version string) ([]byte, error) {
 	const op errors.Op = "s3.GoMod"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
@@ -67,7 +66,7 @@ func (s *Storage) GoMod(ctx context.Context, module, version string) ([]byte, er
 }
 
 // Zip implements the (./pkg/storage).Getter interface
-func (s *Storage) Zip(ctx context.Context, module, version string) (io.ReadCloser, error) {
+func (s *Storage) Zip(ctx observ.ProxyContext, module, version string) (io.ReadCloser, error) {
 	const op errors.Op = "s3.Zip"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
@@ -87,7 +86,7 @@ func (s *Storage) Zip(ctx context.Context, module, version string) (io.ReadClose
 	return zipReader, nil
 }
 
-func (s *Storage) open(ctx context.Context, path string) (io.ReadCloser, error) {
+func (s *Storage) open(ctx observ.ProxyContext, path string) (io.ReadCloser, error) {
 	const op errors.Op = "s3.open"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()

@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/gomods/athens/pkg/download"
+	"github.com/gomods/athens/pkg/observ"
 	"github.com/gomods/athens/pkg/storage"
 )
 
@@ -38,7 +39,7 @@ type mockPool struct {
 	ch  chan struct{}
 }
 
-func (m *mockPool) List(ctx context.Context, mod string) ([]string, error) {
+func (m *mockPool) List(ctx observ.ProxyContext, mod string) ([]string, error) {
 	m.mu.Lock()
 	m.num++
 	if m.num == 5 {
@@ -99,7 +100,7 @@ type mockDP struct {
 }
 
 // List implements GET /{module}/@v/list
-func (m *mockDP) List(ctx context.Context, mod string) ([]string, error) {
+func (m *mockDP) List(ctx observ.ProxyContext, mod string) ([]string, error) {
 	if m.inputMod != mod {
 		return nil, fmt.Errorf("expected mod input %v but got %v", m.inputMod, mod)
 	}
@@ -107,7 +108,7 @@ func (m *mockDP) List(ctx context.Context, mod string) ([]string, error) {
 }
 
 // Info implements GET /{module}/@v/{version}.info
-func (m *mockDP) Info(ctx context.Context, mod, ver string) ([]byte, error) {
+func (m *mockDP) Info(ctx observ.ProxyContext, mod, ver string) ([]byte, error) {
 	if m.inputMod != mod {
 		return nil, fmt.Errorf("expected mod input %v but got %v", m.inputMod, mod)
 	}
@@ -118,7 +119,7 @@ func (m *mockDP) Info(ctx context.Context, mod, ver string) ([]byte, error) {
 }
 
 // Latest implements GET /{module}/@latest
-func (m *mockDP) Latest(ctx context.Context, mod string) (*storage.RevInfo, error) {
+func (m *mockDP) Latest(ctx observ.ProxyContext, mod string) (*storage.RevInfo, error) {
 	if m.inputMod != mod {
 		return nil, fmt.Errorf("expected mod input %v but got %v", m.inputMod, mod)
 	}
@@ -126,7 +127,7 @@ func (m *mockDP) Latest(ctx context.Context, mod string) (*storage.RevInfo, erro
 }
 
 // GoMod implements GET /{module}/@v/{version}.mod
-func (m *mockDP) GoMod(ctx context.Context, mod, ver string) ([]byte, error) {
+func (m *mockDP) GoMod(ctx observ.ProxyContext, mod, ver string) ([]byte, error) {
 	if m.inputMod != mod {
 		return nil, fmt.Errorf("expected mod input %v but got %v", m.inputMod, mod)
 	}
@@ -137,7 +138,7 @@ func (m *mockDP) GoMod(ctx context.Context, mod, ver string) ([]byte, error) {
 }
 
 // Zip implements GET /{module}/@v/{version}.zip
-func (m *mockDP) Zip(ctx context.Context, mod, ver string) (io.ReadCloser, error) {
+func (m *mockDP) Zip(ctx observ.ProxyContext, mod, ver string) (io.ReadCloser, error) {
 	if m.inputMod != mod {
 		return nil, fmt.Errorf("expected mod input %v but got %v", m.inputMod, mod)
 	}
@@ -148,6 +149,6 @@ func (m *mockDP) Zip(ctx context.Context, mod, ver string) (io.ReadCloser, error
 }
 
 // Version is a helper method to get Info, GoMod, and Zip together.
-func (m *mockDP) Version(ctx context.Context, mod, ver string) (*storage.Version, error) {
+func (m *mockDP) Version(ctx observ.ProxyContext, mod, ver string) (*storage.Version, error) {
 	panic("skipped")
 }

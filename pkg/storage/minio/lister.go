@@ -1,7 +1,6 @@
 package minio
 
 import (
-	"context"
 	"sort"
 	"strings"
 
@@ -9,7 +8,7 @@ import (
 	"github.com/gomods/athens/pkg/observ"
 )
 
-func (l *storageImpl) List(ctx context.Context, module string) ([]string, error) {
+func (l *storageImpl) List(ctx observ.ProxyContext, module string) ([]string, error) {
 	const op errors.Op = "minio.List"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()

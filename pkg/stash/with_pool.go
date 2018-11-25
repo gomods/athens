@@ -1,8 +1,6 @@
 package stash
 
 import (
-	"context"
-
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/observ"
 )
@@ -40,7 +38,7 @@ func (s *withpool) listen() {
 	}
 }
 
-func (s *withpool) Stash(ctx context.Context, mod, ver string) error {
+func (s *withpool) Stash(ctx observ.ProxyContext, mod, ver string) error {
 	const op errors.Op = "stash.Pool"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
