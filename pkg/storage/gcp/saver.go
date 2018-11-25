@@ -16,7 +16,7 @@ import (
 // from the standard library until context has been threaded down the stack.
 // see issue: https://github.com/gomods/athens/issues/174
 //
-// Uploaded files are publicly accessable in the storage bucket as per
+// Uploaded files are publicly accessible in the storage bucket as per
 // an ACL rule.
 func (s *Storage) Save(ctx observ.ProxyContext, module, version string, mod []byte, zip io.Reader, info []byte) error {
 	const op errors.Op = "gcp.Save"
