@@ -29,7 +29,7 @@ This storage doesn't need any specific configuration and it's also used by defau
     # StorageType sets the type of storage backend the proxy will use.
     # Env override: ATHENS_STORAGE_TYPE
     StorageType = "memory"
-    
+
 ## Disk
 
 Disk storage allows modules to be stored on a file system. The location on disk where modules will be stored can be configured.
@@ -39,11 +39,11 @@ Disk storage allows modules to be stored on a file system. The location on disk 
     # StorageType sets the type of storage backend the proxy will use.
     # Env override: ATHENS_STORAGE_TYPE
     StorageType = "disk"
-    
+
     [Storage]
         [Storage.Disk]
             RootPath = "/path/on/disk"
-            
+
 where `/path/on/disk` is your desired location. Also it can be set using `ATHENS_DISK_STORAGE_ROOT` env
 
 ## Mongo
@@ -55,32 +55,32 @@ This driver uses a [Mongo](https://www.mongodb.com/) server as data storage. On 
     # StorageType sets the type of storage backend the proxy will use.
     # Env override: ATHENS_STORAGE_TYPE
     StorageType = "mongo"
-    
+
     [Storage]
         [Storage.Mongo]
             # Full URL for mongo storage
             # Env override: ATHENS_MONGO_STORAGE_URL
             URL = "mongodb://127.0.0.1:27017"
-    
+
             # Not required parameter
             # Path to certificate to use for the mongo connection
             # Env override: ATHENS_MONGO_CERT_PATH
             CertPath = "/path/to/cert/file"
-    
+
             # Timeout for networks calls made to Mongo in seconds
             # Defaults to Global Timeout
             # Env override: MONGO_CONN_TIMEOUT_SEC
             Timeout = 300
-    
+
             # Not required parameter
             # Allows for insecure SSL / http connections to mongo storage
             # Should be used for testing or development only
             # Env override: ATHENS_MONGO_INSECURE
-            Insecure = false                    
-            
+            Insecure = false
+
 ## Google Cloud Storage
 
-This driver uses [Google Object Storage](https://cloud.google.com/storage/) and assumes that you already have an `account` in it. 
+This driver uses [Google Object Storage](https://cloud.google.com/storage/) and assumes that you already have an `account` in it.
 The GCP driver at start will try to create `bucket` in which Athens data will be stored.
 
 ##### Configuration:
@@ -88,24 +88,24 @@ The GCP driver at start will try to create `bucket` in which Athens data will be
     # StorageType sets the type of storage backend the proxy will use.
     # Env override: ATHENS_STORAGE_TYPE
     StorageType = "gcp"
-    
+
     [Storage]
         [Storage.GCP]
             # ProjectID to use for GCP Storage
             # Env overide: GOOGLE_CLOUD_PROJECT
             ProjectID = "YOUR_GCP_PROJECT_ID"
-    
+
             # Bucket to use for GCP Storage
             # Env override: ATHENS_STORAGE_GCP_BUCKET
             Bucket = "YOUR_GCP_BUCKET"
-    
+
             # Timeout for networks calls made to GCP in seconds
             # Defaults to Global Timeout
             Timeout = 300
-            
+
 ## AWS S3
 
-This driver is using the [AWS S3](https://aws.amazon.com/s3/) and assumes that you already have `account` and `bucket` created in it. 
+This driver is using the [AWS S3](https://aws.amazon.com/s3/) and assumes that you already have `account` and `bucket` created in it.
 If you never used Amazon Web Services there is [quick guide](https://docs.aws.amazon.com/AmazonS3/latest/gsg/GetStartedWithS3.html) how to create `bucket` inside it.
 After this you can pass you credentials inside `config.toml` file
 
