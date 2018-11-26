@@ -235,7 +235,7 @@ Also configuration for this storage looks almost the same in our proxy as for [M
 
     [Storage]
         [Storage.Minio]
-            # Address of DO Spaces storage
+            # Address of Alibaba OSS storage
             # Env override: ATHENS_MINIO_ENDPOINT
             Endpoint = "YOUR_ADDRESS.aliyuncs.com"
 
@@ -243,7 +243,7 @@ Also configuration for this storage looks almost the same in our proxy as for [M
             # Env override: ATHENS_MINIO_ACCESS_KEY_ID
             Key = "YOUR_OSS_KEY_ID"
 
-            # Secret Key for DO Spaces storage
+            # Secret Key for Alibaba OSS storage
             # Env override: ATHENS_MINIO_SECRET_ACCESS_KEY
             Secret = "YOUR_OSS_SECRET_KEY"
 
@@ -255,11 +255,7 @@ Also configuration for this storage looks almost the same in our proxy as for [M
             # Env override: ATHENS_MINIO_USE_SSL
             EnableSSL = true
 
-            # Space name in your DO Spaces storage
+            # Parent folder in your Alibaba OSS storage
             # Env override: ATHENS_MINIO_BUCKET_NAME
-            Bucket = "YOUR_OSS_BUCKET_NAME"
-
-            # Region for Minio storage
-            # Env override: ATHENS_MINIO_REGION
-            Region = "YOUR_OSS_REGION"
+            Bucket = "YOUR_OSS_FOLDER_PREFIX"
 
