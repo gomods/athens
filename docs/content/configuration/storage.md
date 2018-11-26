@@ -14,6 +14,7 @@ The Athens proxy supports many storage types:
 1. [AWS S3](#aws-s3)
 1. [Minio](#minio)
 1. [DigitalOcean Spaces](#digitalocean-spaces)
+1. [Alibaba OSS](#alibaba-oss)
 
 All of them can be configured using `config.toml` file. You need to set a valid driver in `StorageType` value or you can set it in environment variable `ATHENS_STORAGE_TYPE` on your server.
 Also for most of the drivers you need to provide additional configuration data which will be described below.
@@ -114,110 +115,151 @@ After this you can pass you credentials inside `config.toml` file
     # StorageType sets the type of storage backend the proxy will use.
     # Env override: ATHENS_STORAGE_TYPE
     StorageType = "s3"
-    
-    [Storage] 
+
+    [Storage]
         [Storage.S3]
             # Region on which your S3 storage exists
             # Env override: AWS_REGION
             Region = "YOUR_AWS_REGION"
-    
+
             # Access Key to your account
             # Env override: AWS_ACCESS_KEY_ID
             Key = "YOUR_AWS_ACCESS_KEY_ID"
-    
+
             # Secret Key to your account
             # Env override: AWS_SECRET_ACCESS_KEY
             Secret = "YOUR_AWS_SECRET_ACCESS_KEY"
-            
+
             # Not required parameter
             # Session Token for S3 storage
             # Env override: AWS_SESSION_TOKEN
             Token = ""
-            
+
             # S3 Bucket to use for storage
             # Defaults to gomods
             # Env override: ATHENS_S3_BUCKET_NAME
             Bucket = "YOUR_S3_BUCKET_NAME"
-    
+
             # Timeout for networks calls made to S3 in seconds
             # Defaults to Global Timeout
             Timeout = 300
 
 ## Minio
 
-[Minio](https://www.minio.io/) is an open source object storage server. If you never used minio you can read this [quick start guide](https://docs.minio.io/) 
+[Minio](https://www.minio.io/) is an open source object storage server. If you never used minio you can read this [quick start guide](https://docs.minio.io/)
 
 ##### Configuration:
 
     # StorageType sets the type of storage backend the proxy will use.
     # Env override: ATHENS_STORAGE_TYPE
     StorageType = "minio"
-    
-    [Storage] 
+
+    [Storage]
         [Storage.Minio]
             # Endpoint for Minio storage
             # Env override: ATHENS_MINIO_ENDPOINT
             Endpoint = "127.0.0.1:9001"
-    
+
             # Access Key for Minio storage
             # Env override: ATHENS_MINIO_ACCESS_KEY_ID
             Key = "YOUR_MINIO_SECRET_KEY"
-    
+
             # Secret Key for Minio storage
             # Env override: ATHENS_MINIO_SECRET_ACCESS_KEY
             Secret = "YOUR_MINIO_SECRET_KEY"
-    
+
             # Timeout for networks calls made to Minio in seconds
             # Defaults to Global Timeout
             Timeout = 300
-    
+
             # Enable SSL for Minio connections
             # Defaults to true
             # Env override: ATHENS_MINIO_USE_SSL
             EnableSSL = false
-    
+
             # Minio Bucket to use for storage
             # Env override: ATHENS_MINIO_BUCKET_NAME
             Bucket = "gomods"
-            
+
 ## DigitalOcean Spaces
 
 For Athens to communicate with [DigitalOcean Spaces](https://www.digitalocean.com/products/spaces/), we are using Minio driver because DO Spaces tries to be [fully compatible with it](https://developers.digitalocean.com/documentation/spaces/).
-Also configuration for this storage looks almost the same in our proxy as for [Minio](#minio). 
+Also configuration for this storage looks almost the same in our proxy as for [Minio](#minio).
 
 ##### Configuration:
 
     # StorageType sets the type of storage backend the proxy will use.
     # Env override: ATHENS_STORAGE_TYPE
     StorageType = "minio"
-    
-    [Storage] 
+
+    [Storage]
         [Storage.Minio]
             # Address of DO Spaces storage
             # Env override: ATHENS_MINIO_ENDPOINT
             Endpoint = "YOUR_ADDRESS.digitaloceanspaces.com"
-    
+
             # Access Key for Minio storage
             # Env override: ATHENS_MINIO_ACCESS_KEY_ID
             Key = "YOUR_DO_SPACE_KEY_ID"
-    
+
             # Secret Key for DO Spaces storage
             # Env override: ATHENS_MINIO_SECRET_ACCESS_KEY
             Secret = "YOUR_DO_SPACE_SECRET_KEY"
-    
+
             # Timeout for networks calls made to DO Spaces storage in seconds
             # Defaults to Global Timeout
             Timeout = 300
-    
-            # Enable SSL 
+
+            # Enable SSL
             # Env override: ATHENS_MINIO_USE_SSL
             EnableSSL = true
-    
+
             # Space name in your DO Spaces storage
             # Env override: ATHENS_MINIO_BUCKET_NAME
             Bucket = "YOUR_DO_SPACE_NAME"
-            
+
             # Region for Minio storage
             # Env override: ATHENS_MINIO_REGION
             Region = "YOUR_DO_SPACE_REGION"
-            
+
+## Alibaba OSS
+
+For Athens to communicate with [Alibaba Cloud Object Storage Service](https://www.alibabacloud.com/product/oss), we are using Minio driver.
+Also configuration for this storage looks almost the same in our proxy as for [Minio](#minio).
+
+##### Configuration:
+
+    # StorageType sets the type of storage backend the proxy will use.
+    # Env override: ATHENS_STORAGE_TYPE
+    StorageType = "minio"
+
+    [Storage]
+        [Storage.Minio]
+            # Address of DO Spaces storage
+            # Env override: ATHENS_MINIO_ENDPOINT
+            Endpoint = "YOUR_ADDRESS.aliyuncs.com"
+
+            # Access Key for Minio storage
+            # Env override: ATHENS_MINIO_ACCESS_KEY_ID
+            Key = "YOUR_OSS_KEY_ID"
+
+            # Secret Key for DO Spaces storage
+            # Env override: ATHENS_MINIO_SECRET_ACCESS_KEY
+            Secret = "YOUR_OSS_SECRET_KEY"
+
+            # Timeout for networks calls made to OSS storage in seconds
+            # Defaults to Global Timeout
+            Timeout = 300
+
+            # Enable SSL
+            # Env override: ATHENS_MINIO_USE_SSL
+            EnableSSL = true
+
+            # Space name in your DO Spaces storage
+            # Env override: ATHENS_MINIO_BUCKET_NAME
+            Bucket = "YOUR_OSS_BUCKET_NAME"
+
+            # Region for Minio storage
+            # Env override: ATHENS_MINIO_REGION
+            Region = "YOUR_OSS_REGION"
+
