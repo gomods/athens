@@ -2,7 +2,6 @@ package fs
 
 import (
 	"context"
-	"fmt"
 	"os"
 	"path/filepath"
 	"sort"
@@ -65,7 +64,6 @@ func (s *storageImpl) Catalog(ctx context.Context, token string, elements int) (
 			}
 		}
 	}
-	fmt.Println("FEDE FINAL LAP")
 
 	return res, "", nil
 }
