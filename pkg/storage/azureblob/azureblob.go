@@ -48,8 +48,7 @@ func newBlobStoreClient(accountURL *url.URL, accountName, accountKey, containerN
 // Storage implements (github.com/gomods/athens/pkg/storage).Saver and
 // also provides a function to fetch the location of a module
 type Storage struct {
-	cl   client
-	conf *config.AzureBlobConfig
+	client client
 }
 
 // New creates a new azure blobs storage saver
@@ -63,7 +62,7 @@ func New(conf *config.AzureBlobConfig, timeout time.Duration) (*Storage, error) 
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
-	return &Storage{cl: cl, conf: conf}, nil
+	return &Storage{client: cl}, nil
 }
 
 // BlobExists checks if a particular blob exists in the container

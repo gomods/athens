@@ -22,7 +22,7 @@ func (s *Storage) Info(ctx context.Context, module string, version string) ([]by
 		return nil, errors.E(op, errors.M(module), errors.V(version), errors.KindNotFound)
 	}
 
-	infoReader, err := s.cl.ReadBlob(ctx, config.PackageVersionedName(module, version, "info"))
+	infoReader, err := s.client.ReadBlob(ctx, config.PackageVersionedName(module, version, "info"))
 	if err != nil {
 		return nil, errors.E(op, err, errors.M(module), errors.V(version))
 	}
@@ -49,7 +49,7 @@ func (s *Storage) GoMod(ctx context.Context, module string, version string) ([]b
 		return nil, errors.E(op, errors.M(module), errors.V(version), errors.KindNotFound)
 	}
 
-	modReader, err := s.cl.ReadBlob(ctx, config.PackageVersionedName(module, version, "mod"))
+	modReader, err := s.client.ReadBlob(ctx, config.PackageVersionedName(module, version, "mod"))
 	if err != nil {
 		return nil, errors.E(op, err, errors.M(module), errors.V(version))
 	}
@@ -76,7 +76,7 @@ func (s *Storage) Zip(ctx context.Context, module string, version string) (io.Re
 		return nil, errors.E(op, errors.M(module), errors.V(version), errors.KindNotFound)
 	}
 
-	zipReader, err := s.cl.ReadBlob(ctx, config.PackageVersionedName(module, version, "zip"))
+	zipReader, err := s.client.ReadBlob(ctx, config.PackageVersionedName(module, version, "zip"))
 	if err != nil {
 		return nil, errors.E(op, err, errors.M(module), errors.V(version))
 	}

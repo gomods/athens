@@ -16,5 +16,5 @@ func (s *Storage) Exists(ctx context.Context, module string, version string) (bo
 	defer span.End()
 
 	pkgName := config.PackageVersionedName(module, version, "mod")
-	return s.cl.BlobExists(ctx, pkgName)
+	return s.client.BlobExists(ctx, pkgName)
 }

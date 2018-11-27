@@ -15,7 +15,7 @@ func (s *Storage) List(ctx context.Context, module string) ([]string, error) {
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 
-	blobnames, err := s.cl.ListBlobs(ctx, module)
+	blobnames, err := s.client.ListBlobs(ctx, module)
 	if err != nil {
 		return nil, errors.E(op, err, errors.M(module))
 	}
