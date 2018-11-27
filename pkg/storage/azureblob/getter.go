@@ -19,19 +19,24 @@ func (s *Storage) Info(ctx context.Context, module string, version string) ([]by
 
 	exists, err := s.Exists(ctx, module, version)
 	if err != nil || !exists {
-		return nil, errors.E(op, errors.M(module), errors.V(version), errors.KindNotFound)
+		return nil, errors.E(op, errors.M(module), errors.V(version), errors.KindNotFound, err)
 	}
 
 	infoReader, err := s.client.ReadBlob(ctx, config.PackageVersionedName(module, version, "info"))
 	if err != nil {
 		return nil, errors.E(op, err, errors.M(module), errors.V(version))
 	}
-	defer infoReader.Close()
 
 	infoBytes, err := ioutil.ReadAll(infoReader)
 	if err != nil {
 		return nil, errors.E(op, err, errors.M(module), errors.V(version))
 	}
+
+	err = infoReader.Close()
+	if err != nil {
+		return nil, errors.E(op, err, errors.M(module), errors.V(version))
+	}
+
 	return infoBytes, nil
 }
 
@@ -53,11 +58,15 @@ func (s *Storage) GoMod(ctx context.Context, module string, version string) ([]b
 	if err != nil {
 		return nil, errors.E(op, err, errors.M(module), errors.V(version))
 	}
-	defer modReader.Close()
 
 	modBytes, err := ioutil.ReadAll(modReader)
 	if err != nil {
 		return nil, errors.E(op, fmt.Errorf("could not get new reader for mod file: %s", err), errors.M(module), errors.V(version))
+	}
+
+	err = modReader.Close()
+	if err != nil {
+		return nil, errors.E(op, err, errors.M(module), errors.V(version))
 	}
 
 	return modBytes, nil
