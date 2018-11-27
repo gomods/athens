@@ -11,7 +11,7 @@ import (
 // Exists implements the (./pkg/storage).Checker interface
 // returning true if the module at version exists in storage
 func (s *Storage) Exists(ctx context.Context, module string, version string) (bool, error) {
-	const op errors.Op = "azureblob.Save"
+	const op errors.Op = "azureblob.newBlobStoreClient.Save"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 
