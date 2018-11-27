@@ -29,7 +29,7 @@ type azureBlobStoreClient struct {
 }
 
 func newBlobStoreClient(accountURL *url.URL, accountName, accountKey, containerName string, timeout time.Duration) (*azureBlobStoreClient, error) {
-	const op errors.Op = "storage.azure.azureblob"
+	const op errors.Op = "azureblob.newBlobStoreClient"
 	cred, err := azblob.NewSharedKeyCredential(accountName, accountKey)
 	if err != nil {
 		return nil, errors.E(op, err)

@@ -13,7 +13,7 @@ import (
 
 // Info implements the (./pkg/storage).Getter interface
 func (s *Storage) Info(ctx context.Context, module string, version string) ([]byte, error) {
-	const op errors.Op = "azureblob.newBlobStoreClient.Info"
+	const op errors.Op = "azureblob.Info"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 
@@ -42,7 +42,7 @@ func (s *Storage) Info(ctx context.Context, module string, version string) ([]by
 
 // GoMod implements the (./pkg/storage).Getter interface
 func (s *Storage) GoMod(ctx context.Context, module string, version string) ([]byte, error) {
-	const op errors.Op = "azureblob.newBlobStoreClient.GoMod"
+	const op errors.Op = "azureblob.GoMod"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 
@@ -74,7 +74,7 @@ func (s *Storage) GoMod(ctx context.Context, module string, version string) ([]b
 
 // Zip implements the (./pkg/storage).Getter interface
 func (s *Storage) Zip(ctx context.Context, module string, version string) (io.ReadCloser, error) {
-	const op errors.Op = "azureblob.newBlobStoreClient.Zip"
+	const op errors.Op = "azureblob.Zip"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 	exists, err := s.Exists(ctx, module, version)

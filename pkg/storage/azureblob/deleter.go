@@ -12,7 +12,7 @@ import (
 // removes a version of a module from storage. Returning ErrNotFound
 // if the version does not exist.
 func (s *Storage) Delete(ctx context.Context, module string, vsn string) error {
-	const op errors.Op = "azureblob.newBlobStoreClient.Delete"
+	const op errors.Op = "azureblob.Delete"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 	return errors.E(op, fmt.Errorf("Not Implemented"), errors.M(module))
