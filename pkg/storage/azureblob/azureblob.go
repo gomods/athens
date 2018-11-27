@@ -51,7 +51,7 @@ type Storage struct {
 	client client
 }
 
-// New creates a new azureblob storage backend
+// New creates a new azure blobs storage
 func New(conf *config.AzureBlobConfig, timeout time.Duration) (*Storage, error) {
 	const op errors.Op = "azure.New"
 	u, err := url.Parse(fmt.Sprintf("https://%s.blob.core.windows.net", conf.AccountName))
@@ -76,7 +76,7 @@ func (c *azureBlobStoreClient) BlobExists(ctx context.Context, path string) (boo
 		var ok bool
 
 		if serr, ok = err.(azblob.StorageError); !ok {
-			return false, errors.E(op, fmt.Errorf("Error in casting to azure error type"))
+			return false, errors.E(op, fmt.Errorf("Error in casting to azure error type %v", err))
 		}
 		if serr.Response().StatusCode == http.StatusNotFound {
 			return false, nil
