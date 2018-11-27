@@ -79,7 +79,7 @@ func (c *azureBlobStoreClient) BlobExists(ctx context.Context, path string) (boo
 			return false, errors.E(op, fmt.Errorf("Error in casting to azure error type"))
 		}
 		if serr.Response().StatusCode == http.StatusNotFound {
-			return false, errors.E(op, err)
+			return false, nil
 		}
 
 		return false, errors.E(op, err)
@@ -133,22 +133,15 @@ func (c *azureBlobStoreClient) UploadWithContext(ctx context.Context, path, cont
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 	blobURL := c.containerURL.NewBlockBlobURL(path)
-	emptyMeta := map[string]string{}
-	emptyBlobAccessCond := azblob.BlobAccessConditions{}
-	httpHeaders := func(contentType string) azblob.BlobHTTPHeaders {
-		return azblob.BlobHTTPHeaders{
-			ContentType: contentType,
-		}
-	}
 	bufferSize := 1 * 1024 * 1024 // Size of the rotating buffers that are used when uploading
 	maxBuffers := 3               // Number of rotating buffers that are used when uploading
 
 	uploadStreamOpts := azblob.UploadStreamToBlockBlobOptions{
-		BufferSize:       bufferSize,
-		MaxBuffers:       maxBuffers,
-		BlobHTTPHeaders:  httpHeaders(contentType),
-		Metadata:         emptyMeta,
-		AccessConditions: emptyBlobAccessCond,
+		BufferSize: bufferSize,
+		MaxBuffers: maxBuffers,
+		BlobHTTPHeaders: azblob.BlobHTTPHeaders{
+			ContentType: contentType,
+		},
 	}
 	_, err := azblob.UploadStreamToBlockBlob(ctx, content, blobURL, uploadStreamOpts)
 	if err != nil {
