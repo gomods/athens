@@ -29,7 +29,7 @@ type azureBlobStoreClient struct {
 }
 
 func newBlobStoreClient(accountURL *url.URL, accountName, accountKey, containerName string, timeout time.Duration) (*azureBlobStoreClient, error) {
-	const op errors.Op = "azure.newBlobStoreClient"
+	const op errors.Op = "storage.azure.azureblob"
 	cred, err := azblob.NewSharedKeyCredential(accountName, accountKey)
 	if err != nil {
 		return nil, errors.E(op, err)
@@ -51,7 +51,7 @@ type Storage struct {
 	client client
 }
 
-// New creates a new azure blobs storage saver
+// New creates a new azureblob storage backend
 func New(conf *config.AzureBlobConfig, timeout time.Duration) (*Storage, error) {
 	const op errors.Op = "azure.New"
 	u, err := url.Parse(fmt.Sprintf("https://%s.blob.core.windows.net", conf.AccountName))
