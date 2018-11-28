@@ -18,8 +18,11 @@ func (s *Storage) Info(ctx context.Context, module string, version string) ([]by
 	defer span.End()
 
 	exists, err := s.Exists(ctx, module, version)
-	if err != nil || !exists {
-		return nil, errors.E(op, errors.M(module), errors.V(version), errors.KindNotFound, err)
+	if err != nil {
+		return nil, errors.E(op, err, errors.M(module), errors.V(version))
+	}
+	if !exists {
+		return nil, errors.E(op, errors.M(module), errors.V(version), errors.KindNotFound)
 	}
 
 	infoReader, err := s.client.ReadBlob(ctx, config.PackageVersionedName(module, version, "info"))
