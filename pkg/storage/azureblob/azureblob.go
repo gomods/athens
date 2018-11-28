@@ -20,15 +20,13 @@ type client interface {
 	ReadBlob(ctx context.Context, path string) (io.ReadCloser, error)
 	ListBlobs(ctx context.Context, prefix string) ([]string, error)
 	DeleteBlob(ctx context.Context, path string) error
-	GetTimeout() time.Duration
 }
 
 type azureBlobStoreClient struct {
 	containerURL *azblob.ContainerURL
-	timeout      time.Duration
 }
 
-func newBlobStoreClient(accountURL *url.URL, accountName, accountKey, containerName string, timeout time.Duration) (*azureBlobStoreClient, error) {
+func newBlobStoreClient(accountURL *url.URL, accountName, accountKey, containerName string) (*azureBlobStoreClient, error) {
 	const op errors.Op = "azureblob.newBlobStoreClient"
 	cred, err := azblob.NewSharedKeyCredential(accountName, accountKey)
 	if err != nil {
@@ -41,7 +39,7 @@ func newBlobStoreClient(accountURL *url.URL, accountName, accountKey, containerN
 	//
 	// This container must exist
 	containerURL := serviceURL.NewContainerURL(containerName)
-	cl := &azureBlobStoreClient{containerURL: &containerURL, timeout: timeout}
+	cl := &azureBlobStoreClient{containerURL: &containerURL}
 	return cl, nil
 }
 
@@ -59,7 +57,7 @@ func New(conf *config.AzureBlobConfig, timeout time.Duration) (*Storage, error) 
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
-	cl, err := newBlobStoreClient(u, conf.AccountName, conf.AccountKey, conf.ContainerName, timeout)
+	cl, err := newBlobStoreClient(u, conf.AccountName, conf.AccountKey, conf.ContainerName)
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
@@ -100,6 +98,7 @@ func (c *azureBlobStoreClient) ReadBlob(ctx context.Context, path string) (io.Re
 	return downloadResponse.Body(azblob.RetryReaderOptions{}), nil
 }
 
+// ListBlobs will list all blobs which has the given prefix
 func (c *azureBlobStoreClient) ListBlobs(ctx context.Context, prefix string) ([]string, error) {
 	const op errors.Op = "azure.ListBlobs"
 	var blobs []string
@@ -118,6 +117,8 @@ func (c *azureBlobStoreClient) ListBlobs(ctx context.Context, prefix string) ([]
 	}
 	return blobs, nil
 }
+
+// DeleteBlob deletes the blob with the given path
 func (c *azureBlobStoreClient) DeleteBlob(ctx context.Context, path string) error {
 	const op errors.Op = "azure.DeleteBlob"
 	blobURL := c.containerURL.NewBlockBlobURL(path)
@@ -149,8 +150,4 @@ func (c *azureBlobStoreClient) UploadWithContext(ctx context.Context, path, cont
 		return errors.E(op, err)
 	}
 	return nil
-}
-
-func (c *azureBlobStoreClient) GetTimeout() time.Duration {
-	return time.Second * time.Duration(c.timeout)
 }
