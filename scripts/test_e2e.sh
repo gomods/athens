@@ -59,3 +59,11 @@ clearGoModCache
 # Verify that the test works against the proxy
 export GOPROXY=http://localhost:3000
 $GO_BINARY_PATH run .
+
+CATALOG_RES=$(curl localhost:3000/catalog)
+CATALOG_EXPECTED='{"ModsAndVersions":[{"Module":"github.com/athens-artifacts/no-tags","Version":"v0.0.0-20180803171426-1a540c5d67ab"}],"NextPageToken":""}'
+
+if [[ "$CATALOG_RES" != "$CATALOG_EXPECTED" ]]; then
+  echo ERROR: catalog endpoint failed
+  exit 1 # terminate and indicate error
+fi

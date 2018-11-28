@@ -135,7 +135,7 @@ func testCatalog(t *testing.T, b storage.Backend) {
 
 	mock := getMockModule()
 	zipBts, _ := ioutil.ReadAll(mock.Zip)
-	modname := "testCatalogModule"
+	modname := "github.com/gomods/testCatalogModule"
 	for i := 0; i < 1005; i++ {
 		ver := fmt.Sprintf("v1.2.%04d", i)
 		b.Save(ctx, modname, ver, mock.Mod, bytes.NewReader(zipBts), mock.Info)
@@ -164,9 +164,9 @@ func testCatalog(t *testing.T, b storage.Backend) {
 		}
 		return allres[i].Module < allres[j].Module
 	})
-
-	require.Equal(t, allres[0].Version, "v1.2.0000")
-	require.Equal(t, allres[1004].Version, "v1.2.1004")
+	require.Equal(t, modname, allres[0].Module)
+	require.Equal(t, "v1.2.0000", allres[0].Version)
+	require.Equal(t, "v1.2.1004", allres[1004].Version)
 }
 
 func getMockModule() *storage.Version {

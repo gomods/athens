@@ -2,9 +2,9 @@ package fs
 
 import (
 	"context"
+	"io"
 	"os"
 	"path/filepath"
-	"sort"
 	"strings"
 
 	"github.com/gomods/athens/pkg/observ"
@@ -21,60 +21,45 @@ func (s *storageImpl) Catalog(ctx context.Context, token string, elements int) (
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 
-	moduleInfos, err := afero.ReadDir(s.filesystem, s.rootDir)
-	if err != nil {
-		if os.IsNotExist(err) {
-			return nil, "", nil
-		}
-		return nil, "", errors.E(op, err, errors.KindUnexpected)
-	}
-
-	res := make([]paths.AllPathParams, 0)
 	fromModule, fromVersion, err := modVerFromToken(token)
 	if err != nil {
 		return nil, "", errors.E(op, err, errors.KindBadRequest)
 	}
 
+	res := make([]paths.AllPathParams, 0)
+	resToken := ""
 	count := elements
-	sortFsSlice(moduleInfos)
-	for _, moduleInfo := range moduleInfos {
-		if fromModule != "" && moduleInfo.Name() < fromModule { // is it ok to land on the same module
-			continue
-		}
 
-		if moduleInfo.IsDir() {
-			moduleDir := filepath.Join(s.rootDir, moduleInfo.Name())
-			versionInfos, err := afero.ReadDir(s.filesystem, moduleDir)
-			if err != nil && os.IsNotExist(err) {
-				continue
-			}
+	err = afero.Walk(s.filesystem, s.rootDir, func(path string, info os.FileInfo, err error) error {
+		if strings.HasSuffix(info.Name(), ".info") {
+			verDir := filepath.Dir(path)
+			modVer, err := filepath.Rel(s.rootDir, verDir)
 			if err != nil {
-				return nil, "", errors.E(op, err, errors.KindUnexpected)
+				return err
 			}
-			sortFsSlice(versionInfos)
-			for _, versionInfo := range versionInfos {
-				if fromVersion != "" && versionInfo.Name() <= fromVersion { // we must skip same version
-					continue
-				}
-				res = append(res, paths.AllPathParams{moduleInfo.Name(), versionInfo.Name()})
-				count--
-				if elements > 0 && count == 0 {
-					return res, tokenFromModVer(moduleInfo.Name(), versionInfo.Name()), nil
-				}
+
+			m, version := filepath.Split(modVer)
+			module := filepath.Clean(m)
+
+			if fromModule != "" && module < fromModule { // it is ok to land on the same module
+				return nil
+			}
+
+			if fromVersion != "" && version <= fromVersion { // we must skip same version
+				return nil
+			}
+
+			res = append(res, paths.AllPathParams{module, version})
+			count--
+			if count == 0 {
+				resToken = tokenFromModVer(module, version)
+				return io.EOF
 			}
 		}
-	}
-
-	return res, "", nil
-}
-
-func sortFsSlice(toSort []os.FileInfo) {
-	sort.Slice(toSort, func(i, j int) bool {
-		if toSort[i].Name() < toSort[j].Name() {
-			return true
-		}
-		return false
+		return nil
 	})
+
+	return res, resToken, nil
 }
 
 func tokenFromModVer(module, version string) string {
