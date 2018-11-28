@@ -4,6 +4,7 @@
 
 [![Open Source Helpers](https://www.codetriage.com/gomods/athens/badges/users.svg)](https://www.codetriage.com/gomods/athens)
 [![Build Status](https://travis-ci.org/gomods/athens.svg?branch=master)](https://travis-ci.org/gomods/athens)
+[![Build Status](https://dev.azure.com/gomods/athens/_apis/build/status/gomods.athens?branchName=master)](https://dev.azure.com/gomods/athens/_build/latest?definitionId=1&branchName=master)
 [![codecov](https://codecov.io/gh/gomods/athens/branch/master/graph/badge.svg)](https://codecov.io/gh/gomods/athens)
 [![GoDoc](https://godoc.org/github.com/gomods/athens?status.svg)](https://godoc.org/github.com/gomods/athens)
 [![Go Report Card](https://goreportcard.com/badge/github.com/gomods/athens)](https://goreportcard.com/report/github.com/gomods/athens)
