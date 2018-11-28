@@ -68,11 +68,6 @@ This driver uses a [Mongo](https://www.mongodb.com/) server as data storage. On 
             # Env override: ATHENS_MONGO_CERT_PATH
             CertPath = "/path/to/cert/file"
 
-            # Timeout for networks calls made to Mongo in seconds
-            # Defaults to Global Timeout
-            # Env override: MONGO_CONN_TIMEOUT_SEC
-            Timeout = 300
-
             # Not required parameter
             # Allows for insecure SSL / http connections to mongo storage
             # Should be used for testing or development only
@@ -99,10 +94,6 @@ The GCP driver at start will try to create `bucket` in which Athens data will be
             # Bucket to use for GCP Storage
             # Env override: ATHENS_STORAGE_GCP_BUCKET
             Bucket = "YOUR_GCP_BUCKET"
-
-            # Timeout for networks calls made to GCP in seconds
-            # Defaults to Global Timeout
-            Timeout = 300
 
 ## AWS S3
 
@@ -140,10 +131,6 @@ After this you can pass you credentials inside `config.toml` file
             # Env override: ATHENS_S3_BUCKET_NAME
             Bucket = "YOUR_S3_BUCKET_NAME"
 
-            # Timeout for networks calls made to S3 in seconds
-            # Defaults to Global Timeout
-            Timeout = 300
-
 ## Minio
 
 [Minio](https://www.minio.io/) is an open source object storage server. If you never used minio you can read this [quick start guide](https://docs.minio.io/)
@@ -167,10 +154,6 @@ After this you can pass you credentials inside `config.toml` file
             # Secret Key for Minio storage
             # Env override: ATHENS_MINIO_SECRET_ACCESS_KEY
             Secret = "YOUR_MINIO_SECRET_KEY"
-
-            # Timeout for networks calls made to Minio in seconds
-            # Defaults to Global Timeout
-            Timeout = 300
 
             # Enable SSL for Minio connections
             # Defaults to true
@@ -198,17 +181,13 @@ Also configuration for this storage looks almost the same in our proxy as for [M
             # Env override: ATHENS_MINIO_ENDPOINT
             Endpoint = "YOUR_ADDRESS.digitaloceanspaces.com"
 
-            # Access Key for Minio storage
+            # Access Key for DO Spaces storage
             # Env override: ATHENS_MINIO_ACCESS_KEY_ID
             Key = "YOUR_DO_SPACE_KEY_ID"
 
             # Secret Key for DO Spaces storage
             # Env override: ATHENS_MINIO_SECRET_ACCESS_KEY
             Secret = "YOUR_DO_SPACE_SECRET_KEY"
-
-            # Timeout for networks calls made to DO Spaces storage in seconds
-            # Defaults to Global Timeout
-            Timeout = 300
 
             # Enable SSL
             # Env override: ATHENS_MINIO_USE_SSL
@@ -218,7 +197,7 @@ Also configuration for this storage looks almost the same in our proxy as for [M
             # Env override: ATHENS_MINIO_BUCKET_NAME
             Bucket = "YOUR_DO_SPACE_NAME"
 
-            # Region for Minio storage
+            # Region for DO Spaces storage
             # Env override: ATHENS_MINIO_REGION
             Region = "YOUR_DO_SPACE_REGION"
 
@@ -247,10 +226,6 @@ Also configuration for this storage looks almost the same in our proxy as for [M
             # Env override: ATHENS_MINIO_SECRET_ACCESS_KEY
             Secret = "YOUR_OSS_SECRET_KEY"
 
-            # Timeout for networks calls made to OSS storage in seconds
-            # Defaults to Global Timeout
-            Timeout = 300
-
             # Enable SSL
             # Env override: ATHENS_MINIO_USE_SSL
             EnableSSL = true
@@ -258,4 +233,3 @@ Also configuration for this storage looks almost the same in our proxy as for [M
             # Parent folder in your Alibaba OSS storage
             # Env override: ATHENS_MINIO_BUCKET_NAME
             Bucket = "YOUR_OSS_FOLDER_PREFIX"
-
