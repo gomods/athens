@@ -9,6 +9,5 @@ import (
 // Cataloger is the interface that lists all the modules and version contained in the storage
 type Cataloger interface {
 	// Catalog gets all the modules / versions.
-	// It returns ErrNotFound if the module isn't found
-	Catalog(ctx context.Context, token string, elements int) ([]paths.AllPathParams, string, error)
+	Catalog(ctx context.Context, token string, pageSize int) ([]paths.AllPathParams, string, error)
 }

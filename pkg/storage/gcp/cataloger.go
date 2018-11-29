@@ -14,23 +14,24 @@ import (
 
 // Catalog implements the (./pkg/storage).Catalog interface
 // It returns a list of versions, if any, for a given module
-func (s *Storage) Catalog(ctx context.Context, token string, elements int) ([]paths.AllPathParams, string, error) {
+func (s *Storage) Catalog(ctx context.Context, token string, pageSize int) ([]paths.AllPathParams, string, error) {
 	const op errors.Op = "gcp.Catalog"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 	res := make([]paths.AllPathParams, 0)
 	var resToken string
+	count := pageSize
 
-	for elements > 0 {
+	for count > 0 {
 		var catalog []string
 		var err error
-		catalog, resToken, err = s.bucket.Catalog(ctx, token, 3*elements)
+		catalog, resToken, err = s.bucket.Catalog(ctx, token, 3*count)
 		if err != nil {
 			return nil, "", errors.E(op, err)
 		}
 		pathsAndVers := fetchModsAndVersions(catalog)
 		res = append(res, pathsAndVers...)
-		elements -= len(pathsAndVers)
+		count -= len(pathsAndVers)
 
 		if resToken == "" { // meaning we reached the end
 			break

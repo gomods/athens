@@ -71,11 +71,11 @@ func (b *gcpBucket) Exists(ctx context.Context, path string) (bool, error) {
 	return true, nil
 }
 
-func (b *gcpBucket) Catalog(ctx context.Context, token string, elementNum int) ([]string, string, error) {
+func (b *gcpBucket) Catalog(ctx context.Context, token string, pageSize int) ([]string, string, error) {
 	const op errors.Op = "gcpBucket.Catalog"
 
 	it := b.Objects(ctx, nil)
-	p := iterator.NewPager(it, elementNum, token)
+	p := iterator.NewPager(it, pageSize, token)
 
 	attrs := make([]*storage.ObjectAttrs, 0)
 	nextToken, err := p.NextPage(&attrs)

@@ -14,6 +14,7 @@ import (
 
 // PathCatalog URL.
 const PathCatalog = "/catalog"
+const DefaultPageSize = 1000
 
 type catalogRes struct {
 	ModsAndVersions []paths.AllPathParams
@@ -26,13 +27,17 @@ func CatalogHandler(dp Protocol, lggr log.Entry, eng *render.Engine) buffalo.Han
 
 	return func(c buffalo.Context) error {
 		token := c.Param("token")
-		limit, err := getLimitFromParam(c.Param("limit"))
+		pageSize, err := getLimitFromParam(c.Param("pagesize"))
 		if err != nil {
 			lggr.SystemErr(err)
 			return c.Render(http.StatusInternalServerError, nil)
 		}
 
-		modulesAndVersions, newToken, err := dp.Catalog(c, token, limit)
+		if pageSize == 0 {
+			pageSize = DefaultPageSize
+		}
+
+		modulesAndVersions, newToken, err := dp.Catalog(c, token, pageSize)
 
 		if errors.Kind(err) == errors.KindMethodNotImplemented {
 			return c.Render(http.StatusNotFound, nil)

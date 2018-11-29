@@ -154,7 +154,7 @@ func (m *mockDP) Zip(ctx context.Context, mod, ver string) (io.ReadCloser, error
 }
 
 // Catalog implements GET /catalog
-func (m *mockDP) Catalog(ctx context.Context, token string, limit int) ([]paths.AllPathParams, string, error) {
+func (m *mockDP) Catalog(ctx context.Context, token string, pageSize int) ([]paths.AllPathParams, string, error) {
 	return m.catalog, "", m.err
 }
 

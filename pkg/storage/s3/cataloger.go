@@ -17,13 +17,14 @@ import (
 
 // Catalog implements the (./pkg/storage).Cataloger interface
 // It returns a list of modules and versions contained in the storage
-func (s *Storage) Catalog(ctx context.Context, token string, elements int) ([]paths.AllPathParams, string, error) {
+func (s *Storage) Catalog(ctx context.Context, token string, pageSize int) ([]paths.AllPathParams, string, error) {
 	const op errors.Op = "s3.Catalog"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 	queryToken := token
 	res := make([]paths.AllPathParams, 0)
-	for elements > 0 {
+	count := pageSize
+	for count > 0 {
 		lsParams := &s3.ListObjectsInput{
 			Bucket: aws.String(s.bucket),
 			Marker: &queryToken,
@@ -34,14 +35,14 @@ func (s *Storage) Catalog(ctx context.Context, token string, elements int) ([]pa
 			return nil, "", errors.E(op, err)
 		}
 
-		m, lastKey := fetchModsAndVersions(loo.Contents, elements)
+		m, lastKey := fetchModsAndVersions(loo.Contents, count)
 
 		res = append(res, m...)
-		elements -= len(m)
+		count -= len(m)
 		queryToken = lastKey
 
 		if !*loo.IsTruncated { // not truncated, there is no point in asking more
-			if elements > 0 { // it means we reached the end, no subsequent requests are necessary
+			if count > 0 { // it means we reached the end, no subsequent requests are necessary
 				queryToken = ""
 			}
 			break

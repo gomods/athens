@@ -16,7 +16,7 @@ import (
 
 // Catalog implements the (./pkg/storage).Cataloger interface
 // It returns a list of modules and versions contained in the storage
-func (s *storageImpl) Catalog(ctx context.Context, token string, elements int) ([]paths.AllPathParams, string, error) {
+func (s *storageImpl) Catalog(ctx context.Context, token string, pageSize int) ([]paths.AllPathParams, string, error) {
 	const op errors.Op = "fs.Catalog"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
@@ -28,7 +28,7 @@ func (s *storageImpl) Catalog(ctx context.Context, token string, elements int) (
 
 	res := make([]paths.AllPathParams, 0)
 	resToken := ""
-	count := elements
+	count := pageSize
 
 	err = afero.Walk(s.filesystem, s.rootDir, func(path string, info os.FileInfo, err error) error {
 		if strings.HasSuffix(info.Name(), ".info") {

@@ -31,7 +31,7 @@ type Protocol interface {
 	Zip(ctx context.Context, mod, ver string) (io.ReadCloser, error)
 
 	// Catalog implements GET /catalog
-	Catalog(ctx context.Context, token string, limit int) ([]paths.AllPathParams, string, error)
+	Catalog(ctx context.Context, token string, pageSize int) ([]paths.AllPathParams, string, error)
 }
 
 // Wrapper helps extend the main protocol's functionality with addons.
@@ -161,11 +161,11 @@ func (p *protocol) Zip(ctx context.Context, mod, ver string) (io.ReadCloser, err
 	return zip, nil
 }
 
-func (p *protocol) Catalog(ctx context.Context, token string, limit int) ([]paths.AllPathParams, string, error) {
+func (p *protocol) Catalog(ctx context.Context, token string, pageSize int) ([]paths.AllPathParams, string, error) {
 	const op errors.Op = "protocol.Catalog"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
-	modulesAndVersions, newToken, err := p.storage.Catalog(ctx, token, limit)
+	modulesAndVersions, newToken, err := p.storage.Catalog(ctx, token, pageSize)
 
 	if err != nil {
 		return nil, "", errors.E(op, err)

@@ -19,5 +19,5 @@ type Bucket interface {
 	// Exists returns true if the file exists
 	Exists(ctx context.Context, path string) (bool, error)
 	// Catalog returns a slice of paths starting from the page given by the token and max elementNum
-	Catalog(ctx context.Context, token string, elementNum int) ([]string, string, error)
+	Catalog(ctx context.Context, token string, pageSize int) ([]string, string, error)
 }

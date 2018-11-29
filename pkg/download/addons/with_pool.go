@@ -130,14 +130,14 @@ func (p *withpool) Zip(ctx context.Context, mod, ver string) (io.ReadCloser, err
 	return zip, nil
 }
 
-func (p *withpool) Catalog(ctx context.Context, token string, numElement int) ([]paths.AllPathParams, string, error) {
+func (p *withpool) Catalog(ctx context.Context, token string, pageSize int) ([]paths.AllPathParams, string, error) {
 	const op errors.Op = "pool.Catalog"
 	var modsVers []paths.AllPathParams
 	var nextToken string
 	var err error
 	done := make(chan struct{}, 1)
 	p.jobCh <- func() {
-		modsVers, nextToken, err = p.dp.Catalog(ctx, token, numElement)
+		modsVers, nextToken, err = p.dp.Catalog(ctx, token, pageSize)
 		close(done)
 	}
 	<-done
