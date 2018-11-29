@@ -35,6 +35,8 @@ Thank you to the following **GIANTS**:
 
 * [github.com/gobuffalo/validate/validators](https://godoc.org/github.com/gobuffalo/validate/validators)
 
+* [github.com/gofrs/uuid](https://godoc.org/github.com/gofrs/uuid)
+
 * [github.com/joho/godotenv](https://godoc.org/github.com/joho/godotenv)
 
 * [github.com/markbates/inflect](https://godoc.org/github.com/markbates/inflect)

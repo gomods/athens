@@ -1,3 +1,3 @@
 package github_flavored_markdown
 
-const Version = "v1.0.5"
+const Version = "v1.0.7"
