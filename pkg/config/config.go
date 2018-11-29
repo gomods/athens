@@ -103,8 +103,8 @@ func validateConfig(config Config) error {
 		return validate.Struct(config.Storage.GCP)
 	case "s3":
 		return validate.Struct(config.Storage.S3)
-	case "azure":
-		return validate.Struct(config.Storage.Azure)
+	case "azureblob":
+		return validate.Struct(config.Storage.AzureBlob)
 	default:
 		return fmt.Errorf("storage type %s is unknown", config.StorageType)
 	}

@@ -132,10 +132,6 @@ func (s *Secure) SetBadHostHandler(handler http.Handler) {
 // Handler implements the http.HandlerFunc for integration with the standard net/http lib.
 func (s *Secure) Handler(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if s.opt.nonceEnabled {
-			r = withCSPNonce(r, cspRandNonce())
-		}
-
 		// Let secure process the request. If it returns an error,
 		// that indicates the request should not continue.
 		err := s.Process(w, r)
@@ -153,10 +149,6 @@ func (s *Secure) Handler(h http.Handler) http.Handler {
 // Note that this is for requests only and will not write any headers.
 func (s *Secure) HandlerForRequestOnly(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if s.opt.nonceEnabled {
-			r = withCSPNonce(r, cspRandNonce())
-		}
-
 		// Let secure process the request. If it returns an error,
 		// that indicates the request should not continue.
 		responseHeader, err := s.processRequest(w, r)
@@ -176,10 +168,6 @@ func (s *Secure) HandlerForRequestOnly(h http.Handler) http.Handler {
 
 // HandlerFuncWithNext is a special implementation for Negroni, but could be used elsewhere.
 func (s *Secure) HandlerFuncWithNext(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
-	if s.opt.nonceEnabled {
-		r = withCSPNonce(r, cspRandNonce())
-	}
-
 	// Let secure process the request. If it returns an error,
 	// that indicates the request should not continue.
 	err := s.Process(w, r)
@@ -193,10 +181,6 @@ func (s *Secure) HandlerFuncWithNext(w http.ResponseWriter, r *http.Request, nex
 // HandlerFuncWithNextForRequestOnly is a special implementation for Negroni, but could be used elsewhere.
 // Note that this is for requests only and will not write any headers.
 func (s *Secure) HandlerFuncWithNextForRequestOnly(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
-	if s.opt.nonceEnabled {
-		r = withCSPNonce(r, cspRandNonce())
-	}
-
 	// Let secure process the request. If it returns an error,
 	// that indicates the request should not continue.
 	responseHeader, err := s.processRequest(w, r)
@@ -226,6 +210,11 @@ func (s *Secure) Process(w http.ResponseWriter, r *http.Request) error {
 
 // processRequest runs the actual checks on the request and returns an error if the middleware chain should stop.
 func (s *Secure) processRequest(w http.ResponseWriter, r *http.Request) (http.Header, error) {
+	// Setup nouce if required.
+	if s.opt.nonceEnabled {
+		r = withCSPNonce(r, cspRandNonce())
+	}
+
 	// Resolve the host for the request, using proxy headers if present.
 	host := r.Host
 	for _, header := range s.opt.HostsProxyHeaders {
