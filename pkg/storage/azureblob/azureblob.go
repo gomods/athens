@@ -115,6 +115,7 @@ func (c *azureBlobStoreClient) ListBlobs(ctx context.Context, prefix string) ([]
 			blobs = append(blobs, blob.Name)
 		}
 	}
+
 	return blobs, nil
 }
 
