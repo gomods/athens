@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/gomods/athens/pkg/config"
+
 	"github.com/gomods/athens/pkg/paths"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -73,12 +75,10 @@ func fetchModsAndVersions(objects []*s3.Object, elementsNum int) ([]paths.AllPat
 
 func parseS3Key(o *s3.Object) (paths.AllPathParams, error) {
 	const op errors.Op = "s3.parseS3Key"
-	segments := strings.Split(*o.Key, "/")
-	if len(segments) <= 0 {
+	m, v := config.ModuleVersionFromPath(*o.Key)
+
+	if m == "" || v == "" {
 		return paths.AllPathParams{}, errors.E(op, fmt.Errorf("invalid object key format %s", *o.Key))
 	}
-	module := segments[0]
-	last := segments[len(segments)-1]
-	version := strings.TrimSuffix(last, ".info")
-	return paths.AllPathParams{module, version}, nil
+	return paths.AllPathParams{m, v}, nil
 }

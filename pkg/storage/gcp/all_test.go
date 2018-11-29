@@ -34,7 +34,7 @@ var bucket = flag.String("gcpbucket", "", "the gcp bucket to test against")
 
 func (g *GcpTests) SetupSuite() {
 	g.context = context.Background()
-	g.module = "gcp-test" + time.Now().String()
+	g.module = "github.com/foo/gcp-test" + time.Now().String()
 	g.version = "v1.2.3"
 
 	if !*realGcp {

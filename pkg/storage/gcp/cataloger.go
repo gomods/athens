@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/paths"
 
 	"github.com/gomods/athens/pkg/errors"
@@ -54,13 +55,12 @@ func fetchModsAndVersions(catalog []string) []paths.AllPathParams {
 }
 
 func parseGcpKey(p string) (paths.AllPathParams, error) {
-	const op errors.Op = "gcp.parseGcpKey"
-	segments := strings.Split(p, "/")
-	if len(segments) <= 0 {
+	const op errors.Op = "gcp.parseS3Key"
+	// github.com/gomods/testCatalogModule/@v/v1.2.0976.info
+	m, v := config.ModuleVersionFromPath(p)
+
+	if m == "" || v == "" {
 		return paths.AllPathParams{}, errors.E(op, fmt.Errorf("invalid object key format %s", p))
 	}
-	module := segments[0]
-	last := segments[len(segments)-1]
-	version := strings.TrimSuffix(last, ".info")
-	return paths.AllPathParams{module, version}, nil
+	return paths.AllPathParams{m, v}, nil
 }

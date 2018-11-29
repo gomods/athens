@@ -121,6 +121,7 @@ func (g *GcpTests) TestCatalog() {
 	r.NoError(err)
 	r.Equal(len(allres), 2)
 	r.NotEqual("", nextToken)
+	r.Equal(allres[0].Module, g.module)
 
 	res, nextToken, err := g.store.Catalog(g.context, nextToken, 50)
 	allres = append(allres, res...)
