@@ -134,7 +134,7 @@ After this you can pass you credentials inside `config.toml` file
 
 ## Minio
 
-[Minio](https://www.minio.io/) is an open source object storage server. If you never used minio you can read this [quick start guide](https://docs.minio.io/). Several block storages like Digital Ocean Spaces and Alibaba OSS are compatible with Minio. Any block storage that can use the Minio interface is supported by Minio.
+[Minio](https://www.minio.io/) is an open source object storage server. If you never used minio you can read this [quick start guide](https://docs.minio.io/). Several block storages like Digital Ocean Spaces and Alibaba OSS are compatible with Minio. Any block storage that can use the Minio interface is supported by Athens.
 
 ##### Configuration:
 
