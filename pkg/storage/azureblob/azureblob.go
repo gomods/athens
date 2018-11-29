@@ -52,7 +52,7 @@ type Storage struct {
 
 // New creates a new azure blobs storage
 func New(conf *config.AzureBlobConfig, timeout time.Duration) (*Storage, error) {
-	const op errors.Op = "azure.New"
+	const op errors.Op = "azureblob.New"
 	u, err := url.Parse(fmt.Sprintf("https://%s.blob.core.windows.net", conf.AccountName))
 	if err != nil {
 		return nil, errors.E(op, err)
@@ -66,7 +66,7 @@ func New(conf *config.AzureBlobConfig, timeout time.Duration) (*Storage, error) 
 
 // BlobExists checks if a particular blob exists in the container
 func (c *azureBlobStoreClient) BlobExists(ctx context.Context, path string) (bool, error) {
-	const op errors.Op = "azure.BlobExists"
+	const op errors.Op = "azureblob.BlobExists"
 	// TODO: Any better way of doing this ?
 	blobURL := c.containerURL.NewBlockBlobURL(path)
 	_, err := blobURL.GetProperties(ctx, azblob.BlobAccessConditions{})
@@ -89,7 +89,7 @@ func (c *azureBlobStoreClient) BlobExists(ctx context.Context, path string) (boo
 
 // ReadBlob returns an io.ReadCloser for the contents of a blob
 func (c *azureBlobStoreClient) ReadBlob(ctx context.Context, path string) (io.ReadCloser, error) {
-	const op errors.Op = "azure.ReadBlob"
+	const op errors.Op = "azureblob.ReadBlob"
 	blobURL := c.containerURL.NewBlockBlobURL(path)
 	downloadResponse, err := blobURL.Download(ctx, 0, 0, azblob.BlobAccessConditions{}, false)
 	if err != nil {
@@ -100,7 +100,7 @@ func (c *azureBlobStoreClient) ReadBlob(ctx context.Context, path string) (io.Re
 
 // ListBlobs will list all blobs which has the given prefix
 func (c *azureBlobStoreClient) ListBlobs(ctx context.Context, prefix string) ([]string, error) {
-	const op errors.Op = "azure.ListBlobs"
+	const op errors.Op = "azureblob.ListBlobs"
 	var blobs []string
 	for marker := (azblob.Marker{}); marker.NotDone(); {
 		listBlob, err := c.containerURL.ListBlobsFlatSegment(ctx, marker, azblob.ListBlobsSegmentOptions{
@@ -120,7 +120,7 @@ func (c *azureBlobStoreClient) ListBlobs(ctx context.Context, prefix string) ([]
 
 // DeleteBlob deletes the blob with the given path
 func (c *azureBlobStoreClient) DeleteBlob(ctx context.Context, path string) error {
-	const op errors.Op = "azure.DeleteBlob"
+	const op errors.Op = "azureblob.DeleteBlob"
 	blobURL := c.containerURL.NewBlockBlobURL(path)
 	_, err := blobURL.Delete(ctx, azblob.DeleteSnapshotsOptionNone, azblob.BlobAccessConditions{})
 	if err != nil {
@@ -131,7 +131,7 @@ func (c *azureBlobStoreClient) DeleteBlob(ctx context.Context, path string) erro
 
 // UploadWithContext uploads a blob to the container
 func (c *azureBlobStoreClient) UploadWithContext(ctx context.Context, path, contentType string, content io.Reader) error {
-	const op errors.Op = "azure.UploadWithContext"
+	const op errors.Op = "azureblob.UploadWithContext"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 	blobURL := c.containerURL.NewBlockBlobURL(path)
