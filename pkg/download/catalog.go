@@ -62,5 +62,4 @@ func getLimitFromParam(param string) (int, error) {
 		return 0, nil
 	}
 	return strconv.Atoi(param)
-
 }
