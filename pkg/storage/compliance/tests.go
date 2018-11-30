@@ -179,7 +179,7 @@ func getMockModule() *storage.Version {
 
 func isCatalogImplemented(b storage.Backend) bool {
 	ctx := context.Background()
-	if _, _, err := b.Catalog(ctx, "", 1); errors.Kind(err) == errors.KindMethodNotImplemented {
+	if _, _, err := b.Catalog(ctx, "", 1); errors.Kind(err) == errors.KindNotImplemented {
 		return false
 	}
 	return true

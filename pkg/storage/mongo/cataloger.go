@@ -12,5 +12,5 @@ import (
 // It returns a list of modules and versions contained in the storage
 func (s *ModuleStore) Catalog(ctx context.Context, token string, elements int) ([]paths.AllPathParams, string, error) {
 	const op errors.Op = "mongo.Catalog"
-	return nil, "", errors.E(op, errors.KindMethodNotImplemented)
+	return nil, "", errors.E(op, errors.KindNotImplemented)
 }
