@@ -58,13 +58,8 @@ alldeps:
 
 .PHONY: dev
 dev:
-	docker-compose -p athensdev up -d mongo
-	docker-compose -p athensdev up -d minio
+	docker-compose -p athensdev up -d --build dev
 
 .PHONY: down
 down:
-	docker-compose -p athensdev down -v
-
-.PHONY: dev-teardown
-dev-teardown:
 	docker-compose -p athensdev down -v
