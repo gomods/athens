@@ -167,6 +167,10 @@ func testCatalog(t *testing.T, b storage.Backend) {
 	require.Equal(t, modname, allres[0].Module)
 	require.Equal(t, "v1.2.0000", allres[0].Version)
 	require.Equal(t, "v1.2.1004", allres[1004].Version)
+
+	for i := 1; i < len(allres); i++ {
+		require.NotEqual(t, allres[i].Version, allres[i-1].Version)
+	}
 }
 
 func getMockModule() *storage.Version {
