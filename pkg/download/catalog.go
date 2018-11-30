@@ -14,11 +14,11 @@ import (
 
 // PathCatalog URL.
 const PathCatalog = "/catalog"
-const DefaultPageSize = 1000
+const defaultPageSize = 1000
 
 type catalogRes struct {
-	ModsAndVersions []paths.AllPathParams
-	NextPageToken   string
+	ModsAndVersions []paths.AllPathParams `json:"modules"`
+	NextPageToken   string                `json:"next"`
 }
 
 // CatalogHandler implements GET baseURL/catalog
@@ -34,7 +34,7 @@ func CatalogHandler(dp Protocol, lggr log.Entry, eng *render.Engine) buffalo.Han
 		}
 
 		if pageSize == 0 {
-			pageSize = DefaultPageSize
+			pageSize = defaultPageSize
 		}
 
 		modulesAndVersions, newToken, err := dp.Catalog(c, token, pageSize)

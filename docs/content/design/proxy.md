@@ -78,8 +78,8 @@ Where token is an optional continuation token and limit is the desired size of t
 The result is a json with the following structure:
 
 ```
-{"ModsAndVersions": [{"Module":"github.com/athens-artifacts/no-tags","Version":"v1.0.0"}],
- "NextPageToken":""}'
+{"modules": [{"Module":"github.com/athens-artifacts/no-tags","Version":"v1.0.0"}],
+ "next":""}'
 ```
 
 An empty nextpagetoken means that no more pages are available.
