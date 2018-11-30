@@ -26,6 +26,7 @@ type Runner struct {
 	ChdirFn    func(string, func() error) error                          // function to use when changing directories
 	DeleteFn   func(string) error                                        // function used to delete files/folders
 	RequestFn  func(*http.Request, *http.Client) (*http.Response, error) // function used to make http requests
+	LookPathFn func(string) (string, error)                              // function used to make exec.LookPath lookups
 	Root       string                                                    // the root of the write path
 	Disk       *Disk
 	generators []*Generator
@@ -129,13 +130,21 @@ func (r *Runner) Run() error {
 // Exec can be used inside of Generators to run commands
 func (r *Runner) Exec(cmd *exec.Cmd) error {
 	r.results.Commands = append(r.results.Commands, cmd)
-	r.Logger.Infof(strings.Join(cmd.Args, " "))
+	r.Logger.Debug("Exec: ", strings.Join(cmd.Args, " "))
 	if r.ExecFn == nil {
 		return nil
 	}
 	return safe.RunE(func() error {
 		return r.ExecFn(cmd)
 	})
+}
+
+func (r *Runner) LookPath(s string) (string, error) {
+	r.Logger.Debug("LookPath: ", s)
+	if r.LookPathFn != nil {
+		return r.LookPathFn(s)
+	}
+	return s, nil
 }
 
 // File can be used inside of Generators to write files
@@ -151,7 +160,7 @@ func (r *Runner) File(f File) error {
 	if !filepath.IsAbs(name) {
 		name = filepath.Join(r.Root, name)
 	}
-	r.Logger.Infof(name)
+	r.Logger.Debug("File: ", name)
 	if r.FileFn != nil {
 		err := safe.RunE(func() error {
 			var e error
@@ -188,7 +197,7 @@ func (r *Runner) Chdir(path string, fn func() error) error {
 	if len(path) == 0 {
 		return fn()
 	}
-	r.Logger.Infof("cd: %s", path)
+	r.Logger.Debug("Chdir: ", path)
 
 	if r.ChdirFn != nil {
 		return safe.RunE(func() error {
@@ -203,7 +212,7 @@ func (r *Runner) Chdir(path string, fn func() error) error {
 }
 
 func (r *Runner) Delete(path string) error {
-	r.Logger.Infof("rm: %s", path)
+	r.Logger.Debug("Delete: ", path)
 
 	defer r.Disk.Remove(path)
 	if r.DeleteFn != nil {
@@ -220,7 +229,7 @@ func (r *Runner) Request(req *http.Request) (*http.Response, error) {
 
 func (r *Runner) RequestWithClient(req *http.Request, c *http.Client) (*http.Response, error) {
 	key := fmt.Sprintf("[%s] %s\n", strings.ToUpper(req.Method), req.URL)
-	r.Logger.Infof(key)
+	r.Logger.Debug("Request: ", key)
 	store := func(res *http.Response, err error) (*http.Response, error) {
 		r.moot.Lock()
 		r.results.Requests = append(r.results.Requests, RequestResult{
