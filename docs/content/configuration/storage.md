@@ -15,7 +15,7 @@ The Athens proxy supports many storage types:
 1. [Minio](#minio)
     1. [DigitalOcean Spaces](#digitalocean-spaces)
     1. [Alibaba OSS](#alibaba-oss)
-    1. and other Minio compatible interfaces
+    1. and other S3 / Minio compatible interfaces
 
 All of them can be configured using `config.toml` file. You need to set a valid driver in `StorageType` value or you can set it in environment variable `ATHENS_STORAGE_TYPE` on your server.
 Also for most of the drivers you need to provide additional configuration data which will be described below.
@@ -134,7 +134,7 @@ After this you can pass you credentials inside `config.toml` file
 
 ## Minio
 
-[Minio](https://www.minio.io/) is an open source object storage server. If you never used minio you can read this [quick start guide](https://docs.minio.io/). Several block storages like Digital Ocean Spaces and Alibaba OSS are compatible with Minio. Any block storage that can use the Minio interface is supported by Athens.
+[Minio](https://www.minio.io/) is an open source object storage server that provides an interface for S3 compatible block storages. If you have never used minio, you can read this [quick start guide](https://docs.minio.io/). Any block storage that can use the S3 compatible block storage supported through the minio interface is supported by Athens. Below, you can find different configuration options we provide for Minio. Example configuration for Digital Ocean and Alibaba OSS block storages have also been provided below.
 
 ##### Configuration:
 
