@@ -76,8 +76,9 @@ This driver uses a [Mongo](https://www.mongodb.com/) server as data storage. On 
 
 ## Google Cloud Storage
 
-This driver uses [Google Object Storage](https://cloud.google.com/storage/) and assumes that you already have an `account` in it.
-The GCP driver at start will try to create `bucket` in which Athens data will be stored.
+This driver uses [Google Cloud Storage](https://cloud.google.com/storage/) and assumes that you already have an `account` and `bucket` in it.
+If you never used Google Cloud Storage there is [quick guide](https://cloud.google.com/storage/docs/creating-buckets#storage-create-bucket-console)
+how to create `bucket` inside it.
 
 ##### Configuration:
 
