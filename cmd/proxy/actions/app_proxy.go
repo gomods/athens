@@ -23,6 +23,7 @@ func addProxyRoutes(
 	app.GET("/healthz", healthHandler)
 	app.GET("/readyz", getReadinessHandler(s))
 	app.GET("/version", versionHandler)
+	addMetrics(app, healthHandler, getReadinessHandler(s), versionHandler)
 
 	// Download Protocol
 	// the download.Protocol and the stash.Stasher interfaces are composable
