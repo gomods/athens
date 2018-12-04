@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/gomods/athens/pkg/config"
+	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/module"
 	"github.com/gomods/athens/pkg/stash"
 	"github.com/gomods/athens/pkg/storage"
@@ -316,4 +317,32 @@ func (m *mockFetcher) Fetch(ctx context.Context, mod, ver string) (*storage.Vers
 		Info: bts,
 		Zip:  ioutil.NopCloser(bytes.NewReader(bts)),
 	}, nil
+}
+
+func TestDownloadProtocolWhenFetchFails(t *testing.T) {
+	s, err := mem.NewStorage()
+	if err != nil {
+		t.Fatal(err)
+	}
+	fakeMod := testMod{"github.com/athens-artifacts/samplelib", "v1.0.0"}
+	bts := []byte(fakeMod.mod + "@" + fakeMod.ver)
+	err = s.Save(context.Background(), fakeMod.mod, fakeMod.ver, bts, ioutil.NopCloser(bytes.NewReader(bts)), bts)
+	if err != nil {
+		t.Fatal(err)
+	}
+	mp := &NotFoundFetcher{}
+	st := stash.New(mp, s)
+	dp := New(&Opts{s, st, nil})
+	ctx := context.Background()
+	_, err = dp.GoMod(ctx, fakeMod.mod, fakeMod.ver)
+	if err != nil {
+		t.Errorf("Download protocol should succeed, instead it gave error %s \n", err)
+	}
+}
+
+type NotFoundFetcher struct{}
+
+func (m *NotFoundFetcher) Fetch(ctx context.Context, mod, ver string) (*storage.Version, error) {
+	const op errors.Op = "goGetFetcher.Fetch"
+	return nil, errors.E(op, "Fetcher error")
 }
