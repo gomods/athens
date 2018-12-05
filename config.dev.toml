@@ -119,15 +119,17 @@ GithubToken = ""
 # Env override: ATHENS_HGRC_PATH
 HGRCPath = ""
 
-# TraceExporterURL is the URL to which Athens populates distributed tracing
-# information such as Jaeger. In Stackdriver, use this as the GCP ProjectID.
-# Env override: ATHENS_TRACE_EXPORTER_URL
-TraceExporterURL = ""
-
+# Tracing is not a requirement for Athens. If the infrastructure is not set up,
+# Athens will keep on running and traces won't be exported.
 # TraceExporter is the service to which the data collected by OpenCensus can be exported to.
 # Possible values are: jaeger, datadog, and stackdriver.
 # Env overide: ATHENS_TRACE_EXPORTER
-TraceExporter = ""
+TraceExporter = "jaeger"
+
+# TraceExporterURL is the URL to which Athens populates distributed tracing
+# information such as Jaeger. In Stackdriver, use this as the GCP ProjectID.
+# Env override: ATHENS_TRACE_EXPORTER_URL
+TraceExporterURL = "http://localhost:14268"
 
 [Storage]
     # Only storage backends that are specified in Proxy.StorageType are required here
@@ -135,10 +137,6 @@ TraceExporter = ""
         # Endpoint for CDN storage
         # Env override: CDN_ENDPOINT
         Endpoint = "cdn.example.com"
-
-        # Timeout for networks calls made to the CDN in seconds
-        # Defaults to Global Timeout
-        Timeout = 300
 
     [Storage.Disk]
         # RootPath is the Athens Disk Root folder
@@ -154,10 +152,6 @@ TraceExporter = ""
         # Env override: ATHENS_STORAGE_GCP_BUCKET
         Bucket = "MY_GCP_BUCKET"
 
-        # Timeout for networks calls made to GCP in seconds
-        # Defaults to Global Timeout
-        Timeout = 300
-
     [Storage.Minio]
         # Endpoint for Minio storage
         # Env override: ATHENS_MINIO_ENDPOINT
@@ -170,10 +164,6 @@ TraceExporter = ""
         # Secret Key for Minio storage
         # Env override: ATHENS_MINIO_SECRET_ACCESS_KEY
         Secret = "minio123"
-
-        # Timeout for networks calls made to Minio in seconds
-        # Defaults to Global Timeout
-        Timeout = 300
 
         # Enable SSL for Minio connections
         # Defaults to true
@@ -198,18 +188,13 @@ TraceExporter = ""
         # Env override: ATHENS_MONGO_CERT_PATH
         CertPath = ""
 
-        # Timeout for networks calls made to Mongo in seconds
-        # Defaults to Global Timeout
-        # Env override: MONGO_CONN_TIMEOUT_SEC
-        Timeout = 300
-
         # Allows for insecure SSL / http connections to mongo storage
         # Should be used for testing or development only
         # Env override: ATHENS_MONGO_INSECURE
         Insecure = false
         
     [Storage.S3]
-        # Access Key for S3 storage
+        # Region for S3 storage
         # Env override: AWS_REGION
         Region = "MY_AWS_REGION"
 
@@ -225,11 +210,18 @@ TraceExporter = ""
         # Env override: AWS_SESSION_TOKEN
         Token = ""
 
-        # Timeout for networks calls made to S3 in seconds
-        # Defaults to Global Timeout
-        Timeout = 300
-
         # S3 Bucket to use for storage
-        # Defaults to gomods
         # Env override: ATHENS_S3_BUCKET_NAME
         Bucket = "MY_S3_BUCKET_NAME"
+   [Storage.AzureBlob]
+        # Storage Account name for Azure Blob
+        # Env override: ATHENS_AZURE_ACCOUNT_NAME
+        AccountName = "MY_AZURE_BLOB_ACCOUNT_NAME"
+
+        # Account Key to use with the storage account
+        # Env override: ATHENS_AZURE_ACCOUNT_KEY
+        AccountKey = "MY_AZURE_BLOB_ACCOUNT_KEY"
+
+        # Name of container in the blob storage
+        # Env override: ATHENS_AZURE_CONTAINER_NAME
+        ContainerName = "MY_AZURE_BLOB_CONTAINER_NAME"

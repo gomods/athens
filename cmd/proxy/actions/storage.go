@@ -3,10 +3,12 @@ package actions
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/storage"
+	"github.com/gomods/athens/pkg/storage/azureblob"
 	"github.com/gomods/athens/pkg/storage/fs"
 	"github.com/gomods/athens/pkg/storage/gcp"
 	"github.com/gomods/athens/pkg/storage/mem"
@@ -17,7 +19,7 @@ import (
 )
 
 // GetStorage returns storage backend based on env configuration
-func GetStorage(storageType string, storageConfig *config.StorageConfig) (storage.Backend, error) {
+func GetStorage(storageType string, storageConfig *config.StorageConfig, timeout time.Duration) (storage.Backend, error) {
 	const op errors.Op = "actions.GetStorage"
 	switch storageType {
 	case "memory":
@@ -26,7 +28,7 @@ func GetStorage(storageType string, storageConfig *config.StorageConfig) (storag
 		if storageConfig.Mongo == nil {
 			return nil, errors.E(op, "Invalid Mongo Storage Configuration")
 		}
-		return mongo.NewStorage(storageConfig.Mongo)
+		return mongo.NewStorage(storageConfig.Mongo, timeout)
 	case "disk":
 		if storageConfig.Disk == nil {
 			return nil, errors.E(op, "Invalid Disk Storage Configuration")
@@ -42,17 +44,22 @@ func GetStorage(storageType string, storageConfig *config.StorageConfig) (storag
 		if storageConfig.Minio == nil {
 			return nil, errors.E(op, "Invalid Minio Storage Configuration")
 		}
-		return minio.NewStorage(storageConfig.Minio)
+		return minio.NewStorage(storageConfig.Minio, timeout)
 	case "gcp":
 		if storageConfig.GCP == nil {
 			return nil, errors.E(op, "Invalid GCP Storage Configuration")
 		}
-		return gcp.New(context.Background(), storageConfig.GCP)
+		return gcp.New(context.Background(), storageConfig.GCP, timeout)
 	case "s3":
 		if storageConfig.S3 == nil {
 			return nil, errors.E(op, "Invalid S3 Storage Configuration")
 		}
-		return s3.New(storageConfig.S3)
+		return s3.New(storageConfig.S3, timeout)
+	case "azureblob":
+		if storageConfig.AzureBlob == nil {
+			return nil, errors.E(op, "Invalid AzureBlob Storage Configuration")
+		}
+		return azureblob.New(storageConfig.AzureBlob, timeout)
 	default:
 		return nil, fmt.Errorf("storage type %s is unknown", storageType)
 	}

@@ -5,42 +5,49 @@ install:
 	packr
 	$(GO_BIN) install -v ./genny
 
+tidy:
+ifeq ($(GO111MODULE),on)
+	$(GO_BIN) mod tidy
+else
+	echo skipping go mod tidy
+endif
+
 deps:
 	$(GO_BIN) get github.com/gobuffalo/release
 	$(GO_BIN) get github.com/gobuffalo/packr/packr
 	$(GO_BIN) get -tags ${TAGS} -t ./...
-ifeq ($(GO111MODULE),on)
-	$(GO_BIN) mod tidy
-endif
+	make tidy
 
 build:
 	packr
 	$(GO_BIN) build -v .
+	make tidy
 
 test:
 	packr
 	$(GO_BIN) test -tags ${TAGS} ./...
+	make tidy
 
 ci-test:
 	$(GO_BIN) test -tags ${TAGS} -race ./...
+	make tidy
 
 lint:
 	gometalinter --vendor ./... --deadline=1m --skip=internal
 
 update:
+	packr clean
 	$(GO_BIN) get -u -tags ${TAGS}
-ifeq ($(GO111MODULE),on)
-	$(GO_BIN) mod tidy
-endif
+	make tidy
 	packr
 	make test
 	make install
-ifeq ($(GO111MODULE),on)
-	$(GO_BIN) mod tidy
-endif
+	make tidy
 
 release-test:
 	$(GO_BIN) test -tags ${TAGS} -race ./...
 
 release:
+	make tidy
 	release -y -f version.go
+	make tidy

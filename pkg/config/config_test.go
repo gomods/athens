@@ -4,6 +4,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strconv"
 	"testing"
 
@@ -98,7 +99,6 @@ func TestEnvOverrides(t *testing.T) {
 }
 
 func TestStorageEnvOverrides(t *testing.T) {
-	globalTimeout := 300
 	expStorage := &StorageConfig{
 		Disk: &DiskConfig{
 			RootPath: "/my/root/path",
@@ -106,9 +106,6 @@ func TestStorageEnvOverrides(t *testing.T) {
 		GCP: &GCPConfig{
 			ProjectID: "gcpproject",
 			Bucket:    "gcpbucket",
-			TimeoutConf: TimeoutConf{
-				Timeout: globalTimeout,
-			},
 		},
 		Minio: &MinioConfig{
 			Endpoint:  "minioEndpoint",
@@ -117,16 +114,10 @@ func TestStorageEnvOverrides(t *testing.T) {
 			EnableSSL: false,
 			Bucket:    "minioBucket",
 			Region:    "us-west-1",
-			TimeoutConf: TimeoutConf{
-				Timeout: globalTimeout,
-			},
 		},
 		Mongo: &MongoConfig{
 			URL:      "mongoURL",
 			CertPath: "/test/path",
-			TimeoutConf: TimeoutConf{
-				Timeout: globalTimeout,
-			},
 		},
 		S3: &S3Config{
 			Region: "s3Region",
@@ -134,9 +125,6 @@ func TestStorageEnvOverrides(t *testing.T) {
 			Secret: "s3Secret",
 			Token:  "s3Token",
 			Bucket: "s3Bucket",
-			TimeoutConf: TimeoutConf{
-				Timeout: globalTimeout,
-			},
 		},
 	}
 	envVars := getEnvMap(&Config{Storage: expStorage})
@@ -151,7 +139,6 @@ func TestStorageEnvOverrides(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Env override failed: %v", err)
 	}
-	setStorageTimeouts(conf.Storage, globalTimeout)
 	compareStorageConfigs(conf.Storage, expStorage, t)
 	restoreEnv(envVarBackup)
 }
@@ -181,8 +168,6 @@ func TestParseExampleConfig(t *testing.T) {
 		os.Unsetenv(k)
 	}
 
-	globalTimeout := 300
-
 	expStorage := &StorageConfig{
 		Disk: &DiskConfig{
 			RootPath: "/path/on/disk",
@@ -190,9 +175,6 @@ func TestParseExampleConfig(t *testing.T) {
 		GCP: &GCPConfig{
 			ProjectID: "MY_GCP_PROJECT_ID",
 			Bucket:    "MY_GCP_BUCKET",
-			TimeoutConf: TimeoutConf{
-				Timeout: globalTimeout,
-			},
 		},
 		Minio: &MinioConfig{
 			Endpoint:  "127.0.0.1:9001",
@@ -200,16 +182,10 @@ func TestParseExampleConfig(t *testing.T) {
 			Secret:    "minio123",
 			EnableSSL: false,
 			Bucket:    "gomods",
-			TimeoutConf: TimeoutConf{
-				Timeout: globalTimeout,
-			},
 		},
 		Mongo: &MongoConfig{
-			URL:      "mongodb://127.0.0.1:27017",
-			CertPath: "",
-			TimeoutConf: TimeoutConf{
-				Timeout: globalTimeout,
-			},
+			URL:          "mongodb://127.0.0.1:27017",
+			CertPath:     "",
 			InsecureConn: false,
 		},
 		S3: &S3Config{
@@ -218,9 +194,6 @@ func TestParseExampleConfig(t *testing.T) {
 			Secret: "MY_AWS_SECRET_ACCESS_KEY",
 			Token:  "",
 			Bucket: "MY_S3_BUCKET_NAME",
-			TimeoutConf: TimeoutConf{
-				Timeout: globalTimeout,
-			},
 		},
 	}
 
@@ -235,12 +208,14 @@ func TestParseExampleConfig(t *testing.T) {
 		TimeoutConf: TimeoutConf{
 			Timeout: 300,
 		},
-		StorageType:    "memory",
-		GlobalEndpoint: "http://localhost:3001",
-		Port:           ":3000",
-		BasicAuthUser:  "",
-		BasicAuthPass:  "",
-		Storage:        expStorage,
+		StorageType:      "memory",
+		GlobalEndpoint:   "http://localhost:3001",
+		Port:             ":3000",
+		BasicAuthUser:    "",
+		BasicAuthPass:    "",
+		Storage:          expStorage,
+		TraceExporterURL: "http://localhost:14268",
+		TraceExporter:    "jaeger",
 	}
 
 	absPath, err := filepath.Abs(exampleConfigPath)
@@ -267,7 +242,6 @@ func getEnvMap(config *Config) map[string]string {
 		"BUFFALO_LOG_LEVEL":       config.BuffaloLogLevel,
 		"ATHENS_CLOUD_RUNTIME":    config.CloudRuntime,
 		"ATHENS_TIMEOUT":          strconv.Itoa(config.Timeout),
-		"ATHENS_TRACE_EXPORTER":   config.TraceExporterURL,
 	}
 
 	envVars["ATHENS_STORAGE_TYPE"] = config.StorageType
@@ -325,19 +299,29 @@ func restoreEnv(envVars map[string]string) {
 }
 
 func Test_checkFilePerms(t *testing.T) {
+
+	if runtime.GOOS == "windows" {
+		t.Skipf("Chmod is not supported in windows, so not possible to test. Ref: https://github.com/golang/go/blob/master/src/os/os_test.go#L1031\n")
+	}
+
 	f1, err := ioutil.TempFile(os.TempDir(), "prefix-")
 	if err != nil {
-		t.FailNow()
+		t.Fatalf("Cannot create 1st temp file: %s", err)
 	}
 	defer os.Remove(f1.Name())
-	err = os.Chmod(f1.Name(), 0777)
+	if err = os.Chmod(f1.Name(), 0700); err != nil {
+		t.Fatalf("Cannot chmod 1st temp file: %s", err)
+	}
 
 	f2, err := ioutil.TempFile(os.TempDir(), "prefix-")
 	if err != nil {
-		t.FailNow()
+		t.Fatalf("Cannot create 2nd temp file: %s", err)
 	}
+
 	defer os.Remove(f2.Name())
-	err = os.Chmod(f2.Name(), 0600)
+	if err = os.Chmod(f2.Name(), 0640); err != nil {
+		t.Fatalf("Cannot chmod 2nd temp file: %s", err)
+	}
 
 	type args struct {
 		files []string

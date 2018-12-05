@@ -5,10 +5,11 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/gobuffalo/packd"
 	"github.com/pkg/errors"
 )
 
-type WalkFunc func(string, File) error
+type WalkFunc = packd.WalkFunc
 
 // Walk will traverse the box and call the WalkFunc for each file in the box/folder.
 func (b Box) Walk(wf WalkFunc) error {
