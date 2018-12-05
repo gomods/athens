@@ -330,7 +330,7 @@ func TestDownloadProtocolWhenFetchFails(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	mp := &NotFoundFetcher{}
+	mp := &notFoundFetcher{}
 	st := stash.New(mp, s)
 	dp := New(&Opts{s, st, nil})
 	ctx := context.Background()
@@ -340,9 +340,9 @@ func TestDownloadProtocolWhenFetchFails(t *testing.T) {
 	}
 }
 
-type NotFoundFetcher struct{}
+type notFoundFetcher struct{}
 
-func (m *NotFoundFetcher) Fetch(ctx context.Context, mod, ver string) (*storage.Version, error) {
+func (m *notFoundFetcher) Fetch(ctx context.Context, mod, ver string) (*storage.Version, error) {
 	const op errors.Op = "goGetFetcher.Fetch"
 	return nil, errors.E(op, "Fetcher error")
 }
