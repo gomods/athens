@@ -3,14 +3,12 @@ package gcp
 import (
 	"context"
 	"fmt"
-	"net/http"
 	"net/url"
 	"time"
 
 	"cloud.google.com/go/storage"
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/errors"
-	"google.golang.org/api/googleapi"
 )
 
 // Storage implements the (./pkg/storage).Backend interface
@@ -57,15 +55,6 @@ func New(ctx context.Context, gcpConf *config.GCPConfig, timeout time.Duration) 
 		closeStorage: s.Close,
 		timeout:      timeout,
 	}, nil
-}
-
-func bucketExistsErr(err error) bool {
-	apiErr, ok := err.(*googleapi.Error)
-	if !ok {
-		return false
-	}
-
-	return apiErr.Code == http.StatusConflict
 }
 
 func newWithBucket(bkt Bucket, uri *url.URL, timeout time.Duration) *Storage {

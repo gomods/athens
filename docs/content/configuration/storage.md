@@ -13,8 +13,9 @@ The Athens proxy supports many storage types:
 1. [Google Cloud Storage](#google-cloud-storage)
 1. [AWS S3](#aws-s3)
 1. [Minio](#minio)
-1. [DigitalOcean Spaces](#digitalocean-spaces)
-1. [Alibaba OSS](#alibaba-oss)
+    1. [DigitalOcean Spaces](#digitalocean-spaces)
+    1. [Alibaba OSS](#alibaba-oss)
+    1. and other S3 / Minio compatible interfaces
 
 All of them can be configured using `config.toml` file. You need to set a valid driver in `StorageType` value or you can set it in environment variable `ATHENS_STORAGE_TYPE` on your server.
 Also for most of the drivers you need to provide additional configuration data which will be described below.
@@ -76,8 +77,9 @@ This driver uses a [Mongo](https://www.mongodb.com/) server as data storage. On 
 
 ## Google Cloud Storage
 
-This driver uses [Google Object Storage](https://cloud.google.com/storage/) and assumes that you already have an `account` in it.
-The GCP driver at start will try to create `bucket` in which Athens data will be stored.
+This driver uses [Google Cloud Storage](https://cloud.google.com/storage/) and assumes that you already have an `account` and `bucket` in it.
+If you never used Google Cloud Storage there is [quick guide](https://cloud.google.com/storage/docs/creating-buckets#storage-create-bucket-console)
+how to create `bucket` inside it.
 
 ##### Configuration:
 
@@ -133,7 +135,7 @@ After this you can pass you credentials inside `config.toml` file
 
 ## Minio
 
-[Minio](https://www.minio.io/) is an open source object storage server. If you never used minio you can read this [quick start guide](https://docs.minio.io/)
+[Minio](https://www.minio.io/) is an open source object storage server that provides an interface for S3 compatible block storages. If you have never used minio, you can read this [quick start guide](https://docs.minio.io/).  Any S3 compatible object storage is supported by Athens through the minio interface. Below, you can find different configuration options we provide for Minio. Example configuration for Digital Ocean and Alibaba OSS block storages are provided below.
 
 ##### Configuration:
 
@@ -164,7 +166,7 @@ After this you can pass you credentials inside `config.toml` file
             # Env override: ATHENS_MINIO_BUCKET_NAME
             Bucket = "gomods"
 
-## DigitalOcean Spaces
+#### DigitalOcean Spaces
 
 For Athens to communicate with [DigitalOcean Spaces](https://www.digitalocean.com/products/spaces/), we are using Minio driver because DO Spaces tries to be [fully compatible with it](https://developers.digitalocean.com/documentation/spaces/).
 Also configuration for this storage looks almost the same in our proxy as for [Minio](#minio).
@@ -201,7 +203,7 @@ Also configuration for this storage looks almost the same in our proxy as for [M
             # Env override: ATHENS_MINIO_REGION
             Region = "YOUR_DO_SPACE_REGION"
 
-## Alibaba OSS
+#### Alibaba OSS
 
 For Athens to communicate with [Alibaba Cloud Object Storage Service](https://www.alibabacloud.com/product/oss), we are using Minio driver.
 Also configuration for this storage looks almost the same in our proxy as for [Minio](#minio).
