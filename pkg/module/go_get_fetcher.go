@@ -160,6 +160,7 @@ func downloadModule(goBinaryName string, fs afero.Fs, gopath, repoRoot, module, 
 // successfully (such as GOPATH, GOCACHE, PATH etc)
 func PrepareEnv(gopath string) []string {
 	pathEnv := fmt.Sprintf("PATH=%s", os.Getenv("PATH"))
+	homeEnv := fmt.Sprintf("HOME=%s", os.Getenv("HOME"))
 	httpProxy := fmt.Sprintf("HTTP_PROXY=%s", os.Getenv("HTTP_PROXY"))
 	httpsProxy := fmt.Sprintf("HTTPS_PROXY=%s", os.Getenv("HTTPS_PROXY"))
 	noProxy := fmt.Sprintf("NO_PROXY=%s", os.Getenv("NO_PROXY"))
@@ -167,7 +168,7 @@ func PrepareEnv(gopath string) []string {
 	cacheEnv := fmt.Sprintf("GOCACHE=%s", filepath.Join(gopath, "cache"))
 	disableCgo := "CGO_ENABLED=0"
 	enableGoModules := "GO111MODULE=on"
-	cmdEnv := []string{pathEnv, gopathEnv, cacheEnv, disableCgo, enableGoModules, httpProxy, httpsProxy, noProxy}
+	cmdEnv := []string{pathEnv, homeEnv, gopathEnv, cacheEnv, disableCgo, enableGoModules, httpProxy, httpsProxy, noProxy}
 
 	// add Windows specific ENV VARS
 	if runtime.GOOS == "windows" {
