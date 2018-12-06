@@ -3,9 +3,8 @@ package azureblob
 import (
 	"context"
 
-	"github.com/gomods/athens/pkg/paths"
-
 	"github.com/gomods/athens/pkg/errors"
+	"github.com/gomods/athens/pkg/paths"
 )
 
 // Catalog implements the (./pkg/storage).Cataloger interface

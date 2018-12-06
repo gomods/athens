@@ -4,12 +4,11 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/gomods/athens/pkg/paths"
-
 	"github.com/gobuffalo/buffalo"
 	"github.com/gobuffalo/buffalo/render"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/log"
+	"github.com/gomods/athens/pkg/paths"
 )
 
 // PathCatalog URL.
@@ -33,10 +32,6 @@ func CatalogHandler(dp Protocol, lggr log.Entry, eng *render.Engine) buffalo.Han
 			return c.Render(http.StatusInternalServerError, nil)
 		}
 
-		if pageSize == 0 {
-			pageSize = defaultPageSize
-		}
-
 		modulesAndVersions, newToken, err := dp.Catalog(c, token, pageSize)
 
 		if err != nil {
@@ -53,7 +48,7 @@ func CatalogHandler(dp Protocol, lggr log.Entry, eng *render.Engine) buffalo.Han
 
 func getLimitFromParam(param string) (int, error) {
 	if param == "" {
-		return 0, nil
+		return defaultPageSize, nil
 	}
 	return strconv.Atoi(param)
 }

@@ -10,9 +10,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/gomods/athens/pkg/paths"
-
 	"github.com/gomods/athens/pkg/download"
+	"github.com/gomods/athens/pkg/paths"
 	"github.com/gomods/athens/pkg/storage"
 )
 

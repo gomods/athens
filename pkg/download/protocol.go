@@ -4,10 +4,9 @@ import (
 	"context"
 	"io"
 
-	"github.com/gomods/athens/pkg/paths"
-
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/observ"
+	"github.com/gomods/athens/pkg/paths"
 	"github.com/gomods/athens/pkg/stash"
 	"github.com/gomods/athens/pkg/storage"
 )

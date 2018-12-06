@@ -7,12 +7,13 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/observ"
 	"github.com/gomods/athens/pkg/paths"
 	"github.com/spf13/afero"
-
-	"github.com/gomods/athens/pkg/errors"
 )
+
+const tokenSeparator = "|"
 
 // Catalog implements the (./pkg/storage).Cataloger interface
 // It returns a list of modules and versions contained in the storage
@@ -64,7 +65,7 @@ func (s *storageImpl) Catalog(ctx context.Context, token string, pageSize int) (
 }
 
 func tokenFromModVer(module, version string) string {
-	return module + "|" + version
+	return module + tokenSeparator + version
 }
 
 func modVerFromToken(token string) (string, string, error) {
@@ -72,7 +73,7 @@ func modVerFromToken(token string) (string, string, error) {
 	if token == "" {
 		return "", "", nil
 	}
-	values := strings.Split(token, "|")
+	values := strings.Split(token, tokenSeparator)
 	if len(values) < 2 {
 		return "", "", errors.E(op, "Invalid token")
 	}

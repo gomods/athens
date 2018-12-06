@@ -51,5 +51,4 @@ func RegisterHandlers(app *buffalo.App, opts *HandlerOpts) {
 	app.GET(PathVersionModule, LogEntryHandler(VersionModuleHandler, opts))
 	app.GET(PathVersionZip, LogEntryHandler(VersionZipHandler, opts))
 	app.GET(PathCatalog, LogEntryHandler(CatalogHandler, opts))
-
 }
