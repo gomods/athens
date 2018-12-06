@@ -311,13 +311,12 @@ func tempFile(perm os.FileMode) (name string, err error) {
 }
 
 func Test_checkFilePerms(t *testing.T) {
-
 	if runtime.GOOS == "windows" {
 		t.Skipf("Chmod is not supported in windows, so not possible to test. Ref: https://github.com/golang/go/blob/master/src/os/os_test.go#L1031\n")
 	}
 
-	var incorrectFiles = make([]string, 2)
-	incorrectPerms := []os.FileMode{0700, 0777}
+	incorrectPerms := []os.FileMode{0700, 0777, 0100, 0610, 0660}
+	var incorrectFiles = make([]string, len(incorrectPerms))
 
 	for i := range incorrectPerms {
 		f, err := tempFile(incorrectPerms[i])
@@ -328,8 +327,8 @@ func Test_checkFilePerms(t *testing.T) {
 		defer os.Remove(f)
 	}
 
-	var correctFiles = make([]string, 3)
 	correctPerms := []os.FileMode{0640, 0600, 0400}
+	var correctFiles = make([]string, len(correctPerms))
 
 	for i := range correctPerms {
 		f, err := tempFile(correctPerms[i])
@@ -340,11 +339,13 @@ func Test_checkFilePerms(t *testing.T) {
 		defer os.Remove(f)
 	}
 
-	tests := []struct {
+	type test struct {
 		name    string
 		files   []string
 		wantErr bool
-	}{
+	}
+
+	tests := []test{
 		{
 			"should not have an error on 0600, 0400, 0640",
 			[]string{correctFiles[0], correctFiles[1], correctFiles[2]},
@@ -365,6 +366,14 @@ func Test_checkFilePerms(t *testing.T) {
 			[]string{correctFiles[2], correctFiles[1], incorrectFiles[1]},
 			true,
 		},
+	}
+
+	for _, f := range incorrectFiles {
+		tests = append(tests, test{
+			"incorrect file permission passed",
+			[]string{f},
+			true,
+		})
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
