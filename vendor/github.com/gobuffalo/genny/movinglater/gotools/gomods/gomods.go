@@ -13,6 +13,10 @@ const ENV = "GO111MODULE"
 var ErrModsOff = errors.New("go mods are turned off")
 var modsOn = (strings.TrimSpace(envy.Get(ENV, "off")) == "on")
 
+func Force(b bool) {
+	modsOn = b
+}
+
 func On() bool {
 	return modsOn
 }

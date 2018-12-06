@@ -62,6 +62,7 @@ StorageType = "memory"
 
 # Port sets the port the proxy listens on
 # Env override: PORT
+# Note that PORT needs to be prefixed by :
 Port = ":3000"
 
 # The endpoint for a package registry in case of a proxy cache miss
@@ -119,15 +120,17 @@ GithubToken = ""
 # Env override: ATHENS_HGRC_PATH
 HGRCPath = ""
 
-# TraceExporterURL is the URL to which Athens populates distributed tracing
-# information such as Jaeger. In Stackdriver, use this as the GCP ProjectID.
-# Env override: ATHENS_TRACE_EXPORTER_URL
-TraceExporterURL = ""
-
+# Tracing is not a requirement for Athens. If the infrastructure is not set up,
+# Athens will keep on running and traces won't be exported.
 # TraceExporter is the service to which the data collected by OpenCensus can be exported to.
 # Possible values are: jaeger, datadog, and stackdriver.
 # Env overide: ATHENS_TRACE_EXPORTER
-TraceExporter = ""
+TraceExporter = "jaeger"
+
+# TraceExporterURL is the URL to which Athens populates distributed tracing
+# information such as Jaeger. In Stackdriver, use this as the GCP ProjectID.
+# Env override: ATHENS_TRACE_EXPORTER_URL
+TraceExporterURL = "http://localhost:14268"
 
 [Storage]
     # Only storage backends that are specified in Proxy.StorageType are required here
@@ -211,3 +214,15 @@ TraceExporter = ""
         # S3 Bucket to use for storage
         # Env override: ATHENS_S3_BUCKET_NAME
         Bucket = "MY_S3_BUCKET_NAME"
+   [Storage.AzureBlob]
+        # Storage Account name for Azure Blob
+        # Env override: ATHENS_AZURE_ACCOUNT_NAME
+        AccountName = "MY_AZURE_BLOB_ACCOUNT_NAME"
+
+        # Account Key to use with the storage account
+        # Env override: ATHENS_AZURE_ACCOUNT_KEY
+        AccountKey = "MY_AZURE_BLOB_ACCOUNT_KEY"
+
+        # Name of container in the blob storage
+        # Env override: ATHENS_AZURE_CONTAINER_NAME
+        ContainerName = "MY_AZURE_BLOB_CONTAINER_NAME"

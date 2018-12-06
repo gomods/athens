@@ -208,12 +208,14 @@ func TestParseExampleConfig(t *testing.T) {
 		TimeoutConf: TimeoutConf{
 			Timeout: 300,
 		},
-		StorageType:    "memory",
-		GlobalEndpoint: "http://localhost:3001",
-		Port:           ":3000",
-		BasicAuthUser:  "",
-		BasicAuthPass:  "",
-		Storage:        expStorage,
+		StorageType:      "memory",
+		GlobalEndpoint:   "http://localhost:3001",
+		Port:             ":3000",
+		BasicAuthUser:    "",
+		BasicAuthPass:    "",
+		Storage:          expStorage,
+		TraceExporterURL: "http://localhost:14268",
+		TraceExporter:    "jaeger",
 	}
 
 	absPath, err := filepath.Abs(exampleConfigPath)
@@ -240,7 +242,6 @@ func getEnvMap(config *Config) map[string]string {
 		"BUFFALO_LOG_LEVEL":       config.BuffaloLogLevel,
 		"ATHENS_CLOUD_RUNTIME":    config.CloudRuntime,
 		"ATHENS_TIMEOUT":          strconv.Itoa(config.Timeout),
-		"ATHENS_TRACE_EXPORTER":   config.TraceExporterURL,
 	}
 
 	envVars["ATHENS_STORAGE_TYPE"] = config.StorageType
