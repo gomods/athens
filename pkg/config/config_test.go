@@ -323,10 +323,9 @@ func Test_checkFilePerms(t *testing.T) {
 		f, err := tempFile(incorrectPerms[i])
 		if err != nil {
 			t.Fatalf("tempFile creation error %s", err)
-		} else {
-			incorrectFiles[i] = f
-			defer os.Remove(f)
 		}
+		incorrectFiles[i] = f
+		defer os.Remove(f)
 	}
 
 	var correctFiles = make([]string, 3)
@@ -336,10 +335,9 @@ func Test_checkFilePerms(t *testing.T) {
 		f, err := tempFile(correctPerms[i])
 		if err != nil {
 			t.Fatalf("tempFile creation error %s", err)
-		} else {
-			correctFiles[i] = f
-			defer os.Remove(f)
 		}
+		correctFiles[i] = f
+		defer os.Remove(f)
 	}
 
 	tests := []struct {
