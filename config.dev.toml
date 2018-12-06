@@ -132,6 +132,12 @@ TraceExporter = "jaeger"
 # Env override: ATHENS_TRACE_EXPORTER_URL
 TraceExporterURL = "http://localhost:14268"
 
+# Stats is not a requirement for Athens. If the value is not set,
+# Athens will keep on running and stats won't be collected.
+# Possible values are: prometheus.
+# Env overide: ATHENS_STATS_EXPORTER
+StatsExporter = "prometheus"
+
 [Storage]
     # Only storage backends that are specified in Proxy.StorageType are required here
     [Storage.CDN]

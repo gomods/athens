@@ -6,6 +6,7 @@ import (
 	"github.com/gomods/athens/pkg/download/addons"
 	"github.com/gomods/athens/pkg/log"
 	"github.com/gomods/athens/pkg/module"
+	"github.com/gomods/athens/pkg/observ"
 	"github.com/gomods/athens/pkg/stash"
 	"github.com/gomods/athens/pkg/storage"
 	"github.com/spf13/afero"
@@ -23,7 +24,7 @@ func addProxyRoutes(
 	app.GET("/healthz", healthHandler)
 	app.GET("/readyz", getReadinessHandler(s))
 	app.GET("/version", versionHandler)
-	addMetrics(app, healthHandler, getReadinessHandler(s), versionHandler)
+	app.Middleware.Skip(observ.StatsMiddleware(), healthHandler, getReadinessHandler(s), versionHandler)
 
 	// Download Protocol
 	// the download.Protocol and the stash.Stasher interfaces are composable

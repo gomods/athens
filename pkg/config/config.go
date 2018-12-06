@@ -25,6 +25,7 @@ type Config struct {
 	FilterFile       string `envconfig:"ATHENS_FILTER_FILE"`
 	TraceExporterURL string `envconfig:"ATHENS_TRACE_EXPORTER_URL"`
 	TraceExporter    string `envconfig:"ATHENS_TRACE_EXPORTER"`
+	StatsExporter    string `envconfig:"ATHENS_STATS_EXPORTER"`
 	StorageType      string `validate:"required" envconfig:"ATHENS_STORAGE_TYPE"`
 	GlobalEndpoint   string `envconfig:"ATHENS_GLOBAL_ENDPOINT"` // This feature is not yet implemented
 	Port             string `envconfig:"ATHENS_PORT" default:":3000"`

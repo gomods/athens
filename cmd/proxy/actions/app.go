@@ -107,6 +107,17 @@ func App(conf *config.Config) (*buffalo.App, error) {
 		app.Use(observ.Tracer(Service))
 	}
 
+	// RegisterStatsExporter will register an exporter where we will collect our stats.
+	// The error from the RegisterStatsExporter would be nil if the proper stats exporter
+	// was specified by the user.
+	flushStats, err := observ.RegisterStatsExporter(app, conf.StatsExporter, Service)
+	if err != nil {
+		lggr.Infof("%s", err)
+	} else {
+		defer flushStats()
+		app.Use(observ.StatsMiddleware())
+	}
+
 	// Automatically redirect to SSL
 	app.Use(forcessl.Middleware(secure.Options{
 		SSLRedirect:     conf.ForceSSL,
