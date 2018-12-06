@@ -40,6 +40,7 @@ func (s *storageImpl) Catalog(ctx context.Context, token string, pageSize int) (
 
 			m, version := filepath.Split(modVer)
 			module := filepath.Clean(m)
+			module = strings.Replace(module, string(os.PathSeparator), "/", -1)
 
 			if fromModule != "" && module < fromModule { // it is ok to land on the same module
 				return nil
