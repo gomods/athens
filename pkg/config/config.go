@@ -147,7 +147,7 @@ func checkFilePerms(files ...string) error {
 			}
 		} else {
 			// Assume unix based system (MacOS and Linux)
-			if fInfo.Mode() != 0640 {
+			if fInfo.Mode()&0137 != 0 {
 				return errors.E(op, f+" should have 0640 as permission")
 			}
 		}

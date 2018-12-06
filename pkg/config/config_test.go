@@ -298,19 +298,36 @@ func restoreEnv(envVars map[string]string) {
 	}
 }
 
+func tempFile(perm uint32) (name string, err error) {
+	f, err := ioutil.TempFile(os.TempDir(), "prefix-")
+	if err != nil {
+		return "", err
+	}
+	if err = os.Chmod(f.Name(), 0700); err != nil {
+		os.Remove(f.Name())
+		return "", err
+	}
+	return f.Name(), nil
+}
+
 func Test_checkFilePerms(t *testing.T) {
 
 	if runtime.GOOS == "windows" {
 		t.Skipf("Chmod is not supported in windows, so not possible to test. Ref: https://github.com/golang/go/blob/master/src/os/os_test.go#L1031\n")
 	}
 
-	f1, err := ioutil.TempFile(os.TempDir(), "prefix-")
+	incorrectPerm1, err := tempFile(0700)
 	if err != nil {
-		t.Fatalf("Cannot create 1st temp file: %s", err)
+		t.Fatalf("tempFile creation error %s", err)
+	} else {
+		defer os.Remove(incorrectPerm1)
 	}
-	defer os.Remove(f1.Name())
-	if err = os.Chmod(f1.Name(), 0700); err != nil {
-		t.Fatalf("Cannot chmod 1st temp file: %s", err)
+
+	incorrectPerm2, err := tempFile(0777)
+	if err != nil {
+		t.Fatalf("tempFile creation error %s", err)
+	} else {
+		defer os.Remove(incorrectPerm2)
 	}
 
 	f2, err := ioutil.TempFile(os.TempDir(), "prefix-")
@@ -323,6 +340,24 @@ func Test_checkFilePerms(t *testing.T) {
 		t.Fatalf("Cannot chmod 2nd temp file: %s", err)
 	}
 
+	f3, err := ioutil.TempFile(os.TempDir(), "prefix-")
+	if err != nil {
+		t.Fatalf("Cannot create 3rd temp file: %s", err)
+	}
+	defer os.Remove(f3.Name())
+	if err = os.Chmod(f3.Name(), 0600); err != nil {
+		t.Fatalf("Cannot chmod 3rd temp file: %s", err)
+	}
+
+	f4, err := ioutil.TempFile(os.TempDir(), "prefix-")
+	if err != nil {
+		t.Fatalf("Cannot create 4th temp file: %s", err)
+	}
+	defer os.Remove(f4.Name())
+	if err = os.Chmod(f4.Name(), 0400); err != nil {
+		t.Fatalf("Cannot chmod 4th temp file: %s", err)
+	}
+
 	type args struct {
 		files []string
 	}
@@ -331,6 +366,13 @@ func Test_checkFilePerms(t *testing.T) {
 		args    args
 		wantErr bool
 	}{
+		{
+			"should not have an error on 0600, 0400, 0640",
+			args{
+				[]string{f2.Name(), f3.Name(), f4.Name()},
+			},
+			false,
+		},
 		{
 			"should not have an error on empty file name",
 			args{
@@ -341,14 +383,14 @@ func Test_checkFilePerms(t *testing.T) {
 		{
 			"should have an error if all the files have incorrect permissions",
 			args{
-				[]string{f1.Name(), f1.Name(), f1.Name()},
+				[]string{incorrectPerm1, incorrectPerm1, incorrectPerm2},
 			},
 			true,
 		},
 		{
 			"should have an error when at least 1 file has wrong permissions",
 			args{
-				[]string{f2.Name(), f1.Name()},
+				[]string{f2.Name(), incorrectPerm1},
 			},
 			true,
 		},
