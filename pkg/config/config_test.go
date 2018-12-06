@@ -352,21 +352,21 @@ func Test_checkFilePerms(t *testing.T) {
 			[]string{correctFiles[0], correctFiles[1], correctFiles[2]},
 			false,
 		},
-		// {
-		// 	"should not have an error on empty file name",
-		// 	[]string{"", correctFiles[2]},
-		// 	false,
-		// },
-		// {
-		// 	"should have an error if all the files have incorrect permissions",
-		// 	[]string{incorrectFiles[0], incorrectFiles[1], incorrectFiles[1]},
-		// 	true,
-		// },
-		// {
-		// 	"should have an error when at least 1 file has wrong permissions",
-		// 	[]string{correctFiles[2], correctFiles[1], incorrectFiles[1]},
-		// 	true,
-		// },
+		{
+			"should not have an error on empty file name",
+			[]string{"", correctFiles[2]},
+			false,
+		},
+		{
+			"should have an error if all the files have incorrect permissions",
+			[]string{incorrectFiles[0], incorrectFiles[1], incorrectFiles[1]},
+			true,
+		},
+		{
+			"should have an error when at least 1 file has wrong permissions",
+			[]string{correctFiles[2], correctFiles[1], incorrectFiles[1]},
+			true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
