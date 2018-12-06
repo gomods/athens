@@ -2,7 +2,6 @@ package config
 
 // S3Config specifies the properties required to use S3 as the storage backend
 type S3Config struct {
-	TimeoutConf
 	Region string `validate:"required" envconfig:"AWS_REGION"`
 	Key    string `validate:"required" envconfig:"AWS_ACCESS_KEY_ID"`
 	Secret string `validate:"required" envconfig:"AWS_SECRET_ACCESS_KEY"`

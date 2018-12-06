@@ -4,13 +4,13 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/gobuffalo/packr"
+	"github.com/gobuffalo/packd"
 	"github.com/pkg/errors"
 )
 
 // ForceBox will mount each file in the box and wrap it with ForceFile
-func ForceBox(g *Generator, box packr.Box, force bool) error {
-	return box.Walk(func(path string, bf packr.File) error {
+func ForceBox(g *Generator, box packd.Walkable, force bool) error {
+	return box.Walk(func(path string, bf packd.File) error {
 		f := NewFile(path, bf)
 		ff := ForceFile(f, force)
 		f, err := ff(f)

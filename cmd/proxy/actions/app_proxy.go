@@ -21,6 +21,8 @@ func addProxyRoutes(
 ) error {
 	app.GET("/", proxyHomeHandler)
 	app.GET("/healthz", healthHandler)
+	app.GET("/readyz", getReadinessHandler(s))
+	app.GET("/version", versionHandler)
 
 	// Download Protocol
 	// the download.Protocol and the stash.Stasher interfaces are composable

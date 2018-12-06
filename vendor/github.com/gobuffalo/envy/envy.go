@@ -27,6 +27,9 @@ import (
 var gil = &sync.RWMutex{}
 var env = map[string]string{}
 
+// GO111MODULE is ENV for turning mods on/off
+const GO111MODULE = "GO111MODULE"
+
 func init() {
 	Load()
 	loadEnv()
@@ -77,6 +80,10 @@ func loadEnv() {
 		pair := strings.Split(e, "=")
 		env[pair[0]] = os.Getenv(pair[0])
 	}
+}
+
+func Mods() bool {
+	return Get(GO111MODULE, "off") == "on"
 }
 
 // Reload the ENV variables. Useful if
@@ -196,6 +203,10 @@ func Temp(f func()) {
 
 func GoPath() string {
 	return Get("GOPATH", "")
+}
+
+func GoBin() string {
+	return Get("GO_BIN", "go")
 }
 
 // GoPaths returns all possible GOPATHS that are set.

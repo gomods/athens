@@ -3,14 +3,12 @@ package gcp
 import (
 	"context"
 	"fmt"
-	"net/http"
 	"net/url"
 	"time"
 
 	"cloud.google.com/go/storage"
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/errors"
-	"google.golang.org/api/googleapi"
 )
 
 // Storage implements the (./pkg/storage).Backend interface
@@ -30,38 +28,33 @@ type Storage struct {
 // to the path of your service account file. If you're running on GCP (e.g. AppEngine),
 // credentials will be automatically provided.
 // See https://cloud.google.com/docs/authentication/getting-started.
-func New(ctx context.Context, gcpConf *config.GCPConfig) (*Storage, error) {
+func New(ctx context.Context, gcpConf *config.GCPConfig, timeout time.Duration) (*Storage, error) {
 	const op errors.Op = "gcp.New"
-	storage, err := storage.NewClient(ctx)
+	s, err := storage.NewClient(ctx)
 	if err != nil {
 		return nil, errors.E(op, fmt.Errorf("could not create new storage client: %s", err))
 	}
-	bucketname := gcpConf.Bucket
-	u, err := url.Parse(fmt.Sprintf("https://storage.googleapis.com/%s", bucketname))
+
+	u, err := url.Parse(fmt.Sprintf("https://storage.googleapis.com/%s", gcpConf.Bucket))
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
-	bkt := gcpBucket{storage.Bucket(bucketname)}
-	err = bkt.Create(ctx, gcpConf.ProjectID, nil)
-	if err != nil && !bucketExistsErr(err) {
+
+	bkt := s.Bucket(gcpConf.Bucket)
+	if _, err := bkt.Attrs(ctx); err != nil {
+		if err == storage.ErrBucketNotExist {
+			return nil, errors.E(op, "You must manually create a storage bucket for Athens, see https://cloud.google.com/storage/docs/creating-buckets#storage-create-bucket-console")
+		}
+
 		return nil, errors.E(op, err)
 	}
 
 	return &Storage{
-		bucket:       &bkt,
+		bucket:       &gcpBucket{bkt},
 		baseURI:      u,
-		closeStorage: storage.Close,
-		timeout:      gcpConf.TimeoutDuration(),
+		closeStorage: s.Close,
+		timeout:      timeout,
 	}, nil
-}
-
-func bucketExistsErr(err error) bool {
-	apiErr, ok := err.(*googleapi.Error)
-	if !ok {
-		return false
-	}
-
-	return apiErr.Code == http.StatusConflict
 }
 
 func newWithBucket(bkt Bucket, uri *url.URL, timeout time.Duration) *Storage {

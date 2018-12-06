@@ -59,12 +59,10 @@ $ mkdir -p $(go env GOPATH)/src/github.com/gomods
 $ cd $(go env GOPATH)/src/github.com/gomods
 $ git clone https://github.com/gomods/athens.git
 $ cd athens
-$ GO111MODULE=off go run ./cmd/proxy &
+$ GO111MODULE=on go run ./cmd/proxy -config_file=./config.dev.toml &
 [1] 25243
 INFO[0000] Starting application at 127.0.0.1:3000
 ```
-
-Note: [Building Athens with Go Modules enabled is not yet supported](https://github.com/gomods/athens/pull/371), so we have turned it off in the above example.
 
 **PowerShell**
 ```console
@@ -72,8 +70,8 @@ $ mkdir "$(go env GOPATH)\src\github.com\gomods"
 $ cd "$(go env GOPATH)\src\github.com\gomods"
 $ git clone https://github.com/gomods/athens.git
 $ cd athens
-$ $env:GO111MODULE = "off"
-$ Start-Process -NoNewWindow go "run .\cmd\proxy"
+$ $env:GO111MODULE = "on"
+$ Start-Process -NoNewWindow go 'run -mod=vendor .\cmd\proxy -config_file=".\config.dev.toml"'
 [1] 25243
 INFO[0000] Starting application at 127.0.0.1:3000
 ```
@@ -108,7 +106,7 @@ docker run -d -v $ATHENS_STORAGE:/var/lib/athens \
 ```PowerShell
 $env:ATHENS_STORAGE = "$(Join-Path $HOME athens-storage)"
 md -Path $env:ATHENS_STORAGE
-docker run -d -v "$($env:ATHENS-STORAGE):/var/lib/athens" `
+docker run -d -v "$($env:ATHENS_STORAGE):/var/lib/athens" `
    -e ATHENS_DISK_STORAGE_ROOT=/var/lib/athens `
    -e ATHENS_STORAGE_TYPE=disk `
    --name athens-proxy `
