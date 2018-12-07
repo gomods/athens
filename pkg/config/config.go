@@ -136,7 +136,7 @@ func checkFilePerms(files ...string) error {
 		// TODO: Do not ignore errors when a file is not found
 		// There is a subtle bug in the filter module which ignores the filter file if it does not find it.
 		// This check can be removed once that has been fixed
-		fInfo, err := os.Lstat(f)
+		fInfo, err := os.Stat(f)
 		if err != nil {
 			continue
 		}
