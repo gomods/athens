@@ -12,15 +12,15 @@
 <meta name="description" content="{{ .Site.Params.description }}">
 {{- end }}
 {{ .Hugo.Generator }}
-<link href="{{ .Site.BaseURL }}index.xml" rel="alternate" type="application/rss+xml">
+<link href="/index.xml" rel="alternate" type="application/rss+xml">
 <link rel="canonical" href="{{ .Permalink }}">
-<link rel="stylesheet" href="{{"css/theme.min.css" | absURL}}">
+<link rel="stylesheet" href="/css/theme.min.js">
 <script src="https://use.fontawesome.com/releases/v5.0.6/js/all.js"></script>
 {{ partial "meta/chroma.html" . -}}
 <script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
-<script src="{{"js/functions.min.js" | absURL}}"></script>
+<script src="/js/functions.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jquery.easing@1.4.1/jquery.easing.min.js"></script>
-<script src="{{"js/jquery.backtothetop/jquery.backtothetop.min.js" | absURL}}"></script>
+<script src="/js/jquery.backtothetop/jquery.backtothetop.min.js"></script>
 {{- partial "meta/google-analytics-async.html" . -}}
 {{- partial "meta/tag-manager.html" . -}}
 {{- partial "meta/google-site-verification.html" . -}}
