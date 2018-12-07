@@ -62,19 +62,62 @@ Note that `make dev` only runs the minimum amount of dependencies needed for thi
 
 # Run unit tests
 
-In order to run unit tests, services they depend on must be running first:
+There are two methods for running unit tests:
+
+## Completely In Containers
+
+This method uses Docker Compose to set up and run all the unit tests completely inside Docker containers. It's nice because:
+
+- You don't have to set up anything in advance or clean anything up
+- It's completely isolated
+- All you need is to have Docker Compose installed
+
+... so it's really good for CI/CD systems or anywhere else where you don't want to pre-install other dependencies.
+
+To run unit tests in this manner, use this command:
+
+```console
+make test-e2e-docker
+```
+
+## On the Host
+
+This method uses Docker Compose to set up all the dependencies of the unit tests (databases, etc...) and runs the unit tests directly on your host, not in a Docker container. It's nice because:
+
+- You can keep all the services running that the unit tests need
+- You can run the actual unit tests very quickly
+
+... so it's really good for local development where you'll want to edit and test your code quickly and easily.
+
+To run unit tests in this manner, first run this command to set up all the dependencies:
 
 ```console
 make alldeps
 ```
 
-then you can run the unit tests:
+Then run this to execute the unit tests themselves:
 
 ```console
 make test-unit
 ```
 
-# Run the docs
+And when you're done with unit tests and want to clean up all the dependencies, run this command:
+
+```console
+make dev-teardown
+```
+
+# Run End to End Tests
+
+End to end tests ensure that the Athens server behaves as expected from the `go` CLI tool. These tests run exclusively inside Docker containers. To run them, execute this command:
+
+```console
+make test-e2e-docker
+```
+
+This will create the e2e test containers, run the tests themselves, and then shut everything down.
+
+# Run the Docs
 
 To get started with developing the docs we provide a docker image, which runs [Hugo](https://gohugo.io/) to render the docs. Using the docker image, we mount the `/docs` directory into the container. To get it up and running, from the project root run:
 

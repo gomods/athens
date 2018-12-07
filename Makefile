@@ -30,9 +30,19 @@ test:
 test-unit:
 	./scripts/test_unit.sh
 
+.PHONY: test-unit-docker
+test-unit-docker:
+	docker-compose -p athensunit up --exit-code-from=testunit --build testunit
+	docker-compose -p athensunit down
+
 .PHONY: test-e2e
 test-e2e:
 	./scripts/test_e2e.sh
+
+.PHONY: test-e2e-docker
+test-e2e-docker:
+	docker-compose -p athense2e up --build --exit-code-from=teste2e teste2e
+	docker-compose -p athense2e down
 
 .PHONY: docker
 docker: proxy-docker
