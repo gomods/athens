@@ -16,9 +16,6 @@ Athens currently supports a number of storage drivers. For local use we recommen
 
 In order to run Athens with disk storage, you will next need to identify where you would like to persist modules. In the example below, we will create a new directory named `athens-storage` in our current directory.  Now you are ready to run Athens with disk storage enabled. To enable disk storage, you need to set the `ATHENS_STORAGE_TYPE` and `ATHENS_DISK_STORAGE_ROOT` environment variables when you run the Docker container.
 
-The examples below use the `:latest` Docker tags for simplicity, however we strongly recommend that after your environment is up and running that you switch to using
-an explicit version (for example `:v0.2.0`).
-
 **Bash**
 ```bash
 export ATHENS_STORAGE=~/athens-storage
@@ -29,7 +26,7 @@ docker run -d -v $ATHENS_STORAGE:/var/lib/athens \
    --name athens-proxy \
    --restart always \
    -p 3000:3000 \
-   gomods/athens:latest
+   gomods/athens:stable
 ```
 
 **PowerShell**
@@ -42,17 +39,19 @@ docker run -d -v "$($env:ATHENS_STORAGE):/var/lib/athens" `
    --name athens-proxy `
    --restart always `
    -p 3000:3000 `
-   gomods/athens:latest
+   gomods/athens:stable
 ```
 
-Note: if you have not previously mounted this drive with Docker for Windows, you may be prompted to allow access
+>You can also use `gomods/athens:canary` to get the most up to date Athens code
+
+If you have not previously mounted this drive with Docker for Windows, you may be prompted to allow access
 
 Athens should now be running as a Docker container with the local directory, `athens-storage` mounted as a volume. When Athens retrieves the modules, they will be will be stored in the directory previously created. First, let's verify that Athens is running:
 
 ```console
 $ docker ps
 CONTAINER ID        IMAGE                               COMMAND           PORTS                    NAMES
-f0429b81a4f9        gomods/athens:latest   "/bin/app"        0.0.0.0:3000->3000/tcp   athens-proxy
+f0429b81a4f9        gomods/athens:stable   "/bin/app"        0.0.0.0:3000->3000/tcp   athens-proxy
 ```
 
 Now, we can use Athens from any development machine that has Go 1.11 installed. To verify this, try the following example:
@@ -145,7 +144,7 @@ docker run -d -v $ATHENS_STORAGE:/var/lib/athens \
    --name athens-proxy \
    --restart always \
    -p 3000:3000 \
-   gomods/athens:latest
+   gomods/athens:stable
 ```
 
 **PowerShell**
@@ -156,8 +155,10 @@ docker run -d -v "$($env:ATHENS_STORAGE):/var/lib/athens" `
    --name athens-proxy `
    --restart always `
    -p 3000:3000 `
-   gomods/athens:latest
+   gomods/athens:stable
 ```
+
+>You can also use `gomods/athens:canary` to get the most up to date Athens code
 
 When we re-run our Go example, the Go cli will again download module from Athens. Athens, however, will not need to retrieve the module. It will be served from the Athens on-disk storage.
 

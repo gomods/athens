@@ -34,7 +34,7 @@ weight: 1
       --name athens-proxy \
       --restart always \
       -p 3000:3000 \
-      gomods/athens:latest
+      gomods/athens:stable
     ```
 
     **PowerShell**
@@ -50,8 +50,10 @@ weight: 1
       --name athens-proxy `
       --restart always `
       -p 3000:3000 `
-      gomods/athens:latest
+      gomods/athens:stable
     ```
+
+>You can also use `gomods/athens:canary` to get the most up to date Athens code
 
 ## Bazaar(bzr) private repositories
 
@@ -157,7 +159,7 @@ weight: 1
       --name athens-proxy \
       --restart always \
       -p 3000:3000 \
-      gomods/athens:latest
+      gomods/athens:stable
     ```
 
     **PowerShell**
@@ -173,5 +175,7 @@ weight: 1
       --name athens-proxy `
       --restart always `
       -p 3000:3000 `
-      gomods/athens:latest
+      gomods/athens:stable
     ```
+
+>You can also use `gomods/athens:canary` to get the most up to date Athens code

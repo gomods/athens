@@ -85,7 +85,7 @@ for a short period of time, as you will quickly run out of memory and the storag
 doesn't persist between restarts.
 
 ### With Docker
-In order to run the Athens Proxy using docker, we need first to create a directory that will store the persitant modules.
+In order to run the Athens Proxy using docker, we need first to create a directory that will store the persistent modules.
 In the example below, the new directory is named `athens-storage` and is located in our userspace (i.e. `$HOME`). 
 Then we need to set the `ATHENS_STORAGE_TYPE` and `ATHENS_DISK_STORAGE_ROOT` environment variables when we run the Docker container.
 
@@ -99,7 +99,7 @@ docker run -d -v $ATHENS_STORAGE:/var/lib/athens \
    --name athens-proxy \
    --restart always \
    -p 3000:3000 \
-   gomods/athens:latest
+   gomods/athens:stable
 ```
 
 **PowerShell**
@@ -112,8 +112,10 @@ docker run -d -v "$($env:ATHENS_STORAGE):/var/lib/athens" `
    --name athens-proxy `
    --restart always `
    -p 3000:3000 `
-   gomods/athens:latest
+   gomods/athens:stable
 ```
+
+>You can also use `gomods/athens:canary` to get the most up to date Athens code
 
 Next, you will need to enable the [Go Modules](https://github.com/golang/go/wiki/Modules)
 feature and configure Go to use the Athens proxy!
