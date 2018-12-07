@@ -1,0 +1,58 @@
+{{$currentNode := .}}
+<nav>
+<ul>
+<li class="{{ if .IsHome }}active{{ end }}"><a href="{{ .Site.BaseURL }}">Home</a></li>
+{{- if eq .Site.Params.ordersectionsby "title" -}}
+  {{- range .Site.Home.Sections.ByTitle -}}
+{{template "menu" dict "sect" . "currentnode" $currentNode}}
+  {{- end -}}
+{{- else -}}
+  {{- range .Site.Home.Sections.ByWeight -}}
+{{template "menu" dict "sect" . "currentnode" $currentNode}}
+  {{- end -}}
+{{- end}}
+</ul>
+</nav>
+
+{{define "menu"}}
+{{- $currentNode := .currentnode -}}
+{{ with .sect }}
+{{ if .IsSection }}
+{{ if in .Site.Params.menu_exclusion .Section }}
+{{- else -}}
+  {{- safeHTML .Params.head -}}
+<li class="{{ if .IsAncestor $currentNode }}parent{{ end }}{{ if eq .UniqueID $currentNode.UniqueID }} active{{ end }}{{ if .Params.alwaysopen }} parent{{ end }}"><a href="{{ .URL }}">{{ safeHTML .Params.Pre }}{{ .Title }}{{ safeHTML .Params.Post }}</a>
+  {{- $numberOfPages := (add (len .Pages) (len .Sections)) -}}
+  {{if ne $numberOfPages 0}}
+<ul class="{{ if .IsAncestor $currentNode }}sub-menu{{ end }}">
+    {{- .Scratch.Set "pages" .Pages -}}
+    {{- if .Sections -}}
+      {{- .Scratch.Set "pages" (.Pages | union .Sections) -}}
+    {{- end -}}
+    {{- $pages := (.Scratch.Get "pages") -}}
+    {{- if eq .Site.Params.ordersectionsby "title" -}}
+      {{- range $pages.ByTitle -}}
+        {{- if and .Params.hidden (not $.showhidden) -}}
+        {{- else -}}
+{{template "menu" dict "sect" . "currentnode" $currentNode}}
+        {{- end -}}
+      {{- end -}}
+    {{- else -}}
+      {{- range $pages.ByWeight -}}
+        {{- if and .Params.hidden (not $.showhidden) -}}
+        {{- else -}}
+{{template "menu" dict "sect" . "currentnode" $currentNode}}
+        {{- end -}}
+      {{- end -}}
+    {{- end}}
+</ul>
+  {{end}}
+</li>
+{{- end -}}
+{{- else -}}
+  {{- if not .Params.Hidden -}}
+<li class="{{ if eq .UniqueID $currentNode.UniqueID }}active{{ end }}"><a href="{{ .URL }}">{{ safeHTML .Params.Pre }}{{ .Title }}{{ safeHTML .Params.Post }}</a></li>
+  {{- end -}}
+{{ end -}}
+{{ end -}}
+{{ end }}

@@ -1,5 +1,5 @@
 baseURL = "https://docs.gomods.io"
-theme = "hugo-theme-learn"
+theme = "hugo-theme-techdoc"
 languageCode = "en-us"
 title = "Athens"
 

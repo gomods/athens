@@ -1,0 +1,22 @@
+{{ $currentPage := . }}
+{{- if .Site.Menus.main -}}
+<div class="menu">
+<nav>
+<ul>
+{{- range .Site.Menus.main.ByWeight -}}
+{{ if .HasChildren -}}
+<li class="parent{{ if $currentPage.HasMenuCurrent "main" . }} active{{ end }}"><a href="{{ .URL }}">{{- .Name -}} <i class="fas fa-angle-right"></i></a>
+<ul class="sub-menu">
+{{ range .Children -}}
+<li class="child{{ if $currentPage.HasMenuCurrent "main" . }} active{{ end }}"><a href="{{ .URL }}">{{ .Name }}</a></li>
+{{ end -}}
+</ul>
+</li>
+{{- else }}
+<li{{ if $currentPage.HasMenuCurrent "main" . }} class="active"{{ end }}><a href="{{ .URL }}">{{- .Name -}}</a></li>
+{{- end -}}
+{{- end -}}
+</ul>
+</nav>
+</div>
+{{- end }}
