@@ -327,7 +327,7 @@ func Test_checkFilePerms(t *testing.T) {
 		defer os.Remove(f)
 	}
 
-	correctPerms := []os.FileMode{0640, 0600, 0400}
+	correctPerms := []os.FileMode{0600, 0400}
 	var correctFiles = make([]string, len(correctPerms))
 
 	for i := range correctPerms {
@@ -348,12 +348,12 @@ func Test_checkFilePerms(t *testing.T) {
 	tests := []test{
 		{
 			"should not have an error on 0600, 0400, 0640",
-			[]string{correctFiles[0], correctFiles[1], correctFiles[2]},
+			[]string{correctFiles[0], correctFiles[1]},
 			false,
 		},
 		{
 			"should not have an error on empty file name",
-			[]string{"", correctFiles[2]},
+			[]string{"", correctFiles[1]},
 			false,
 		},
 		{
@@ -363,7 +363,7 @@ func Test_checkFilePerms(t *testing.T) {
 		},
 		{
 			"should have an error when at least 1 file has wrong permissions",
-			[]string{correctFiles[2], correctFiles[1], incorrectFiles[1]},
+			[]string{correctFiles[0], correctFiles[1], incorrectFiles[1]},
 			true,
 		},
 	}
