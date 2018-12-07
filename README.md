@@ -4,12 +4,18 @@
 
 [![Open Source Helpers](https://www.codetriage.com/gomods/athens/badges/users.svg)](https://www.codetriage.com/gomods/athens)
 [![Build Status](https://travis-ci.org/gomods/athens.svg?branch=master)](https://travis-ci.org/gomods/athens)
+[![Build Status](https://dev.azure.com/gomods/athens/_apis/build/status/gomods.athens?branchName=master)](https://dev.azure.com/gomods/athens/_build/latest?definitionId=1&branchName=master)
 [![codecov](https://codecov.io/gh/gomods/athens/branch/master/graph/badge.svg)](https://codecov.io/gh/gomods/athens)
 [![GoDoc](https://godoc.org/github.com/gomods/athens?status.svg)](https://godoc.org/github.com/gomods/athens)
 [![Go Report Card](https://goreportcard.com/badge/github.com/gomods/athens)](https://goreportcard.com/report/github.com/gomods/athens)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com)
 
 Welcome to the Athens project! We are a proxy server for the [Go Modules download API](https://docs.gomods.io/intro/protocol/).
+
+|<img src="docs/static/meeting-icon.svg" alt="Developer Meetings" width="20" height="20" />Developer Meetings|
+|------------------|
+|We hold weekly developer meetings on a Thursday, to join them, watch previous meeting recordings or find more information, please see [the docs](https://docs.gomods.io/contributing/community/developer-meetings/). Absolutely everyone is invited to attend these, suggest topics, and participate!|
+</br>
 
 See our documentation site [https://docs.gomods.io](https://docs.gomods.io) for more details on the project.
 
@@ -36,11 +42,6 @@ See [DEVELOPMENT.md](./DEVELOPMENT.md) for details on how to set up your develop
 Speaking of contributing, read on!
 
 # Contributing
-
-|<img src="docs/static/meeting-icon.svg" alt="Developer Meetings" width="20" height="20" />Developer Meetings|
-|------------------|
-|We hold weekly developer meetings on a Thursday, to join them, watch previous meeting recordings or find more information, please see [the docs](https://docs.gomods.io/contributing/community/developer-meetings/). Absolutely everyone is invited to attend these, suggest topics, and participate!|
-</br>
 
 This project is early and there's plenty of interesting and challenging work to do.
 

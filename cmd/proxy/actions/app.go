@@ -8,12 +8,12 @@ import (
 	"github.com/gobuffalo/buffalo/render"
 	forcessl "github.com/gobuffalo/mw-forcessl"
 	paramlogger "github.com/gobuffalo/mw-paramlogger"
+	sessions "github.com/gobuffalo/x/sessions"
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/log"
 	mw "github.com/gomods/athens/pkg/middleware"
 	"github.com/gomods/athens/pkg/module"
 	"github.com/gomods/athens/pkg/observ"
-	"github.com/rs/cors"
 	"github.com/sirupsen/logrus"
 	"github.com/unrolled/secure"
 )
@@ -33,7 +33,7 @@ func App(conf *config.Config) (*buffalo.App, error) {
 	// ENV is used to help switch settings based on where the
 	// application is being run. Default is "development".
 	ENV := conf.GoEnv
-	store, err := GetStorage(conf.StorageType, conf.Storage)
+	store, err := GetStorage(conf.StorageType, conf.Storage, conf.TimeoutDuration())
 	if err != nil {
 		err = fmt.Errorf("error getting storage configuration (%s)", err)
 		return nil, err
@@ -69,15 +69,12 @@ func App(conf *config.Config) (*buffalo.App, error) {
 	blggr := log.Buffalo(bLogLvl)
 
 	app := buffalo.New(buffalo.Options{
-		Env: ENV,
-		PreWares: []buffalo.PreWare{
-			cors.Default().Handler,
-		},
-		SessionName: "_athens_session",
-		Logger:      blggr,
-		Addr:        conf.Port,
-		WorkerOff:   true,
-		Host:        "http://127.0.0.1" + conf.Port,
+		Env:          ENV,
+		SessionStore: sessions.Null{},
+		Logger:       blggr,
+		Addr:         conf.Port,
+		WorkerOff:    true,
+		Host:         "http://127.0.0.1" + conf.Port,
 	})
 
 	app.Use(mw.LogEntryMiddleware(lggr))

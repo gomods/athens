@@ -39,4 +39,4 @@ var FromString = guuid.FromString
 
 // FromStringOrNil returns UUID parsed from string input.
 // Same behavior as FromString, but returns a Nil UUID on error.
-var FromStringOrNil = guuid.FromBytesOrNil
+var FromStringOrNil = guuid.FromStringOrNil

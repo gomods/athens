@@ -21,14 +21,22 @@ func exts(f File) []string {
 	return exts
 }
 
-// HasExt checks if a file has a particular extension
-func HasExt(f File, ext string) bool {
-	if ext == "*" {
+// HasExt checks if a file has ANY of the
+// extensions passed in. If no extensions
+// are given then `true` is returned
+func HasExt(f File, ext ...string) bool {
+	if len(ext) == 0 || ext == nil {
 		return true
 	}
-	for _, x := range exts(f) {
-		if x == ext {
+	for _, xt := range ext {
+		xt = strings.TrimSpace(xt)
+		if xt == "*" || xt == "*.*" {
 			return true
+		}
+		for _, x := range exts(f) {
+			if x == xt {
+				return true
+			}
 		}
 	}
 	return false

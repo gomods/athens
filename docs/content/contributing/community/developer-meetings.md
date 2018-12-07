@@ -1,7 +1,7 @@
 ---
 title: "Developer Meetings"
 date: 2018-09-28T10:40:50-07:00
-weight: 2
+weight: 3
 
 ---
 
@@ -11,7 +11,7 @@ Absolutely everyone is invited to attend, suggest topics for the agenda, and par
 
 ### Meeting Details
 
-They're every Thursday at 11am to 12pm US Pacific Time and you can join the meeting here by following this link: https://zoom.us/j/193797787
+They're every Thursday at 11am to 12pm US Pacific Time and you can join the meeting here by following this link: [https://aka.ms/athensdevzoom](https://aka.ms/athensdevzoom)
 
 ### Agenda
 

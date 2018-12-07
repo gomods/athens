@@ -2,6 +2,7 @@ package mongo
 
 import (
 	"context"
+	"fmt"
 	"io"
 
 	"github.com/gomods/athens/pkg/errors"
@@ -15,6 +16,14 @@ func (s *ModuleStore) Save(ctx context.Context, module, version string, mod []by
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 
+	exists, err := s.Exists(ctx, module, version)
+	if err != nil {
+		return errors.E(op, err, errors.M(module), errors.V(version))
+	}
+	if exists {
+		return errors.E(op, "already exists", errors.M(module), errors.V(version), errors.KindAlreadyExists)
+	}
+
 	zipName := s.gridFileName(module, version)
 	fs := s.s.DB(s.d).GridFS("fs")
 	f, err := fs.Create(zipName)
@@ -23,9 +32,13 @@ func (s *ModuleStore) Save(ctx context.Context, module, version string, mod []by
 	}
 	defer f.Close()
 
-	_, err = io.Copy(f, zip) // check number of bytes written?
+	numBytesWritten, err := io.Copy(f, zip)
 	if err != nil {
 		return errors.E(op, err, errors.M(module), errors.V(version))
+	}
+	if numBytesWritten <= 0 {
+		e := fmt.Errorf("copied %d bytes to Mongo GridFS", numBytesWritten)
+		return errors.E(op, e, errors.M(module), errors.V(version))
 	}
 
 	m := &storage.Module{

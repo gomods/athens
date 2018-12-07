@@ -10,16 +10,15 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/gobuffalo/logger"
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 )
 
 // WetRunner will execute commands and write files
 // it is DESTRUCTIVE
 func WetRunner(ctx context.Context) *Runner {
 	r := DryRunner(ctx)
-	l := logrus.New()
-	l.Out = os.Stdout
+	l := logger.New(DefaultLogLvl)
 	r.Logger = l
 
 	r.ExecFn = wetExecFn
@@ -37,6 +36,7 @@ func WetRunner(ctx context.Context) *Runner {
 		}
 		return fn()
 	}
+	r.LookPathFn = exec.LookPath
 	return r
 }
 

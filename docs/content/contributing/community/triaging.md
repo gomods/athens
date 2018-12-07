@@ -1,7 +1,7 @@
 ---
 title: "Triaging Pull Requests"
 date: 2018-08-24T17:01:56-07:00
-weight: 3
+weight: 4
 
 ---
 

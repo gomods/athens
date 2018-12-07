@@ -76,20 +76,22 @@ make test-unit
 
 # Run the docs
 
-To get started with developing the docs we provide a docker image which you can use from within the `/docs` directory. It should work on all platforms. To get it up and running:
+To get started with developing the docs we provide a docker image, which runs [Hugo](https://gohugo.io/) to render the docs. Using the docker image, we mount the `/docs` directory into the container. To get it up and running, from the project root run:
 
 ```
+make docs
 docker run -it --rm \
         --name hugo-server \
         -p 1313:1313 \
-        -v $(PWD):/src:cached \
+        -v ${PWD}/docs:/src:cached \
         gomods/hugo
-        
 ```
 
-# Linting 
+Then open [http://localhost:1313](http://localhost:1313/).
 
-In our CI/CD pass, we use golint, so feel free to install and run it locally beforehand: 
+# Linting
+
+In our CI/CD pass, we use golint, so feel free to install and run it locally beforehand:
 
 ```
 go get golang.org/x/lint/golint

@@ -17,7 +17,11 @@ func (pe *PrefixExpression) String() string {
 
 	out.WriteString("(")
 	out.WriteString(pe.Operator)
-	out.WriteString(pe.Right.String())
+	if pe.Right != nil {
+		out.WriteString(pe.Right.String())
+	} else {
+		out.WriteString("<pe.Right == nil>")
+	}
 	out.WriteString(")")
 
 	return out.String()
