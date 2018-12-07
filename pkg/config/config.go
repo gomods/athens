@@ -147,8 +147,10 @@ func checkFilePerms(files ...string) error {
 			}
 		} else {
 			// Assume unix based system (MacOS and Linux)
+			// the bit mask is calculated using the umask command which tells which permissions
+			// should not be allowed for a particular user, group or world
 			if fInfo.Mode()&0137 != 0 {
-				return errors.E(op, f+" should have at most rw,r as permission")
+				return errors.E(op, f+" should have at most rw,r (umask 0137) as permission")
 			}
 		}
 	}
