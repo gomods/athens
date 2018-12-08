@@ -4,8 +4,11 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"path/filepath"
+
+	"github.com/gobuffalo/buffalo/servers"
 
 	"github.com/gomods/athens/cmd/proxy/actions"
 	"github.com/gomods/athens/pkg/build"
@@ -35,7 +38,19 @@ func main() {
 		log.Fatal(err)
 	}
 
-	if err := app.Serve(); err != nil {
+	cert, key, err := conf.TLSCertFiles()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	var srv servers.Server
+	if cert != "" && key != "" {
+		srv = servers.WrapTLS(&http.Server{}, conf.TLSCertFile, conf.TLSKeyFile)
+	} else {
+		srv = servers.Wrap(&http.Server{})
+	}
+
+	if err := app.Serve(srv); err != nil {
 		log.Fatal(err)
 	}
 }
