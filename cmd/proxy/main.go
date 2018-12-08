@@ -9,7 +9,6 @@ import (
 	"path/filepath"
 
 	"github.com/gobuffalo/buffalo/servers"
-
 	"github.com/gomods/athens/cmd/proxy/actions"
 	"github.com/gomods/athens/pkg/build"
 	"github.com/gomods/athens/pkg/config"

@@ -67,7 +67,7 @@ func (c *Config) TLSCertFiles() (cert, key string, err error) {
 		return "", "", fmt.Errorf("Could not access TLSKeyFile: %v", err)
 	}
 
-	if keyFile.Mode()&077 != 0 {
+	if keyFile.Mode()&077 != 0 && runtime.GOOS != "windows" {
 		return "", "", fmt.Errorf("TLSKeyFile should not be accessable by others")
 	}
 
