@@ -16,7 +16,7 @@ func (s *ModuleStore) Catalog(ctx context.Context, token string, pageSize int) (
 	const op errors.Op = "mongo.Catalog"
 	q := bson.M{}
 	if token != "" {
-		q = bson.M{"_id": bson.M{"$gt": bson.ObjectId(token)}}
+		q = bson.M{"_id": bson.M{"$gt": bson.ObjectIdHex(token)}}
 	}
 
 	fields := bson.M{"module": 1, "version": 1}

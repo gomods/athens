@@ -199,7 +199,7 @@ TraceExporterURL = "http://localhost:14268"
         # Should be used for testing or development only
         # Env override: ATHENS_MONGO_INSECURE
         Insecure = false
-        
+
     [Storage.S3]
         # Region for S3 storage
         # Env override: AWS_REGION
