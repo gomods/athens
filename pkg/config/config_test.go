@@ -12,7 +12,13 @@ import (
 	"github.com/google/go-cmp/cmp/cmpopts"
 )
 
-const exampleConfigPath = "../../config.dev.toml"
+func testConfigFile(t *testing.T) (testConfigFile string) {
+	testConfigFile = filepath.Join("..", "..", "config.dev.toml")
+	if err := os.Chmod(testConfigFile, 0700); err != nil {
+		t.Fatalf("%s\n", err)
+	}
+	return testConfigFile
+}
 
 func compareConfigs(parsedConf *Config, expConf *Config, t *testing.T) {
 	opts := cmpopts.IgnoreTypes(StorageConfig{})
@@ -218,7 +224,7 @@ func TestParseExampleConfig(t *testing.T) {
 		TraceExporter:    "jaeger",
 	}
 
-	absPath, err := filepath.Abs(exampleConfigPath)
+	absPath, err := filepath.Abs(testConfigFile(t))
 	if err != nil {
 		t.Errorf("Unable to construct absolute path to example config file")
 	}
