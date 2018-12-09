@@ -63,7 +63,7 @@ func ParseConfigFile(configFile string) (*Config, error) {
 	}
 
 	// Check file perms from config
-	if err := checkFilePerms(config.FilterFile); err != nil {
+	if err := checkFilePerms(configFile, config.FilterFile); err != nil {
 		return nil, err
 	}
 
@@ -149,8 +149,8 @@ func checkFilePerms(files ...string) error {
 			// Assume unix based system (MacOS and Linux)
 			// the bit mask is calculated using the umask command which tells which permissions
 			// should not be allowed for a particular user, group or world
-			if fInfo.Mode()&0177 != 0 {
-				return errors.E(op, f+" should have at most rw,-, - as permission")
+			if fInfo.Mode()&0077 != 0 {
+				return errors.E(op, f+" should have at most rwx,-, - (bit mask 077) as permission")
 			}
 		}
 	}

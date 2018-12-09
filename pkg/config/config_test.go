@@ -315,7 +315,7 @@ func Test_checkFilePerms(t *testing.T) {
 		t.Skipf("Chmod is not supported in windows, so not possible to test. Ref: https://github.com/golang/go/blob/master/src/os/os_test.go#L1031\n")
 	}
 
-	incorrectPerms := []os.FileMode{0700, 0777, 0100, 0610, 0660}
+	incorrectPerms := []os.FileMode{0777, 0610, 0660}
 	var incorrectFiles = make([]string, len(incorrectPerms))
 
 	for i := range incorrectPerms {
