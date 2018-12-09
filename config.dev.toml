@@ -60,6 +60,12 @@ Timeout = 300
 # Env override: ATHENS_STORAGE_TYPE
 StorageType = "memory"
 
+# Certificate and key to make athens serve using https instead of plain text http.
+# Set both to enable.
+# Env override: ATHENS_TLSCERT_FILE, ATHENS_TLSKEY_FILE
+#TLSCertFile = "server.cer"
+#TLSKeyFile = "server.key"
+
 # Port sets the port the proxy listens on
 # Env override: PORT
 # Note that PORT needs to be prefixed by :
