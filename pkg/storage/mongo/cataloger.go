@@ -23,7 +23,11 @@ func (s *ModuleStore) Catalog(ctx context.Context, token string, pageSize int) (
 
 	c := s.s.DB(s.d).C(s.c)
 	modules := make([]storage.Module, 0)
-	err := c.Find(q).Limit(pageSize).Select(fields).Sort("_id").All(&modules)
+	err := c.Find(q).
+		Select(fields).
+		Sort("_id").
+		Limit(pageSize).
+		All(&modules)
 
 	if err != nil {
 		return nil, "", errors.E(op, err)
