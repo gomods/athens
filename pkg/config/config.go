@@ -141,18 +141,13 @@ func checkFilePerms(files ...string) error {
 			continue
 		}
 
-		if runtime.GOOS == "windows" {
-			if (fInfo.Mode() & 0100) != 0 {
-				return errors.E(op, f+" should have rw,-, - as permission")
-			}
-		} else {
-			// Assume unix based system (MacOS and Linux)
-			// the bit mask is calculated using the umask command which tells which permissions
-			// should not be allowed for a particular user, group or world
-			if fInfo.Mode()&0077 != 0 {
-				return errors.E(op, f+" should have at most rwx,-, - (bit mask 077) as permission")
-			}
+		// Assume unix based system (MacOS and Linux)
+		// the bit mask is calculated using the umask command which tells which permissions
+		// should not be allowed for a particular user, group or world
+		if fInfo.Mode()&0077 != 0 && runtime.GOOS != "windows" {
+			return errors.E(op, f+" should have at most rwx,-, - (bit mask 077) as permission")
 		}
+
 	}
 
 	return nil
