@@ -15,7 +15,7 @@ func TestBackend(t *testing.T) {
 }
 
 func (m *ModuleStore) clear() error {
-	m.s.DB(m.d).C(m.c).DropCollection()
+	m.s.DB(m.d).DropDatabase()
 
 	return m.initDatabase()
 }

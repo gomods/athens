@@ -6,7 +6,7 @@ import (
 
 // Module represents a vgo module saved in a storage backend.
 type Module struct {
-	ID      bson.ObjectId `bson:"_id"`
+	ID      bson.ObjectId `bson:"_id,omitempty"`
 	Module  string        `bson:"module"`
 	Version string        `bson:"version"`
 	Mod     []byte        `bson:"mod"`
