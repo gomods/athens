@@ -65,7 +65,7 @@ Exclude lists for public modules are also globs that tell the Athens proxy what 
 
 ## Catalog Endpoint
 
-The proxy provides a `/catalog` service endpoint to fetch all the modules and version contained in the local storage.
+The proxy provides a `/catalog` service endpoint to fetch all the modules and their versions contained in the local storage.
 The endpoint accepts a continuation token and a page size parameter in order to provide paginated results.
 
 A query is of the form
@@ -73,6 +73,7 @@ A query is of the form
 `https://proxyurl/catalog?token=foo&limit=47`
 
 Where token is an optional continuation token and limit is the desired size of the returned page.
+The `token` parameter is not required for the first call and it's needed for handling paginated results.
 
 
 The result is a json with the following structure:
@@ -82,5 +83,5 @@ The result is a json with the following structure:
  "next":""}'
 ```
 
-An empty nextpagetoken means that no more pages are available.
+An empty `next` token means that no more pages are available.
 The default page size is 1000.
