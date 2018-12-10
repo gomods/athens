@@ -32,7 +32,7 @@ The proxy implements the [Go modules download protocol](https://docs.gomods.io/i
 
 There is currently an experimental public proxy, and we have plans to host a more stable public proxy with more guarantees. We also have a community of folks using Athens inside their organizations as an internal proxy. In either deployment, developers set their `GOPROXY` environment variable to point to the Athens proxy of their choice. At that point, `go get`, `go build`, and `go build`s will use the proxy to download dependencies as necessary.
 
-Athens proxies are highly configurable, so they can work for lots of different deployments. For example, proxies support a wide variety of storage drivers like cloud blob storage systems, cloud CDNs, shared disk, and even in-memory.
+Athens proxies are highly configurable, so they can work for lots of different deployments. For example, proxies support a wide variety of storage drivers like cloud blob storage systems, content distribution networks (CDNs), shared disk, and even in-memory.
 
 # Development
 
