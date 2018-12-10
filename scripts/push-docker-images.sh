@@ -18,6 +18,7 @@ else
     BRANCH=${BRANCH:-$(git symbolic-ref -q --short HEAD || echo "")}
 fi
 
+LATEST_TAG=0
 # MUTABLE_TAG is the docker image tag that we will reuse between pushes, it is not an immutable tag like a commit hash or tag.
 if [[ "${MUTABLE_TAG:-}" == "" ]]; then
     # tagged builds
@@ -26,6 +27,7 @@ if [[ "${MUTABLE_TAG:-}" == "" ]]; then
     # master build
     elif [[ "$BRANCH" == "master" ]]; then
         MUTABLE_TAG="canary"
+        LATEST_TAG=1
     # branch build
     else
         MUTABLE_TAG=${BRANCH}
@@ -41,3 +43,8 @@ docker tag ${REGISTRY}athens:${VERSION} ${REGISTRY}athens:${MUTABLE_TAG}
 
 docker push ${REGISTRY}athens:${VERSION}
 docker push ${REGISTRY}athens:${MUTABLE_TAG}
+
+if [ LATEST_TAG == 1 ]; then
+    docker tag ${REGISTRY}athens:${VERSION} ${REGISTRY}athens:latest
+    docker push ${REGISTRY}athens:${VERSION}
+fi
