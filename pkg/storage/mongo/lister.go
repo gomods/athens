@@ -16,8 +16,9 @@ func (s *ModuleStore) List(ctx context.Context, module string) ([]string, error)
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 	c := s.s.DB(s.d).C(s.c)
+	fields := bson.M{"version": 1}
 	result := make([]storage.Module, 0)
-	err := c.Find(bson.M{"module": module}).All(&result)
+	err := c.Find(bson.M{"module": module}).Select(fields).All(&result)
 	if err != nil {
 		kind := errors.KindUnexpected
 		if err == mgo.ErrNotFound {
