@@ -70,7 +70,7 @@ func (p *protocol) List(ctx context.Context, mod string) ([]string, error) {
 	if sErr != nil {
 		return nil, errors.E(op, sErr)
 	}
-	_, goList, goErr := p.lister.List(mod)
+	_, goList, goErr := p.lister.List(ctx, mod)
 	isUnexpGoErr := goErr != nil && !errors.IsRepoNotFoundErr(goErr)
 	// if i.e. github is unavailable we should fail as well so that the behavior of the proxy is stable.
 	// otherwise we will get different results the next time because i.e. GH is up again
@@ -91,7 +91,7 @@ func (p *protocol) Latest(ctx context.Context, mod string) (*storage.RevInfo, er
 	const op errors.Op = "protocol.Latest"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
-	lr, _, err := p.lister.List(mod)
+	lr, _, err := p.lister.List(ctx, mod)
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
