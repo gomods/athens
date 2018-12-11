@@ -18,7 +18,7 @@ func RegisterStatsExporter(app *buffalo.App, statsExporter, service string) (fun
 
 	switch statsExporter {
 	case "prometheus":
-		if _, err := registerPrometheusExporter(app, service); err != nil {
+		if err := registerPrometheusExporter(app, service); err != nil {
 			return nil, errors.E(op, err)
 		}
 	case "":
@@ -31,6 +31,9 @@ func RegisterStatsExporter(app *buffalo.App, statsExporter, service string) (fun
 		return nil, errors.E(op, err)
 	}
 
+	// Currently func() prop it's not needed by Prometheus exporter.
+	// This param should be used to pass StackDriver Flush or
+	// DataDog Stop method when this Exporters will be implemented.
 	return func() {}, nil
 }
 
@@ -45,14 +48,14 @@ func registerViews() error {
 }
 
 // registerPrometheusExporter creates exporter that collects stats for Prometheus.
-func registerPrometheusExporter(app *buffalo.App, service string) (func(), error) {
+func registerPrometheusExporter(app *buffalo.App, service string) error {
 	const op errors.Op = "registerPrometheusExporter"
 
 	prom, err := prometheus.NewExporter(prometheus.Options{
 		Namespace: service,
 	})
 	if err != nil {
-		return nil, errors.E(op, err)
+		return errors.E(op, err)
 	}
 
 	app.GET("/metrics", metricsHandler(prom))
@@ -60,7 +63,7 @@ func registerPrometheusExporter(app *buffalo.App, service string) (func(), error
 
 	view.RegisterExporter(prom)
 
-	return func() {}, nil
+	return nil
 }
 
 func metricsHandler(handler http.Handler) buffalo.Handler {
