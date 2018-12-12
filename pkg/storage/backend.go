@@ -7,4 +7,5 @@ type Backend interface {
 	Checker
 	Saver
 	Deleter
+	Cataloger
 }

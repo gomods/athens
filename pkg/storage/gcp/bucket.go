@@ -18,4 +18,6 @@ type Bucket interface {
 	List(ctx context.Context, prefix string) ([]string, error)
 	// Exists returns true if the file exists
 	Exists(ctx context.Context, path string) (bool, error)
+	// Catalog returns a slice of paths starting from the page given by the token and max elementNum
+	Catalog(ctx context.Context, token string, pageSize int) ([]string, string, error)
 }

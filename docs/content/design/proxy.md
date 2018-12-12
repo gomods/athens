@@ -62,3 +62,26 @@ Private module filters are string globs that tell the Athens proxy what is a pri
 ### Exclude Lists for Public Modules
 
 Exclude lists for public modules are also globs that tell the Athens proxy what modules it should never download from any upstream proxy. For example, the string `github.com/arschles/**` tells the Athens proxy to always return `404 Not Found` to clients.
+
+## Catalog Endpoint
+
+The proxy provides a `/catalog` service endpoint to fetch all the modules and their versions contained in the local storage.
+The endpoint accepts a continuation token and a page size parameter in order to provide paginated results.
+
+A query is of the form
+
+`https://proxyurl/catalog?token=foo&limit=47`
+
+Where token is an optional continuation token and limit is the desired size of the returned page.
+The `token` parameter is not required for the first call and it's needed for handling paginated results.
+
+
+The result is a json with the following structure:
+
+```
+{"modules": [{"module":"github.com/athens-artifacts/no-tags","version":"v1.0.0"}],
+ "next":""}'
+```
+
+An empty `next` token means that no more pages are available.
+The default page size is 1000.
