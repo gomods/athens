@@ -31,8 +31,8 @@ func GetVersion(c buffalo.Context) (string, error) {
 // AllPathParams holds the module and version in the path of a ?go-get=1
 // request
 type AllPathParams struct {
-	Module  string
-	Version string
+	Module  string `json:"module"`
+	Version string `json:"version"`
 }
 
 // GetAllParams fetches the path patams from c and returns them
