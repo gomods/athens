@@ -82,4 +82,4 @@ The result is a json with the following structure:
  "next":""}'
 ```
 
-An empty `next` token means that no more pages are available. The default page size is 1000.
+If a `next` token is not returned, then it means that no more pages are available. The default page size is 1000.
