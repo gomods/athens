@@ -3,6 +3,7 @@ package download
 import (
 	"context"
 	"io"
+	"sync"
 
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/observ"
@@ -64,16 +65,32 @@ func (p *protocol) List(ctx context.Context, mod string) ([]string, error) {
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 
-	strList, sErr := p.storage.List(ctx, mod)
+	var strList, goList []string
+	var sErr, goErr error
+	var wg sync.WaitGroup
+	wg.Add(2)
+
+	go func() {
+		defer wg.Done()
+		strList, sErr = p.storage.List(ctx, mod)
+	}()
+
+	go func() {
+		defer wg.Done()
+		_, goList, goErr = p.lister.List(mod)
+	}()
+
+	wg.Wait()
+
 	// if we got an unexpected storage err then we can not guarantee that the end result contains all versions
 	// a tag or repo could have been deleted
 	if sErr != nil {
 		return nil, errors.E(op, sErr)
 	}
-	_, goList, goErr := p.lister.List(mod)
-	isUnexpGoErr := goErr != nil && !errors.IsRepoNotFoundErr(goErr)
+
 	// if i.e. github is unavailable we should fail as well so that the behavior of the proxy is stable.
 	// otherwise we will get different results the next time because i.e. GH is up again
+	isUnexpGoErr := goErr != nil && !errors.IsRepoNotFoundErr(goErr)
 	if isUnexpGoErr {
 		return nil, errors.E(op, goErr)
 	}
