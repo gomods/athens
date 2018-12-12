@@ -41,7 +41,7 @@ export GO111MODULE=on
 cd $REPO_DIR/cmd/proxy
 pkill athens-proxy || true # cleanup proxy if it is running
 go build -mod=vendor -o athens-proxy && ./athens-proxy &
-while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' localhost:3000)" != "200" ]]; do sleep 5; done
+while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' localhost:3000)" != "200" ]]; do sleep 0.1; done
 
 # Clone our test repo
 TEST_SOURCE=${TMPDIR}/happy-path
