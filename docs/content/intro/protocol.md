@@ -10,7 +10,7 @@ The original vgo research paper on Download protocol can be found here: https://
 
 Each of these endpoints sits on top of a module. Let's assume module `htp` authored by `acidburn`.
 
-So for each of endpoints mentioned bellow we will assume address `acidburn/htp/@v/{endpoint}` (e.g `acidburn/htp/@v/list`)
+So for each of the endpoints mentioned below we will assume address `acidburn/htp/@v/{endpoint}` (e.g `acidburn/htp/@v/list`)
 
 In the examples below, `$HOST` and `$PORT` are placeholders for the host and port of your Athens server.
 
