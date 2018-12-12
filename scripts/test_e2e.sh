@@ -61,7 +61,11 @@ export GOPROXY=http://localhost:3000
 $GO_BINARY_PATH run .
 
 CATALOG_RES=$(curl localhost:3000/catalog)
+<<<<<<< HEAD
 CATALOG_EXPECTED='{"modules":[{"module":"github.com/athens-artifacts/no-tags","version":"v0.0.0-20180803171426-1a540c5d67ab"}]}'
+=======
+CATALOG_EXPECTED='{"modules":[{"module":"github.com/athens-artifacts/no-tags","version":"v0.0.0-20180803171426-1a540c5d67ab"}],"next":""}'
+>>>>>>> master
 
 if [[ "$CATALOG_RES" != "$CATALOG_EXPECTED" ]]; then
   echo ERROR: catalog endpoint failed

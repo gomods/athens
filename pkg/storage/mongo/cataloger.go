@@ -4,10 +4,10 @@ import (
 	"context"
 
 	"github.com/globalsign/mgo/bson"
-	"github.com/gomods/athens/pkg/paths"
-	"github.com/gomods/athens/pkg/storage"
 
 	"github.com/gomods/athens/pkg/errors"
+	"github.com/gomods/athens/pkg/paths"
+	"github.com/gomods/athens/pkg/storage"
 )
 
 // Catalog implements the (./pkg/storage).Cataloger interface
