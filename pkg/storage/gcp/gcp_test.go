@@ -3,6 +3,7 @@ package gcp
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"io/ioutil"
 	"testing"
 	"time"
@@ -50,9 +51,14 @@ func (g *GcpTests) TestSaveGetListExistsRoundTrip() {
 		r.Equal(true, exists)
 	})
 
+	g.T().Run("Delete storage", func(t *testing.T) {
+		err := g.store.Delete(g.context, g.module, g.version)
+		r.NoError(err)
+	})
+
 	g.T().Run("Resources closed", func(t *testing.T) {
-		r.Equal(true, g.bucket.ReadClosed())
-		r.Equal(true, g.bucket.WriteClosed())
+		r.Equal(true, g.BucketReadClosed())
+		r.Equal(true, g.BucketWriteClosed())
 	})
 }
 
@@ -94,4 +100,33 @@ func (g *GcpTests) TestNotFounds() {
 		r.NoError(err)
 		r.Equal(0, len(list))
 	})
+}
+
+func (g *GcpTests) TestCatalog() {
+	r := g.Require()
+	for i := 0; i < 50; i++ {
+		ver := fmt.Sprintf("v1.2.%04d", i)
+		err := g.store.Save(g.context, g.module, ver, mod, bytes.NewReader(zip), info)
+		r.NoError(err)
+	}
+	defer func() {
+		for i := 0; i < 50; i++ {
+			ver := fmt.Sprintf("v1.2.%04d", i)
+			err := g.store.Delete(g.context, g.module, ver)
+			r.NoError(err)
+		}
+	}()
+
+	allres, nextToken, err := g.store.Catalog(g.context, "", 2)
+	r.NoError(err)
+	r.Equal(len(allres), 2)
+	r.NotEqual("", nextToken)
+	r.Equal(allres[0].Module, g.module)
+
+	res, nextToken, err := g.store.Catalog(g.context, nextToken, 50)
+	allres = append(allres, res...)
+	r.NoError(err)
+	r.Equal(len(allres), 50)
+	r.Equal(len(res), 48)
+	r.Equal("", nextToken)
 }
