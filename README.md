@@ -22,7 +22,7 @@ See our documentation site [https://docs.gomods.io](https://docs.gomods.io) for 
 
 # Project Status
 
-Project Athens is in beta. It's being tested and used used on teams and has an experimental deployment for public use.
+Project Athens is in beta. It's being tested and used on teams and has an experimental deployment for public use.
 
 We encourage you to [try it out](https://docs.gomods.io/install/), let us know what you think, and [contribute](#contributing) when you can!
 
