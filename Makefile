@@ -1,6 +1,11 @@
+VERSION = "unset"
+DATE=$(shell date -u +%Y-%m-%d-%H:%M:%S-%Z)
 .PHONY: build
 build:
 	cd cmd/proxy && buffalo build
+
+build-ver:
+	GO111MODULE=on CGO_ENABLED=0 go build -mod=vendor -ldflags "-X github.com/gomods/athens/pkg/build.version=$(VERSION) -X github.com/gomods/athens/pkg/build.buildDate=$(DATE)" -o athens ./cmd/proxy
 
 .PHONY: run
 run: build
