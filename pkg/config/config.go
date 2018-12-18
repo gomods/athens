@@ -90,7 +90,7 @@ func ParseConfigFile(configFile string) (*Config, error) {
 	}
 
 	// Check file perms from config
-	if err := checkFilePerms(config.FilterFile); err != nil {
+	if err := checkFilePerms(configFile, config.FilterFile); err != nil {
 		return nil, err
 	}
 
@@ -163,21 +163,18 @@ func checkFilePerms(files ...string) error {
 		// TODO: Do not ignore errors when a file is not found
 		// There is a subtle bug in the filter module which ignores the filter file if it does not find it.
 		// This check can be removed once that has been fixed
-		fInfo, err := os.Lstat(f)
+		fInfo, err := os.Stat(f)
 		if err != nil {
 			continue
 		}
 
-		if runtime.GOOS == "windows" {
-			if (fInfo.Mode() & 0600) != 0600 {
-				return errors.E(op, f+" should have 0600 as permission")
-			}
-		} else {
-			// Assume unix based system (MacOS and Linux)
-			if fInfo.Mode() != 0640 {
-				return errors.E(op, f+" should have 0640 as permission")
-			}
+		// Assume unix based system (MacOS and Linux)
+		// the bit mask is calculated using the umask command which tells which permissions
+		// should not be allowed for a particular user, group or world
+		if fInfo.Mode()&0077 != 0 && runtime.GOOS != "windows" {
+			return errors.E(op, f+" should have at most rwx,-, - (bit mask 077) as permission")
 		}
+
 	}
 
 	return nil
