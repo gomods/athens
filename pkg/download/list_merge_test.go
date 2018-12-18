@@ -105,7 +105,7 @@ type listerMock struct {
 	err      error
 }
 
-func (l *listerMock) List(mod string) (*storage.RevInfo, []string, error) {
+func (l *listerMock) List(ctx context.Context, mod string) (*storage.RevInfo, []string, error) {
 	return nil, l.versions, l.err
 }
 
