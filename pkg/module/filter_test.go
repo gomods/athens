@@ -9,9 +9,13 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
-var (
+func testConfigFile(t *testing.T) (testConfigFile string) {
 	testConfigFile = filepath.Join("..", "..", "config.dev.toml")
-)
+	if err := os.Chmod(testConfigFile, 0700); err != nil {
+		t.Fatalf("%s\n", err)
+	}
+	return testConfigFile
+}
 
 type FilterTests struct {
 	suite.Suite

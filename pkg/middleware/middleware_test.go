@@ -22,9 +22,13 @@ const (
 	pathVersionInfo = "/{module:.+}/@v/{version}.info"
 )
 
-var (
+func testConfigFile(t *testing.T) (testConfigFile string) {
 	testConfigFile = filepath.Join("..", "..", "config.dev.toml")
-)
+	if err := os.Chmod(testConfigFile, 0700); err != nil {
+		t.Fatalf("%s\n", err)
+	}
+	return testConfigFile
+}
 
 func middlewareFilterApp(filterFile, registryEndpoint string) (*buffalo.App, error) {
 	h := func(c buffalo.Context) error {
@@ -63,7 +67,7 @@ func Test_FilterMiddleware(t *testing.T) {
 	}
 	defer os.Remove(filter.Name())
 
-	conf, err := config.GetConf(testConfigFile)
+	conf, err := config.GetConf(testConfigFile(t))
 	if err != nil {
 		t.Fatalf("Unable to parse config file: %s", err.Error())
 	}
