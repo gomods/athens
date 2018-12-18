@@ -14,7 +14,7 @@ import (
 // RegisterStatsExporter determines the type of StatsExporter service for exporting stats from Opencensus
 // Currently it supports: prometheus
 func RegisterStatsExporter(app *buffalo.App, statsExporter, service string) (func(), error) {
-	const op errors.Op = "RegisterStatsExporter"
+	const op errors.Op = "observ.RegisterStatsExporter"
 
 	switch statsExporter {
 	case "prometheus":
@@ -39,7 +39,7 @@ func RegisterStatsExporter(app *buffalo.App, statsExporter, service string) (fun
 
 // registerViews register stats which should be collected in Athens
 func registerViews() error {
-	const op errors.Op = "registerViews"
+	const op errors.Op = "observ.registerViews"
 	if err := view.Register(ochttp.DefaultServerViews...); err != nil {
 		return errors.E(op, err)
 	}
@@ -49,7 +49,7 @@ func registerViews() error {
 
 // registerPrometheusExporter creates exporter that collects stats for Prometheus.
 func registerPrometheusExporter(app *buffalo.App, service string) error {
-	const op errors.Op = "registerPrometheusExporter"
+	const op errors.Op = "observ.registerPrometheusExporter"
 
 	prom, err := prometheus.NewExporter(prometheus.Options{
 		Namespace: service,
