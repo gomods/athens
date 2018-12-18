@@ -3,9 +3,11 @@ package download
 import (
 	"context"
 	"io"
+	"sync"
 
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/observ"
+	"github.com/gomods/athens/pkg/paths"
 	"github.com/gomods/athens/pkg/stash"
 	"github.com/gomods/athens/pkg/storage"
 )
@@ -27,6 +29,9 @@ type Protocol interface {
 
 	// Zip implements GET /{module}/@v/{version}.zip
 	Zip(ctx context.Context, mod, ver string) (io.ReadCloser, error)
+
+	// Catalog implements GET /catalog
+	Catalog(ctx context.Context, token string, pageSize int) ([]paths.AllPathParams, string, error)
 }
 
 // Wrapper helps extend the main protocol's functionality with addons.
@@ -64,16 +69,32 @@ func (p *protocol) List(ctx context.Context, mod string) ([]string, error) {
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 
-	strList, sErr := p.storage.List(ctx, mod)
+	var strList, goList []string
+	var sErr, goErr error
+	var wg sync.WaitGroup
+	wg.Add(2)
+
+	go func() {
+		defer wg.Done()
+		strList, sErr = p.storage.List(ctx, mod)
+	}()
+
+	go func() {
+		defer wg.Done()
+		_, goList, goErr = p.lister.List(ctx, mod)
+	}()
+
+	wg.Wait()
+
 	// if we got an unexpected storage err then we can not guarantee that the end result contains all versions
 	// a tag or repo could have been deleted
 	if sErr != nil {
 		return nil, errors.E(op, sErr)
 	}
-	_, goList, goErr := p.lister.List(mod)
-	isUnexpGoErr := goErr != nil && !errors.IsRepoNotFoundErr(goErr)
+
 	// if i.e. github is unavailable we should fail as well so that the behavior of the proxy is stable.
 	// otherwise we will get different results the next time because i.e. GH is up again
+	isUnexpGoErr := goErr != nil && !errors.IsRepoNotFoundErr(goErr)
 	if isUnexpGoErr {
 		return nil, errors.E(op, goErr)
 	}
@@ -91,7 +112,7 @@ func (p *protocol) Latest(ctx context.Context, mod string) (*storage.RevInfo, er
 	const op errors.Op = "protocol.Latest"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
-	lr, _, err := p.lister.List(mod)
+	lr, _, err := p.lister.List(ctx, mod)
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
@@ -154,6 +175,19 @@ func (p *protocol) Zip(ctx context.Context, mod, ver string) (io.ReadCloser, err
 	}
 
 	return zip, nil
+}
+
+func (p *protocol) Catalog(ctx context.Context, token string, pageSize int) ([]paths.AllPathParams, string, error) {
+	const op errors.Op = "protocol.Catalog"
+	ctx, span := observ.StartSpan(ctx, op.String())
+	defer span.End()
+	modulesAndVersions, newToken, err := p.storage.Catalog(ctx, token, pageSize)
+
+	if err != nil {
+		return nil, "", errors.E(op, err)
+	}
+
+	return modulesAndVersions, newToken, err
 }
 
 // union concatenates two version lists and removes duplicates

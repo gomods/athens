@@ -70,3 +70,22 @@ func (b *gcpBucket) Exists(ctx context.Context, path string) (bool, error) {
 
 	return true, nil
 }
+
+func (b *gcpBucket) Catalog(ctx context.Context, token string, pageSize int) ([]string, string, error) {
+	const op errors.Op = "gcpBucket.Catalog"
+
+	it := b.Objects(ctx, nil)
+	p := iterator.NewPager(it, pageSize, token)
+
+	attrs := make([]*storage.ObjectAttrs, 0)
+	nextToken, err := p.NextPage(&attrs)
+	if err != nil {
+		return nil, "", errors.E(op, err)
+	}
+
+	res := []string{}
+	for _, attr := range attrs {
+		res = append(res, attr.Name)
+	}
+	return res, nextToken, nil
+}
