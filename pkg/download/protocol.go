@@ -81,7 +81,7 @@ func (p *protocol) List(ctx context.Context, mod string) ([]string, error) {
 
 	go func() {
 		defer wg.Done()
-		_, goList, goErr = p.lister.List(mod)
+		_, goList, goErr = p.lister.List(ctx, mod)
 	}()
 
 	wg.Wait()
@@ -112,7 +112,7 @@ func (p *protocol) Latest(ctx context.Context, mod string) (*storage.RevInfo, er
 	const op errors.Op = "protocol.Latest"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
-	lr, _, err := p.lister.List(mod)
+	lr, _, err := p.lister.List(ctx, mod)
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
