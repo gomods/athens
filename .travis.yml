@@ -41,11 +41,4 @@ deploy:
     on:
       repo: gomods/athens
       all_branches: true
-  - provider: script
-    skip_cleanup: true
-    script: curl -sL https://git.io/goreleaser | bash
-    on:
-      repo: gomods/athens
-      tags: true
-      condition: $GORELEASER_ON = 1
-      condition: $GO111MODULE = on
+

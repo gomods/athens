@@ -36,6 +36,8 @@ type Config struct {
 	NETRCPath        string `envconfig:"ATHENS_NETRC_PATH"`
 	GithubToken      string `envconfig:"ATHENS_GITHUB_TOKEN"`
 	HGRCPath         string `envconfig:"ATHENS_HGRC_PATH"`
+	TLSCertFile      string `envconfig:"ATHENS_TLSCERT_FILE"`
+	TLSKeyFile       string `envconfig:"ATHENS_TLSKEY_FILE"`
 	Storage          *StorageConfig
 }
 
@@ -46,6 +48,30 @@ func (c *Config) BasicAuth() (user, pass string, ok bool) {
 	pass = c.BasicAuthPass
 	ok = user != "" && pass != ""
 	return user, pass, ok
+}
+
+// TLSCertFiles returns certificate and key files and an error if
+// both files doesn't exist and have approperiate file permissions
+func (c *Config) TLSCertFiles() (cert, key string, err error) {
+	if c.TLSCertFile == "" && c.TLSKeyFile == "" {
+		return "", "", nil
+	}
+
+	certFile, err := os.Stat(c.TLSCertFile)
+	if err != nil {
+		return "", "", fmt.Errorf("Could not access TLSCertFile: %v", err)
+	}
+
+	keyFile, err := os.Stat(c.TLSKeyFile)
+	if err != nil {
+		return "", "", fmt.Errorf("Could not access TLSKeyFile: %v", err)
+	}
+
+	if keyFile.Mode()&077 != 0 && runtime.GOOS != "windows" {
+		return "", "", fmt.Errorf("TLSKeyFile should not be accessable by others")
+	}
+
+	return certFile.Name(), keyFile.Name(), nil
 }
 
 // FilterOff returns true if the FilterFile is empty
