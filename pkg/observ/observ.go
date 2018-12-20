@@ -24,7 +24,7 @@ type observabilityContext struct {
 // User can choose from multiple tracing services (datadog, jaegar)
 // RegisterExporter returns the 'Flush' function for that particular tracing service
 func RegisterExporter(traceExporter, URL, service, ENV string) (func(), error) {
-	const op errors.Op = "RegisterExporter"
+	const op errors.Op = "observ.RegisterExporter"
 	switch traceExporter {
 	case "jaeger":
 		return registerJaegerExporter(URL, service, ENV)
@@ -43,7 +43,7 @@ func RegisterExporter(traceExporter, URL, service, ENV string) (func(), error) {
 // Currently uses the 'TraceExporter' variable in the config file.
 // It should in the future have a nice sampling rate defined
 func registerJaegerExporter(URL, service, ENV string) (func(), error) {
-	const op errors.Op = "registerJaegarExporter"
+	const op errors.Op = "observ.registerJaegarExporter"
 	if URL == "" {
 		return nil, errors.E(op, "Exporter URL is empty. Traces won't be exported")
 	}
@@ -86,7 +86,7 @@ func registerDatadogExporter(URL, service, ENV string) (func(), error) {
 }
 
 func registerStackdriverExporter(projectID, ENV string) (func(), error) {
-	const op errors.Op = "registerStackdriverExporter"
+	const op errors.Op = "observ.registerStackdriverExporter"
 	ex, err := stackdriver.NewExporter(stackdriver.Options{ProjectID: projectID})
 	if err != nil {
 		return nil, errors.E(op, err)
