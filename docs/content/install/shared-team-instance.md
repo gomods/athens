@@ -10,7 +10,7 @@ We will use Docker to run the Athens proxy, so first make sure you have Docker [
 
 ## Selecting a Storage Provider
 
-Athens currently supports a number of storage drivers. For local use we recommend starting with the local disk provider. For other providers, please see the Storage Provider documentation [Coming Soon].
+Athens currently supports a number of storage drivers. For local use we recommend starting with the local disk provider. For other providers, please see [the Storage Provider documentation](/configuration/storage).
 
 ## Running Athens with Local Disk Storage
 
