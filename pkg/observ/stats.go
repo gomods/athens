@@ -37,6 +37,19 @@ func RegisterStatsExporter(app *buffalo.App, statsExporter, service string) (fun
 	return func() {}, nil
 }
 
+// StatsMiddleware is middleware that instruments buffalo handlers
+func StatsMiddleware() buffalo.MiddlewareFunc {
+	return func(next buffalo.Handler) buffalo.Handler {
+		return func(ctx buffalo.Context) error {
+			och := &ochttp.Handler{
+				Handler: buffalo.WrapBuffaloHandlerFunc(next),
+			}
+
+			return buffalo.WrapHandler(och)(ctx)
+		}
+	}
+}
+
 // registerViews register stats which should be collected in Athens
 func registerViews() error {
 	const op errors.Op = "observ.registerViews"
@@ -68,17 +81,4 @@ func registerPrometheusExporter(app *buffalo.App, service string) error {
 
 func metricsHandler(handler http.Handler) buffalo.Handler {
 	return buffalo.WrapHandler(handler)
-}
-
-// StatsMiddleware is middleware that instruments buffalo handlers
-func StatsMiddleware() buffalo.MiddlewareFunc {
-	return func(next buffalo.Handler) buffalo.Handler {
-		return func(ctx buffalo.Context) error {
-			och := &ochttp.Handler{
-				Handler: buffalo.WrapBuffaloHandlerFunc(next),
-			}
-
-			return buffalo.WrapHandler(och)(ctx)
-		}
-	}
 }
