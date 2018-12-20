@@ -20,7 +20,7 @@ func LatestHandler(dp Protocol, lggr log.Entry, eng *render.Engine) buffalo.Hand
 		mod, err := paths.GetModule(c)
 		if err != nil {
 			lggr.SystemErr(errors.E(op, err))
-			return c.Render(500, nil)
+			return c.Render(http.StatusInternalServerError, nil)
 		}
 
 		info, err := dp.Latest(c, mod)

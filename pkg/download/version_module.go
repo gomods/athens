@@ -5,6 +5,7 @@ import (
 	"github.com/gobuffalo/buffalo/render"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/log"
+	"net/http"
 )
 
 // PathVersionModule URL.
@@ -28,6 +29,6 @@ func VersionModuleHandler(dp Protocol, lggr log.Entry, eng *render.Engine) buffa
 
 		// Calling c.Response().Write will write the header directly
 		// and we would get a 0 status in the buffalo logs.
-		return c.Render(200, eng.String(string(modBts)))
+		return c.Render(http.StatusOK, eng.String(string(modBts)))
 	}
 }

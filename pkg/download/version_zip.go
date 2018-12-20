@@ -2,6 +2,7 @@ package download
 
 import (
 	"io"
+	"net/http"
 
 	"github.com/gobuffalo/buffalo"
 	"github.com/gobuffalo/buffalo/render"
@@ -31,7 +32,7 @@ func VersionZipHandler(dp Protocol, lggr log.Entry, eng *render.Engine) buffalo.
 
 		// Calling c.Response().Write will write the header directly
 		// and we would get a 0 status in the buffalo logs.
-		c.Render(200, nil)
+		c.Render(http.StatusOK, nil)
 		_, err = io.Copy(c.Response(), zip)
 		if err != nil {
 			lggr.SystemErr(errors.E(op, errors.M(mod), errors.V(ver), err))
