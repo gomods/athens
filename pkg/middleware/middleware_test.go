@@ -32,7 +32,7 @@ func testConfigFile(t *testing.T) (testConfigFile string) {
 
 func middlewareFilterApp(filterFile, registryEndpoint string) (*buffalo.App, error) {
 	h := func(c buffalo.Context) error {
-		return c.Render(200, nil)
+		return c.Render(http.StatusOK, nil)
 	}
 
 	a := buffalo.New(buffalo.Options{})
@@ -85,22 +85,22 @@ func Test_FilterMiddleware(t *testing.T) {
 	paths := []string{"/github.com/gomods/athens/@v/list/", "/github.com/gomods/athens/@v/list"}
 	for _, path := range paths {
 		res := w.JSON(path).Get()
-		r.Equal(303, res.Code)
+		r.Equal(http.StatusSeeOther, res.Code)
 		r.Equal(conf.GlobalEndpoint+"/github.com/gomods/athens/@v/list/", res.HeaderMap.Get("Location"))
 	}
 
 	// Excluded, expects a 403
 	res := w.JSON("/github.com/athens-artifacts/no-tags/@v/list").Get()
-	r.Equal(403, res.Code)
+	r.Equal(http.StatusForbidden, res.Code)
 
 	// Private, the proxy is working and returns a 200
 	res = w.JSON("/github.com/athens-artifacts/happy-path/@v/list").Get()
-	r.Equal(200, res.Code)
+	r.Equal(http.StatusOK, res.Code)
 }
 
 func hookFilterApp(hook string) *buffalo.App {
 	h := func(c buffalo.Context) error {
-		return c.Render(200, nil)
+		return c.Render(http.StatusOK, nil)
 	}
 
 	a := buffalo.New(buffalo.Options{})
