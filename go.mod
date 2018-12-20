@@ -30,10 +30,10 @@ require (
 	github.com/kelseyhightower/envconfig v1.3.0
 	github.com/kr/pty v1.1.3 // indirect
 	github.com/markbates/goth v1.46.0
-	github.com/markbates/grift v1.0.4
 	github.com/minio/minio-go v6.0.5+incompatible
 	github.com/mitchellh/go-homedir v1.0.0
 	github.com/philhofer/fwd v1.0.0 // indirect
+	github.com/prometheus/client_golang v0.9.1
 	github.com/sirupsen/logrus v1.1.1
 	github.com/smartystreets/assertions v0.0.0-20180820201707-7c9eb446e3cf // indirect
 	github.com/smartystreets/goconvey v0.0.0-20180222194500-ef6db91d284a // indirect
