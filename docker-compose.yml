@@ -33,3 +33,74 @@ services:
       - 6832:6832/udp
       - 5778:5778
       - 16686:16686
+  etcd0:
+    image: quay.io/coreos/etcd
+    ports:
+      - "2379:2379"
+    volumes:
+      - etcd0:/etcd_data
+    command:
+      - /usr/local/bin/etcd
+      - -name
+      - etcd0
+      - --data-dir
+      - /etcd_data
+      - -advertise-client-urls
+      - http://etcd0:2379
+      - -listen-client-urls
+      - http://0.0.0.0:2379
+      - -initial-advertise-peer-urls
+      - http://etcd0:2380
+      - -listen-peer-urls
+      - http://0.0.0.0:2380
+      - -initial-cluster
+      - etcd0=http://etcd0:2380,etcd1=http://etcd1:2380,etcd2=http://etcd2:2380
+  etcd1:
+    image: quay.io/coreos/etcd
+    ports:
+      - "22379:2379"
+    volumes:
+      - etcd1:/etcd_data
+    command:
+      - /usr/local/bin/etcd
+      - -name
+      - etcd1
+      - --data-dir
+      - /etcd_data
+      - -advertise-client-urls
+      - http://etcd1:2379
+      - -listen-client-urls
+      - http://0.0.0.0:2379
+      - -initial-advertise-peer-urls
+      - http://etcd1:2380
+      - -listen-peer-urls
+      - http://0.0.0.0:2380
+      - -initial-cluster
+      - etcd0=http://etcd0:2380,etcd1=http://etcd1:2380,etcd2=http://etcd2:2380
+  etcd2:
+    image: quay.io/coreos/etcd
+    ports:
+      - "32379:2379"
+    volumes:
+      - etcd2:/etcd_data
+    command:
+      - /usr/local/bin/etcd
+      - -name
+      - etcd2
+      - --data-dir
+      - /etcd_data
+      - -advertise-client-urls
+      - http://etcd2:2379
+      - -listen-client-urls
+      - http://0.0.0.0:2379
+      - -initial-advertise-peer-urls
+      - http://etcd2:2380
+      - -listen-peer-urls
+      - http://0.0.0.0:2380
+      - -initial-cluster
+      - etcd0=http://etcd0:2380,etcd1=http://etcd1:2380,etcd2=http://etcd2:2380
+
+volumes:
+  etcd0:
+  etcd1:
+  etcd2:

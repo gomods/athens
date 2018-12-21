@@ -20,7 +20,6 @@ require (
 	github.com/gobuffalo/release v1.0.60 // indirect
 	github.com/gobuffalo/suite v2.1.6+incompatible
 	github.com/gobuffalo/x v0.0.0-20181007152206-913e47c59ca7
-	github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b // indirect
 	github.com/google/go-cmp v0.2.0
 	github.com/google/martian v2.1.0+incompatible // indirect
 	github.com/googleapis/gax-go v2.0.0+incompatible // indirect
@@ -33,7 +32,7 @@ require (
 	github.com/minio/minio-go v6.0.5+incompatible
 	github.com/mitchellh/go-homedir v1.0.0
 	github.com/philhofer/fwd v1.0.0 // indirect
-	github.com/prometheus/client_golang v0.9.1
+	github.com/prometheus/client_golang v0.9.1 // indirect
 	github.com/sirupsen/logrus v1.1.1
 	github.com/smartystreets/assertions v0.0.0-20180820201707-7c9eb446e3cf // indirect
 	github.com/smartystreets/goconvey v0.0.0-20180222194500-ef6db91d284a // indirect
@@ -41,6 +40,7 @@ require (
 	github.com/stretchr/testify v1.2.2
 	github.com/tinylib/msgp v1.0.2 // indirect
 	github.com/unrolled/secure v0.0.0-20181022170031-4b6b7cf51606
+	go.etcd.io/etcd v0.0.0-20181116071624-bb25891960b9
 	go.opencensus.io v0.17.0
 	golang.org/x/sync v0.0.0-20180314180146-1d60e4601c6f
 	golang.org/x/sys v0.0.0-20181031143558-9b800f95dbbc // indirect

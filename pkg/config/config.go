@@ -39,6 +39,7 @@ type Config struct {
 	HGRCPath         string `envconfig:"ATHENS_HGRC_PATH"`
 	TLSCertFile      string `envconfig:"ATHENS_TLSCERT_FILE"`
 	TLSKeyFile       string `envconfig:"ATHENS_TLSKEY_FILE"`
+	EtcdEndpoints    string `envconfig:"ATHENS_ETCD_ENDPOINTS"`
 	Storage          *StorageConfig
 }
 

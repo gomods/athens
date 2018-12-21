@@ -144,6 +144,14 @@ TraceExporterURL = "http://localhost:14268"
 # Env overide: ATHENS_STATS_EXPORTER
 StatsExporter = "prometheus"
 
+# EtcdEndoints are comma separated URLs that determine whether to use Etcd as a distributed lock mechanism 
+# for single-flight requests. If empty, in-memory single-flight is used. If you 
+# have a single instance of Athens, then keep this empty. Otherwise, use etcd. 
+# Athens uses a single-flight mechanism to store modules into a storage Backend 
+# so that no two concurrent requests can override each other.
+# Env override: ATHENS_ETCD_ENDPOINTS
+EtcdEndpoints = ""
+
 [Storage]
     # Only storage backends that are specified in Proxy.StorageType are required here
     [Storage.CDN]

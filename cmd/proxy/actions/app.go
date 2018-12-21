@@ -148,7 +148,12 @@ func App(conf *config.Config) (*buffalo.App, error) {
 		app.Use(mw.NewValidationMiddleware(vHook))
 	}
 
-	if err := addProxyRoutes(app, store, lggr, conf.GoBinary, conf.GoGetWorkers, conf.ProtocolWorkers); err != nil {
+	if err := addProxyRoutes(
+ 		app,
+ 		store,
+ 		lggr,
+ 		conf,
+ 	); err != nil {
 		err = fmt.Errorf("error adding proxy routes (%s)", err)
 		return nil, err
 	}

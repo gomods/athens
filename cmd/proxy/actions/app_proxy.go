@@ -1,12 +1,14 @@
 package actions
 
 import (
+	"strings"
+
 	"github.com/gobuffalo/buffalo"
+	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/download"
 	"github.com/gomods/athens/pkg/download/addons"
 	"github.com/gomods/athens/pkg/log"
 	"github.com/gomods/athens/pkg/module"
-	"github.com/gomods/athens/pkg/observ"
 	"github.com/gomods/athens/pkg/stash"
 	"github.com/gomods/athens/pkg/storage"
 	"github.com/spf13/afero"
@@ -16,15 +18,11 @@ func addProxyRoutes(
 	app *buffalo.App,
 	s storage.Backend,
 	l *log.Logger,
-	goBin string,
-	goGetWorkers int,
-	protocolWorkers int,
+	c *config.Config,
 ) error {
 	app.GET("/", proxyHomeHandler)
 	app.GET("/healthz", healthHandler)
-	app.GET("/readyz", getReadinessHandler(s))
 	app.GET("/version", versionHandler)
-	app.Middleware.Skip(observ.StatsMiddleware(), healthHandler, getReadinessHandler(s), versionHandler)
 
 	// Download Protocol
 	// the download.Protocol and the stash.Stasher interfaces are composable
@@ -49,20 +47,28 @@ func addProxyRoutes(
 	// 3. The stashpool manages limiting concurrent requests and passes them to stash.
 	// 4. The plain stash.New just takes a request from upstream and saves it into storage.
 	fs := afero.NewOsFs()
-	mf, err := module.NewGoGetFetcher(goBin, fs)
+	mf, err := module.NewGoGetFetcher(c.GoBinary, fs)
 	if err != nil {
 		return err
 	}
 
-	lister := download.NewVCSLister(goBin, fs)
-	st := stash.New(mf, s, stash.WithPool(goGetWorkers), stash.WithSingleflight)
+	lister := download.NewVCSLister(c.GoBinary, fs)
+	sf := stash.WithSingleflight
+	if c.EtcdEndpoints != "" {
+		endpoints := strings.Split(c.EtcdEndpoints, ",")
+		sf, err = stash.WithEtcd(endpoints, s)
+		if err != nil {
+			return err
+		}
+	}
+	st := stash.New(mf, s, stash.WithPool(c.GoGetWorkers), sf)
 
 	dpOpts := &download.Opts{
 		Storage: s,
 		Stasher: st,
 		Lister:  lister,
 	}
-	dp := download.New(dpOpts, addons.WithPool(protocolWorkers))
+	dp := download.New(dpOpts, addons.WithPool(c.ProtocolWorkers))
 
 	handlerOpts := &download.HandlerOpts{Protocol: dp, Logger: l, Engine: proxy}
 	download.RegisterHandlers(app, handlerOpts)
