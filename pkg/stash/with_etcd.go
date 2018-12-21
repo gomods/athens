@@ -15,7 +15,7 @@ import (
 
 // WithEtcd returns a distributed singleflight
 // using an etcd cluster. If it cannot connect,
-// then it will panic
+// to any of the endpoints, it will return an error.
 func WithEtcd(endpoints []string, checker storage.Checker) (Wrapper, error) {
 	const op errors.Op = "stash.WithEtcd"
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
@@ -49,7 +49,7 @@ type etcd struct {
 	checker storage.Checker
 }
 
-func (s *etcd) Stash(ctx context.Context, mod, ver string) error {
+func (s *etcd) Stash(ctx context.Context, mod, ver string) (err error) {
 	const op errors.Op = "etcd.Stash"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
@@ -63,7 +63,13 @@ func (s *etcd) Stash(ctx context.Context, mod, ver string) error {
 	if err != nil {
 		return errors.E(op, err)
 	}
-	defer mu.Unlock(ctx)
+	defer func() {
+		const op errors.Op = "etcd.Unlock"
+		lockErr := mu.Unlock(ctx)
+		if err == nil && lockErr != nil {
+			err = errors.E(op, lockErr)
+		}
+	}()
 	ok, err := s.checker.Exists(ctx, mod, ver)
 	if err != nil {
 		return errors.E(op, err)
