@@ -149,11 +149,11 @@ func App(conf *config.Config) (*buffalo.App, error) {
 	}
 
 	if err := addProxyRoutes(
- 		app,
- 		store,
- 		lggr,
- 		conf,
- 	); err != nil {
+		app,
+		store,
+		lggr,
+		conf,
+	); err != nil {
 		err = fmt.Errorf("error adding proxy routes (%s)", err)
 		return nil, err
 	}
