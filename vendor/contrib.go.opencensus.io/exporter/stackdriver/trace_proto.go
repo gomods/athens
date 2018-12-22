@@ -124,8 +124,8 @@ func protoFromSpanData(s *trace.SpanData, projectID string, mr *monitoredrespb.M
 			Time: timestampProto(e.Time),
 			Value: &tracepb.Span_TimeEvent_MessageEvent_{
 				MessageEvent: &tracepb.Span_TimeEvent_MessageEvent{
-					Type: tracepb.Span_TimeEvent_MessageEvent_Type(e.EventType),
-					Id:   e.MessageID,
+					Type:                  tracepb.Span_TimeEvent_MessageEvent_Type(e.EventType),
+					Id:                    e.MessageID,
 					UncompressedSizeBytes: e.UncompressedByteSize,
 					CompressedSizeBytes:   e.CompressedByteSize,
 				},

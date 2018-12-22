@@ -589,12 +589,12 @@ does any email provider accept all posibilities.
 
 File path
 
-This validates that a string value contains a valid file path and that 
-the file exists on the machine. 
-This is done using os.Stat, which is a platform independent function. 
+This validates that a string value contains a valid file path and that
+the file exists on the machine.
+This is done using os.Stat, which is a platform independent function.
 
 	Usage: file
-	
+
 URL String
 
 This validates that a string value contains a valid url

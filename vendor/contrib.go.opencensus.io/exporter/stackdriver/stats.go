@@ -345,8 +345,8 @@ func newTypedValue(vd *view.View, r *view.Row) *monitoringpb.TypedValue {
 	case *view.DistributionData:
 		return &monitoringpb.TypedValue{Value: &monitoringpb.TypedValue_DistributionValue{
 			DistributionValue: &distributionpb.Distribution{
-				Count: v.Count,
-				Mean:  v.Mean,
+				Count:                 v.Count,
+				Mean:                  v.Mean,
 				SumOfSquaredDeviation: v.SumOfSquaredDev,
 				// TODO(songya): uncomment this once Stackdriver supports min/max.
 				// Range: &distributionpb.Distribution_Range{
