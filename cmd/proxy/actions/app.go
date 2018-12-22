@@ -55,6 +55,7 @@ func App(conf *config.Config) (http.Handler, error) {
 	lggr := log.New(conf.CloudRuntime, logLvl)
 
 	r := mux.NewRouter()
+	var subRouter *mux.Router
 	if conf.GoEnv == "development" {
 		r.Use(mw.RequestLogger)
 	}
@@ -67,7 +68,7 @@ func App(conf *config.Config) (http.Handler, error) {
 		// is running behind a prefix as well as some authentication
 		// mechanism, we should allow the plain / to return 200.
 		r.HandleFunc("/", healthHandler).Methods(http.MethodGet)
-		r = r.PathPrefix(prefix).Subrouter()
+		subRouter = r.PathPrefix(prefix).Subrouter()
 	}
 
 	// RegisterExporter will register an exporter where we will export our traces to.
@@ -116,7 +117,11 @@ func App(conf *config.Config) (http.Handler, error) {
 		r.Use(mw.NewValidationMiddleware(vHook))
 	}
 
-	if err := addProxyRoutes(r, store, lggr, conf.GoBinary, conf.GoGetWorkers, conf.ProtocolWorkers); err != nil {
+	proxyRouter := r
+	if subRouter != nil {
+		proxyRouter = subRouter
+	}
+	if err := addProxyRoutes(proxyRouter, store, lggr, conf.GoBinary, conf.GoGetWorkers, conf.ProtocolWorkers); err != nil {
 		err = fmt.Errorf("error adding proxy routes (%s)", err)
 		return nil, err
 	}
