@@ -167,6 +167,8 @@ github.com/stretchr/testify/suite
 github.com/stretchr/testify/assert
 # github.com/tinylib/msgp v1.0.2
 github.com/tinylib/msgp/msgp
+# github.com/unrolled/secure v0.0.0-20181221173256-0d6b5bb13069
+github.com/unrolled/secure
 # go.opencensus.io v0.17.0
 go.opencensus.io/plugin/ochttp
 go.opencensus.io/exporter/jaeger
