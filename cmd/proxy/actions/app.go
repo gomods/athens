@@ -59,6 +59,7 @@ func App(conf *config.Config) (http.Handler, error) {
 		r.Use(mw.RequestLogger)
 	}
 	r.Use(mw.LogEntryMiddleware(lggr))
+	r.Use(mw.ContentType)
 
 	if prefix := conf.PathPrefix; prefix != "" {
 		// certain Ingress Controllers (such as GCP Load Balancer)

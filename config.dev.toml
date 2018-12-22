@@ -147,7 +147,7 @@ StatsExporter = "prometheus"
     [Storage.Disk]
         # RootPath is the Athens Disk Root folder
         # Env override: ATHENS_DISK_STORAGE_ROOT
-        RootPath = "/Users/208581/Desktop/ans"
+        RootPath = "/path/on/disk"
 
     [Storage.GCP]
         # ProjectID to use for GCP Storage
