@@ -56,7 +56,6 @@ func App(conf *config.Config) (http.Handler, error) {
 	lggr := log.New(conf.CloudRuntime, logLvl)
 
 	r := mux.NewRouter()
-	var subRouter *mux.Router
 	if conf.GoEnv == "development" {
 		r.Use(mw.RequestLogger)
 	}
@@ -67,6 +66,7 @@ func App(conf *config.Config) (http.Handler, error) {
 	}).Handler)
 	r.Use(mw.ContentType)
 
+	var subRouter *mux.Router
 	if prefix := conf.PathPrefix; prefix != "" {
 		// certain Ingress Controllers (such as GCP Load Balancer)
 		// can not send custom headers and therefore if the proxy
