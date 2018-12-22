@@ -4,21 +4,17 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
-
-	"github.com/gobuffalo/buffalo"
 )
 
 func TestCacheControl(t *testing.T) {
-	h := func(c buffalo.Context) error { return c.Render(http.StatusOK, nil) }
-	a := buffalo.New(buffalo.Options{})
-	a.GET("/test", h)
-
+	h := func(w http.ResponseWriter, r *http.Request) {}
 	expected := "private, no-store"
-	a.Use(CacheControl(expected))
+	ch := CacheControl(expected)
+	handler := ch(http.HandlerFunc(h))
 
 	w := httptest.NewRecorder()
 	r, _ := http.NewRequest("GET", "/test", nil)
-	a.ServeHTTP(w, r)
+	handler.ServeHTTP(w, r)
 
 	given := w.Result().Header.Get("Cache-Control")
 	if given != expected {

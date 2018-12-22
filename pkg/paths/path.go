@@ -1,27 +1,27 @@
 package paths
 
 import (
-	"github.com/gobuffalo/buffalo"
+	"net/http"
+
 	"github.com/gomods/athens/pkg/errors"
+	"github.com/gorilla/mux"
 )
 
 // GetModule gets the module from the path of a ?go-get=1 request
-func GetModule(c buffalo.Context) (string, error) {
+func GetModule(r *http.Request) (string, error) {
 	const op errors.Op = "paths.GetModule"
-
-	module := c.Param("module")
+	module := mux.Vars(r)["module"]
 	if module == "" {
 		return "", errors.E(op, "missing module parameter")
 	}
-
 	return DecodePath(module)
 }
 
 // GetVersion gets the version from the path of a ?go-get=1 request
-func GetVersion(c buffalo.Context) (string, error) {
+func GetVersion(r *http.Request) (string, error) {
 	const op errors.Op = "paths.GetVersion"
 
-	version := c.Param("version")
+	version := mux.Vars(r)["version"]
 	if version == "" {
 		return "", errors.E(op, "missing version paramater")
 	}
@@ -36,14 +36,14 @@ type AllPathParams struct {
 }
 
 // GetAllParams fetches the path patams from c and returns them
-func GetAllParams(c buffalo.Context) (*AllPathParams, error) {
+func GetAllParams(r *http.Request) (*AllPathParams, error) {
 	const op errors.Op = "paths.GetAllParams"
-	mod, err := GetModule(c)
+	mod, err := GetModule(r)
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
 
-	version, err := GetVersion(c)
+	version, err := GetVersion(r)
 	if err != nil {
 		return nil, errors.E(op, err)
 	}

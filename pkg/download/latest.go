@@ -1,10 +1,9 @@
 package download
 
 import (
+	"encoding/json"
 	"net/http"
 
-	"github.com/gobuffalo/buffalo"
-	"github.com/gobuffalo/buffalo/render"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/log"
 	"github.com/gomods/athens/pkg/paths"
@@ -14,21 +13,26 @@ import (
 const PathLatest = "/{module:.+}/@latest"
 
 // LatestHandler implements GET baseURL/module/@latest
-func LatestHandler(dp Protocol, lggr log.Entry, eng *render.Engine) buffalo.Handler {
+func LatestHandler(dp Protocol, lggr log.Entry) http.Handler {
 	const op errors.Op = "download.LatestHandler"
-	return func(c buffalo.Context) error {
-		mod, err := paths.GetModule(c)
+	f := func(w http.ResponseWriter, r *http.Request) {
+		mod, err := paths.GetModule(r)
 		if err != nil {
 			lggr.SystemErr(errors.E(op, err))
-			return c.Render(http.StatusInternalServerError, nil)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
 		}
 
-		info, err := dp.Latest(c, mod)
+		info, err := dp.Latest(r.Context(), mod)
 		if err != nil {
 			lggr.SystemErr(errors.E(op, err))
-			return c.Render(errors.Kind(err), eng.JSON(errors.KindText(err)))
+			w.WriteHeader(errors.Kind(err))
+			return
 		}
 
-		return c.Render(http.StatusOK, eng.JSON(info))
+		if err = json.NewEncoder(w).Encode(info); err != nil {
+			lggr.SystemErr(errors.E(op, err))
+		}
 	}
+	return http.HandlerFunc(f)
 }

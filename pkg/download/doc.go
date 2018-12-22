@@ -1,3 +1,3 @@
-// Package download provides buffalo handlers that implement vgo's Download
+// Package download provides http handlers that implement vgo's Download
 // Protocol.
 package download

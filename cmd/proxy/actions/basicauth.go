@@ -4,20 +4,21 @@ import (
 	"crypto/subtle"
 	"net/http"
 
-	"github.com/gobuffalo/buffalo"
+	"github.com/gorilla/mux"
 )
 
-func basicAuth(user, pass string) buffalo.MiddlewareFunc {
-	return func(next buffalo.Handler) buffalo.Handler {
-		return func(c buffalo.Context) error {
-			if !checkAuth(c.Request(), user, pass) {
-				c.Response().Header().Set("WWW-Authenticate", `Basic realm="basic auth required"`)
-				c.Render(http.StatusUnauthorized, nil)
-				return nil
+func basicAuth(user, pass string) mux.MiddlewareFunc {
+	return func(h http.Handler) http.Handler {
+		f := func(w http.ResponseWriter, r *http.Request) {
+			if !checkAuth(r, user, pass) {
+				w.Header().Set("WWW-Authenticate", `Basic realm="basic auth required"`)
+				w.WriteHeader(http.StatusUnauthorized)
+				return
 			}
 
-			return next(c)
+			h.ServeHTTP(w, r)
 		}
+		return http.HandlerFunc(f)
 	}
 }
 
