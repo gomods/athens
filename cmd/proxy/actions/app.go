@@ -128,8 +128,6 @@ func App(conf *config.Config) (*buffalo.App, error) {
 		app.Use(paramlogger.ParameterLogger)
 	}
 
-	initializeAuth(app)
-
 	user, pass, ok := conf.BasicAuth()
 	if ok {
 		app.Use(basicAuth(user, pass))
