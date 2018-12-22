@@ -12,6 +12,7 @@ import (
 	"github.com/gomods/athens/pkg/observ"
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
+	"github.com/unrolled/secure"
 	"go.opencensus.io/plugin/ochttp"
 )
 
@@ -60,6 +61,10 @@ func App(conf *config.Config) (http.Handler, error) {
 		r.Use(mw.RequestLogger)
 	}
 	r.Use(mw.LogEntryMiddleware(lggr))
+	r.Use(secure.New(secure.Options{
+		SSLRedirect:     conf.ForceSSL,
+		SSLProxyHeaders: map[string]string{"X-Forwarded-Proto": "https"},
+	}).Handler)
 	r.Use(mw.ContentType)
 
 	if prefix := conf.PathPrefix; prefix != "" {

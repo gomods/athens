@@ -18,7 +18,6 @@ tmp/*
 vgp
 bin/*
 .envrc
-yarn-error.log
 cmd/proxy/proxy
 test-keys.json
 tmp
