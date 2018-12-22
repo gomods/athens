@@ -90,8 +90,10 @@ func ParseConfigFile(configFile string) (*Config, error) {
 	}
 
 	// Check file perms from config
-	if err := checkFilePerms(configFile, config.FilterFile); err != nil {
-		return nil, err
+	if config.GoEnv == "production" {
+		if err := checkFilePerms(configFile, config.FilterFile); err != nil {
+			return nil, err
+		}
 	}
 
 	// override values with environment variables if specified
