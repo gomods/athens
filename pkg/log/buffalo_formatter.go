@@ -2,6 +2,7 @@ package log
 
 import (
 	"fmt"
+	"net/http"
 
 	"github.com/fatih/color"
 	"github.com/sirupsen/logrus"
@@ -19,9 +20,9 @@ func (buffaloFormatter) Format(entry *logrus.Entry) ([]byte, error) {
 	statusCode, _ := entry.Data["status"].(int)
 	status := fmt.Sprint(statusCode)
 	switch {
-	case statusCode < 400:
+	case statusCode < http.StatusBadRequest:
 		status = color.GreenString("%v", status)
-	case statusCode >= 400 && statusCode < 500:
+	case statusCode >= http.StatusBadRequest && statusCode < http.StatusInternalServerError:
 		status = color.HiYellowString("%v", status)
 	default:
 		status = color.HiRedString("%v", status)

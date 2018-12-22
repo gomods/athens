@@ -222,6 +222,7 @@ func TestParseExampleConfig(t *testing.T) {
 		Storage:          expStorage,
 		TraceExporterURL: "http://localhost:14268",
 		TraceExporter:    "jaeger",
+		StatsExporter:    "prometheus",
 	}
 
 	absPath, err := filepath.Abs(testConfigFile(t))

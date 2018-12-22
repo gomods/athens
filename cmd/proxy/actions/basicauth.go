@@ -12,7 +12,7 @@ func basicAuth(user, pass string) buffalo.MiddlewareFunc {
 		return func(c buffalo.Context) error {
 			if !checkAuth(c.Request(), user, pass) {
 				c.Response().Header().Set("WWW-Authenticate", `Basic realm="basic auth required"`)
-				c.Render(401, nil)
+				c.Render(http.StatusUnauthorized, nil)
 				return nil
 			}
 

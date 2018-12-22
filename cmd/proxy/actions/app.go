@@ -6,9 +6,9 @@ import (
 
 	"github.com/gobuffalo/buffalo"
 	"github.com/gobuffalo/buffalo/render"
-	forcessl "github.com/gobuffalo/mw-forcessl"
-	paramlogger "github.com/gobuffalo/mw-paramlogger"
-	sessions "github.com/gobuffalo/x/sessions"
+	"github.com/gobuffalo/mw-forcessl"
+	"github.com/gobuffalo/mw-paramlogger"
+	"github.com/gobuffalo/x/sessions"
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/log"
 	mw "github.com/gomods/athens/pkg/middleware"
@@ -105,6 +105,17 @@ func App(conf *config.Config) (*buffalo.App, error) {
 	} else {
 		defer flushTraces()
 		app.Use(observ.Tracer(Service))
+	}
+
+	// RegisterStatsExporter will register an exporter where we will collect our stats.
+	// The error from the RegisterStatsExporter would be nil if the proper stats exporter
+	// was specified by the user.
+	flushStats, err := observ.RegisterStatsExporter(app, conf.StatsExporter, Service)
+	if err != nil {
+		lggr.Infof("%s", err)
+	} else {
+		defer flushStats()
+		app.Use(observ.StatsMiddleware())
 	}
 
 	// Automatically redirect to SSL

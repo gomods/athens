@@ -9,7 +9,7 @@ import (
 )
 
 func TestCacheControl(t *testing.T) {
-	h := func(c buffalo.Context) error { return c.Render(200, nil) }
+	h := func(c buffalo.Context) error { return c.Render(http.StatusOK, nil) }
 	a := buffalo.New(buffalo.Options{})
 	a.GET("/test", h)
 
