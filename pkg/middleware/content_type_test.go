@@ -6,17 +6,16 @@ import (
 	"testing"
 )
 
-func TestCacheControl(t *testing.T) {
+func TestContentType(t *testing.T) {
 	h := func(w http.ResponseWriter, r *http.Request) {}
-	expected := "private, no-store"
-	ch := CacheControl(expected)
-	handler := ch(http.HandlerFunc(h))
+	expected := "application/json"
+	handler := ContentType(http.HandlerFunc(h))
 
 	w := httptest.NewRecorder()
 	r, _ := http.NewRequest("GET", "/test", nil)
 	handler.ServeHTTP(w, r)
 
-	given := w.Result().Header.Get("Cache-Control")
+	given := w.Result().Header.Get("Content-Type")
 	if given != expected {
 		t.Fatalf("expected cache-control header to be %v but got %v", expected, given)
 	}

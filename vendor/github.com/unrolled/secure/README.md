@@ -331,6 +331,31 @@ func main() {
 }
 ~~~
 
+### [Mux](https://github.com/gorilla/mux)
+~~~ go
+//main.go
+package main
+
+import (
+    "log"
+    "net/http"
+    
+    "github.com/gorilla/mux"
+    "github.com/unrolled/secure" // or "gopkg.in/unrolled/secure.v1"
+)
+
+func main() {
+    secureMiddleware := secure.New(secure.Options{
+        FrameDeny: true,
+    })
+    
+    r := mux.NewRouter()
+    r.Use(secureMiddleware.Handler)
+    http.Handle("/", r)
+    log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", 8080), nil))
+}
+~~~
+
 ### [Negroni](https://github.com/codegangsta/negroni)
 Note this implementation has a special helper function called `HandlerFuncWithNext`.
 ~~~ go
