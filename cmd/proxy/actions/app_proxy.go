@@ -1,30 +1,28 @@
 package actions
 
 import (
-	"github.com/gobuffalo/buffalo"
 	"github.com/gomods/athens/pkg/download"
 	"github.com/gomods/athens/pkg/download/addons"
 	"github.com/gomods/athens/pkg/log"
 	"github.com/gomods/athens/pkg/module"
-	"github.com/gomods/athens/pkg/observ"
 	"github.com/gomods/athens/pkg/stash"
 	"github.com/gomods/athens/pkg/storage"
+	"github.com/gorilla/mux"
 	"github.com/spf13/afero"
 )
 
 func addProxyRoutes(
-	app *buffalo.App,
+	r *mux.Router,
 	s storage.Backend,
 	l *log.Logger,
 	goBin string,
-	goGetWorkers int,
+	goGetWorkers,
 	protocolWorkers int,
 ) error {
-	app.GET("/", proxyHomeHandler)
-	app.GET("/healthz", healthHandler)
-	app.GET("/readyz", getReadinessHandler(s))
-	app.GET("/version", versionHandler)
-	app.Middleware.Skip(observ.StatsMiddleware(), healthHandler, getReadinessHandler(s), versionHandler)
+	r.HandleFunc("/", proxyHomeHandler)
+	r.HandleFunc("/healthz", healthHandler)
+	r.HandleFunc("/readyz", getReadinessHandler(s))
+	r.HandleFunc("/version", versionHandler)
 
 	// Download Protocol
 	// the download.Protocol and the stash.Stasher interfaces are composable
@@ -64,8 +62,8 @@ func addProxyRoutes(
 	}
 	dp := download.New(dpOpts, addons.WithPool(protocolWorkers))
 
-	handlerOpts := &download.HandlerOpts{Protocol: dp, Logger: l, Engine: proxy}
-	download.RegisterHandlers(app, handlerOpts)
+	handlerOpts := &download.HandlerOpts{Protocol: dp, Logger: l}
+	download.RegisterHandlers(r, handlerOpts)
 
 	return nil
 }

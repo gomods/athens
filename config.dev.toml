@@ -32,13 +32,6 @@ ProtocolWorkers = 30
 # Env override: ATHENS_LOG_LEVEL
 LogLevel = "debug"
 
-# BuffaloLogLevel returns the log level for logs
-# emitted by Buffalo itself. This is different from our own
-# LogLevel in this file because you might want info level
-# for our codebase, but panic level for buffalo.
-# Env override: BUFFALO_LOG_LEVEL
-BuffaloLogLevel = "debug"
-
 # CloudRuntime is the Cloud Provider on which the Proxy/Registry is running.
 # Currently available options are "GCP", or "none". Defaults to "none"
 # Env override: ATHENS_CLOUD_RUNTIME
@@ -67,7 +60,7 @@ StorageType = "memory"
 #TLSKeyFile = "server.key"
 
 # Port sets the port the proxy listens on
-# Env override: PORT
+# Env override: ATHENS_PORT
 # Note that PORT needs to be prefixed by :
 Port = ":3000"
 

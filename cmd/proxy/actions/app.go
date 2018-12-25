@@ -2,34 +2,27 @@ package actions
 
 import (
 	"fmt"
+	"net/http"
 	"os"
 
-	"github.com/gobuffalo/buffalo"
-	"github.com/gobuffalo/buffalo/render"
-	"github.com/gobuffalo/mw-forcessl"
-	"github.com/gobuffalo/mw-paramlogger"
-	"github.com/gobuffalo/x/sessions"
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/log"
 	mw "github.com/gomods/athens/pkg/middleware"
 	"github.com/gomods/athens/pkg/module"
 	"github.com/gomods/athens/pkg/observ"
+	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
 	"github.com/unrolled/secure"
+	"go.opencensus.io/plugin/ochttp"
 )
 
 // Service is the name of the service that we want to tag our processes with
 const Service = "proxy"
 
-var proxy = render.New(render.Options{
-	// Add template helpers here:
-	Helpers: render.Helpers{},
-})
-
-// App is where all routes and middleware for buffalo
+// App is where all routes and middleware for the proxy
 // should be defined. This is the nerve center of your
 // application.
-func App(conf *config.Config) (*buffalo.App, error) {
+func App(conf *config.Config) (http.Handler, error) {
 	// ENV is used to help switch settings based on where the
 	// application is being run. Default is "development".
 	ENV := conf.GoEnv
@@ -62,30 +55,25 @@ func App(conf *config.Config) (*buffalo.App, error) {
 	}
 	lggr := log.New(conf.CloudRuntime, logLvl)
 
-	bLogLvl, err := logrus.ParseLevel(conf.BuffaloLogLevel)
-	if err != nil {
-		return nil, err
+	r := mux.NewRouter()
+	if conf.GoEnv == "development" {
+		r.Use(mw.RequestLogger)
 	}
-	blggr := log.Buffalo(bLogLvl)
+	r.Use(mw.LogEntryMiddleware(lggr))
+	r.Use(secure.New(secure.Options{
+		SSLRedirect:     conf.ForceSSL,
+		SSLProxyHeaders: map[string]string{"X-Forwarded-Proto": "https"},
+	}).Handler)
+	r.Use(mw.ContentType)
 
-	app := buffalo.New(buffalo.Options{
-		Env:          ENV,
-		SessionStore: sessions.Null{},
-		Logger:       blggr,
-		Addr:         conf.Port,
-		WorkerOff:    true,
-		Host:         "http://127.0.0.1" + conf.Port,
-	})
-
-	app.Use(mw.LogEntryMiddleware(lggr))
-
+	var subRouter *mux.Router
 	if prefix := conf.PathPrefix; prefix != "" {
 		// certain Ingress Controllers (such as GCP Load Balancer)
 		// can not send custom headers and therefore if the proxy
 		// is running behind a prefix as well as some authentication
 		// mechanism, we should allow the plain / to return 200.
-		app.GET("/", healthHandler)
-		app = app.Group(prefix)
+		r.HandleFunc("/", healthHandler).Methods(http.MethodGet)
+		subRouter = r.PathPrefix(prefix).Subrouter()
 	}
 
 	// RegisterExporter will register an exporter where we will export our traces to.
@@ -104,33 +92,21 @@ func App(conf *config.Config) (*buffalo.App, error) {
 		lggr.Infof("%s", err)
 	} else {
 		defer flushTraces()
-		app.Use(observ.Tracer(Service))
 	}
 
 	// RegisterStatsExporter will register an exporter where we will collect our stats.
 	// The error from the RegisterStatsExporter would be nil if the proper stats exporter
 	// was specified by the user.
-	flushStats, err := observ.RegisterStatsExporter(app, conf.StatsExporter, Service)
+	flushStats, err := observ.RegisterStatsExporter(r, conf.StatsExporter, Service)
 	if err != nil {
 		lggr.Infof("%s", err)
 	} else {
 		defer flushStats()
-		app.Use(observ.StatsMiddleware())
-	}
-
-	// Automatically redirect to SSL
-	app.Use(forcessl.Middleware(secure.Options{
-		SSLRedirect:     conf.ForceSSL,
-		SSLProxyHeaders: map[string]string{"X-Forwarded-Proto": "https"},
-	}))
-
-	if ENV == "development" {
-		app.Use(paramlogger.ParameterLogger)
 	}
 
 	user, pass, ok := conf.BasicAuth()
 	if ok {
-		app.Use(basicAuth(user, pass))
+		r.Use(basicAuth(user, pass))
 	}
 
 	if !conf.FilterOff() {
@@ -138,18 +114,26 @@ func App(conf *config.Config) (*buffalo.App, error) {
 		if err != nil {
 			lggr.Fatal(err)
 		}
-		app.Use(mw.NewFilterMiddleware(mf, conf.GlobalEndpoint))
+		r.Use(mw.NewFilterMiddleware(mf, conf.GlobalEndpoint))
 	}
 
 	// Having the hook set means we want to use it
 	if vHook := conf.ValidatorHook; vHook != "" {
-		app.Use(mw.NewValidationMiddleware(vHook))
+		r.Use(mw.NewValidationMiddleware(vHook))
 	}
 
-	if err := addProxyRoutes(app, store, lggr, conf.GoBinary, conf.GoGetWorkers, conf.ProtocolWorkers); err != nil {
+	proxyRouter := r
+	if subRouter != nil {
+		proxyRouter = subRouter
+	}
+	if err := addProxyRoutes(proxyRouter, store, lggr, conf.GoBinary, conf.GoGetWorkers, conf.ProtocolWorkers); err != nil {
 		err = fmt.Errorf("error adding proxy routes (%s)", err)
 		return nil, err
 	}
 
-	return app, nil
+	h := &ochttp.Handler{
+		Handler: r,
+	}
+
+	return h, nil
 }

@@ -8,32 +8,32 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gobuffalo/buffalo"
 	"github.com/gomods/athens/pkg/log"
+	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestLogContext(t *testing.T) {
-	h := func(c buffalo.Context) error {
-		e := log.EntryFromContext(c)
+	h := func(w http.ResponseWriter, r *http.Request) {
+		e := log.EntryFromContext(r.Context())
 		e.Infof("test")
-		return nil
 	}
 
-	a := buffalo.New(buffalo.Options{})
-	a.GET("/test", h)
+	r := mux.NewRouter()
+	r.HandleFunc("/test", h)
 
 	var buf bytes.Buffer
 	lggr := log.New("", logrus.DebugLevel)
+	lggr.Formatter = &logrus.JSONFormatter{DisableTimestamp: true}
 	lggr.Out = &buf
 
-	a.Use(LogEntryMiddleware(lggr))
+	r.Use(LogEntryMiddleware(lggr))
 
 	w := httptest.NewRecorder()
-	r, _ := http.NewRequest("GET", "/test", nil)
-	a.ServeHTTP(w, r)
+	req, _ := http.NewRequest("GET", "/test", nil)
+	r.ServeHTTP(w, req)
 
-	expected := `"http-method":"GET","http-path":"/test/","http-url":"/test/"`
+	expected := `{"http-method":"GET","http-path":"/test","http-url":"/test","level":"info","msg":"test"}`
 	assert.True(t, strings.Contains(buf.String(), expected), fmt.Sprintf("%s should contain: %s", buf.String(), expected))
 }
