@@ -1,14 +1,14 @@
 package download
 
 import (
+	"encoding/json"
 	"net/http"
 	"strconv"
 
-	"github.com/gobuffalo/buffalo"
-	"github.com/gobuffalo/buffalo/render"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/log"
 	"github.com/gomods/athens/pkg/paths"
+	"github.com/gorilla/mux"
 )
 
 // PathCatalog URL.
@@ -21,29 +21,34 @@ type catalogRes struct {
 }
 
 // CatalogHandler implements GET baseURL/catalog
-func CatalogHandler(dp Protocol, lggr log.Entry, eng *render.Engine) buffalo.Handler {
+func CatalogHandler(dp Protocol, lggr log.Entry) http.Handler {
 	const op errors.Op = "download.CatalogHandler"
-
-	return func(c buffalo.Context) error {
-		token := c.Param("token")
-		pageSize, err := getLimitFromParam(c.Param("pagesize"))
+	f := func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		token := vars["token"]
+		pageSize, err := getLimitFromParam(vars["pagesize"])
 		if err != nil {
 			lggr.SystemErr(err)
-			return c.Render(http.StatusInternalServerError, nil)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
 		}
 
-		modulesAndVersions, newToken, err := dp.Catalog(c, token, pageSize)
+		modulesAndVersions, newToken, err := dp.Catalog(r.Context(), token, pageSize)
 
 		if err != nil {
 			if errors.Kind(err) != errors.KindNotImplemented {
 				lggr.SystemErr(errors.E(op, err))
 			}
-			return c.Render(errors.Kind(err), eng.JSON(errors.KindText(err)))
+			w.WriteHeader(errors.Kind(err))
+			return
 		}
 
 		res := catalogRes{modulesAndVersions, newToken}
-		return c.Render(http.StatusOK, eng.JSON(res))
+		if err = json.NewEncoder(w).Encode(res); err != nil {
+			lggr.SystemErr(errors.E(op, err))
+		}
 	}
+	return http.HandlerFunc(f)
 }
 
 func getLimitFromParam(param string) (int, error) {

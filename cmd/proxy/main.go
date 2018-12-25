@@ -1,14 +1,16 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
+	"os/signal"
 	"path/filepath"
+	"time"
 
-	"github.com/gobuffalo/buffalo/servers"
 	"github.com/gomods/athens/cmd/proxy/actions"
 	"github.com/gomods/athens/pkg/build"
 	"github.com/gomods/athens/pkg/config"
@@ -32,7 +34,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	app, err := actions.App(conf)
+	handler, err := actions.App(conf)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -42,14 +44,35 @@ func main() {
 		log.Fatal(err)
 	}
 
-	var srv servers.Server
+	srv := &http.Server{
+		Addr:    conf.Port,
+		Handler: handler,
+	}
+	idleConnsClosed := make(chan struct{})
+
+	go func() {
+		sigint := make(chan os.Signal, 1)
+		signal.Notify(sigint, os.Interrupt)
+		<-sigint
+
+		// We received an interrupt signal, shut down.
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+		defer cancel()
+		if err := srv.Shutdown(ctx); err != nil {
+			log.Fatal(err)
+		}
+		close(idleConnsClosed)
+	}()
+
 	if cert != "" && key != "" {
-		srv = servers.WrapTLS(&http.Server{}, conf.TLSCertFile, conf.TLSKeyFile)
+		err = srv.ListenAndServeTLS(conf.TLSCertFile, conf.TLSKeyFile)
 	} else {
-		srv = servers.Wrap(&http.Server{})
+		err = srv.ListenAndServe()
 	}
 
-	if err := app.Serve(srv); err != nil {
+	if err != http.ErrServerClosed {
 		log.Fatal(err)
 	}
+
+	<-idleConnsClosed
 }

@@ -63,7 +63,7 @@ func TestPoolWrapper(t *testing.T) {
 	m.inputVer = ver
 	m.list = []string{"v0.0.0", "v0.1.0"}
 	m.catalog = []paths.AllPathParams{
-		{"pkg", "v0.1.0"},
+		{Module: "pkg", Version: "v0.1.0"},
 	}
 	givenList, err := dp.List(ctx, mod)
 	if err != m.err {
