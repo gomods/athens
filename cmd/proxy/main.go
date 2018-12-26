@@ -64,6 +64,7 @@ func main() {
 		close(idleConnsClosed)
 	}()
 
+	log.Printf("Starting application at port %v", conf.Port)
 	if cert != "" && key != "" {
 		err = srv.ListenAndServeTLS(conf.TLSCertFile, conf.TLSKeyFile)
 	} else {
