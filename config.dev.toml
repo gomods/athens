@@ -60,7 +60,7 @@ StorageType = "memory"
 #TLSKeyFile = "server.key"
 
 # Port sets the port the proxy listens on
-# Env override: PORT
+# Env override: ATHENS_PORT
 # Note that PORT needs to be prefixed by :
 Port = ":3000"
 
