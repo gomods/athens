@@ -13,8 +13,11 @@ import (
 
 // Stasher has the job of taking a module
 // from an upstream entity and stashing it to a Storage Backend.
+// It also returns a string that represents a semver version of
+// what was requested, this is helpful if what was requested
+// was a descriptive version such as a branch name or a full commit sha.
 type Stasher interface {
-	Stash(ctx context.Context, mod string, ver string) error
+	Stash(ctx context.Context, mod string, ver string) (string, error)
 }
 
 // Wrapper helps extend the main stasher's functionality with addons.
@@ -37,7 +40,7 @@ type stasher struct {
 	storage storage.Backend
 }
 
-func (s *stasher) Stash(ctx context.Context, mod, ver string) error {
+func (s *stasher) Stash(ctx context.Context, mod, ver string) (string, error) {
 	const op errors.Op = "stasher.Stash"
 	_, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
@@ -49,14 +52,23 @@ func (s *stasher) Stash(ctx context.Context, mod, ver string) error {
 
 	v, err := s.fetchModule(ctx, mod, ver)
 	if err != nil {
-		return errors.E(op, err)
+		return "", errors.E(op, err)
 	}
 	defer v.Zip.Close()
-	err = s.storage.Save(ctx, mod, ver, v.Mod, v.Zip, v.Info)
-	if err != nil {
-		return errors.E(op, err)
+	if v.Semver != ver {
+		exists, err := s.storage.Exists(ctx, mod, v.Semver)
+		if err != nil {
+			return "", errors.E(op, err)
+		}
+		if exists {
+			return v.Semver, nil
+		}
 	}
-	return nil
+	err = s.storage.Save(ctx, mod, v.Semver, v.Mod, v.Zip, v.Info)
+	if err != nil {
+		return "", errors.E(op, err)
+	}
+	return v.Semver, nil
 }
 
 func (s *stasher) fetchModule(ctx context.Context, mod, ver string) (*storage.Version, error) {
