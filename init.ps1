@@ -59,7 +59,7 @@ if ($setup_dev_env.IsPresent) {
 if ($build.IsPresent) {
 	try {
 		Push-Location $(Join-Path cmd proxy)
-		& buffalo build
+		& go build
 	}
 	finally {
 		Pop-Location
