@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"github.com/gomods/athens/pkg/errors"
+	"github.com/gomods/athens/pkg/log"
 	"github.com/gomods/athens/pkg/paths"
 	"github.com/gorilla/mux"
 )
@@ -29,20 +30,20 @@ func RegisterHandlers(r *mux.Router, s Backend) {
 func CatalogHandler(s Backend) http.Handler {
 	const op errors.Op = "download.CatalogHandler"
 	f := func(w http.ResponseWriter, r *http.Request) {
+		lggr := log.EntryFromContext(r.Context())
 		vars := mux.Vars(r)
 		token := vars["token"]
 		pageSize, err := getLimitFromParam(vars["pagesize"])
 		if err != nil {
-			// lggr.SystemErr(err)
+			lggr.SystemErr(err)
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
 
 		modulesAndVersions, newToken, err := s.Catalog(r.Context(), token, pageSize)
-
 		if err != nil {
 			if errors.Kind(err) != errors.KindNotImplemented {
-				// lggr.SystemErr(errors.E(op, err))
+				lggr.SystemErr(errors.E(op, err))
 			}
 			w.WriteHeader(errors.Kind(err))
 			return
@@ -50,7 +51,7 @@ func CatalogHandler(s Backend) http.Handler {
 
 		res := catalogRes{modulesAndVersions, newToken}
 		if err = json.NewEncoder(w).Encode(res); err != nil {
-			// lggr.SystemErr(errors.E(op, err))
+			lggr.SystemErr(errors.E(op, err))
 		}
 	}
 	return http.HandlerFunc(f)
