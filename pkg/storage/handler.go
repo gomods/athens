@@ -1,4 +1,4 @@
-package download
+package storage
 
 import (
 	"encoding/json"
@@ -6,7 +6,6 @@ import (
 	"strconv"
 
 	"github.com/gomods/athens/pkg/errors"
-	"github.com/gomods/athens/pkg/log"
 	"github.com/gomods/athens/pkg/paths"
 	"github.com/gorilla/mux"
 )
@@ -20,24 +19,30 @@ type catalogRes struct {
 	NextPageToken   string                `json:"next"`
 }
 
+// RegisterHandlers is a convenience method that registers
+// all the download protocol paths for you.
+func RegisterHandlers(r *mux.Router, s Backend) {
+	r.Handle(PathCatalog, CatalogHandler(s)).Methods(http.MethodGet)
+}
+
 // CatalogHandler implements GET baseURL/catalog
-func CatalogHandler(dp Protocol, lggr log.Entry) http.Handler {
+func CatalogHandler(s Backend) http.Handler {
 	const op errors.Op = "download.CatalogHandler"
 	f := func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 		token := vars["token"]
 		pageSize, err := getLimitFromParam(vars["pagesize"])
 		if err != nil {
-			lggr.SystemErr(err)
+			// lggr.SystemErr(err)
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
 
-		modulesAndVersions, newToken, err := dp.Catalog(r.Context(), token, pageSize)
+		modulesAndVersions, newToken, err := s.Catalog(r.Context(), token, pageSize)
 
 		if err != nil {
 			if errors.Kind(err) != errors.KindNotImplemented {
-				lggr.SystemErr(errors.E(op, err))
+				// lggr.SystemErr(errors.E(op, err))
 			}
 			w.WriteHeader(errors.Kind(err))
 			return
@@ -45,7 +50,7 @@ func CatalogHandler(dp Protocol, lggr log.Entry) http.Handler {
 
 		res := catalogRes{modulesAndVersions, newToken}
 		if err = json.NewEncoder(w).Encode(res); err != nil {
-			lggr.SystemErr(errors.E(op, err))
+			// lggr.SystemErr(errors.E(op, err))
 		}
 	}
 	return http.HandlerFunc(f)
