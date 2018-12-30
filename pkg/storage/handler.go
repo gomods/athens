@@ -11,8 +11,6 @@ import (
 	"github.com/gorilla/mux"
 )
 
-// PathCatalog URL.
-const PathCatalog = "/catalog"
 const defaultPageSize = 1000
 
 type catalogRes struct {
@@ -21,9 +19,9 @@ type catalogRes struct {
 }
 
 // RegisterHandlers is a convenience method that registers
-// all the download protocol paths for you.
+// all the storage routes.
 func RegisterHandlers(r *mux.Router, s Backend) {
-	r.Handle(PathCatalog, CatalogHandler(s)).Methods(http.MethodGet)
+	r.Handle("/catalog", CatalogHandler(s)).Methods(http.MethodGet)
 }
 
 // CatalogHandler implements GET baseURL/catalog
