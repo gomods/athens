@@ -119,7 +119,7 @@ To use the Mongo DB storage provider, you will first need a MongoDB instance. On
 helm install ./charts/proxy -n athens --set storage.type=mongo --set storage.mongo.url=<some-mongodb-connection-string>
 ```
 
-### Kuberentes Service
+### Kubernetes Service
 
 By default, a Kubernetes `ClusterIP` service is created for the Athens proxy. "ClusterIP" is sufficient in the case when the Athens proxy will be used from within the cluster. To expose Athens outside of the cluster, consider using a "NodePort" or "LoadBalancer" service. This can be changed by setting the `service.type` value when installing the chart. For example, to deploy Athens using a NodePort service, the following command could be used:
 
