@@ -41,6 +41,24 @@ type Config struct {
 	Storage          *StorageConfig
 }
 
+// CreateDefault creates a Config with default values
+func CreateDefault() *Config {
+	return &Config{
+		GoBinary:         "go",
+		GoEnv:            "development",
+		GoGetWorkers:     30,
+		ProtocolWorkers:  30,
+		LogLevel:         "debug",
+		CloudRuntime:     "none",
+		TimeoutConf:      TimeoutConf{Timeout: 300},
+		StorageType:      "memory",
+		Port:             ":3000",
+		GlobalEndpoint:   "http://localhost:3001",
+		TraceExporterURL: "http://localhost:14268",
+		StatsExporter:    "prometheus",
+	}
+}
+
 // BasicAuth returns BasicAuthUser and BasicAuthPassword
 // and ok if neither of them are empty
 func (c *Config) BasicAuth() (user, pass string, ok bool) {
