@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -41,8 +42,21 @@ type Config struct {
 	Storage          *StorageConfig
 }
 
-// CreateDefault creates a Config with default values
-func CreateDefault() *Config {
+// Load loads the config from a file.
+// If file is not present returns default config
+func Load(configFile string) (*Config, error) {
+	_, err := os.Stat(configFile)
+	if err == nil {
+		conf, err := ParseConfigFile(configFile)
+		return conf, err
+	} else if os.IsNotExist(err) {
+		log.Printf("config file not found under %s - using default settings", configFile)
+		return createDefault(), nil
+	}
+	return nil, err
+}
+
+func createDefault() *Config {
 	return &Config{
 		GoBinary:         "go",
 		GoEnv:            "development",

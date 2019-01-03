@@ -27,16 +27,9 @@ func main() {
 		fmt.Println(build.String())
 		os.Exit(0)
 	}
-	var conf *config.Config
-
-	if _, err := os.Stat(*configFile); os.IsNotExist(err) {
-		log.Print("Config file not found - using default settings")
-		conf = config.CreateDefault()
-	} else {
-		conf, err = config.ParseConfigFile(*configFile)
-		if err != nil {
-			log.Fatal(err)
-		}
+	conf, err := config.Load(*configFile)
+	if err != nil {
+		log.Fatalf("could not load config file: %v", err)
 	}
 
 	handler, err := actions.App(conf)
