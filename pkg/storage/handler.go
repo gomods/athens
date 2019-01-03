@@ -15,7 +15,7 @@ const defaultPageSize = 1000
 
 type catalogRes struct {
 	ModsAndVersions []paths.AllPathParams `json:"modules"`
-	NextPageToken   string                `json:"next"`
+	NextPageToken   string                `json:"next,omitempty"`
 }
 
 // RegisterHandlers is a convenience method that registers
