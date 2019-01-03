@@ -65,5 +65,7 @@ func addProxyRoutes(
 	handlerOpts := &download.HandlerOpts{Protocol: dp, Logger: l}
 	download.RegisterHandlers(r, handlerOpts)
 
+	storage.RegisterHandlers(r, s)
+
 	return nil
 }
