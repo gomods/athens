@@ -1,4 +1,4 @@
-package download
+package storage
 
 import (
 	"encoding/json"
@@ -11,19 +11,24 @@ import (
 	"github.com/gorilla/mux"
 )
 
-// PathCatalog URL.
-const PathCatalog = "/catalog"
 const defaultPageSize = 1000
 
 type catalogRes struct {
 	ModsAndVersions []paths.AllPathParams `json:"modules"`
-	NextPageToken   string                `json:"next"`
+	NextPageToken   string                `json:"next,omitempty"`
+}
+
+// RegisterHandlers is a convenience method that registers
+// all the storage routes.
+func RegisterHandlers(r *mux.Router, s Backend) {
+	r.Handle("/catalog", CatalogHandler(s)).Methods(http.MethodGet)
 }
 
 // CatalogHandler implements GET baseURL/catalog
-func CatalogHandler(dp Protocol, lggr log.Entry) http.Handler {
+func CatalogHandler(s Backend) http.Handler {
 	const op errors.Op = "download.CatalogHandler"
 	f := func(w http.ResponseWriter, r *http.Request) {
+		lggr := log.EntryFromContext(r.Context())
 		vars := mux.Vars(r)
 		token := vars["token"]
 		pageSize, err := getLimitFromParam(vars["pagesize"])
@@ -33,8 +38,7 @@ func CatalogHandler(dp Protocol, lggr log.Entry) http.Handler {
 			return
 		}
 
-		modulesAndVersions, newToken, err := dp.Catalog(r.Context(), token, pageSize)
-
+		modulesAndVersions, newToken, err := s.Catalog(r.Context(), token, pageSize)
 		if err != nil {
 			if errors.Kind(err) != errors.KindNotImplemented {
 				lggr.SystemErr(errors.E(op, err))
