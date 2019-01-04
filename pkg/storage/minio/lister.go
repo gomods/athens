@@ -17,11 +17,13 @@ func (l *storageImpl) List(ctx context.Context, module string) ([]string, error)
 
 	doneCh := make(chan struct{})
 	defer close(doneCh)
-	searchPrefix := module + "/"
-	objectCh := l.minioClient.ListObjectsV2(l.bucketName, searchPrefix, false, doneCh)
+	objectCh := l.minioClient.ListObjectsV2(l.bucketName, module, true, doneCh)
 	for object := range objectCh {
 		if object.Err != nil {
 			return nil, errors.E(op, object.Err, errors.M(module))
+		}
+		if !strings.HasSuffix(object.Key, "go.mod") {
+			continue
 		}
 		parts := strings.Split(object.Key, "/")
 		ver := parts[len(parts)-2]

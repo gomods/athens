@@ -16,7 +16,7 @@ func (v *storageImpl) Info(ctx context.Context, module, vsn string) ([]byte, err
 	const op errors.Op = "minio.Info"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
-	infoPath := fmt.Sprintf("%s/%s.info", v.versionLocation(module, vsn), vsn)
+	infoPath := fmt.Sprintf("%s/%s.info", module, vsn)
 	infoReader, err := v.minioClient.GetObject(v.bucketName, infoPath, minio.GetObjectOptions{})
 	if err != nil {
 		return nil, errors.E(op, err)

@@ -17,7 +17,7 @@ func (s *storageImpl) Save(ctx context.Context, module, vsn string, mod []byte, 
 	dir := s.versionLocation(module, vsn)
 	modFileName := dir + "/" + "go.mod"
 	zipFileName := dir + "/" + "source.zip"
-	infoFileName := dir + "/" + vsn + ".info"
+	infoFileName := dir + ".info"
 	_, err := s.minioClient.PutObject(s.bucketName, modFileName, bytes.NewReader(mod), int64(len(mod)), minio.PutObjectOptions{})
 	if err != nil {
 		return errors.E(op, err)
