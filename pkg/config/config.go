@@ -45,31 +45,26 @@ type Config struct {
 // Load loads the config from a file.
 // If file is not present returns default config
 func Load(configFile string) (*Config, error) {
-	_, err := os.Stat(configFile)
-	if err == nil {
-		conf, err := ParseConfigFile(configFile)
-		return conf, err
-	} else if os.IsNotExist(err) {
-		log.Printf("config file not found under %s - using default settings", configFile)
+	if configFile == "" {
+		log.Print("config file not provided - using default settings")
 		return createDefault(), nil
 	}
-	return nil, err
+	return ParseConfigFile(configFile)
 }
 
 func createDefault() *Config {
+	log.Print("def conf")
 	return &Config{
-		GoBinary:         "go",
-		GoEnv:            "development",
-		GoGetWorkers:     30,
-		ProtocolWorkers:  30,
-		LogLevel:         "debug",
-		CloudRuntime:     "none",
-		TimeoutConf:      TimeoutConf{Timeout: 300},
-		StorageType:      "memory",
-		Port:             ":3000",
-		GlobalEndpoint:   "http://localhost:3001",
-		TraceExporterURL: "http://localhost:14268",
-		StatsExporter:    "prometheus",
+		GoBinary:        "go",
+		GoEnv:           "development",
+		GoGetWorkers:    30,
+		ProtocolWorkers: 30,
+		LogLevel:        "debug",
+		CloudRuntime:    "none",
+		TimeoutConf:     TimeoutConf{Timeout: 300},
+		StorageType:     "memory",
+		Port:            ":3000",
+		GlobalEndpoint:  "http://localhost:3001",
 	}
 }
 

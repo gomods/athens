@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"path/filepath"
 	"time"
 
 	"github.com/gomods/athens/cmd/proxy/actions"
@@ -17,7 +16,7 @@ import (
 )
 
 var (
-	configFile = flag.String("config_file", filepath.Join("..", "..", "config.dev.toml"), "The path to the config file")
+	configFile = flag.String("config_file", "", "The path to the config file")
 	version    = flag.Bool("version", false, "Print version information and exit")
 )
 
