@@ -1,16 +1,12 @@
 package mongo
 
 import (
-	"path/filepath"
+	"os"
 	"testing"
 
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/storage/compliance"
 	"github.com/stretchr/testify/require"
-)
-
-var (
-	testConfigFile = filepath.Join("..", "..", "..", "config.dev.toml")
 )
 
 func TestBackend(t *testing.T) {
@@ -29,15 +25,11 @@ func BenchmarkBackend(b *testing.B) {
 }
 
 func getStorage(tb testing.TB) *ModuleStore {
-	conf, err := config.GetConf(testConfigFile)
-	if err != nil {
-		tb.Fatalf("Unable to parse config file: %s", err.Error())
-	}
-	if conf.Storage.Mongo.URL == "" {
+	url := os.Getenv("ATHENS_MONGO_STORAGE_URL")
+	if url == "" {
 		tb.SkipNow()
 	}
-
-	backend, err := NewStorage(&config.MongoConfig{URL: conf.Storage.Mongo.URL}, config.GetTimeoutDuration(300))
+	backend, err := NewStorage(&config.MongoConfig{URL: url}, config.GetTimeoutDuration(300))
 	require.NoError(tb, err)
 
 	return backend
