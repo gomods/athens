@@ -35,7 +35,7 @@ func (s *Storage) clear() error {
 		if err != nil {
 			return err
 		}
-		err = s.delete(ctx, attrs.Name)
+		err = s.bucket.Object(attrs.Name).Delete(ctx)
 		if err != nil {
 			return err
 		}
@@ -64,8 +64,7 @@ func getStorage(t testing.TB) *Storage {
 	}
 
 	return &Storage{
-		bucket:       bkt,
-		closeStorage: s.Close,
-		timeout:      config.GetTimeoutDuration(300),
+		bucket:  bkt,
+		timeout: config.GetTimeoutDuration(300),
 	}
 }

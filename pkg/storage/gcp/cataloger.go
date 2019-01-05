@@ -5,11 +5,12 @@ import (
 	"fmt"
 	"strings"
 
+	"cloud.google.com/go/storage"
 	"github.com/gomods/athens/pkg/config"
-	"github.com/gomods/athens/pkg/paths"
-
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/observ"
+	"github.com/gomods/athens/pkg/paths"
+	"google.golang.org/api/iterator"
 )
 
 // Catalog implements the (./pkg/storage).Catalog interface
@@ -25,7 +26,7 @@ func (s *Storage) Catalog(ctx context.Context, token string, pageSize int) ([]pa
 	for count > 0 {
 		var catalog []string
 		var err error
-		catalog, resToken, err = s.catalog(ctx, token, 3*count)
+		catalog, resToken, err = nextPage(ctx, s.bucket, token, 3*count)
 		if err != nil {
 			return nil, "", errors.E(op, err)
 		}
@@ -38,6 +39,23 @@ func (s *Storage) Catalog(ctx context.Context, token string, pageSize int) ([]pa
 		}
 	}
 	return res, resToken, nil
+}
+
+func nextPage(ctx context.Context, bkt *storage.BucketHandle, token string, pageSize int) ([]string, string, error) {
+	it := bkt.Objects(ctx, nil)
+	p := iterator.NewPager(it, pageSize, token)
+
+	attrs := make([]*storage.ObjectAttrs, 0)
+	nextToken, err := p.NextPage(&attrs)
+	if err != nil {
+		return nil, "", err
+	}
+
+	res := []string{}
+	for _, attr := range attrs {
+		res = append(res, attr.Name)
+	}
+	return res, nextToken, nil
 }
 
 func fetchModsAndVersions(catalog []string) []paths.AllPathParams {

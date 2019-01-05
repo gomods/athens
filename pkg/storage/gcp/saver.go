@@ -46,7 +46,7 @@ func (s *Storage) upload(ctx context.Context, path, contentType string, stream i
 	const op errors.Op = "gcp.upload"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
-	wc := s.write(ctx, path)
+	wc := s.bucket.Object(path).NewWriter(ctx)
 	defer func(wc io.WriteCloser) {
 		if err := wc.Close(); err != nil {
 			log.Printf("WARNING: failed to close storage object writer: %s", err)
