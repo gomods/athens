@@ -7,7 +7,6 @@ import (
 
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/observ"
-	"github.com/gomods/athens/pkg/paths"
 	"github.com/gomods/athens/pkg/stash"
 	"github.com/gomods/athens/pkg/storage"
 )
@@ -29,9 +28,6 @@ type Protocol interface {
 
 	// Zip implements GET /{module}/@v/{version}.zip
 	Zip(ctx context.Context, mod, ver string) (io.ReadCloser, error)
-
-	// Catalog implements GET /catalog
-	Catalog(ctx context.Context, token string, pageSize int) ([]paths.AllPathParams, string, error)
 }
 
 // Wrapper helps extend the main protocol's functionality with addons.
@@ -178,19 +174,6 @@ func (p *protocol) Zip(ctx context.Context, mod, ver string) (io.ReadCloser, err
 	}
 
 	return zip, nil
-}
-
-func (p *protocol) Catalog(ctx context.Context, token string, pageSize int) ([]paths.AllPathParams, string, error) {
-	const op errors.Op = "protocol.Catalog"
-	ctx, span := observ.StartSpan(ctx, op.String())
-	defer span.End()
-	modulesAndVersions, newToken, err := p.storage.Catalog(ctx, token, pageSize)
-
-	if err != nil {
-		return nil, "", errors.E(op, err)
-	}
-
-	return modulesAndVersions, newToken, err
 }
 
 // union concatenates two version lists and removes duplicates
