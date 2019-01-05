@@ -41,7 +41,8 @@ func (s *storageImpl) Save(ctx context.Context, module, vsn string, mod []byte, 
 		})
 	}
 
-	if err := eg.Wait(); err != nil {
+	var err error
+	if err = eg.Wait(); err != nil {
 		// Best effort delete when any one of the save fails
 		var wg sync.WaitGroup
 		for _, m := range mS {
@@ -53,5 +54,5 @@ func (s *storageImpl) Save(ctx context.Context, module, vsn string, mod []byte, 
 		}
 		wg.Wait()
 	}
-	return nil
+	return err
 }
