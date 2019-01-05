@@ -16,7 +16,7 @@ func (s *Storage) Delete(ctx context.Context, module, version string) error {
 	const op errors.Op = "gcp.Delete"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
-	exists, err := s.bucket.Exists(ctx, config.PackageVersionedName(module, version, "mod"))
+	exists, err := s.exists(ctx, config.PackageVersionedName(module, version, "mod"))
 	if err != nil {
 		return errors.E(op, err, errors.M(module), errors.V(version))
 	}
@@ -24,5 +24,5 @@ func (s *Storage) Delete(ctx context.Context, module, version string) error {
 		return errors.E(op, errors.M(module), errors.V(version), errors.KindNotFound)
 	}
 
-	return modupl.Delete(ctx, module, version, s.bucket.Delete, s.timeout)
+	return modupl.Delete(ctx, module, version, s.delete, s.timeout)
 }

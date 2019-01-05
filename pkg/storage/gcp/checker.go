@@ -14,5 +14,5 @@ func (s *Storage) Exists(ctx context.Context, module, version string) (bool, err
 	const op errors.Op = "gcp.Exists"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
-	return s.bucket.Exists(ctx, config.PackageVersionedName(module, version, "mod"))
+	return s.exists(ctx, config.PackageVersionedName(module, version, "mod"))
 }

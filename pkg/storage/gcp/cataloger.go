@@ -25,7 +25,7 @@ func (s *Storage) Catalog(ctx context.Context, token string, pageSize int) ([]pa
 	for count > 0 {
 		var catalog []string
 		var err error
-		catalog, resToken, err = s.bucket.Catalog(ctx, token, 3*count)
+		catalog, resToken, err = s.catalog(ctx, token, 3*count)
 		if err != nil {
 			return nil, "", errors.E(op, err)
 		}

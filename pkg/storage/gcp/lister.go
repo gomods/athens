@@ -14,7 +14,7 @@ func (s *Storage) List(ctx context.Context, module string) ([]string, error) {
 	const op errors.Op = "gcp.List"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
-	paths, err := s.bucket.List(ctx, module)
+	paths, err := s.list(ctx, module)
 	if err != nil {
 		return nil, errors.E(op, err, errors.M(module))
 	}
