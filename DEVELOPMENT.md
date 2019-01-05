@@ -47,7 +47,7 @@ on to the next step.
 
 If you want to stop everything at any time, run `make down`.
 
-Note that `make dev` only runs the minimum amount of dependencies needed for things to work. If you'd like to run all the possible dependencies run `make alldeps` or directly the services available in the `docker-compose.yml` file. Keep in mind, though, that `make alldeps` does not start up Athens, but **only** it's dependencies.
+Note that `make dev` only runs the minimum amount of dependencies needed for things to work. If you'd like to run all the possible dependencies run `make alldeps` or directly the services available in the `docker-compose.yml` file. Keep in mind, though, that `make alldeps` does not start up Athens, but **only** its dependencies.
 
 # Run unit tests
 
