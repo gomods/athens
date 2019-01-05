@@ -48,7 +48,7 @@ func (s *storageImpl) Save(ctx context.Context, module, vsn string, mod []byte, 
 		for _, m := range mS {
 			wg.Add(1)
 			go func(m modMeta) {
-				_ = s.minioClient.RemoveObject(s.bucketName, m.file)
+				s.minioClient.RemoveObject(s.bucketName, m.file)
 				wg.Done()
 			}(m)
 		}
