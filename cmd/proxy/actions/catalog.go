@@ -21,7 +21,7 @@ type catalogRes struct {
 
 // catalogHandler implements GET baseURL/catalog
 func catalogHandler(s storage.Backend) http.HandlerFunc {
-	const op errors.Op = "download.CatalogHandler"
+	const op errors.Op = "actions.CatalogHandler"
 	cs, isCataloger := s.(storage.Cataloger)
 	f := func(w http.ResponseWriter, r *http.Request) {
 		if !isCataloger {
