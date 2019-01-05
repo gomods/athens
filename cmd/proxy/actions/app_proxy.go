@@ -23,6 +23,7 @@ func addProxyRoutes(
 	r.HandleFunc("/healthz", healthHandler)
 	r.HandleFunc("/readyz", getReadinessHandler(s))
 	r.HandleFunc("/version", versionHandler)
+	r.HandleFunc("/catalog", catalogHandler(s))
 
 	// Download Protocol
 	// the download.Protocol and the stash.Stasher interfaces are composable
@@ -64,8 +65,6 @@ func addProxyRoutes(
 
 	handlerOpts := &download.HandlerOpts{Protocol: dp, Logger: l}
 	download.RegisterHandlers(r, handlerOpts)
-
-	storage.RegisterHandlers(r, s)
 
 	return nil
 }
