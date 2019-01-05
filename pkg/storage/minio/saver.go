@@ -3,32 +3,53 @@ package minio
 import (
 	"bytes"
 	"context"
-	"io"
-
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/observ"
 	minio "github.com/minio/minio-go"
+	"golang.org/x/sync/errgroup"
+	"io"
+	"sync"
 )
+
+type modMeta struct {
+	file string
+	len  int64
+	data io.Reader
+}
 
 func (s *storageImpl) Save(ctx context.Context, module, vsn string, mod []byte, zip io.Reader, info []byte) error {
 	const op errors.Op = "storage.minio.Save"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
+
+	var eg errgroup.Group
 	dir := s.versionLocation(module, vsn)
-	modFileName := dir + "/" + "go.mod"
-	zipFileName := dir + "/" + "source.zip"
-	infoFileName := dir + "/" + vsn + ".info"
-	_, err := s.minioClient.PutObject(s.bucketName, modFileName, bytes.NewReader(mod), int64(len(mod)), minio.PutObjectOptions{})
-	if err != nil {
-		return errors.E(op, err)
+
+	mS := []modMeta{
+		modMeta{file: dir + "/" + "go.mod", len: int64(len(mod)), data: bytes.NewReader(mod)},
+		modMeta{file: dir + "/" + "source.zip", len: -1, data: zip},
+		modMeta{file: dir + "/" + vsn + ".info", len: int64(len(info)), data: bytes.NewBuffer(info)},
 	}
-	_, err = s.minioClient.PutObject(s.bucketName, zipFileName, zip, -1, minio.PutObjectOptions{})
-	if err != nil {
-		return errors.E(op, err)
+
+	for _, m := range mS {
+		m := m
+		eg.Go(func() error {
+			_, err := s.minioClient.PutObject(s.bucketName, m.file, m.data, m.len, minio.PutObjectOptions{})
+			return err
+		})
 	}
-	_, err = s.minioClient.PutObject(s.bucketName, infoFileName, bytes.NewReader(info), int64(len(info)), minio.PutObjectOptions{})
-	if err != nil {
-		return errors.E(op, err)
+
+	if err := eg.Wait(); err != nil {
+		// Best effort delete when any one of the save fails
+		var wg sync.WaitGroup
+		for _, m := range mS {
+			wg.Add(1)
+			go func(m modMeta) {
+				s.minioClient.RemoveObject(s.bucketName, m.file)
+				wg.Done()
+			}(m)
+		}
+		wg.Wait()
 	}
 	return nil
 }
