@@ -3,12 +3,13 @@ package minio
 import (
 	"bytes"
 	"context"
+	"io"
+	"sync"
+
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/observ"
 	minio "github.com/minio/minio-go"
 	"golang.org/x/sync/errgroup"
-	"io"
-	"sync"
 )
 
 type modMeta struct {
@@ -17,6 +18,7 @@ type modMeta struct {
 	data io.Reader
 }
 
+// Save takes in a module and its data and tries to save it in the minio bucket
 func (s *storageImpl) Save(ctx context.Context, module, vsn string, mod []byte, zip io.Reader, info []byte) error {
 	const op errors.Op = "storage.minio.Save"
 	ctx, span := observ.StartSpan(ctx, op.String())
@@ -25,10 +27,10 @@ func (s *storageImpl) Save(ctx context.Context, module, vsn string, mod []byte, 
 	var eg errgroup.Group
 	dir := s.versionLocation(module, vsn)
 
-	mS := []modMeta{
-		modMeta{file: dir + "/" + "go.mod", len: int64(len(mod)), data: bytes.NewReader(mod)},
-		modMeta{file: dir + "/" + "source.zip", len: -1, data: zip},
-		modMeta{file: dir + "/" + vsn + ".info", len: int64(len(info)), data: bytes.NewBuffer(info)},
+	mS := [3]modMeta{
+		{file: dir + "/" + "go.mod", len: int64(len(mod)), data: bytes.NewReader(mod)},
+		{file: dir + "/" + "source.zip", len: -1, data: zip},
+		{file: dir + "/" + vsn + ".info", len: int64(len(info)), data: bytes.NewBuffer(info)},
 	}
 
 	for _, m := range mS {
@@ -45,7 +47,7 @@ func (s *storageImpl) Save(ctx context.Context, module, vsn string, mod []byte, 
 		for _, m := range mS {
 			wg.Add(1)
 			go func(m modMeta) {
-				s.minioClient.RemoveObject(s.bucketName, m.file)
+				_ = s.minioClient.RemoveObject(s.bucketName, m.file)
 				wg.Done()
 			}(m)
 		}
