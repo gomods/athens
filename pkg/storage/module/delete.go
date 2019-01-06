@@ -54,7 +54,7 @@ func Delete(ctx context.Context, module, version string, delete Deleter, timeout
 	}
 	close(errChan)
 	if errs != nil {
-		return errors.E(op, errs)
+		return errors.E(op, errs, errors.M(module), errors.V(version))
 	}
 	return nil
 }
