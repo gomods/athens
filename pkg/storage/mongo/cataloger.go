@@ -20,22 +20,47 @@ func (s *ModuleStore) Catalog(ctx context.Context, token string, pageSize int) (
 
 	fields := bson.M{"module": 1, "version": 1}
 
-	c := s.s.DB(s.d).C(s.c)
+	compositeQ := bson.D{q, fields}
+
+	c := s.s.Database(s.d).Collection(s.c)
+
+	documentCount, erro := c.Count(compositeQ)
+
+	// If there are 0 results, return empty results without an error
+	if erro != nil && documentCount == 0 {
+		return nil, "", nil
+	}
+
 	modules := make([]storage.Module, 0)
-	err := c.Find(q).
-		Select(fields).
-		Sort("_id").
-		Limit(pageSize).
-		All(&modules)
+	cursor, err := c.Find(compositeQ)
+	// * Currently the driver doesn't have any of the below provisions so maybe adding the
+	// field projection along with the query will work
+	//
+	// Select(fields).
+	// Sort("_id").
+	// Limit(pageSize).
+	// All(&modules)
+	// *
 
 	if err != nil {
 		return nil, "", errors.E(op, err)
+	} else {
+		for cursor.Next() {
+			var module storage.Module
+			bytes, err := cursor.DecodeBytes()
+			if err == nil {
+				err = bson.Unmarshal(bytes, &module)
+				if err == nil {
+					modules = append(modules, module)
+				}
+			}
+		}
 	}
 
 	// If there are 0 results, return empty results without an error
-	if len(modules) == 0 {
-		return nil, "", nil
-	}
+	// if len(modules) == 0 {
+	// return nil, "", nil
+	// }
 
 	var versions = make([]paths.AllPathParams, len(modules))
 	for i := range modules {
