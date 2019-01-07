@@ -152,11 +152,6 @@ func (m *mockDP) Zip(ctx context.Context, mod, ver string) (io.ReadCloser, error
 	return m.zip, m.err
 }
 
-// Catalog implements GET /catalog
-func (m *mockDP) Catalog(ctx context.Context, token string, pageSize int) ([]paths.AllPathParams, string, error) {
-	return m.catalog, "", m.err
-}
-
 // Version is a helper method to get Info, GoMod, and Zip together.
 func (m *mockDP) Version(ctx context.Context, mod, ver string) (*storage.Version, error) {
 	panic("skipped")
