@@ -24,7 +24,7 @@ func TestHealthHandler(t *testing.T) {
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		t.Errorf("ioutil.ReadAll error = %s; want nil", err)
+		t.Fatal(err)
 	}
 	require.Equal(t, string(body), wantBody)
 }
