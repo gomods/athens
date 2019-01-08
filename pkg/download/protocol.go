@@ -121,12 +121,13 @@ func (p *protocol) Info(ctx context.Context, mod, ver string) ([]byte, error) {
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 	info, err := p.storage.Info(ctx, mod, ver)
+	var newVer string
 	if errors.IsNotFoundErr(err) {
-		err = p.stasher.Stash(ctx, mod, ver)
+		newVer, err = p.stasher.Stash(ctx, mod, ver)
 		if err != nil {
 			return nil, errors.E(op, err)
 		}
-		info, err = p.storage.Info(ctx, mod, ver)
+		info, err = p.storage.Info(ctx, mod, newVer)
 	}
 	if err != nil {
 		return nil, errors.E(op, err)
@@ -140,12 +141,13 @@ func (p *protocol) GoMod(ctx context.Context, mod, ver string) ([]byte, error) {
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 	goMod, err := p.storage.GoMod(ctx, mod, ver)
+	var newVer string
 	if errors.IsNotFoundErr(err) {
-		err = p.stasher.Stash(ctx, mod, ver)
+		newVer, err = p.stasher.Stash(ctx, mod, ver)
 		if err != nil {
 			return nil, errors.E(op, err)
 		}
-		goMod, err = p.storage.GoMod(ctx, mod, ver)
+		goMod, err = p.storage.GoMod(ctx, mod, newVer)
 	}
 	if err != nil {
 		return nil, errors.E(op, err)
@@ -159,12 +161,13 @@ func (p *protocol) Zip(ctx context.Context, mod, ver string) (io.ReadCloser, err
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 	zip, err := p.storage.Zip(ctx, mod, ver)
+	var newVer string
 	if errors.IsNotFoundErr(err) {
-		err = p.stasher.Stash(ctx, mod, ver)
+		newVer, err = p.stasher.Stash(ctx, mod, ver)
 		if err != nil {
 			return nil, errors.E(op, err)
 		}
-		zip, err = p.storage.Zip(ctx, mod, ver)
+		zip, err = p.storage.Zip(ctx, mod, newVer)
 	}
 	if err != nil {
 		return nil, errors.E(op, err)
