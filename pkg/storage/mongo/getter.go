@@ -16,9 +16,9 @@ func (s *ModuleStore) Info(ctx context.Context, module, vsn string) ([]byte, err
 	const op errors.Op = "mongo.Info"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
-	c := s.s.DB(s.d).C(s.c)
+	c := s.s.Database(s.d).Collection(s.c)
 	result := &storage.Module{}
-	err := c.Find(bson.M{"module": module, "version": vsn}).One(result)
+	err := c.FindOne(bson.M{"module": module, "version": vsn})
 	if err != nil {
 		kind := errors.KindUnexpected
 		if err == mgo.ErrNotFound {
@@ -35,9 +35,9 @@ func (s *ModuleStore) GoMod(ctx context.Context, module, vsn string) ([]byte, er
 	const op errors.Op = "mongo.GoMod"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
-	c := s.s.DB(s.d).C(s.c)
+	c := s.s.Database(s.d).Collection(s.c)
 	result := &storage.Module{}
-	err := c.Find(bson.M{"module": module, "version": vsn}).One(result)
+	err := c.FindOne(bson.M{"module": module, "version": vsn})
 	if err != nil {
 		kind := errors.KindUnexpected
 		if err == mgo.ErrNotFound {
@@ -56,7 +56,7 @@ func (s *ModuleStore) Zip(ctx context.Context, module, vsn string) (io.ReadClose
 	defer span.End()
 
 	zipName := s.gridFileName(module, vsn)
-	fs := s.s.DB(s.d).GridFS("fs")
+	fs := s.s.Database(s.d).GridFS("fs")
 	f, err := fs.Open(zipName)
 	if err != nil {
 		kind := errors.KindUnexpected

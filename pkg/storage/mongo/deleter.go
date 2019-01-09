@@ -21,13 +21,13 @@ func (s *ModuleStore) Delete(ctx context.Context, module, version string) error 
 		return errors.E(op, errors.M(module), errors.V(version), errors.KindNotFound)
 	}
 
-	db := s.s.DB(s.d)
-	c := db.C(s.c)
+	db := s.s.Database(s.d)
+	c := db.Collection(s.c)
 	err = db.GridFS("fs").Remove(s.gridFileName(module, version))
 	if err != nil {
 		return errors.E(op, err, errors.M(module), errors.V(version))
 	}
-	err = c.Remove(bson.M{"module": module, "version": version})
+	err = c.DeleteOne(bson.M{"module": module, "version": version})
 	if err != nil {
 		return errors.E(op, err, errors.M(module), errors.V(version))
 	}
