@@ -44,8 +44,8 @@ func (s *Storage) clear() error {
 }
 
 func getStorage(t testing.TB) *Storage {
-	url := os.Getenv("GOOGLE_APPLICATION_CREDENTIALS")
-	if url == "" {
+	creds := os.Getenv("GOOGLE_APPLICATION_CREDENTIALS")
+	if creds == "" {
 		t.SkipNow()
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), config.GetTimeoutDuration(30))
@@ -54,7 +54,7 @@ func getStorage(t testing.TB) *Storage {
 	if err != nil {
 		t.Fatalf("could not create new storage client: %s", err)
 	}
-	bucketName := "AthensTestBucket"
+	bucketName := "athens_test_bucket"
 	bkt := s.Bucket(bucketName)
 	if _, err := bkt.Attrs(ctx); err != nil {
 		if err == storage.ErrBucketNotExist {
