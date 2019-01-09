@@ -1,4 +1,4 @@
-package storage
+package actions
 
 import (
 	"encoding/json"
@@ -8,6 +8,7 @@ import (
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/log"
 	"github.com/gomods/athens/pkg/paths"
+	"github.com/gomods/athens/pkg/storage"
 	"github.com/gorilla/mux"
 )
 
@@ -18,16 +19,15 @@ type catalogRes struct {
 	NextPageToken   string                `json:"next,omitempty"`
 }
 
-// RegisterHandlers is a convenience method that registers
-// all the storage routes.
-func RegisterHandlers(r *mux.Router, s Backend) {
-	r.Handle("/catalog", CatalogHandler(s)).Methods(http.MethodGet)
-}
-
-// CatalogHandler implements GET baseURL/catalog
-func CatalogHandler(s Backend) http.Handler {
-	const op errors.Op = "download.CatalogHandler"
+// catalogHandler implements GET baseURL/catalog
+func catalogHandler(s storage.Backend) http.HandlerFunc {
+	const op errors.Op = "actions.CatalogHandler"
+	cs, isCataloger := s.(storage.Cataloger)
 	f := func(w http.ResponseWriter, r *http.Request) {
+		if !isCataloger {
+			w.WriteHeader(errors.KindNotImplemented)
+			return
+		}
 		lggr := log.EntryFromContext(r.Context())
 		vars := mux.Vars(r)
 		token := vars["token"]
@@ -38,11 +38,9 @@ func CatalogHandler(s Backend) http.Handler {
 			return
 		}
 
-		modulesAndVersions, newToken, err := s.Catalog(r.Context(), token, pageSize)
+		modulesAndVersions, newToken, err := cs.Catalog(r.Context(), token, pageSize)
 		if err != nil {
-			if errors.Kind(err) != errors.KindNotImplemented {
-				lggr.SystemErr(errors.E(op, err))
-			}
+			lggr.SystemErr(errors.E(op, err))
 			w.WriteHeader(errors.Kind(err))
 			return
 		}
