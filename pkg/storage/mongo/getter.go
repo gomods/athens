@@ -18,7 +18,7 @@ func (s *ModuleStore) Info(ctx context.Context, module, vsn string) ([]byte, err
 	defer span.End()
 	c := s.s.Database(s.d).Collection(s.c)
 	result := &storage.Module{}
-	err := c.FindOne(bson.M{"module": module, "version": vsn})
+	err := c.FindOne(bson.M{"module": module, "version": vsn}).Decode(result)
 	if err != nil {
 		kind := errors.KindUnexpected
 		if err == mgo.ErrNotFound {
@@ -37,7 +37,7 @@ func (s *ModuleStore) GoMod(ctx context.Context, module, vsn string) ([]byte, er
 	defer span.End()
 	c := s.s.Database(s.d).Collection(s.c)
 	result := &storage.Module{}
-	err := c.FindOne(bson.M{"module": module, "version": vsn})
+	err := c.FindOne(bson.M{"module": module, "version": vsn}).Decode(result)
 	if err != nil {
 		kind := errors.KindUnexpected
 		if err == mgo.ErrNotFound {
@@ -56,6 +56,7 @@ func (s *ModuleStore) Zip(ctx context.Context, module, vsn string) (io.ReadClose
 	defer span.End()
 
 	zipName := s.gridFileName(module, vsn)
+	db := s.s.Database(s.d)
 	fs := s.s.Database(s.d).GridFS("fs")
 	f, err := fs.Open(zipName)
 	if err != nil {

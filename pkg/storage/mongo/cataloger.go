@@ -44,15 +44,14 @@ func (s *ModuleStore) Catalog(ctx context.Context, token string, pageSize int) (
 
 	if err != nil {
 		return nil, "", errors.E(op, err)
-	} else {
-		for cursor.Next() {
-			var module storage.Module
-			bytes, err := cursor.DecodeBytes()
+	}
+	for cursor.Next() {
+		var module storage.Module
+		bytes, err := cursor.DecodeBytes()
+		if err == nil {
+			err = bson.Unmarshal(bytes, &module)
 			if err == nil {
-				err = bson.Unmarshal(bytes, &module)
-				if err == nil {
-					modules = append(modules, module)
-				}
+				modules = append(modules, module)
 			}
 		}
 	}
