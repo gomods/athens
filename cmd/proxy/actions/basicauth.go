@@ -3,6 +3,7 @@ package actions
 import (
 	"crypto/subtle"
 	"net/http"
+	"strings"
 
 	"github.com/gomods/athens/pkg/log"
 	"github.com/gorilla/mux"
@@ -18,7 +19,7 @@ func basicAuth(user, pass string) mux.MiddlewareFunc {
 				// if they forget to send auth headers
 				// kubernetes silently fails, so a log
 				// might help them.
-				if r.URL.Path == "/healthz" {
+				if strings.HasSuffix(r.URL.Path, "/healthz") {
 					lggr := log.EntryFromContext(r.Context())
 					lggr.Warnf(healthWarning)
 				}
