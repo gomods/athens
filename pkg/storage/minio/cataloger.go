@@ -21,22 +21,38 @@ func (s *storageImpl) Catalog(ctx context.Context, token string, pageSize int) (
 	res := make([]paths.AllPathParams, 0)
 	doneCh := make(chan struct{})
 	defer close(doneCh)
-	loo := s.minioClient.ListObjectsV2(s.bucketName, token, true, doneCh)
+	startAfter := token
+	token = ""
 
-	m, lastKey := fetchModsAndVersions(loo, pageSize)
+	count := pageSize
+	for count > 0 {
+		loo, err := s.minioCore.ListObjectsV2(s.bucketName, token, "", false,"",0,startAfter)
+		if err != nil {
+			return nil, "", errors.E(op, err)
+		}
 
-	res = append(res, m...)
-	queryToken = lastKey
+		m, lastKey := fetchModsAndVersions(loo.Contents, count)
+
+		res = append(res, m...)
+		count -= len(m)
+		queryToken = lastKey
+
+		if !loo.IsTruncated { // not truncated, there is no point in asking more
+			if count > 0 { // it means we reached the end, no subsequent requests are necessary
+				queryToken = ""
+			}
+			break
+		}
+	}
 
 	return res, queryToken, nil
 }
 
-func fetchModsAndVersions(objects <-chan minio.ObjectInfo, elementsNum int) ([]paths.AllPathParams, string) {
+func fetchModsAndVersions(objects  []minio.ObjectInfo, elementsNum int) ([]paths.AllPathParams, string) {
 	res := make([]paths.AllPathParams, 0)
 	lastKey := ""
 
-	for o := range objects {
-		fmt.Println(o.Key)
+	for _, o := range objects {
 		if !strings.HasSuffix(o.Key, ".info") {
 			continue
 		}
@@ -60,11 +76,9 @@ func fetchModsAndVersions(objects <-chan minio.ObjectInfo, elementsNum int) ([]p
 func parseMinioKey(o *minio.ObjectInfo) (paths.AllPathParams, error) {
 	const op errors.Op = "minio.parseMinioKey"
 	parts := strings.Split(o.Key, "/")
-	fmt.Println(parts)
-	v := parts[len(parts)-1]
-	fmt.Println(v)
-
-	m := strings.Replace(o.Key, v + "/.info", "", -1)
+	v := parts[len(parts)-2]
+	m := strings.Replace(o.Key, v, "", -2)
+	m = strings.Replace(m, "//.info", "", -1)
 	if m == "" || v == "" {
 		return paths.AllPathParams{}, errors.E(op, fmt.Errorf("invalid object key format %s", o.Key))
 	}
