@@ -6,7 +6,6 @@ import (
 
 	"github.com/gomods/athens/pkg/download"
 	"github.com/gomods/athens/pkg/errors"
-	"github.com/gomods/athens/pkg/paths"
 	"github.com/gomods/athens/pkg/storage"
 )
 
@@ -127,22 +126,4 @@ func (p *withpool) Zip(ctx context.Context, mod, ver string) (io.ReadCloser, err
 		return nil, errors.E(op, err)
 	}
 	return zip, nil
-}
-
-func (p *withpool) Catalog(ctx context.Context, token string, pageSize int) ([]paths.AllPathParams, string, error) {
-	const op errors.Op = "pool.Catalog"
-	var modsVers []paths.AllPathParams
-	var nextToken string
-	var err error
-	done := make(chan struct{}, 1)
-	p.jobCh <- func() {
-		modsVers, nextToken, err = p.dp.Catalog(ctx, token, pageSize)
-		close(done)
-	}
-	<-done
-	if err != nil {
-		return nil, "", errors.E(op, err)
-	}
-
-	return modsVers, nextToken, nil
 }
