@@ -25,7 +25,7 @@ func (s *ModuleStore) Save(ctx context.Context, module, version string, mod []by
 	}
 
 	zipName := s.gridFileName(module, version)
-	fs := s.s.DB(s.d).GridFS("fs")
+	fs := s.s.Database(s.d).GridFS("fs")
 	f, err := fs.Create(zipName)
 	if err != nil {
 		return errors.E(op, err, errors.M(module), errors.V(version))
@@ -48,7 +48,7 @@ func (s *ModuleStore) Save(ctx context.Context, module, version string, mod []by
 		Info:    info,
 	}
 
-	c := s.s.DB(s.d).C(s.c)
+	c := s.s.Database(s.d).Collection(s.c)
 	err = c.Insert(m)
 	if err != nil {
 		return errors.E(op, err, errors.M(module), errors.V(version))
