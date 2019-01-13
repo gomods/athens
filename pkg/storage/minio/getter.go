@@ -16,7 +16,7 @@ func (v *storageImpl) Info(ctx context.Context, module, vsn string) ([]byte, err
 	const op errors.Op = "minio.Info"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
-	infoPath := fmt.Sprintf("%s/%s.info", v.versionLocation(module, vsn), vsn)
+	infoPath := fmt.Sprintf("%s.info", v.versionLocation(module, vsn))
 	infoReader, err := v.minioClient.GetObject(v.bucketName, infoPath, minio.GetObjectOptions{})
 	if err != nil {
 		return nil, errors.E(op, err)
@@ -33,7 +33,7 @@ func (v *storageImpl) GoMod(ctx context.Context, module, vsn string) ([]byte, er
 	const op errors.Op = "minio.GoMod"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
-	modPath := fmt.Sprintf("%s/go.mod", v.versionLocation(module, vsn))
+	modPath := fmt.Sprintf("%s.mod", v.versionLocation(module, vsn))
 	modReader, err := v.minioClient.GetObject(v.bucketName, modPath, minio.GetObjectOptions{})
 	if err != nil {
 		return nil, errors.E(op, err)
@@ -50,7 +50,7 @@ func (v *storageImpl) Zip(ctx context.Context, module, vsn string) (io.ReadClose
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 
-	zipPath := fmt.Sprintf("%s/source.zip", v.versionLocation(module, vsn))
+	zipPath := fmt.Sprintf("%s.zip", v.versionLocation(module, vsn))
 	_, err := v.minioClient.StatObject(v.bucketName, zipPath, minio.StatObjectOptions{})
 	if err != nil {
 		return nil, errors.E(op, err, errors.KindNotFound, errors.M(module), errors.V(vsn))

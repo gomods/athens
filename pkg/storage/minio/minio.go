@@ -17,7 +17,7 @@ type storageImpl struct {
 }
 
 func (s *storageImpl) versionLocation(module, version string) string {
-	return fmt.Sprintf("%s/%s", module, version)
+	return fmt.Sprintf("%s/@v/%s", module, version)
 }
 
 // NewStorage returns a connected Minio or DigitalOcean Spaces storage

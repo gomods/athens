@@ -18,7 +18,7 @@ func (v *storageImpl) Exists(ctx context.Context, module, version string) (bool,
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 	versionedPath := v.versionLocation(module, version)
-	modPath := fmt.Sprintf("%s/go.mod", versionedPath)
+	modPath := fmt.Sprintf("%s.mod", versionedPath)
 	_, err := v.minioClient.StatObject(v.bucketName, modPath, minio.StatObjectOptions{})
 
 	if minio.ToErrorResponse(err).Code == minioErrorCodeNoSuchKey {
