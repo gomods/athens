@@ -17,14 +17,15 @@ func (l *storageImpl) List(ctx context.Context, module string) ([]string, error)
 
 	doneCh := make(chan struct{})
 	defer close(doneCh)
-	searchPrefix := module + "/"
-	objectCh := l.minioClient.ListObjectsV2(l.bucketName, searchPrefix, false, doneCh)
+	searchPrefix := module
+	objectCh := l.minioClient.ListObjectsV2(l.bucketName, searchPrefix, true, doneCh)
 	for object := range objectCh {
 		if object.Err != nil {
 			return nil, errors.E(op, object.Err, errors.M(module))
 		}
 		parts := strings.Split(object.Key, "/")
-		ver := parts[len(parts)-2]
+		modPart := parts[len(parts)-1]
+		ver := stripExtension(modPart)
 		if _, ok := dict[ver]; !ok {
 			dict[ver] = struct{}{}
 		}
@@ -36,4 +37,11 @@ func (l *storageImpl) List(ctx context.Context, module string) ([]string, error)
 	}
 	sort.Strings(ret)
 	return ret, nil
+}
+
+func stripExtension(modPart string) string {
+	modPart = strings.TrimSuffix(modPart, ".mod")
+	modPart = strings.TrimSuffix(modPart, ".info")
+	modPart = strings.TrimSuffix(modPart, ".zip")
+	return modPart
 }

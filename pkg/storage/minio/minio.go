@@ -13,6 +13,7 @@ import (
 type storageImpl struct {
 	minioClient *minio.Client
 	bucketName  string
+	timeout     time.Duration
 }
 
 func (s *storageImpl) versionLocation(module, version string) string {
@@ -42,5 +43,5 @@ func NewStorage(conf *config.MinioConfig, timeout time.Duration) (storage.Backen
 			return nil, errors.E(op, err)
 		}
 	}
-	return &storageImpl{minioClient, bucketName}, nil
+	return &storageImpl{minioClient, bucketName, timeout}, nil
 }
