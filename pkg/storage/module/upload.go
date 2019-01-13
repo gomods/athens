@@ -43,7 +43,7 @@ func Upload(ctx context.Context, module, version string, info, mod, zip io.Reade
 			errChan <- fmt.Errorf("uploading %s.%s.%s failed: %s", module, version, ext, tctx.Err())
 		}
 	}
-	saveOrAbort("info", "application/json", info)
+	go saveOrAbort("info", "application/json", info)
 	saveOrAbort("mod", "text/plain", mod)
 	saveOrAbort("zip", "application/octet-stream", zip)
 
