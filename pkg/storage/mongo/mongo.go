@@ -9,7 +9,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/globalsign/mgo"
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/mongodb/mongo-go-driver/mongo"

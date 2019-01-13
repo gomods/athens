@@ -3,9 +3,9 @@ package mongo
 import (
 	"context"
 
-	"github.com/globalsign/mgo/bson"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/observ"
+	"github.com/mongodb/mongo-go-driver/bson"
 )
 
 // Delete removes a specific version of a module
