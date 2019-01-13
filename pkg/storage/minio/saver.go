@@ -25,6 +25,6 @@ func (s *storageImpl) Save(ctx context.Context, module, version string, mod []by
 
 func (s *storageImpl) upload(ctx context.Context, path, contentType string, stream io.Reader) error {
 	const op errors.Op = "minio.upload"
-	_, err := s.minioClient.PutObject(s.bucketName, path, stream, -1, minio.PutObjectOptions{ContentType: contentType})
+	_, err := s.minioClient.PutObject(s.bucketName, path, stream, -1, minio.PutObjectOptions{})
 	return err
 }
