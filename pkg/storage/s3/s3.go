@@ -3,6 +3,8 @@ package s3
 import (
 	"fmt"
 	"net/url"
+	"os/user"
+	"path/filepath"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -18,9 +20,9 @@ import (
 // Storage implements (./pkg/storage).Backend and
 // also provides a function to fetch the location of a module
 // Storage uses amazon aws go SDK which expects these env variables
-// - AWS_REGION 			- region for this storage, e.g 'us-west-2'
-// - AWS_ACCESS_KEY_ID		-
-// - AWS_SECRET_ACCESS_KEY 	-
+// - AWS_REGION			- region for this storage, e.g 'us-west-2'
+// - AWS_ACCESS_KEY_ID		- [optional]
+// - AWS_SECRET_ACCESS_KEY 	- [optional]
 // - AWS_SESSION_TOKEN		- [optional]
 // For information how to get your keyId and access key turn to official aws docs: https://docs.aws.amazon.com/sdk-for-go/v1/developer-guide/setting-up.html
 type Storage struct {
@@ -39,8 +41,13 @@ func New(s3Conf *config.S3Config, timeout time.Duration, options ...func(*aws.Co
 		return nil, errors.E(op, err)
 	}
 
+	creds, err := buildAWSCredentials(s3Conf)
+	if err != nil {
+		return nil, errors.E(op, "unable to build AWS credentials")
+	}
+
 	awsConfig := &aws.Config{
-		Credentials: credentials.NewStaticCredentials(s3Conf.Key, s3Conf.Secret, s3Conf.Token),
+		Credentials: creds,
 		Region:      aws.String(s3Conf.Region),
 	}
 
@@ -62,4 +69,22 @@ func New(s3Conf *config.S3Config, timeout time.Duration, options ...func(*aws.Co
 		baseURI:  u,
 		timeout:  timeout,
 	}, nil
+}
+
+// buildAWSCredentials builds the credentials required to create a new AWS session.  It will prefer the access key ID and
+// secret access key if specified in the S3Config.  Otherwise it will look for credentials in the filesystem.
+func buildAWSCredentials(s3Conf *config.S3Config) (*credentials.Credentials, error) {
+	if s3Conf.Key != "" && s3Conf.Secret != "" {
+		return credentials.NewStaticCredentials(s3Conf.Key, s3Conf.Secret, s3Conf.Token), nil
+	}
+
+	u, err := user.Current()
+	if err != nil {
+		return nil, err
+	}
+
+	filename := filepath.Join(u.HomeDir, ".aws", "credentials")
+	sc := credentials.NewSharedCredentials(filename, "default")
+
+	return sc, nil
 }

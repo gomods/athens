@@ -1,13 +1,14 @@
 package download
 
 import (
-	"github.com/gobuffalo/buffalo"
+	"net/http"
+
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/paths"
 )
 
-func getModuleParams(c buffalo.Context, op errors.Op) (mod string, vers string, err error) {
-	params, err := paths.GetAllParams(c)
+func getModuleParams(r *http.Request, op errors.Op) (mod string, ver string, err error) {
+	params, err := paths.GetAllParams(r)
 	if err != nil {
 		return "", "", errors.E(op, err, errors.KindBadRequest)
 	}

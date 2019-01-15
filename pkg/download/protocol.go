@@ -7,7 +7,6 @@ import (
 
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/observ"
-	"github.com/gomods/athens/pkg/paths"
 	"github.com/gomods/athens/pkg/stash"
 	"github.com/gomods/athens/pkg/storage"
 )
@@ -29,9 +28,6 @@ type Protocol interface {
 
 	// Zip implements GET /{module}/@v/{version}.zip
 	Zip(ctx context.Context, mod, ver string) (io.ReadCloser, error)
-
-	// Catalog implements GET /catalog
-	Catalog(ctx context.Context, token string, pageSize int) ([]paths.AllPathParams, string, error)
 }
 
 // Wrapper helps extend the main protocol's functionality with addons.
@@ -81,7 +77,7 @@ func (p *protocol) List(ctx context.Context, mod string) ([]string, error) {
 
 	go func() {
 		defer wg.Done()
-		_, goList, goErr = p.lister.List(mod)
+		_, goList, goErr = p.lister.List(ctx, mod)
 	}()
 
 	wg.Wait()
@@ -112,7 +108,7 @@ func (p *protocol) Latest(ctx context.Context, mod string) (*storage.RevInfo, er
 	const op errors.Op = "protocol.Latest"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
-	lr, _, err := p.lister.List(mod)
+	lr, _, err := p.lister.List(ctx, mod)
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
@@ -125,12 +121,13 @@ func (p *protocol) Info(ctx context.Context, mod, ver string) ([]byte, error) {
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 	info, err := p.storage.Info(ctx, mod, ver)
+	var newVer string
 	if errors.IsNotFoundErr(err) {
-		err = p.stasher.Stash(ctx, mod, ver)
+		newVer, err = p.stasher.Stash(ctx, mod, ver)
 		if err != nil {
 			return nil, errors.E(op, err)
 		}
-		info, err = p.storage.Info(ctx, mod, ver)
+		info, err = p.storage.Info(ctx, mod, newVer)
 	}
 	if err != nil {
 		return nil, errors.E(op, err)
@@ -144,12 +141,13 @@ func (p *protocol) GoMod(ctx context.Context, mod, ver string) ([]byte, error) {
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 	goMod, err := p.storage.GoMod(ctx, mod, ver)
+	var newVer string
 	if errors.IsNotFoundErr(err) {
-		err = p.stasher.Stash(ctx, mod, ver)
+		newVer, err = p.stasher.Stash(ctx, mod, ver)
 		if err != nil {
 			return nil, errors.E(op, err)
 		}
-		goMod, err = p.storage.GoMod(ctx, mod, ver)
+		goMod, err = p.storage.GoMod(ctx, mod, newVer)
 	}
 	if err != nil {
 		return nil, errors.E(op, err)
@@ -163,31 +161,19 @@ func (p *protocol) Zip(ctx context.Context, mod, ver string) (io.ReadCloser, err
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 	zip, err := p.storage.Zip(ctx, mod, ver)
+	var newVer string
 	if errors.IsNotFoundErr(err) {
-		err = p.stasher.Stash(ctx, mod, ver)
+		newVer, err = p.stasher.Stash(ctx, mod, ver)
 		if err != nil {
 			return nil, errors.E(op, err)
 		}
-		zip, err = p.storage.Zip(ctx, mod, ver)
+		zip, err = p.storage.Zip(ctx, mod, newVer)
 	}
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
 
 	return zip, nil
-}
-
-func (p *protocol) Catalog(ctx context.Context, token string, pageSize int) ([]paths.AllPathParams, string, error) {
-	const op errors.Op = "protocol.Catalog"
-	ctx, span := observ.StartSpan(ctx, op.String())
-	defer span.End()
-	modulesAndVersions, newToken, err := p.storage.Catalog(ctx, token, pageSize)
-
-	if err != nil {
-		return nil, "", errors.E(op, err)
-	}
-
-	return modulesAndVersions, newToken, err
 }
 
 // union concatenates two version lists and removes duplicates

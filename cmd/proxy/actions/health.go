@@ -1,9 +1,9 @@
 package actions
 
 import (
-	"github.com/gobuffalo/buffalo"
+	"net/http"
 )
 
-func healthHandler(c buffalo.Context) error {
-	return c.Render(200, nil)
+func healthHandler(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
 }

@@ -1,10 +1,6 @@
 # Development Guide for Athens
 
-The proxy is built on the [Buffalo](https://gobuffalo.io/) framework. We chose
-this framework to make it as straightforward as possible to get your development environment up and running.
-However, **you do not need to install buffalo to run Athens**. 
-
-Buffalo provides nice features like a file watcher for your server, so if you'd like to install Buffalo, download [v0.12.4](https://github.com/gobuffalo/buffalo/releases/tag/v0.12.4) or later to get started on Athens and be sure to download the CLI and put it into your `PATH`.
+The proxy is written in idiomatic Go and uses standard tools. If you know Go, you'll be able to read the code and run the server.
 
 Athens uses [Go Modules](https://golang.org/cmd/go/#hdr-Modules__module_versions__and_more) for dependency management. You will need Go [v1.11](https://golang.org/dl) or later to get started on Athens.
 
@@ -16,18 +12,12 @@ Athens is developed on Go1.11+.
 To point Athens to a different version of Go set the following environment variable
 ```
 GO_BINARY_PATH=go1.11.X
-or whichever binary you want to use with athens
+# or whichever binary you want to use with athens
 ```
 
 # Run the Proxy
-After you've set up your dependencies, the `buffalo` CLI makes it easy to launch the proxy: 
-
-```console
-cd cmd/proxy
-buffalo dev
-```
-
-If you don't have Buffalo installed, you can just use the `go` command directly as such: 
+If you're inside GOPATH, make sure `GO111MODULE=on`, if you're outside GOPATH, then Go Modules are on by default.
+The main package is inside `cmd/proxy` and is run like any go project as follows: 
 
 ```
 cd cmd/proxy
@@ -47,8 +37,7 @@ Starting application at 127.0.0.1:3000
 
 Athens relies on several services (i.e. databases, etc...) to function properly. We use [Docker](http://docker.com/) images to configure and run those services. **However, Athens does not require any storage dependencies by default**. The default storage is in memory, you can opt-in to using the `fs` which would also require no dependencies. But if you'd like to test out Athens against a real storage backend (such as MongoDB, Minio, S3 etc), continue reading this section:
 
-If you're not familiar with Docker, that's ok. In the spirit of Buffalo, we've tried to make
-it easy to get up and running:
+If you're not familiar with Docker, that's ok. We've tried to make it easy to get up and running:
 
 1. [Download and install docker-compose](https://docs.docker.com/compose/install/) (docker-compose is a tool for easily starting and stopping lots of services at once)
 2. Run `make dev` from the root of this repository
@@ -58,7 +47,7 @@ on to the next step.
 
 If you want to stop everything at any time, run `make down`.
 
-Note that `make dev` only runs the minimum amount of dependencies needed for things to work. If you'd like to run all the possible dependencies run `make alldeps` or directly the services available in the `docker-compose.yml` file. Keep in mind, though, that `make alldeps` does not start up Athens or Oympus, but **only** their dependencies.
+Note that `make dev` only runs the minimum amount of dependencies needed for things to work. If you'd like to run all the possible dependencies run `make alldeps` or directly the services available in the `docker-compose.yml` file. Keep in mind, though, that `make alldeps` does not start up Athens, but **only** its dependencies.
 
 # Run unit tests
 

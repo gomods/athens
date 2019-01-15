@@ -2,6 +2,7 @@ package download
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"os/exec"
@@ -10,14 +11,15 @@ import (
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/module"
+	"github.com/gomods/athens/pkg/observ"
 	"github.com/gomods/athens/pkg/storage"
 	"github.com/spf13/afero"
 )
 
-// UpstreamLister retrieves a list o available module versions from upstream
+// UpstreamLister retrieves a list of available module versions from upstream
 // i.e. VCS, and a Storage backend.
 type UpstreamLister interface {
-	List(mod string) (*storage.RevInfo, []string, error)
+	List(ctx context.Context, mod string) (*storage.RevInfo, []string, error)
 }
 
 type listResp struct {
@@ -32,8 +34,11 @@ type vcsLister struct {
 	fs        afero.Fs
 }
 
-func (l *vcsLister) List(mod string) (*storage.RevInfo, []string, error) {
+func (l *vcsLister) List(ctx context.Context, mod string) (*storage.RevInfo, []string, error) {
 	const op errors.Op = "vcsLister.List"
+	ctx, span := observ.StartSpan(ctx, op.String())
+	defer span.End()
+
 	hackyPath, err := afero.TempDir(l.fs, "", "hackymod")
 	if err != nil {
 		return nil, nil, errors.E(op, err)
