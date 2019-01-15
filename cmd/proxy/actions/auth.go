@@ -4,25 +4,12 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
-	"os"
 	"path/filepath"
 	"runtime"
 	"strings"
 
-	"github.com/gobuffalo/buffalo"
-	"github.com/markbates/goth"
-	"github.com/markbates/goth/gothic"
-	"github.com/markbates/goth/providers/github"
 	"github.com/mitchellh/go-homedir"
 )
-
-func initializeAuth(app *buffalo.App) {
-	gothic.Store = app.SessionStore
-
-	goth.UseProviders(
-		github.New(os.Getenv("GITHUB_KEY"), os.Getenv("GITHUB_SECRET"), fmt.Sprintf("%s%s", app.Host, "/auth/github/callback")),
-	)
-}
 
 // initializeAuthFile checks if provided auth file is at a pre-configured path
 // and moves to home directory -- note that this will override whatever
