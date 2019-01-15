@@ -20,15 +20,16 @@ import (
 // at one time.
 func TestPoolLogic(t *testing.T) {
 	m := &mockPool{}
-	dp := WithPool(5)(m)
+	workers := 5
+	dp := WithPool(workers)(m)
 	ctx := context.Background()
 	m.ch = make(chan struct{})
 	for i := 0; i < 10; i++ {
 		go dp.List(ctx, "")
 	}
 	<-m.ch
-	if m.num != 5 {
-		t.Fatalf("expected 4 workers but got %v", m.num)
+	if m.num != workers {
+		t.Fatalf("expected %d workers but got %v", workers, m.num)
 	}
 }
 
@@ -150,11 +151,6 @@ func (m *mockDP) Zip(ctx context.Context, mod, ver string) (io.ReadCloser, error
 		return nil, fmt.Errorf("expected ver input %v but got %v", m.inputVer, ver)
 	}
 	return m.zip, m.err
-}
-
-// Catalog implements GET /catalog
-func (m *mockDP) Catalog(ctx context.Context, token string, pageSize int) ([]paths.AllPathParams, string, error) {
-	return m.catalog, "", m.err
 }
 
 // Version is a helper method to get Info, GoMod, and Zip together.

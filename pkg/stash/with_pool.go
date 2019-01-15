@@ -40,20 +40,21 @@ func (s *withpool) listen() {
 	}
 }
 
-func (s *withpool) Stash(ctx context.Context, mod, ver string) error {
+func (s *withpool) Stash(ctx context.Context, mod, ver string) (string, error) {
 	const op errors.Op = "stash.Pool"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 	var err error
+	var newVer string
 	done := make(chan struct{}, 1)
 	s.jobCh <- func() {
-		err = s.stasher.Stash(ctx, mod, ver)
+		newVer, err = s.stasher.Stash(ctx, mod, ver)
 		close(done)
 	}
 	<-done
 	if err != nil {
-		return errors.E(op, err)
+		return "", errors.E(op, err)
 	}
 
-	return nil
+	return newVer, nil
 }
