@@ -78,6 +78,7 @@ func (g *goGetFetcher) Fetch(ctx context.Context, mod, ver string) (*storage.Ver
 	}
 
 	var storageVer storage.Version
+	storageVer.Semver = m.Version
 	info, err := afero.ReadFile(g.fs, m.Info)
 	if err != nil {
 		return nil, errors.E(op, err)
