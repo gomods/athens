@@ -12,10 +12,11 @@ import (
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/observ"
+	moduploader "github.com/gomods/athens/pkg/storage/module"
 )
 
 type client interface {
-	UploadWithContext(ctx context.Context, path, contentType string, content io.Reader) error
+	UploadWithContext(ctx context.Context, path, contentType string, content moduploader.Stream) error
 	BlobExists(ctx context.Context, path string) (bool, error)
 	ReadBlob(ctx context.Context, path string) (io.ReadCloser, error)
 	ListBlobs(ctx context.Context, prefix string) ([]string, error)
@@ -131,7 +132,7 @@ func (c *azureBlobStoreClient) DeleteBlob(ctx context.Context, path string) erro
 }
 
 // UploadWithContext uploads a blob to the container
-func (c *azureBlobStoreClient) UploadWithContext(ctx context.Context, path, contentType string, content io.Reader) error {
+func (c *azureBlobStoreClient) UploadWithContext(ctx context.Context, path, contentType string, stream moduploader.Stream) error {
 	const op errors.Op = "azureblob.UploadWithContext"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
@@ -146,7 +147,7 @@ func (c *azureBlobStoreClient) UploadWithContext(ctx context.Context, path, cont
 			ContentType: contentType,
 		},
 	}
-	_, err := azblob.UploadStreamToBlockBlob(ctx, content, blobURL, uploadStreamOpts)
+	_, err := azblob.UploadStreamToBlockBlob(ctx, stream.Stream, blobURL, uploadStreamOpts)
 	if err != nil {
 		return errors.E(op, err)
 	}

@@ -1,7 +1,6 @@
 package gcp
 
 import (
-	"bytes"
 	"context"
 	"io"
 	"log"
@@ -31,7 +30,8 @@ func (s *Storage) Save(ctx context.Context, module, version string, mod []byte, 
 		return errors.E(op, "already exists", errors.M(module), errors.V(version), errors.KindAlreadyExists)
 	}
 
-	err = moduploader.Upload(ctx, module, version, bytes.NewReader(info), bytes.NewReader(mod), zip, s.upload, s.timeout)
+	// err = moduploader.Upload(ctx, module, version, bytes.NewReader(info), bytes.NewReader(mod), zip, s.upload, s.timeout)
+	err = moduploader.Upload(ctx, module, version, moduploader.NewStreamFromBytes(info), moduploader.NewStreamFromBytes(mod), moduploader.NewStreamFromReader(zip), s.upload, s.timeout)
 	if err != nil {
 		return errors.E(op, err, errors.M(module), errors.V(version))
 	}
@@ -42,7 +42,7 @@ func (s *Storage) Save(ctx context.Context, module, version string, mod []byte, 
 	return nil
 }
 
-func (s *Storage) upload(ctx context.Context, path, contentType string, stream io.Reader) error {
+func (s *Storage) upload(ctx context.Context, path, contentType string, stream moduploader.Stream) error {
 	const op errors.Op = "gcp.upload"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
@@ -55,7 +55,7 @@ func (s *Storage) upload(ctx context.Context, path, contentType string, stream i
 	// NOTE: content type is auto detected on GCP side and ACL defaults to public
 	// Once we support private storage buckets this may need refactoring
 	// unless there is a way to set the default perms in the project.
-	if _, err := io.Copy(wc, stream); err != nil {
+	if _, err := io.Copy(wc, stream.Stream); err != nil {
 		return err
 	}
 	return nil

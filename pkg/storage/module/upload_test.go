@@ -1,10 +1,8 @@
 package module
 
 import (
-	"bytes"
 	"context"
 	"errors"
-	"io"
 	"testing"
 	"time"
 
@@ -30,7 +28,7 @@ func (u *UploadTests) TearDownTest() {
 
 func (u *UploadTests) TestUploadTimeout() {
 	r := u.Require()
-	rd := bytes.NewReader([]byte("123"))
+	rd := NewStreamFromBytes([]byte("123"))
 	err := Upload(context.Background(), "mx", "1.1.1", rd, rd, rd, uplWithTimeout, time.Second)
 	r.Error(err, "deleter returned at least one error")
 	r.Contains(err.Error(), "uploading mx.1.1.1.info failed: context deadline exceeded")
@@ -40,17 +38,18 @@ func (u *UploadTests) TestUploadTimeout() {
 
 func (u *UploadTests) TestUploadError() {
 	r := u.Require()
-	rd := bytes.NewReader([]byte("123"))
+	rd := NewStreamFromBytes([]byte("123"))
+
 	err := Upload(context.Background(), "mx", "1.1.1", rd, rd, rd, uplWithErr, time.Second)
 	r.Error(err, "deleter returned at least one error")
 	r.Contains(err.Error(), "some err")
 }
 
-func uplWithTimeout(ctx context.Context, path, contentType string, stream io.Reader) error {
+func uplWithTimeout(ctx context.Context, path, contentType string, stream Stream) error {
 	time.Sleep(2 * time.Second)
 	return nil
 }
 
-func uplWithErr(ctx context.Context, path, contentType string, stream io.Reader) error {
+func uplWithErr(ctx context.Context, path, contentType string, stream Stream) error {
 	return errors.New("some err")
 }

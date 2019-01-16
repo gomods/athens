@@ -1,7 +1,6 @@
 package s3
 
 import (
-	"bytes"
 	"context"
 	"io"
 
@@ -17,7 +16,7 @@ func (s *Storage) Save(ctx context.Context, module, version string, mod []byte, 
 	const op errors.Op = "s3.Save"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
-	err := moduploader.Upload(ctx, module, version, bytes.NewReader(info), bytes.NewReader(mod), zip, s.upload, s.timeout)
+	err := moduploader.Upload(ctx, module, version, moduploader.NewStreamFromBytes(info), moduploader.NewStreamFromBytes(mod), moduploader.NewStreamFromReader(zip), s.upload, s.timeout)
 	// TODO: take out lease on the /list file and add the version to it
 	//
 	// Do that only after module source+metadata is uploaded
@@ -27,14 +26,14 @@ func (s *Storage) Save(ctx context.Context, module, version string, mod []byte, 
 	return nil
 }
 
-func (s *Storage) upload(ctx context.Context, path, contentType string, stream io.Reader) error {
+func (s *Storage) upload(ctx context.Context, path, contentType string, stream moduploader.Stream) error {
 	const op errors.Op = "s3.upload"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 	upParams := &s3manager.UploadInput{
 		Bucket:      aws.String(s.bucket),
 		Key:         aws.String(path),
-		Body:        stream,
+		Body:        stream.Stream,
 		ContentType: aws.String(contentType),
 	}
 

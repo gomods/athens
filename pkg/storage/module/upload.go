@@ -1,10 +1,10 @@
 package module
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"io"
-	"runtime"
 	"time"
 
 	"github.com/gomods/athens/pkg/config"
@@ -15,16 +15,38 @@ import (
 const numFiles = 3
 
 // Uploader takes a stream and saves it to the blob store under a given path
-type Uploader func(ctx context.Context, path, contentType string, stream io.Reader) error
+type Uploader func(ctx context.Context, path, contentType string, stream Stream) error
+
+// Stream is the object that is passed along to Uploaders
+type Stream struct {
+	Stream io.Reader
+	Size   int64
+}
+
+// NewStreamFromBytes returns a new module.Stream from a slice of bytes to Savers
+func NewStreamFromBytes(b []byte) Stream {
+	return Stream{
+		Stream: bytes.NewReader(b),
+		Size:   int64(len(b)),
+	}
+}
+
+// NewStreamFromReader returns a new module.Stream from an io.Reader and keeps the len -1 to Savers
+func NewStreamFromReader(r io.Reader) Stream {
+	return Stream{
+		Stream: r,
+		Size:   -1,
+	}
+}
 
 // Upload saves .info, .mod and .zip files to the blob store in parallel.
 // Returns multierror containing errors from all uploads and timeouts
-func Upload(ctx context.Context, module, version string, info, mod, zip io.Reader, uploader Uploader, timeout time.Duration) error {
+func Upload(ctx context.Context, module, version string, info, mod, zip Stream, uploader Uploader, timeout time.Duration) error {
 	const op errors.Op = "module.Upload"
 	tctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
-	save := func(ext, contentType string, stream io.Reader) <-chan error {
+	save := func(ext, contentType string, stream Stream) <-chan error {
 		ec := make(chan error)
 
 		go func() {
@@ -36,7 +58,7 @@ func Upload(ctx context.Context, module, version string, info, mod, zip io.Reade
 	}
 
 	errChan := make(chan error, numFiles)
-	saveOrAbort := func(ext, contentType string, stream io.Reader) {
+	saveOrAbort := func(ext, contentType string, stream Stream) {
 		select {
 		case err := <-save(ext, contentType, stream):
 			errChan <- err
@@ -45,10 +67,9 @@ func Upload(ctx context.Context, module, version string, info, mod, zip io.Reade
 		}
 	}
 
-	runtime.GC()
 	go saveOrAbort("info", "application/json", info)
 	go saveOrAbort("mod", "text/plain", mod)
-	go saveOrAbort("zip", "application/octet-stream", zip)
+	go saveOrAbort("zip", "applicatlsion/octet-stream", zip)
 
 	var errs error
 	for i := 0; i < numFiles; i++ {
