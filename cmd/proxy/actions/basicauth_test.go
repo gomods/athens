@@ -13,50 +13,50 @@ import (
 )
 
 var basicAuthTests = [...]struct {
-	name   string
-	user   string
-	pass   string
-	path   string
-	logs   string
-	status int
+	name           string
+	user           string
+	pass           string
+	path           string
+	logs           string
+	expectedStatus int
 }{
 	{
-		name:   "happy_path",
-		user:   "correctUser",
-		pass:   "correctPass",
-		path:   "/",
-		logs:   "",
-		status: 404,
+		name:           "happy_path",
+		user:           "correctUser",
+		pass:           "correctPass",
+		path:           "/",
+		logs:           "",
+		expectedStatus: 200,
 	},
 	{
-		name:   "incorrect_username",
-		user:   "wrongUser",
-		pass:   "correctPass",
-		path:   "/",
-		logs:   "",
-		status: 401,
+		name:           "incorrect_username",
+		user:           "wrongUser",
+		pass:           "correctPass",
+		path:           "/",
+		logs:           "",
+		expectedStatus: 401,
 	},
 	{
-		name:   "incorrect_password",
-		user:   "correctUser",
-		pass:   "wrongPassword",
-		path:   "/",
-		logs:   "",
-		status: 401,
+		name:           "incorrect_password",
+		user:           "correctUser",
+		pass:           "wrongPassword",
+		path:           "/",
+		logs:           "",
+		expectedStatus: 401,
 	},
 	{
-		name:   "log_on_healthz",
-		user:   "wrongUser",
-		pass:   "wrongPassword",
-		path:   "/healthz",
-		logs:   healthWarning,
-		status: 401,
+		name:           "log_on_healthz",
+		user:           "wrongUser",
+		pass:           "wrongPassword",
+		path:           "/healthz",
+		logs:           healthWarning,
+		expectedStatus: 401,
 	},
 }
 
 func TestBasicAuth(t *testing.T) {
 	mwFunc := basicAuth("correctUser", "correctPass")
-	handler := mwFunc(http.NotFoundHandler())
+	handler := mwFunc(http.HandlerFunc(mockHandler))
 	for _, tc := range basicAuthTests {
 		t.Run(tc.name, func(t *testing.T) {
 			w := httptest.NewRecorder()
@@ -69,12 +69,16 @@ func TestBasicAuth(t *testing.T) {
 			r = r.WithContext(ctx)
 			handler.ServeHTTP(w, r)
 			resp := w.Result()
-			if resp.StatusCode != tc.status {
-				t.Fatalf("expected http status to be %v but got %v", tc.status, resp.StatusCode)
+			if resp.StatusCode != tc.expectedStatus {
+				t.Fatalf("expected http status to be %v but got %v", tc.expectedStatus, resp.StatusCode)
 			}
 			if !strings.Contains(buf.String(), tc.logs) {
 				t.Fatalf("expected logs to include: %s but got: %s", tc.logs, buf.String())
 			}
 		})
 	}
+}
+
+func mockHandler(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(200)
 }
