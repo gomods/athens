@@ -4,8 +4,10 @@ import (
 	"context"
 	"strings"
 
+	"cloud.google.com/go/storage"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/observ"
+	"google.golang.org/api/iterator"
 )
 
 // List implements the (./pkg/storage).Lister interface
@@ -14,10 +16,20 @@ func (s *Storage) List(ctx context.Context, module string) ([]string, error) {
 	const op errors.Op = "gcp.List"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
-	paths, err := s.bucket.List(ctx, module)
-	if err != nil {
-		return nil, errors.E(op, err, errors.M(module))
+
+	it := s.bucket.Objects(ctx, &storage.Query{Prefix: module})
+	paths := []string{}
+	for {
+		attrs, err := it.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			return nil, errors.E(op, err, errors.M(module))
+		}
+		paths = append(paths, attrs.Name)
 	}
+
 	return extractVersions(paths), nil
 }
 
