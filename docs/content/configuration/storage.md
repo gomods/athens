@@ -48,6 +48,27 @@ Disk storage allows modules to be stored on a file system. The location on disk 
 
 where `/path/on/disk` is your desired location. Also it can be set using `ATHENS_DISK_STORAGE_ROOT` env
 
+## HTTP
+
+This driver stores files to an HTTP server via standard GET and PUT requests. The files are laid out in a manner identical to the proxy URL used to access them, and the requests are optionally (but hopefully!) authenticated using Basic Auth.
+
+The HTTP storage driver can be used to integrate with systems like Artifactory that offer blob storage over HTTP.
+
+##### Configuration:
+
+    # StorageType sets the type of storage backend the proxy will use.
+    # Env override: ATHENS_STORAGE_TYPE
+    StorageType = "http"
+
+    [Storage]
+        [Storage.HTTP]
+            BaseURL = "http://my.server.io/repository/athens-modules"
+
+            Username = "YOUR_HTTP_USERNAME"
+
+            Password = "YOUR_HTTP_PASSWORD"
+
+
 ## Mongo
 
 This driver uses a [Mongo](https://www.mongodb.com/) server as data storage. On start this driver will create an `athens` database and `module` collection on your Mongo server.
