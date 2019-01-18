@@ -51,7 +51,7 @@ Timeout = 300
 # Possible values are memory, disk, mongo, gcp, minio, s3, http
 # Defaults to memory
 # Env override: ATHENS_STORAGE_TYPE
-StorageType = "http"
+StorageType = "memory"
 
 # Certificate and key to make athens serve using https instead of plain text http.
 # Set both to enable.

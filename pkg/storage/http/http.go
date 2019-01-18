@@ -38,13 +38,13 @@ func New(conf *config.HTTPConfig, timeout time.Duration) (*ModuleStore, error) {
 	return ms, nil
 }
 
-func (m *ModuleStore) connect() error {
+func (s *ModuleStore) connect() error {
 	const op errors.Op = "http.connect"
 
 	// I guess just GET the base URL and see if it 401's?
-	req, _ := http.NewRequest(http.MethodGet, m.url, nil)
-	req.SetBasicAuth(m.username, m.password)
-	resp, err := m.client.Do(req)
+	req, _ := http.NewRequest(http.MethodGet, s.url, nil)
+	req.SetBasicAuth(s.username, s.password)
+	resp, err := s.client.Do(req)
 	if err != nil {
 		return errors.E(op, err)
 	}
@@ -59,8 +59,8 @@ func (m *ModuleStore) connect() error {
 }
 
 // moduleRoot determines the root URL for a module.
-func (m *ModuleStore) moduleRoot(module string) string {
-	return m.url + "/" + module + "/@v/"
+func (s *ModuleStore) moduleRoot(module string) string {
+	return s.url + "/" + module + "/@v/"
 }
 
 func (s *ModuleStore) doRequest(ctx context.Context, req *http.Request, expectedStatus int) (io.ReadCloser, error) {

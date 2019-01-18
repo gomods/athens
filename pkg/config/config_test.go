@@ -200,6 +200,11 @@ func TestParseExampleConfig(t *testing.T) {
 			Token:  "",
 			Bucket: "MY_S3_BUCKET_NAME",
 		},
+		HTTP: &HTTPConfig{
+			BaseURL:  "http://my.server.io/repository/athens-modules",
+			Username: "MY_HTTP_USERNAME",
+			Password: "MY_HTTP_PASSWORD",
+		},
 	}
 
 	expConf := &Config{
