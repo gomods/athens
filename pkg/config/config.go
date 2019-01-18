@@ -133,6 +133,8 @@ func validateConfig(config Config) error {
 		return validate.Struct(config.Storage.S3)
 	case "azureblob":
 		return validate.Struct(config.Storage.AzureBlob)
+	case "http":
+		return validate.Struct(config.Storage.HTTP)
 	default:
 		return fmt.Errorf("storage type %s is unknown", config.StorageType)
 	}

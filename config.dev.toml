@@ -48,10 +48,10 @@ FilterFile = ""
 Timeout = 300
 
 # StorageType sets the type of storage backend the proxy will use.
-# Possible values are memory, disk, mongo, gcp, minio, s3
+# Possible values are memory, disk, mongo, gcp, minio, s3, http
 # Defaults to memory
 # Env override: ATHENS_STORAGE_TYPE
-StorageType = "memory"
+StorageType = "http"
 
 # Certificate and key to make athens serve using https instead of plain text http.
 # Set both to enable.
@@ -229,6 +229,7 @@ StatsExporter = "prometheus"
         # https://godoc.org/github.com/aws/aws-sdk-go/aws/session#hdr-Environment_Variables
         # for environment variables that will affect the aws configuration.
         UseDefaultConfiguration = false
+
    [Storage.AzureBlob]
         # Storage Account name for Azure Blob
         # Env override: ATHENS_AZURE_ACCOUNT_NAME
@@ -241,3 +242,16 @@ StatsExporter = "prometheus"
         # Name of container in the blob storage
         # Env override: ATHENS_AZURE_CONTAINER_NAME
         ContainerName = "MY_AZURE_BLOB_CONTAINER_NAME"
+
+    [Storage.HTTP]
+        # The root URL into which modules will be uploaded
+        # Env override: ATHENS_HTTP_BASE_URL
+        BaseURL = "http://artifactory.server.io:8081/artifactory/athens-modules"
+
+        # Username for use with HTTP Basic Auth (optional)
+        # Env override: ATHENS_HTTP_USERNAME
+        Username = "MY_HTTP_USERNAME"
+
+        # Password for use with HTTP Basic Auth (optional)
+        # Env override: ATHENS_HTTP_PASSWORD
+        Password = "MY_HTTP_PASSWORD"

@@ -11,6 +11,7 @@ import (
 	"github.com/gomods/athens/pkg/storage/azureblob"
 	"github.com/gomods/athens/pkg/storage/fs"
 	"github.com/gomods/athens/pkg/storage/gcp"
+	"github.com/gomods/athens/pkg/storage/http"
 	"github.com/gomods/athens/pkg/storage/mem"
 	"github.com/gomods/athens/pkg/storage/minio"
 	"github.com/gomods/athens/pkg/storage/mongo"
@@ -60,6 +61,11 @@ func GetStorage(storageType string, storageConfig *config.StorageConfig, timeout
 			return nil, errors.E(op, "Invalid AzureBlob Storage Configuration")
 		}
 		return azureblob.New(storageConfig.AzureBlob, timeout)
+	case "http":
+		if storageConfig.HTTP == nil {
+			return nil, errors.E(op, "Invalid HTTP Storage Configuration")
+		}
+		return http.New(storageConfig.HTTP, timeout)
 	default:
 		return nil, fmt.Errorf("storage type %s is unknown", storageType)
 	}
