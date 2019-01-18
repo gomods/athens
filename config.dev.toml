@@ -246,7 +246,7 @@ StatsExporter = "prometheus"
     [Storage.HTTP]
         # The root URL into which modules will be uploaded
         # Env override: ATHENS_HTTP_BASE_URL
-        BaseURL = "http://artifactory.server.io:8081/artifactory/athens-modules"
+        BaseURL = "http://my.server.io/repository/athens-modules"
 
         # Username for use with HTTP Basic Auth (optional)
         # Env override: ATHENS_HTTP_USERNAME

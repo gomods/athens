@@ -84,6 +84,7 @@ func (s *ModuleStore) doRequest(ctx context.Context, req *http.Request, expected
 			kind = errors.KindNotFound
 		}
 		io.Copy(ioutil.Discard, resp.Body)
+		resp.Body.Close()
 		return nil, errors.E(op, kind)
 	}
 
@@ -117,6 +118,7 @@ func (s *ModuleStore) upload(ctx context.Context, path, contentType string, stre
 	if err != nil {
 		return errors.E(op, err)
 	}
+	defer body.Close()
 
 	// we don't actually care what the body is but we'll throw it away
 	// so we can reuse the underlying connection
@@ -135,6 +137,7 @@ func (s *ModuleStore) remove(ctx context.Context, path string) error {
 	if err != nil {
 		return errors.E(op, err)
 	}
+	defer body.Close()
 
 	// we don't actually care what the body is but we'll throw it away
 	// so we can reuse the underlying connection

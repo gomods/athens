@@ -1,6 +1,7 @@
 package http
 
 import (
+	"bytes"
 	"context"
 	"io"
 	"net/http"
@@ -79,12 +80,15 @@ floop:
 			break floop
 		case html.StartTagToken:
 			tn, _ := t.TagName()
-			if len(tn) == 1 && tn[0] == 'a' {
-				attrs := getAttrs(t)
-				if href, ok := attrs["href"]; ok {
-					if filter == nil || filter(href) {
-						links = append(links, string(href))
-					}
+			if !bytes.Equal(tn, []byte{'a'}) {
+				continue
+			}
+
+			// include links that have an href that pass the filter (if any)
+			attrs := getAttrs(t)
+			if href, ok := attrs["href"]; ok {
+				if filter == nil || filter(href) {
+					links = append(links, string(href))
 				}
 			}
 		}
