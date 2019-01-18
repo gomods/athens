@@ -68,11 +68,11 @@ github.com/davecgh/go-spew/spew
 # github.com/fatih/color v1.7.0
 github.com/fatih/color
 # github.com/globalsign/mgo v0.0.0-20180828104044-6f9f54af1356
-github.com/globalsign/mgo
 github.com/globalsign/mgo/bson
+github.com/globalsign/mgo
+github.com/globalsign/mgo/internal/json
 github.com/globalsign/mgo/internal/sasl
 github.com/globalsign/mgo/internal/scram
-github.com/globalsign/mgo/internal/json
 # github.com/go-ini/ini v1.25.4
 github.com/go-ini/ini
 # github.com/go-playground/locales v0.12.1
@@ -192,7 +192,9 @@ golang.org/x/crypto/ssh/terminal
 golang.org/x/crypto/argon2
 golang.org/x/crypto/blake2b
 # golang.org/x/net v0.0.0-20181029044818-c44066c5c816
+golang.org/x/net/html
 golang.org/x/net/context
+golang.org/x/net/html/atom
 golang.org/x/net/http/httpguts
 golang.org/x/net/context/ctxhttp
 golang.org/x/net/idna
