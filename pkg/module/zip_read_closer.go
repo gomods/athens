@@ -12,6 +12,7 @@ type zipReadCloser struct {
 	zip    io.ReadCloser
 	fs     afero.Fs
 	goPath string
+	size   int64
 }
 
 // Close closes the zip file handle and clears up disk space used by the underlying disk ref

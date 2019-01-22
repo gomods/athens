@@ -8,4 +8,5 @@ type Version struct {
 	Zip    io.ReadCloser
 	Info   []byte
 	Semver string
+	Size   int64
 }

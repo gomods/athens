@@ -11,7 +11,7 @@ import (
 	"github.com/spf13/afero"
 )
 
-func (s *storageImpl) Save(ctx context.Context, module, version string, mod []byte, zip io.Reader, info []byte) error {
+func (s *storageImpl) Save(ctx context.Context, module, version string, mod []byte, zip io.Reader, info []byte, size int64) error {
 	const op errors.Op = "fs.Save"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()

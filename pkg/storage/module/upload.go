@@ -31,11 +31,15 @@ func NewStreamFromBytes(b []byte) Stream {
 	}
 }
 
-// NewStreamFromReader returns a new module.Stream from an io.Reader and keeps the len -1 to Savers
-func NewStreamFromReader(r io.Reader) Stream {
+// NewStreamFromReaderWithSize returns a new module.Stream from an io.Reader and keeps the len -1 for minio storage > 600 MB
+func NewStreamFromReaderWithSize(r io.Reader, s int64) Stream {
+	const MinioLimit = 600000000
+	if s > MinioLimit {
+		s = -1
+	}
 	return Stream{
 		Stream: r,
-		Size:   -1,
+		Size:   s,
 	}
 }
 

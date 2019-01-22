@@ -326,7 +326,7 @@ func TestDownloadProtocolWhenFetchFails(t *testing.T) {
 	}
 	fakeMod := testMod{"github.com/athens-artifacts/samplelib", "v1.0.0"}
 	bts := []byte(fakeMod.mod + "@" + fakeMod.ver)
-	err = s.Save(context.Background(), fakeMod.mod, fakeMod.ver, bts, ioutil.NopCloser(bytes.NewReader(bts)), bts)
+	err = s.Save(context.Background(), fakeMod.mod, fakeMod.ver, bts, ioutil.NopCloser(bytes.NewReader(bts)), bts, int64(len(bts)))
 	if err != nil {
 		t.Fatal(err)
 	}

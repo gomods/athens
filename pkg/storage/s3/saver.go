@@ -12,11 +12,11 @@ import (
 )
 
 // Save implements the (github.com/gomods/athens/pkg/storage).Saver interface.
-func (s *Storage) Save(ctx context.Context, module, version string, mod []byte, zip io.Reader, info []byte) error {
+func (s *Storage) Save(ctx context.Context, module, version string, mod []byte, zip io.Reader, info []byte, size int64) error {
 	const op errors.Op = "s3.Save"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
-	err := moduploader.Upload(ctx, module, version, moduploader.NewStreamFromBytes(info), moduploader.NewStreamFromBytes(mod), moduploader.NewStreamFromReader(zip), s.upload, s.timeout)
+	err := moduploader.Upload(ctx, module, version, moduploader.NewStreamFromBytes(info), moduploader.NewStreamFromBytes(mod), moduploader.NewStreamFromReaderWithSize(zip, size), s.upload, s.timeout)
 	// TODO: take out lease on the /list file and add the version to it
 	//
 	// Do that only after module source+metadata is uploaded

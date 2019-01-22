@@ -10,12 +10,12 @@ import (
 )
 
 // Save implements the (./pkg/storage).Saver interface.
-func (s *Storage) Save(ctx context.Context, module, version string, mod []byte, zip io.Reader, info []byte) error {
+func (s *Storage) Save(ctx context.Context, module, version string, mod []byte, zip io.Reader, info []byte, size int64) error {
 	const op errors.Op = "azureblob.Save"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 
-	err := moduploader.Upload(ctx, module, version, moduploader.NewStreamFromBytes(info), moduploader.NewStreamFromBytes(mod), moduploader.NewStreamFromReader(zip), s.client.UploadWithContext, s.timeout)
+	err := moduploader.Upload(ctx, module, version, moduploader.NewStreamFromBytes(info), moduploader.NewStreamFromBytes(mod), moduploader.NewStreamFromReaderWithSize(zip, size), s.client.UploadWithContext, s.timeout)
 	if err != nil {
 		return errors.E(op, err, errors.M(module), errors.V(version))
 	}

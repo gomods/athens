@@ -95,11 +95,16 @@ func (g *goGetFetcher) Fetch(ctx context.Context, mod, ver string) (*storage.Ver
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
+
+	zipStat, err := zip.Stat()
+	if err != nil {
+		return nil, errors.E(op, err)
+	}
 	// note: don't close zip here so that the caller can read directly from disk.
 	//
 	// if we close, then the caller will panic, and the alternative to make this work is
 	// that we read into memory and return an io.ReadCloser that reads out of memory
-	storageVer.Zip = &zipReadCloser{zip, g.fs, goPathRoot}
+	storageVer.Zip = &zipReadCloser{zip, g.fs, goPathRoot, zipStat.Size()}
 
 	return &storageVer, nil
 }
