@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/gomods/athens/pkg/observ"
 	"github.com/gomods/athens/pkg/errors"
+	"github.com/gomods/athens/pkg/observ"
 	"github.com/gomods/athens/pkg/paths"
 	"github.com/minio/minio-go"
 )
@@ -26,7 +26,7 @@ func (s *storageImpl) Catalog(ctx context.Context, token string, pageSize int) (
 
 	count := pageSize
 	for count > 0 {
-		loo, err := s.minioCore.ListObjectsV2(s.bucketName, token, "", false,"",0,startAfter)
+		loo, err := s.minioCore.ListObjectsV2(s.bucketName, token, "", false, "", 0, startAfter)
 		if err != nil {
 			return nil, "", errors.E(op, err)
 		}
@@ -48,7 +48,7 @@ func (s *storageImpl) Catalog(ctx context.Context, token string, pageSize int) (
 	return res, queryToken, nil
 }
 
-func fetchModsAndVersions(objects  []minio.ObjectInfo, elementsNum int) ([]paths.AllPathParams, string) {
+func fetchModsAndVersions(objects []minio.ObjectInfo, elementsNum int) ([]paths.AllPathParams, string) {
 	res := make([]paths.AllPathParams, 0)
 	lastKey := ""
 

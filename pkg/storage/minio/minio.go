@@ -12,7 +12,7 @@ import (
 
 type storageImpl struct {
 	minioClient *minio.Client
-	minioCore *minio.Core
+	minioCore   *minio.Core
 	bucketName  string
 }
 

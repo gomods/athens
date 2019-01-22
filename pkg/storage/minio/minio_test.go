@@ -19,7 +19,7 @@ func BenchmarkBackend(b *testing.B) {
 }
 
 func (s *storageImpl) clear() error {
-	objectCh, _ := s.minioCore.ListObjectsV2(s.bucketName, "", "", false,"",0,"")
+	objectCh, _ := s.minioCore.ListObjectsV2(s.bucketName, "", "", false, "", 0, "")
 	for _, object := range objectCh.Contents {
 		if object.Err != nil {
 			return object.Err
