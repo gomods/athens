@@ -138,20 +138,22 @@ func testCatalog(t *testing.T, b storage.Backend) {
 	mock := getMockModule()
 	zipBts, _ := ioutil.ReadAll(mock.Zip)
 	modname := "github.com/gomods/testCatalogModule"
-	for i := 0; i < 1005; i++ {
+	for i := 0; i < 6; i++ {
 		ver := fmt.Sprintf("v1.2.%04d", i)
 		b.Save(ctx, modname, ver, mock.Mod, bytes.NewReader(zipBts), mock.Info)
+
+		defer b.Delete(ctx, modname, ver)
 	}
 
-	allres, next, err := cs.Catalog(ctx, "", 1001)
+	allres, next, err := cs.Catalog(ctx, "", 5)
 
 	require.NoError(t, err)
-	require.Equal(t, 1001, len(allres))
+	require.Equal(t, 5, len(allres))
 
 	res, next, err := cs.Catalog(ctx, next, 50)
 	allres = append(allres, res...)
 	require.NoError(t, err)
-	require.Equal(t, 4, len(res))
+	require.Equal(t, 1, len(res))
 	require.Equal(t, "", next)
 
 	sort.Slice(allres, func(i, j int) bool {
@@ -162,7 +164,7 @@ func testCatalog(t *testing.T, b storage.Backend) {
 	})
 	require.Equal(t, modname, allres[0].Module)
 	require.Equal(t, "v1.2.0000", allres[0].Version)
-	require.Equal(t, "v1.2.1004", allres[1004].Version)
+	require.Equal(t, "v1.2.0004", allres[4].Version)
 
 	for i := 1; i < len(allres); i++ {
 		require.NotEqual(t, allres[i].Version, allres[i-1].Version)
