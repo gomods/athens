@@ -1,0 +1,66 @@
+# This section contains your application metadata.
+# Version of the application
+version: 0.1.0
+# Name of the application
+name: athens
+# A short description of the application
+description:
+# Namespace to use when pushing to a registry. This is typically your Hub username.
+#namespace: myhubusername
+# List of application maintainers with name and email for each
+maintainers:
+  - name: nunix
+    email:
+
+---
+# This section contains the Compose file that describes your application services.
+version: '3.2'
+services:
+  mongo:
+    image: mongo:3.7.9-jessie
+    ports:
+      - ${port.mango}:27017
+  minio:
+    image: minio/minio:latest
+    command: server /data
+    ports:
+      - ${port.minio}:9000
+    environment:
+      MINIO_ACCESS_KEY: minio
+      MINIO_SECRET_KEY: minio123
+  datadog:
+    environment:
+      - DD_API_KEY=
+      - DD_LOG_LEVEL=trace
+      - DD_APM_ENABLED=true
+    image:
+      datadog/agent:latest
+    ports:
+      - ${port.datadog}:8126
+  jaeger:
+    environment:
+      - COLLECTOR_ZIPKIN_HTTP_PORT=9441
+    image: jaegertracing/all-in-one:latest
+    ports:
+      - ${port.jaeger.jaeger-clients}:14268
+      - ${port.jaeger.zipkin-endpoint}:9411
+      - ${port.jaeger.zipkin-compact}:5775/udp
+      - ${port.jaeger.jaeger-compact}:6831/udp
+      - ${port.jaeger.jaeger-binary}:6832/udp
+      - ${port.jaeger.serve-configs}:5778
+      - ${port.jaeger.serve-frontend}:16686
+
+---
+# This section contains the default values for your application parameters.
+port:
+  datadog: 8126
+  mango: 27017
+  minio: 9001
+  jaeger:
+    zipkin-compact: 5775
+    serve-configs: 5778
+    jaeger-compact: 6831
+    jaeger-binary: 6832
+    zipkin-endpoint: 9411
+    jaeger-clients: 14268
+    serve-frontend: 16686
