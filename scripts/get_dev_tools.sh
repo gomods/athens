@@ -5,5 +5,3 @@
 set -xeuo pipefail
 
 GO111MODULE=off go get golang.org/x/lint/golint
-
-./scripts/get_buffalo.sh

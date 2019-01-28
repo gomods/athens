@@ -12,7 +12,13 @@ import (
 	"github.com/google/go-cmp/cmp/cmpopts"
 )
 
-const exampleConfigPath = "../../config.dev.toml"
+func testConfigFile(t *testing.T) (testConfigFile string) {
+	testConfigFile = filepath.Join("..", "..", "config.dev.toml")
+	if err := os.Chmod(testConfigFile, 0700); err != nil {
+		t.Fatalf("%s\n", err)
+	}
+	return testConfigFile
+}
 
 func compareConfigs(parsedConf *Config, expConf *Config, t *testing.T) {
 	opts := cmpopts.IgnoreTypes(StorageConfig{})
@@ -63,7 +69,6 @@ func TestEnvOverrides(t *testing.T) {
 		GoGetWorkers:    10,
 		ProtocolWorkers: 10,
 		LogLevel:        "info",
-		BuffaloLogLevel: "info",
 		GoBinary:        "go11",
 		CloudRuntime:    "gcp",
 		TimeoutConf: TimeoutConf{
@@ -200,7 +205,6 @@ func TestParseExampleConfig(t *testing.T) {
 	expConf := &Config{
 		GoEnv:           "development",
 		LogLevel:        "debug",
-		BuffaloLogLevel: "debug",
 		GoBinary:        "go",
 		GoGetWorkers:    30,
 		ProtocolWorkers: 30,
@@ -215,10 +219,11 @@ func TestParseExampleConfig(t *testing.T) {
 		BasicAuthPass:    "",
 		Storage:          expStorage,
 		TraceExporterURL: "http://localhost:14268",
-		TraceExporter:    "jaeger",
+		TraceExporter:    "",
+		StatsExporter:    "prometheus",
 	}
 
-	absPath, err := filepath.Abs(exampleConfigPath)
+	absPath, err := filepath.Abs(testConfigFile(t))
 	if err != nil {
 		t.Errorf("Unable to construct absolute path to example config file")
 	}
@@ -239,7 +244,6 @@ func getEnvMap(config *Config) map[string]string {
 		"ATHENS_GOGET_WORKERS":    strconv.Itoa(config.GoGetWorkers),
 		"ATHENS_PROTOCOL_WORKERS": strconv.Itoa(config.ProtocolWorkers),
 		"ATHENS_LOG_LEVEL":        config.LogLevel,
-		"BUFFALO_LOG_LEVEL":       config.BuffaloLogLevel,
 		"ATHENS_CLOUD_RUNTIME":    config.CloudRuntime,
 		"ATHENS_TIMEOUT":          strconv.Itoa(config.Timeout),
 	}
@@ -298,64 +302,86 @@ func restoreEnv(envVars map[string]string) {
 	}
 }
 
-func Test_checkFilePerms(t *testing.T) {
+func tempFile(perm os.FileMode) (name string, err error) {
+	f, err := ioutil.TempFile(os.TempDir(), "prefix-")
+	if err != nil {
+		return "", err
+	}
+	if err = os.Chmod(f.Name(), perm); err != nil {
+		os.Remove(f.Name())
+		return "", err
+	}
+	return f.Name(), nil
+}
 
+func Test_checkFilePerms(t *testing.T) {
 	if runtime.GOOS == "windows" {
 		t.Skipf("Chmod is not supported in windows, so not possible to test. Ref: https://github.com/golang/go/blob/master/src/os/os_test.go#L1031\n")
 	}
 
-	f1, err := ioutil.TempFile(os.TempDir(), "prefix-")
-	if err != nil {
-		t.Fatalf("Cannot create 1st temp file: %s", err)
-	}
-	defer os.Remove(f1.Name())
-	if err = os.Chmod(f1.Name(), 0700); err != nil {
-		t.Fatalf("Cannot chmod 1st temp file: %s", err)
+	incorrectPerms := []os.FileMode{0777, 0610, 0660}
+	var incorrectFiles = make([]string, len(incorrectPerms))
+
+	for i := range incorrectPerms {
+		f, err := tempFile(incorrectPerms[i])
+		if err != nil {
+			t.Fatalf("tempFile creation error %s", err)
+		}
+		incorrectFiles[i] = f
+		defer os.Remove(f)
 	}
 
-	f2, err := ioutil.TempFile(os.TempDir(), "prefix-")
-	if err != nil {
-		t.Fatalf("Cannot create 2nd temp file: %s", err)
+	correctPerms := []os.FileMode{0600, 0400}
+	var correctFiles = make([]string, len(correctPerms))
+
+	for i := range correctPerms {
+		f, err := tempFile(correctPerms[i])
+		if err != nil {
+			t.Fatalf("tempFile creation error %s", err)
+		}
+		correctFiles[i] = f
+		defer os.Remove(f)
 	}
 
-	defer os.Remove(f2.Name())
-	if err = os.Chmod(f2.Name(), 0640); err != nil {
-		t.Fatalf("Cannot chmod 2nd temp file: %s", err)
-	}
-
-	type args struct {
-		files []string
-	}
-	tests := []struct {
+	type test struct {
 		name    string
-		args    args
+		files   []string
 		wantErr bool
-	}{
+	}
+
+	tests := []test{
+		{
+			"should not have an error on 0600, 0400, 0640",
+			[]string{correctFiles[0], correctFiles[1]},
+			false,
+		},
 		{
 			"should not have an error on empty file name",
-			args{
-				[]string{"", f2.Name()},
-			},
+			[]string{"", correctFiles[1]},
 			false,
 		},
 		{
 			"should have an error if all the files have incorrect permissions",
-			args{
-				[]string{f1.Name(), f1.Name(), f1.Name()},
-			},
+			[]string{incorrectFiles[0], incorrectFiles[1], incorrectFiles[1]},
 			true,
 		},
 		{
 			"should have an error when at least 1 file has wrong permissions",
-			args{
-				[]string{f2.Name(), f1.Name()},
-			},
+			[]string{correctFiles[0], correctFiles[1], incorrectFiles[1]},
 			true,
 		},
 	}
+
+	for _, f := range incorrectFiles {
+		tests = append(tests, test{
+			"incorrect file permission passed",
+			[]string{f},
+			true,
+		})
+	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := checkFilePerms(tt.args.files...); (err != nil) != tt.wantErr {
+			if err := checkFilePerms(tt.files...); (err != nil) != tt.wantErr {
 				t.Errorf("checkFilePerms() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})

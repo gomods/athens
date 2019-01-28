@@ -1,10 +1,12 @@
 package actions
 
 import (
-	"github.com/gobuffalo/buffalo"
+	"encoding/json"
+	"net/http"
+
 	"github.com/gomods/athens/pkg/build"
 )
 
-func versionHandler(c buffalo.Context) error {
-	return c.Render(200, proxy.JSON(build.Data()))
+func versionHandler(w http.ResponseWriter, r *http.Request) {
+	json.NewEncoder(w).Encode(build.Data())
 }

@@ -26,7 +26,6 @@ We strongly recommend using a tagged release, e.g. `gomods/athens:v0.2.0`, inste
 
 To make sure it's easy to install, we try to provide as many ways as possible to install and run Athens:
 
-- It's written in Go, so we provide a self-contained binary. You can configure and run the binary on your machine(s)
-    - Instructions on how to run directly from the binary are coming soon
+- It's written in Go, so you can easily build it yourself on almost any platform. You can also build the binary providing your own version and build time. See [here](./build-from-source)
 - We provide a [Docker image](https://hub.docker.com/r/gomods/athens/) and [instructions on how to run it](./shared-team-instance)
 - We provide [Kubernetes](https://kubernetes.io) [Helm Charts](https://helm.sh) with [instructions on how to run Athens on Kubernetes](./install-on-kubernetes)

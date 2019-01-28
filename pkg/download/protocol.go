@@ -3,6 +3,7 @@ package download
 import (
 	"context"
 	"io"
+	"sync"
 
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/observ"
@@ -64,16 +65,32 @@ func (p *protocol) List(ctx context.Context, mod string) ([]string, error) {
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 
-	strList, sErr := p.storage.List(ctx, mod)
+	var strList, goList []string
+	var sErr, goErr error
+	var wg sync.WaitGroup
+	wg.Add(2)
+
+	go func() {
+		defer wg.Done()
+		strList, sErr = p.storage.List(ctx, mod)
+	}()
+
+	go func() {
+		defer wg.Done()
+		_, goList, goErr = p.lister.List(ctx, mod)
+	}()
+
+	wg.Wait()
+
 	// if we got an unexpected storage err then we can not guarantee that the end result contains all versions
 	// a tag or repo could have been deleted
 	if sErr != nil {
 		return nil, errors.E(op, sErr)
 	}
-	_, goList, goErr := p.lister.List(mod)
-	isUnexpGoErr := goErr != nil && !errors.IsRepoNotFoundErr(goErr)
+
 	// if i.e. github is unavailable we should fail as well so that the behavior of the proxy is stable.
 	// otherwise we will get different results the next time because i.e. GH is up again
+	isUnexpGoErr := goErr != nil && !errors.IsRepoNotFoundErr(goErr)
 	if isUnexpGoErr {
 		return nil, errors.E(op, goErr)
 	}
@@ -91,7 +108,7 @@ func (p *protocol) Latest(ctx context.Context, mod string) (*storage.RevInfo, er
 	const op errors.Op = "protocol.Latest"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
-	lr, _, err := p.lister.List(mod)
+	lr, _, err := p.lister.List(ctx, mod)
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
@@ -104,12 +121,13 @@ func (p *protocol) Info(ctx context.Context, mod, ver string) ([]byte, error) {
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 	info, err := p.storage.Info(ctx, mod, ver)
+	var newVer string
 	if errors.IsNotFoundErr(err) {
-		err = p.stasher.Stash(ctx, mod, ver)
+		newVer, err = p.stasher.Stash(ctx, mod, ver)
 		if err != nil {
 			return nil, errors.E(op, err)
 		}
-		info, err = p.storage.Info(ctx, mod, ver)
+		info, err = p.storage.Info(ctx, mod, newVer)
 	}
 	if err != nil {
 		return nil, errors.E(op, err)
@@ -123,12 +141,13 @@ func (p *protocol) GoMod(ctx context.Context, mod, ver string) ([]byte, error) {
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 	goMod, err := p.storage.GoMod(ctx, mod, ver)
+	var newVer string
 	if errors.IsNotFoundErr(err) {
-		err = p.stasher.Stash(ctx, mod, ver)
+		newVer, err = p.stasher.Stash(ctx, mod, ver)
 		if err != nil {
 			return nil, errors.E(op, err)
 		}
-		goMod, err = p.storage.GoMod(ctx, mod, ver)
+		goMod, err = p.storage.GoMod(ctx, mod, newVer)
 	}
 	if err != nil {
 		return nil, errors.E(op, err)
@@ -142,12 +161,13 @@ func (p *protocol) Zip(ctx context.Context, mod, ver string) (io.ReadCloser, err
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 	zip, err := p.storage.Zip(ctx, mod, ver)
+	var newVer string
 	if errors.IsNotFoundErr(err) {
-		err = p.stasher.Stash(ctx, mod, ver)
+		newVer, err = p.stasher.Stash(ctx, mod, ver)
 		if err != nil {
 			return nil, errors.E(op, err)
 		}
-		zip, err = p.storage.Zip(ctx, mod, ver)
+		zip, err = p.storage.Zip(ctx, mod, newVer)
 	}
 	if err != nil {
 		return nil, errors.E(op, err)

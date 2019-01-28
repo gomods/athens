@@ -1,97 +1,70 @@
 package gcp
 
 import (
-	"bytes"
 	"context"
-	"io/ioutil"
+	"os"
 	"testing"
-	"time"
 
-	"github.com/gomods/athens/pkg/errors"
+	"cloud.google.com/go/storage"
+	"github.com/gomods/athens/pkg/config"
+	"github.com/gomods/athens/pkg/storage/compliance"
+	"google.golang.org/api/iterator"
 )
 
-func (g *GcpTests) TestSaveGetListExistsRoundTrip() {
-	r := g.Require()
-
-	g.T().Run("Save to storage", func(t *testing.T) {
-		err := g.store.Save(g.context, g.module, g.version, mod, bytes.NewReader(zip), info)
-		r.NoError(err)
-	})
-
-	g.T().Run("Get from storage", func(t *testing.T) {
-		ctx := context.Background()
-		modBts, err := g.store.GoMod(ctx, g.module, g.version)
-		r.NoError(err)
-		r.Equal(mod, modBts)
-
-		infoBts, err := g.store.Info(ctx, g.module, g.version)
-		r.NoError(err)
-		r.Equal(info, infoBts)
-
-		ziprc, err := g.store.Zip(ctx, g.module, g.version)
-		r.NoError(err)
-
-		gotZip, err := ioutil.ReadAll(ziprc)
-		r.NoError(ziprc.Close())
-		r.NoError(err)
-		r.Equal(zip, gotZip)
-	})
-
-	g.T().Run("List module versions", func(t *testing.T) {
-		versionList, err := g.store.List(g.context, g.module)
-		r.NoError(err)
-		r.Equal(1, len(versionList))
-		r.Equal(g.version, versionList[0])
-	})
-
-	g.T().Run("Module exists", func(t *testing.T) {
-		exists, err := g.store.Exists(g.context, g.module, g.version)
-		r.NoError(err)
-		r.Equal(true, exists)
-	})
-
-	g.T().Run("Resources closed", func(t *testing.T) {
-		r.Equal(true, g.bucket.ReadClosed())
-		r.Equal(true, g.bucket.WriteClosed())
-	})
+func TestBackend(t *testing.T) {
+	backend := getStorage(t)
+	compliance.RunTests(t, backend, backend.clear)
 }
 
-func (g *GcpTests) TestDeleter() {
-	r := g.Require()
-
-	version := "delete" + time.Now().String()
-	err := g.store.Save(g.context, g.module, version, mod, bytes.NewReader(zip), info)
-	r.NoError(err)
-
-	err = g.store.Delete(g.context, g.module, version)
-	r.NoError(err)
-
-	exists, err := g.store.Exists(g.context, g.module, version)
-	r.NoError(err)
-	r.Equal(false, exists)
+func BenchmarkBackend(b *testing.B) {
+	backend := getStorage(b)
+	compliance.RunBenchmarks(b, backend, backend.clear)
 }
 
-func (g *GcpTests) TestNotFounds() {
-	r := g.Require()
+func (s *Storage) clear() error {
+	ctx, cancel := context.WithTimeout(context.Background(), s.timeout)
+	defer cancel()
 
-	g.T().Run("Get module version not found", func(t *testing.T) {
-		_, err := g.store.Info(context.Background(), "never", "there")
-		r.True(errors.IsNotFoundErr(err))
-		_, err = g.store.GoMod(context.Background(), "never", "there")
-		r.True(errors.IsNotFoundErr(err))
-		_, err = g.store.Zip(context.Background(), "never", "there")
-		r.True(errors.IsNotFoundErr(err))
-	})
+	it := s.bucket.Objects(ctx, nil)
 
-	g.T().Run("Exists module version not found", func(t *testing.T) {
-		exists, err := g.store.Exists(g.context, "never", "there")
-		r.NoError(err)
-		r.Equal(false, exists)
-	})
+	for {
+		attrs, err := it.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			return err
+		}
+		err = s.bucket.Object(attrs.Name).Delete(ctx)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
 
-	g.T().Run("List not found", func(t *testing.T) {
-		list, err := g.store.List(g.context, "nothing/to/see/here")
-		r.NoError(err)
-		r.Equal(0, len(list))
-	})
+func getStorage(t testing.TB) *Storage {
+	creds := os.Getenv("GOOGLE_APPLICATION_CREDENTIALS")
+	if creds == "" {
+		t.SkipNow()
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), config.GetTimeoutDuration(30))
+	defer cancel()
+	s, err := storage.NewClient(ctx)
+	if err != nil {
+		t.Fatalf("could not create new storage client: %s", err)
+	}
+	bucketName := "athens_test_bucket"
+	bkt := s.Bucket(bucketName)
+	if _, err := bkt.Attrs(ctx); err != nil {
+		if err == storage.ErrBucketNotExist {
+			t.Fatalf("bucket: %s does not exist - You must manually create a storage bucket for Athens, see https://cloud.google.com/storage/docs/creating-buckets#storage-create-bucket-console", bucketName)
+		}
+		t.Fatalf("error getting BucketHandle: %s", err)
+	}
+
+	return &Storage{
+		bucket:  bkt,
+		timeout: config.GetTimeoutDuration(300),
+	}
 }

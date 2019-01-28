@@ -20,11 +20,11 @@ type Config struct {
 	GoGetWorkers     int    `validate:"required" envconfig:"ATHENS_GOGET_WORKERS"`
 	ProtocolWorkers  int    `validate:"required" envconfig:"ATHENS_PROTOCOL_WORKERS"`
 	LogLevel         string `validate:"required" envconfig:"ATHENS_LOG_LEVEL"`
-	BuffaloLogLevel  string `validate:"required" envconfig:"BUFFALO_LOG_LEVEL"`
 	CloudRuntime     string `validate:"required" envconfig:"ATHENS_CLOUD_RUNTIME"`
 	FilterFile       string `envconfig:"ATHENS_FILTER_FILE"`
 	TraceExporterURL string `envconfig:"ATHENS_TRACE_EXPORTER_URL"`
 	TraceExporter    string `envconfig:"ATHENS_TRACE_EXPORTER"`
+	StatsExporter    string `envconfig:"ATHENS_STATS_EXPORTER"`
 	StorageType      string `validate:"required" envconfig:"ATHENS_STORAGE_TYPE"`
 	GlobalEndpoint   string `envconfig:"ATHENS_GLOBAL_ENDPOINT"` // This feature is not yet implemented
 	Port             string `envconfig:"ATHENS_PORT" default:":3000"`
@@ -36,6 +36,8 @@ type Config struct {
 	NETRCPath        string `envconfig:"ATHENS_NETRC_PATH"`
 	GithubToken      string `envconfig:"ATHENS_GITHUB_TOKEN"`
 	HGRCPath         string `envconfig:"ATHENS_HGRC_PATH"`
+	TLSCertFile      string `envconfig:"ATHENS_TLSCERT_FILE"`
+	TLSKeyFile       string `envconfig:"ATHENS_TLSKEY_FILE"`
 	Storage          *StorageConfig
 }
 
@@ -46,6 +48,30 @@ func (c *Config) BasicAuth() (user, pass string, ok bool) {
 	pass = c.BasicAuthPass
 	ok = user != "" && pass != ""
 	return user, pass, ok
+}
+
+// TLSCertFiles returns certificate and key files and an error if
+// both files doesn't exist and have approperiate file permissions
+func (c *Config) TLSCertFiles() (cert, key string, err error) {
+	if c.TLSCertFile == "" && c.TLSKeyFile == "" {
+		return "", "", nil
+	}
+
+	certFile, err := os.Stat(c.TLSCertFile)
+	if err != nil {
+		return "", "", fmt.Errorf("Could not access TLSCertFile: %v", err)
+	}
+
+	keyFile, err := os.Stat(c.TLSKeyFile)
+	if err != nil {
+		return "", "", fmt.Errorf("Could not access TLSKeyFile: %v", err)
+	}
+
+	if keyFile.Mode()&077 != 0 && runtime.GOOS != "windows" {
+		return "", "", fmt.Errorf("TLSKeyFile should not be accessable by others")
+	}
+
+	return certFile.Name(), keyFile.Name(), nil
 }
 
 // FilterOff returns true if the FilterFile is empty
@@ -63,8 +89,10 @@ func ParseConfigFile(configFile string) (*Config, error) {
 	}
 
 	// Check file perms from config
-	if err := checkFilePerms(config.FilterFile); err != nil {
-		return nil, err
+	if config.GoEnv == "production" {
+		if err := checkFilePerms(configFile, config.FilterFile); err != nil {
+			return nil, err
+		}
 	}
 
 	// override values with environment variables if specified
@@ -136,21 +164,18 @@ func checkFilePerms(files ...string) error {
 		// TODO: Do not ignore errors when a file is not found
 		// There is a subtle bug in the filter module which ignores the filter file if it does not find it.
 		// This check can be removed once that has been fixed
-		fInfo, err := os.Lstat(f)
+		fInfo, err := os.Stat(f)
 		if err != nil {
 			continue
 		}
 
-		if runtime.GOOS == "windows" {
-			if (fInfo.Mode() & 0600) != 0600 {
-				return errors.E(op, f+" should have 0600 as permission")
-			}
-		} else {
-			// Assume unix based system (MacOS and Linux)
-			if fInfo.Mode() != 0640 {
-				return errors.E(op, f+" should have 0640 as permission")
-			}
+		// Assume unix based system (MacOS and Linux)
+		// the bit mask is calculated using the umask command which tells which permissions
+		// should not be allowed for a particular user, group or world
+		if fInfo.Mode()&0077 != 0 && runtime.GOOS != "windows" {
+			return errors.E(op, f+" should have at most rwx,-, - (bit mask 077) as permission")
 		}
+
 	}
 
 	return nil

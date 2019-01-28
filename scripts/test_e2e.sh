@@ -41,7 +41,7 @@ export GO111MODULE=on
 cd $REPO_DIR/cmd/proxy
 pkill athens-proxy || true # cleanup proxy if it is running
 go build -mod=vendor -o athens-proxy && ./athens-proxy &
-while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' localhost:3000)" != "200" ]]; do sleep 5; done
+while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' localhost:3000/readyz)" != "200" ]]; do sleep 1; done
 
 # Clone our test repo
 TEST_SOURCE=${TMPDIR}/happy-path
@@ -59,3 +59,11 @@ clearGoModCache
 # Verify that the test works against the proxy
 export GOPROXY=http://localhost:3000
 $GO_BINARY_PATH run .
+
+CATALOG_RES=$(curl localhost:3000/catalog)
+CATALOG_EXPECTED='{"modules":[{"module":"github.com/athens-artifacts/no-tags","version":"v0.0.0-20180803171426-1a540c5d67ab"}]}'
+
+if [[ "$CATALOG_RES" != "$CATALOG_EXPECTED" ]]; then
+  echo ERROR: catalog endpoint failed
+  exit 1 # terminate and indicate error
+fi

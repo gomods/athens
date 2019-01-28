@@ -1,6 +1,6 @@
 ---
 title: "Intro"
-date: 2018-02-11T16:52:23-05:00
+date: 2018-12-07T11:44:36+00:00
 ---
 
 <img src="/banner.png" width="600" alt="Athens Logo"/>
@@ -28,7 +28,7 @@ Athens is easy to run yourself. We give you a few options:
 - You can run it as a [Docker](https://www.docker.com/) image (see [here](./install/shared-team-instance/) for how to do that)
 - You can run it on [Kubernetes](https://kubernetes.io) (see [here](./install/install-on-kubernetes/) for how to do that)
 
-We also run an experimental server for public use, so you can get started with Athens without even installing it. For details, see [here](./public_proxy).
+We also run an experimental version of Athens so you can get started without even installing anything. To get started, set `GOPROXY="https://athens.azurefd.net"`.
 
 **[Like what you hear? Try Athens Now!](/try-out)**
 

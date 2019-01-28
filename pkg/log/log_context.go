@@ -1,25 +1,25 @@
 package log
 
 import (
-	"github.com/gobuffalo/buffalo"
+	"context"
 )
 
-const logEntryKey = "log-entry-context-key"
+type ctxKey string
 
-// SetEntryInContext stores an Entry in the buffalo context
-func SetEntryInContext(ctx buffalo.Context, e Entry) {
-	ctx.Set(logEntryKey, e)
+const logEntryKey ctxKey = "log-entry-context-key"
+
+// SetEntryInContext stores an Entry in the request context
+func SetEntryInContext(ctx context.Context, e Entry) context.Context {
+	return context.WithValue(ctx, logEntryKey, e)
 }
 
-// EntryFromContext returns an Entry that has been stored in the buffalo context.
+// EntryFromContext returns an Entry that has been stored in the request context.
 // If there is no value for the key or the type assertion fails, it returns a new
 // entry from the provided logger
-func EntryFromContext(ctx buffalo.Context) Entry {
-	d := ctx.Data()
-	e, ok := d[logEntryKey].(Entry)
-	if e == nil || !ok {
+func EntryFromContext(ctx context.Context) Entry {
+	e, ok := ctx.Value(logEntryKey).(Entry)
+	if !ok || e == nil {
 		return NoOpLogger()
 	}
-
 	return e
 }

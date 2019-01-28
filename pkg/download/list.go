@@ -1,11 +1,10 @@
 package download
 
 import (
+	"fmt"
 	"net/http"
 	"strings"
 
-	"github.com/gobuffalo/buffalo"
-	"github.com/gobuffalo/buffalo/render"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/log"
 	"github.com/gomods/athens/pkg/paths"
@@ -15,21 +14,24 @@ import (
 const PathList = "/{module:.+}/@v/list"
 
 // ListHandler implements GET baseURL/module/@v/list
-func ListHandler(dp Protocol, lggr log.Entry, eng *render.Engine) buffalo.Handler {
+func ListHandler(dp Protocol, lggr log.Entry) http.Handler {
 	const op errors.Op = "download.ListHandler"
-	return func(c buffalo.Context) error {
-		mod, err := paths.GetModule(c)
+	f := func(w http.ResponseWriter, r *http.Request) {
+		mod, err := paths.GetModule(r)
 		if err != nil {
 			lggr.SystemErr(errors.E(op, err))
-			return c.Render(500, nil)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
 		}
 
-		versions, err := dp.List(c, mod)
+		versions, err := dp.List(r.Context(), mod)
 		if err != nil {
 			lggr.SystemErr(errors.E(op, err))
-			return c.Render(errors.Kind(err), eng.JSON(errors.KindText(err)))
+			w.WriteHeader(errors.Kind(err))
+			return
 		}
 
-		return c.Render(http.StatusOK, eng.String(strings.Join(versions, "\n")))
+		fmt.Fprint(w, strings.Join(versions, "\n"))
 	}
+	return http.HandlerFunc(f)
 }
