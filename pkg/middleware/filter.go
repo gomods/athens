@@ -17,13 +17,17 @@ func NewFilterMiddleware(mf *module.Filter, upstreamEndpoint string) mux.Middlew
 	const op errors.Op = "actions.NewFilterMiddleware"
 	return func(h http.Handler) http.Handler {
 		f := func(w http.ResponseWriter, r *http.Request) {
-			mod, err := paths.GetAllParams(r)
+			mod, err := paths.GetModule(r)
 			if err != nil {
 				// if there is no module the path we are hitting is not one related to modules, like /
 				h.ServeHTTP(w, r)
 				return
 			}
-			rule := mf.Rule(mod.Module, mod.Version)
+			ver, err := paths.GetVersion(r)
+			if err != nil {
+				ver = ""
+			}
+			rule := mf.Rule(mod, ver)
 			switch rule {
 			case module.Exclude:
 				// Exclude: ignore request for this module

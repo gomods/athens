@@ -109,7 +109,7 @@ func (f *Filter) getAssociatedRule(version string, path ...string) FilterRule {
 				break
 			}
 		}
-		if match {
+		if match || version == "" {
 			rules = append(rules, rn.rule)
 		}
 	}
