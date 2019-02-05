@@ -52,13 +52,13 @@ func (t *FilterTests) Test_IgnoreSimple() {
 
 	f, err := NewFilter(filter)
 	r.NoError(err)
-	f.AddRule("github.com/a/b", Exclude)
+	f.AddRule("github.com/a/b", nil, Exclude)
 
-	r.Equal(Include, f.Rule("github.com/a"))
-	r.Equal(Exclude, f.Rule("github.com/a/b"))
-	r.Equal(Exclude, f.Rule("github.com/a/b/c"))
-	r.Equal(Include, f.Rule("github.com/d"))
-	r.Equal(Include, f.Rule("bitbucket.com/a/b"))
+	r.Equal(Include, f.Rule("github.com/a", ""))
+	r.Equal(Exclude, f.Rule("github.com/a/b", ""))
+	r.Equal(Exclude, f.Rule("github.com/a/b/c", ""))
+	r.Equal(Include, f.Rule("github.com/d", ""))
+	r.Equal(Include, f.Rule("bitbucket.com/a/b", ""))
 }
 
 func (t *FilterTests) Test_IgnoreParentAllowChildren() {
@@ -69,14 +69,14 @@ func (t *FilterTests) Test_IgnoreParentAllowChildren() {
 
 	f, err := NewFilter(filter)
 	r.NoError(err)
-	f.AddRule("github.com/a/b", Exclude)
-	f.AddRule("github.com/a/b/c", Include)
+	f.AddRule("github.com/a/b", nil, Exclude)
+	f.AddRule("github.com/a/b/c", nil, Include)
 
-	r.Equal(Include, f.Rule("github.com/a"))
-	r.Equal(Exclude, f.Rule("github.com/a/b"))
-	r.Equal(Include, f.Rule("github.com/a/b/c"))
-	r.Equal(Include, f.Rule("github.com/d"))
-	r.Equal(Include, f.Rule("bitbucket.com/a/b"))
+	r.Equal(Include, f.Rule("github.com/a", ""))
+	r.Equal(Exclude, f.Rule("github.com/a/b", ""))
+	r.Equal(Include, f.Rule("github.com/a/b/c", ""))
+	r.Equal(Include, f.Rule("github.com/d", ""))
+	r.Equal(Include, f.Rule("bitbucket.com/a/b", ""))
 }
 
 func (t *FilterTests) Test_OnlyAllowed() {
@@ -87,14 +87,14 @@ func (t *FilterTests) Test_OnlyAllowed() {
 
 	f, err := NewFilter(filter)
 	r.NoError(err)
-	f.AddRule("github.com/a/b", Include)
-	f.AddRule("", Exclude)
+	f.AddRule("github.com/a/b", nil, Include)
+	f.AddRule("", nil, Exclude)
 
-	r.Equal(Exclude, f.Rule("github.com/a"))
-	r.Equal(Include, f.Rule("github.com/a/b"))
-	r.Equal(Include, f.Rule("github.com/a/b/c"))
-	r.Equal(Exclude, f.Rule("github.com/d"))
-	r.Equal(Exclude, f.Rule("bitbucket.com/a/b"))
+	r.Equal(Exclude, f.Rule("github.com/a", ""))
+	r.Equal(Include, f.Rule("github.com/a/b", ""))
+	r.Equal(Include, f.Rule("github.com/a/b/c", ""))
+	r.Equal(Exclude, f.Rule("github.com/d", ""))
+	r.Equal(Exclude, f.Rule("bitbucket.com/a/b", ""))
 }
 
 func (t *FilterTests) Test_Direct() {
@@ -105,14 +105,32 @@ func (t *FilterTests) Test_Direct() {
 
 	f, err := NewFilter(filter)
 	r.NoError(err)
-	f.AddRule("github.com/a/b/c", Exclude)
-	f.AddRule("github.com/a/b", Direct)
-	f.AddRule("github.com/a", Include)
-	f.AddRule("", Exclude)
+	f.AddRule("github.com/a/b/c", nil, Exclude)
+	f.AddRule("github.com/a/b", nil, Direct)
+	f.AddRule("github.com/a", nil, Include)
+	f.AddRule("", nil, Exclude)
 
-	r.Equal(Include, f.Rule("github.com/a"))
-	r.Equal(Direct, f.Rule("github.com/a/b"))
-	r.Equal(Exclude, f.Rule("github.com/a/b/c/d"))
+	r.Equal(Include, f.Rule("github.com/a", ""))
+	r.Equal(Direct, f.Rule("github.com/a/b", ""))
+	r.Equal(Exclude, f.Rule("github.com/a/b/c/d", ""))
+}
+
+func (t *FilterTests) Test_versionFilter() {
+	r := t.Require()
+	filter := tempFilterFile(t.T())
+	defer os.Remove(filter)
+
+	f, err := NewFilter(filter)
+	r.NoError(err)
+	f.AddRule("", nil, Exclude)
+	f.AddRule("github.com/a/b", []string{"v1."}, Include)
+	f.AddRule("github.com/a/b/c", []string{"v1.2.", "v0.8."}, Direct)
+
+	r.Equal(Exclude, f.Rule("github.com/d/e", "v1.2.0"))
+	r.Equal(Exclude, f.Rule("github.com/a/b", "v10.0.0"))
+	r.Equal(Include, f.Rule("github.com/a/b", "v1.5.0"))
+	r.Equal(Direct, f.Rule("github.com/a/b/c/d", "v1.2.3"))
+	r.Equal(Include, f.Rule("github.com/a/b/c/d", "v1.3.4"))
 }
 
 func (t *FilterTests) Test_initFromConfig() {
@@ -133,6 +151,11 @@ func (t *FilterTests) Test_initFromConfig() {
 	r.Nil(f)
 	r.Error(err)
 
+	versionInput := []byte("+ github.com/a/b\n\n# some comment\n\n- github.com/c/d v1,v2.3.4,v3.2.*\n\nD github.com/x\n")
+	ioutil.WriteFile(filterFile, versionInput, 0644)
+	f, err = initFromConfig(filterFile)
+	r.NotNil(f)
+	r.NoError(err)
 }
 
 func tempFilterFile(t *testing.T) (path string) {
