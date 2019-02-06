@@ -201,7 +201,7 @@ dependency described by this import which is hosted on Bitbucket
 import "git.example.com/golibs/logo"
 ```
 
-Further assume that you would manually clone this import like this
+Further, assume that you would manually clone this import like this
 
 ```bash
 $ git clone ssh://git@git.example.com:7999/golibs/logo.git
