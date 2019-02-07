@@ -15,8 +15,7 @@ func TestBackend(t *testing.T) {
 }
 
 func (m *ModuleStore) clear() error {
-	m.s.DB(m.d).C(m.c).DropCollection()
-
+	m.s.DB(m.d).DropDatabase()
 	return m.initDatabase()
 }
 
@@ -30,7 +29,6 @@ func getStorage(tb testing.TB) *ModuleStore {
 	if url == "" {
 		tb.SkipNow()
 	}
-
 	backend, err := NewStorage(&config.MongoConfig{URL: url}, config.GetTimeoutDuration(300))
 	require.NoError(tb, err)
 

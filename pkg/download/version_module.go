@@ -1,8 +1,8 @@
 package download
 
 import (
-	"github.com/gobuffalo/buffalo"
-	"github.com/gobuffalo/buffalo/render"
+	"net/http"
+
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/log"
 )
@@ -10,24 +10,24 @@ import (
 // PathVersionModule URL.
 const PathVersionModule = "/{module:.+}/@v/{version}.mod"
 
-// VersionModuleHandler implements GET baseURL/module/@v/version.mod
-func VersionModuleHandler(dp Protocol, lggr log.Entry, eng *render.Engine) buffalo.Handler {
+// ModuleHandler implements GET baseURL/module/@v/version.mod
+func ModuleHandler(dp Protocol, lggr log.Entry) http.Handler {
 	const op errors.Op = "download.VersionModuleHandler"
-	return func(c buffalo.Context) error {
-		mod, ver, err := getModuleParams(c, op)
+	f := func(w http.ResponseWriter, r *http.Request) {
+		mod, ver, err := getModuleParams(r, op)
 		if err != nil {
 			lggr.SystemErr(err)
-			return c.Render(errors.Kind(err), nil)
+			w.WriteHeader(errors.Kind(err))
+			return
 		}
-		modBts, err := dp.GoMod(c, mod, ver)
+		modBts, err := dp.GoMod(r.Context(), mod, ver)
 		if err != nil {
 			err = errors.E(op, errors.M(mod), errors.V(ver), err)
 			lggr.SystemErr(err)
-			return c.Render(errors.Kind(err), nil)
+			w.WriteHeader(errors.Kind(err))
+			return
 		}
-
-		// Calling c.Response().Write will write the header directly
-		// and we would get a 0 status in the buffalo logs.
-		return c.Render(200, eng.String(string(modBts)))
+		w.Write(modBts)
 	}
+	return http.HandlerFunc(f)
 }

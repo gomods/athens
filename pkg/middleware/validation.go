@@ -5,44 +5,43 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/gobuffalo/buffalo"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/log"
 	"github.com/gomods/athens/pkg/paths"
+	"github.com/gorilla/mux"
 )
 
 // NewValidationMiddleware builds a middleware function that performs validation checks by calling
 // an external webhook
-func NewValidationMiddleware(validatorHook string) buffalo.MiddlewareFunc {
+func NewValidationMiddleware(validatorHook string) mux.MiddlewareFunc {
 	const op errors.Op = "actions.NewValidationMiddleware"
-
-	return func(next buffalo.Handler) buffalo.Handler {
-		return func(c buffalo.Context) error {
-			mod, err := paths.GetModule(c)
-
+	return func(h http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			mod, err := paths.GetModule(r)
 			if err != nil {
 				// if there is no module the path we are hitting is not one related to modules, like /
-				return next(c)
+				h.ServeHTTP(w, r)
+				return
 			}
-
 			// not checking the error. Not all requests include a version
 			// i.e. list requests path is like /{module:.+}/@v/list with no version parameter
-			version, _ := paths.GetVersion(c)
-
+			version, _ := paths.GetVersion(r)
 			if version != "" {
 				valid, err := validate(validatorHook, mod, version, c.Request().Header.Get("Authorization"))
 				if err != nil {
-					entry := log.EntryFromContext(c)
+					entry := log.EntryFromContext(r.Context())
 					entry.SystemErr(err)
-					return c.Render(http.StatusInternalServerError, nil)
+					w.WriteHeader(http.StatusInternalServerError)
+					return
 				}
 
 				if !valid {
-					return c.Render(http.StatusForbidden, nil)
+					w.WriteHeader(http.StatusForbidden)
+					return
 				}
 			}
-			return next(c)
-		}
+			h.ServeHTTP(w, r)
+		})
 	}
 }
 

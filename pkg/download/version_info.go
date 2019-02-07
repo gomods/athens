@@ -3,8 +3,6 @@ package download
 import (
 	"net/http"
 
-	"github.com/gobuffalo/buffalo"
-	"github.com/gobuffalo/buffalo/render"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/log"
 )
@@ -12,21 +10,23 @@ import (
 // PathVersionInfo URL.
 const PathVersionInfo = "/{module:.+}/@v/{version}.info"
 
-// VersionInfoHandler implements GET baseURL/module/@v/version.info
-func VersionInfoHandler(dp Protocol, lggr log.Entry, eng *render.Engine) buffalo.Handler {
-	const op errors.Op = "download.VersionInfoHandler"
-	return func(c buffalo.Context) error {
-		mod, ver, err := getModuleParams(c, op)
+// InfoHandler implements GET baseURL/module/@v/version.info
+func InfoHandler(dp Protocol, lggr log.Entry) http.Handler {
+	const op errors.Op = "download.InfoHandler"
+	f := func(w http.ResponseWriter, r *http.Request) {
+		mod, ver, err := getModuleParams(r, op)
 		if err != nil {
 			lggr.SystemErr(err)
-			return c.Render(errors.Kind(err), nil)
+			w.WriteHeader(errors.Kind(err))
+			return
 		}
-		info, err := dp.Info(c, mod, ver)
+		info, err := dp.Info(r.Context(), mod, ver)
 		if err != nil {
 			lggr.SystemErr(errors.E(op, err, errors.M(mod), errors.V(ver)))
-			return c.Render(errors.Kind(err), nil)
+			w.WriteHeader(errors.Kind(err))
 		}
 
-		return c.Render(http.StatusOK, eng.String(string(info)))
+		w.Write(info)
 	}
+	return http.HandlerFunc(f)
 }

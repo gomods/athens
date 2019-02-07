@@ -20,11 +20,11 @@ type Config struct {
 	GoGetWorkers     int    `validate:"required" envconfig:"ATHENS_GOGET_WORKERS"`
 	ProtocolWorkers  int    `validate:"required" envconfig:"ATHENS_PROTOCOL_WORKERS"`
 	LogLevel         string `validate:"required" envconfig:"ATHENS_LOG_LEVEL"`
-	BuffaloLogLevel  string `validate:"required" envconfig:"BUFFALO_LOG_LEVEL"`
 	CloudRuntime     string `validate:"required" envconfig:"ATHENS_CLOUD_RUNTIME"`
 	FilterFile       string `envconfig:"ATHENS_FILTER_FILE"`
 	TraceExporterURL string `envconfig:"ATHENS_TRACE_EXPORTER_URL"`
 	TraceExporter    string `envconfig:"ATHENS_TRACE_EXPORTER"`
+	StatsExporter    string `envconfig:"ATHENS_STATS_EXPORTER"`
 	StorageType      string `validate:"required" envconfig:"ATHENS_STORAGE_TYPE"`
 	GlobalEndpoint   string `envconfig:"ATHENS_GLOBAL_ENDPOINT"` // This feature is not yet implemented
 	Port             string `envconfig:"ATHENS_PORT" default:":3000"`
@@ -89,8 +89,10 @@ func ParseConfigFile(configFile string) (*Config, error) {
 	}
 
 	// Check file perms from config
-	if err := checkFilePerms(configFile, config.FilterFile); err != nil {
-		return nil, err
+	if config.GoEnv == "production" {
+		if err := checkFilePerms(configFile, config.FilterFile); err != nil {
+			return nil, err
+		}
 	}
 
 	// override values with environment variables if specified

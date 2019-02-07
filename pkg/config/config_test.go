@@ -69,7 +69,6 @@ func TestEnvOverrides(t *testing.T) {
 		GoGetWorkers:    10,
 		ProtocolWorkers: 10,
 		LogLevel:        "info",
-		BuffaloLogLevel: "info",
 		GoBinary:        "go11",
 		CloudRuntime:    "gcp",
 		TimeoutConf: TimeoutConf{
@@ -206,7 +205,6 @@ func TestParseExampleConfig(t *testing.T) {
 	expConf := &Config{
 		GoEnv:           "development",
 		LogLevel:        "debug",
-		BuffaloLogLevel: "debug",
 		GoBinary:        "go",
 		GoGetWorkers:    30,
 		ProtocolWorkers: 30,
@@ -221,7 +219,8 @@ func TestParseExampleConfig(t *testing.T) {
 		BasicAuthPass:    "",
 		Storage:          expStorage,
 		TraceExporterURL: "http://localhost:14268",
-		TraceExporter:    "jaeger",
+		TraceExporter:    "",
+		StatsExporter:    "prometheus",
 	}
 
 	absPath, err := filepath.Abs(testConfigFile(t))
@@ -245,7 +244,6 @@ func getEnvMap(config *Config) map[string]string {
 		"ATHENS_GOGET_WORKERS":    strconv.Itoa(config.GoGetWorkers),
 		"ATHENS_PROTOCOL_WORKERS": strconv.Itoa(config.ProtocolWorkers),
 		"ATHENS_LOG_LEVEL":        config.LogLevel,
-		"BUFFALO_LOG_LEVEL":       config.BuffaloLogLevel,
 		"ATHENS_CLOUD_RUNTIME":    config.CloudRuntime,
 		"ATHENS_TIMEOUT":          strconv.Itoa(config.Timeout),
 	}

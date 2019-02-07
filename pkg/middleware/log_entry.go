@@ -1,25 +1,28 @@
 package middleware
 
 import (
-	"github.com/gobuffalo/buffalo"
+	"net/http"
+
 	"github.com/gomods/athens/pkg/log"
+	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
 )
 
 // LogEntryMiddleware builds a log.Entry, setting the request fields
 // and storing it in the context to be used throughout the stack
-func LogEntryMiddleware(lggr *log.Logger) buffalo.MiddlewareFunc {
-	return func(next buffalo.Handler) buffalo.Handler {
-		return func(c buffalo.Context) error {
-			req := c.Request()
+func LogEntryMiddleware(lggr *log.Logger) mux.MiddlewareFunc {
+	return func(h http.Handler) http.Handler {
+		f := func(w http.ResponseWriter, r *http.Request) {
 			ent := lggr.WithFields(logrus.Fields{
-				"http-method": req.Method,
-				"http-path":   req.URL.Path,
-				"http-url":    req.URL.String(),
+				"http-method": r.Method,
+				"http-path":   r.URL.Path,
+				"http-url":    r.URL.String(),
 			})
 
-			log.SetEntryInContext(c, ent)
-			return next(c)
+			ctx := log.SetEntryInContext(r.Context(), ent)
+			r = r.WithContext(ctx)
+			h.ServeHTTP(w, r)
 		}
+		return http.HandlerFunc(f)
 	}
 }
