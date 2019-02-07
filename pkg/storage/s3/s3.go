@@ -3,8 +3,6 @@ package s3
 import (
 	"fmt"
 	"net/url"
-	"os/user"
-	"path/filepath"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -41,10 +39,7 @@ func New(s3Conf *config.S3Config, timeout time.Duration, options ...func(*aws.Co
 		return nil, errors.E(op, err)
 	}
 
-	creds, err := buildAWSCredentials(s3Conf)
-	if err != nil {
-		return nil, errors.E(op, "unable to build AWS credentials")
-	}
+	creds := buildAWSCredentials(s3Conf)
 
 	awsConfig := &aws.Config{
 		Credentials: creds,
@@ -71,20 +66,20 @@ func New(s3Conf *config.S3Config, timeout time.Duration, options ...func(*aws.Co
 	}, nil
 }
 
-// buildAWSCredentials builds the credentials required to create a new AWS session.  It will prefer the access key ID and
-// secret access key if specified in the S3Config.  Otherwise it will look for credentials in the filesystem.
-func buildAWSCredentials(s3Conf *config.S3Config) (*credentials.Credentials, error) {
-	if s3Conf.Key != "" && s3Conf.Secret != "" {
-		return credentials.NewStaticCredentials(s3Conf.Key, s3Conf.Secret, s3Conf.Token), nil
+// buildAWSCredentials builds the credentials required to create a new AWS
+// session.  It will prefer the access key ID and secret access key if specified
+// in the S3Config unless UseDefaultConfiguration is true. If the key ID and
+// secret access key are unspecified or UseDefaultConfiguration is true, then
+// the default aws configuration will be used. This will attempt to find
+// credentials in the environment, in the shared configuration
+// (~/.aws/credentials) and from ec2 instance role credentials. See
+// https://godoc.org/github.com/aws/aws-sdk-go#hdr-Configuring_Credentials and
+// https://godoc.org/github.com/aws/aws-sdk-go/aws/session#hdr-Environment_Variables
+// for environment variables that will affect the aws configuration.
+func buildAWSCredentials(s3Conf *config.S3Config) *credentials.Credentials {
+	if !s3Conf.UseDefaultConfiguration && s3Conf.Key != "" && s3Conf.Secret != "" {
+		return credentials.NewStaticCredentials(s3Conf.Key, s3Conf.Secret, s3Conf.Token)
 	}
 
-	u, err := user.Current()
-	if err != nil {
-		return nil, err
-	}
-
-	filename := filepath.Join(u.HomeDir, ".aws", "credentials")
-	sc := credentials.NewSharedCredentials(filename, "default")
-
-	return sc, nil
+	return nil
 }
