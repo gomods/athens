@@ -42,7 +42,7 @@ func NewFilter(filterFilePath string) (*Filter, error) {
 }
 
 // AddRule adds rule for specified path
-func (f *Filter) AddRule(path string, rule FilterRule) {
+func (f *Filter) AddRule(path string, versions []string, rule FilterRule) {
 	f.ensurePath(path)
 
 	segments := getPathSegments(path)
@@ -62,13 +62,14 @@ func (f *Filter) AddRule(path string, rule FilterRule) {
 	last := segments[len(segments)-1]
 	rn := latest.next[last]
 	rn.rule = rule
+	rn.vers = versions
 	latest.next[last] = rn
 }
 
 // Rule returns the filter rule to be applied to the given path
-func (f *Filter) Rule(path string) FilterRule {
+func (f *Filter) Rule(path, version string) FilterRule {
 	segs := getPathSegments(path)
-	rule := f.getAssociatedRule(segs...)
+	rule := f.getAssociatedRule(version, segs...)
 	if rule == Default {
 		rule = Include
 	}
@@ -88,7 +89,7 @@ func (f *Filter) ensurePath(path string) {
 	}
 }
 
-func (f *Filter) getAssociatedRule(path ...string) FilterRule {
+func (f *Filter) getAssociatedRule(version string, path ...string) FilterRule {
 	if len(path) == 0 {
 		return f.root.rule
 	}
@@ -100,7 +101,17 @@ func (f *Filter) getAssociatedRule(path ...string) FilterRule {
 			break
 		}
 		rn = rn.next[p]
-		rules = append(rules, rn.rule)
+		// default to true if no version filter, false otherwise
+		match := len(rn.vers) == 0
+		for _, ver := range rn.vers {
+			if strings.HasPrefix(version, ver) {
+				match = true
+				break
+			}
+		}
+		if match || version == "" {
+			rules = append(rules, rn.rule)
+		}
 	}
 
 	if len(rules) == 0 {
@@ -140,7 +151,7 @@ func initFromConfig(filePath string) (*Filter, error) {
 		}
 
 		split := strings.Split(line, " ")
-		if len(split) > 2 {
+		if len(split) > 3 {
 			return nil, errors.E(op, "Invalid configuration found in filter file at the line "+strconv.Itoa(idx+1))
 		}
 
@@ -158,12 +169,22 @@ func initFromConfig(filePath string) (*Filter, error) {
 		}
 		// is root config
 		if len(split) == 1 {
-			f.AddRule("", rule)
+			f.AddRule("", nil, rule)
 			continue
+		}
+		var vers []string
+		if len(split) == 3 {
+			vers = strings.Split(split[2], ",")
+			for i := range vers {
+				vers[i] = strings.TrimRight(vers[i], "*")
+				if vers[i][len(vers[i])-1] != '.' && strings.Count(vers[i], ".") < 2 {
+					vers[i] += "."
+				}
+			}
 		}
 
 		path := strings.TrimSpace(split[1])
-		f.AddRule(path, rule)
+		f.AddRule(path, vers, rule)
 	}
 	return f, nil
 }
