@@ -19,8 +19,6 @@ func (s *storageImpl) Catalog(ctx context.Context, token string, pageSize int) (
 	defer span.End()
 	queryToken := token
 	res := make([]paths.AllPathParams, 0)
-	doneCh := make(chan struct{})
-	defer close(doneCh)
 	startAfter := token
 	token = ""
 
