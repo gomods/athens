@@ -53,7 +53,6 @@ func Load(configFile string) (*Config, error) {
 }
 
 func createDefault() *Config {
-	log.Print("def conf")
 	return &Config{
 		GoBinary:        "go",
 		GoEnv:           "development",
