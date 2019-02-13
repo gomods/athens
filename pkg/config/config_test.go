@@ -206,7 +206,7 @@ func TestParseExampleConfig(t *testing.T) {
 		GoEnv:           "development",
 		LogLevel:        "debug",
 		GoBinary:        "go",
-		GoGetWorkers:    30,
+		GoGetWorkers:    10,
 		ProtocolWorkers: 30,
 		CloudRuntime:    "none",
 		TimeoutConf: TimeoutConf{
