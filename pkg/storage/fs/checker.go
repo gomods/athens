@@ -2,6 +2,7 @@ package fs
 
 import (
 	"context"
+	"fmt"
 	"path/filepath"
 
 	"github.com/gomods/athens/pkg/errors"
@@ -14,10 +15,16 @@ func (v *storageImpl) Exists(ctx context.Context, module, version string) (bool,
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 	versionedPath := v.versionLocation(module, version)
-	exists, err := afero.Exists(v.filesystem, filepath.Join(versionedPath, "go.mod"))
-	if err != nil {
-		return false, errors.E(op, errors.M(module), errors.V(version), err)
+	files := []string{"go.mod", fmt.Sprintf("%s.info"), fmt.Sprintf("%s.zip")}
+	for _, file := range files {
+		exists, err := afero.Exists(v.filesystem, filepath.Join(versionedPath, file))
+		if err != nil {
+			return false, errors.E(op, errors.M(module), errors.V(version), err)
+		}
+		if !exists {
+			return false, nil
+		}
 	}
 
-	return exists, nil
+	return true, nil
 }
