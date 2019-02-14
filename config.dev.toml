@@ -15,8 +15,11 @@ GoEnv = "development"
 # GoGetWorkers specifies how many times you can concurrently
 # go mod download, this is so that low performance instances
 # can manage go get more sanely and not run out of disk or memory.
+# One way to think about is: the number of GoGetWorkers corresponds
+# directly to how many parallel "git clones" your underlying machine
+# can handle. 
 # Env override: ATHENS_GOGET_WORKERS
-GoGetWorkers = 30
+GoGetWorkers = 10
 
 # ProtocolWorkers specifies how many concurrent
 # requests can you handle at a time for all
@@ -186,9 +189,13 @@ StatsExporter = "prometheus"
         Region = ""
 
     [Storage.Mongo]
-        # Full URL for mongo storage
+        # Full connection string for mongo storage
         # Env override: ATHENS_MONGO_STORAGE_URL
         URL = "mongodb://127.0.0.1:27017"
+
+        # Sets default database name for mongo storage if not set by URL
+        # Env override: ATHENS_MONGO_DEFAULT_DATABASE
+        DefaultDBName = "athens"
 
         # Path to certificate to use for the mongo connection
         # Env override: ATHENS_MONGO_CERT_PATH

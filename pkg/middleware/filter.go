@@ -23,7 +23,11 @@ func NewFilterMiddleware(mf *module.Filter, upstreamEndpoint string) mux.Middlew
 				h.ServeHTTP(w, r)
 				return
 			}
-			rule := mf.Rule(mod)
+			ver, err := paths.GetVersion(r)
+			if err != nil {
+				ver = ""
+			}
+			rule := mf.Rule(mod, ver)
 			switch rule {
 			case module.Exclude:
 				// Exclude: ignore request for this module
