@@ -32,7 +32,7 @@ func NewStorage(conf *config.MongoConfig, timeout time.Duration) (*ModuleStore, 
 	if conf == nil {
 		return nil, errors.E(op, "No Mongo Configuration provided")
 	}
-	ms := &ModuleStore{url: conf.URL, certPath: conf.CertPath, timeout: conf.TimeoutDuration()}
+	ms := &ModuleStore{url: conf.URL, certPath: conf.CertPath, timeout: timeout}
 
 	err := ms.connect(conf)
 	if err != nil {
