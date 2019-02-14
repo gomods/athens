@@ -123,6 +123,7 @@ func TestStorageEnvOverrides(t *testing.T) {
 		Mongo: &MongoConfig{
 			URL:      "mongoURL",
 			CertPath: "/test/path",
+			DefaultDBName: "athens",
 		},
 		S3: &S3Config{
 			Region: "s3Region",
