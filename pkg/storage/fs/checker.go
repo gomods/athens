@@ -15,7 +15,11 @@ func (v *storageImpl) Exists(ctx context.Context, module, version string) (bool,
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 	versionedPath := v.versionLocation(module, version)
-	files := []string{"go.mod", fmt.Sprintf("%s.info"), fmt.Sprintf("%s.zip")}
+	files := []string{
+		"go.mod",
+		fmt.Sprintf("%s.info", version),
+		fmt.Sprintf("%s.zip", version),
+	}
 	for _, file := range files {
 		exists, err := afero.Exists(v.filesystem, filepath.Join(versionedPath, file))
 		if err != nil {
