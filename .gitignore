@@ -22,6 +22,7 @@ cmd/proxy/proxy
 test-keys.json
 tmp
 .vs
+.vscode
 cmd/proxy/bin
 .idea
 .DS_Store
