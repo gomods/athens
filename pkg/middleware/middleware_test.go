@@ -8,10 +8,10 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/gobuffalo/buffalo"
 	ht "github.com/gobuffalo/httptest"
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/module"
+	"github.com/gorilla/mux"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 )
@@ -22,25 +22,26 @@ const (
 	pathVersionInfo = "/{module:.+}/@v/{version}.info"
 )
 
-var (
+func testConfigFile(t *testing.T) (testConfigFile string) {
 	testConfigFile = filepath.Join("..", "..", "config.dev.toml")
-)
-
-func middlewareFilterApp(filterFile, registryEndpoint string) (*buffalo.App, error) {
-	h := func(c buffalo.Context) error {
-		return c.Render(200, nil)
+	if err := os.Chmod(testConfigFile, 0700); err != nil {
+		t.Fatalf("%s\n", err)
 	}
+	return testConfigFile
+}
 
-	a := buffalo.New(buffalo.Options{})
+func middlewareFilterApp(filterFile, registryEndpoint string) (*mux.Router, error) {
+	h := func(w http.ResponseWriter, r *http.Request) {}
+	r := mux.NewRouter()
 	mf, err := newTestFilter(filterFile)
 	if err != nil {
 		return nil, err
 	}
-	a.Use(NewFilterMiddleware(mf, registryEndpoint))
+	r.Use(NewFilterMiddleware(mf, registryEndpoint))
 
-	a.GET(pathList, h)
-	a.GET(pathVersionInfo, h)
-	return a, nil
+	r.HandleFunc(pathList, h)
+	r.HandleFunc(pathVersionInfo, h)
+	return r, nil
 }
 
 func newTestFilter(filterFile string) (*module.Filter, error) {
@@ -48,9 +49,9 @@ func newTestFilter(filterFile string) (*module.Filter, error) {
 	if err != nil {
 		return nil, err
 	}
-	f.AddRule("github.com/gomods/athens/", module.Direct)
-	f.AddRule("github.com/athens-artifacts/no-tags", module.Exclude)
-	f.AddRule("github.com/athens-artifacts", module.Include)
+	f.AddRule("github.com/gomods/athens/", nil, module.Direct)
+	f.AddRule("github.com/athens-artifacts/no-tags", nil, module.Exclude)
+	f.AddRule("github.com/athens-artifacts", nil, module.Include)
 	return f, nil
 }
 
@@ -63,7 +64,7 @@ func Test_FilterMiddleware(t *testing.T) {
 	}
 	defer os.Remove(filter.Name())
 
-	conf, err := config.GetConf(testConfigFile)
+	conf, err := config.GetConf(testConfigFile(t))
 	if err != nil {
 		t.Fatalf("Unable to parse config file: %s", err.Error())
 	}
@@ -77,34 +78,28 @@ func Test_FilterMiddleware(t *testing.T) {
 	r.NoError(err, "app should be successfully created in the test")
 	w := ht.New(app)
 
-	// Public, expects to be redirected to the global registry endpoint, with and without a trailing slash
-	paths := []string{"/github.com/gomods/athens/@v/list/", "/github.com/gomods/athens/@v/list"}
-	for _, path := range paths {
-		res := w.JSON(path).Get()
-		r.Equal(303, res.Code)
-		r.Equal(conf.GlobalEndpoint+"/github.com/gomods/athens/@v/list/", res.HeaderMap.Get("Location"))
-	}
+	path := "/github.com/gomods/athens/@v/list"
+	res := w.JSON(path).Get()
+	r.Equal(http.StatusSeeOther, res.Code)
+	r.Equal(conf.GlobalEndpoint+"/github.com/gomods/athens/@v/list", res.HeaderMap.Get("Location"))
 
 	// Excluded, expects a 403
-	res := w.JSON("/github.com/athens-artifacts/no-tags/@v/list").Get()
-	r.Equal(403, res.Code)
+	res = w.JSON("/github.com/athens-artifacts/no-tags/@v/list").Get()
+	r.Equal(http.StatusForbidden, res.Code)
 
 	// Private, the proxy is working and returns a 200
 	res = w.JSON("/github.com/athens-artifacts/happy-path/@v/list").Get()
-	r.Equal(200, res.Code)
+	r.Equal(http.StatusOK, res.Code)
 }
 
-func hookFilterApp(hook string) *buffalo.App {
-	h := func(c buffalo.Context) error {
-		return c.Render(200, nil)
-	}
+func hookFilterApp(hook string) *mux.Router {
+	h := func(w http.ResponseWriter, r *http.Request) {}
+	r := mux.NewRouter()
+	r.Use(NewValidationMiddleware(hook))
 
-	a := buffalo.New(buffalo.Options{})
-	a.Use(NewValidationMiddleware(hook))
-
-	a.GET(pathList, h)
-	a.GET(pathVersionInfo, h)
-	return a
+	r.HandleFunc(pathList, h)
+	r.HandleFunc(pathVersionInfo, h)
+	return r
 }
 
 type hookMock struct {

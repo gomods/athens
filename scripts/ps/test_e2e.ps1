@@ -49,10 +49,10 @@ try {
   $proxyUp = $false
   do {
     try {
-      $proxyUp = (Invoke-WebRequest  -Method GET -Uri http://localhost:3000/healthz).StatusCode -eq "200"
+      $proxyUp = (Invoke-WebRequest  -Method GET -Uri http://localhost:3000/readyz).StatusCode -eq "200"
     }
     catch {
-      Start-Sleep -Seconds 5
+      Start-Sleep -Seconds 1
     }
   } while(-not $proxyUp)
 

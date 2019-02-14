@@ -15,8 +15,11 @@ GoEnv = "development"
 # GoGetWorkers specifies how many times you can concurrently
 # go mod download, this is so that low performance instances
 # can manage go get more sanely and not run out of disk or memory.
+# One way to think about is: the number of GoGetWorkers corresponds
+# directly to how many parallel "git clones" your underlying machine
+# can handle. 
 # Env override: ATHENS_GOGET_WORKERS
-GoGetWorkers = 30
+GoGetWorkers = 10
 
 # ProtocolWorkers specifies how many concurrent
 # requests can you handle at a time for all
@@ -31,13 +34,6 @@ ProtocolWorkers = 30
 # Supports all logrus log levels (https://github.com/Sirupsen/logrus#level-logging)
 # Env override: ATHENS_LOG_LEVEL
 LogLevel = "debug"
-
-# BuffaloLogLevel returns the log level for logs
-# emitted by Buffalo itself. This is different from our own
-# LogLevel in this file because you might want info level
-# for our codebase, but panic level for buffalo.
-# Env override: BUFFALO_LOG_LEVEL
-BuffaloLogLevel = "debug"
 
 # CloudRuntime is the Cloud Provider on which the Proxy/Registry is running.
 # Currently available options are "GCP", or "none". Defaults to "none"
@@ -60,8 +56,14 @@ Timeout = 300
 # Env override: ATHENS_STORAGE_TYPE
 StorageType = "memory"
 
+# Certificate and key to make athens serve using https instead of plain text http.
+# Set both to enable.
+# Env override: ATHENS_TLSCERT_FILE, ATHENS_TLSKEY_FILE
+#TLSCertFile = "server.cer"
+#TLSKeyFile = "server.key"
+
 # Port sets the port the proxy listens on
-# Env override: PORT
+# Env override: ATHENS_PORT
 # Note that PORT needs to be prefixed by :
 Port = ":3000"
 
@@ -125,12 +127,18 @@ HGRCPath = ""
 # TraceExporter is the service to which the data collected by OpenCensus can be exported to.
 # Possible values are: jaeger, datadog, and stackdriver.
 # Env overide: ATHENS_TRACE_EXPORTER
-TraceExporter = "jaeger"
+TraceExporter = ""
 
 # TraceExporterURL is the URL to which Athens populates distributed tracing
 # information such as Jaeger. In Stackdriver, use this as the GCP ProjectID.
 # Env override: ATHENS_TRACE_EXPORTER_URL
 TraceExporterURL = "http://localhost:14268"
+
+# Stats is not a requirement for Athens. If the value is not set,
+# Athens will keep on running and stats won't be collected.
+# Possible values are: prometheus.
+# Env overide: ATHENS_STATS_EXPORTER
+StatsExporter = "prometheus"
 
 [Storage]
     # Only storage backends that are specified in Proxy.StorageType are required here
@@ -181,9 +189,13 @@ TraceExporterURL = "http://localhost:14268"
         Region = ""
 
     [Storage.Mongo]
-        # Full URL for mongo storage
+        # Full connection string for mongo storage
         # Env override: ATHENS_MONGO_STORAGE_URL
         URL = "mongodb://127.0.0.1:27017"
+
+        # Sets default database name for mongo storage if not set by URL
+        # Env override: ATHENS_MONGO_DEFAULT_DATABASE
+        DefaultDBName = "athens"
 
         # Path to certificate to use for the mongo connection
         # Env override: ATHENS_MONGO_CERT_PATH
@@ -193,7 +205,7 @@ TraceExporterURL = "http://localhost:14268"
         # Should be used for testing or development only
         # Env override: ATHENS_MONGO_INSECURE
         Insecure = false
-        
+
     [Storage.S3]
         # Region for S3 storage
         # Env override: AWS_REGION
@@ -214,6 +226,16 @@ TraceExporterURL = "http://localhost:14268"
         # S3 Bucket to use for storage
         # Env override: ATHENS_S3_BUCKET_NAME
         Bucket = "MY_S3_BUCKET_NAME"
+
+        # If true then the default aws configuration will be used. This will
+        # attempt to find credentials in the environment, in the shared
+        # configuration (~/.aws/credentials) and from ec2 instance role
+        # credentials. See
+        # https://godoc.org/github.com/aws/aws-sdk-go#hdr-Configuring_Credentials
+        # and
+        # https://godoc.org/github.com/aws/aws-sdk-go/aws/session#hdr-Environment_Variables
+        # for environment variables that will affect the aws configuration.
+        UseDefaultConfiguration = false
    [Storage.AzureBlob]
         # Storage Account name for Azure Blob
         # Env override: ATHENS_AZURE_ACCOUNT_NAME

@@ -3,28 +3,19 @@ package observ
 import (
 	"context"
 	"fmt"
-	"net/http"
 
 	"contrib.go.opencensus.io/exporter/stackdriver"
 	datadog "github.com/DataDog/opencensus-go-exporter-datadog"
-	"github.com/gobuffalo/buffalo"
 	"github.com/gomods/athens/pkg/errors"
 	"go.opencensus.io/exporter/jaeger"
-	"go.opencensus.io/plugin/ochttp"
 	"go.opencensus.io/trace"
 )
-
-// observabilityContext is a private context that is used by the packages to start the span
-type observabilityContext struct {
-	buffalo.Context
-	spanCtx context.Context
-}
 
 // RegisterExporter determines the type of TraceExporter service for exporting traces from opencensus
 // User can choose from multiple tracing services (datadog, jaegar)
 // RegisterExporter returns the 'Flush' function for that particular tracing service
 func RegisterExporter(traceExporter, URL, service, ENV string) (func(), error) {
-	const op errors.Op = "RegisterExporter"
+	const op errors.Op = "observ.RegisterExporter"
 	switch traceExporter {
 	case "jaeger":
 		return registerJaegerExporter(URL, service, ENV)
@@ -43,7 +34,7 @@ func RegisterExporter(traceExporter, URL, service, ENV string) (func(), error) {
 // Currently uses the 'TraceExporter' variable in the config file.
 // It should in the future have a nice sampling rate defined
 func registerJaegerExporter(URL, service, ENV string) (func(), error) {
-	const op errors.Op = "registerJaegarExporter"
+	const op errors.Op = "observ.registerJaegarExporter"
 	if URL == "" {
 		return nil, errors.E(op, "Exporter URL is empty. Traces won't be exported")
 	}
@@ -86,7 +77,7 @@ func registerDatadogExporter(URL, service, ENV string) (func(), error) {
 }
 
 func registerStackdriverExporter(projectID, ENV string) (func(), error) {
-	const op errors.Op = "registerStackdriverExporter"
+	const op errors.Op = "observ.registerStackdriverExporter"
 	ex, err := stackdriver.NewExporter(stackdriver.Options{ProjectID: projectID})
 	if err != nil {
 		return nil, errors.E(op, err)
@@ -95,51 +86,8 @@ func registerStackdriverExporter(projectID, ENV string) (func(), error) {
 	return ex.Flush, nil
 }
 
-// Tracer is a middleware that starts a span from the top of a buffalo context
-// and propates it to the bottom of the stack
-func Tracer(service string) buffalo.MiddlewareFunc {
-	return func(next buffalo.Handler) buffalo.Handler {
-		return func(ctx buffalo.Context) error {
-			spanCtx, span := trace.StartSpan(ctx,
-				ctx.Request().URL.Path,
-				trace.WithSpanKind(trace.SpanKindClient))
-			defer span.End()
-
-			handler := next(&observabilityContext{Context: ctx, spanCtx: spanCtx})
-
-			// Add request attributes
-			span.AddAttributes(
-				requestAttrs(ctx.Request())...,
-			)
-
-			// SetSpan Status from response
-			if resp, ok := ctx.Response().(*buffalo.Response); ok {
-				span.SetStatus(ochttp.TraceStatus(resp.Status, ""))
-				span.AddAttributes(trace.Int64Attribute("http.status_code", int64(resp.Status)))
-			}
-
-			return handler
-		}
-	}
-}
-
-// Applies request information to the span
-func requestAttrs(r *http.Request) []trace.Attribute {
-	// From: https://github.com/census-instrumentation/opencensus-go/blob/master/plugin/ochttp/trace.go
-	return []trace.Attribute{
-		trace.StringAttribute("http.path", r.URL.Path),
-		trace.StringAttribute("http.host", r.URL.Host),
-		trace.StringAttribute("http.method", r.Method),
-		trace.StringAttribute("http.user_agent", r.UserAgent()),
-	}
-}
-
 // StartSpan takes in a Context Interface and opName and starts a span. It returns the new attached ObserverContext
 // and span
 func StartSpan(ctx context.Context, op string) (context.Context, *trace.Span) {
-	oCtx, ok := ctx.(*observabilityContext)
-	if ok {
-		return trace.StartSpan(oCtx.spanCtx, op)
-	}
 	return trace.StartSpan(ctx, op)
 }

@@ -18,9 +18,9 @@ import (
 // Storage implements (./pkg/storage).Backend and
 // also provides a function to fetch the location of a module
 // Storage uses amazon aws go SDK which expects these env variables
-// - AWS_REGION 			- region for this storage, e.g 'us-west-2'
-// - AWS_ACCESS_KEY_ID		-
-// - AWS_SECRET_ACCESS_KEY 	-
+// - AWS_REGION			- region for this storage, e.g 'us-west-2'
+// - AWS_ACCESS_KEY_ID		- [optional]
+// - AWS_SECRET_ACCESS_KEY 	- [optional]
 // - AWS_SESSION_TOKEN		- [optional]
 // For information how to get your keyId and access key turn to official aws docs: https://docs.aws.amazon.com/sdk-for-go/v1/developer-guide/setting-up.html
 type Storage struct {
@@ -39,8 +39,10 @@ func New(s3Conf *config.S3Config, timeout time.Duration, options ...func(*aws.Co
 		return nil, errors.E(op, err)
 	}
 
+	creds := buildAWSCredentials(s3Conf)
+
 	awsConfig := &aws.Config{
-		Credentials: credentials.NewStaticCredentials(s3Conf.Key, s3Conf.Secret, s3Conf.Token),
+		Credentials: creds,
 		Region:      aws.String(s3Conf.Region),
 	}
 
@@ -62,4 +64,22 @@ func New(s3Conf *config.S3Config, timeout time.Duration, options ...func(*aws.Co
 		baseURI:  u,
 		timeout:  timeout,
 	}, nil
+}
+
+// buildAWSCredentials builds the credentials required to create a new AWS
+// session.  It will prefer the access key ID and secret access key if specified
+// in the S3Config unless UseDefaultConfiguration is true. If the key ID and
+// secret access key are unspecified or UseDefaultConfiguration is true, then
+// the default aws configuration will be used. This will attempt to find
+// credentials in the environment, in the shared configuration
+// (~/.aws/credentials) and from ec2 instance role credentials. See
+// https://godoc.org/github.com/aws/aws-sdk-go#hdr-Configuring_Credentials and
+// https://godoc.org/github.com/aws/aws-sdk-go/aws/session#hdr-Environment_Variables
+// for environment variables that will affect the aws configuration.
+func buildAWSCredentials(s3Conf *config.S3Config) *credentials.Credentials {
+	if !s3Conf.UseDefaultConfiguration && s3Conf.Key != "" && s3Conf.Secret != "" {
+		return credentials.NewStaticCredentials(s3Conf.Key, s3Conf.Secret, s3Conf.Token)
+	}
+
+	return nil
 }
