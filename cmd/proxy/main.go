@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"path/filepath"
 	"time"
 
 	"github.com/gomods/athens/cmd/proxy/actions"
@@ -17,7 +16,7 @@ import (
 )
 
 var (
-	configFile = flag.String("config_file", filepath.Join("..", "..", "config.dev.toml"), "The path to the config file")
+	configFile = flag.String("config_file", "", "The path to the config file")
 	version    = flag.Bool("version", false, "Print version information and exit")
 )
 
@@ -27,13 +26,11 @@ func main() {
 		fmt.Println(build.String())
 		os.Exit(0)
 	}
-	if configFile == nil {
-		log.Fatal("Invalid config file path provided")
-	}
-	conf, err := config.ParseConfigFile(*configFile)
+	conf, err := config.Load(*configFile)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("could not load config file: %v", err)
 	}
+
 	handler, err := actions.App(conf)
 	if err != nil {
 		log.Fatal(err)
