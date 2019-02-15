@@ -7,6 +7,7 @@ import (
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/observ"
+	modupl "github.com/gomods/athens/pkg/storage/module"
 )
 
 // Exists implements the (./pkg/storage).Checker interface
@@ -15,15 +16,17 @@ func (s *Storage) Exists(ctx context.Context, module, version string) (bool, err
 	const op errors.Op = "gcp.Exists"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
-	_, err := s.bucket.Object(config.PackageVersionedName(module, version, "mod")).Attrs(ctx)
+	return modupl.Exists(ctx, module, version, func(ctx context.Context, name string) (bool, error) {
+		_, err := s.bucket.Object(config.PackageVersionedName(module, version, "mod")).Attrs(ctx)
 
-	if err == storage.ErrObjectNotExist {
-		return false, nil
-	}
+		if err == storage.ErrObjectNotExist {
+			return false, nil
+		}
 
-	if err != nil {
-		return false, errors.E(op, err, errors.M(module), errors.V(version))
-	}
+		if err != nil {
+			return false, errors.E(op, err, errors.M(module), errors.V(version))
+		}
 
-	return true, nil
+		return true, nil
+	})
 }
