@@ -121,8 +121,9 @@ func TestStorageEnvOverrides(t *testing.T) {
 			Region:    "us-west-1",
 		},
 		Mongo: &MongoConfig{
-			URL:      "mongoURL",
-			CertPath: "/test/path",
+			URL:           "mongoURL",
+			CertPath:      "/test/path",
+			DefaultDBName: "athens",
 		},
 		S3: &S3Config{
 			Region: "s3Region",
@@ -206,7 +207,7 @@ func TestParseExampleConfig(t *testing.T) {
 		GoEnv:           "development",
 		LogLevel:        "debug",
 		GoBinary:        "go",
-		GoGetWorkers:    30,
+		GoGetWorkers:    10,
 		ProtocolWorkers: 30,
 		CloudRuntime:    "none",
 		TimeoutConf: TimeoutConf{

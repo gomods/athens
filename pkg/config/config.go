@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -39,6 +40,31 @@ type Config struct {
 	TLSCertFile      string `envconfig:"ATHENS_TLSCERT_FILE"`
 	TLSKeyFile       string `envconfig:"ATHENS_TLSKEY_FILE"`
 	Storage          *StorageConfig
+}
+
+// Load loads the config from a file.
+// If file is not present returns default config
+func Load(configFile string) (*Config, error) {
+	if configFile == "" {
+		log.Print("config file not provided - using default settings")
+		return createDefault(), nil
+	}
+	return ParseConfigFile(configFile)
+}
+
+func createDefault() *Config {
+	return &Config{
+		GoBinary:        "go",
+		GoEnv:           "development",
+		GoGetWorkers:    30,
+		ProtocolWorkers: 30,
+		LogLevel:        "debug",
+		CloudRuntime:    "none",
+		TimeoutConf:     TimeoutConf{Timeout: 300},
+		StorageType:     "memory",
+		Port:            ":3000",
+		GlobalEndpoint:  "http://localhost:3001",
+	}
 }
 
 // BasicAuth returns BasicAuthUser and BasicAuthPassword
