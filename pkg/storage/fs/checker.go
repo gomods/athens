@@ -18,7 +18,7 @@ func (v *storageImpl) Exists(ctx context.Context, module, version string) (bool,
 	files := []string{
 		"go.mod",
 		fmt.Sprintf("%s.info", version),
-		fmt.Sprintf("%s.zip", version),
+		"source.zip",
 	}
 	for _, file := range files {
 		exists, err := afero.Exists(v.filesystem, filepath.Join(versionedPath, file))
