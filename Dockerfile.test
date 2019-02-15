@@ -1,0 +1,7 @@
+FROM golang:1.11
+
+RUN mkdir -p /athens/tests
+
+WORKDIR /athens/tests
+
+COPY . .
