@@ -19,8 +19,12 @@ func Exists(ctx context.Context, module, version string, check Checker) (bool, e
 	}
 	g, ctx := errgroup.WithContext(ctx)
 	for i, name := range names {
+		// don't remove the below line because you need to close over the name
+		// variable inside the goroutine so you don't get a race on the next
+		// iteration of the loop
+		n := name
 		g.Go(func() error {
-			found, err := check(ctx, name)
+			found, err := check(ctx, n)
 			if err != nil {
 				return err
 			}
