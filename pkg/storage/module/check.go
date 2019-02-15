@@ -10,7 +10,7 @@ import (
 type Checker = func(context.Context, string) (bool, error)
 
 func Exists(ctx context.Context, module, version string, check Checker) (bool, error) {
-	availabilities := make([]bool, 3)
+	availableCh := make(chan bool, 3)
 
 	names := []string{
 		config.PackageVersionedName(module, version, "mod"),
@@ -18,7 +18,7 @@ func Exists(ctx context.Context, module, version string, check Checker) (bool, e
 		config.PackageVersionedName(module, version, "zip"),
 	}
 	g, ctx := errgroup.WithContext(ctx)
-	for i, name := range names {
+	for _, name := range names {
 		// don't remove the below line because you need to close over the name
 		// variable inside the goroutine so you don't get a race on the next
 		// iteration of the loop
@@ -28,7 +28,7 @@ func Exists(ctx context.Context, module, version string, check Checker) (bool, e
 			if err != nil {
 				return err
 			}
-			availabilities[i] = found
+			availableCh <- found
 			return nil
 		})
 	}
@@ -37,7 +37,7 @@ func Exists(ctx context.Context, module, version string, check Checker) (bool, e
 	}
 
 	available := true
-	for _, avail := range availabilities {
+	for avail := range availableCh {
 		available = available && avail
 	}
 	return available, nil
