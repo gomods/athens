@@ -3,9 +3,6 @@
 # Add steps that test, save build artifacts, deploy, and more:
 # https://docs.microsoft.com/azure/devops/pipelines/languages/go
 
-pool:
-  vmImage: 'vs2017-win2016'
-
 variables:
   GOBIN:  '$(GOPATH)\bin' # Go binaries path
   GOPATH: '$(system.defaultWorkingDirectory)\gopath' # Go workspace path
@@ -14,6 +11,8 @@ variables:
 
 jobs:
 - job: WorkspaceSetup
+  pool:
+    vmImage: 'vs2017-win2016'
   displayName: "Set up the Go workspace"
   steps:
     - powershell: |
@@ -23,6 +22,8 @@ jobs:
         robocopy "$env:system_defaultWorkingDirectory\" "$env:modulePath\" /E /Z /ZB /R:5 /W:5 /TBD /NP /V /XD "$env:GOPATH"
         exit ($LastExitCode -band 24)
 - job: Minio
+  pool:
+    vmImage: 'vs2017-win2016'
   displayName: "Download and start minio"
   steps:
     - powershell: |
@@ -32,10 +33,12 @@ jobs:
         Invoke-WebRequest -Uri $downloadURL -OutFile "minio.exe"
         Write-Host "download minio - end"
         Start-Process -NoNewWindow minio.exe 'server --address ":9001" .'
-  env:
-    MINIO_ACCESS_KEY: "minio"
-    MINIO_SECRET_KEY: "minio123"
+      env:
+        MINIO_ACCESS_KEY: "minio"
+        MINIO_SECRET_KEY: "minio123"
 - job: Mongo
+  pool:
+    vmImage: 'vs2017-win2016'
   displayName: "Install & start mongo"
   steps:
     - powershell: |
@@ -52,14 +55,15 @@ jobs:
         mkdir C:\data\configdb | out-null
         Write-Host "install mongo - end"
         Start-Process -NoNewWindow mongod.exe '--bind_ip_all --dbpath="C:\data\db"'
-- job: "Run tests"
+- job: Tests
+  displayName: "Run tests"
   steps:
     - powershell: |
         go test -mod=vendor -race ./...
-  env:
-    ATHENS_MINIO_ENDPOINT: "127.0.0.1:9001"
-    ATHENS_MONGO_STORAGE_URL: "127.0.0.1:27017"
-  workingDirectory: '$(modulePath)'
+      env:
+        ATHENS_MINIO_ENDPOINT: "127.0.0.1:9001"
+        ATHENS_MONGO_STORAGE_URL: "127.0.0.1:27017"
+      workingDirectory: '$(modulePath)'
   dependsOn:
     - WorkspaceSetup
     - Minio
