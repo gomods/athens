@@ -1,5 +1,24 @@
 version: '3'
 services:
+  testunit:
+    build:
+      context: .
+      dockerfile: Dockerfile.test
+    command: ["./scripts/test_unit.sh"]
+    environment:
+      - GO_ENV=test
+      - ATHENS_MINIO_ENDPOINT=minio:9000
+      - ATHENS_MONGO_STORAGE_URL=mongodb://mongo:27017
+      - TIMEOUT=20 # in case the mongo dependency takes longer to start up
+      - ATHENS_STORAGE_TYPE=mongo
+    depends_on:
+      - mongo
+      - minio
+  teste2e:
+    build:
+      context: .
+      dockerfile: Dockerfile.test
+    command: ["./scripts/test_e2e.sh"]
   mongo:
     image: mongo:3.7.9-jessie
     ports:

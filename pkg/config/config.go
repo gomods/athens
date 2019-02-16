@@ -56,7 +56,7 @@ func createDefault() *Config {
 	return &Config{
 		GoBinary:        "go",
 		GoEnv:           "development",
-		GoGetWorkers:    30,
+		GoGetWorkers:    10,
 		ProtocolWorkers: 30,
 		LogLevel:        "debug",
 		CloudRuntime:    "none",
