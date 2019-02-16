@@ -57,6 +57,8 @@ jobs:
         Start-Process -NoNewWindow mongod.exe '--bind_ip_all --dbpath="C:\data\db"'
 - job: Tests
   displayName: "Run tests"
+  pool:
+    vmImage: 'vs2017-win2016'
   steps:
     - powershell: |
         go test -mod=vendor -race ./...
