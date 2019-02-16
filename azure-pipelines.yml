@@ -10,17 +10,6 @@ variables:
   modulePath: '$(GOPATH)\src\github.com\$(build.repository.name)' # Path to the module's code
 
 jobs:
-- job: WorkspaceSetup
-  pool:
-    vmImage: 'vs2017-win2016'
-  displayName: "Set up the Go workspace"
-  steps:
-    - powershell: |
-        mkdir "$env:GOBIN" | out-null
-        mkdir "$env:GOPATH\pkg" | out-null
-        mkdir "$env:modulePath" | out-null
-        robocopy "$env:system_defaultWorkingDirectory\" "$env:modulePath\" /E /Z /ZB /R:5 /W:5 /TBD /NP /V /XD "$env:GOPATH"
-        exit ($LastExitCode -band 24)
 - job: Minio
   pool:
     vmImage: 'vs2017-win2016'
@@ -61,13 +50,18 @@ jobs:
     vmImage: 'vs2017-win2016'
   steps:
     - powershell: |
+        mkdir "$env:GOBIN" | out-null
+        mkdir "$env:GOPATH\pkg" | out-null
+        mkdir "$env:modulePath" | out-null
+        robocopy "$env:system_defaultWorkingDirectory\" "$env:modulePath\" /E /Z /ZB /R:5 /W:5 /TBD /NP /V /XD "$env:GOPATH"
+        exit ($LastExitCode -band 24)
+    - powershell: |
         go test -mod=vendor -race ./...
       env:
         ATHENS_MINIO_ENDPOINT: "127.0.0.1:9001"
         ATHENS_MONGO_STORAGE_URL: "127.0.0.1:27017"
       workingDirectory: '$(modulePath)'
   dependsOn:
-    - WorkspaceSetup
     - Minio
     - Mongo
 
