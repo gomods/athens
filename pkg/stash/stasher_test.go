@@ -2,7 +2,6 @@ package stash
 
 import (
 	"context"
-	"io"
 	"io/ioutil"
 	"strings"
 	"testing"
@@ -84,7 +83,7 @@ type mockStorage struct {
 	existsResponse bool
 }
 
-func (ms *mockStorage) Save(ctx context.Context, module, version string, mod []byte, zip io.Reader, info []byte, size int64) error {
+func (ms *mockStorage) Save(ctx context.Context, module, version string, mod []byte, zip storage.Zip, info []byte) error {
 	ms.saveCalled = true
 	ms.givenVersion = version
 	return nil
@@ -103,7 +102,7 @@ func (mf *mockFetcher) Fetch(ctx context.Context, mod, ver string) (*storage.Ver
 	return &storage.Version{
 		Info:   []byte("info"),
 		Mod:    []byte("gomod"),
-		Zip:    ioutil.NopCloser(strings.NewReader("zipfile")),
+		Zip:    storage.Zip{ioutil.NopCloser(strings.NewReader("zipfile")), 7},
 		Semver: mf.ver,
 	}, nil
 }

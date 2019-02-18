@@ -69,9 +69,7 @@ func testList(t *testing.T, b storage.Backend) {
 			version,
 			mock.Mod,
 			mock.Zip,
-			mock.Info,
-			mock.Size,
-		)
+			mock.Info)
 		require.NoError(t, err, "Save for storage failed")
 	}
 	defer func() {
@@ -90,8 +88,8 @@ func testGet(t *testing.T, b storage.Backend) {
 	modname := "getTestModule"
 	ver := "v1.2.3"
 	mock := getMockModule()
-	zipBts, _ := ioutil.ReadAll(mock.Zip)
-	b.Save(ctx, modname, ver, mock.Mod, bytes.NewReader(zipBts), mock.Info, mock.Size)
+	zipBts, _ := ioutil.ReadAll(mock.Zip.Zip)
+	b.Save(ctx, modname, ver, mock.Mod, mock.Zip, mock.Info)
 	defer b.Delete(ctx, modname, ver)
 
 	info, err := b.Info(ctx, modname, ver)
@@ -118,7 +116,7 @@ func testDelete(t *testing.T, b storage.Backend) {
 	version := fmt.Sprintf("%s%d", "delete", rand.Int())
 
 	mock := getMockModule()
-	err := b.Save(ctx, modname, version, mock.Mod, mock.Zip, mock.Info, mock.Size)
+	err := b.Save(ctx, modname, version, mock.Mod, mock.Zip, mock.Info)
 	require.NoError(t, err)
 
 	err = b.Delete(ctx, modname, version)
@@ -137,11 +135,10 @@ func testCatalog(t *testing.T, b storage.Backend) {
 	ctx := context.Background()
 
 	mock := getMockModule()
-	zipBts, _ := ioutil.ReadAll(mock.Zip)
 	modname := "github.com/gomods/testCatalogModule"
 	for i := 0; i < 6; i++ {
 		ver := fmt.Sprintf("v1.2.%04d", i)
-		b.Save(ctx, modname, ver, mock.Mod, bytes.NewReader(zipBts), mock.Info, mock.Size)
+		b.Save(ctx, modname, ver, mock.Mod, mock.Zip, mock.Info)
 
 		defer b.Delete(ctx, modname, ver)
 	}
@@ -176,7 +173,6 @@ func getMockModule() *storage.Version {
 	return &storage.Version{
 		Info: []byte("123"),
 		Mod:  []byte("456"),
-		Zip:  ioutil.NopCloser(bytes.NewReader([]byte("789"))),
-		Size: 3,
+		Zip:  storage.Zip{ioutil.NopCloser(bytes.NewReader([]byte("789"))), 3},
 	}
 }

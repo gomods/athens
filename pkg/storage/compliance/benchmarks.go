@@ -1,7 +1,6 @@
 package compliance
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"io/ioutil"
@@ -31,9 +30,7 @@ func benchList(b *testing.B, s storage.Backend, clear func() error) {
 		version,
 		mock.Mod,
 		mock.Zip,
-		mock.Info,
-		3,
-	)
+		mock.Info)
 	require.NoError(b, err, "save for storage failed")
 
 	b.Run("list", func(b *testing.B) {
@@ -50,7 +47,7 @@ func benchSave(b *testing.B, s storage.Backend, clear func() error) {
 
 	module, version := "benchSaveModule", "1.0.1"
 	mock := getMockModule()
-	zipBts, err := ioutil.ReadAll(mock.Zip)
+	_, err := ioutil.ReadAll(mock.Zip.Zip)
 	require.NoError(b, err)
 
 	mi := 0
@@ -62,10 +59,8 @@ func benchSave(b *testing.B, s storage.Backend, clear func() error) {
 				fmt.Sprintf("save-%s-%d", module, mi),
 				version,
 				mock.Mod,
-				bytes.NewReader(zipBts),
-				mock.Info,
-				int64(len(zipBts)),
-			)
+				mock.Zip,
+				mock.Info)
 			require.NoError(b, err)
 			mi++
 		}
@@ -78,14 +73,14 @@ func benchDelete(b *testing.B, s storage.Backend, clear func() error) {
 
 	module, version := "benchDeleteModule", "1.0.1"
 	mock := getMockModule()
-	zipBts, err := ioutil.ReadAll(mock.Zip)
+	_, err := ioutil.ReadAll(mock.Zip.Zip)
 	require.NoError(b, err)
 	ctx := context.Background()
 
 	b.Run("delete", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
 			name := fmt.Sprintf("del-%s-%d", module, i)
-			err := s.Save(ctx, name, version, mock.Mod, bytes.NewReader(zipBts), mock.Info, int64(len(zipBts)))
+			err := s.Save(ctx, name, version, mock.Mod, mock.Zip, mock.Info)
 			require.NoError(b, err, "saving %s for storage failed", name)
 			err = s.Delete(ctx, name, version)
 			require.NoError(b, err, "delete failed: %s", name)
@@ -101,7 +96,7 @@ func benchExists(b *testing.B, s storage.Backend, clear func() error) {
 	mock := getMockModule()
 
 	ctx := context.Background()
-	err := s.Save(ctx, module, version, mock.Mod, mock.Zip, mock.Info, mock.Size)
+	err := s.Save(ctx, module, version, mock.Mod, mock.Zip, mock.Info)
 	require.NoError(b, err)
 
 	b.Run("exists", func(b *testing.B) {

@@ -315,7 +315,7 @@ func (m *mockFetcher) Fetch(ctx context.Context, mod, ver string) (*storage.Vers
 	return &storage.Version{
 		Mod:  bts,
 		Info: bts,
-		Zip:  ioutil.NopCloser(bytes.NewReader(bts)),
+		Zip:  storage.Zip{ioutil.NopCloser(bytes.NewReader(bts)), int64(len(bts))},
 	}, nil
 }
 
@@ -326,7 +326,8 @@ func TestDownloadProtocolWhenFetchFails(t *testing.T) {
 	}
 	fakeMod := testMod{"github.com/athens-artifacts/samplelib", "v1.0.0"}
 	bts := []byte(fakeMod.mod + "@" + fakeMod.ver)
-	err = s.Save(context.Background(), fakeMod.mod, fakeMod.ver, bts, ioutil.NopCloser(bytes.NewReader(bts)), bts, int64(len(bts)))
+	zipStram := storage.Zip{ioutil.NopCloser(bytes.NewReader(bts)), int64(len(bts))}
+	err = s.Save(context.Background(), fakeMod.mod, fakeMod.ver, bts, zipStram, bts)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -125,7 +125,8 @@ func TestListMerge(t *testing.T) {
 				t.Fatal(err)
 			}
 			for _, v := range tc.strVersions {
-				s.Save(ctx, testModName, v, bts, ioutil.NopCloser(bytes.NewReader(bts)), bts, int64(len(bts)))
+				zipStream := storage.Zip{ioutil.NopCloser(bytes.NewReader(bts)), int64(len(bts))}
+				s.Save(ctx, testModName, v, bts, zipStream, bts)
 			}
 			defer clearStorage(s, testModName, tc.strVersions)
 			dp := New(&Opts{s, nil, &listerMock{versions: tc.goVersions, err: tc.goErr}})
