@@ -18,8 +18,9 @@ func (l *storageImpl) List(ctx context.Context, module string) ([]string, error)
 	doneCh := make(chan struct{})
 	defer close(doneCh)
 	searchPrefix := module
-	objectCh := l.minioClient.ListObjectsV2(l.bucketName, searchPrefix, true, doneCh)
-	for object := range objectCh {
+	objectCh, _ := l.minioCore.ListObjectsV2(l.bucketName, searchPrefix, "", false, "", 0, "")
+
+	for _, object := range objectCh.Contents {
 		if object.Err != nil {
 			return nil, errors.E(op, object.Err, errors.M(module))
 		}

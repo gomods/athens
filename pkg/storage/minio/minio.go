@@ -12,6 +12,7 @@ import (
 
 type storageImpl struct {
 	minioClient *minio.Client
+	minioCore   *minio.Core
 	bucketName  string
 	timeout     time.Duration
 }
@@ -30,6 +31,7 @@ func NewStorage(conf *config.MinioConfig, timeout time.Duration) (storage.Backen
 	bucketName := conf.Bucket
 	region := conf.Region
 	useSSL := conf.EnableSSL
+	minioCore, err := minio.NewCore(endpoint, accessKeyID, secretAccessKey, useSSL)
 	minioClient, err := minio.New(endpoint, accessKeyID, secretAccessKey, useSSL)
 	if err != nil {
 		return nil, errors.E(op, err)
@@ -43,5 +45,5 @@ func NewStorage(conf *config.MinioConfig, timeout time.Duration) (storage.Backen
 			return nil, errors.E(op, err)
 		}
 	}
-	return &storageImpl{minioClient, bucketName, timeout}, nil
+	return &storageImpl{minioClient, minioCore, bucketName, timeout}, nil
 }
