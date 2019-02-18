@@ -31,18 +31,6 @@ func NewStreamFromBytes(b []byte) Stream {
 	}
 }
 
-// NewStreamFromReaderWithSize returns a new module.Stream from an io.Reader and keeps the len -1 for minio storage > 600 MB
-func NewStreamFromReaderWithSize(r io.Reader, s int64) Stream {
-	const MinioLimit = 600000000
-	if s > MinioLimit {
-		s = -1
-	}
-	return Stream{
-		Stream: r,
-		Size:   s,
-	}
-}
-
 // Upload saves .info, .mod and .zip files to the blob store in parallel.
 // Returns multierror containing errors from all uploads and timeouts
 func Upload(ctx context.Context, module, version string, info, mod, zip Stream, uploader Uploader, timeout time.Duration) error {

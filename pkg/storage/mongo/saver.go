@@ -11,7 +11,7 @@ import (
 )
 
 // Save stores a module in mongo storage.
-func (s *ModuleStore) Save(ctx context.Context, module, version string, mod []byte, zip io.Reader, info []byte, size int64) error {
+func (s *ModuleStore) Save(ctx context.Context, module, version string, mod []byte, zip storage.Zip, info []byte) error {
 	const op errors.Op = "mongo.Save"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
@@ -32,7 +32,7 @@ func (s *ModuleStore) Save(ctx context.Context, module, version string, mod []by
 	}
 	defer f.Close()
 
-	numBytesWritten, err := io.Copy(f, zip)
+	numBytesWritten, err := io.Copy(f, zip.Zip)
 	if err != nil {
 		return errors.E(op, err, errors.M(module), errors.V(version))
 	}

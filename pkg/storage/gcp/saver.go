@@ -7,6 +7,7 @@ import (
 
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/observ"
+	"github.com/gomods/athens/pkg/storage"
 
 	moduploader "github.com/gomods/athens/pkg/storage/module"
 )
@@ -18,7 +19,7 @@ import (
 //
 // Uploaded files are publicly accessible in the storage bucket as per
 // an ACL rule.
-func (s *Storage) Save(ctx context.Context, module, version string, mod []byte, zip io.Reader, info []byte, size int64) error {
+func (s *Storage) Save(ctx context.Context, module, version string, mod []byte, zip storage.Zip, info []byte) error {
 	const op errors.Op = "gcp.Save"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
@@ -31,7 +32,8 @@ func (s *Storage) Save(ctx context.Context, module, version string, mod []byte, 
 	}
 
 	// err = moduploader.Upload(ctx, module, version, bytes.NewReader(info), bytes.NewReader(mod), zip, s.upload, s.timeout)
-	err = moduploader.Upload(ctx, module, version, moduploader.NewStreamFromBytes(info), moduploader.NewStreamFromBytes(mod), moduploader.NewStreamFromReaderWithSize(zip, size), s.upload, s.timeout)
+	zipStream := moduploader.Stream{zip.Zip, zip.Size}
+	err = moduploader.Upload(ctx, module, version, moduploader.NewStreamFromBytes(info), moduploader.NewStreamFromBytes(mod), zipStream, s.upload, s.timeout)
 	if err != nil {
 		return errors.E(op, err, errors.M(module), errors.V(version))
 	}

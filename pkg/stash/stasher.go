@@ -54,7 +54,7 @@ func (s *stasher) Stash(ctx context.Context, mod, ver string) (string, error) {
 	if err != nil {
 		return "", errors.E(op, err)
 	}
-	defer v.Zip.Close()
+	defer v.Zip.Zip.Close()
 	if v.Semver != ver {
 		exists, err := s.storage.Exists(ctx, mod, v.Semver)
 		if err != nil {
@@ -64,7 +64,7 @@ func (s *stasher) Stash(ctx context.Context, mod, ver string) (string, error) {
 			return v.Semver, nil
 		}
 	}
-	err = s.storage.Save(ctx, mod, v.Semver, v.Mod, v.Zip, v.Info, v.Size)
+	err = s.storage.Save(ctx, mod, v.Semver, v.Mod, v.Zip, v.Info)
 	if err != nil {
 		return "", errors.E(op, err)
 	}

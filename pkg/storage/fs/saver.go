@@ -8,10 +8,11 @@ import (
 
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/observ"
+	"github.com/gomods/athens/pkg/storage"
 	"github.com/spf13/afero"
 )
 
-func (s *storageImpl) Save(ctx context.Context, module, version string, mod []byte, zip io.Reader, info []byte, size int64) error {
+func (s *storageImpl) Save(ctx context.Context, module, version string, mod []byte, zip storage.Zip, info []byte) error {
 	const op errors.Op = "fs.Save"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
@@ -37,7 +38,7 @@ func (s *storageImpl) Save(ctx context.Context, module, version string, mod []by
 		return errors.E(op, err, errors.M(module), errors.V(version))
 	}
 	defer f.Close()
-	_, err = io.Copy(f, zip)
+	_, err = io.Copy(f, zip.Zip)
 	if err != nil {
 		return errors.E(op, err, errors.M(module), errors.V(version))
 	}
