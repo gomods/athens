@@ -404,6 +404,6 @@ func TestDefaultConfigMatchesConfigFile(t *testing.T) {
 	opts := cmpopts.IgnoreTypes(&StorageConfig{})
 	eq := cmp.Equal(defConf, parsedConf, opts)
 	if !eq {
-		t.Error("Default values from the config file should equal to the default values returned in case the config file isn't provided.")
+		t.Errorf("Default values from the config file: %v should equal to the default values returned in case the config file isn't provided %v", parsedConf, defConf)
 	}
 }
