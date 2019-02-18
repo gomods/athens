@@ -401,8 +401,9 @@ func TestDefaultConfigMatchesConfigFile(t *testing.T) {
 
 	defConf := createDefault()
 
-	opts := cmpopts.IgnoreTypes(&StorageConfig{})
-	eq := cmp.Equal(defConf, parsedConf, opts)
+	ignoreStorageOpts := cmpopts.IgnoreTypes(&StorageConfig{})
+	ignoreGoEnvOpts := cmpopts.IgnoreFields(Config{}, "GoEnv")
+	eq := cmp.Equal(defConf, parsedConf, ignoreStorageOpts, ignoreGoEnvOpts)
 	if !eq {
 		t.Errorf("Default values from the config file: %v should equal to the default values returned in case the config file isn't provided %v", parsedConf, defConf)
 	}
