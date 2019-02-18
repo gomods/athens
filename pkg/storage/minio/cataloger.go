@@ -77,5 +77,8 @@ func parseMinioKey(o *minio.ObjectInfo) (paths.AllPathParams, error) {
 	parts := strings.Split(o.Key, "/@v/")
 	m, v := parts[0], parts[1]
 	v = strings.Replace(v, ".info", "", -1)
+	if m == "" || v == "" {
+		return paths.AllPathParams{}, errors.E(op, "cannot extract version")
+	}
 	return paths.AllPathParams{Module: m, Version: v}, nil
 }
