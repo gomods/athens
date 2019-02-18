@@ -132,13 +132,13 @@ TraceExporter = ""
 # TraceExporterURL is the URL to which Athens populates distributed tracing
 # information such as Jaeger. In Stackdriver, use this as the GCP ProjectID.
 # Env override: ATHENS_TRACE_EXPORTER_URL
-TraceExporterURL = ""
+TraceExporterURL = "http://localhost:14268"
 
 # Stats is not a requirement for Athens. If the value is not set,
 # Athens will keep on running and stats won't be collected.
 # Possible values are: prometheus.
 # Env overide: ATHENS_STATS_EXPORTER
-StatsExporter = ""
+StatsExporter = "prometheus"
 
 [Storage]
     # Only storage backends that are specified in Proxy.StorageType are required here

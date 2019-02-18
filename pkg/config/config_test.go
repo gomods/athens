@@ -219,9 +219,9 @@ func TestParseExampleConfig(t *testing.T) {
 		BasicAuthUser:    "",
 		BasicAuthPass:    "",
 		Storage:          expStorage,
-		TraceExporterURL: "",
+		TraceExporterURL: "http://localhost:14268",
 		TraceExporter:    "",
-		StatsExporter:    "",
+		StatsExporter:    "prometheus",
 	}
 
 	absPath, err := filepath.Abs(testConfigFile(t))
