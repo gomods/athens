@@ -21,6 +21,7 @@ func (s *storageImpl) Catalog(ctx context.Context, token string, pageSize int) (
 	res := make([]paths.AllPathParams, 0)
 	startAfter := token
 	token = ""
+	fmt.Println("catalog test")
 
 	count := pageSize
 	for count > 0 {
@@ -73,12 +74,8 @@ func fetchModsAndVersions(objects []minio.ObjectInfo, elementsNum int) ([]paths.
 
 func parseMinioKey(o *minio.ObjectInfo) (paths.AllPathParams, error) {
 	const op errors.Op = "minio.parseMinioKey"
-	parts := strings.Split(o.Key, "/")
-	v := parts[len(parts)-2]
-	m := strings.Replace(o.Key, v, "", -2)
-	m = strings.Replace(m, "//.info", "", -1)
-	if m == "" || v == "" {
-		return paths.AllPathParams{}, errors.E(op, fmt.Errorf("invalid object key format %s", o.Key))
-	}
-	return paths.AllPathParams{m, v}, nil
+	parts := strings.Split(o.Key, "/@v/")
+	m, v := parts[0], parts[1]
+	v = strings.Replace(v, ".info", "", -1)
+	return paths.AllPathParams{Module: m, Version: v}, nil
 }
