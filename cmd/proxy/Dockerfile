@@ -2,7 +2,7 @@
 # https://github.com/docker-library/buildpack-deps/blob/1845b3f918f69b4c97912b0d4d68a5658458e84f/stretch/scm/Dockerfile
 # https://github.com/golang/go/blob/f082dbfd4f23b0c95ee1de5c2b091dad2ff6d930/src/cmd/go/internal/get/vcs.go#L90
 
-FROM golang:1.11-alpine AS builder
+FROM golang:1.12-rc-alpine AS builder
 
 WORKDIR $GOPATH/src/github.com/gomods/athens
 
