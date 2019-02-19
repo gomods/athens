@@ -62,7 +62,7 @@ func createDefault() *Config {
 		ProtocolWorkers:  30,
 		LogLevel:         "debug",
 		CloudRuntime:     "none",
-        StatsExporter:   "prometheus",
+		StatsExporter:    "prometheus",
 		TimeoutConf:      TimeoutConf{Timeout: 300},
 		StorageType:      "memory",
 		Port:             ":3000",
