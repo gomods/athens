@@ -54,17 +54,18 @@ func Load(configFile string) (*Config, error) {
 
 func createDefault() *Config {
 	return &Config{
-		GoBinary:        "go",
-		GoEnv:           "development",
-		GoGetWorkers:    10,
-		ProtocolWorkers: 30,
-		LogLevel:        "debug",
-		CloudRuntime:    "none",
-		StatsExporter:   "prometheus",
-		TimeoutConf:     TimeoutConf{Timeout: 300},
-		StorageType:     "memory",
-		Port:            ":3000",
-		GlobalEndpoint:  "http://localhost:3001",
+		GoBinary:         "go",
+		GoEnv:            "development",
+		GoGetWorkers:     10,
+		ProtocolWorkers:  30,
+		LogLevel:         "debug",
+		CloudRuntime:     "none",
+		StatsExporter:    "prometheus",
+		TimeoutConf:      TimeoutConf{Timeout: 300},
+		StorageType:      "memory",
+		Port:             ":3000",
+		GlobalEndpoint:   "http://localhost:3001",
+		TraceExporterURL: "http://localhost:14268",
 	}
 }
 

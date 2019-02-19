@@ -388,3 +388,23 @@ func Test_checkFilePerms(t *testing.T) {
 		})
 	}
 }
+
+func TestDefaultConfigMatchesConfigFile(t *testing.T) {
+	absPath, err := filepath.Abs(testConfigFile(t))
+	if err != nil {
+		t.Errorf("Unable to construct absolute path to example config file")
+	}
+	parsedConf, err := ParseConfigFile(absPath)
+	if err != nil {
+		t.Errorf("Unable to parse example config file: %+v", err)
+	}
+
+	defConf := createDefault()
+
+	ignoreStorageOpts := cmpopts.IgnoreTypes(&StorageConfig{})
+	ignoreGoEnvOpts := cmpopts.IgnoreFields(Config{}, "GoEnv")
+	eq := cmp.Equal(defConf, parsedConf, ignoreStorageOpts, ignoreGoEnvOpts)
+	if !eq {
+		t.Errorf("Default values from the config file: %v should equal to the default values returned in case the config file isn't provided %v", parsedConf, defConf)
+	}
+}
