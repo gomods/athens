@@ -61,7 +61,7 @@ func Upload(ctx context.Context, module, version string, info, mod, zip Stream, 
 
 	go saveOrAbort("info", "application/json", info)
 	go saveOrAbort("mod", "text/plain", mod)
-	go saveOrAbort("zip", "applicatlsion/octet-stream", zip)
+	go saveOrAbort("zip", "application/octet-stream", zip)
 
 	var errs error
 	for i := 0; i < numFiles; i++ {
