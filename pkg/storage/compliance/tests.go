@@ -139,14 +139,16 @@ func testCatalog(t *testing.T, b storage.Backend) {
 	modname := "github.com/gomods/testCatalogModule"
 	for i := 0; i < 6; i++ {
 		ver := fmt.Sprintf("v1.2.%04d", i)
-		b.Save(ctx, modname, ver, mock.Mod, mock.Zip, mock.Info)
-
+		err := b.Save(ctx, modname, ver, mock.Mod, mock.Zip, mock.Info)
+		require.NoError(t, err)
 		defer b.Delete(ctx, modname, ver)
 	}
 
 	allres, next, err := cs.Catalog(ctx, "", 5)
 
 	require.NoError(t, err)
+
+	fmt.Println("----", allres)
 	require.Equal(t, 5, len(allres))
 
 	res, next, err := cs.Catalog(ctx, next, 50)
