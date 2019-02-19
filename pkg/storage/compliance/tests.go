@@ -103,8 +103,6 @@ func testGet(t *testing.T, b storage.Backend) {
 	zip, err := b.Zip(ctx, modname, ver)
 	require.NoError(t, err)
 
-	fmt.Sprintf("-----> zipbeats %s", zipBts)
-	fmt.Sprintf("----> zip %s", zip)
 	givenZipBts, err := ioutil.ReadAll(zip)
 	require.NoError(t, err)
 	require.Equal(t, zipBts, givenZipBts)
