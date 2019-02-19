@@ -19,11 +19,11 @@ import (
 func RunTests(t *testing.T, b storage.Backend, clearBackend func() error) {
 	require.NoError(t, clearBackend(), "clearing backend failed")
 	defer require.NoError(t, clearBackend(), "clearning backend failed")
-	testNotFound(t, b)
-	testList(t, b)
-	testDelete(t, b)
+	// testNotFound(t, b)
+	// testList(t, b)
+	// testDelete(t, b)
 	testGet(t, b)
-	testCatalog(t, b)
+	// testCatalog(t, b)
 }
 
 // testNotFound ensures that a storage Backend
@@ -88,7 +88,7 @@ func testGet(t *testing.T, b storage.Backend) {
 	modname := "getTestModule"
 	ver := "v1.2.3"
 	mock := getMockModule()
-	zipBts, _ := ioutil.ReadAll(mock.Zip.Zip)
+	zipBts, _ := ioutil.ReadAll(getMockModule().Zip.Zip)
 	b.Save(ctx, modname, ver, mock.Mod, mock.Zip, mock.Info)
 	defer b.Delete(ctx, modname, ver)
 
@@ -102,6 +102,9 @@ func testGet(t *testing.T, b storage.Backend) {
 
 	zip, err := b.Zip(ctx, modname, ver)
 	require.NoError(t, err)
+
+	fmt.Sprintf("-----> zipbeats %s", zipBts)
+	fmt.Sprintf("----> zip %s", zip)
 	givenZipBts, err := ioutil.ReadAll(zip)
 	require.NoError(t, err)
 	require.Equal(t, zipBts, givenZipBts)
