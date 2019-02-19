@@ -134,10 +134,9 @@ func testCatalog(t *testing.T, b storage.Backend) {
 		t.Skip()
 	}
 	ctx := context.Background()
-
-	mock := getMockModule()
 	modname := "github.com/gomods/testCatalogModule"
 	for i := 0; i < 6; i++ {
+		mock := getMockModule()
 		ver := fmt.Sprintf("v1.2.%04d", i)
 		err := b.Save(ctx, modname, ver, mock.Mod, mock.Zip, mock.Info)
 		require.NoError(t, err)
