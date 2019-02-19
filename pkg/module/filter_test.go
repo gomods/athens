@@ -133,7 +133,7 @@ func (t *FilterTests) Test_versionFilter() {
 	r.Equal(Include, f.Rule("github.com/a/b/c/d", "v1.3.4"))
 }
 
-func (t *FilterTests) Test_versionFilterAdvanced() {
+func (t *FilterTests) Test_versionFilterMinor() {
 	r := t.Require()
 	filter := tempFilterFile(t.T())
 	defer os.Remove(filter)
@@ -142,12 +142,48 @@ func (t *FilterTests) Test_versionFilterAdvanced() {
 	r.NoError(err)
 	f.AddRule("", nil, Exclude)
 	f.AddRule("github.com/a/b", []string{"~1.2.3", "~2.3.40"}, Include)
-	r.Equal(Exclude, f.Rule("github.com/d/e", "v1.2.0"))
-	r.Equal(Exclude, f.Rule("github.com/a/b", "v10.0.0"))
-	r.Equal(Include, f.Rule("github.com/a/b", "v1.2.4"))
+	r.Equal(Include, f.Rule("github.com/a/b", "v1.2.3"))
 	r.Equal(Include, f.Rule("github.com/a/b", "v1.2.5"))
+	r.Equal(Exclude, f.Rule("github.com/a/b", "v1.2.2"))
+	r.Equal(Exclude, f.Rule("github.com/a/b", "v1.3.3"))
 	r.Equal(Include, f.Rule("github.com/a/b", "v2.3.45"))
 	r.Equal(Exclude, f.Rule("github.com/a/b", "v2.2.45"))
+	r.Equal(Exclude, f.Rule("github.com/a/b", "v2.3.20"))
+}
+
+func (t *FilterTests) Test_versionFilterMiddle() {
+	r := t.Require()
+	filter := tempFilterFile(t.T())
+	defer os.Remove(filter)
+
+	f, err := NewFilter(filter)
+	r.NoError(err)
+	f.AddRule("", nil, Exclude)
+	f.AddRule("github.com/a/b", []string{"^1.2.3", "^2.3.40"}, Include)
+	r.Equal(Include, f.Rule("github.com/a/b", "v1.2.3"))
+	r.Equal(Include, f.Rule("github.com/a/b", "v1.2.5"))
+	r.Equal(Include, f.Rule("github.com/a/b", "v1.4.2"))
+	r.Equal(Exclude, f.Rule("github.com/a/b", "v1.2.1"))
+	r.Equal(Include, f.Rule("github.com/a/b", "v2.3.45"))
+	r.Equal(Include, f.Rule("github.com/a/b", "v2.4.1"))
+	r.Equal(Exclude, f.Rule("github.com/a/b", "v2.2.45"))
+}
+
+func (t *FilterTests) Test_versionFilterLess() {
+	r := t.Require()
+	filter := tempFilterFile(t.T())
+	defer os.Remove(filter)
+
+	f, err := NewFilter(filter)
+	r.NoError(err)
+	f.AddRule("", nil, Exclude)
+	f.AddRule("github.com/a/b", []string{"<2.3.40"}, Include)
+	r.Equal(Include, f.Rule("github.com/a/b", "v1.2.3"))
+	r.Equal(Include, f.Rule("github.com/a/b", "v1.4.2"))
+	r.Equal(Include, f.Rule("github.com/a/b", "v1.2.1"))
+	r.Equal(Include, f.Rule("github.com/a/b", "v2.3.39"))
+	r.Equal(Include, f.Rule("github.com/a/b", "v2.2.45"))
+	r.Equal(Exclude, f.Rule("github.com/a/b", "v2.4.1"))
 }
 
 func (t *FilterTests) Test_initFromConfig() {

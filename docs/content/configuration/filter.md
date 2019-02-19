@@ -68,3 +68,19 @@ D enterprise.github.com/company
 </pre>
 
 In the above example, any module not in the rules will be excluded.  All modules from `enterprise.github.com/company` are fetched directly from the source.  The `github.com/gomods/athens` module will be stored in the proxy storage, but only for version `v0.4.1` and any patch versions under `v0.1` and `v0.2` minor versions.
+
+### Versions Filter Modifiers
+
+Athens provides advanced filter modifiers to cover cases such as api compatibility or when a given dependency changes its license from a given versions. The modifiers are intended to be used in the pattern list of the filter file.
+
+<pre>
+-
+# external dependency approved list
++ github.com/gomods/athens <1.2.3
+</pre>
+
+The currently supported modifiers are 
+
+- ~1.2.3: enables 1.2.x  which are at least 1.2.3
+- ^1.2.3: enables 1.x.x which are at least 1.2.3
+- <1.2.3: enables everything lower than 1.2.3 includes 1.2.2 and 0.58.9 as well

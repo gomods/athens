@@ -230,7 +230,7 @@ func matches(version, qualifier string) bool {
 		}
 		return false
 	case '^':
-		if v[0] == q[0] && v[1] >= q[1] {
+		if v[0] == q[0] && v[1] > q[1] {
 			return true
 		}
 		if v[0] == q[0] && v[1] == q[1] && v[2] >= q[2] {
