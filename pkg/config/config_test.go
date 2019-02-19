@@ -64,6 +64,7 @@ func TestPortDefaultsCorrectly(t *testing.T) {
 }
 
 func TestEnvOverrides(t *testing.T) {
+	os.Clearenv()
 	expConf := &Config{
 		GoEnv:           "production",
 		GoGetWorkers:    10,
@@ -88,10 +89,7 @@ func TestEnvOverrides(t *testing.T) {
 	}
 
 	envVars := getEnvMap(expConf)
-	envVarBackup := map[string]string{}
 	for k, v := range envVars {
-		oldVal := os.Getenv(k)
-		envVarBackup[k] = oldVal
 		os.Setenv(k, v)
 	}
 	conf := &Config{}
@@ -100,7 +98,19 @@ func TestEnvOverrides(t *testing.T) {
 		t.Fatalf("Env override failed: %v", err)
 	}
 	compareConfigs(conf, expConf, t)
-	restoreEnv(envVarBackup)
+}
+
+func TestEnvOverridesPreservingPort(t *testing.T) {
+	os.Clearenv()
+	const expPort = ":5000"
+	conf := &Config{Port: expPort}
+	err := envOverride(conf)
+	if err != nil {
+		t.Fatalf("Env override failed: %v", err)
+	}
+	if conf.Port != expPort {
+		t.Errorf("Port was incorrect. Got: %s, want: %s", conf.Port, expPort)
+	}
 }
 
 func TestStorageEnvOverrides(t *testing.T) {
