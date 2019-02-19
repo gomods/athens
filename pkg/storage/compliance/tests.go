@@ -19,11 +19,11 @@ import (
 func RunTests(t *testing.T, b storage.Backend, clearBackend func() error) {
 	require.NoError(t, clearBackend(), "clearing backend failed")
 	defer require.NoError(t, clearBackend(), "clearning backend failed")
-	// testNotFound(t, b)
-	// testList(t, b)
-	// testDelete(t, b)
+	testNotFound(t, b)
+	testList(t, b)
+	testDelete(t, b)
 	testGet(t, b)
-	// testCatalog(t, b)
+	testCatalog(t, b)
 }
 
 // testNotFound ensures that a storage Backend
