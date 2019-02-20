@@ -126,7 +126,7 @@ HGRCPath = ""
 # Athens will keep on running and traces won't be exported.
 # TraceExporter is the service to which the data collected by OpenCensus can be exported to.
 # Possible values are: jaeger, datadog, and stackdriver.
-# Env overide: ATHENS_TRACE_EXPORTER
+# Env override: ATHENS_TRACE_EXPORTER
 TraceExporter = ""
 
 # TraceExporterURL is the URL to which Athens populates distributed tracing
@@ -137,7 +137,7 @@ TraceExporterURL = "http://localhost:14268"
 # Stats is not a requirement for Athens. If the value is not set,
 # Athens will keep on running and stats won't be collected.
 # Possible values are: prometheus.
-# Env overide: ATHENS_STATS_EXPORTER
+# Env override: ATHENS_STATS_EXPORTER
 StatsExporter = "prometheus"
 
 [Storage]
@@ -154,7 +154,7 @@ StatsExporter = "prometheus"
 
     [Storage.GCP]
         # ProjectID to use for GCP Storage
-        # Env overide: GOOGLE_CLOUD_PROJECT
+        # Env override: GOOGLE_CLOUD_PROJECT
         ProjectID = "MY_GCP_PROJECT_ID"
 
         # Bucket to use for GCP Storage
