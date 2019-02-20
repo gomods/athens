@@ -76,11 +76,11 @@ Athens provides advanced filter modifiers to cover cases such as api compatibili
 <pre>
 -
 # external dependency approved list
-+ github.com/gomods/athens <1.2.3
++ github.com/gomods/athens <v1.2.3
 </pre>
 
 The currently supported modifiers are 
 
-- ~1.2.3: enables 1.2.x  which are at least 1.2.3
-- ^1.2.3: enables 1.x.x which are at least 1.2.3
-- <1.2.3: enables everything lower than 1.2.3 includes 1.2.2 and 0.58.9 as well
+- ~v1.2.3: enables 1.2.x  which are at least 1.2.3
+- ^v1.2.3: enables 1.x.x which are at least 1.2.3
+- <v1.2.3: enables everything lower than 1.2.3 includes 1.2.2 and 0.58.9 as well

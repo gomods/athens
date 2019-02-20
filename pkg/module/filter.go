@@ -199,9 +199,11 @@ func initFromConfig(filePath string) (*Filter, error) {
 // - <1.2.3: enables everything lower than 1.2.3 includes 1.2.2 and 0.58.9 as well
 func matches(version, qualifier string) bool {
 	prefix := qualifier[0]
+	first := qualifier[1]
 
 	// v1.2.3 means we accept every version starting with v.1.2.3
-	if prefix == 'v' {
+	// handle this special case first, then go for ~v1.2.3 and similar
+	if prefix == 'v' && first >= '0' && first <= '9' { // a number
 		return strings.HasPrefix(version, qualifier)
 	}
 
@@ -210,7 +212,7 @@ func matches(version, qualifier string) bool {
 		return false
 	}
 
-	q, err := getVersionSegments(qualifier[1:])
+	q, err := getVersionSegments(qualifier[2:])
 	if err != nil {
 		return false
 	}
