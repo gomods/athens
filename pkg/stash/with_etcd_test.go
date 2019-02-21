@@ -37,7 +37,9 @@ func TestEtcdSingleFlight(t *testing.T) {
 	var eg errgroup.Group
 	for i := 0; i < 5; i++ {
 		eg.Go(func() error {
-			_, err := s.Stash(context.Background(), "mod", "ver")
+			ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+			defer cancel()
+			_, err := s.Stash(ctx, "mod", "ver")
 			return err
 		})
 	}

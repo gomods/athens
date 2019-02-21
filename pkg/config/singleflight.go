@@ -11,5 +11,5 @@ type SingleFlight struct {
 // that helps Athens connect to the
 // Etcd backends.
 type Etcd struct {
-	Endpoints string
+	Endpoints string `envconfig:"ATHENS_ETCD_ENDPOINTS"`
 }
