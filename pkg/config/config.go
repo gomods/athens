@@ -28,7 +28,7 @@ type Config struct {
 	StatsExporter    string `envconfig:"ATHENS_STATS_EXPORTER"`
 	StorageType      string `validate:"required" envconfig:"ATHENS_STORAGE_TYPE"`
 	GlobalEndpoint   string `envconfig:"ATHENS_GLOBAL_ENDPOINT"` // This feature is not yet implemented
-	Port             string `envconfig:"ATHENS_PORT" default:":3000"`
+	Port             string `envconfig:"ATHENS_PORT"`
 	BasicAuthUser    string `envconfig:"BASIC_AUTH_USER"`
 	BasicAuthPass    string `envconfig:"BASIC_AUTH_PASS"`
 	ForceSSL         bool   `envconfig:"PROXY_FORCE_SSL"`
@@ -54,16 +54,18 @@ func Load(configFile string) (*Config, error) {
 
 func createDefault() *Config {
 	return &Config{
-		GoBinary:        "go",
-		GoEnv:           "development",
-		GoGetWorkers:    10,
-		ProtocolWorkers: 30,
-		LogLevel:        "debug",
-		CloudRuntime:    "none",
-		TimeoutConf:     TimeoutConf{Timeout: 300},
-		StorageType:     "memory",
-		Port:            ":3000",
-		GlobalEndpoint:  "http://localhost:3001",
+		GoBinary:         "go",
+		GoEnv:            "development",
+		GoGetWorkers:     10,
+		ProtocolWorkers:  30,
+		LogLevel:         "debug",
+		CloudRuntime:     "none",
+		StatsExporter:    "prometheus",
+		TimeoutConf:      TimeoutConf{Timeout: 300},
+		StorageType:      "memory",
+		Port:             ":3000",
+		GlobalEndpoint:   "http://localhost:3001",
+		TraceExporterURL: "http://localhost:14268",
 	}
 }
 
@@ -135,7 +137,15 @@ func ParseConfigFile(configFile string) (*Config, error) {
 
 // envOverride uses Environment variables to override unspecified properties
 func envOverride(config *Config) error {
-	return envconfig.Process("athens", config)
+	const defaultPort = ":3000"
+	err := envconfig.Process("athens", config)
+	if err != nil {
+		return err
+	}
+	if config.Port == "" {
+		config.Port = defaultPort
+	}
+	return nil
 }
 
 func validateConfig(config Config) error {
