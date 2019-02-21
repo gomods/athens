@@ -68,7 +68,7 @@ func createDefault() *Config {
 		Port:             ":3000",
 		SingleFlightType: "memory",
 		GlobalEndpoint:   "http://localhost:3001",
-        TraceExporterURL: "http://localhost:14268",
+		TraceExporterURL: "http://localhost:14268",
 		SingleFlight:     &SingleFlight{&Etcd{"localhost:2379,localhost:22379,localhost:32379"}},
 	}
 }
