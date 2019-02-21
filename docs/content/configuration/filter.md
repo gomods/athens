@@ -81,6 +81,11 @@ Athens provides advanced filter modifiers to cover cases such as api compatibili
 
 The currently supported modifiers are 
 
-- ~v1.2.3: enables 1.2.x  which are at least 1.2.3
-- ^v1.2.3: enables 1.x.x which are at least 1.2.3
-- <v1.2.3: enables everything lower than 1.2.3 includes 1.2.2 and 0.58.9 as well
+* `~1.2.3` will enable all patch versions from 1.2.3 and above (e.g. 1.2.3, 1.2.4, 1.2.5)
+  * Formally, `1.2.x` where `x >= 3`
+
+* `^1.2.3` will enable all patch and minor versions from 1.2.3 and above (e.g. 1.2.4, 1.3.0 and 1.4.5)
+  * Formally, `1.x.y` where `x >= 2` and `y >= 3`
+
+* `<1.2.3` will enable all versions lower than 1.2.3 (e.g. 1.2.2, 1.0.0 and 0.58.9)
+  * Formally, `x.y.z` where `x <= 1`, `y < = 2` and `z < 3`
