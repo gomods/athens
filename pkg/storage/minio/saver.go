@@ -25,7 +25,7 @@ func (s *storageImpl) Save(ctx context.Context, module, version string, mod []by
 
 func (s *storageImpl) upload(ctx context.Context, path, contentType string, stream moduploader.Stream) error {
 	const op errors.Op = "minio.upload"
-	if stream.Size > 600000000 {
+	if stream.Size > 6*8*1024*1024 {
 		stream.Size = -1
 	}
 	_, err := s.minioClient.PutObject(s.bucketName, path, stream.Stream, stream.Size, minio.PutObjectOptions{})
