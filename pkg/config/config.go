@@ -39,6 +39,8 @@ type Config struct {
 	HGRCPath         string `envconfig:"ATHENS_HGRC_PATH"`
 	TLSCertFile      string `envconfig:"ATHENS_TLSCERT_FILE"`
 	TLSKeyFile       string `envconfig:"ATHENS_TLSKEY_FILE"`
+	SingleFlightType string `envconfig:"ATHENS_SINGLE_FLIGHT_TYPE"`
+	SingleFlight     *SingleFlight
 	Storage          *StorageConfig
 }
 
@@ -64,8 +66,10 @@ func createDefault() *Config {
 		TimeoutConf:      TimeoutConf{Timeout: 300},
 		StorageType:      "memory",
 		Port:             ":3000",
+		SingleFlightType: "memory",
 		GlobalEndpoint:   "http://localhost:3001",
 		TraceExporterURL: "http://localhost:14268",
+		SingleFlight:     &SingleFlight{&Etcd{"localhost:2379,localhost:22379,localhost:32379"}},
 	}
 }
 
