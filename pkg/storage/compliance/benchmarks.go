@@ -30,7 +30,8 @@ func benchList(b *testing.B, s storage.Backend, clear func() error) {
 		version,
 		mock.Mod,
 		mock.Zip,
-		mock.Info)
+		mock.Info,
+	)
 	require.NoError(b, err, "save for storage failed")
 
 	b.Run("list", func(b *testing.B) {
@@ -60,7 +61,8 @@ func benchSave(b *testing.B, s storage.Backend, clear func() error) {
 				version,
 				mock.Mod,
 				mock.Zip,
-				mock.Info)
+				mock.Info,
+			)
 			require.NoError(b, err)
 			mi++
 		}

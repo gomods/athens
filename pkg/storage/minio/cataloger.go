@@ -21,7 +21,6 @@ func (s *storageImpl) Catalog(ctx context.Context, token string, pageSize int) (
 	res := make([]paths.AllPathParams, 0)
 	startAfter := token
 	token = ""
-	fmt.Println("catalog test")
 
 	count := pageSize
 	for count > 0 {

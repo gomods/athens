@@ -14,7 +14,6 @@ import (
 // It returns a list of modules and versions contained in the storage
 func (s *ModuleStore) Catalog(ctx context.Context, token string, pageSize int) ([]paths.AllPathParams, string, error) {
 	const op errors.Op = "mongo.Catalog"
-	fmt.Sprintf("modules %s\n", op)
 
 	q := bson.M{}
 	if token != "" {

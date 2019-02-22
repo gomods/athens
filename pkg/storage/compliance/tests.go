@@ -69,7 +69,8 @@ func testList(t *testing.T, b storage.Backend) {
 			version,
 			mock.Mod,
 			mock.Zip,
-			mock.Info)
+			mock.Info,
+		)
 		require.NoError(t, err, "Save for storage failed")
 	}
 	defer func() {
@@ -137,6 +138,7 @@ func testCatalog(t *testing.T, b storage.Backend) {
 	modname := "github.com/gomods/testCatalogModule"
 	for i := 0; i < 6; i++ {
 		mock := getMockModule()
+
 		ver := fmt.Sprintf("v1.2.%04d", i)
 		err := b.Save(ctx, modname, ver, mock.Mod, mock.Zip, mock.Info)
 		require.NoError(t, err)
@@ -146,8 +148,6 @@ func testCatalog(t *testing.T, b storage.Backend) {
 	allres, next, err := cs.Catalog(ctx, "", 5)
 
 	require.NoError(t, err)
-
-	fmt.Println("----", allres)
 	require.Equal(t, 5, len(allres))
 
 	res, next, err := cs.Catalog(ctx, next, 50)
