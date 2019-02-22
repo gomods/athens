@@ -17,13 +17,68 @@ GO_BINARY_PATH=go1.11.X
 ```
 
 # Run the Proxy
+
+We provide two ways to run the proxy on your local machine:
+
+1. Using [Docker](https://www.docker.com/) and [Docker Compose](https://docs.docker.com/compose/) (_we suggest this one if you're getting started_)
+2. Natively on your host
+
+.See below for insrtuctions to do both!
+
+## Using Docker
+
+As we said above, we suggest that you use this approach because it simulates a more realistic Athens deployment. This technique does the following, completely inside containers:
+
+1. Builds Athens from scratch
+2. Starts up [MongoDB](https://www.mongodb.com/) and [Jaeger](https://www.jaegertracing.io/)
+3. Configures Athens to use MongoDB for its storage and Jaeger for its distributed tracing
+4. Runs Athens
+
+You'll need [Docker](https://www.docker.com/) and [Docker Compose](https://docs.docker.com/compose/) installed. Once you do, run the below command to set everything up:
+
+```console
+$ make dev-docker
+```
+
+You should see some output that look like this:
+
+```console
+docker-compose -p athensdockerdev up -d dev
+Creating network "athensdockerdev_default" with the default driver
+Creating athensdockerdev_jaeger_1 ... done
+Creating athensdockerdev_minio_1  ... done
+Creating athensdockerdev_mongo_1  ... done
+Creating athensdockerdev_dev_1    ... done
+```
+
+After that runs, Athens should be up and running and serving on post 3000. To test it out, run this command:
+
+```console
+$ curl localhost:3000
+```
+
+... and you should see the standard Athens response:
+
+```console
+"Welcome to The Athens Proxy"
+```
+
+When you're ready to stop Athens and all its dependencies, run this command:
+
+```console
+$ make run-docker-teardown
+```
+
+## Natively on Your Host
+
 If you're inside GOPATH, make sure `GO111MODULE=on`, if you're outside GOPATH, then Go Modules are on by default.
+
 The main package is inside `cmd/proxy` and is run like any go project as follows: 
 
-```
-cd cmd/proxy
-go build
-./proxy
+```console
+$ cd cmd/proxy
+$ go build
+$ ./proxy
 ```
 
 After the server starts, you'll see some console output like:

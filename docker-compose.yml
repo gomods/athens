@@ -1,5 +1,18 @@
 version: '3'
 services:
+  dev:
+    build:
+      context: .
+      dockerfile: cmd/proxy/Dockerfile
+    environment:
+      - ATHENS_MONGO_STORAGE_URL=mongodb://mongo:27017
+      - TIMEOUT=20 # in case the mongo dependency takes longer to start up
+      - ATHENS_STORAGE_TYPE=mongo
+    ports:
+      - 3000:3000
+    depends_on:
+      - mongo
+      - jaeger
   testunit:
     build:
       context: .

@@ -11,6 +11,13 @@ build-ver:
 run: 
 	cd ./cmd/proxy && go run . -config_file ../../config.dev.toml
 
+.PHONE: run-docker
+run-docker:
+	docker-compose -p athensdockerdev up -d dev
+
+run-docker-teardown:
+	docker-compose -p athensdockerdev down
+
 .PHONY: docs
 docs:
 	docker build -t gomods/hugo -f docs/Dockerfile .
