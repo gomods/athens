@@ -3,6 +3,7 @@ package stash
 import (
 	"context"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"strings"
 	"sync"
@@ -64,13 +65,17 @@ func (ms *mockEtcdStasher) Stash(ctx context.Context, mod, ver string) (string, 
 	time.Sleep(time.Millisecond * 100) // allow for second requests to come in.
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
+	zip := storage.Zip{
+		Reader: ioutil.NopCloser(strings.NewReader("zip file")),
+		Size:   8,
+	}
 	if ms.num == 0 {
 		err := ms.strg.Save(
 			ctx,
 			mod,
 			ver,
 			[]byte("mod file"),
-			strings.NewReader("zip file"),
+			zip,
 			[]byte("info file"),
 		)
 		if err != nil {
