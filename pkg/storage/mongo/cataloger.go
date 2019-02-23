@@ -2,7 +2,6 @@ package mongo
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/globalsign/mgo/bson"
 	"github.com/gomods/athens/pkg/errors"

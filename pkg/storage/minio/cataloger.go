@@ -2,7 +2,6 @@ package minio
 
 import (
 	"context"
-	"fmt"
 	"strings"
 
 	"github.com/gomods/athens/pkg/errors"
