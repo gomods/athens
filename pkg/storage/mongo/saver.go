@@ -32,7 +32,7 @@ func (s *ModuleStore) Save(ctx context.Context, module, version string, mod []by
 	}
 	defer f.Close()
 
-	numBytesWritten, err := io.Copy(f, zip.Zip)
+	numBytesWritten, err := io.Copy(f, zip.Reader)
 	if err != nil {
 		return errors.E(op, err, errors.M(module), errors.V(version))
 	}

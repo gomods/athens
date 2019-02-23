@@ -54,7 +54,7 @@ func (s *stasher) Stash(ctx context.Context, mod, ver string) (string, error) {
 	if err != nil {
 		return "", errors.E(op, err)
 	}
-	defer v.Zip.Zip.Close()
+	defer v.Zip.Reader.Close()
 	if v.Semver != ver {
 		exists, err := s.storage.Exists(ctx, mod, v.Semver)
 		if err != nil {

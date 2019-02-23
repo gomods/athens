@@ -32,7 +32,7 @@ func (s *Storage) Save(ctx context.Context, module, version string, mod []byte, 
 	}
 
 	// err = moduploader.Upload(ctx, module, version, bytes.NewReader(info), bytes.NewReader(mod), zip, s.upload, s.timeout)
-	zipStream := moduploader.Stream{zip.Zip, zip.Size}
+	zipStream := moduploader.Stream{zip.Reader, zip.Size}
 	err = moduploader.Upload(ctx, module, version, moduploader.NewStreamFromBytes(info), moduploader.NewStreamFromBytes(mod), zipStream, s.upload, s.timeout)
 	if err != nil {
 		return errors.E(op, err, errors.M(module), errors.V(version))

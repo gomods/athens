@@ -38,7 +38,7 @@ func (s *storageImpl) Save(ctx context.Context, module, version string, mod []by
 		return errors.E(op, err, errors.M(module), errors.V(version))
 	}
 	defer f.Close()
-	_, err = io.Copy(f, zip.Zip)
+	_, err = io.Copy(f, zip.Reader)
 	if err != nil {
 		return errors.E(op, err, errors.M(module), errors.V(version))
 	}

@@ -48,7 +48,7 @@ func benchSave(b *testing.B, s storage.Backend, clear func() error) {
 
 	module, version := "benchSaveModule", "1.0.1"
 	mock := getMockModule()
-	_, err := ioutil.ReadAll(mock.Zip.Zip)
+	_, err := ioutil.ReadAll(mock.Zip.Reader)
 	require.NoError(b, err)
 
 	mi := 0
@@ -75,7 +75,7 @@ func benchDelete(b *testing.B, s storage.Backend, clear func() error) {
 
 	module, version := "benchDeleteModule", "1.0.1"
 	mock := getMockModule()
-	_, err := ioutil.ReadAll(mock.Zip.Zip)
+	_, err := ioutil.ReadAll(mock.Zip.Reader)
 	require.NoError(b, err)
 	ctx := context.Background()
 

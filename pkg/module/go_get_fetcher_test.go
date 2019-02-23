@@ -38,16 +38,16 @@ func (s *ModuleSuite) TestGoGetFetcherFetch() {
 	r.NoError(err)
 	ver, err := fetcher.Fetch(ctx, repoURI, version)
 	r.NoError(err)
-	defer ver.Zip.Zip.Close()
+	defer ver.Zip.Reader.Close()
 
 	r.True(len(ver.Info) > 0)
 
 	r.True(len(ver.Mod) > 0)
 
-	zipBytes, err := ioutil.ReadAll(ver.Zip.Zip)
+	zipBytes, err := ioutil.ReadAll(ver.Zip.Reader)
 	r.NoError(err)
 	r.True(len(zipBytes) > 0)
 
 	// close the version's zip file (which also cleans up the underlying GOPATH) and expect it to fail again
-	r.NoError(ver.Zip.Zip.Close())
+	r.NoError(ver.Zip.Reader.Close())
 }

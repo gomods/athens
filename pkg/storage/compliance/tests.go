@@ -89,7 +89,7 @@ func testGet(t *testing.T, b storage.Backend) {
 	modname := "getTestModule"
 	ver := "v1.2.3"
 	mock := getMockModule()
-	zipBts, _ := ioutil.ReadAll(getMockModule().Zip.Zip)
+	zipBts, _ := ioutil.ReadAll(getMockModule().Zip.Reader)
 	b.Save(ctx, modname, ver, mock.Mod, mock.Zip, mock.Info)
 	defer b.Delete(ctx, modname, ver)
 

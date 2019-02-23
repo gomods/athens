@@ -16,7 +16,7 @@ func (s *Storage) Save(ctx context.Context, module, version string, mod []byte, 
 	const op errors.Op = "s3.Save"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
-	zipStream := moduploader.Stream{zip.Zip, zip.Size}
+	zipStream := moduploader.Stream{zip.Reader, zip.Size}
 	err := moduploader.Upload(ctx, module, version, moduploader.NewStreamFromBytes(info), moduploader.NewStreamFromBytes(mod), zipStream, s.upload, s.timeout)
 	// TODO: take out lease on the /list file and add the version to it
 	//

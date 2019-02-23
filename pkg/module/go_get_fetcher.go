@@ -104,7 +104,7 @@ func (g *goGetFetcher) Fetch(ctx context.Context, mod, ver string) (*storage.Ver
 	//
 	// if we close, then the caller will panic, and the alternative to make this work is
 	// that we read into memory and return an io.ReadCloser that reads out of memory
-	storageVer.Zip = storage.Zip{Zip: zip, Size: zipStat.Size()}
+	storageVer.Zip = storage.Zip{Reader: zip, Size: zipStat.Size()}
 	return &storageVer, nil
 }
 

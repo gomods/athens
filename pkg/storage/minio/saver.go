@@ -17,7 +17,7 @@ func (s *storageImpl) Save(ctx context.Context, module, version string, mod []by
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 
-	zipStream := moduploader.Stream{Stream: zip.Zip, Size: zip.Size}
+	zipStream := moduploader.Stream{Stream: zip.Reader, Size: zip.Size}
 	err := moduploader.Upload(ctx, module, version, moduploader.NewStreamFromBytes(info), moduploader.NewStreamFromBytes(mod), zipStream, s.upload, s.timeout)
 	if err != nil {
 		return errors.E(op, err, errors.M(module), errors.V(version))
