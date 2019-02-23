@@ -21,7 +21,7 @@ func testConfigFile(t *testing.T) (testConfigFile string) {
 }
 
 func compareConfigs(parsedConf *Config, expConf *Config, t *testing.T) {
-	opts := cmpopts.IgnoreTypes(StorageConfig{})
+	opts := cmpopts.IgnoreTypes(StorageConfig{}, SingleFlight{})
 	eq := cmp.Equal(parsedConf, expConf, opts)
 	if !eq {
 		t.Errorf("Parsed Example configuration did not match expected values. Expected: %+v. Actual: %+v", expConf, parsedConf)
@@ -86,6 +86,7 @@ func TestEnvOverrides(t *testing.T) {
 		NETRCPath:      "/test/path/.netrc",
 		HGRCPath:       "/test/path/.hgrc",
 		Storage:        &StorageConfig{},
+		SingleFlight:   &SingleFlight{},
 	}
 
 	envVars := getEnvMap(expConf)
@@ -174,6 +175,7 @@ func TestParseExampleConfig(t *testing.T) {
 			Mongo: &MongoConfig{},
 			S3:    &S3Config{},
 		},
+		SingleFlight: &SingleFlight{},
 	}
 	// unset all environment variables
 	envVars := getEnvMap(emptyConf)
@@ -232,6 +234,8 @@ func TestParseExampleConfig(t *testing.T) {
 		TraceExporterURL: "http://localhost:14268",
 		TraceExporter:    "",
 		StatsExporter:    "prometheus",
+		SingleFlightType: "memory",
+		SingleFlight:     &SingleFlight{},
 	}
 
 	absPath, err := filepath.Abs(testConfigFile(t))

@@ -26,6 +26,7 @@ tmp
 cmd/proxy/bin
 .idea
 .DS_Store
+.vscode
 
 
 # prod config file
