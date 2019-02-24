@@ -1,0 +1,22 @@
+# Most of this config stolen from 
+# https://stackoverflow.com/questions/50051642/networking-using-docker-compose-in-docker-executor-in-circleci
+version: 2
+jobs:
+  build:
+    docker:
+      - image: docker:18.03.0-ce-git
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: Install Docker Compose
+          command: |
+            apk --update add py2-pip
+            /usr/bin/pip2 install docker-compose
+            docker-compose --version
+      - run:
+          name: Run Unit Tests
+          command: docker-compose up --exit-code-from=testunit testunit
+      - run:
+          name: Run e2e Tests
+          command: docker-compose up --exit-code-from=teste2e teste2e
