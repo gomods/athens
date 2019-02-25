@@ -186,6 +186,18 @@ func (t *FilterTests) Test_versionFilterLess() {
 	r.Equal(Exclude, f.Rule("github.com/a/b", "v2.4.1"))
 }
 
+func (t *FilterTests) Test_versionFilterRobust() {
+	r := t.Require()
+	filter := tempFilterFile(t.T())
+	defer os.Remove(filter)
+
+	f, err := NewFilter(filter)
+	r.NoError(err)
+	f.AddRule("", nil, Exclude)
+	f.AddRule("github.com/a/b", []string{"v"}, Include)
+	r.Equal(Exclude, f.Rule("github.com/a/b", "v"))
+}
+
 func (t *FilterTests) Test_initFromConfig() {
 	r := t.Require()
 	filterFile := tempFilterFile(t.T())

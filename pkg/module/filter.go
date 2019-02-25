@@ -173,19 +173,19 @@ func initFromConfig(filePath string) (*Filter, error) {
 			f.AddRule("", nil, rule)
 			continue
 		}
-		var vers []string
+		var qual []string
 		if len(split) == 3 {
-			vers = strings.Split(split[2], ",")
-			for i := range vers {
-				vers[i] = strings.TrimRight(vers[i], "*")
-				if vers[i][len(vers[i])-1] != '.' && strings.Count(vers[i], ".") < 2 {
-					vers[i] += "."
+			qual = strings.Split(split[2], ",")
+			for i := range qual {
+				qual[i] = strings.TrimRight(qual[i], "*")
+				if qual[i][len(qual[i])-1] != '.' && strings.Count(qual[i], ".") < 2 {
+					qual[i] += "."
 				}
 			}
 		}
 
 		path := strings.TrimSpace(split[1])
-		f.AddRule(path, vers, rule)
+		f.AddRule(path, qual, rule)
 	}
 	return f, nil
 }
@@ -198,10 +198,14 @@ func initFromConfig(filePath string) (*Filter, error) {
 // - ^1.2.3: enables 1.x.x which are at least 1.2.3
 // - <1.2.3: enables everything lower than 1.2.3 includes 1.2.2 and 0.58.9 as well
 func matches(version, qualifier string) bool {
+	if len(qualifier) < 2 || len(qualifier) < 2 {
+		return false
+	}
+
 	prefix := qualifier[0]
 	first := qualifier[1]
 
-	// v1.2.3 means we accept every version starting with v.1.2.3
+	// v1.2.3 means we accept every version starting with v1.2.3
 	// handle this special case first, then go for ~v1.2.3 and similar
 	if prefix == 'v' && first >= '0' && first <= '9' { // a number
 		return strings.HasPrefix(version, qualifier)

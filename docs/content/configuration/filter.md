@@ -71,7 +71,7 @@ In the above example, any module not in the rules will be excluded.  All modules
 
 ### Versions Filter Modifiers
 
-Athens provides advanced filter modifiers to cover cases such as api compatibility or when a given dependency changes its license from a given versions. The modifiers are intended to be used in the pattern list of the filter file.
+Athens provides advanced filter modifiers to cover cases such as API compatibility or when a given dependency changes its license from a given versions. The modifiers are intended to be used in the pattern list of the filter file.
 
 <pre>
 -
@@ -89,3 +89,5 @@ The currently supported modifiers are
 
 * `<1.2.3` will enable all versions lower than 1.2.3 (e.g. 1.2.2, 1.0.0 and 0.58.9)
   * Formally, `x.y.z` where `x <= 1`, `y < = 2` and `z < 3`
+
+This kind of modifiers will work only if a three parts semantic version is specified. For example, `~4.5.6` will work while `~4.5` won't.
