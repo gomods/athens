@@ -140,6 +140,27 @@ TraceExporterURL = "http://localhost:14268"
 # Env override: ATHENS_STATS_EXPORTER
 StatsExporter = "prometheus"
 
+# SingleFlightType determines what mechanism Athens uses 
+# to manage concurrency flowing into the Athens Backend. 
+# This is important for the following scenario: if two concurrent requests 
+# were made to Athens that wanted to store the same module at the same time, 
+# we want to make sure only the first request gets to store the module, 
+# and the second request will wait for the first one to finish so that 
+# it doesn't override the storage. 
+# Options are ["memory", "etcd"]
+# The default option is "memory" which means that only one instance of Athens 
+# should be used.
+# Env override: ATHENS_SINGLE_FLIGHT_TYPE
+SingleFlightType = "memory"
+
+[SingleFlight]
+    [SingleFlight.Etcd]
+        # Endpoints are comma separated URLs that determine all distributed etcd servers.
+        # It defaults to what we have in our docker-compose file. It is by default ignored 
+        # as the SingleFlightType field above determines whether Etcd is used or not.
+        # Env override: ATHENS_ETCD_ENDPOINTS
+        Endpoints = "localhost:2379,localhost:22379,localhost:32379"
+
 [Storage]
     # Only storage backends that are specified in Proxy.StorageType are required here
     [Storage.CDN]
@@ -160,6 +181,15 @@ StatsExporter = "prometheus"
         # Bucket to use for GCP Storage
         # Env override: ATHENS_STORAGE_GCP_BUCKET
         Bucket = "MY_GCP_BUCKET"
+
+        # JSONKey is a base64 encoded service account 
+        # key that allows Athens to be run outside of GCP
+        # but still be able to access GCS. If you are 
+        # running Athens inside GCP, you will most
+        # likely not need this as GCP figures out 
+        # internal authentication between products for you. 
+        # Env override: ATHENS_STORAGE_GCP_JSON_KEY
+        JSONKey = ""
 
     [Storage.Minio]
         # Endpoint for Minio storage
