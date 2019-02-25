@@ -23,11 +23,11 @@ spec:
         imagePullPolicy: {{ .Values.image.pullPolicy | quote }}
         livenessProbe:
           httpGet:
-            path: /healthz
+            path: /
             port: 3000
         readinessProbe:
           httpGet:
-            path: /readyz
+            path: /
             port: 3000
         env:
         - name: ATHENS_STORAGE_TYPE

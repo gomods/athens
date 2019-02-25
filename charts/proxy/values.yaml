@@ -10,6 +10,8 @@ image:
   pullPolicy: Always
 
 service:
+  ## Port as exposed by the service
+  servicePort: 80
   ## Type of service; valid values are "ClusterIP", "LoadBalancer", and
   ## "NodePort". "ClusterIP" is sufficient in the case when the Proxy will be used
   ## from within the cluster. To expose externally, consider a "NodePort" or "LoadBalancer" service.
