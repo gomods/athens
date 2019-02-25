@@ -37,7 +37,7 @@ As we said above, we suggest that you use this approach because it simulates a m
 You'll need [Docker](https://www.docker.com/) and [Docker Compose](https://docs.docker.com/compose/) installed. Once you do, run the below command to set everything up:
 
 ```console
-$ make dev-docker
+$ make run-docker
 ```
 
 You should see some output that look like this:
