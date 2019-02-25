@@ -8,6 +8,8 @@ import (
 	"cloud.google.com/go/storage"
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/errors"
+	"golang.org/x/oauth2/google"
+	"google.golang.org/api/option"
 )
 
 // Storage implements the (./pkg/storage).Backend interface
@@ -26,7 +28,16 @@ type Storage struct {
 // See https://cloud.google.com/docs/authentication/getting-started.
 func New(ctx context.Context, gcpConf *config.GCPConfig, timeout time.Duration) (*Storage, error) {
 	const op errors.Op = "gcp.New"
-	s, err := storage.NewClient(ctx)
+
+	opts := []option.ClientOption{}
+	if gcpConf.JSONKey != "" {
+		creds, err := google.CredentialsFromJSON(ctx, []byte(gcpConf.JSONKey), storage.ScopeReadWrite)
+		if err != nil {
+			return nil, errors.E(op, fmt.Errorf("could not get GCS credentials: %v", err))
+		}
+		opts = append(opts, option.WithCredentials(creds))
+	}
+	s, err := storage.NewClient(ctx, opts...)
 	if err != nil {
 		return nil, errors.E(op, fmt.Errorf("could not create new storage client: %s", err))
 	}
