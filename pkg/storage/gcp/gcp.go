@@ -2,6 +2,7 @@ package gcp
 
 import (
 	"context"
+	"encoding/base64"
 	"fmt"
 	"time"
 
@@ -31,7 +32,11 @@ func New(ctx context.Context, gcpConf *config.GCPConfig, timeout time.Duration) 
 
 	opts := []option.ClientOption{}
 	if gcpConf.JSONKey != "" {
-		creds, err := google.CredentialsFromJSON(ctx, []byte(gcpConf.JSONKey), storage.ScopeReadWrite)
+		key, err := base64.StdEncoding.DecodeString(gcpConf.JSONKey)
+		if err != nil {
+			return nil, errors.E(op, fmt.Errorf("could not decode base64 json key: %v", err))
+		}
+		creds, err := google.CredentialsFromJSON(ctx, key, storage.ScopeReadWrite)
 		if err != nil {
 			return nil, errors.E(op, fmt.Errorf("could not get GCS credentials: %v", err))
 		}
