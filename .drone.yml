@@ -15,7 +15,16 @@ steps:
   - ./scripts/check_gofmt.sh
   - go vet -mod=vendor ./...
   - go test -mod=vendor -v ./...
-  - ./scripts/test_e2e.sh
+
+  # end to end test
+  - ./main & # run the just-built athens server
+  - sleep 3 # wait for it to spin up
+  - mkdir -p ~/happy
+  - mkdir -p ~/emptygopath # ensure the gopath has no modules cached.
+  - cd ~/happy
+  - git clone https://github.com/athens-artifacts/happy-path.git
+  - cd happy-path
+  - GOPATH=~/emptygopath GOPROXY=http://localhost:3000 go build
   environment:
     GO111MODULE: on
     ATHENS_MONGO_STORAGE_URL: mongodb://mongo:27017
