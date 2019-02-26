@@ -69,6 +69,7 @@ steps:
     event:
       - tag
 
+# Here we can add any backend storage that can be tested.
 services:
 - name: mongo
   image: mongo
