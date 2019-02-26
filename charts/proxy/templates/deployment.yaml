@@ -23,11 +23,11 @@ spec:
         imagePullPolicy: {{ .Values.image.pullPolicy | quote }}
         livenessProbe:
           httpGet:
-            path: /
+            path: "{{ template "livenessPath" . }}"
             port: 3000
         readinessProbe:
           httpGet:
-            path: /
+            path: "{{ template "readinessPath" . }}"
             port: 3000
         env:
         - name: ATHENS_STORAGE_TYPE
