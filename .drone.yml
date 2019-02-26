@@ -21,9 +21,31 @@ steps:
     ATHENS_MONGO_STORAGE_URL: mongodb://mongo:27017
     ATHENS_MINIO_ENDPOINT: minio:9000
   when:
+    branch:
+      - master
     event:
       - push
       - pull_request
+
+- name: docker
+  image: plugins/docker
+  settings:
+    username:
+      from_secret: DOCKER_USER
+    password:
+      from_secret: DOCKER_PASSWORD
+    repo: gomods/athens
+    tags:
+      - latest
+      - canary
+      - $DRONE_TAG
+    dockerfile: cmd/proxy/Dockerfile
+  when:
+    branch:
+      - master
+      - tag
+    event:
+      - push
 
 services:
 - name: mongo
