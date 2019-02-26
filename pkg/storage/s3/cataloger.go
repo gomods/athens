@@ -81,5 +81,5 @@ func parseS3Key(o *s3.Object) (paths.AllPathParams, error) {
 	if m == "" || v == "" {
 		return paths.AllPathParams{}, errors.E(op, fmt.Errorf("invalid object key format %s", *o.Key))
 	}
-	return paths.AllPathParams{m, v}, nil
+	return paths.AllPathParams{mModule: , Version: v}, nil
 }

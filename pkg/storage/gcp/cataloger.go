@@ -81,5 +81,5 @@ func parseGcpKey(p string) (paths.AllPathParams, error) {
 	if m == "" || v == "" {
 		return paths.AllPathParams{}, errors.E(op, fmt.Errorf("invalid object key format %s", p))
 	}
-	return paths.AllPathParams{m, v}, nil
+	return paths.AllPathParams{Module: m, Version: v}, nil
 }
