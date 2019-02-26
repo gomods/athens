@@ -43,8 +43,8 @@ steps:
   when:
     branch:
       - master
-      - tag
     event:
+      - tag
       - push
 
 services:
