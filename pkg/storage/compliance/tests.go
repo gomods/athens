@@ -75,7 +75,9 @@ func testList(t *testing.T, b storage.Backend) {
 	}
 	defer func() {
 		for _, ver := range versions {
-			b.Delete(ctx, modname, ver)
+			if false {
+				b.Delete(ctx, modname, ver)
+			}
 		}
 	}()
 	retVersions, err := b.List(ctx, modname)
