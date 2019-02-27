@@ -1,9 +1,10 @@
+---
 kind: pipeline
 name: default
 
 steps:
 - name: build
-  image: golang:1.12rc1
+  image: golang:1.12
   commands:
   # wait for services to be ready.
   - sleep 3 
@@ -87,3 +88,8 @@ services:
   environment:
     MINIO_ACCESS_KEY: minio
     MINIO_SECRET_KEY: minio123
+---
+kind: signature
+hmac: 54b2ab3873059d43d453a69a8a5c6aee8cd7b748ffafa227c6ec277de124a177
+
+...
