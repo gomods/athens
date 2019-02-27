@@ -47,7 +47,6 @@ steps:
       from_secret: DOCKER_PASSWORD
     repo: gomods/athens
     tags:
-      - latest
       - canary
     dockerfile: cmd/proxy/Dockerfile
   when:
@@ -66,6 +65,7 @@ steps:
     repo: gomods/athens
     tags:
       - ${DRONE_TAG}
+      - latest
     dockerfile: cmd/proxy/Dockerfile
   when:
     event:
