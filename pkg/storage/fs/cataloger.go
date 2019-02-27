@@ -51,7 +51,7 @@ func (s *storageImpl) Catalog(ctx context.Context, token string, pageSize int) (
 				return nil
 			}
 
-			res = append(res, paths.AllPathParams{module, version})
+			res = append(res, paths.AllPathParams{Module: module, Version: version})
 			count--
 			if count == 0 {
 				resToken = tokenFromModVer(module, version)
