@@ -29,6 +29,8 @@ steps:
     GO111MODULE: on
     ATHENS_MONGO_STORAGE_URL: mongodb://mongo:27017
     ATHENS_MINIO_ENDPOINT: minio:9000
+    GCS_SERVICE_ACCOUNT:
+      from_secret: GCS_SERVICE_ACCOUNT
   when:
     branch:
       - master
