@@ -3,7 +3,7 @@ services:
 language: go
 install: false
 go:
-  - "1.11.x"
+  - "1.12.x"
 env:
   global:
     - PATH=${PATH}:./bin
