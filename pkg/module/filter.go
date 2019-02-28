@@ -198,7 +198,7 @@ func initFromConfig(filePath string) (*Filter, error) {
 // - ^1.2.3: enables 1.x.x which are at least 1.2.3
 // - <1.2.3: enables everything lower than 1.2.3 includes 1.2.2 and 0.58.9 as well
 func matches(version, qualifier string) bool {
-	if len(qualifier) < 2 || len(qualifier) < 2 {
+	if len(qualifier) < 2 || len(version) < 1 {
 		return false
 	}
 
