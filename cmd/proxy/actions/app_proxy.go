@@ -57,6 +57,11 @@ func addProxyRoutes(
 
 	lister := download.NewVCSLister(c.GoBinary, fs)
 
+	if c.Proxy != "" {
+		mf = module.WithProxy(c.Proxy, mf)
+		lister = download.WithProxy(c.Proxy, lister)
+	}
+
 	withSingleFlight, err := getSingleFlight(c, s)
 	if err != nil {
 		return err

@@ -10,7 +10,7 @@ import (
 	"github.com/BurntSushi/toml"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/kelseyhightower/envconfig"
-	validator "gopkg.in/go-playground/validator.v9"
+	"gopkg.in/go-playground/validator.v9"
 )
 
 // Config provides configuration values for all components
@@ -40,6 +40,7 @@ type Config struct {
 	TLSCertFile      string `envconfig:"ATHENS_TLSCERT_FILE"`
 	TLSKeyFile       string `envconfig:"ATHENS_TLSKEY_FILE"`
 	SingleFlightType string `envconfig:"ATHENS_SINGLE_FLIGHT_TYPE"`
+	Proxy            string `envconfig:"ATHENS_PROXY"`
 	SingleFlight     *SingleFlight
 	Storage          *StorageConfig
 }
