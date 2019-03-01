@@ -19,7 +19,9 @@ import (
 // UpstreamLister retrieves a list of available module versions from upstream
 // i.e. VCS, and a Storage backend.
 type UpstreamLister interface {
-	List(ctx context.Context, mod string) (*storage.RevInfo, []string, error)
+	List(ctx context.Context, mod string) ([]string, error)
+
+	Latest(ctx context.Context, mod string) (*storage.RevInfo, error)
 }
 
 type listResp struct {
@@ -34,7 +36,17 @@ type vcsLister struct {
 	fs        afero.Fs
 }
 
-func (l *vcsLister) List(ctx context.Context, mod string) (*storage.RevInfo, []string, error) {
+func (l *vcsLister) List(ctx context.Context, mod string) ([]string, error) {
+	_, versions, err := l.list(ctx, mod)
+	return versions, err
+}
+
+func (l *vcsLister) Latest(ctx context.Context, mod string) (*storage.RevInfo, error) {
+	revInfo, _, err := l.list(ctx, mod)
+	return revInfo, err
+}
+
+func (l *vcsLister) list(ctx context.Context, mod string) (*storage.RevInfo, []string, error) {
 	const op errors.Op = "vcsLister.List"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
