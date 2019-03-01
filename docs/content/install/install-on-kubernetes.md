@@ -82,13 +82,13 @@ tiller-deploy-5456568744-76c6s          1/1       Running   0          5s
 The fastest way to install Athens using Helm is to deploy it from our public Helm chart repository. First, add the repository with this command:
 
 ```console
-$ helm repo add gomods https://athens.blob.core.windows.net
+$ helm repo add gomods https://athens.blob.core.windows.net/charts
 ```
 
 Next, install the chart using no arguments.  
 
 ```
-$ helm install gomods/athens -n athens
+$ helm install gomods/athens-proxy -n athens
 ```
 
 This will deploy a single Athens instance in the `default` namespace with `disk` storage enabled. Additionally, a `ClusterIP` service will be created.
