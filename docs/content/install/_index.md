@@ -13,6 +13,29 @@ We feel that Athens should keep the community federated and open, and nobody sho
 - Anyone can run their own full-featured mirror, public or private
 - Any organization can run their own private mirror, so they can manage their private code just as they would their public code
 
+## Immutability
+
+As you know, `go get` and most of the popular Go package managers like `dep`, `glide`, etc. will fetch packages directly from version control systems like GitHub. Even the `go get` for modules will fetch directly from version control systems! But there's a fundamental problem that can crop up and bite you.
+
+Code in version control systems can always change even after it's been committed. For example, a package developer can run `git push -f` and overwrite a commit or tag that you depend on in your project. In that case, you'll often see checksum verification errors (for example, see [here](https://github.com/go-ole/go-ole/issues/185)). Even worse, packages can completely disappear or move out from under you, and that can break your build or even silently change your dependencies without you realizing.
+
+_Athens prevents these issues by storing code in its own, immutable database_. Here's what happens when you run `go get`:
+
+
+1. `go get` requests a module from Athens
+2. Athens accepts the request and begins looking for the module
+3. First, it looks in its storage. If it finds the module, Athens immediately sends it back to the `go get` client from (1)
+4. If it doesn't find the module, it does this:
+   1. Fetches it from the module's original location using a slightly modified `go get` command called `go mod download`
+   2. Saves the module to storage
+   3. Returns it to the client 
+   > For example, if the requested module is `github.com/arschles/assert@v1.0.0` and Athens doesn't have that module in storage, it does a `go mod download github.com/arschles/assert@v1.0.0`, saves it to storage, and sends it back to the client
+
+Athens never changes anything in its storage once it saves a module to storage (unless you manually change it), so the system has the following two important properties:
+
+- _Athens will only ever call `go mod download` **once** per module version_. In other words, Athens will only hit step (4) once for any given module & version
+- _Athens treats storage as write-only, so once a module is saved, it never changes, even if a developer changes it in GitHub_
+
 ## Release Scheme
 
 We follow [semver](https://semver.org). Our Docker images are tagged to indicate stability:
