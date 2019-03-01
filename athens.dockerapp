@@ -4,22 +4,35 @@ version: 0.1.0
 # Name of the application
 name: athens
 # A short description of the application
-description:
+description: 
 # Namespace to use when pushing to a registry. This is typically your Hub username.
-#namespace: myhubusername
+#namespace: <your dockerhub username>
 # List of application maintainers with name and email for each
 maintainers:
   - name: nunix
-    email:
+    email: 
 
 ---
 # This section contains the Compose file that describes your application services.
 version: '3.2'
 services:
+  proxy:
+    image: gomods/athens:canary
+    ports:
+      - ${port.proxy}:3000
+    environment:
+      ATHENS_DISK_STORAGE_ROOT: /var/lib/athens
+      ATHENS_STORAGE_TYPE: disk
+    volumes:
+      - type: bind
+        source: /athens-storage
+        target: /var/lib/athens
+
   mongo:
     image: mongo:3.7.9-jessie
     ports:
       - ${port.mango}:27017
+
   minio:
     image: minio/minio:latest
     command: server /data
@@ -28,15 +41,7 @@ services:
     environment:
       MINIO_ACCESS_KEY: minio
       MINIO_SECRET_KEY: minio123
-  datadog:
-    environment:
-      - DD_API_KEY=
-      - DD_LOG_LEVEL=trace
-      - DD_APM_ENABLED=true
-    image:
-      datadog/agent:latest
-    ports:
-      - ${port.datadog}:8126
+
   jaeger:
     environment:
       - COLLECTOR_ZIPKIN_HTTP_PORT=9441
@@ -53,6 +58,7 @@ services:
 ---
 # This section contains the default values for your application parameters.
 port:
+  proxy: 3000
   datadog: 8126
   mango: 27017
   minio: 9001
