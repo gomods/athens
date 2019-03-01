@@ -15,9 +15,9 @@ We feel that Athens should keep the community federated and open, and nobody sho
 
 ## Immutability
 
-As you know, `go get` and most of the popular Go package managers like `dep`, `glide`, etc. will fetch packages directly from version control systems like GitHub. Even the `go get` for modules will fetch directly from version control systems! But there's a fundamental problem that can crop up and bite you.
+As you know, `go get` and `go mod download` will fetch packages directly from version control systems like GitHub. This system has been mostly great for both package developers and the dependent apps, but at the same we've suffered from a fundamental problem for a long time.
 
-Code in version control systems can always change even after it's been committed. For example, a package developer can run `git push -f` and overwrite a commit or tag that you depend on in your project. In that case, you'll often see checksum verification errors (for example, see [here](https://github.com/go-ole/go-ole/issues/185)).
+Code in version control systems can always change even after it's been committed. For example, a package developer can run `git push -f` and overwrite a commit or tag that you depend on in your project. In these cases, you'll often see checksum verification errors (for example, see [here](https://github.com/go-ole/go-ole/issues/185)).
 
 _Athens prevents these issues by storing code in its own, immutable database_. Here's what happens when you run `go get`:
 
