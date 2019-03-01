@@ -15,7 +15,6 @@ require (
 	github.com/gobuffalo/envy v1.6.7
 	github.com/gobuffalo/httptest v1.0.4
 	github.com/gogo/protobuf v1.2.0 // indirect
-	github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b // indirect
 	github.com/google/go-cmp v0.2.0
 	github.com/google/martian v2.1.0+incompatible // indirect
 	github.com/googleapis/gax-go v2.0.0+incompatible // indirect
@@ -26,8 +25,6 @@ require (
 	github.com/kelseyhightower/envconfig v1.3.0
 	github.com/konsorten/go-windows-terminal-sequences v1.0.1 // indirect
 	github.com/kr/pretty v0.1.0 // indirect
-	github.com/mattn/go-colorable v0.0.9 // indirect
-	github.com/mattn/go-isatty v0.0.4 // indirect
 	github.com/minio/minio-go v6.0.5+incompatible
 	github.com/mitchellh/go-homedir v1.0.0
 	github.com/philhofer/fwd v1.0.0 // indirect
@@ -39,10 +36,11 @@ require (
 	github.com/stretchr/testify v1.2.2
 	github.com/tinylib/msgp v1.0.2 // indirect
 	github.com/unrolled/secure v0.0.0-20181221173256-0d6b5bb13069
+	go.etcd.io/etcd v0.0.0-20190215181705-784daa04988c
 	go.opencensus.io v0.17.0
 	golang.org/x/crypto v0.0.0-20181029103014-dab2b1051b5d // indirect
 	golang.org/x/net v0.0.0-20181029044818-c44066c5c816 // indirect
-	golang.org/x/oauth2 v0.0.0-20180620175406-ef147856a6dd // indirect
+	golang.org/x/oauth2 v0.0.0-20180620175406-ef147856a6dd
 	golang.org/x/sync v0.0.0-20180314180146-1d60e4601c6f
 	golang.org/x/sys v0.0.0-20181031143558-9b800f95dbbc // indirect
 	google.golang.org/api v0.0.0-20180910000450-7ca32eb868bf

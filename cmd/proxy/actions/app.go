@@ -126,7 +126,12 @@ func App(conf *config.Config) (http.Handler, error) {
 	if subRouter != nil {
 		proxyRouter = subRouter
 	}
-	if err := addProxyRoutes(proxyRouter, store, lggr, conf.GoBinary, conf.GoGetWorkers, conf.ProtocolWorkers); err != nil {
+	if err := addProxyRoutes(
+		proxyRouter,
+		store,
+		lggr,
+		conf,
+	); err != nil {
 		err = fmt.Errorf("error adding proxy routes (%s)", err)
 		return nil, err
 	}
