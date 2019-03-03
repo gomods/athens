@@ -15,7 +15,7 @@ build-image:
 
 .PHONY: run
 run:
-	cd ./cmd/proxy && go run . -config_file ../../config.dev.toml
+	go run ./cmd/proxy -config_file config-example.toml
 
 .PHONY: docs
 docs:

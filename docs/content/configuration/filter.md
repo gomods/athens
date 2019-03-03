@@ -11,7 +11,7 @@ The proxy supports the following three use cases
 3. Include a module in the local proxy.
 
 These settings can be done by creating a configuration file which can be pointed by setting either
-`FilterFile` in `config.dev.toml` or setting `ATHENS_FILTER_FILE` as an environment variable.
+`FilterFile` in `config.toml` or setting `ATHENS_FILTER_FILE` as an environment variable.
 
 ### Writing the configuration file
 

@@ -85,7 +85,7 @@ func (m *ModuleStore) newSession(timeout time.Duration, insecure bool, conf *con
 	}
 
 	if m.certPath != "" {
-		// Sets only when the env var is setup in config.dev.toml
+		// Sets only when the env var is setup in config.toml
 		tlsConfig.InsecureSkipVerify = insecure
 		var roots *x509.CertPool
 		// See if there is a system cert pool

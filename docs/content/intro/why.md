@@ -21,7 +21,7 @@ The Go community has had lots of problems with libraries disappearing or changin
 
 ### Logic 
 
-The fact that the Go command line can now ping _your own_ server to download dependencies, that means you can program whatever logic you want around providing such dependencies. Things like Access Control (discussed below), adding custom versions, custom forks, and custom packages. For example, Athens provides a [Validation Hook](https://github.com/gomods/athens/blob/master/config.dev.toml#L87) that will get called for every module download to determine whether a module should be downloaded or not. Therefore, you can extend Athens with your own logic such as scanning a module path or code for red flags etc. 
+The fact that the Go command line can now ping _your own_ server to download dependencies, that means you can program whatever logic you want around providing such dependencies. Things like Access Control (discussed below), adding custom versions, custom forks, and custom packages. For example, Athens provides a [Validation Hook](https://github.com/gomods/athens/blob/master/config-example.toml#L87) that will get called for every module download to determine whether a module should be downloaded or not. Therefore, you can extend Athens with your own logic such as scanning a module path or code for red flags etc. 
 
 
 ### Performance 
