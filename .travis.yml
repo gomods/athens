@@ -3,7 +3,7 @@ services:
 language: go
 install: false
 go:
-  - "1.11.x"
+  - "1.12.x"
 env:
   global:
     - PATH=${PATH}:./bin
@@ -15,6 +15,7 @@ env:
     - CODE_COV=1
     - ATHENS_DIR=${GOPATH}/src/github.com/gomods/athens
     - REGISTRY=gomods/
+    - CHARTS_REPO=https://athens.blob.core.windows.net
     - GORELEASER_ON=1
     - GO111MODULE=on
 
@@ -37,8 +38,7 @@ before_deploy:
 
 deploy:
   - provider: script
-    script: make docker-push
+    script: make docker-push charts-push
     on:
       repo: gomods/athens
       all_branches: true
-
