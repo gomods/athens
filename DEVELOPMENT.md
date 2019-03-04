@@ -51,7 +51,7 @@ Creating athensdockerdev_mongo_1  ... done
 Creating athensdockerdev_dev_1    ... done
 ```
 
-After that runs, Athens should be up and running and serving on post 3000. To test it out, run this command:
+After that runs, Athens should be up and running and serving on port 3000. To test it out, run this command:
 
 ```console
 $ curl localhost:3000
