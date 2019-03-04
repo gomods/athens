@@ -50,6 +50,8 @@ curl https://raw.githubusercontent.com/kubernetes/helm/master/scripts/get | bash
 
 If your cluster has already been configured to use Helm, please continue to [deploy Athens](#deploy-athens).
 
+If not, please read on.
+
 ### RBAC Cluster
 
 If your cluster has RBAC enabled, you will need to create a ServiceAccount, ClusterRole and ClusterRoleBinding for Helm to use. The following command will create these and initialize Helm.
@@ -77,12 +79,16 @@ tiller-deploy-5456568744-76c6s          1/1       Running   0          5s
 
 ## Deploy Athens
 
-The fastest way to install Athens using Helm is to simply clone this repository and install the chart using no arguments.  
+The fastest way to install Athens using Helm is to deploy it from our public Helm chart repository. First, add the repository with this command:
+
+```console
+$ helm repo add gomods https://athens.blob.core.windows.net/charts
+```
+
+Next, install the chart using no arguments.  
 
 ```
-git clone git@github.com:gomods/athens.git
-cd athens
-helm install ./charts/proxy -n athens
+$ helm install gomods/athens-proxy -n athens
 ```
 
 This will deploy a single Athens instance in the `default` namespace with `disk` storage enabled. Additionally, a `ClusterIP` service will be created.
