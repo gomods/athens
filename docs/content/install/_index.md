@@ -38,7 +38,7 @@ We follow [semver](https://semver.org). Our Docker images are tagged to indicate
 * latest = the most recent stable release
 * canary = the most recent build of master
 
-We strongly recommend using a tagged release, e.g. `gomods/athens:v0.2.0`, instead of the latest or canary tags.
+We strongly recommend using a tagged release, e.g. `gomods/athens:v0.3.0`, instead of the latest or canary tags.
 
 ## Where to Go from Here
 
