@@ -24,7 +24,7 @@ func (s *storageImpl) Save(ctx context.Context, module, vsn string, mod []byte, 
 	if err != nil {
 		return errors.E(op, err)
 	}
-	// Chunk the stream into 8mb send them in parts to minio.
+	// Chunk the stream into 8mb and send them in parts to minio.
 	// This is because the minio client over-allocates a stream buffer (600Mb)
 	// when the size is unknown, see https://github.com/minio/minio-go/issues/848
 	err = s.saveZip(dir, module, vsn, zip)
