@@ -9,6 +9,7 @@ import (
 
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/observ"
+	"github.com/hashicorp/go-multierror"
 	minio "github.com/minio/minio-go"
 )
 
@@ -98,8 +99,12 @@ func (s *storageImpl) removeParts(mod, ver string, numParts int) error {
 			objectsCh <- fmt.Sprintf("parts/%s/%s/%d", mod, ver, i)
 		}
 	}()
+	var errs error
 	for e := range s.minioClient.RemoveObjects(s.bucketName, objectsCh) {
-		return errors.E(op, e.Err)
+		errs = multierror.Append(errs, e.Err)
+	}
+	if errs != nil {
+		return errors.E(op, errs)
 	}
 	return nil
 }
