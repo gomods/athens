@@ -72,6 +72,15 @@ Port = ":3000"
 # Env override: ATHENS_GLOBAL_ENDPOINT
 GlobalEndpoint = "http://localhost:3001"
 
+# BASIC AUTH OPTIONS 
+# ==================
+# PLASE NOTE THAT THIS IS A BAD HACK AROUND 
+# THE FACT THAT GO DOES NOT SUPPORT PROPER AUTHENTICATION 
+# YET! YOUR BASIC AUTH CREDENTIALS CAN EASILY LEAK 
+# IN ATHENS LOGS AS WELL AS GO COMMAND LOGS.
+# THIS WILL BE ADDRESSED IN 1.13.
+# SEE https://github.com/golang/go/issues/30610
+
 # Username for basic auth
 # Env override: BASIC_AUTH_USER
 BasicAuthUser = ""
