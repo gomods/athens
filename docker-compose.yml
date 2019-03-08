@@ -19,6 +19,15 @@ services:
       context: .
       dockerfile: Dockerfile.test
     command: ["./scripts/test_e2e.sh"]
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - 9090:9090 
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
   azurite:
     image: arafato/azurite:2.6.5
     ports:
