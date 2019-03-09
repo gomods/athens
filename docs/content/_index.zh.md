@@ -13,11 +13,11 @@ date: 2018-12-07T11:44:36+00:00
 
 #### Athens 做了什么？
 
-Athens [Go 模块](https://github.com/golang/go/wiki/Modules) 为提供了一个可运行的服务。它可以为你提供公有和私有的代码，因此，你不需要直接从像 GitHub 或 GitLab 等版本控制系统（VCS）上拉取。
+Athens 为你运行 [Go 模块](https://github.com/golang/go/wiki/Modules) 提供服务。它可以为你提供公有和私有的代码，因此，你不需要直接从像 GitHub 或 GitLab 等版本控制系统（VCS）上拉取。
 
 #### 它为什么有意义？
 
-你有很多不想使用代理服务的理由，例如：安全和性能方面的考虑。[看一下](/zh/intro/why)这里的描述的。
+你需要代理服务器（如安全性和性能）的原因有很多。[看一下](/zh/intro/why)这里的描述的。
 
 #### 我如何使用它？
 
