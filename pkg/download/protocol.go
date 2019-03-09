@@ -75,7 +75,6 @@ func (p *protocol) List(ctx context.Context, mod string) ([]string, error) {
 	go func() {
 		defer wg.Done()
 		strList, sErr = p.storage.List(ctx, mod)
-
 	}()
 
 	go func() {
