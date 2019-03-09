@@ -21,7 +21,6 @@ Athens [Go 模块](https://github.com/golang/go/wiki/Modules) 为提供了一个
 
 #### 我如何使用它？
 
-Athens is easy to run yourself. We give you a few options:
 你自己可以轻易地运行起来 Athens.我们给你几个选项： 
 
 - 可以在你的系统上以二进制的方式运行
