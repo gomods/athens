@@ -3,6 +3,8 @@ package download
 import (
 	"context"
 	"io"
+	"regexp"
+	"strings"
 	"sync"
 
 	"github.com/gomods/athens/pkg/errors"
@@ -73,6 +75,7 @@ func (p *protocol) List(ctx context.Context, mod string) ([]string, error) {
 	go func() {
 		defer wg.Done()
 		strList, sErr = p.storage.List(ctx, mod)
+
 	}()
 
 	go func() {
@@ -100,8 +103,30 @@ func (p *protocol) List(ctx context.Context, mod string) ([]string, error) {
 	if isRepoNotFoundErr && storageEmpty {
 		return nil, errors.E(op, errors.M(mod), errors.KindNotFound, goErr)
 	}
+	// we have to filter out pseudo versions to prevent following scenario:
+	// user does go get github.com/my/mod
+	// there is no sem-ver and the /list endpoint returns nothing - /latests endpoint gets hit
+	// Athens saves the pseudo version x1
+	// from now on every time user runs go get github.com/my/mod she/he will get pseudo version x1 even if a newer version x2 exists
+	// this is because /list returns non-empty list of versions (x1) and so /latest wont get hit
+	return union(goList, removePseudoVersions(strList)), nil
+}
 
-	return union(goList, strList), nil
+var pseudoVersionRE = regexp.MustCompile(`^v[0-9]+\.(0\.0-|\d+\.\d+-([^+]*\.)?0\.)\d{14}-[A-Za-z0-9]+(\+incompatible)?$`)
+
+func removePseudoVersions(allVersions []string) []string {
+	// copied from go cmd https://github.com/golang/go/blob/master/src/cmd/go/internal/modfetch/pseudo.go#L93
+	isPseudoVersion := func(v string) bool {
+		return strings.Count(v, "-") >= 2 && pseudoVersionRE.MatchString(v)
+	}
+
+	var vers []string
+	for _, v := range allVersions {
+		if !isPseudoVersion(v) {
+			vers = append(vers, v)
+		}
+	}
+	return vers
 }
 
 func (p *protocol) Latest(ctx context.Context, mod string) (*storage.RevInfo, error) {
