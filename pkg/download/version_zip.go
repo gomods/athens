@@ -29,6 +29,7 @@ func ZipHandler(dp Protocol, lggr log.Entry) http.Handler {
 		}
 		defer zip.Close()
 
+		w.Header().Set("Content-Type", "application/zip")
 		_, err = io.Copy(w, zip)
 		if err != nil {
 			lggr.SystemErr(errors.E(op, errors.M(mod), errors.V(ver), err))
