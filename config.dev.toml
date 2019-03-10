@@ -156,7 +156,7 @@ StatsExporter = "prometheus"
 # we want to make sure only the first request gets to store the module, 
 # and the second request will wait for the first one to finish so that 
 # it doesn't override the storage. 
-# Options are ["memory", "etcd"]
+# Options are ["memory", "etcd", "redis"]
 # The default option is "memory" which means that only one instance of Athens 
 # should be used.
 # Env override: ATHENS_SINGLE_FLIGHT_TYPE
@@ -169,6 +169,11 @@ SingleFlightType = "memory"
         # as the SingleFlightType field above determines whether Etcd is used or not.
         # Env override: ATHENS_ETCD_ENDPOINTS
         Endpoints = "localhost:2379,localhost:22379,localhost:32379"
+    [SingleFlight.Redis]
+        # Endpoint is the redis endpoint for a SingleFlight lock.
+        # TODO(marwan): enable multiple endpoints for redis clusters.
+        # Env override: ATHENS_REDIS_ENDPOINT
+        Endpoints = "127.0.0.1:6379"
 
 [Storage]
     # Only storage backends that are specified in Proxy.StorageType are required here
