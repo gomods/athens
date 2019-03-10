@@ -1,0 +1,95 @@
+---
+kind: pipeline
+name: default
+
+steps:
+- name: build
+  image: golang:1.12
+  commands:
+  # wait for services to be ready.
+  - sleep 3 
+
+  # build
+  - go build -mod=vendor cmd/proxy/*.go
+
+  # test
+  - ./scripts/check_gofmt.sh
+  - go vet -mod=vendor ./...
+  - go test -mod=vendor -v ./...
+
+  # end to end test
+  - ./main & # run the just-built athens server
+  - sleep 3 # wait for it to spin up
+  - mkdir -p ~/happy
+  - mkdir -p ~/emptygopath # ensure the gopath has no modules cached.
+  - cd ~/happy
+  - git clone https://github.com/athens-artifacts/happy-path.git
+  - cd happy-path
+  - GOPATH=~/emptygopath GOPROXY=http://localhost:3000 go build
+  environment:
+    GO111MODULE: on
+    ATHENS_MONGO_STORAGE_URL: mongodb://mongo:27017
+    ATHENS_MINIO_ENDPOINT: minio:9000
+    GCS_SERVICE_ACCOUNT:
+      from_secret: GCS_SERVICE_ACCOUNT
+  when:
+    branch:
+      - master
+    event:
+      - push
+      - pull_request
+
+- name: docker-latest
+  image: plugins/docker
+  settings:
+    username:
+      from_secret: DOCKER_USER
+    password:
+      from_secret: DOCKER_PASSWORD
+    repo: gomods/athens
+    tags:
+      - canary
+    dockerfile: cmd/proxy/Dockerfile
+  when:
+    branch:
+      - master
+    event:
+      - push
+
+- name: docker-release
+  image: plugins/docker
+  settings:
+    username:
+      from_secret: DOCKER_USER
+    password:
+      from_secret: DOCKER_PASSWORD
+    repo: gomods/athens
+    tags:
+      - ${DRONE_TAG}
+      - latest
+    dockerfile: cmd/proxy/Dockerfile
+  when:
+    event:
+      - tag
+
+# Here we can add any backend storage that can be tested.
+services:
+- name: mongo
+  image: mongo
+  ports:
+  - 27017
+- name: minio
+  image: minio/minio:latest
+  command:
+    - server
+    - /data
+  ports:
+    - 9000
+  environment:
+    MINIO_ACCESS_KEY: minio
+    MINIO_SECRET_KEY: minio123
+---
+kind: signature
+hmac: 54b2ab3873059d43d453a69a8a5c6aee8cd7b748ffafa227c6ec277de124a177
+
+...
