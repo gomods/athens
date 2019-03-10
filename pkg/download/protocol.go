@@ -102,26 +102,32 @@ func (p *protocol) List(ctx context.Context, mod string) ([]string, error) {
 	if isRepoNotFoundErr && storageEmpty {
 		return nil, errors.E(op, errors.M(mod), errors.KindNotFound, goErr)
 	}
-	// we have to filter out pseudo versions to prevent following scenario:
+
+	strListSemVers := removePseudoVersions(strList)
+	// if the repo does not exist but athens already saved some versions
+	// return those so that running go get github.com/my/mod gives us the newest saved version
+	// we should only do that if exclusively pseudo-versions have been saved
+	// otherwise @latest would not return the latest stable version but latest commit
+	if isRepoNotFoundErr && len(strListSemVers) == 0 {
+		return strList, nil
+	}
+	// if the repo exists we have to filter out pseudo versions to prevent following scenario:
 	// user does go get github.com/my/mod
-	// there is no sem-ver and the /list endpoint returns nothing - /latests endpoint gets hit
+	// there is no sem-ver and so the /list endpoint returns nothing, then /latests gets hit
 	// Athens saves the pseudo version x1
 	// from now on every time user runs go get github.com/my/mod she/he will get pseudo version x1 even if a newer version x2 exists
 	// this is because /list returns non-empty list of versions (x1) and so /latest wont get hit
-	return union(goList, removePseudoVersions(strList)), nil
+	return union(goList, strListSemVers), nil
 }
 
 var pseudoVersionRE = regexp.MustCompile(`^v[0-9]+\.(0\.0-|\d+\.\d+-([^+]*\.)?0\.)\d{14}-[A-Za-z0-9]+(\+incompatible)?$`)
 
 func removePseudoVersions(allVersions []string) []string {
-	// copied from go cmd https://github.com/golang/go/blob/master/src/cmd/go/internal/modfetch/pseudo.go#L93
-	isPseudoVersion := func(v string) bool {
-		return strings.Count(v, "-") >= 2 && pseudoVersionRE.MatchString(v)
-	}
-
 	var vers []string
 	for _, v := range allVersions {
-		if !isPseudoVersion(v) {
+		// copied from go cmd https://github.com/golang/go/blob/master/src/cmd/go/internal/modfetch/pseudo.go#L93
+		isPseudoVersion := strings.Count(v, "-") >= 2 && pseudoVersionRE.MatchString(v)
+		if !isPseudoVersion {
 			vers = append(vers, v)
 		}
 	}
