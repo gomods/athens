@@ -173,7 +173,7 @@ SingleFlightType = "memory"
         # Endpoint is the redis endpoint for a SingleFlight lock.
         # TODO(marwan): enable multiple endpoints for redis clusters.
         # Env override: ATHENS_REDIS_ENDPOINT
-        Endpoints = "127.0.0.1:6379"
+        Endpoint = "127.0.0.1:6379"
 
 [Storage]
     # Only storage backends that are specified in Proxy.StorageType are required here
