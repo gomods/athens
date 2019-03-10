@@ -5,7 +5,6 @@ import (
 	"os"
 	"testing"
 
-	"cloud.google.com/go/storage"
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/storage/compliance"
 	"google.golang.org/api/iterator"
@@ -44,27 +43,27 @@ func (s *Storage) clear() error {
 }
 
 func getStorage(t testing.TB) *Storage {
-	creds := os.Getenv("GOOGLE_APPLICATION_CREDENTIALS")
-	if creds == "" {
+	t.Helper()
+	cfg := getTestConfig()
+	if cfg == nil {
 		t.SkipNow()
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), config.GetTimeoutDuration(30))
-	defer cancel()
-	s, err := storage.NewClient(ctx)
+
+	s, err := New(context.Background(), cfg, config.GetTimeoutDuration(30))
 	if err != nil {
-		t.Fatalf("could not create new storage client: %s", err)
-	}
-	bucketName := "athens_test_bucket"
-	bkt := s.Bucket(bucketName)
-	if _, err := bkt.Attrs(ctx); err != nil {
-		if err == storage.ErrBucketNotExist {
-			t.Fatalf("bucket: %s does not exist - You must manually create a storage bucket for Athens, see https://cloud.google.com/storage/docs/creating-buckets#storage-create-bucket-console", bucketName)
-		}
-		t.Fatalf("error getting BucketHandle: %s", err)
+		t.Fatal(err)
 	}
 
-	return &Storage{
-		bucket:  bkt,
-		timeout: config.GetTimeoutDuration(300),
+	return s
+}
+
+func getTestConfig() *config.GCPConfig {
+	creds := os.Getenv("GCS_SERVICE_ACCOUNT")
+	if creds == "" {
+		return nil
+	}
+	return &config.GCPConfig{
+		Bucket:  "athens_drone_bucket",
+		JSONKey: creds,
 	}
 }
