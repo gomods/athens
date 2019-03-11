@@ -86,6 +86,11 @@ func getSingleFlight(c *config.Config, checker storage.Checker) (stash.Wrapper, 
 		}
 		endpoints := strings.Split(c.SingleFlight.Etcd.Endpoints, ",")
 		return stash.WithEtcd(endpoints, checker)
+	case "redis":
+		if c.SingleFlight == nil || c.SingleFlight.Redis == nil {
+			return nil, fmt.Errorf("Redis config must be present")
+		}
+		return stash.WithRedisLock(c.SingleFlight.Redis.Endpoint, checker)
 	default:
 		return nil, fmt.Errorf("unrecognized single flight type: %v", c.SingleFlightType)
 	}
