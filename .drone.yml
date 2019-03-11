@@ -72,6 +72,19 @@ steps:
     event:
       - tag
 
+- name: publish-helm
+  image: gomods/drone-helm
+  settings:
+    charts_repo: https://athens.blob.core.windows.net
+  environment:
+    AZURE_STORAGE_CONNECTION_STRING:
+      from_secret: AZURE_STORAGE_CONNECTION_STRING
+  when:
+    branch:
+      - master
+    event:
+     - push
+
 # Here we can add any backend storage that can be tested.
 services:
 - name: mongo
