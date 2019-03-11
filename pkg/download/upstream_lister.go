@@ -39,22 +39,18 @@ func (l *vcsLister) List(ctx context.Context, mod string) (*storage.RevInfo, []s
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 
-	hackyPath, err := afero.TempDir(l.fs, "", "hackymod")
+	tmpDir, err := afero.TempDir(l.fs, "", "go-list")
 	if err != nil {
 		return nil, nil, errors.E(op, err)
 	}
-	defer l.fs.RemoveAll(hackyPath)
-	err = module.Dummy(l.fs, hackyPath)
-	if err != nil {
-		return nil, nil, errors.E(op, err)
-	}
+	defer l.fs.RemoveAll(tmpDir)
 
 	cmd := exec.Command(
 		l.goBinPath,
 		"list", "-m", "-versions", "-json",
 		config.FmtModVer(mod, "latest"),
 	)
-	cmd.Dir = hackyPath
+	cmd.Dir = tmpDir
 	stdout := &bytes.Buffer{}
 	stderr := &bytes.Buffer{}
 	cmd.Stdout = stdout
