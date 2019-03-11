@@ -52,7 +52,7 @@ func (s *redisLock) Stash(ctx context.Context, mod, ver string) (newVer string, 
 		return ver, errors.E(op, err)
 	}
 	defer func() {
-		const op errors.Op = "etcd.Unlock"
+		const op errors.Op = "redis.Unlock"
 		lockErr := lock.Unlock()
 		if err == nil && lockErr != nil {
 			err = errors.E(op, lockErr)
