@@ -7,7 +7,6 @@ import (
 	"io/ioutil"
 
 	"cloud.google.com/go/storage"
-
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/observ"
