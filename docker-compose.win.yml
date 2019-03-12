@@ -1,0 +1,8 @@
+version: '3'
+services:
+  testunit-win:
+    build:
+      context: .
+      dockerfile: Dockerfile.win.test
+    command: go test -mod=vendor -race -coverprofile cover.out -covermode atomic ./...
+ 
