@@ -3,6 +3,15 @@ theme = "hugo-theme-learn"
 languageCode = "en-us"
 title = "Athens"
 
+[languages]
+  [languages.en]
+    weight = 1
+    languageName = "English"
+  [languages.zh]
+    languageCode = "zh-CN"
+    weight = 2
+    languageName = "中文"
+
 [params]
 disableShortcutsTitle = true
 disableInlineCopyToClipBoard = true
