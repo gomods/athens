@@ -1,7 +1,7 @@
 FROM golang:1.12-windowsservercore-1803
 
-RUN powershell New-Item c:\tests
+RUN powershell New-Item C:\tests -ItemType directory
 
-WORKDIR c:\\tests
+WORKDIR C:\\tests
 
 COPY . .
