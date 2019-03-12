@@ -4,7 +4,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.win.test
-    command: go test -mod=vendor -race ./...
+    command: go test -mod=vendor ./...
     environment:
       - GO_ENV=test
       - GO111MODULE=on
