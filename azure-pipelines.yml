@@ -8,6 +8,6 @@ pool:
 
 steps:
 - script: |
-    docker-compose -f docker-compose.win.yml -p athensunit up --exit-code-from=testunit-win --build testunit-win
+    docker-compose -f docker-compose.yml -p athensunit up --exit-code-from=testunit-win --build testunit-win
   displayName: 'Unit tests'
 
