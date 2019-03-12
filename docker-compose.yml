@@ -14,6 +14,11 @@ services:
     depends_on:
       - mongo
       - minio
+  testunit-win:
+    build:
+      context: .
+      dockerfile: Dockerfile.win.test
+    command: go test -mod=vendor -race -coverprofile cover.out -covermode atomic ./...
   teste2e:
     build:
       context: .
