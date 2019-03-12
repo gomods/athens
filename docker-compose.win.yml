@@ -5,4 +5,7 @@ services:
       context: .
       dockerfile: Dockerfile.win.test
     command: go test -mod=vendor -race -coverprofile cover.out -covermode atomic ./...
+    environment:
+      - GO_ENV=test
+      - GO111MODULE=on
  
