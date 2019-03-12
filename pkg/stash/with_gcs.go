@@ -8,7 +8,7 @@ import (
 )
 
 // WithGCSLock returns a distributed singleflight
-// using an redis cluster. If it cannot connect, it will return an error.
+// using a GCS backend. See the config.toml documentation for details.
 func WithGCSLock(s Stasher) Stasher {
 	return &gcsLock{s}
 }
