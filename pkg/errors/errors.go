@@ -46,6 +46,14 @@ func (e Error) Error() string {
 	return e.Err.Error()
 }
 
+// Is is a shorthand for checking an error against a kind.
+func Is(err error, kind int) bool {
+	if err == nil {
+		return false
+	}
+	return Kind(err) == kind
+}
+
 // Op describes any independent function or
 // method in Athens. A series of operations
 // forms a more readable stack trace.
