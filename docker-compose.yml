@@ -1,4 +1,4 @@
-version: '3'
+version: '3.5'
 services:
   testunit:
     build:
@@ -19,6 +19,7 @@ services:
       context: .
       dockerfile: Dockerfile.win.test
     command: go test -mod=vendor ./...
+    isolation: 'hyperv'
     environment:
       - GO_ENV=test
       - GO111MODULE=on
