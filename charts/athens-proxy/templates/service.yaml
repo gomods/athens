@@ -13,7 +13,7 @@ spec:
     app: {{ template "fullname" . }}
   ports:
   - name: http
-    port: 80
+    port: {{ .Values.service.servicePort }}
     targetPort: 3000
     protocol: TCP
     {{- if eq .Values.service.type "NodePort" }}
