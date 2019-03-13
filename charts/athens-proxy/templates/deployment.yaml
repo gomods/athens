@@ -8,7 +8,6 @@ metadata:
     release: "{{ .Release.Name }}"
     heritage: "{{ .Release.Service }}"
 spec:
-  
   replicas: {{ .Values.replicaCount }}
   template:
     metadata:
@@ -16,7 +15,26 @@ spec:
         app: {{ template "fullname" . }}
         chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
         release: "{{ .Release.Name }}"
+      annotations:
+        checksum/secret: {{ include (print .Template.BasePath "/secret.yaml") . | sha256sum }}
+        checksum/configmap: {{ include (print .Template.BasePath "/configmap.yaml") . | sha256sum }}
     spec:
+      initContainers:
+        - name: copy-key-files
+          image: alpine:3.6
+          command:
+            - sh
+            - -c
+          args: ["cp /root/.ssh/id_rsa* /ssh-keys && chmod 400 /ssh-keys/*"]
+          volumeMounts:
+          - name: ssh-keys
+            mountPath: /ssh-keys
+          {{- range $server := .Values.sshGitServers }}
+          - name: {{ template "fullname" $ }}-secret
+            mountPath: /root/.ssh/id_rsa-{{ $server.host }}
+            subPath: id_rsa-{{ $server.host }}
+          {{- end }}
+      volumes:
       containers:
       - name: {{ template "fullname" . }}
         image: "{{ .Values.image.registry }}/{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -32,7 +50,7 @@ spec:
         env:
         - name: ATHENS_STORAGE_TYPE
           value: {{ .Values.storage.type | quote }}
-        {{- if eq .Values.storage.type "disk"}}
+        {{- if eq .Values.storage.type "disk" }}
         - name: ATHENS_DISK_STORAGE_ROOT
           value: {{ .Values.storage.disk.storageRoot | quote }}
         {{- else if eq .Values.storage.type "mongo"}}
@@ -61,10 +79,20 @@ spec:
           mountPath: "/etc/netrc"
           readOnly: true
         {{- end }}
+        - name: {{ template "fullname" . }}-configmap
+          mountPath: /root/.ssh/config
+          subPath: ssh_config
+        - name: {{ template "fullname" . }}-configmap
+          mountPath: /root/.gitconfig
+          subPath: git_config
+        - name: ssh-keys
+          mountPath: /ssh-keys
       volumes:
+      - name: ssh-keys
+        emptyDir: {}
       - name: storage-volume
       {{- if .Values.storage.disk.persistence.enabled }}
-        persistentVolumeClaim: 
+        persistentVolumeClaim:
           claimName: {{ template "fullname" . }}-storage
       {{- else }}
         emptyDir: {}
@@ -74,3 +102,9 @@ spec:
         secret:
           secretName: netrcsecret
       {{- end }}
+      - name: {{ template "fullname" . }}-configmap
+        configMap:
+          name: {{ template "fullname" . }}-configmap
+      - name: {{ template "fullname" . }}-secret
+        secret:
+          secretName: {{ template "fullname" . }}-secret

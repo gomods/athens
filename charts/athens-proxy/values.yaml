@@ -58,3 +58,16 @@ jaeger:
   # you must set this on the command line when you run 'helm install'
   # for example, you need to run 'helm install --set jaeger.url=myurl ...'
   url: "SET THIS ON THE COMMAND LINE"
+
+# private git servers over ssh
+sshGitServers:
+  ## hostname of the git server
+  - host: git.example.com
+    ## ssh username
+    user: git
+    ## ssh private key for the user
+    privateKey: |
+      -----BEGIN RSA PRIVATE KEY-----
+      -----END RSA PRIVATE KEY-----
+    ## ssh port
+    port: 22
