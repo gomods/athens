@@ -4,12 +4,12 @@ import (
 	"bytes"
 	"context"
 	"io"
-	"log"
 
+	"cloud.google.com/go/storage"
+	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/observ"
-
-	moduploader "github.com/gomods/athens/pkg/storage/module"
+	googleapi "google.golang.org/api/googleapi"
 )
 
 // Save uploads the module's .mod, .zip and .info files for a given version
@@ -23,40 +23,48 @@ func (s *Storage) Save(ctx context.Context, module, version string, mod []byte, 
 	const op errors.Op = "gcp.Save"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
-	exists, err := s.Exists(ctx, module, version)
+	gomodPath := config.PackageVersionedName(module, version, "mod")
+	err := s.upload(ctx, gomodPath, bytes.NewReader(mod))
 	if err != nil {
-		return errors.E(op, err, errors.M(module), errors.V(version))
+		return errors.E(op, err)
 	}
-	if exists {
-		return errors.E(op, "already exists", errors.M(module), errors.V(version), errors.KindAlreadyExists)
-	}
-
-	err = moduploader.Upload(ctx, module, version, bytes.NewReader(info), bytes.NewReader(mod), zip, s.upload, s.timeout)
+	zipPath := config.PackageVersionedName(module, version, "zip")
+	err = s.upload(ctx, zipPath, zip)
 	if err != nil {
-		return errors.E(op, err, errors.M(module), errors.V(version))
+		return errors.E(op, err)
 	}
-
-	// TODO: take out lease on the /list file and add the version to it
-	//
-	// Do that only after module source+metadata is uploaded
+	infoPath := config.PackageVersionedName(module, version, "info")
+	err = s.upload(ctx, infoPath, bytes.NewReader(info))
+	if err != nil {
+		return errors.E(op, err)
+	}
 	return nil
 }
 
-func (s *Storage) upload(ctx context.Context, path, contentType string, stream io.Reader) error {
+func (s *Storage) upload(ctx context.Context, path string, stream io.Reader) error {
 	const op errors.Op = "gcp.upload"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
-	wc := s.bucket.Object(path).NewWriter(ctx)
-	defer func(wc io.WriteCloser) {
-		if err := wc.Close(); err != nil {
-			log.Printf("WARNING: failed to close storage object writer: %s", err)
-		}
-	}(wc)
+	wc := s.bucket.Object(path).If(storage.Conditions{
+		DoesNotExist: true,
+	}).NewWriter(ctx)
+
 	// NOTE: content type is auto detected on GCP side and ACL defaults to public
 	// Once we support private storage buckets this may need refactoring
 	// unless there is a way to set the default perms in the project.
 	if _, err := io.Copy(wc, stream); err != nil {
+		wc.Close()
 		return err
+	}
+
+	err := wc.Close()
+	if err != nil {
+		kind := errors.KindBadRequest
+		apiErr, ok := err.(*googleapi.Error)
+		if ok && apiErr.Code == 412 {
+			kind = errors.KindAlreadyExists
+		}
+		return errors.E(op, err, kind)
 	}
 	return nil
 }

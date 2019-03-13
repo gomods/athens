@@ -17,8 +17,8 @@ import (
 // RunTests takes a backend implementation and runs compliance tests
 // against the interface.
 func RunTests(t *testing.T, b storage.Backend, clearBackend func() error) {
-	require.NoError(t, clearBackend(), "clearing backend failed")
-	defer require.NoError(t, clearBackend(), "clearning backend failed")
+	require.NoError(t, clearBackend(), "pre-clearing backend failed")
+	defer require.NoError(t, clearBackend(), "post-clearning backend failed")
 	testNotFound(t, b)
 	testList(t, b)
 	testDelete(t, b)

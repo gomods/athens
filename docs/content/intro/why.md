@@ -30,7 +30,7 @@ Downloading stored dependencies from Athens is _significantly_ faster than downl
 
 ### Access Control 
 
-Worse than packages disappearing, packages can be malicious. To make sure no such malicious package is ever installed by your team or company, you can have your proxy server return a 500 when the Go command line asks for an excluded module. This will cause the build to fail because Go expects a 200 HTTP response code. With Athens, you can achieve this through the [filter file](/configuration/filter.md). 
+Worse than packages disappearing, packages can be malicious. To make sure no such malicious package is ever installed by your team or company, you can have your proxy server return a 500 when the Go command line asks for an excluded module. This will cause the build to fail because Go expects a 200 HTTP response code. With Athens, you can achieve this through the [filter file]({{< ref "/configuration/filter.md" >}}).
 
 
 ### Vendor Directory Becomes Optional
