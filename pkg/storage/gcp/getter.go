@@ -6,6 +6,7 @@ import (
 	"io"
 	"io/ioutil"
 
+	"cloud.google.com/go/storage"
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/observ"
@@ -16,17 +17,9 @@ func (s *Storage) Info(ctx context.Context, module, version string) ([]byte, err
 	const op errors.Op = "gcp.Info"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
-	exists, err := s.Exists(ctx, module, version)
-	if err != nil {
-		return nil, errors.E(op, err, errors.M(module), errors.V(version))
-	}
-	if !exists {
-		return nil, errors.E(op, errors.M(module), errors.V(version), errors.KindNotFound)
-	}
-
 	infoReader, err := s.bucket.Object(config.PackageVersionedName(module, version, "info")).NewReader(ctx)
 	if err != nil {
-		return nil, errors.E(op, err, errors.M(module), errors.V(version))
+		return nil, errors.E(op, err, getErrorKind(err), errors.M(module), errors.V(version))
 	}
 	infoBytes, err := ioutil.ReadAll(infoReader)
 	infoReader.Close()
@@ -41,16 +34,9 @@ func (s *Storage) GoMod(ctx context.Context, module, version string) ([]byte, er
 	const op errors.Op = "gcp.GoMod"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
-	exists, err := s.Exists(ctx, module, version)
-	if err != nil {
-		return nil, errors.E(op, err, errors.M(module), errors.V(version))
-	}
-	if !exists {
-		return nil, errors.E(op, errors.M(module), errors.V(version), errors.KindNotFound)
-	}
 	modReader, err := s.bucket.Object(config.PackageVersionedName(module, version, "mod")).NewReader(ctx)
 	if err != nil {
-		return nil, errors.E(op, err, errors.M(module), errors.V(version))
+		return nil, errors.E(op, err, getErrorKind(err), errors.M(module), errors.V(version))
 	}
 	modBytes, err := ioutil.ReadAll(modReader)
 	modReader.Close()
@@ -66,17 +52,17 @@ func (s *Storage) Zip(ctx context.Context, module, version string) (io.ReadClose
 	const op errors.Op = "gcp.Zip"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
-	exists, err := s.Exists(ctx, module, version)
-	if err != nil {
-		return nil, errors.E(op, err, errors.M(module), errors.V(version))
-	}
-	if !exists {
-		return nil, errors.E(op, errors.M(module), errors.V(version), errors.KindNotFound)
-	}
 	zipReader, err := s.bucket.Object(config.PackageVersionedName(module, version, "zip")).NewReader(ctx)
 	if err != nil {
-		return nil, errors.E(op, err, errors.M(module), errors.V(version))
+		return nil, errors.E(op, err, getErrorKind(err), errors.M(module), errors.V(version))
 	}
 
 	return zipReader, nil
+}
+
+func getErrorKind(err error) int {
+	if err == storage.ErrObjectNotExist {
+		return errors.KindNotFound
+	}
+	return errors.KindUnexpected
 }

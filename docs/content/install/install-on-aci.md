@@ -33,7 +33,7 @@ Before executing any of the commands below, make sure you have the following env
 az container create \
 -g "${AZURE_ATHENS_RESOURCE_GROUP}" \
 -n "${AZURE_ATHENS_CONTAINER_NAME}-${LOCATION}" \
---image gomods/athens:v0.2.0 \
+--image gomods/athens:v0.3.0 \
 -e "ATHENS_STORAGE_TYPE=disk" "ATHENS_DISK_STORAGE_ROOT=/var/lib/athens" \
 --ip-address=Public \
 --dns-name="${AZURE_ATHENS_DNS_NAME}" \
@@ -55,7 +55,7 @@ Then run the create command:
 az container create \
 -g "${AZURE_ATHENS_RESOURCE_GROUP}" \
 -n "${AZURE_ATHENS_CONTAINER_NAME}-${LOCATION}" \
---image gomods/athens:v0.2.0 \
+--image gomods/athens:v0.3.0 \
 -e "ATHENS_STORAGE_TYPE=mongo" "ATHENS_MONGO_STORAGE_URL=${AZURE_ATHENS_MONGO_URL}" \
 --ip-address=Public \
 --dns-name="${AZURE_ATHENS_DNS_NAME}" \

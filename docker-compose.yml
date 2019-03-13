@@ -71,6 +71,10 @@ services:
       - 6832:6832/udp
       - 5778:5778
       - 16686:16686
+  redis:
+    image: redis
+    ports: 
+      - 6379:6379
   etcd0:
     image: quay.io/coreos/etcd
     ports:
