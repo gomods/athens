@@ -10,7 +10,7 @@ steps:
     - go mod vendor # this is for when the Dockerfile gets built
   environment:
     GO111MODULE: on
-    GOPROXY: http://proxy-server:3000
+    GOPROXY: http://athens-proxy:3000
 
 - name: build
   image: golang:1.12
