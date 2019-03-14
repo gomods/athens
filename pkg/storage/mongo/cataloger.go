@@ -24,13 +24,6 @@ func (s *ModuleStore) Catalog(ctx context.Context, token string, pageSize int) (
 
 	c := s.s.Database(s.d).Collection(s.c)
 
-	documentCount, erro := c.Count(compositeQ)
-
-	// If there are 0 results, return empty results without an error
-	if erro != nil && documentCount == 0 {
-		return nil, "", nil
-	}
-
 	modules := make([]storage.Module, 0)
 	cursor, err := c.Find(compositeQ)
 	// * Currently the driver doesn't have any of the below provisions so maybe adding the
@@ -57,9 +50,9 @@ func (s *ModuleStore) Catalog(ctx context.Context, token string, pageSize int) (
 	}
 
 	// If there are 0 results, return empty results without an error
-	// if len(modules) == 0 {
-	// return nil, "", nil
-	// }
+	if len(modules) == 0 {
+		return nil, "", nil
+	}
 
 	var versions = make([]paths.AllPathParams, len(modules))
 	for i := range modules {
