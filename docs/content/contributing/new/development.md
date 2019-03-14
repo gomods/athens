@@ -9,7 +9,7 @@ The proxy is written in idiomatic Go and uses standard tools. If you know Go, yo
 
 Athens uses [Go Modules](https://golang.org/cmd/go/#hdr-Modules__module_versions__and_more) for dependency management. You will need Go [v1.11](https://golang.org/dl) or later to get started on Athens.
 
-See our [Contributing Guide](CONTRIBUTING.md) for tips on how to submit a pull request when you are ready.
+See our [Contributing Guide](https://github.com/gomods/athens/blob/master/CONTRIBUTING.md) for tips on how to submit a pull request when you are ready.
 
 ### Go version
 Athens is developed on Go1.11+.

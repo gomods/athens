@@ -1,5 +1,30 @@
 version: '3'
 services:
+  testunit:
+    build:
+      context: .
+      dockerfile: Dockerfile.test
+    command: ["./scripts/test_unit.sh"]
+    environment:
+      - GO_ENV=test
+      - ATHENS_MINIO_ENDPOINT=minio:9000
+      - ATHENS_MONGO_STORAGE_URL=mongodb://mongo:27017
+      - TIMEOUT=20 # in case the mongo dependency takes longer to start up
+      - ATHENS_STORAGE_TYPE=mongo
+    depends_on:
+      - mongo
+      - minio
+  teste2e:
+    build:
+      context: .
+      dockerfile: Dockerfile.test
+    command: ["./scripts/test_e2e.sh"]
+  azurite:
+    image: arafato/azurite:2.6.5
+    ports:
+      - 10000:10000
+    environment:
+      executable: blob
   mongo:
     image: mongo:3.7.9-jessie
     ports:
@@ -33,3 +58,78 @@ services:
       - 6832:6832/udp
       - 5778:5778
       - 16686:16686
+  redis:
+    image: redis
+    ports: 
+      - 6379:6379
+  etcd0:
+    image: quay.io/coreos/etcd
+    ports:
+      - "2379:2379"
+    volumes:
+      - etcd0:/etcd_data
+    command:
+      - /usr/local/bin/etcd
+      - -name
+      - etcd0
+      - --data-dir
+      - /etcd_data
+      - -advertise-client-urls
+      - http://etcd0:2379
+      - -listen-client-urls
+      - http://0.0.0.0:2379
+      - -initial-advertise-peer-urls
+      - http://etcd0:2380
+      - -listen-peer-urls
+      - http://0.0.0.0:2380
+      - -initial-cluster
+      - etcd0=http://etcd0:2380,etcd1=http://etcd1:2380,etcd2=http://etcd2:2380
+  etcd1:
+    image: quay.io/coreos/etcd
+    ports:
+      - "22379:2379"
+    volumes:
+      - etcd1:/etcd_data
+    command:
+      - /usr/local/bin/etcd
+      - -name
+      - etcd1
+      - --data-dir
+      - /etcd_data
+      - -advertise-client-urls
+      - http://etcd1:2379
+      - -listen-client-urls
+      - http://0.0.0.0:2379
+      - -initial-advertise-peer-urls
+      - http://etcd1:2380
+      - -listen-peer-urls
+      - http://0.0.0.0:2380
+      - -initial-cluster
+      - etcd0=http://etcd0:2380,etcd1=http://etcd1:2380,etcd2=http://etcd2:2380
+  etcd2:
+    image: quay.io/coreos/etcd
+    ports:
+      - "32379:2379"
+    volumes:
+      - etcd2:/etcd_data
+    command:
+      - /usr/local/bin/etcd
+      - -name
+      - etcd2
+      - --data-dir
+      - /etcd_data
+      - -advertise-client-urls
+      - http://etcd2:2379
+      - -listen-client-urls
+      - http://0.0.0.0:2379
+      - -initial-advertise-peer-urls
+      - http://etcd2:2380
+      - -listen-peer-urls
+      - http://0.0.0.0:2380
+      - -initial-cluster
+      - etcd0=http://etcd0:2380,etcd1=http://etcd1:2380,etcd2=http://etcd2:2380
+
+volumes:
+  etcd0:
+  etcd1:
+  etcd2:

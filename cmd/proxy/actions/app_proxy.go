@@ -1,6 +1,10 @@
 package actions
 
 import (
+	"fmt"
+	"strings"
+
+	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/download"
 	"github.com/gomods/athens/pkg/download/addons"
 	"github.com/gomods/athens/pkg/log"
@@ -15,9 +19,7 @@ func addProxyRoutes(
 	r *mux.Router,
 	s storage.Backend,
 	l *log.Logger,
-	goBin string,
-	goGetWorkers,
-	protocolWorkers int,
+	c *config.Config,
 ) error {
 	r.HandleFunc("/", proxyHomeHandler)
 	r.HandleFunc("/healthz", healthHandler)
@@ -48,23 +50,53 @@ func addProxyRoutes(
 	// 3. The stashpool manages limiting concurrent requests and passes them to stash.
 	// 4. The plain stash.New just takes a request from upstream and saves it into storage.
 	fs := afero.NewOsFs()
-	mf, err := module.NewGoGetFetcher(goBin, fs)
+	mf, err := module.NewGoGetFetcher(c.GoBinary, fs)
 	if err != nil {
 		return err
 	}
 
-	lister := download.NewVCSLister(goBin, fs)
-	st := stash.New(mf, s, stash.WithPool(goGetWorkers), stash.WithSingleflight)
+	lister := download.NewVCSLister(c.GoBinary, fs)
+
+	withSingleFlight, err := getSingleFlight(c, s)
+	if err != nil {
+		return err
+	}
+	st := stash.New(mf, s, stash.WithPool(c.GoGetWorkers), withSingleFlight)
 
 	dpOpts := &download.Opts{
 		Storage: s,
 		Stasher: st,
 		Lister:  lister,
 	}
-	dp := download.New(dpOpts, addons.WithPool(protocolWorkers))
+	dp := download.New(dpOpts, addons.WithPool(c.ProtocolWorkers))
 
 	handlerOpts := &download.HandlerOpts{Protocol: dp, Logger: l}
 	download.RegisterHandlers(r, handlerOpts)
 
 	return nil
+}
+
+func getSingleFlight(c *config.Config, checker storage.Checker) (stash.Wrapper, error) {
+	switch c.SingleFlightType {
+	case "", "memory":
+		return stash.WithSingleflight, nil
+	case "etcd":
+		if c.SingleFlight == nil || c.SingleFlight.Etcd == nil {
+			return nil, fmt.Errorf("Etcd config must be present")
+		}
+		endpoints := strings.Split(c.SingleFlight.Etcd.Endpoints, ",")
+		return stash.WithEtcd(endpoints, checker)
+	case "redis":
+		if c.SingleFlight == nil || c.SingleFlight.Redis == nil {
+			return nil, fmt.Errorf("Redis config must be present")
+		}
+		return stash.WithRedisLock(c.SingleFlight.Redis.Endpoint, checker)
+	case "gcp":
+		if c.StorageType != "gcp" {
+			return nil, fmt.Errorf("gcp SingleFlight only works with a gcp storage type and not: %v", c.StorageType)
+		}
+		return stash.WithGCSLock, nil
+	default:
+		return nil, fmt.Errorf("unrecognized single flight type: %v", c.SingleFlightType)
+	}
 }

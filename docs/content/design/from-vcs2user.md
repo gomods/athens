@@ -85,7 +85,7 @@ _stasher.go_
 ### Stash wrapper - Pool
 As downloading a module is resource heavy (memory) operation, `Pool` (pkg/stash/with_pool.go) helps us to control simultaneous downloads.
 
-It uses N-worker patter which spins up the specified number of workers which then waits for a job to complete. Once they complete their job, they return the result and are ready for the next one.
+It uses N-worker pattern which spins up the specified number of workers which then waits for a job to complete. Once they complete their job, they return the result and are ready for the next one.
 
 A job, in this case, is a call to Stash function on a backing `Stash`er.
 
