@@ -3,19 +3,28 @@ kind: pipeline
 name: default
 
 steps:
+- name: download-dependencies
+  image: golang:1.12
+  commands:
+    - go mod download
+    - go mod vendor # this is for when the Dockerfile gets built
+  environment:
+    GO111MODULE: on
+    GOPROXY: http://proxy-server:3000
+
 - name: build
   image: golang:1.12
   commands:
   # wait for services to be ready.
-  - sleep 3 
+  - sleep 7
 
   # build
-  - go build -mod=vendor cmd/proxy/*.go
+  - go build cmd/proxy/*.go
 
   # test
   - ./scripts/check_gofmt.sh
-  - go vet -mod=vendor ./...
-  - go test -mod=vendor -v ./...
+  - go vet ./...
+  - go test -v ./...
 
   # end to end test
   - ./main & # run the just-built athens server
@@ -108,8 +117,21 @@ services:
   image: redis
   ports:
     - 6379
+- name: athens-proxy
+  image: gomods/athens:canary
+  ports:
+    - 3000
+  environment:
+    ATHENS_GOGET_WORKERS: 5
+    ATHENS_PROTOCOL_WORKERS: 10
+    ATHENS_SINGLE_FLIGHT_TYPE: gcp
+    ATHENS_STORAGE_TYPE: gcp
+    ATHENS_STORAGE_GCP_BUCKET: "athens_ci_build"
+    ATHENS_STORAGE_GCP_JSON_KEY:
+      from_secret: GCS_SERVICE_ACCOUNT
+
 ---
 kind: signature
-hmac: f15b6f458a1bd97950dfce43d1726958777ed22c2e3c0f1806af0e497bbbb23e
+hmac: 8ee2a04fedfd1a0c1ab3da19a3441485bf447de3e04fe057f626c83454a042b6
 
 ...
