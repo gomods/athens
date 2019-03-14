@@ -6,6 +6,8 @@ steps:
 - name: download-dependencies
   image: golang:1.12
   commands:
+    # wait for services to be ready.
+    - sleep 5
     - go mod download
     - go mod vendor # this is for when the Dockerfile gets built
   environment:
@@ -15,8 +17,6 @@ steps:
 - name: build
   image: golang:1.12
   commands:
-  # wait for services to be ready.
-  - sleep 7
 
   # build
   - go build cmd/proxy/*.go
