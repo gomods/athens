@@ -54,7 +54,7 @@ GET $HOST:$PORT/github.com/acidburn/htp/@v/v1.0.0.mod
 ```
 
 这会返回文件 go.mod 的版本 v1.0.0.如果 $HOST:$PORT/github.com/acidburn/htp 的 `v1.0.0` 版本没有依赖，
-响应看起来像：
+那么响应就会像这样：
 
 ```
 module github.com/acidburn/htp
@@ -66,7 +66,7 @@ module github.com/acidburn/htp
 GET $HOST:$PORT/github.com/acidburn/htp/@v/v1.0.0.zip
 ```
 
-这也就是会把模块的 v1.0.0 版本的源码以 zip 格式返回。
+显而易见——它会把该模块的 v1.0.0 版本的源码以 zip 格式返回。
 
 ## Latest
 
