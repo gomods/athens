@@ -23,6 +23,6 @@ steps:
   displayName: 'set up the Go workspace'
 
 - powershell: |
-    go test -mod=vendor -race ./...
+    go test -race ./...
   workingDirectory: '$(modulePath)'
   displayName: 'run tests'
