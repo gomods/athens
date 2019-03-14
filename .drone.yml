@@ -119,6 +119,7 @@ services:
     - 6379
 - name: athens-proxy
   image: gomods/athens:canary
+  pull: always
   ports:
     - 3000
   environment:
