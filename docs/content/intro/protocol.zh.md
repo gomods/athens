@@ -74,4 +74,4 @@ GET $HOST:$PORT/github.com/acidburn/htp/@v/v1.0.0.zip
 GET $HOST:$PORT/github.com/acidburn/htp/@latest
 ```
 
-这个端点返回模块的最新版本。如果这个版本不存在，则会返回最新提交的哈希。
+这个端点会返回对应模块的最新版本。如果没有 latest 标签，它会根据最后一次提交的哈希值去找到对应的版本。
