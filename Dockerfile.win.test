@@ -1,4 +1,4 @@
-FROM golang:1.12-windowsservercore
+FROM golang:1.12-windowsservercore-1803
 
 RUN powershell New-Item C:\tests -ItemType directory
 
