@@ -17,9 +17,9 @@ import (
 
 // ModuleStore represents a mongo backed storage backend.
 type ModuleStore struct {
-	s        *mongo.NewClient
-	d        string // database
-	c        string // collection
+	client   *mongo.NewClient
+	db       string // database
+	coll     string // collection
 	url      string
 	certPath string
 	insecure bool // Only to be used for development instances

@@ -22,7 +22,7 @@ func (s *ModuleStore) Catalog(ctx context.Context, token string, pageSize int) (
 
 	compositeQ := bson.D{q, fields}
 
-	c := s.s.Database(s.d).Collection(s.c)
+	c := s.client.Database(s.db).Collection(s.coll)
 
 	modules := make([]storage.Module, 0)
 	cursor, err := c.Find(compositeQ)

@@ -13,7 +13,7 @@ func (s *ModuleStore) Exists(ctx context.Context, module, vsn string) (bool, err
 	var op errors.Op = "mongo.Exists"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
-	c := s.s.Database(s.d).Collection(s.c)
+	c := s.client.Database(s.db).Collection(s.coll)
 	count, err := c.Count(bson.M{"module": module, "version": vsn})
 	if err != nil {
 		return false, errors.E(op, errors.M(module), errors.V(vsn), err)

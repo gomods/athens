@@ -14,7 +14,7 @@ func (s *ModuleStore) List(ctx context.Context, module string) ([]string, error)
 	const op errors.Op = "mongo.List"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
-	c := s.s.DB(s.d).C(s.c)
+	c := s.client.DB(s.db).C(s.coll)
 	fields := bson.M{"version": 1}
 	compositeQ := bson.D{bson.M{"module": module}, fields}
 	cur, err := c.Find(compositeQ)

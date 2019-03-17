@@ -21,8 +21,8 @@ func (s *ModuleStore) Delete(ctx context.Context, module, version string) error 
 		return errors.E(op, errors.M(module), errors.V(version), errors.KindNotFound)
 	}
 
-	db := s.s.Database(s.d)
-	c := db.Collection(s.c)
+	db := s.client.Database(s.db)
+	c := db.Collection(s.coll)
 	err = db.GridFS("fs").Remove(s.gridFileName(module, version))
 	if err != nil {
 		return errors.E(op, err, errors.M(module), errors.V(version))
