@@ -8,6 +8,7 @@ import (
 	"net"
 	"strings"
 	"time"
+	"context"
 
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/errors"
@@ -59,16 +60,13 @@ func (m *ModuleStore) initDatabase() *mongo.Collection {
 	m.d = "athens"
 	m.c = "modules"
 
-	// Couldn't find EnsureIndex or something similar in the beta driver
-	// index := mgo.Index{
-	// 	Key:        []string{"base_url", "module", "version"},
-	// 	Unique:     true,
-	// 	Background: true,
-	// 	Sparse:     true,
-	// }
 	c := m.s.Database(m.d).Collection(m.c)
+	indexView := mongo.IndexView{collection: c}
+	keys := interface{base_url: 1, module: 1, version: 1}
+	indexOptions := &mongo.options.IndexOptions{Background: true, Sparse: true, Unique: true}
+	indexView.CreateOne(context.Background(), keys, indexOptions, &CreateIndexesOptions{})
+	
 	return c
-	// return c.EnsureIndex(index)
 }
 
 func (m *ModuleStore) newClient(timeout time.Duration, insecure bool) (*mongo.NewClient, error) {
