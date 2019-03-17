@@ -18,5 +18,5 @@ func (s *ModuleStore) Exists(ctx context.Context, module, vsn string) (bool, err
 	if err != nil {
 		return false, errors.E(op, errors.M(module), errors.V(vsn), err)
 	}
-	return count > 0, nil
+	return count == 3, nil
 }
