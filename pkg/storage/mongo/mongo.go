@@ -62,7 +62,10 @@ func (m *ModuleStore) initDatabase() *mongo.Collection {
 
 	c := m.s.Database(m.d).Collection(m.c)
 	indexView := mongo.IndexView{collection: c}
-	keys := interface{base_url: 1, module: 1, version: 1}
+	keys := make(map[string]int)
+	keys["base_url"] = 1
+	keys["module"] = 1
+	keys["version"] = 1
 	indexOptions := &mongo.options.IndexOptions{Background: true, Sparse: true, Unique: true}
 	indexView.CreateOne(context.Background(), keys, indexOptions, &CreateIndexesOptions{})
 	
