@@ -2,6 +2,7 @@ package fs
 
 import (
 	"context"
+	"os"
 
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/observ"
@@ -14,16 +15,13 @@ func (v *storageImpl) Exists(ctx context.Context, module, version string) (bool,
 	defer span.End()
 	versionedPath := v.versionLocation(module, version)
 
-	ok, err := afero.Exists(v.filesystem, versionedPath)
-	if err != nil {
-		return false, errors.E(op, errors.M(module), errors.V(version), err)
-	}
-	if !ok {
-		return false, nil
-	}
-
 	files, err := afero.ReadDir(v.filesystem, versionedPath)
+
 	if err != nil {
+		_, ok := err.(*os.PathError)
+		if ok {
+			return false, nil
+		}
 		return false, errors.E(op, errors.M(module), errors.V(version), err)
 	}
 
