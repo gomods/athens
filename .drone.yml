@@ -30,6 +30,7 @@ steps:
     GO111MODULE: on
     ATHENS_MONGO_STORAGE_URL: mongodb://mongo:27017
     ATHENS_MINIO_ENDPOINT: minio:9000
+    REDIS_TEST_ENDPOINT: redis:6379
     GCS_SERVICE_ACCOUNT:
       from_secret: GCS_SERVICE_ACCOUNT
   when:
@@ -101,8 +102,12 @@ services:
   environment:
     MINIO_ACCESS_KEY: minio
     MINIO_SECRET_KEY: minio123
+- name: redis
+  image: redis
+  ports:
+    - 6379
 ---
 kind: signature
-hmac: 54b2ab3873059d43d453a69a8a5c6aee8cd7b748ffafa227c6ec277de124a177
+hmac: f15b6f458a1bd97950dfce43d1726958777ed22c2e3c0f1806af0e497bbbb23e
 
 ...

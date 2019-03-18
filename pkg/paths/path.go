@@ -23,7 +23,7 @@ func GetVersion(r *http.Request) (string, error) {
 
 	version := mux.Vars(r)["version"]
 	if version == "" {
-		return "", errors.E(op, "missing version paramater")
+		return "", errors.E(op, "missing version parameter")
 	}
 	return version, nil
 }
@@ -35,7 +35,7 @@ type AllPathParams struct {
 	Version string `json:"version"`
 }
 
-// GetAllParams fetches the path patams from c and returns them
+// GetAllParams fetches the path params from r and returns them
 func GetAllParams(r *http.Request) (*AllPathParams, error) {
 	const op errors.Op = "paths.GetAllParams"
 	mod, err := GetModule(r)
