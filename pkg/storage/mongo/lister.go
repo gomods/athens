@@ -3,10 +3,10 @@ package mongo
 import (
 	"context"
 
-	"github.com/mongodb/mongo-go-driver/bson"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/observ"
 	"github.com/gomods/athens/pkg/storage"
+	"github.com/mongodb/mongo-go-driver/bson"
 )
 
 // List lists all versions of a module
