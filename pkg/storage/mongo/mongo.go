@@ -70,10 +70,7 @@ func (m *ModuleStore) initDatabase() *mongo.Collection {
 	keys["base_url"] = 1
 	keys["module"] = 1
 	keys["version"] = 1
-	indexOptions := mongo.options.Index()
-	indexOptions := indexOptions.SetBackground(true)
-	indexOptions := indexOptions.SetSparse(true)
-	indexOptions := indexOptions.SetUnique(true)
+	indexOptions := mongo.options.Index().SetBackground(true).SetSparse(true).SetUnique(true)
 	indexView.CreateOne(context.Background(), keys, indexOptions, &CreateIndexesOptions{})
 
 	return c
