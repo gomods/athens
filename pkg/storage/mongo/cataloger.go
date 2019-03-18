@@ -6,7 +6,7 @@ import (
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/paths"
 	"github.com/gomods/athens/pkg/storage"
-	"github.com/mongodb/mongo-go-driver/bson"
+	"go.mongodb.org/mongo-driver/bson"
 )
 
 // Catalog implements the (./pkg/storage).Cataloger interface

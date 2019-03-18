@@ -11,7 +11,7 @@ import (
 
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/errors"
-	"github.com/mongodb/mongo-go-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 // ModuleStore represents a mongo backed storage backend.
