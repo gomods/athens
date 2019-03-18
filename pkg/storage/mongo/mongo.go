@@ -1,14 +1,13 @@
 package mongo
 
 import (
+	"context"
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
 	"io/ioutil"
-	"net"
 	"strings"
 	"time"
-	"context"
 
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/errors"
@@ -28,14 +27,19 @@ type ModuleStore struct {
 
 // NewStorage returns a connected Mongo backed storage
 // that satisfies the Backend interface.
-func NewStorage(conf *config.MongoConfig, timeout time.Duration) (*ModuleStore, error) {
+func NewStorage(conf *config.MongoConfig, timeout time.Duration, insecure bool) (*ModuleStore, error) {
 	const op errors.Op = "mongo.NewStorage"
 	if conf == nil {
 		return nil, errors.E(op, "No Mongo Configuration provided")
 	}
-	ms := &ModuleStore{url: conf.URL, certPath: conf.CertPath, timeout: timeout}
+	ms := &ModuleStore{url: conf.URL, certPath: conf.CertPath, timeout: timeout, insecure: insecure}
+	ms.client, err = ms.newClient()
 
-	err := ms.connect()
+	if err != nil {
+		return nil, errors.E(op, e)
+	}
+
+	err = ms.connect()
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
@@ -47,7 +51,7 @@ func (m *ModuleStore) connect() *mongo.Collection {
 	const op errors.Op = "mongo.connect"
 
 	var err error
-	m.s, err = m.newSession(m.timeout, m.insecure)
+	err = m.client.Connect(context.Background())
 	if err != nil {
 		return errors.E(op, err)
 	}
@@ -60,7 +64,7 @@ func (m *ModuleStore) initDatabase() *mongo.Collection {
 	m.db = "athens"
 	m.coll = "modules"
 
-	c := m.s.Database(m.d).Collection(m.c)
+	c := m.client.Database(m.db).Collection(m.coll)
 	indexView := mongo.IndexView{collection: c}
 	keys := make(map[string]int)
 	keys["base_url"] = 1
@@ -71,49 +75,46 @@ func (m *ModuleStore) initDatabase() *mongo.Collection {
 	indexOptions := indexOptions.SetSparse(true)
 	indexOptions := indexOptions.SetUnique(true)
 	indexView.CreateOne(context.Background(), keys, indexOptions, &CreateIndexesOptions{})
-	
+
 	return c
 }
 
-func (m *ModuleStore) newClient(timeout time.Duration, insecure bool) (*mongo.NewClient, error) {
-	// tlsConfig := &tls.Config{}
+func (m *ModuleStore) newClient() (*mongo.NewClient, error) {
+	tlsConfig := &tls.Config{}
+	clientOptions := mongo.options.Client()
+	// Maybe check for error using Validate()?
+	clientOptions = clientOptions.ApplyURI(m.url)
 
-	// dialInfo, err := mgo.ParseURL(m.url)
-	// if err != nil {
-	// 	return nil, err
-	// }
+	if m.certPath != "" {
+		// Sets only when the env var is setup in config.dev.toml
+		tlsConfig.InsecureSkipVerify = m.insecure
+		var roots *x509.CertPool
+		// See if there is a system cert pool
+		roots, err = x509.SystemCertPool()
+		if err != nil {
+			// If there is no system cert pool, create a new one
+			roots = x509.NewCertPool()
+		}
 
-	// dialInfo.Timeout = timeout
+		cert, err := ioutil.ReadFile(m.certPath)
+		if err != nil {
+			return nil, err
+		}
 
-	// if m.certPath != "" {
-	// 	// Sets only when the env var is setup in config.dev.toml
-	// 	tlsConfig.InsecureSkipVerify = insecure
-	// 	var roots *x509.CertPool
-	// 	// See if there is a system cert pool
-	// 	roots, err = x509.SystemCertPool()
-	// 	if err != nil {
-	// 		// If there is no system cert pool, create a new one
-	// 		roots = x509.NewCertPool()
-	// 	}
+		if ok := roots.AppendCertsFromPEM(cert); !ok {
+			return nil, fmt.Errorf("failed to parse certificate from: %s", m.certPath)
+		}
 
-	// 	cert, err := ioutil.ReadFile(m.certPath)
-	// 	if err != nil {
-	// 		return nil, err
-	// 	}
+		tlsConfig.ClientCAs = roots
+	}
 
-	// 	if ok := roots.AppendCertsFromPEM(cert); !ok {
-	// 		return nil, fmt.Errorf("failed to parse certificate from: %s", m.certPath)
-	// 	}
+	clientOptions = clientOptions.SetTLSConfig(tlsConfig).SetConnectTimeout(m.timeout)
+	client, err := mongo.NewClient(clientOptions)
+	if err != nil {
+		return nil, err
+	}
 
-	// 	tlsConfig.ClientCAs = roots
-
-	// 	dialInfo.DialServer = func(addr *mgo.ServerAddr) (net.Conn, error) {
-	// 		return tls.Dial("tcp", addr.String(), tlsConfig)
-	// 	}
-	// }
-
-	// return mgo.DialWithInfo(dialInfo)
-	return &Client.NewClient(m.url)
+	return client, nil
 }
 
 func (m *ModuleStore) gridFileName(mod, ver string) string {
