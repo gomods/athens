@@ -57,8 +57,8 @@ func (m *ModuleStore) connect() *mongo.Collection {
 
 func (m *ModuleStore) initDatabase() *mongo.Collection {
 	// TODO: database and collection as env vars, or params to New()? together with user/mongo
-	m.d = "athens"
-	m.c = "modules"
+	m.db = "athens"
+	m.coll = "modules"
 
 	c := m.s.Database(m.d).Collection(m.c)
 	indexView := mongo.IndexView{collection: c}
@@ -66,7 +66,10 @@ func (m *ModuleStore) initDatabase() *mongo.Collection {
 	keys["base_url"] = 1
 	keys["module"] = 1
 	keys["version"] = 1
-	indexOptions := &mongo.options.IndexOptions{Background: true, Sparse: true, Unique: true}
+	indexOptions := mongo.options.Index()
+	indexOptions := indexOptions.SetBackground(true)
+	indexOptions := indexOptions.SetSparse(true)
+	indexOptions := indexOptions.SetUnique(true)
 	indexView.CreateOne(context.Background(), keys, indexOptions, &CreateIndexesOptions{})
 	
 	return c
