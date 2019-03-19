@@ -63,6 +63,8 @@ func getStorage(t testing.TB) *Storage {
 }
 
 func getTestConfig() *config.GCPConfig {
+	// moniker is a cool library to produce mostly unique, human-readable names
+	// see https://github.com/technosophos/moniker for more details
 	namer := moniker.New()
 	bucketName := fmt.Sprintf("athens_drone_%s", namer.NameSep("_"))
 	creds := os.Getenv("GCS_SERVICE_ACCOUNT")
