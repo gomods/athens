@@ -18,8 +18,7 @@ func (v *storageImpl) Exists(ctx context.Context, module, version string) (bool,
 	files, err := afero.ReadDir(v.filesystem, versionedPath)
 
 	if err != nil {
-		_, ok := err.(*os.PathError)
-		if ok {
+		if os.IsNotExist(err) {
 			return false, nil
 		}
 		return false, errors.E(op, errors.M(module), errors.V(version), err)
