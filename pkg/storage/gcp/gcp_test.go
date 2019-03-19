@@ -2,11 +2,13 @@ package gcp
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"testing"
 
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/storage/compliance"
+	"github.com/technosophos/moniker"
 	"google.golang.org/api/iterator"
 )
 
@@ -39,7 +41,10 @@ func (s *Storage) clear() error {
 			return err
 		}
 	}
-	return nil
+	// since this is a unique bucket name (see getTestConfig), we need to
+	// not only delete all the objects in the bucket (above), we need to then
+	// delete the bucket itself
+	return s.bucket.Delete(ctx)
 }
 
 func getStorage(t testing.TB) *Storage {
@@ -58,12 +63,14 @@ func getStorage(t testing.TB) *Storage {
 }
 
 func getTestConfig() *config.GCPConfig {
+	namer := moniker.New()
+	bucketName := fmt.Sprintf("athens_drone_%s", namer.NameSep("_"))
 	creds := os.Getenv("GCS_SERVICE_ACCOUNT")
 	if creds == "" {
 		return nil
 	}
 	return &config.GCPConfig{
-		Bucket:  "athens_drone_bucket",
+		Bucket:  bucketName,
 		JSONKey: creds,
 	}
 }
