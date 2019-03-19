@@ -44,7 +44,7 @@ CloudRuntime = "none"
 # Env override: ATHENS_FILTER_FILE
 #
 # To point Athens to an upstream proxy to fetch modules,
-# set GlobalEndPoint to "https://<url_to_upstream>"
+# set GlobalEndpoint to "https://<url_to_upstream>"
 # and also ensure that FilterFile is  set to a fully qualified file name 
 # that contains the letter `D` (for "Direct Access") in the first line.
 FilterFile = ""
@@ -77,7 +77,7 @@ Port = ":3000"
 # Env override: ATHENS_GLOBAL_ENDPOINT
 #
 # To point Athens to an upstream proxy to fetch modules,
-# set GlobalEndPoint to "https://<url_to_upstream>"
+# set GlobalEndpoint to "https://<url_to_upstream>"
 # and also ensure that FilterFile is  set to a fully qualified file name 
 # that contains the letter `D` (for "Direct Access") in the first line.
 GlobalEndpoint = "http://localhost:3001"
