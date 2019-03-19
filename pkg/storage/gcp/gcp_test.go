@@ -54,7 +54,7 @@ func getStorage(t testing.TB) *Storage {
 		t.SkipNow()
 	}
 
-	s, err := New(context.Background(), cfg, config.GetTimeoutDuration(30))
+	s, err := New(context.Background(), cfg, true, config.GetTimeoutDuration(30))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -71,8 +71,13 @@ func getTestConfig() *config.GCPConfig {
 	if creds == "" {
 		return nil
 	}
+	projID := os.Getenv("GOOGLE_CLOUD_PROJECT")
+	if projID == "" {
+		return nil
+	}
 	return &config.GCPConfig{
-		Bucket:  bucketName,
-		JSONKey: creds,
+		Bucket:    bucketName,
+		JSONKey:   creds,
+		ProjectID: projID,
 	}
 }
