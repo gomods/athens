@@ -3,10 +3,12 @@ package mongo
 import (
 	"context"
 
+	"github.com/globalsign/mgo"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/observ"
 	"github.com/gomods/athens/pkg/storage"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 // List lists all versions of a module
@@ -14,10 +16,10 @@ func (s *ModuleStore) List(ctx context.Context, module string) ([]string, error)
 	const op errors.Op = "mongo.List"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
-	c := s.client.DB(s.db).C(s.coll)
-	fields := bson.M{"version": 1}
-	compositeQ := bson.D{bson.M{"module": module}, fields}
-	cur, err := c.Find(compositeQ)
+	c := s.client.Database(s.db).Collection(s.coll)
+	projection := bson.M{"version": 1}
+	query := bson.E{Key: "module", Value: module}
+	cursor, err := c.Find(context.Background(), query, &options.FindOptions{Projection: projection})
 	if err != nil {
 		kind := errors.KindUnexpected
 		if err == mgo.ErrNotFound {
@@ -26,14 +28,11 @@ func (s *ModuleStore) List(ctx context.Context, module string) ([]string, error)
 		return nil, errors.E(op, kind, errors.M(module), err)
 	}
 	result := make([]storage.Module, 0)
-	for cursor.Next() {
+	for cursor.Next(context.Background()) {
 		var module storage.Module
-		bytes, err := cursor.DecodeBytes()
+		err := cursor.Decode(&module)
 		if err == nil {
-			err = bson.Unmarshal(bytes, &module)
-			if err == nil {
-				result = append(result, module)
-			}
+			result = append(result, module)
 		}
 	}
 

@@ -12,6 +12,7 @@ import (
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/errors"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 // ModuleStore represents a mongo backed storage backend.
@@ -33,13 +34,14 @@ func NewStorage(conf *config.MongoConfig, timeout time.Duration, insecure bool) 
 		return nil, errors.E(op, "No Mongo Configuration provided")
 	}
 	ms := &ModuleStore{url: conf.URL, certPath: conf.CertPath, timeout: timeout, insecure: insecure}
-	ms.client, err = ms.newClient()
+	client, err := ms.newClient()
+	ms.client = client
 
 	if err != nil {
-		return nil, errors.E(op, e)
+		return nil, errors.E(op, err)
 	}
 
-	err = ms.connect()
+	_, err = ms.connect()
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
@@ -47,16 +49,16 @@ func NewStorage(conf *config.MongoConfig, timeout time.Duration, insecure bool) 
 	return ms, nil
 }
 
-func (m *ModuleStore) connect() *mongo.Collection {
+func (m *ModuleStore) connect() (*mongo.Collection, error) {
 	const op errors.Op = "mongo.connect"
 
 	var err error
 	err = m.client.Connect(context.Background())
 	if err != nil {
-		return errors.E(op, err)
+		return nil, errors.E(op, err)
 	}
 
-	return m.initDatabase()
+	return m.initDatabase(), nil
 }
 
 func (m *ModuleStore) initDatabase() *mongo.Collection {
@@ -65,13 +67,13 @@ func (m *ModuleStore) initDatabase() *mongo.Collection {
 	m.coll = "modules"
 
 	c := m.client.Database(m.db).Collection(m.coll)
-	indexView := mongo.IndexView{collection: c}
+	indexView := mongo.IndexView{coll: c}
 	keys := make(map[string]int)
 	keys["base_url"] = 1
 	keys["module"] = 1
 	keys["version"] = 1
 	indexOptions := options.Index().SetBackground(true).SetSparse(true).SetUnique(true)
-	indexView.CreateOne(context.Background(), keys, indexOptions, &CreateIndexesOptions{})
+	indexView.CreateOne(context.Background(), mongo.IndexModel{Keys: keys, Options: indexOptions}, options.CreateIndexes())
 
 	return c
 }
@@ -87,7 +89,7 @@ func (m *ModuleStore) newClient() (*mongo.Client, error) {
 		tlsConfig.InsecureSkipVerify = m.insecure
 		var roots *x509.CertPool
 		// See if there is a system cert pool
-		roots, err = x509.SystemCertPool()
+		roots, err := x509.SystemCertPool()
 		if err != nil {
 			// If there is no system cert pool, create a new one
 			roots = x509.NewCertPool()

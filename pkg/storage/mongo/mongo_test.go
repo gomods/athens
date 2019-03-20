@@ -1,6 +1,7 @@
 package mongo
 
 import (
+	"context"
 	"os"
 	"testing"
 
@@ -15,8 +16,8 @@ func TestBackend(t *testing.T) {
 }
 
 func (m *ModuleStore) clear() error {
-	m.client.Database(m.db).Drop()
-	return m.initDatabase()
+	m.client.Database(m.db).Drop(context.Background())
+	return nil
 }
 
 func BenchmarkBackend(b *testing.B) {
@@ -29,7 +30,7 @@ func getStorage(tb testing.TB) *ModuleStore {
 	if url == "" {
 		tb.SkipNow()
 	}
-	backend, err := NewStorage(&config.MongoConfig{URL: url}, config.GetTimeoutDuration(300))
+	backend, err := NewStorage(&config.MongoConfig{URL: url}, config.GetTimeoutDuration(300), false)
 	require.NoError(tb, err)
 
 	return backend
