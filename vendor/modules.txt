@@ -68,11 +68,11 @@ github.com/davecgh/go-spew/spew
 # github.com/fatih/color v1.7.0
 github.com/fatih/color
 # github.com/globalsign/mgo v0.0.0-20180828104044-6f9f54af1356
-github.com/globalsign/mgo
 github.com/globalsign/mgo/bson
+github.com/globalsign/mgo
+github.com/globalsign/mgo/internal/json
 github.com/globalsign/mgo/internal/sasl
 github.com/globalsign/mgo/internal/scram
-github.com/globalsign/mgo/internal/json
 # github.com/go-ini/ini v1.25.4
 github.com/go-ini/ini
 # github.com/go-playground/locales v0.12.1
@@ -80,6 +80,8 @@ github.com/go-playground/locales
 github.com/go-playground/locales/currency
 # github.com/go-playground/universal-translator v0.16.0
 github.com/go-playground/universal-translator
+# github.com/go-stack/stack v1.8.0
+github.com/go-stack/stack
 # github.com/gobuffalo/envy v1.6.7
 github.com/gobuffalo/envy
 # github.com/gobuffalo/httptest v1.0.4
@@ -94,6 +96,8 @@ github.com/golang/protobuf/ptypes/duration
 github.com/golang/protobuf/ptypes/any
 github.com/golang/protobuf/protoc-gen-go/descriptor
 github.com/golang/protobuf/ptypes
+# github.com/golang/snappy v0.0.1
+github.com/golang/snappy
 # github.com/google/go-cmp v0.2.0
 github.com/google/go-cmp/cmp
 github.com/google/go-cmp/cmp/cmpopts
@@ -169,6 +173,42 @@ github.com/stretchr/testify/assert
 github.com/tinylib/msgp/msgp
 # github.com/unrolled/secure v0.0.0-20181221173256-0d6b5bb13069
 github.com/unrolled/secure
+# github.com/xdg/scram v0.0.0-20180814205039-7eeb5667e42c
+github.com/xdg/scram
+# github.com/xdg/stringprep v1.0.0
+github.com/xdg/stringprep
+# go.mongodb.org/mongo-driver v1.0.0
+go.mongodb.org/mongo-driver/bson
+go.mongodb.org/mongo-driver/mongo
+go.mongodb.org/mongo-driver/mongo/gridfs
+go.mongodb.org/mongo-driver/mongo/options
+go.mongodb.org/mongo-driver/bson/bsoncodec
+go.mongodb.org/mongo-driver/bson/bsonrw
+go.mongodb.org/mongo-driver/bson/bsontype
+go.mongodb.org/mongo-driver/bson/primitive
+go.mongodb.org/mongo-driver/x/bsonx/bsoncore
+go.mongodb.org/mongo-driver/event
+go.mongodb.org/mongo-driver/mongo/readconcern
+go.mongodb.org/mongo-driver/mongo/readpref
+go.mongodb.org/mongo-driver/mongo/writeconcern
+go.mongodb.org/mongo-driver/x/bsonx
+go.mongodb.org/mongo-driver/x/mongo/driver
+go.mongodb.org/mongo-driver/x/mongo/driver/auth
+go.mongodb.org/mongo-driver/x/mongo/driver/session
+go.mongodb.org/mongo-driver/x/mongo/driver/topology
+go.mongodb.org/mongo-driver/x/mongo/driver/uuid
+go.mongodb.org/mongo-driver/x/network/command
+go.mongodb.org/mongo-driver/x/network/connection
+go.mongodb.org/mongo-driver/x/network/connstring
+go.mongodb.org/mongo-driver/x/network/description
+go.mongodb.org/mongo-driver/x/network/result
+go.mongodb.org/mongo-driver/tag
+go.mongodb.org/mongo-driver/x/network/wiremessage
+go.mongodb.org/mongo-driver/x/mongo/driver/auth/internal/gssapi
+go.mongodb.org/mongo-driver/x/network/address
+go.mongodb.org/mongo-driver/version
+go.mongodb.org/mongo-driver/x/network/compressor
+go.mongodb.org/mongo-driver/internal
 # go.opencensus.io v0.17.0
 go.opencensus.io/plugin/ochttp
 go.opencensus.io/exporter/jaeger
@@ -191,6 +231,7 @@ go.opencensus.io/plugin/ocgrpc
 golang.org/x/crypto/ssh/terminal
 golang.org/x/crypto/argon2
 golang.org/x/crypto/blake2b
+golang.org/x/crypto/pbkdf2
 # golang.org/x/net v0.0.0-20181029044818-c44066c5c816
 golang.org/x/net/context
 golang.org/x/net/http/httpguts
@@ -284,7 +325,7 @@ google.golang.org/grpc/stats
 google.golang.org/grpc/tap
 google.golang.org/grpc/credentials/oauth
 google.golang.org/grpc/balancer/base
-# gopkg.in/DataDog/dd-trace-go.v1 v1.3.0
+# gopkg.in/DataDog/dd-trace-go.v1 v1.10.0
 gopkg.in/DataDog/dd-trace-go.v1/ddtrace/ext
 # gopkg.in/go-playground/validator.v9 v9.20.2
 gopkg.in/go-playground/validator.v9
