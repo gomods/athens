@@ -10,7 +10,8 @@ import (
 )
 
 var (
-	pathSeparator = "/"
+	pathSeparator    = "/"
+	versionSeparator = "."
 )
 
 // Filter is a filter of modules
@@ -42,7 +43,7 @@ func NewFilter(filterFilePath string) (*Filter, error) {
 }
 
 // AddRule adds rule for specified path
-func (f *Filter) AddRule(path string, rule FilterRule) {
+func (f *Filter) AddRule(path string, qualifiers []string, rule FilterRule) {
 	f.ensurePath(path)
 
 	segments := getPathSegments(path)
@@ -62,13 +63,14 @@ func (f *Filter) AddRule(path string, rule FilterRule) {
 	last := segments[len(segments)-1]
 	rn := latest.next[last]
 	rn.rule = rule
+	rn.qualifiers = qualifiers
 	latest.next[last] = rn
 }
 
 // Rule returns the filter rule to be applied to the given path
-func (f *Filter) Rule(path string) FilterRule {
+func (f *Filter) Rule(path, version string) FilterRule {
 	segs := getPathSegments(path)
-	rule := f.getAssociatedRule(segs...)
+	rule := f.getAssociatedRule(version, segs...)
 	if rule == Default {
 		rule = Include
 	}
@@ -88,7 +90,7 @@ func (f *Filter) ensurePath(path string) {
 	}
 }
 
-func (f *Filter) getAssociatedRule(path ...string) FilterRule {
+func (f *Filter) getAssociatedRule(version string, path ...string) FilterRule {
 	if len(path) == 0 {
 		return f.root.rule
 	}
@@ -100,7 +102,17 @@ func (f *Filter) getAssociatedRule(path ...string) FilterRule {
 			break
 		}
 		rn = rn.next[p]
-		rules = append(rules, rn.rule)
+		// default to true if no version filter, false otherwise
+		match := len(rn.qualifiers) == 0
+		for _, q := range rn.qualifiers {
+			if matches(version, q) {
+				match = true
+				break
+			}
+		}
+		if match || version == "" {
+			rules = append(rules, rn.rule)
+		}
 	}
 
 	if len(rules) == 0 {
@@ -140,7 +152,7 @@ func initFromConfig(filePath string) (*Filter, error) {
 		}
 
 		split := strings.Split(line, " ")
-		if len(split) > 2 {
+		if len(split) > 3 {
 			return nil, errors.E(op, "Invalid configuration found in filter file at the line "+strconv.Itoa(idx+1))
 		}
 
@@ -158,23 +170,118 @@ func initFromConfig(filePath string) (*Filter, error) {
 		}
 		// is root config
 		if len(split) == 1 {
-			f.AddRule("", rule)
+			f.AddRule("", nil, rule)
 			continue
+		}
+		var qual []string
+		if len(split) == 3 {
+			qual = strings.Split(split[2], ",")
+			for i := range qual {
+				qual[i] = strings.TrimRight(qual[i], "*")
+				if qual[i][len(qual[i])-1] != '.' && strings.Count(qual[i], ".") < 2 {
+					qual[i] += "."
+				}
+			}
 		}
 
 		path := strings.TrimSpace(split[1])
-		f.AddRule(path, rule)
+		f.AddRule(path, qual, rule)
 	}
 	return f, nil
 }
 
+// matches checks if the given version matches the given qualifier.
+// Qualifiers can be:
+// - plain versions
+// - v1.2.3 enables v1.2.3
+// - ~1.2.3: enables 1.2.x  which are at least 1.2.3
+// - ^1.2.3: enables 1.x.x which are at least 1.2.3
+// - <1.2.3: enables everything lower than 1.2.3 includes 1.2.2 and 0.58.9 as well
+func matches(version, qualifier string) bool {
+	if len(qualifier) < 2 || len(version) < 1 {
+		return false
+	}
+
+	prefix := qualifier[0]
+	first := qualifier[1]
+
+	// v1.2.3 means we accept every version starting with v1.2.3
+	// handle this special case first, then go for ~v1.2.3 and similar
+	if prefix == 'v' && first >= '0' && first <= '9' { // a number
+		return strings.HasPrefix(version, qualifier)
+	}
+
+	v, err := getVersionSegments(version[1:])
+	if err != nil {
+		return false
+	}
+
+	q, err := getVersionSegments(qualifier[2:])
+	if err != nil {
+		return false
+	}
+
+	if len(v) != len(q) {
+		return false
+	}
+	// no semver
+	if len(v) != 3 || len(q) != 3 {
+		return false
+	}
+
+	switch prefix {
+	case '~':
+		if v[0] == q[0] && v[1] == q[1] && v[2] >= q[2] {
+			return true
+		}
+		return false
+	case '^':
+		if v[0] == q[0] && v[1] > q[1] {
+			return true
+		}
+		if v[0] == q[0] && v[1] == q[1] && v[2] >= q[2] {
+			return true
+		}
+		return false
+	case '<':
+		if v[0] < q[0] {
+			return true
+		}
+		if v[0] == q[0] && v[1] < q[1] {
+			return true
+		}
+		if v[0] == q[0] && v[1] == q[1] && v[2] <= q[2] {
+			return true
+		}
+		return false
+	}
+	return false
+}
+
 func getPathSegments(path string) []string {
+	return getSegments(path, pathSeparator)
+}
+
+func getVersionSegments(path string) ([]int, error) {
+	vv := getSegments(path, versionSeparator)
+	res := make([]int, len(vv))
+	for i, v := range vv {
+		n, err := strconv.Atoi(v)
+		if err != nil {
+			return nil, err
+		}
+		res[i] = n
+	}
+	return res, nil
+}
+
+func getSegments(path, separator string) []string {
 	path = strings.TrimSpace(path)
-	path = strings.Trim(path, pathSeparator)
+	path = strings.Trim(path, separator)
 	if path == "" {
 		return []string{}
 	}
-	return strings.Split(path, pathSeparator)
+	return strings.Split(path, separator)
 }
 
 func newRule(r FilterRule) ruleNode {

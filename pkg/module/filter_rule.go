@@ -1,6 +1,7 @@
 package module
 
 type ruleNode struct {
-	next map[string]ruleNode
-	rule FilterRule
+	next       map[string]ruleNode
+	rule       FilterRule
+	qualifiers []string
 }

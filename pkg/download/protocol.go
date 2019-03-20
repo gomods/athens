@@ -3,11 +3,12 @@ package download
 import (
 	"context"
 	"io"
+	"regexp"
+	"strings"
 	"sync"
 
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/observ"
-	"github.com/gomods/athens/pkg/paths"
 	"github.com/gomods/athens/pkg/stash"
 	"github.com/gomods/athens/pkg/storage"
 )
@@ -29,9 +30,6 @@ type Protocol interface {
 
 	// Zip implements GET /{module}/@v/{version}.zip
 	Zip(ctx context.Context, mod, ver string) (io.ReadCloser, error)
-
-	// Catalog implements GET /catalog
-	Catalog(ctx context.Context, token string, pageSize int) ([]paths.AllPathParams, string, error)
 }
 
 // Wrapper helps extend the main protocol's functionality with addons.
@@ -105,7 +103,35 @@ func (p *protocol) List(ctx context.Context, mod string) ([]string, error) {
 		return nil, errors.E(op, errors.M(mod), errors.KindNotFound, goErr)
 	}
 
-	return union(goList, strList), nil
+	strListSemVers := removePseudoVersions(strList)
+	// if the repo does not exist but athens already saved some versions
+	// return those so that running go get github.com/my/mod gives us the newest saved version
+	// we should only do that if exclusively pseudo-versions have been saved
+	// otherwise @latest would not return the latest stable version but latest commit
+	if isRepoNotFoundErr && len(strListSemVers) == 0 {
+		return strList, nil
+	}
+	// if the repo exists we have to filter out pseudo versions to prevent following scenario:
+	// user does go get github.com/my/mod
+	// there is no sem-ver and so the /list endpoint returns nothing, then /latests gets hit
+	// Athens saves the pseudo version x1
+	// from now on every time user runs go get github.com/my/mod she/he will get pseudo version x1 even if a newer version x2 exists
+	// this is because /list returns non-empty list of versions (x1) and so /latest wont get hit
+	return union(goList, strListSemVers), nil
+}
+
+var pseudoVersionRE = regexp.MustCompile(`^v[0-9]+\.(0\.0-|\d+\.\d+-([^+]*\.)?0\.)\d{14}-[A-Za-z0-9]+(\+incompatible)?$`)
+
+func removePseudoVersions(allVersions []string) []string {
+	var vers []string
+	for _, v := range allVersions {
+		// copied from go cmd https://github.com/golang/go/blob/master/src/cmd/go/internal/modfetch/pseudo.go#L93
+		isPseudoVersion := strings.Count(v, "-") >= 2 && pseudoVersionRE.MatchString(v)
+		if !isPseudoVersion {
+			vers = append(vers, v)
+		}
+	}
+	return vers
 }
 
 func (p *protocol) Latest(ctx context.Context, mod string) (*storage.RevInfo, error) {
@@ -125,12 +151,13 @@ func (p *protocol) Info(ctx context.Context, mod, ver string) ([]byte, error) {
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 	info, err := p.storage.Info(ctx, mod, ver)
+	var newVer string
 	if errors.IsNotFoundErr(err) {
-		err = p.stasher.Stash(ctx, mod, ver)
+		newVer, err = p.stasher.Stash(ctx, mod, ver)
 		if err != nil {
 			return nil, errors.E(op, err)
 		}
-		info, err = p.storage.Info(ctx, mod, ver)
+		info, err = p.storage.Info(ctx, mod, newVer)
 	}
 	if err != nil {
 		return nil, errors.E(op, err)
@@ -144,12 +171,13 @@ func (p *protocol) GoMod(ctx context.Context, mod, ver string) ([]byte, error) {
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 	goMod, err := p.storage.GoMod(ctx, mod, ver)
+	var newVer string
 	if errors.IsNotFoundErr(err) {
-		err = p.stasher.Stash(ctx, mod, ver)
+		newVer, err = p.stasher.Stash(ctx, mod, ver)
 		if err != nil {
 			return nil, errors.E(op, err)
 		}
-		goMod, err = p.storage.GoMod(ctx, mod, ver)
+		goMod, err = p.storage.GoMod(ctx, mod, newVer)
 	}
 	if err != nil {
 		return nil, errors.E(op, err)
@@ -163,31 +191,19 @@ func (p *protocol) Zip(ctx context.Context, mod, ver string) (io.ReadCloser, err
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 	zip, err := p.storage.Zip(ctx, mod, ver)
+	var newVer string
 	if errors.IsNotFoundErr(err) {
-		err = p.stasher.Stash(ctx, mod, ver)
+		newVer, err = p.stasher.Stash(ctx, mod, ver)
 		if err != nil {
 			return nil, errors.E(op, err)
 		}
-		zip, err = p.storage.Zip(ctx, mod, ver)
+		zip, err = p.storage.Zip(ctx, mod, newVer)
 	}
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
 
 	return zip, nil
-}
-
-func (p *protocol) Catalog(ctx context.Context, token string, pageSize int) ([]paths.AllPathParams, string, error) {
-	const op errors.Op = "protocol.Catalog"
-	ctx, span := observ.StartSpan(ctx, op.String())
-	defer span.End()
-	modulesAndVersions, newToken, err := p.storage.Catalog(ctx, token, pageSize)
-
-	if err != nil {
-		return nil, "", errors.E(op, err)
-	}
-
-	return modulesAndVersions, newToken, err
 }
 
 // union concatenates two version lists and removes duplicates

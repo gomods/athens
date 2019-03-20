@@ -6,6 +6,7 @@
 
 # Test binary, build with `go test -c`
 *.test
+!Dockerfile.test
 
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
@@ -25,6 +26,7 @@ tmp
 cmd/proxy/bin
 .idea
 .DS_Store
+.vscode
 
 
 # prod config file
