@@ -16,7 +16,7 @@ import (
 
 // ModuleStore represents a mongo backed storage backend.
 type ModuleStore struct {
-	client   *mongo.NewClient
+	client   *mongo.Client
 	db       string // database
 	coll     string // collection
 	url      string
@@ -70,15 +70,15 @@ func (m *ModuleStore) initDatabase() *mongo.Collection {
 	keys["base_url"] = 1
 	keys["module"] = 1
 	keys["version"] = 1
-	indexOptions := mongo.options.Index().SetBackground(true).SetSparse(true).SetUnique(true)
+	indexOptions := options.Index().SetBackground(true).SetSparse(true).SetUnique(true)
 	indexView.CreateOne(context.Background(), keys, indexOptions, &CreateIndexesOptions{})
 
 	return c
 }
 
-func (m *ModuleStore) newClient() (*mongo.NewClient, error) {
+func (m *ModuleStore) newClient() (*mongo.Client, error) {
 	tlsConfig := &tls.Config{}
-	clientOptions := mongo.options.Client()
+	clientOptions := options.Client()
 	// Maybe check for error using Validate()?
 	clientOptions = clientOptions.ApplyURI(m.url)
 

@@ -7,45 +7,33 @@ import (
 	"github.com/gomods/athens/pkg/paths"
 	"github.com/gomods/athens/pkg/storage"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 // Catalog implements the (./pkg/storage).Cataloger interface
 // It returns a list of modules and versions contained in the storage
 func (s *ModuleStore) Catalog(ctx context.Context, token string, pageSize int) ([]paths.AllPathParams, string, error) {
 	const op errors.Op = "mongo.Catalog"
-	q := bson.M{}
+	q := bson.E{}
 	if token != "" {
-		q = bson.M{"_id": bson.M{"$gt": bson.ObjectIdHex(token)}}
+		q = bson.E{Key: "_id", Value: bson.M{"$gt": token}}
 	}
 
-	fields := bson.M{"module": 1, "version": 1}
-
-	compositeQ := bson.D{q, fields}
+	projection := bson.M{"module": 1, "version": 1}
 
 	c := s.client.Database(s.db).Collection(s.coll)
 
 	modules := make([]storage.Module, 0)
-	cursor, err := c.Find(compositeQ)
-	// * Currently the driver doesn't have any of the below provisions so maybe adding the
-	// field projection along with the query will work
-	//
-	// Select(fields).
-	// Sort("_id").
-	// Limit(pageSize).
-	// All(&modules)
-	// *
+	cursor, err := c.Find(context.Background(), q, &options.FindOptions{Projection: projection})
 
 	if err != nil {
 		return nil, "", errors.E(op, err)
 	}
-	for cursor.Next() {
+	for cursor.Next(context.Background()) {
 		var module storage.Module
-		bytes, err := cursor.DecodeBytes()
-		if err == nil {
-			err = bson.Unmarshal(bytes, &module)
-			if err == nil {
-				modules = append(modules, module)
-			}
+		elem := &bson.D{}
+		if err := cursor.Decode(module); err == nil {
+			modules = append(modules, module)
 		}
 	}
 
