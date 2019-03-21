@@ -14,7 +14,7 @@ func (s *ModuleStore) Exists(ctx context.Context, module, vsn string) (bool, err
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 
-	req, _ := http.NewRequest(http.MethodHead, s.moduleRoot(module)+vsn+".mod", nil)
+	req, _ := http.NewRequest(http.MethodHead, s.moduleFile(module, vsn, "mod"), nil)
 	req.SetBasicAuth(s.username, s.password)
 	resp, err := s.client.Do(req)
 	if err != nil {

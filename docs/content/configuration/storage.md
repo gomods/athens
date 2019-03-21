@@ -50,9 +50,11 @@ where `/path/on/disk` is your desired location. Also it can be set using `ATHENS
 
 ## HTTP
 
-This driver stores files to an HTTP server via standard GET and PUT requests. The files are laid out in a manner identical to the proxy URL used to access them, and the requests are optionally (but hopefully!) authenticated using Basic Auth.
+This driver stores files to an HTTP server via bare GET and PUT requests. The files are laid out in a manner identical to the proxy URL used to access them, and the requests are optionally (but hopefully!) authenticated using Basic Auth.
 
-The HTTP storage driver can be used to integrate with systems like Artifactory that offer blob storage over HTTP.
+While other drivers (S3, GCP, etc.) also communicate with external storage systems over HTTP, this driver intentionally uses an extremely simple and vendor-neutral API. Because it is based on the universal HTTP methods, it can be used to easily integrate with systems like Artifactory that offer blob storage via a generic HTTP-method-based interface.
+
+The simple API also provides an extensible way to use Athens with arbitrary new storage engines by implementing a small translation layer to be deployed alongside Athens. Any HTTP server that supports GET, PUT, and DELETE calls for arbitrary URLs (and responds to GET requests of a directory by providing a directory listing) can be used with this storage driver.
 
 ##### Configuration:
 

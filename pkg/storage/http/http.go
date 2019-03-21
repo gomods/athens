@@ -63,6 +63,12 @@ func (s *ModuleStore) moduleRoot(module string) string {
 	return s.url + "/" + module + "/@v/"
 }
 
+// moduleFile determines the URL for a file with a given extension, within a
+// given version, of a given module.
+func (s *ModuleStore) moduleFile(module, version, ext string) string {
+	return s.moduleRoot(module) + version + "." + ext
+}
+
 func (s *ModuleStore) doRequest(ctx context.Context, req *http.Request, expectedStatus int) (io.ReadCloser, error) {
 	const op errors.Op = "http.doRequest"
 	ctx, span := observ.StartSpan(ctx, op.String())

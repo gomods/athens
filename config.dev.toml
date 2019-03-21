@@ -299,7 +299,8 @@ SingleFlightType = "memory"
         ContainerName = "MY_AZURE_BLOB_CONTAINER_NAME"
 
     [Storage.HTTP]
-        # The root URL into which modules will be uploaded
+        # Root URL in which modules will be kept. All files uploaded and
+        # downloaded by Athens will use URLs beginning with this prefix.
         # Env override: ATHENS_HTTP_BASE_URL
         BaseURL = "http://my.server.io/repository/athens-modules"
 
