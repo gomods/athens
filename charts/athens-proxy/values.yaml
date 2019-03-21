@@ -2,12 +2,16 @@ replicaCount: 1
 image:
   registry: docker.io
   repository: gomods/athens
-  tag: v0.3.0
+  # Note that by default we use appVersion to get image tag
+  # You can set another tag by replacing "{{ .Chart.AppVersion }}" with the tag e.g. tag: v0.3.1
+  # or with --set image.tag="v0.3.1"
+  tag: "{{ .Chart.AppVersion }}"
+
   ## Specify a imagePullPolicy
   ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
   ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
   ##
-  pullPolicy: Always
+  pullPolicy: IfNotPresent
 
 service:
   ## Port as exposed by the service
@@ -47,6 +51,12 @@ storage:
 netrc:
   # if enabled, it expects to find the content of a valid .netrc file imported as a secret named netrcsecret
   enabled: false
+  existingSecret: netrcsecret
+
+goCenter:
+  # Set https://gocenter.io as upstream proxy
+  enabled: true
+  url: "https://gocenter.io"
 
 jaeger:
   ## Type of service; valid values are "ClusterIP", "LoadBalancer", and "NodePort".
@@ -58,3 +68,9 @@ jaeger:
   # you must set this on the command line when you run 'helm install'
   # for example, you need to run 'helm install --set jaeger.url=myurl ...'
   url: "SET THIS ON THE COMMAND LINE"
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
