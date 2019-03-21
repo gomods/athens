@@ -47,10 +47,7 @@ func (s *ModuleStore) List(ctx context.Context, module string) ([]string, error)
 	// very closely to what we expect here. I'm not settled on this but it does
 	// work surprisingly well.
 	mods, err := collectLinks(resp.Body, func(ref string) bool {
-		bu, _ := url.Parse(baseURL)
-		bu.Path = path.Join(bu.Path, ref)
-		absolute := bu.String()
-		return strings.HasPrefix(absolute, baseURL) && strings.HasSuffix(absolute, ".mod")
+		return strings.HasPrefix(absolute(baseURL, ref), baseURL) && strings.HasSuffix(ref, ".mod")
 	})
 
 	// convert mod file references to versions
@@ -60,6 +57,22 @@ func (s *ModuleStore) List(ctx context.Context, module string) ([]string, error)
 	}
 
 	return versions, nil
+}
+
+// absolute turns href into an absolute url, using the given base if href turns out to be relative.
+func absolute(base, href string) string {
+
+	// if it's already absolute, return it
+	hrefURL, _ := url.Parse(href)
+	if hrefURL.IsAbs() {
+		return href
+	}
+
+	// if not, resolve relative to the url we fetched
+	bu, _ := url.Parse(base)
+	bu.Path = path.Join(bu.Path, href)
+	return bu.String()
+
 }
 
 // collectLinks traverses the contents of r, which is assumed to be HTML, and gathers
@@ -74,7 +87,7 @@ func collectLinks(r io.Reader, filter func(string) bool) ([]string, error) {
 		tt := t.Next()
 		switch tt {
 		case html.ErrorToken:
-			return links, err
+			return links, t.Err()
 
 		case html.StartTagToken:
 			tn, _ := t.TagName()

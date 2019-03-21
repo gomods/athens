@@ -49,6 +49,22 @@ const (
 </pre>
 <hr/><address style="font-size:small;">Artifactory/6.6.0 Server at artifactory.server.io Port 8081</address></body></html>
 `
+
+	// externalLinkIndexPage is a contrived module index page containing a link to a ".mod" file on another domain.
+	externalLinkIndexPage = `<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 3.2 Final//EN"><html>
+<title>Directory listing for /golang.org/x/net/@v/</title>
+<body>
+<h2>Directory listing for /golang.org/x/net/@v/</h2>
+<hr>
+<ul>
+<li><a href="list">list</a>
+<li><a href="v0.0.0-20180724234803-3673e40ba225.mod">v0.0.0-20180724234803-3673e40ba225.mod</a>
+<li><a href="https://raw.githubusercontent.com/gomods/athens/master/go.mod">go.mod</a>
+</ul>
+<hr>
+</body>
+</html>
+`
 )
 
 func TestCollectLinks(t *testing.T) {
@@ -94,6 +110,16 @@ func TestCollectLinks(t *testing.T) {
 				"v0.0.0-20180724234803-3673e40ba225.mod",
 				"v0.0.0-20180906233101-161cd47e91fd.mod",
 				"v0.0.0-20181029044818-c44066c5c816.mod",
+			},
+		},
+		{
+			Reader: strings.NewReader(externalLinkIndexPage),
+			Filter: func(s string) bool {
+				baseURL := "http://artifactory.server.io/athens-modules"
+				return strings.HasPrefix(absolute(baseURL, s), baseURL) && strings.HasSuffix(s, ".mod")
+			},
+			Expected: []string{
+				"v0.0.0-20180724234803-3673e40ba225.mod",
 			},
 		},
 	}
