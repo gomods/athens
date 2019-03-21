@@ -82,13 +82,10 @@ func collectLinks(r io.Reader, filter func(string) bool) ([]string, error) {
 	t := html.NewTokenizer(r)
 
 	var links []string
+	var tt html.TokenType
 
-	for {
-		tt := t.Next()
+	for tt = t.Next(); tt != html.ErrorToken; tt = t.Next() {
 		switch tt {
-		case html.ErrorToken:
-			return links, t.Err()
-
 		case html.StartTagToken:
 			tn, _ := t.TagName()
 			if !bytes.Equal(tn, []byte{'a'}) {
@@ -105,7 +102,7 @@ func collectLinks(r io.Reader, filter func(string) bool) ([]string, error) {
 		}
 	}
 
-	return links, nil
+	return links, t.Err()
 }
 
 // getAttrs gathers the attributes of the current token.
