@@ -3,8 +3,8 @@
 {{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 {{- define "livenessPath" -}}
-{{- if eq .Values.image.tag "v0.3.0" -}}/{{- else -}}/healthz{{- end -}}
+{{- if contains "v0.2" .Values.image.tag -}}/healthz{{- else -}}/{{- end -}}
 {{- end -}}
 {{- define "readinessPath" -}}
-{{- if eq .Values.image.tag "v0.3.0" -}}/{{- else -}}/readyz{{- end -}}
+{{- if contains "v0.2" .Values.image.tag -}}/readyz{{- else -}}/{{- end -}}
 {{- end -}}

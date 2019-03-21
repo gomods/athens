@@ -2,10 +2,7 @@ replicaCount: 1
 image:
   registry: docker.io
   repository: gomods/athens
-  # Note that by default we use appVersion to get image tag
-  # You can set another tag by replacing "{{ .Chart.AppVersion }}" with the tag e.g. tag: v0.3.1
-  # or with --set image.tag="v0.3.1"
-  tag: "{{ .Chart.AppVersion }}"
+  tag: "v0.3.1"
 
   ## Specify a imagePullPolicy
   ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
