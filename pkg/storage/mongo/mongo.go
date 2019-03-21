@@ -34,14 +34,15 @@ func NewStorage(conf *config.MongoConfig, timeout time.Duration, insecure bool) 
 		return nil, errors.E(op, "No Mongo Configuration provided")
 	}
 	ms := &ModuleStore{url: conf.URL, certPath: conf.CertPath, timeout: timeout, insecure: insecure}
-	client, err := ms.newClient()
+	client, err := ms.newClient(conf)
 	ms.client = client
 
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
 
-	_, err = ms.connect()
+	_, err = ms.connect(conf)
+
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
@@ -49,11 +50,12 @@ func NewStorage(conf *config.MongoConfig, timeout time.Duration, insecure bool) 
 	return ms, nil
 }
 
-func (m *ModuleStore) connect() (*mongo.Collection, error) {
+func (m *ModuleStore) connect(conf *config.MongoConfig) (*mongo.Collection, error) {
 	const op errors.Op = "mongo.connect"
 
 	var err error
 	err = m.client.Connect(context.Background())
+
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
@@ -78,7 +80,7 @@ func (m *ModuleStore) initDatabase() *mongo.Collection {
 	return c
 }
 
-func (m *ModuleStore) newClient() (*mongo.Client, error) {
+func (m *ModuleStore) newClient(conf *config.MongoConfig) (*mongo.Client, error) {
 	tlsConfig := &tls.Config{}
 	clientOptions := options.Client()
 	// Maybe check for error using Validate()?

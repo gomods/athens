@@ -17,12 +17,13 @@ import (
 // RunTests takes a backend implementation and runs compliance tests
 // against the interface.
 func RunTests(t *testing.T, b storage.Backend, clearBackend func() error) {
-	require.NoError(t, clearBackend(), "clearing backend failed")
-	defer require.NoError(t, clearBackend(), "clearning backend failed")
+	require.NoError(t, clearBackend(), "pre-clearing backend failed")
+	defer require.NoError(t, clearBackend(), "post-clearning backend failed")
 	testNotFound(t, b)
 	testList(t, b)
 	testDelete(t, b)
 	testGet(t, b)
+	testExists(t, b)
 	testCatalog(t, b)
 }
 
@@ -106,6 +107,20 @@ func testGet(t *testing.T, b storage.Backend) {
 	givenZipBts, err := ioutil.ReadAll(zip)
 	require.NoError(t, err)
 	require.Equal(t, zipBts, givenZipBts)
+}
+
+func testExists(t *testing.T, b storage.Backend) {
+	ctx := context.Background()
+	modname := "getTestModule"
+	ver := "v1.2.3"
+	mock := getMockModule()
+	zipBts, _ := ioutil.ReadAll(mock.Zip)
+	b.Save(ctx, modname, ver, mock.Mod, bytes.NewReader(zipBts), mock.Info)
+	defer b.Delete(ctx, modname, ver)
+
+	exists, err := b.Exists(ctx, modname, ver)
+	require.NoError(t, err)
+	require.Equal(t, true, exists)
 }
 
 // testDelete tests that a module can be deleted from a

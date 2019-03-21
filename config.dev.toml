@@ -42,6 +42,11 @@ CloudRuntime = "none"
 
 # The filename for the include exclude filter.
 # Env override: ATHENS_FILTER_FILE
+#
+# To point Athens to an upstream proxy to fetch modules,
+# set GlobalEndpoint to "https://<url_to_upstream>"
+# and also ensure that FilterFile is  set to a fully qualified file name 
+# that contains the letter `D` (for "Direct Access") in the first line.
 FilterFile = ""
 
 # Timeout is the timeout for external network calls in seconds
@@ -70,7 +75,21 @@ Port = ":3000"
 # The endpoint for a package registry in case of a proxy cache miss
 # NOTE: Currently no registries have been implemented
 # Env override: ATHENS_GLOBAL_ENDPOINT
+#
+# To point Athens to an upstream proxy to fetch modules,
+# set GlobalEndpoint to "https://<url_to_upstream>"
+# and also ensure that FilterFile is  set to a fully qualified file name 
+# that contains the letter `D` (for "Direct Access") in the first line.
 GlobalEndpoint = "http://localhost:3001"
+
+# BASIC AUTH OPTIONS 
+# ==================
+# PLASE NOTE THAT THIS IS A BAD HACK AROUND 
+# THE FACT THAT GO DOES NOT SUPPORT PROPER AUTHENTICATION 
+# YET! YOUR BASIC AUTH CREDENTIALS CAN EASILY LEAK 
+# IN ATHENS LOGS AS WELL AS GO COMMAND LOGS.
+# THIS WILL BE ADDRESSED IN 1.13.
+# SEE https://github.com/golang/go/issues/30610
 
 # Username for basic auth
 # Env override: BASIC_AUTH_USER
@@ -126,7 +145,7 @@ HGRCPath = ""
 # Athens will keep on running and traces won't be exported.
 # TraceExporter is the service to which the data collected by OpenCensus can be exported to.
 # Possible values are: jaeger, datadog, and stackdriver.
-# Env overide: ATHENS_TRACE_EXPORTER
+# Env override: ATHENS_TRACE_EXPORTER
 TraceExporter = ""
 
 # TraceExporterURL is the URL to which Athens populates distributed tracing
@@ -137,8 +156,38 @@ TraceExporterURL = "http://localhost:14268"
 # Stats is not a requirement for Athens. If the value is not set,
 # Athens will keep on running and stats won't be collected.
 # Possible values are: prometheus.
-# Env overide: ATHENS_STATS_EXPORTER
+# Env override: ATHENS_STATS_EXPORTER
 StatsExporter = "prometheus"
+
+# SingleFlightType determines what mechanism Athens uses 
+# to manage concurrency flowing into the Athens Backend. 
+# This is important for the following scenario: if two concurrent requests 
+# were made to Athens that wanted to store the same module at the same time, 
+# we want to make sure only the first request gets to store the module, 
+# and the second request will wait for the first one to finish so that 
+# it doesn't override the storage. 
+# Options are ["memory", "etcd", "redis", "gcp"]
+# The default option is "memory" which means that only one instance of Athens 
+# should be used.
+# The "gcp" single flight will assume that you have a "gcp" StorageType 
+# and therefore it will use its strong-consistency features to ensure 
+# that only one module is ever written even when concurrent saves happen 
+# at the same time.
+# Env override: ATHENS_SINGLE_FLIGHT_TYPE
+SingleFlightType = "memory"
+
+[SingleFlight]
+    [SingleFlight.Etcd]
+        # Endpoints are comma separated URLs that determine all distributed etcd servers.
+        # It defaults to what we have in our docker-compose file. It is by default ignored 
+        # as the SingleFlightType field above determines whether Etcd is used or not.
+        # Env override: ATHENS_ETCD_ENDPOINTS
+        Endpoints = "localhost:2379,localhost:22379,localhost:32379"
+    [SingleFlight.Redis]
+        # Endpoint is the redis endpoint for a SingleFlight lock.
+        # TODO(marwan): enable multiple endpoints for redis clusters.
+        # Env override: ATHENS_REDIS_ENDPOINT
+        Endpoint = "127.0.0.1:6379"
 
 [Storage]
     # Only storage backends that are specified in Proxy.StorageType are required here
@@ -154,12 +203,21 @@ StatsExporter = "prometheus"
 
     [Storage.GCP]
         # ProjectID to use for GCP Storage
-        # Env overide: GOOGLE_CLOUD_PROJECT
+        # Env override: GOOGLE_CLOUD_PROJECT
         ProjectID = "MY_GCP_PROJECT_ID"
 
         # Bucket to use for GCP Storage
         # Env override: ATHENS_STORAGE_GCP_BUCKET
         Bucket = "MY_GCP_BUCKET"
+
+        # JSONKey is a base64 encoded service account 
+        # key that allows Athens to be run outside of GCP
+        # but still be able to access GCS. If you are 
+        # running Athens inside GCP, you will most
+        # likely not need this as GCP figures out 
+        # internal authentication between products for you. 
+        # Env override: ATHENS_STORAGE_GCP_JSON_KEY
+        JSONKey = ""
 
     [Storage.Minio]
         # Endpoint for Minio storage
@@ -189,9 +247,13 @@ StatsExporter = "prometheus"
         Region = ""
 
     [Storage.Mongo]
-        # Full URL for mongo storage
+        # Full connection string for mongo storage
         # Env override: ATHENS_MONGO_STORAGE_URL
         URL = "mongodb://127.0.0.1:27017"
+
+        # Sets default database name for mongo storage if not set by URL
+        # Env override: ATHENS_MONGO_DEFAULT_DATABASE
+        DefaultDBName = "athens"
 
         # Path to certificate to use for the mongo connection
         # Env override: ATHENS_MONGO_CERT_PATH

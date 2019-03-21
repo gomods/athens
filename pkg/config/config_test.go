@@ -21,7 +21,7 @@ func testConfigFile(t *testing.T) (testConfigFile string) {
 }
 
 func compareConfigs(parsedConf *Config, expConf *Config, t *testing.T) {
-	opts := cmpopts.IgnoreTypes(StorageConfig{})
+	opts := cmpopts.IgnoreTypes(StorageConfig{}, SingleFlight{})
 	eq := cmp.Equal(parsedConf, expConf, opts)
 	if !eq {
 		t.Errorf("Parsed Example configuration did not match expected values. Expected: %+v. Actual: %+v", expConf, parsedConf)
@@ -64,6 +64,7 @@ func TestPortDefaultsCorrectly(t *testing.T) {
 }
 
 func TestEnvOverrides(t *testing.T) {
+	os.Clearenv()
 	expConf := &Config{
 		GoEnv:           "production",
 		GoGetWorkers:    10,
@@ -85,13 +86,11 @@ func TestEnvOverrides(t *testing.T) {
 		NETRCPath:      "/test/path/.netrc",
 		HGRCPath:       "/test/path/.hgrc",
 		Storage:        &StorageConfig{},
+		SingleFlight:   &SingleFlight{},
 	}
 
 	envVars := getEnvMap(expConf)
-	envVarBackup := map[string]string{}
 	for k, v := range envVars {
-		oldVal := os.Getenv(k)
-		envVarBackup[k] = oldVal
 		os.Setenv(k, v)
 	}
 	conf := &Config{}
@@ -100,7 +99,19 @@ func TestEnvOverrides(t *testing.T) {
 		t.Fatalf("Env override failed: %v", err)
 	}
 	compareConfigs(conf, expConf, t)
-	restoreEnv(envVarBackup)
+}
+
+func TestEnvOverridesPreservingPort(t *testing.T) {
+	os.Clearenv()
+	const expPort = ":5000"
+	conf := &Config{Port: expPort}
+	err := envOverride(conf)
+	if err != nil {
+		t.Fatalf("Env override failed: %v", err)
+	}
+	if conf.Port != expPort {
+		t.Errorf("Port was incorrect. Got: %s, want: %s", conf.Port, expPort)
+	}
 }
 
 func TestStorageEnvOverrides(t *testing.T) {
@@ -121,8 +132,9 @@ func TestStorageEnvOverrides(t *testing.T) {
 			Region:    "us-west-1",
 		},
 		Mongo: &MongoConfig{
-			URL:      "mongoURL",
-			CertPath: "/test/path",
+			URL:           "mongoURL",
+			CertPath:      "/test/path",
+			DefaultDBName: "athens",
 		},
 		S3: &S3Config{
 			Region: "s3Region",
@@ -163,6 +175,7 @@ func TestParseExampleConfig(t *testing.T) {
 			Mongo: &MongoConfig{},
 			S3:    &S3Config{},
 		},
+		SingleFlight: &SingleFlight{},
 	}
 	// unset all environment variables
 	envVars := getEnvMap(emptyConf)
@@ -221,6 +234,8 @@ func TestParseExampleConfig(t *testing.T) {
 		TraceExporterURL: "http://localhost:14268",
 		TraceExporter:    "",
 		StatsExporter:    "prometheus",
+		SingleFlightType: "memory",
+		SingleFlight:     &SingleFlight{},
 	}
 
 	absPath, err := filepath.Abs(testConfigFile(t))
@@ -385,5 +400,25 @@ func Test_checkFilePerms(t *testing.T) {
 				t.Errorf("checkFilePerms() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
+	}
+}
+
+func TestDefaultConfigMatchesConfigFile(t *testing.T) {
+	absPath, err := filepath.Abs(testConfigFile(t))
+	if err != nil {
+		t.Errorf("Unable to construct absolute path to example config file")
+	}
+	parsedConf, err := ParseConfigFile(absPath)
+	if err != nil {
+		t.Errorf("Unable to parse example config file: %+v", err)
+	}
+
+	defConf := createDefault()
+
+	ignoreStorageOpts := cmpopts.IgnoreTypes(&StorageConfig{})
+	ignoreGoEnvOpts := cmpopts.IgnoreFields(Config{}, "GoEnv")
+	eq := cmp.Equal(defConf, parsedConf, ignoreStorageOpts, ignoreGoEnvOpts)
+	if !eq {
+		t.Errorf("Default values from the config file: %v should equal to the default values returned in case the config file isn't provided %v", parsedConf, defConf)
 	}
 }
