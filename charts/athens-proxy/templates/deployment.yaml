@@ -23,6 +23,23 @@ spec:
       annotations:
         checksum/config: {{ include (print $.Template.BasePath "/config-gocenter.yaml") . | sha256sum }}
     spec:
+      {{- if .Values.sshGitServers }}
+      initContainers:
+        - name: copy-key-files
+          image: alpine:3.6
+          command:
+            - sh
+            - -c
+          args: ["cp /root/.ssh/id_rsa* /ssh-keys && chmod 400 /ssh-keys/*"]
+          volumeMounts:
+          - name: ssh-keys
+            mountPath: /ssh-keys
+          {{- range $server := .Values.sshGitServers }}
+          - name: ssh-git-servers-secret
+            mountPath: /root/.ssh/id_rsa-{{ $server.host }}
+            subPath: id_rsa-{{ $server.host }}
+          {{- end }}
+      {{- end }}
       containers:
       - name: {{ template "fullname" . }}
         image: "{{ .Values.image.registry }}/{{ .Values.image.repository }}:{{ tpl .Values.image.tag . }}"
@@ -78,6 +95,16 @@ spec:
           mountPath: "/etc/netrc"
           readOnly: true
         {{- end }}
+        {{- if .Values.sshGitServers }}
+        - name: ssh-git-servers-config
+          mountPath: /root/.ssh/config
+          subPath: ssh_config
+        - name: ssh-git-servers-config
+          mountPath: /root/.gitconfig
+          subPath: git_config
+        - name: ssh-keys
+          mountPath: /ssh-keys
+        {{- end }}
       volumes:
       - name: storage-volume
       {{- if .Values.storage.disk.persistence.enabled }}
@@ -95,6 +122,16 @@ spec:
       - name: netrc
         secret:
           secretName: {{ .Values.netrc.existingSecret }}
+      {{- end }}
+      {{- if .Values.sshGitServers }}
+      - name: ssh-keys
+        emptyDir: {}
+      - name: ssh-git-servers-config
+        configMap:
+          name: {{ template "fullname" . }}-ssh-git-servers
+      - name: ssh-git-servers-secret
+        secret:
+          secretName: {{ template "fullname" . }}-ssh-git-servers
       {{- end }}
     {{- with .Values.nodeSelector }}
       nodeSelector:
