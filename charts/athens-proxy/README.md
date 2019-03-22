@@ -124,7 +124,7 @@ helm install ./charts/proxy -n athens --set netrc.enabled=true
 ```yaml
 goCenter:
   # Set https://gocenter.io as upstream proxy
-  enabled: enable
+  enabled: true
   url: "https://gocenter.io"
 ```
 
