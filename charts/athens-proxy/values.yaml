@@ -52,7 +52,7 @@ netrc:
 
 goCenter:
   # Set https://gocenter.io as upstream proxy
-  enabled: true
+  enabled: false
   url: "https://gocenter.io"
 
 jaeger:
