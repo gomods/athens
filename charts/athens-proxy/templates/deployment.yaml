@@ -48,7 +48,7 @@ spec:
         imagePullPolicy: {{ .Values.image.pullPolicy | quote }}
         livenessProbe:
           httpGet:
-            path: "{{ template "livenessPath" . }}"
+            path: "/healthz"
             port: 3000
         readinessProbe:
           httpGet:
