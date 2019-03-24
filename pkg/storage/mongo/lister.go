@@ -3,12 +3,12 @@ package mongo
 import (
 	"context"
 
-	"github.com/globalsign/mgo"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/observ"
 	"github.com/gomods/athens/pkg/storage"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/mongo"
 	"github.com/hashicorp/go-multierror"
 )
 
@@ -25,18 +25,18 @@ func (s *ModuleStore) List(ctx context.Context, module string) ([]string, error)
 
 	cursor, err := c.Find(tctx, query, &options.FindOptions{Projection: projection})
 	if err != nil {
-		kind := errors.KindUnexpected
-		if err == mgo.ErrNotFound {
-			kind = errors.KindNotFound
-		}
-		return nil, errors.E(op, kind, errors.M(module), err)
+		return nil, errors.E(op, err, errors.M(module))
 	}
 	result := make([]storage.Module, 0)
 	var errs error;
 	for cursor.Next(ctx) {
 		var module storage.Module
 		if err := cursor.Decode(module); err != nil {
-			errs = multierror.Append(errs, err)
+			kind := errors.KindUnexpected
+			if err == mongo.ErrNoDocuments {
+				kind = errors.KindNotFound
+			}
+			errs = multierror.Append(errs, errors.E(op, kind))
 		} else {
 			result = append(result, module)
 		}

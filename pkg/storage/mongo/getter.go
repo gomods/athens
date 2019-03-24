@@ -61,7 +61,6 @@ func (s *ModuleStore) Zip(ctx context.Context, module, vsn string) (io.ReadClose
 		return nil, errors.E(op, err, errors.M(module), errors.V(vsn))
 	}
 
-	//ErrFileNotFound
 	dStream, err := bucket.OpenDownloadStreamByName(zipName, options.GridFSName())
 	if err != nil {
 		kind := errors.KindUnexpected
