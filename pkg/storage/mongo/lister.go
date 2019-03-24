@@ -9,6 +9,7 @@ import (
 	"github.com/gomods/athens/pkg/storage"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"github.com/hashicorp/go-multierror"
 )
 
 // List lists all versions of a module
@@ -28,10 +29,12 @@ func (s *ModuleStore) List(ctx context.Context, module string) ([]string, error)
 		return nil, errors.E(op, kind, errors.M(module), err)
 	}
 	result := make([]storage.Module, 0)
+	var errs error;
 	for cursor.Next(context.Background()) {
 		var module storage.Module
-		err := cursor.Decode(&module)
-		if err == nil {
+		if err := cursor.Decode(module); err != nil {
+			errs = multierror.Append(errs, err)
+		} else {
 			result = append(result, module)
 		}
 	}

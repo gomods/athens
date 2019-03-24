@@ -8,6 +8,7 @@ import (
 	"github.com/gomods/athens/pkg/storage"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"github.com/hashicorp/go-multierror"
 )
 
 // Catalog implements the (./pkg/storage).Cataloger interface
@@ -29,10 +30,14 @@ func (s *ModuleStore) Catalog(ctx context.Context, token string, pageSize int) (
 	if err != nil {
 		return nil, "", errors.E(op, err)
 	}
+
+	var errs error
 	for cursor.Next(context.Background()) {
 		var module storage.Module
 		elem := &bson.D{}
-		if err := cursor.Decode(module); err == nil {
+		if err := cursor.Decode(module); err != nil {
+			errs = multierror.Append(errs, err)
+		} else {
 			modules = append(modules, module)
 		}
 	}
