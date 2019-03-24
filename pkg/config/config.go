@@ -47,14 +47,31 @@ type Config struct {
 // Load loads the config from a file.
 // If file is not present returns default config
 func Load(configFile string) (*Config, error) {
-	if configFile == "" {
-		log.Print("config file not provided - using default settings")
-		return createDefault(), nil
+	// User explicitly specified a config file
+	if configFile != "" {
+		return ParseConfigFile(configFile)
 	}
-	return ParseConfigFile(configFile)
+
+	defaultConfigFile := ".athens.toml"
+	// There is a config in the current directory
+	if fi, err := os.Stat(defaultConfigFile); err == nil {
+		return ParseConfigFile(fi.Name())
+	}
+
+	// There is a config in the user home directory
+	if homeDir, err := os.UserHomeDir(); err == nil {
+		f := filepath.Join(homeDir, defaultConfigFile)
+		if fi, err := os.Stat(f); err == nil && !fi.IsDir() {
+			return ParseConfigFile(f)
+		}
+	}
+
+	// Use default values
+	log.Println("Running dev mode with default settings, consult config when you're ready to run in production")
+	return defaultConfig(), nil
 }
 
-func createDefault() *Config {
+func defaultConfig() *Config {
 	return &Config{
 		GoBinary:         "go",
 		GoEnv:            "development",

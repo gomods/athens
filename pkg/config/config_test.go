@@ -413,7 +413,7 @@ func TestDefaultConfigMatchesConfigFile(t *testing.T) {
 		t.Errorf("Unable to parse example config file: %+v", err)
 	}
 
-	defConf := createDefault()
+	defConf := defaultConfig()
 
 	ignoreStorageOpts := cmpopts.IgnoreTypes(&StorageConfig{})
 	ignoreGoEnvOpts := cmpopts.IgnoreFields(Config{}, "GoEnv")

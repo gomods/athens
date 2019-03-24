@@ -2,6 +2,9 @@
 # Most properties can be overridden with environment variables specified in this file
 # Most properties also have defaults (mentioned in this file) if they are not set in either the config file or the corresponding environment variable
 
+# If you put this file where you start Athens from (or in your home directory) as ".athens.toml", athens will use it when starting.
+# You can also start athens with -config_file as command line argument to point out a config file.
+
 # GoBinary returns the path to the go binary to use. This value can be a name of a binary in your PATH, or the full path
 # Defaults to "go"
 # Env override: GO_BINARY_PATH
