@@ -60,7 +60,7 @@ func (s *ModuleStore) Save(ctx context.Context, module, version string, mod []by
 	tctx, cancel := context.WithTimeout(ctx, s.timeout)
 	defer cancel()
 
-	result, err := c.InsertOne(tctx, m, options.InsertOne().SetBypassDocumentValidation(false))
+	_, err = c.InsertOne(tctx, m, options.InsertOne().SetBypassDocumentValidation(false))
 	if err != nil {
 		return errors.E(op, err, errors.M(module), errors.V(version))
 	}

@@ -36,7 +36,7 @@ func (s *ModuleStore) Delete(ctx context.Context, module, version string) error 
 
 	tctx, cancel := context.WithTimeout(ctx, s.timeout)
 	defer cancel()
-	result, err := c.DeleteOne(tctx, bson.M{"module": module, "version": version})
+	_, err = c.DeleteOne(tctx, bson.M{"module": module, "version": version})
 	if err != nil {
 		return errors.E(op, err, errors.M(module), errors.V(version))
 	}
