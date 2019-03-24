@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"net/http"
 	"net/url"
 	"time"
 
@@ -125,9 +126,10 @@ func (s *azureBlob) AcquireLease(ctx context.Context, blobURL azblob.BlockBlobUR
 	tctx, cancel := context.WithTimeout(ctx, 300*time.Second)
 	defer cancel()
 	for {
+		http.StatusConflict
 		_, err := blobURL.Upload(tctx, bytes.NewReader([]byte{1}), azblob.BlobHTTPHeaders{}, nil, azblob.BlobAccessConditions{})
 		if err != nil {
-			if stgErr, ok := err.(azblob.StorageError); ok && stgErr.Response().StatusCode == 412 {
+			if stgErr, ok := err.(azblob.StorageError); ok && stgErr.Response().StatusCode == http.StatusPreconditionFailed {
 				select {
 				case <-time.After(1 * time.Second):
 					continue
@@ -144,7 +146,7 @@ func (s *azureBlob) AcquireLease(ctx context.Context, blobURL azblob.BlockBlobUR
 		}
 		res, err := blobURL.AcquireLease(tctx, leaseID.String(), 15, azblob.ModifiedAccessConditions{})
 		if err != nil {
-			if stgErr, ok := err.(azblob.StorageError); ok && stgErr.Response().StatusCode == 409 {
+			if stgErr, ok := err.(azblob.StorageError); ok && stgErr.Response().StatusCode == http.StatusConflict {
 				select {
 				case <-time.After(1 * time.Second):
 					continue
