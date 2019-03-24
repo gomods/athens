@@ -3,7 +3,6 @@ package mongo
 import (
 	"context"
 	"io"
-	"io/ioutil"
 
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/observ"
@@ -72,5 +71,5 @@ func (s *ModuleStore) Zip(ctx context.Context, module, vsn string) (io.ReadClose
 		return nil, errors.E(op, err, kind, errors.M(module), errors.V(vsn))
 	}
 
-	return ioutil.NopCloser(dStream), nil
+	return dStream, nil
 }
