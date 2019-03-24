@@ -69,7 +69,7 @@ func (m *ModuleStore) initDatabase() *mongo.Collection {
 	m.coll = "modules"
 
 	c := m.client.Database(m.db).Collection(m.coll)
-	indexView := mongo.IndexView{coll: c}
+	indexView := c.Indexes()
 	keys := make(map[string]int)
 	keys["base_url"] = 1
 	keys["module"] = 1
