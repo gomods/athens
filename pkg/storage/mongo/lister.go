@@ -20,7 +20,10 @@ func (s *ModuleStore) List(ctx context.Context, module string) ([]string, error)
 	c := s.client.Database(s.db).Collection(s.coll)
 	projection := bson.M{"version": 1}
 	query := bson.E{Key: "module", Value: module}
-	cursor, err := c.Find(context.Background(), query, &options.FindOptions{Projection: projection})
+	tctx, cancel := context.WithTimeout(ctx, s.timeout)
+	defer cancel()
+
+	cursor, err := c.Find(tctx, query, &options.FindOptions{Projection: projection})
 	if err != nil {
 		kind := errors.KindUnexpected
 		if err == mgo.ErrNotFound {
@@ -30,7 +33,7 @@ func (s *ModuleStore) List(ctx context.Context, module string) ([]string, error)
 	}
 	result := make([]storage.Module, 0)
 	var errs error;
-	for cursor.Next(context.Background()) {
+	for cursor.Next(ctx) {
 		var module storage.Module
 		if err := cursor.Decode(module); err != nil {
 			errs = multierror.Append(errs, err)

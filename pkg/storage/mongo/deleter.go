@@ -33,7 +33,10 @@ func (s *ModuleStore) Delete(ctx context.Context, module, version string) error 
 	if err != nil {
 		return errors.E(op, err, errors.M(module), errors.V(version))
 	}
-	result, err := c.DeleteOne(context.Background(), bson.M{"module": module, "version": version})
+
+	tctx, cancel := context.WithTimeout(ctx, s.timeout)
+	defer cancel()
+	result, err := c.DeleteOne(tctx, bson.M{"module": module, "version": version})
 	if err != nil {
 		return errors.E(op, err, errors.M(module), errors.V(version))
 	}

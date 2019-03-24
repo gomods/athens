@@ -24,15 +24,17 @@ func (s *ModuleStore) Catalog(ctx context.Context, token string, pageSize int) (
 
 	c := s.client.Database(s.db).Collection(s.coll)
 
+	tctx, cancel := context.WithTimeout(ctx, s.timeout)
+	defer cancel()
 	modules := make([]storage.Module, 0)
-	cursor, err := c.Find(context.Background(), q, &options.FindOptions{Projection: projection})
+	cursor, err := c.Find(tctx, q, &options.FindOptions{Projection: projection})
 
 	if err != nil {
 		return nil, "", errors.E(op, err)
 	}
 
 	var errs error
-	for cursor.Next(context.Background()) {
+	for cursor.Next(ctx) {
 		var module storage.Module
 		elem := &bson.D{}
 		if err := cursor.Decode(module); err != nil {

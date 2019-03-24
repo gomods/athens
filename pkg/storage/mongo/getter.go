@@ -20,7 +20,10 @@ func (s *ModuleStore) Info(ctx context.Context, module, vsn string) ([]byte, err
 	defer span.End()
 	c := s.client.Database(s.db).Collection(s.coll)
 	result := &storage.Module{}
-	err := c.FindOne(context.Background(), bson.M{"module": module, "version": vsn}).Decode(result)
+	tctx, cancel := context.WithTimeout(ctx, s.timeout)
+	defer cancel()
+
+	err := c.FindOne(tctx, bson.M{"module": module, "version": vsn}).Decode(result)
 	if err != nil {
 		return nil, errors.E(op, err, errors.M(module), errors.V(vsn))
 	}
@@ -35,7 +38,10 @@ func (s *ModuleStore) GoMod(ctx context.Context, module, vsn string) ([]byte, er
 	defer span.End()
 	c := s.client.Database(s.db).Collection(s.coll)
 	result := &storage.Module{}
-	err := c.FindOne(context.Background(), bson.M{"module": module, "version": vsn}).Decode(result)
+	tctx, cancel := context.WithTimeout(ctx, s.timeout)
+	defer cancel()
+
+	err := c.FindOne(tctx, bson.M{"module": module, "version": vsn}).Decode(result)
 	if err != nil {
 		return nil, errors.E(op, err, errors.M(module), errors.V(vsn))
 	}
