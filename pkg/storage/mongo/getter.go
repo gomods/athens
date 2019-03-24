@@ -5,7 +5,6 @@ import (
 	"io"
 	"io/ioutil"
 
-	"github.com/globalsign/mgo"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/observ"
 	"github.com/gomods/athens/pkg/storage"
@@ -23,11 +22,7 @@ func (s *ModuleStore) Info(ctx context.Context, module, vsn string) ([]byte, err
 	result := &storage.Module{}
 	err := c.FindOne(context.Background(), bson.M{"module": module, "version": vsn}).Decode(result)
 	if err != nil {
-		kind := errors.KindUnexpected
-		if err == mgo.ErrNotFound {
-			kind = errors.KindNotFound
-		}
-		return nil, errors.E(op, kind, errors.M(module), errors.V(vsn), err)
+		return nil, errors.E(op, err, errors.M(module), errors.V(vsn))
 	}
 
 	return result.Info, nil
@@ -42,11 +37,7 @@ func (s *ModuleStore) GoMod(ctx context.Context, module, vsn string) ([]byte, er
 	result := &storage.Module{}
 	err := c.FindOne(context.Background(), bson.M{"module": module, "version": vsn}).Decode(result)
 	if err != nil {
-		kind := errors.KindUnexpected
-		if err == mgo.ErrNotFound {
-			kind = errors.KindNotFound
-		}
-		return nil, errors.E(op, kind, errors.M(module), errors.V(vsn), err)
+		return nil, errors.E(op, err, errors.M(module), errors.V(vsn))
 	}
 
 	return result.Mod, nil
