@@ -66,7 +66,6 @@ func (s *ModuleStore) Zip(ctx context.Context, module, vsn string) (io.ReadClose
 	}
 
 	dStream, err := bucket.OpenDownloadStreamByName(zipName, options.GridFSName())
-	defer dStream.Close()
 	if err != nil {
 		return nil, errors.E(op, err, errors.M(module), errors.V(vsn))
 	}
