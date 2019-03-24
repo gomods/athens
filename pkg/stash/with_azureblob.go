@@ -126,7 +126,6 @@ func (s *azureBlob) AcquireLease(ctx context.Context, blobURL azblob.BlockBlobUR
 	tctx, cancel := context.WithTimeout(ctx, 300*time.Second)
 	defer cancel()
 	for {
-		http.StatusConflict
 		_, err := blobURL.Upload(tctx, bytes.NewReader([]byte{1}), azblob.BlobHTTPHeaders{}, nil, azblob.BlobAccessConditions{})
 		if err != nil {
 			if stgErr, ok := err.(azblob.StorageError); ok && stgErr.Response().StatusCode == http.StatusPreconditionFailed {
