@@ -13,7 +13,7 @@ import (
 )
 
 func testConfigFile(t *testing.T) (testConfigFile string) {
-	testConfigFile = filepath.Join("..", "..", "config-example.toml")
+	testConfigFile = filepath.Join("..", "..", "config.dev.toml")
 	if err := os.Chmod(testConfigFile, 0700); err != nil {
 		t.Fatalf("%s\n", err)
 	}

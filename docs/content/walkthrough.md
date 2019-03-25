@@ -59,8 +59,7 @@ $ mkdir -p $(go env GOPATH)/src/github.com/gomods
 $ cd $(go env GOPATH)/src/github.com/gomods
 $ git clone https://github.com/gomods/athens.git
 $ cd athens
-$ cp config-example.toml config.toml
-$ GO111MODULE=on go run ./cmd/proxy -config_file=./config.toml &
+$ GO111MODULE=on go run ./cmd/proxy -config_file=./config.dev.toml &
 [1] 25243
 INFO[0000] Starting application at 127.0.0.1:3000
 ```
@@ -71,9 +70,8 @@ $ mkdir "$(go env GOPATH)\src\github.com\gomods"
 $ cd "$(go env GOPATH)\src\github.com\gomods"
 $ git clone https://github.com/gomods/athens.git
 $ cd athens
-$ cp config-example.toml config.toml
 $ $env:GO111MODULE = "on"
-$ Start-Process -NoNewWindow go 'run -mod=vendor .\cmd\proxy -config_file=".\config.toml"'
+$ Start-Process -NoNewWindow go 'run -mod=vendor .\cmd\proxy -config_file=".\config.dev.toml"'
 [1] 25243
 INFO[0000] Starting application at 127.0.0.1:3000
 ```
