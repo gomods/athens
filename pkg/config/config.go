@@ -13,6 +13,8 @@ import (
 	validator "gopkg.in/go-playground/validator.v9"
 )
 
+const defaultConfigFile = "athens.toml"
+
 // Config provides configuration values for all components
 type Config struct {
 	TimeoutConf
@@ -52,18 +54,9 @@ func Load(configFile string) (*Config, error) {
 		return ParseConfigFile(configFile)
 	}
 
-	defaultConfigFile := ".athens.toml"
 	// There is a config in the current directory
 	if fi, err := os.Stat(defaultConfigFile); err == nil {
 		return ParseConfigFile(fi.Name())
-	}
-
-	// There is a config in the user home directory
-	if homeDir, err := os.UserHomeDir(); err == nil {
-		f := filepath.Join(homeDir, defaultConfigFile)
-		if fi, err := os.Stat(f); err == nil && !fi.IsDir() {
-			return ParseConfigFile(f)
-		}
 	}
 
 	// Use default values
