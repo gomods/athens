@@ -19,7 +19,7 @@ import (
 )
 
 // GetStorage returns storage backend based on env configuration
-func GetStorage(storageType string, storageConfig *config.StorageConfig, timeout time.Duration) (storage.Backend, error) {
+func GetStorage(storageType string, storageConfig *config.StorageConfig, timeout time.Duration, insecure bool) (storage.Backend, error) {
 	const op errors.Op = "actions.GetStorage"
 	switch storageType {
 	case "memory":
@@ -28,7 +28,7 @@ func GetStorage(storageType string, storageConfig *config.StorageConfig, timeout
 		if storageConfig.Mongo == nil {
 			return nil, errors.E(op, "Invalid Mongo Storage Configuration")
 		}
-		return mongo.NewStorage(storageConfig.Mongo, timeout)
+		return mongo.NewStorage(storageConfig.Mongo, timeout, insecure)
 	case "disk":
 		if storageConfig.Disk == nil {
 			return nil, errors.E(op, "Invalid Disk Storage Configuration")
