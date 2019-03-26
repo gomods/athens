@@ -14,6 +14,7 @@ variables:
 
 steps:
 - powershell: |
+    choco upgrade golang
     mkdir "$env:GOBIN" | out-null
     mkdir "$env:GOPATH\pkg" | out-null
     mkdir "$env:modulePath" | out-null

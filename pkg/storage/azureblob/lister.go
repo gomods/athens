@@ -29,7 +29,7 @@ func extractVersions(blobnames []string) []string {
 		if strings.HasSuffix(b, ".info") {
 			segments := strings.Split(b, "/")
 
-			if len(segments) <= 0 {
+			if len(segments) == 0 {
 				continue
 			}
 			// version should be last segment w/ .info suffix

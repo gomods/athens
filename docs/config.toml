@@ -11,6 +11,11 @@ title = "Athens"
     languageCode = "zh-CN"
     weight = 2
     languageName = "中文"
+  [languages.es]
+    languageCode = "es-ES"
+    weight = 3
+    languageName = "Español"
+
 
 [params]
 disableShortcutsTitle = true

@@ -45,6 +45,11 @@ CloudRuntime = "none"
 
 # The filename for the include exclude filter.
 # Env override: ATHENS_FILTER_FILE
+#
+# To point Athens to an upstream proxy to fetch modules,
+# set GlobalEndpoint to "https://<url_to_upstream>"
+# and also ensure that FilterFile is  set to a fully qualified file name 
+# that contains the letter `D` (for "Direct Access") in the first line.
 FilterFile = ""
 
 # Timeout is the timeout for external network calls in seconds
@@ -73,6 +78,11 @@ Port = ":3000"
 # The endpoint for a package registry in case of a proxy cache miss
 # NOTE: Currently no registries have been implemented
 # Env override: ATHENS_GLOBAL_ENDPOINT
+#
+# To point Athens to an upstream proxy to fetch modules,
+# set GlobalEndpoint to "https://<url_to_upstream>"
+# and also ensure that FilterFile is  set to a fully qualified file name 
+# that contains the letter `D` (for "Direct Access") in the first line.
 GlobalEndpoint = "http://localhost:3001"
 
 # BASIC AUTH OPTIONS 
