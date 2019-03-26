@@ -30,7 +30,6 @@ A clear and concise description of what you expected to happen.
 **Environment (please complete the following information):**
  - OS: [e.g. Linux 64bit]
  - Go version :
- - Buffalo Version :
  - Proxy version :
  - Storage (fs/mongodb/s3 etc.) :
 
