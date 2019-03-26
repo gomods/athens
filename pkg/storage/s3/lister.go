@@ -37,7 +37,7 @@ func extractVersions(objects []*s3.Object) []string {
 		if strings.HasSuffix(*o.Key, ".info") {
 			segments := strings.Split(*o.Key, "/")
 
-			if len(segments) <= 0 {
+			if len(segments) == 0 {
 				continue
 			}
 			// version should be last segment w/ .info suffix
