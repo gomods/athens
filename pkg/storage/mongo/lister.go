@@ -28,7 +28,7 @@ func (s *ModuleStore) List(ctx context.Context, module string) ([]string, error)
 		return nil, errors.E(op, err, errors.M(module))
 	}
 	result := make([]storage.Module, 0)
-	var errs error;
+	var errs error
 	for cursor.Next(ctx) {
 		var module storage.Module
 		if err := cursor.Decode(module); err != nil {
@@ -36,7 +36,7 @@ func (s *ModuleStore) List(ctx context.Context, module string) ([]string, error)
 			if err == mongo.ErrNoDocuments {
 				kind = errors.KindNotFound
 			}
-			errs = multierror.Append(errs, errors.E(op, kind))
+			errs = multierror.Append(errs, errors.E(op, err, kind))
 		} else {
 			result = append(result, module)
 		}
