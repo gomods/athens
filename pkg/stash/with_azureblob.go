@@ -16,8 +16,10 @@ import (
 	"github.com/google/uuid"
 )
 
-func WithAzureBlob(conf *config.AzureBlobConfig, timeout time.Duration, checker storage.Checker) (Wrapper, error) {
-	const op errors.Op = "stash.WithAzureBlob"
+// WithAzureBlobLock returns a distributed singleflight
+// using a Azure Blob Storage backend. See the config.toml documentation for details.
+func WithAzureBlobLock(conf *config.AzureBlobConfig, timeout time.Duration, checker storage.Checker) (Wrapper, error) {
+	const op errors.Op = "stash.WithAzureBlobLock"
 
 	accountURL, err := url.Parse(fmt.Sprintf("https://%s.blob.core.windows.net", conf.AccountName))
 	if err != nil {
@@ -29,10 +31,7 @@ func WithAzureBlob(conf *config.AzureBlobConfig, timeout time.Duration, checker 
 	}
 	pipe := azblob.NewPipeline(cred, azblob.PipelineOptions{})
 	serviceURL := azblob.NewServiceURL(*accountURL, pipe)
-	// rules on container names:
-	// https://docs.microsoft.com/en-us/rest/api/storageservices/naming-and-referencing-containers--blobs--and-metadata#container-names
-	//
-	// This container must exist
+
 	containerURL := serviceURL.NewContainerURL(conf.ContainerName)
 
 	return func(s Stasher) Stasher {
@@ -58,13 +57,13 @@ func (s *azureBlob) Stash(ctx context.Context, mod, ver string) (newVer string, 
 	leaseBlobName := "lease/" + config.FmtModVer(mod, ver)
 	leaseBlobURL := s.containerURL.NewBlockBlobURL(leaseBlobName)
 
-	leaseID, err := s.AcquireLease(ctx, leaseBlobURL)
+	leaseID, err := s.acquireLease(ctx, leaseBlobURL)
 	if err != nil {
 		return ver, errors.E(op, err)
 	}
 	defer func() {
 		const op errors.Op = "azureblob.Unlock"
-		relErr := s.ReleaseLease(ctx, leaseBlobURL, leaseID)
+		relErr := s.releaseLease(ctx, leaseBlobURL, leaseID)
 		if err == nil && relErr != nil {
 			err = errors.E(op, relErr)
 		}
@@ -95,7 +94,7 @@ func (s *azureBlob) Stash(ctx context.Context, mod, ver string) (newVer string, 
 			newVer = sr.v
 			return newVer, nil
 		case <-time.After(10 * time.Second):
-			err := s.RenewLease(ctx, leaseBlobURL, leaseID)
+			err := s.renewLease(ctx, leaseBlobURL, leaseID)
 			if err != nil {
 				return ver, errors.E(op, err)
 			}
@@ -103,48 +102,48 @@ func (s *azureBlob) Stash(ctx context.Context, mod, ver string) (newVer string, 
 	}
 }
 
-func (s *azureBlob) ReleaseLease(ctx context.Context, blobURL azblob.BlockBlobURL, leaseID string) error {
-	const op errors.Op = "azureblob.ReleaseLease"
+func (s *azureBlob) releaseLease(ctx context.Context, blobURL azblob.BlockBlobURL, leaseID string) error {
+	const op errors.Op = "azureblob.releaseLease"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 	_, err := blobURL.ReleaseLease(ctx, leaseID, azblob.ModifiedAccessConditions{})
 	return err
 }
 
-func (s *azureBlob) RenewLease(ctx context.Context, blobURL azblob.BlockBlobURL, leaseID string) error {
-	const op errors.Op = "azureblob.RenewLease"
+func (s *azureBlob) renewLease(ctx context.Context, blobURL azblob.BlockBlobURL, leaseID string) error {
+	const op errors.Op = "azureblob.renewLease"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 	_, err := blobURL.RenewLease(ctx, leaseID, azblob.ModifiedAccessConditions{})
 	return err
 }
 
-func (s *azureBlob) AcquireLease(ctx context.Context, blobURL azblob.BlockBlobURL) (string, error) {
-	const op errors.Op = "azureblob.AcquireLease"
+func (s *azureBlob) acquireLease(ctx context.Context, blobURL azblob.BlockBlobURL) (string, error) {
+	const op errors.Op = "azureblob.acquireLease"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 	tctx, cancel := context.WithTimeout(ctx, 300*time.Second)
 	defer cancel()
-	for {
-		_, err := blobURL.Upload(tctx, bytes.NewReader([]byte{1}), azblob.BlobHTTPHeaders{}, nil, azblob.BlobAccessConditions{})
-		if err != nil {
-			if stgErr, ok := err.(azblob.StorageError); ok && stgErr.Response().StatusCode == http.StatusPreconditionFailed {
-				select {
-				case <-time.After(1 * time.Second):
-					continue
-				case <-tctx.Done():
-					return "", tctx.Err()
-				}
-			}
-			return "", errors.E(op, err)
-		}
 
-		leaseID, err := uuid.NewRandom()
-		if err != nil {
+	// first we need to create a blob which can be then leased
+	_, err := blobURL.Upload(tctx, bytes.NewReader([]byte{1}), azblob.BlobHTTPHeaders{}, nil, azblob.BlobAccessConditions{})
+	if err != nil {
+		// if the blob is already leased we will get http.StatusPreconditionFailed while writing tot he blob
+		stgErr, ok := err.(azblob.StorageError)
+		if !ok || stgErr.Response().StatusCode != http.StatusPreconditionFailed {
 			return "", errors.E(op, err)
 		}
+	}
+
+	leaseID, err := uuid.NewRandom()
+	if err != nil {
+		return "", errors.E(op, err)
+	}
+	for {
+		// acquire lease for 15 sec (it's the min value)
 		res, err := blobURL.AcquireLease(tctx, leaseID.String(), 15, azblob.ModifiedAccessConditions{})
 		if err != nil {
+			// if the blob is already leased we will get http.StatusConflict -wait and try again
 			if stgErr, ok := err.(azblob.StorageError); ok && stgErr.Response().StatusCode == http.StatusConflict {
 				select {
 				case <-time.After(1 * time.Second):
