@@ -53,8 +53,24 @@ func getStorage(t testing.TB) *Storage {
 	if cfg == nil {
 		t.SkipNow()
 	}
+	ctx := context.Background()
 
-	s, err := New(context.Background(), cfg, true, config.GetTimeoutDuration(30))
+	// get the raw GCP client
+	cl, err := newClient(ctx, cfg)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Create the GCP bucket, so that the below call to New doesn't fail.
+	//
+	// The 'New' function calls bucket.Attrs(), so the bucket has to exist
+	bkt := cl.Bucket(cfg.Bucket)
+	if err := bkt.Create(ctx, cfg.ProjectID, nil); err != nil {
+		t.Fatal(err)
+	}
+
+	// create a new Storage implementation for GCP
+	s, err := New(ctx, cfg, config.GetTimeoutDuration(30))
 	if err != nil {
 		t.Fatal(err)
 	}
