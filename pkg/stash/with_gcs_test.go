@@ -107,7 +107,7 @@ func getStorage(t *testing.T) *gcp.Storage {
 		t.SkipNow()
 	}
 
-	s, err := gcp.New(context.Background(), cfg, true, config.GetTimeoutDuration(30))
+	s, err := gcp.New(context.Background(), cfg, config.GetTimeoutDuration(30))
 	if err != nil {
 		t.Fatal(err)
 	}
