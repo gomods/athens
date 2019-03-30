@@ -3,7 +3,10 @@ package observ
 import (
 	"fmt"
 	"net/http"
+	"time"
 
+	"contrib.go.opencensus.io/exporter/stackdriver"
+	datadog "github.com/DataDog/opencensus-go-exporter-datadog"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gorilla/mux"
 	"go.opencensus.io/exporter/prometheus"
@@ -18,6 +21,14 @@ func RegisterStatsExporter(r *mux.Router, statsExporter, service string) (func()
 	switch statsExporter {
 	case "prometheus":
 		if err := registerPrometheusExporter(r, service); err != nil {
+			return nil, errors.E(op, err)
+		}
+	case "stackdriver":
+		if err := registerStatsStackDriverExporter(r, service); err != nil {
+			return nil, errors.E(op, err)
+		}
+	case "datadog":
+		if err := registerStatsDataDogExporter(r, service); err != nil {
 			return nil, errors.E(op, err)
 		}
 	case "":
@@ -47,6 +58,33 @@ func registerPrometheusExporter(r *mux.Router, service string) error {
 	r.Handle("/metrics", prom).Methods(http.MethodGet)
 
 	view.RegisterExporter(prom)
+
+	return nil
+}
+
+func registerStatsDataDogExporter(r *mux.Router, service string) error {
+	const op errors.Op = "observ.registerStatsDataDogExporter"
+
+	dd := datadog.NewExporter(datadog.Options{Service: service})
+	if dd == nil {
+		return errors.E(op, "Failed to initialize data dog exporter")
+	}
+	view.RegisterExporter(dd)
+	return nil
+}
+
+func registerStatsStackDriverExporter(r *mux.Router, projectID string) error {
+	const op errors.Op = "observ.registerStatsStackDriverExporter"
+
+	sd, err := stackdriver.NewExporter(stackdriver.Options{
+		ProjectID: projectID,
+	})
+	if err != nil {
+		return errors.E(op, err)
+	}
+
+	view.RegisterExporter(sd)
+	view.SetReportingPeriod(60 * time.Second)
 
 	return nil
 }
