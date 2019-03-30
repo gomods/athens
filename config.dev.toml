@@ -56,7 +56,7 @@ FilterFile = ""
 Timeout = 300
 
 # StorageType sets the type of storage backend the proxy will use.
-# Possible values are memory, disk, mongo, gcp, minio, s3
+# Possible values are memory, disk, mongo, gcp, minio, s3, azureblob
 # Defaults to memory
 # Env override: ATHENS_STORAGE_TYPE
 StorageType = "memory"
@@ -166,7 +166,9 @@ StatsExporter = "prometheus"
 # we want to make sure only the first request gets to store the module, 
 # and the second request will wait for the first one to finish so that 
 # it doesn't override the storage. 
+
 # Options are ["memory", "etcd", "redis", "gcp", "azureblob"]
+
 # The default option is "memory" which means that only one instance of Athens 
 # should be used.
 # The "gcp" single flight will assume that you have a "gcp" StorageType 
