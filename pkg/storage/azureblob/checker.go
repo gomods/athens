@@ -15,6 +15,11 @@ func (s *Storage) Exists(ctx context.Context, module string, version string) (bo
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 
-	pkgName := config.PackageVersionedName(module, version, "mod")
-	return s.client.BlobExists(ctx, pkgName)
+	px := config.PackageVersionedName(module, version, "")
+	blobs, err := s.client.ListBlobs(ctx, px)
+	if err != nil {
+		return false, errors.E(op, err, errors.M(module), errors.V(version))
+	}
+
+	return len(blobs) == 3, nil
 }
