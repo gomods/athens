@@ -144,9 +144,23 @@ func PrepareEnv(gopath string) []string {
 	noProxy := fmt.Sprintf("NO_PROXY=%s", os.Getenv("NO_PROXY"))
 	gopathEnv := fmt.Sprintf("GOPATH=%s", gopath)
 	cacheEnv := fmt.Sprintf("GOCACHE=%s", filepath.Join(gopath, "cache"))
+	gitSSH := fmt.Sprintf("GIT_SSH=%s", os.Getenv("GIT_SSH"))
+	gitSSHCmd := fmt.Sprintf("GIT_SSH_COMMAND=%s", os.Getenv("GIT_SSH_COMMAND"))
 	disableCgo := "CGO_ENABLED=0"
 	enableGoModules := "GO111MODULE=on"
-	cmdEnv := []string{pathEnv, homeEnv, gopathEnv, cacheEnv, disableCgo, enableGoModules, httpProxy, httpsProxy, noProxy}
+	cmdEnv := []string{
+		pathEnv,
+		homeEnv,
+		gopathEnv,
+		cacheEnv,
+		disableCgo,
+		enableGoModules,
+		httpProxy,
+		httpsProxy,
+		noProxy,
+		gitSSH,
+		gitSSHCmd,
+	}
 
 	// add Windows specific ENV VARS
 	if runtime.GOOS == "windows" {
