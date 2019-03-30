@@ -18,17 +18,19 @@ import (
 // Currently it supports: prometheus
 func RegisterStatsExporter(r *mux.Router, statsExporter, service string) (func(), error) {
 	const op errors.Op = "observ.RegisterStatsExporter"
+	var stop = func() {}
+	var err error
 	switch statsExporter {
 	case "prometheus":
 		if err := registerPrometheusExporter(r, service); err != nil {
 			return nil, errors.E(op, err)
 		}
 	case "stackdriver":
-		if err := registerStatsStackDriverExporter(r, service); err != nil {
+		if stop, err = registerStatsStackDriverExporter(r, service); err != nil {
 			return nil, errors.E(op, err)
 		}
 	case "datadog":
-		if err := registerStatsDataDogExporter(r, service); err != nil {
+		if stop, err = registerStatsDataDogExporter(r, service); err != nil {
 			return nil, errors.E(op, err)
 		}
 	case "":
@@ -39,10 +41,8 @@ func RegisterStatsExporter(r *mux.Router, statsExporter, service string) (func()
 	if err := registerViews(); err != nil {
 		return nil, errors.E(op, err)
 	}
-	// Currently func() prop it's not needed by Prometheus exporter.
-	// This param should be used to pass StackDriver Flush or
-	// DataDog Stop method when this Exporters will be implemented.
-	return func() {}, nil
+
+	return stop, nil
 }
 
 // registerPrometheusExporter creates exporter that collects stats for Prometheus.
@@ -62,31 +62,31 @@ func registerPrometheusExporter(r *mux.Router, service string) error {
 	return nil
 }
 
-func registerStatsDataDogExporter(r *mux.Router, service string) error {
+func registerStatsDataDogExporter(r *mux.Router, service string) (func(), error) {
 	const op errors.Op = "observ.registerStatsDataDogExporter"
 
 	dd := datadog.NewExporter(datadog.Options{Service: service})
 	if dd == nil {
-		return errors.E(op, "Failed to initialize data dog exporter")
+		return nil, errors.E(op, "Failed to initialize data dog exporter")
 	}
 	view.RegisterExporter(dd)
-	return nil
+	return dd.Stop, nil
 }
 
-func registerStatsStackDriverExporter(r *mux.Router, projectID string) error {
+func registerStatsStackDriverExporter(r *mux.Router, projectID string) (func(), error) {
 	const op errors.Op = "observ.registerStatsStackDriverExporter"
 
 	sd, err := stackdriver.NewExporter(stackdriver.Options{
 		ProjectID: projectID,
 	})
 	if err != nil {
-		return errors.E(op, err)
+		return nil, errors.E(op, err)
 	}
 
 	view.RegisterExporter(sd)
 	view.SetReportingPeriod(60 * time.Second)
 
-	return nil
+	return sd.Flush, nil
 }
 
 // registerViews register stats which should be collected in Athens
