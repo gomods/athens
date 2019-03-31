@@ -18,6 +18,7 @@ steps:
     mkdir "$env:GOBIN" | out-null
     mkdir "$env:GOPATH\pkg" | out-null
     mkdir "$env:modulePath" | out-null
+    go version
     robocopy "$env:system_defaultWorkingDirectory\" "$env:modulePath\" /E /Z /ZB /R:5 /W:5 /TBD /NP /V /XD "$env:GOPATH"
     exit ($LastExitCode -band 24)
   displayName: 'set up the Go workspace'
