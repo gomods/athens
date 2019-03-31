@@ -20,7 +20,7 @@ func (s *Storage) List(ctx context.Context, module string) ([]string, error) {
 
 	lsParams := &s3.ListObjectsInput{
 		Bucket: aws.String(s.bucket),
-		Prefix: aws.String(filepath.Join(module, "/")),
+		Prefix: aws.String(filepath.Join(module, "/@v")),
 	}
 
 	loo, err := s.s3API.ListObjectsWithContext(ctx, lsParams)
