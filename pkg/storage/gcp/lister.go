@@ -2,7 +2,6 @@ package gcp
 
 import (
 	"context"
-	"path/filepath"
 	"strings"
 
 	"cloud.google.com/go/storage"
@@ -18,7 +17,7 @@ func (s *Storage) List(ctx context.Context, module string) ([]string, error) {
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 
-	modulePrefix := filepath.Join(module, "/@v")
+	modulePrefix := strings.TrimSuffix(module, "/") + "/@v"
 	it := s.bucket.Objects(ctx, &storage.Query{Prefix: modulePrefix})
 	paths := []string{}
 	for {
