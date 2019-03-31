@@ -14,9 +14,8 @@ variables:
 
 steps:
 - powershell: |
-    ls C:\\Go\\bin\\go.exe
     choco upgrade golang
-    ls C:\\Go\\bin\\go.exe
+    & "C:\\Go\\bin\\go.exe" version
     mkdir "$env:GOBIN" | out-null
     mkdir "$env:GOPATH\pkg" | out-null
     mkdir "$env:modulePath" | out-null
