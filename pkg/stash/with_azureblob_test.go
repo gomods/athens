@@ -20,6 +20,9 @@ import (
 // is done synchronously so that only the first module gets saved.
 func TestWithAzureBlob(t *testing.T) {
 	cfg := getAzureTestConfig()
+	if cfg == nil {
+		t.SkipNow()
+	}
 	strg, err := mem.NewStorage()
 	if err != nil {
 		t.Fatal(err)
