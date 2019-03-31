@@ -7,7 +7,7 @@ pool:
   vmImage: 'vs2017-win2016'
 
 variables:
-  GOBIN:  '$(GOPATH)\bin' # Go binaries path
+  GOBIN:  'C:\Go\bin' # Go binaries path
   GOPATH: '$(system.defaultWorkingDirectory)\gopath' # Go workspace path
   GO111MODULE: 'on'
   modulePath: '$(GOPATH)\src\github.com\$(build.repository.name)' # Path to the module's code
@@ -15,7 +15,7 @@ variables:
 steps:
 - powershell: |
     choco upgrade golang
-    & "C:\\Go\\bin\\go.exe" version
+    go version
     mkdir "$env:GOBIN" | out-null
     mkdir "$env:GOPATH\pkg" | out-null
     mkdir "$env:modulePath" | out-null
