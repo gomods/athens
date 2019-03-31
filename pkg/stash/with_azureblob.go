@@ -75,18 +75,15 @@ func (s *azblobLock) Stash(ctx context.Context, mod, ver string) (newVer string,
 	if ok {
 		return ver, nil
 	}
-	stash := func() <-chan stashRes {
-		sChan := make(chan stashRes)
-		go func() {
-			v, err := s.stasher.Stash(ctx, mod, ver)
-			sChan <- stashRes{v, err}
-		}()
-		return sChan
-	}
+	sChan := make(chan stashRes)
+	go func() {
+		v, err := s.stasher.Stash(ctx, mod, ver)
+		sChan <- stashRes{v, err}
+	}()
 
 	for {
 		select {
-		case sr := <-stash():
+		case sr := <-sChan:
 			if sr.err != nil {
 				err = errors.E(op, sr.err)
 				return ver, err
