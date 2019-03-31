@@ -2,6 +2,7 @@ package s3
 
 import (
 	"context"
+	"path/filepath"
 	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -19,7 +20,7 @@ func (s *Storage) List(ctx context.Context, module string) ([]string, error) {
 
 	lsParams := &s3.ListObjectsInput{
 		Bucket: aws.String(s.bucket),
-		Prefix: aws.String(module),
+		Prefix: aws.String(filepath.Join(module, "/")),
 	}
 
 	loo, err := s.s3API.ListObjectsWithContext(ctx, lsParams)
