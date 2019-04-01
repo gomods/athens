@@ -54,6 +54,10 @@ func (s *azblobLock) Stash(ctx context.Context, mod, ver string) (newVer string,
 	const op errors.Op = "azblobLock.Stash"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
+
+	ctx, cancel := context.WithTimeout(ctx, time.Minute*10)
+	defer cancel()
+
 	leaseBlobName := "lease/" + config.FmtModVer(mod, ver)
 	leaseBlobURL := s.containerURL.NewBlockBlobURL(leaseBlobName)
 
@@ -95,6 +99,8 @@ func (s *azblobLock) Stash(ctx context.Context, mod, ver string) (newVer string,
 			if err != nil {
 				return ver, errors.E(op, err)
 			}
+		case <-ctx.Done():
+			return ver, errors.E(op, ctx.Err())
 		}
 	}
 }
@@ -119,13 +125,13 @@ func (s *azblobLock) acquireLease(ctx context.Context, blobURL azblob.BlockBlobU
 	const op errors.Op = "azblobLock.acquireLease"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
-	tctx, cancel := context.WithTimeout(ctx, 300*time.Second)
+	tctx, cancel := context.WithTimeout(ctx, 10*time.Minute)
 	defer cancel()
 
 	// first we need to create a blob which can be then leased
 	_, err := blobURL.Upload(tctx, bytes.NewReader([]byte{1}), azblob.BlobHTTPHeaders{}, nil, azblob.BlobAccessConditions{})
 	if err != nil {
-		// if the blob is already leased we will get http.StatusPreconditionFailed while writing tot he blob
+		// if the blob is already leased we will get http.StatusPreconditionFailed while writing to that blob
 		stgErr, ok := err.(azblob.StorageError)
 		if !ok || stgErr.Response().StatusCode != http.StatusPreconditionFailed {
 			return "", errors.E(op, err)
@@ -140,7 +146,7 @@ func (s *azblobLock) acquireLease(ctx context.Context, blobURL azblob.BlockBlobU
 		// acquire lease for 15 sec (it's the min value)
 		res, err := blobURL.AcquireLease(tctx, leaseID.String(), 15, azblob.ModifiedAccessConditions{})
 		if err != nil {
-			// if the blob is already leased we will get http.StatusConflict -wait and try again
+			// if the blob is already leased we will get http.StatusConflict - wait and try again
 			if stgErr, ok := err.(azblob.StorageError); ok && stgErr.Response().StatusCode == http.StatusConflict {
 				select {
 				case <-time.After(1 * time.Second):
