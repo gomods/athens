@@ -61,7 +61,8 @@ func Load(configFile string) (*Config, error) {
 
 	// Use default values
 	log.Println("Running dev mode with default settings, consult config when you're ready to run in production")
-	return defaultConfig(), nil
+	cfg := defaultConfig()
+	return cfg, envOverride(cfg)
 }
 
 func defaultConfig() *Config {
