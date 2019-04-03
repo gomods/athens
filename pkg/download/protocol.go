@@ -8,6 +8,7 @@ import (
 	"sync"
 
 	"github.com/gomods/athens/pkg/errors"
+	"github.com/gomods/athens/pkg/log"
 	"github.com/gomods/athens/pkg/observ"
 	"github.com/gomods/athens/pkg/stash"
 	"github.com/gomods/athens/pkg/storage"
@@ -66,6 +67,27 @@ func (p *protocol) List(ctx context.Context, mod string) ([]string, error) {
 	const op errors.Op = "protocol.List"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
+	lggr := log.EntryFromContext(ctx)
+
+	// if the storage implements ListCacher, check the expiry. If the list
+	// cache for this module isn't expired yet, just return what's in storage.
+	// Otherwise, just continue on to the normal storage + VCS check
+	listCacher, hasListCacher := p.storage.(storage.ListCacher)
+	if hasListCacher {
+		expiresIn, err := listCacher.ExpiresIn(ctx, mod)
+		if err == nil && expiresIn > 0 {
+			return p.storage.List(ctx, mod)
+		}
+		// don't use an else here, and don't return the error, because we
+		// need to continue down to the below list logic
+		if err != nil {
+			lggr.Warnf(
+				"The list cacher returned an error (%s). Athens will continue to fetch the version list for module %s from the VCS",
+				err,
+				mod,
+			)
+		}
+	}
 
 	var strList, goList []string
 	var sErr, goErr error
