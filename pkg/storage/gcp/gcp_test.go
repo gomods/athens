@@ -2,13 +2,12 @@ package gcp
 
 import (
 	"context"
-	"fmt"
 	"os"
 	"testing"
 
 	"github.com/gomods/athens/pkg/config"
+	"github.com/gomods/athens/pkg/storage"
 	"github.com/gomods/athens/pkg/storage/compliance"
-	"github.com/technosophos/moniker"
 	"google.golang.org/api/iterator"
 )
 
@@ -47,16 +46,23 @@ func (s *Storage) clear() error {
 	return s.bucket.Delete(ctx)
 }
 
+// getStorage returns a new storage from the config returned by getTestConfig,
+// or nil and an appropriate error if the storage couldn't be created.
+//
+// Returns nil, nil if getTestConfig returned nil. See docs on that function
+// for why that might happen
 func getStorage(t testing.TB) *Storage {
 	t.Helper()
 	cfg := getTestConfig()
 	if cfg == nil {
+		t.Logf("Skipping GCS tests because no config found. See the docs in this package for more information")
 		t.SkipNow()
 	}
+
 	ctx := context.Background()
 
 	// get the raw GCP client
-	cl, err := newClient(ctx, cfg)
+	cl, err := NewClient(ctx, cfg)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -64,8 +70,7 @@ func getStorage(t testing.TB) *Storage {
 	// Create the GCP bucket, so that the below call to New doesn't fail.
 	//
 	// The 'New' function calls bucket.Attrs(), so the bucket has to exist
-	bkt := cl.Bucket(cfg.Bucket)
-	if err := bkt.Create(ctx, cfg.ProjectID, nil); err != nil {
+	if err := cl.Bucket(cfg.Bucket).Create(ctx, cfg.ProjectID, nil); err != nil {
 		t.Fatal(err)
 	}
 
@@ -78,11 +83,12 @@ func getStorage(t testing.TB) *Storage {
 	return s
 }
 
+// getTestConfig returns a GCP config, if all GCP environment variables are found.
+// see the godoc for this package to learn what variables these are.
+//
+// If all the variables are not found, returns nil
 func getTestConfig() *config.GCPConfig {
-	// moniker is a cool library to produce mostly unique, human-readable names
-	// see https://github.com/technosophos/moniker for more details
-	namer := moniker.New()
-	bucketName := fmt.Sprintf("athens_drone_%s", namer.NameSep("_"))
+	bucketName := storage.RandomBucketName("athens_drone")
 	creds := os.Getenv("GCS_SERVICE_ACCOUNT")
 	if creds == "" {
 		return nil

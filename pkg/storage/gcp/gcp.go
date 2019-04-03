@@ -19,18 +19,21 @@ type Storage struct {
 	timeout time.Duration
 }
 
-// newClient is used by the New function below, and also for tests.
+// NewClient creates a new storage client, without making any network calls.
+// Most callers will want to call New, because that does everything needed
+// to create a new Storage implementation that is backed by GCP. This function
+// is helpful primarily for tests.
 //
-// Test code needs to create a GCP storage client _without_ calling Attrs() on
-// a bucket. Since the 'New' function (below) creates a client and then calls
-// Attrs() on the bucket right afterward, tests will need to call this function
-// first in order to create the bucket, before they can call New()
-func newClient(ctx context.Context, gcpConf *config.GCPConfig) (*storage.Client, error) {
+// Here's why: test code needs to create a GCP storage client _without_ doing
+// any network calls, since it needs to create a unique bucket for testing
+// purposes. Since the below call to 'New' does some validation on the bucket,
+// they need to call this function, create the new bucket, and then call New
+func NewClient(ctx context.Context, jsonKey string) (*storage.Client, error) {
 	const op errors.Op = "gcp.newClient"
 
 	opts := []option.ClientOption{}
-	if gcpConf.JSONKey != "" {
-		key, err := base64.StdEncoding.DecodeString(gcpConf.JSONKey)
+	if jsonKey != "" {
+		key, err := base64.StdEncoding.DecodeString(jsonKey)
 		if err != nil {
 			return nil, errors.E(op, fmt.Errorf("could not decode base64 json key: %v", err))
 		}
@@ -57,7 +60,7 @@ func newClient(ctx context.Context, gcpConf *config.GCPConfig) (*storage.Client,
 // See https://cloud.google.com/docs/authentication/getting-started.
 func New(ctx context.Context, gcpConf *config.GCPConfig, timeout time.Duration) (*Storage, error) {
 	const op errors.Op = "gcp.New"
-	s, err := newClient(ctx, gcpConf)
+	s, err := NewClient(ctx, gcpConf.JSONKey)
 	if err != nil {
 		return nil, errors.E(op, fmt.Errorf("could not create new storage client: %s", err))
 	}

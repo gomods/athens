@@ -107,6 +107,15 @@ func getStorage(t *testing.T) *gcp.Storage {
 		t.SkipNow()
 	}
 
+	ctx := context.Background()
+	cl, err := gcp.NewClient(ctx, cfg.JSONKey)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := cl.Bucket(cfg.Bucket).Create(ctx, cfg.ProjectID, nil); err != nil {
+		t.Fatal(err)
+	}
+
 	s, err := gcp.New(context.Background(), cfg, config.GetTimeoutDuration(30))
 	if err != nil {
 		t.Fatal(err)
@@ -116,12 +125,13 @@ func getStorage(t *testing.T) *gcp.Storage {
 }
 
 func getTestConfig() *config.GCPConfig {
+	bucketName := storage.RandomBucketName("athens_drone_stash")
 	creds := os.Getenv("GCS_SERVICE_ACCOUNT")
 	if creds == "" {
 		return nil
 	}
 	return &config.GCPConfig{
-		Bucket:  "athens_drone_stash_bucket",
+		Bucket:  bucketName,
 		JSONKey: creds,
 	}
 }
