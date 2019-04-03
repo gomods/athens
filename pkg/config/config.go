@@ -18,32 +18,34 @@ const defaultConfigFile = "athens.toml"
 // Config provides configuration values for all components
 type Config struct {
 	TimeoutConf
-	GoEnv            string `validate:"required" envconfig:"GO_ENV"`
-	GoBinary         string `validate:"required" envconfig:"GO_BINARY_PATH"`
-	GoGetWorkers     int    `validate:"required" envconfig:"ATHENS_GOGET_WORKERS"`
-	ProtocolWorkers  int    `validate:"required" envconfig:"ATHENS_PROTOCOL_WORKERS"`
-	LogLevel         string `validate:"required" envconfig:"ATHENS_LOG_LEVEL"`
-	CloudRuntime     string `validate:"required" envconfig:"ATHENS_CLOUD_RUNTIME"`
-	FilterFile       string `envconfig:"ATHENS_FILTER_FILE"`
-	TraceExporterURL string `envconfig:"ATHENS_TRACE_EXPORTER_URL"`
-	TraceExporter    string `envconfig:"ATHENS_TRACE_EXPORTER"`
-	StatsExporter    string `envconfig:"ATHENS_STATS_EXPORTER"`
-	StorageType      string `validate:"required" envconfig:"ATHENS_STORAGE_TYPE"`
-	GlobalEndpoint   string `envconfig:"ATHENS_GLOBAL_ENDPOINT"` // This feature is not yet implemented
-	Port             string `envconfig:"ATHENS_PORT"`
-	BasicAuthUser    string `envconfig:"BASIC_AUTH_USER"`
-	BasicAuthPass    string `envconfig:"BASIC_AUTH_PASS"`
-	ForceSSL         bool   `envconfig:"PROXY_FORCE_SSL"`
-	ValidatorHook    string `envconfig:"ATHENS_PROXY_VALIDATOR"`
-	PathPrefix       string `envconfig:"ATHENS_PATH_PREFIX"`
-	NETRCPath        string `envconfig:"ATHENS_NETRC_PATH"`
-	GithubToken      string `envconfig:"ATHENS_GITHUB_TOKEN"`
-	HGRCPath         string `envconfig:"ATHENS_HGRC_PATH"`
-	TLSCertFile      string `envconfig:"ATHENS_TLSCERT_FILE"`
-	TLSKeyFile       string `envconfig:"ATHENS_TLSKEY_FILE"`
-	SingleFlightType string `envconfig:"ATHENS_SINGLE_FLIGHT_TYPE"`
-	SingleFlight     *SingleFlight
-	Storage          *StorageConfig
+	GoEnv                   string `validate:"required" envconfig:"GO_ENV"`
+	GoBinary                string `validate:"required" envconfig:"GO_BINARY_PATH"`
+	GoGetWorkers            int    `validate:"required" envconfig:"ATHENS_GOGET_WORKERS"`
+	ProtocolWorkers         int    `validate:"required" envconfig:"ATHENS_PROTOCOL_WORKERS"`
+	LogLevel                string `validate:"required" envconfig:"ATHENS_LOG_LEVEL"`
+	CloudRuntime            string `validate:"required" envconfig:"ATHENS_CLOUD_RUNTIME"`
+	FilterFile              string `envconfig:"ATHENS_FILTER_FILE"`
+	TraceExporterURL        string `envconfig:"ATHENS_TRACE_EXPORTER_URL"`
+	TraceExporter           string `envconfig:"ATHENS_TRACE_EXPORTER"`
+	StatsExporter           string `envconfig:"ATHENS_STATS_EXPORTER"`
+	StorageType             string `validate:"required" envconfig:"ATHENS_STORAGE_TYPE"`
+	GlobalEndpoint          string `envconfig:"ATHENS_GLOBAL_ENDPOINT"` // This feature is not yet implemented
+	Port                    string `envconfig:"ATHENS_PORT"`
+	BasicAuthUser           string `envconfig:"BASIC_AUTH_USER"`
+	BasicAuthPass           string `envconfig:"BASIC_AUTH_PASS"`
+	ForceSSL                bool   `envconfig:"PROXY_FORCE_SSL"`
+	ValidatorHook           string `envconfig:"ATHENS_PROXY_VALIDATOR"`
+	PathPrefix              string `envconfig:"ATHENS_PATH_PREFIX"`
+	NETRCPath               string `envconfig:"ATHENS_NETRC_PATH"`
+	GithubToken             string `envconfig:"ATHENS_GITHUB_TOKEN"`
+	HGRCPath                string `envconfig:"ATHENS_HGRC_PATH"`
+	TLSCertFile             string `envconfig:"ATHENS_TLSCERT_FILE"`
+	TLSKeyFile              string `envconfig:"ATHENS_TLSKEY_FILE"`
+	SingleFlightType        string `envconfig:"ATHENS_SINGLE_FLIGHT_TYPE"`
+	MutableCacheDuration    int    `envconfig:"ATHENS_MUTABLE_CACHE_DURATION" default:"0"`
+	MutableCacheStorageType string `envconfig:"ATHENS_MUTABLE_CACHE_STORAGE_TYPE" default:"memory"`
+	SingleFlight            *SingleFlight
+	Storage                 *StorageConfig
 }
 
 // Load loads the config from a file.
@@ -67,19 +69,21 @@ func Load(configFile string) (*Config, error) {
 
 func defaultConfig() *Config {
 	return &Config{
-		GoBinary:         "go",
-		GoEnv:            "development",
-		GoGetWorkers:     10,
-		ProtocolWorkers:  30,
-		LogLevel:         "debug",
-		CloudRuntime:     "none",
-		StatsExporter:    "prometheus",
-		TimeoutConf:      TimeoutConf{Timeout: 300},
-		StorageType:      "memory",
-		Port:             ":3000",
-		SingleFlightType: "memory",
-		GlobalEndpoint:   "http://localhost:3001",
-		TraceExporterURL: "http://localhost:14268",
+		GoBinary:                "go",
+		GoEnv:                   "development",
+		GoGetWorkers:            10,
+		ProtocolWorkers:         30,
+		LogLevel:                "debug",
+		CloudRuntime:            "none",
+		StatsExporter:           "prometheus",
+		TimeoutConf:             TimeoutConf{Timeout: 300},
+		StorageType:             "memory",
+		Port:                    ":3000",
+		SingleFlightType:        "memory",
+		MutableCacheDuration:    0,
+		MutableCacheStorageType: "memory",
+		GlobalEndpoint:          "http://localhost:3001",
+		TraceExporterURL:        "http://localhost:14268",
 		SingleFlight: &SingleFlight{
 			Etcd:  &Etcd{"localhost:2379,localhost:22379,localhost:32379"},
 			Redis: &Redis{"127.0.0.1:6379"},

@@ -151,6 +151,44 @@ HGRCPath = ""
 # Env override: ATHENS_TRACE_EXPORTER
 TraceExporter = ""
 
+# Athens has two "mutable endpoints" - the /list and /latest endpoints.
+# These endpoints return all of the available versions of a given module, 
+# and the latest version of a given module, respectively. By default,
+# the server uses 'go list' to get the versions list, and this operation
+# does a request to the upstream.
+# 
+# The upstream is a version control system (VCS) by default, and that means 
+# that all 'go get' calls will make at least one request to the upstream VCS.
+# If a VCS has downtime, a 'go get' can fail even though Athens is working
+# properly. 
+#
+# You can insulate against that downtime if you set this variable to a 
+# positive number. That number represents the number of seconds that the 
+# version list and latest version will be cached for every module path.
+#
+# The cache also needs a storage, of course, so if you do set this value
+# to a positive number, make sure to also make sure that MutableCacheStorage
+# is also set to the appropriate storage driver for your use case.
+#
+# Note: you can override the upstream by setting GlobalEndpoint to the address
+# of another proxy. If that proxy is highly available, it probably makes
+# less sense to turn on the mutable cache, because Athens will make a request
+# up to another highly available HTTP server. If you do still want to turn
+# on this cache, that's still ok though.
+#
+# Env override: ATHENS_MUTABLE_CACHE_SEC
+MutableCacheDuration = 0
+
+# This value is If you set MutableCacheSec, make sure this value is set to the
+# storage that is appropriate for your mutable cache. This value does not need 
+# to be the same as your StorageType value, and it might support
+# different storage drivers.
+#
+# The only currently supported driver is memory
+#
+# Env override: ATHENS_MUTABLE_CACHE_STORAGE_TYPE
+MutableCacheStorageType = "memory"
+
 # TraceExporterURL is the URL to which Athens populates distributed tracing
 # information such as Jaeger. In Stackdriver, use this as the GCP ProjectID.
 # Env override: ATHENS_TRACE_EXPORTER_URL
