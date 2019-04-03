@@ -22,12 +22,12 @@ services:
   prometheus:
     image: prom/prometheus:latest
     ports:
-      - 9090:9090 
+      - 9091:9090
     volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./assets/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ${ATHENS_STORAGE}/prometheus:/prometheus/data
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
-      - '--storage.tsdb.path=/prometheus'
   azurite:
     image: arafato/azurite:2.6.5
     ports:
