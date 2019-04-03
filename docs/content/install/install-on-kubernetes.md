@@ -113,7 +113,7 @@ helm install gomods/athens-proxy -n athens --namespace athens --set replicaCount
 ### Give Athens access to private repositories via Github Token (Optional)
 
 1. Create a token at https://github.com/settings/tokens
-2. Provide the token to the Athens proxy either through the [config.toml](https://github.com/gomods/athens/blob/master/config.dev.toml#L111) file or by setting the `ATHENS_GITHUB_TOKEN` environment variable.
+2. Provide the token to the Athens proxy either through the [config.toml](https://github.com/gomods/athens/blob/master/config.dev.toml) file (the `GithubToken` field) or by setting the `ATHENS_GITHUB_TOKEN` environment variable.
 
 ### Storage Providers
 
