@@ -21,6 +21,7 @@ func testConfigFile(t *testing.T) (testConfigFile string) {
 }
 
 func compareConfigs(parsedConf *Config, expConf *Config, t *testing.T) {
+	t.Helper()
 	opts := cmpopts.IgnoreTypes(StorageConfig{}, SingleFlight{})
 	eq := cmp.Equal(parsedConf, expConf, opts)
 	if !eq {
