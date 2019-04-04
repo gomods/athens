@@ -13,10 +13,13 @@ import (
 )
 
 var bucketName = randomBucketName(os.Getenv("DRONE_PULL_REQUEST"))
+var strg *Storage
 
 func TestMain(m *testing.M) {
 	exitCode := m.Run()
-	// TODO: clean up bucket
+	if strg != nil {
+		strg.bucket.Delete(context.Background())
+	}
 	os.Exit(exitCode)
 }
 
