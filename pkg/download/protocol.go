@@ -189,6 +189,7 @@ func (p *protocol) Info(ctx context.Context, mod, ver string) ([]byte, error) {
 	const op errors.Op = "protocol.Info"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
+	lggr := log.EntryFromContext(ctx)
 	info, err := p.storage.Info(ctx, mod, ver)
 	var newVer string
 	if errors.IsNotFoundErr(err) {
@@ -196,7 +197,7 @@ func (p *protocol) Info(ctx context.Context, mod, ver string) ([]byte, error) {
 		if err != nil {
 			return nil, errors.E(op, err)
 		}
-		if err := p.resetListCache(ctx, mod, ver); err != nil {
+		if err := p.resetListCache(ctx, mod); err != nil {
 			lggr.Warnf(
 				"Tried to clear list cache for module %s, failed with %s",
 				mod,
@@ -216,6 +217,7 @@ func (p *protocol) GoMod(ctx context.Context, mod, ver string) ([]byte, error) {
 	const op errors.Op = "protocol.GoMod"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
+	lggr := log.EntryFromContext(ctx)
 	goMod, err := p.storage.GoMod(ctx, mod, ver)
 	var newVer string
 	if errors.IsNotFoundErr(err) {
@@ -223,7 +225,7 @@ func (p *protocol) GoMod(ctx context.Context, mod, ver string) ([]byte, error) {
 		if err != nil {
 			return nil, errors.E(op, err)
 		}
-		if err := p.resetListCache(ctx, mod, ver); err != nil {
+		if err := p.resetListCache(ctx, mod); err != nil {
 			lggr.Warnf(
 				"Tried to clear list cache for module %s, failed with %s",
 				mod,
@@ -251,7 +253,7 @@ func (p *protocol) Zip(ctx context.Context, mod, ver string) (io.ReadCloser, err
 		if err != nil {
 			return nil, errors.E(op, err)
 		}
-		if err := p.resetListCache(ctx, mod, ver); err != nil {
+		if err := p.resetListCache(ctx, mod); err != nil {
 			lggr.Warnf(
 				"Tried to clear list cache for module %s, failed with %s",
 				mod,
