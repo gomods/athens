@@ -6,5 +6,6 @@ import (
 )
 
 type ListCacher interface {
-	ExpiresIn(ctx context.Context, module string) (time.Duration, error)
+	Reset(context.Context, string) error
+	ExpiresIn(context.Context, string) (time.Duration, error)
 }
