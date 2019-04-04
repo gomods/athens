@@ -8,6 +8,7 @@ import (
 	"math/rand"
 	"sort"
 	"testing"
+	"time"
 
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/storage"
@@ -26,6 +27,7 @@ func RunTests(t *testing.T, b storage.Backend, clearBackend func() error) {
 	testGet(t, b)
 	testExists(t, b)
 	testCatalog(t, b)
+	testListCache(t, b)
 }
 
 // testNotFound ensures that a storage Backend
@@ -227,6 +229,46 @@ func testCatalog(t *testing.T, b storage.Backend) {
 	for i := 1; i < len(allres); i++ {
 		require.NotEqual(t, allres[i].Version, allres[i-1].Version)
 	}
+}
+
+func testListCache(t *testing.T, b storage.Backend) {
+	lc, ok := b.(storage.ListCacher)
+	if !ok {
+		t.Skip()
+	}
+	ctx := context.Background()
+
+	mock := getMockModule()
+	zipBts, err := ioutil.ReadAll(mock.Zip)
+	require.NoError(t, err)
+	modname := "github.com/gomods/testListCacherModule"
+	for i := 0; i < 6; i++ {
+		ver := fmt.Sprintf("v1.2.%04d", i)
+		b.Save(ctx, modname, ver, mock.Mod, bytes.NewReader(zipBts), mock.Info)
+		defer b.Delete(ctx, modname, ver)
+	}
+
+	initialExpires, err := lc.ExpiresIn(ctx, modname)
+	require.NoError(t, err)
+	require.True(t, initialExpires >= 0, "initial value for expiry must be >= 0")
+	time.Sleep(1 * time.Millisecond)
+	nextExpires, err := lc.ExpiresIn(ctx, modname)
+	require.NoError(t, err)
+	require.True(
+		t,
+		nextExpires < initialExpires,
+		"slept for 1 millisecond and the expiresIn value didn't go down",
+	)
+
+	time.Sleep(1)
+	require.NoError(t, lc.Reset(ctx, modname))
+	afterReset, err := lc.ExpiresIn(ctx, modname)
+	require.NoError(t, err)
+	require.True(
+		t,
+		afterReset > nextExpires,
+		"slept for 1 more millisecond, reset the cache TTL, and expiry duration after reset was not longer than before the reset",
+	)
 }
 
 func getMockModule() *storage.Version {
