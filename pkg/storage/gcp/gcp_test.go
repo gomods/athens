@@ -12,24 +12,15 @@ import (
 	"google.golang.org/api/iterator"
 )
 
-var bucketName = randomBucketName(os.Getenv("DRONE_PULL_REQUEST"))
-var strg *Storage
-
-func TestMain(m *testing.M) {
-	exitCode := m.Run()
-	if strg != nil {
-		strg.bucket.Delete(context.Background())
-	}
-	os.Exit(exitCode)
-}
-
 func TestBackend(t *testing.T) {
 	backend := getStorage(t)
+	defer backend.bucket.Delete(context.Background())
 	compliance.RunTests(t, backend, backend.clear)
 }
 
 func BenchmarkBackend(b *testing.B) {
 	backend := getStorage(b)
+	defer backend.bucket.Delete(context.Background())
 	compliance.RunBenchmarks(b, backend, backend.clear)
 }
 
@@ -57,7 +48,7 @@ func (s *Storage) clear() error {
 
 func getStorage(t testing.TB) *Storage {
 	t.Helper()
-	cfg := getTestConfig(bucketName)
+	cfg := getTestConfig(randomBucketName(os.Getenv("DRONE_PULL_REQUEST")))
 	if cfg == nil {
 		t.SkipNow()
 	}
@@ -66,7 +57,6 @@ func getStorage(t testing.TB) *Storage {
 	if err != nil {
 		t.Fatal(err)
 	}
-	strg = s
 	err = s.bucket.Create(context.Background(), cfg.ProjectID, nil)
 	if err != nil {
 		t.Fatal(err)
