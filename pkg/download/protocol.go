@@ -73,10 +73,11 @@ func (p *protocol) List(ctx context.Context, mod string) ([]string, error) {
 	// cache for this module isn't expired yet, just return what's in storage.
 	// Otherwise, just continue on to the normal storage + VCS check
 	listCacher, hasListCacher := p.storage.(storage.ListCacher)
+	skipVCS := false
 	if hasListCacher {
 		expiresIn, err := listCacher.ExpiresIn(ctx, mod)
 		if err == nil && expiresIn > 0 {
-			return p.storage.List(ctx, mod)
+			skipVCS = true
 		}
 		// don't use an else here, and don't return the error, because we
 		// need to continue down to the below list logic
@@ -87,6 +88,22 @@ func (p *protocol) List(ctx context.Context, mod string) ([]string, error) {
 				mod,
 			)
 		}
+	}
+
+	if skipVCS {
+		vers, err := p.storage.List(ctx, mod)
+		if err == nil {
+			// see the below call to removePseudoVersions for details on why
+			// this function must be called
+			return removePseudoVersions(vers), nil
+		}
+		// if the storage list call failed, we still want to move on, but
+		// log
+		lggr.Warnf(
+			"The list cache is turned on and is not expired, so Athens requested module %s from storage only. Storage failed with %s, but Athens will continue to fetch from VCS",
+			mod,
+			err,
+		)
 	}
 
 	var strList, goList []string
