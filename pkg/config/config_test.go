@@ -25,7 +25,7 @@ func compareConfigs(parsedConf *Config, expConf *Config, t *testing.T) {
 	opts := cmpopts.IgnoreTypes(StorageConfig{}, SingleFlight{})
 	eq := cmp.Equal(parsedConf, expConf, opts)
 	if !eq {
-		t.Errorf("Parsed Example configuration did not match expected values. Expected: %+v. Actual: %+v", expConf, parsedConf)
+		t.Errorf("Parsed Example configuration did not match expected values.\nExpected: %+v.\nActual: %+v", expConf, parsedConf)
 	}
 }
 
@@ -76,18 +76,20 @@ func TestEnvOverrides(t *testing.T) {
 		TimeoutConf: TimeoutConf{
 			Timeout: 30,
 		},
-		StorageType:    "minio",
-		GlobalEndpoint: "mytikas.gomods.io",
-		Port:           ":7000",
-		BasicAuthUser:  "testuser",
-		BasicAuthPass:  "testpass",
-		ForceSSL:       true,
-		ValidatorHook:  "testhook.io",
-		PathPrefix:     "prefix",
-		NETRCPath:      "/test/path/.netrc",
-		HGRCPath:       "/test/path/.hgrc",
-		Storage:        &StorageConfig{},
-		SingleFlight:   &SingleFlight{},
+		StorageType:             "minio",
+		GlobalEndpoint:          "mytikas.gomods.io",
+		Port:                    ":7000",
+		BasicAuthUser:           "testuser",
+		BasicAuthPass:           "testpass",
+		ForceSSL:                true,
+		ValidatorHook:           "testhook.io",
+		PathPrefix:              "prefix",
+		NETRCPath:               "/test/path/.netrc",
+		HGRCPath:                "/test/path/.hgrc",
+		MutableCacheDuration:    0,
+		MutableCacheStorageType: "memory",
+		Storage:                 &StorageConfig{},
+		SingleFlight:            &SingleFlight{},
 	}
 
 	envVars := getEnvMap(expConf)
@@ -226,17 +228,19 @@ func TestParseExampleConfig(t *testing.T) {
 		TimeoutConf: TimeoutConf{
 			Timeout: 300,
 		},
-		StorageType:      "memory",
-		GlobalEndpoint:   "http://localhost:3001",
-		Port:             ":3000",
-		BasicAuthUser:    "",
-		BasicAuthPass:    "",
-		Storage:          expStorage,
-		TraceExporterURL: "http://localhost:14268",
-		TraceExporter:    "",
-		StatsExporter:    "prometheus",
-		SingleFlightType: "memory",
-		SingleFlight:     &SingleFlight{},
+		StorageType:             "memory",
+		GlobalEndpoint:          "http://localhost:3001",
+		Port:                    ":3000",
+		BasicAuthUser:           "",
+		BasicAuthPass:           "",
+		Storage:                 expStorage,
+		TraceExporterURL:        "http://localhost:14268",
+		TraceExporter:           "",
+		StatsExporter:           "prometheus",
+		SingleFlightType:        "memory",
+		MutableCacheDuration:    0,
+		MutableCacheStorageType: "memory",
+		SingleFlight:            &SingleFlight{},
 	}
 
 	absPath, err := filepath.Abs(testConfigFile(t))
