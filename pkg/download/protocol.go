@@ -267,6 +267,14 @@ func (p *protocol) Zip(ctx context.Context, mod, ver string) (io.ReadCloser, err
 	return zip, nil
 }
 
+func (p *protocol) resetListCache(ctx context.Context, mod string) error {
+	listCacher, ok := p.storage.(storage.ListCacher)
+	if !ok {
+		return nil
+	}
+	return listCacher.Reset(ctx, mod)
+}
+
 // union concatenates two version lists and removes duplicates
 func union(list1, list2 []string) []string {
 	if list1 == nil {
