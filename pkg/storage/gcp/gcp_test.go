@@ -66,6 +66,7 @@ func getStorage(t testing.TB) *Storage {
 	if err != nil {
 		t.Fatal(err)
 	}
+	strg = s
 	err = s.bucket.Create(context.Background(), cfg.ProjectID, nil)
 	if err != nil {
 		t.Fatal(err)
