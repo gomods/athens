@@ -33,10 +33,20 @@ const time22 = moment().
 
 
 const time20ID = document.getElementById("time20");
-time20ID.innerHTML = nextThurs20.getHours() + ":00";
+const time20Str = nextThurs20.getHours() + ":00";
+if (time22.day() == 4) {
+    time20ID.innerHTML = time20Str;
+} else {
+    time20ID.innerHTML = time20Str + " (Friday)";
+}
 
 const time22ID = document.getElementById("time22");
-time22ID.innerHTML = nextThurs22.getHours() + ":00";
+const time22Str = nextThurs22.getHours() + ":00";
+if (time22.day() == 4) {
+    time22ID.innerHTML = time22Str;
+} else {
+    time22ID.innerHTML = time22Str + " (Friday)";
+}
 // const tz = jstz.guess();
 // console.log("you are in timezone " + tz.name());
 // var utc20 = moment(now).hour(20);
