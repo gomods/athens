@@ -33,6 +33,8 @@ steps:
     REDIS_TEST_ENDPOINT: redis:6379
     GCS_SERVICE_ACCOUNT:
       from_secret: GCS_SERVICE_ACCOUNT
+    GCS_PROJECT_ID: 
+      from_secret: GOOGLE_CLOUD_PROJECT
   when:
     branch:
       - master
