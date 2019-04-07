@@ -8,6 +8,7 @@ import (
 	"github.com/gomods/athens/pkg/observ"
 	"github.com/gomods/athens/pkg/storage"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/gridfs"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -22,9 +23,18 @@ func (s *ModuleStore) Info(ctx context.Context, module, vsn string) ([]byte, err
 	tctx, cancel := context.WithTimeout(ctx, s.timeout)
 	defer cancel()
 
-	err := c.FindOne(tctx, bson.M{"module": module, "version": vsn}).Decode(result)
+	queryResult := c.FindOne(tctx, bson.M{"module": module, "version": vsn})
+	if queryErr := queryResult.Err(); queryErr != nil {
+		return nil, errors.E(op, queryErr, errors.M(module), errors.V(vsn))
+	}
+
+	err := queryResult.Decode(result)
 	if err != nil {
-		return nil, errors.E(op, err, errors.M(module), errors.V(vsn))
+		kind := errors.KindUnexpected
+		if err != mongo.ErrNoDocuments {
+			return nil, errors.E(op, err, errors.M(module), errors.V(vsn))
+		}
+		return nil, errors.E(op, err, kind, errors.M(module), errors.V(vsn))
 	}
 
 	return result.Info, nil
@@ -40,9 +50,18 @@ func (s *ModuleStore) GoMod(ctx context.Context, module, vsn string) ([]byte, er
 	tctx, cancel := context.WithTimeout(ctx, s.timeout)
 	defer cancel()
 
-	err := c.FindOne(tctx, bson.M{"module": module, "version": vsn}).Decode(result)
+	queryResult := c.FindOne(tctx, bson.M{"module": module, "version": vsn})
+	if queryErr := queryResult.Err(); queryErr != nil {
+		return nil, errors.E(op, queryErr, errors.M(module), errors.V(vsn))
+	}
+
+	err := queryResult.Decode(result)
 	if err != nil {
-		return nil, errors.E(op, err, errors.M(module), errors.V(vsn))
+		kind := errors.KindUnexpected
+		if err != mongo.ErrNoDocuments {
+			return nil, errors.E(op, err, errors.M(module), errors.V(vsn))
+		}
+		return nil, errors.E(op, err, kind, errors.M(module), errors.V(vsn))
 	}
 
 	return result.Mod, nil
