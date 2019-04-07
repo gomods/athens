@@ -28,11 +28,10 @@ func (s *ModuleStore) Info(ctx context.Context, module, vsn string) ([]byte, err
 		return nil, errors.E(op, queryErr, errors.M(module), errors.V(vsn))
 	}
 
-	err := queryResult.Decode(result)
-	if err != nil {
+	if err := queryResult.Decode(result); err != nil {
 		kind := errors.KindUnexpected
-		if err != mongo.ErrNoDocuments {
-			return nil, errors.E(op, err, errors.M(module), errors.V(vsn))
+		if err == mongo.ErrNoDocuments {
+			kind = errors.KindNotFound
 		}
 		return nil, errors.E(op, err, kind, errors.M(module), errors.V(vsn))
 	}
@@ -55,11 +54,10 @@ func (s *ModuleStore) GoMod(ctx context.Context, module, vsn string) ([]byte, er
 		return nil, errors.E(op, queryErr, errors.M(module), errors.V(vsn))
 	}
 
-	err := queryResult.Decode(result)
-	if err != nil {
+	if err := queryResult.Decode(result); err != nil {
 		kind := errors.KindUnexpected
-		if err != mongo.ErrNoDocuments {
-			return nil, errors.E(op, err, errors.M(module), errors.V(vsn))
+		if err == mongo.ErrNoDocuments {
+			kind = errors.KindNotFound
 		}
 		return nil, errors.E(op, err, kind, errors.M(module), errors.V(vsn))
 	}
