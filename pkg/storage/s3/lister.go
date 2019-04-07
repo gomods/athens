@@ -17,9 +17,10 @@ func (s *Storage) List(ctx context.Context, module string) ([]string, error) {
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 
+	modulePrefix := strings.TrimSuffix(module, "/") + "/@v"
 	lsParams := &s3.ListObjectsInput{
 		Bucket: aws.String(s.bucket),
-		Prefix: aws.String(module),
+		Prefix: aws.String(modulePrefix),
 	}
 
 	loo, err := s.s3API.ListObjectsWithContext(ctx, lsParams)
@@ -37,7 +38,7 @@ func extractVersions(objects []*s3.Object) []string {
 		if strings.HasSuffix(*o.Key, ".info") {
 			segments := strings.Split(*o.Key, "/")
 
-			if len(segments) <= 0 {
+			if len(segments) == 0 {
 				continue
 			}
 			// version should be last segment w/ .info suffix

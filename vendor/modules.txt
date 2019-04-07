@@ -28,13 +28,13 @@ github.com/DataDog/opencensus-go-exporter-datadog
 github.com/ajg/form
 # github.com/aws/aws-sdk-go v1.15.24
 github.com/aws/aws-sdk-go/aws
-github.com/aws/aws-sdk-go/aws/awserr
 github.com/aws/aws-sdk-go/aws/credentials
 github.com/aws/aws-sdk-go/aws/session
 github.com/aws/aws-sdk-go/service/s3
 github.com/aws/aws-sdk-go/service/s3/s3iface
 github.com/aws/aws-sdk-go/service/s3/s3manager
 github.com/aws/aws-sdk-go/service/s3/s3manager/s3manageriface
+github.com/aws/aws-sdk-go/aws/awserr
 github.com/aws/aws-sdk-go/aws/endpoints
 github.com/aws/aws-sdk-go/internal/sdkio
 github.com/aws/aws-sdk-go/internal/shareddefaults
@@ -118,7 +118,7 @@ github.com/google/go-cmp/cmp/cmpopts
 github.com/google/go-cmp/cmp/internal/diff
 github.com/google/go-cmp/cmp/internal/function
 github.com/google/go-cmp/cmp/internal/value
-# github.com/google/uuid v1.0.0
+# github.com/google/uuid v1.1.1
 github.com/google/uuid
 # github.com/googleapis/gax-go v2.0.0+incompatible
 github.com/googleapis/gax-go
@@ -185,6 +185,8 @@ github.com/spf13/afero/mem
 github.com/stretchr/testify/require
 github.com/stretchr/testify/suite
 github.com/stretchr/testify/assert
+# github.com/technosophos/moniker v0.0.0-20180509230615-a5dbd03a2245
+github.com/technosophos/moniker
 # github.com/tinylib/msgp v1.0.2
 github.com/tinylib/msgp/msgp
 # github.com/unrolled/secure v0.0.0-20181221173256-0d6b5bb13069
@@ -265,15 +267,15 @@ golang.org/x/text/unicode/norm
 golang.org/x/text/secure/bidirule
 golang.org/x/text/unicode/bidi
 # google.golang.org/api v0.0.0-20180910000450-7ca32eb868bf
+google.golang.org/api/googleapi
 google.golang.org/api/iterator
 google.golang.org/api/option
 google.golang.org/api/support/bundler
-google.golang.org/api/googleapi
 google.golang.org/api/storage/v1
 google.golang.org/api/transport/http
+google.golang.org/api/googleapi/internal/uritemplates
 google.golang.org/api/internal
 google.golang.org/api/transport
-google.golang.org/api/googleapi/internal/uritemplates
 google.golang.org/api/gensupport
 google.golang.org/api/googleapi/transport
 google.golang.org/api/transport/grpc
