@@ -23,6 +23,6 @@ Additionally in the current or new config file, set the following parameters as 
 1. Restart Athens specifying the updated current or new config file.
 
     ```
-    /proxy  -config_file <path-to updated  current or new configfile>
+     <path_to_athens>/proxy  -config_file <path-to updated  current or new configfile>
     ```
 1. Verify the new configuration using the steps mentioned in ("Try out Athens" document)[/try-out], and go through the same walkthrough example.
