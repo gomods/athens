@@ -26,19 +26,11 @@ func RegisterStatsExporter(r *mux.Router, statsExporter, service string) (func()
 			return nil, errors.E(op, err)
 		}
 	case "stackdriver":
-<<<<<<< HEAD
 		if stop, err = registerStatsStackDriverExporter(service); err != nil {
 			return nil, errors.E(op, err)
 		}
 	case "datadog":
 		if stop, err = registerStatsDataDogExporter(service); err != nil {
-=======
-		if stop, err = registerStatsStackDriverExporter(r, service); err != nil {
-			return nil, errors.E(op, err)
-		}
-	case "datadog":
-		if stop, err = registerStatsDataDogExporter(r, service); err != nil {
->>>>>>> 240d5da26df1e416958eebbb4d07d522c9bfcb1f
 			return nil, errors.E(op, err)
 		}
 	case "":
