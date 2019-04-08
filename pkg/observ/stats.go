@@ -26,11 +26,11 @@ func RegisterStatsExporter(r *mux.Router, statsExporter, service string) (func()
 			return nil, errors.E(op, err)
 		}
 	case "stackdriver":
-		if stop, err = registerStatsStackDriverExporter(r, service); err != nil {
+		if stop, err = registerStatsStackDriverExporter(service); err != nil {
 			return nil, errors.E(op, err)
 		}
 	case "datadog":
-		if stop, err = registerStatsDataDogExporter(r, service); err != nil {
+		if stop, err = registerStatsDataDogExporter(service); err != nil {
 			return nil, errors.E(op, err)
 		}
 	case "":
@@ -62,7 +62,7 @@ func registerPrometheusExporter(r *mux.Router, service string) error {
 	return nil
 }
 
-func registerStatsDataDogExporter(r *mux.Router, service string) (func(), error) {
+func registerStatsDataDogExporter(service string) (func(), error) {
 	const op errors.Op = "observ.registerStatsDataDogExporter"
 
 	dd := datadog.NewExporter(datadog.Options{Service: service})
@@ -73,7 +73,7 @@ func registerStatsDataDogExporter(r *mux.Router, service string) (func(), error)
 	return dd.Stop, nil
 }
 
-func registerStatsStackDriverExporter(r *mux.Router, projectID string) (func(), error) {
+func registerStatsStackDriverExporter(projectID string) (func(), error) {
 	const op errors.Op = "observ.registerStatsStackDriverExporter"
 
 	sd, err := stackdriver.NewExporter(stackdriver.Options{
