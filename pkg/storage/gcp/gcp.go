@@ -29,7 +29,25 @@ type Storage struct {
 // See https://cloud.google.com/docs/authentication/getting-started.
 func New(ctx context.Context, gcpConf *config.GCPConfig, timeout time.Duration) (*Storage, error) {
 	const op errors.Op = "gcp.New"
+	s, err := newClient(ctx, gcpConf, timeout)
+	if err != nil {
+		return nil, errors.E(op, err)
+	}
 
+	if _, err := s.bucket.Attrs(ctx); err != nil {
+		if err == storage.ErrBucketNotExist {
+			return nil, errors.E(op, "You must manually create a storage bucket for Athens, see https://cloud.google.com/storage/docs/creating-buckets#storage-create-bucket-console")
+		}
+		return nil, errors.E(op, err)
+	}
+
+	return s, nil
+}
+
+// newClient handles the GCS client creation but does not check whether the bucket exists or not
+// this is so that the unit tests can use this to create their own short-lived buckets.
+func newClient(ctx context.Context, gcpConf *config.GCPConfig, timeout time.Duration) (*Storage, error) {
+	const op errors.Op = "gcp.newClient"
 	opts := []option.ClientOption{}
 	if gcpConf.JSONKey != "" {
 		key, err := base64.StdEncoding.DecodeString(gcpConf.JSONKey)
@@ -47,16 +65,8 @@ func New(ctx context.Context, gcpConf *config.GCPConfig, timeout time.Duration) 
 		return nil, errors.E(op, fmt.Errorf("could not create new storage client: %s", err))
 	}
 
-	bkt := s.Bucket(gcpConf.Bucket)
-	if _, err := bkt.Attrs(ctx); err != nil {
-		if err == storage.ErrBucketNotExist {
-			return nil, errors.E(op, "You must manually create a storage bucket for Athens, see https://cloud.google.com/storage/docs/creating-buckets#storage-create-bucket-console")
-		}
-		return nil, errors.E(op, err)
-	}
-
 	return &Storage{
-		bucket:  bkt,
+		bucket:  s.Bucket(gcpConf.Bucket),
 		timeout: timeout,
 	}, nil
 }
