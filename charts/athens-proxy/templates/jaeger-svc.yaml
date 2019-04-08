@@ -10,8 +10,6 @@ metadata:
     heritage: "{{ .Release.Service }}"
 spec:
   type: {{ .Values.jaeger.type }}
-  selector:
-    app: {{ template "fullname" . }}-jaeger
   ports:
     - name: jaeger-collector-http
       port: 14268
@@ -37,4 +35,8 @@ spec:
       port: 16686
       protocol: TCP
       targetPort: 16686
+  selector:
+    app: {{ template "fullname" . }}-jaeger
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: "{{ .Release.Name }}"
 {{- end -}}
