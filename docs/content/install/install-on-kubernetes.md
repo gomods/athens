@@ -83,21 +83,37 @@ The fastest way to install Athens using Helm is to deploy it from our public Hel
 
 ```console
 $ helm repo add gomods https://athens.blob.core.windows.net/charts
+$ helm repo update
 ```
 
-Next, install the chart using no arguments.  
+Next, install the chart with default values to `athens` namespace:  
 
 ```
-$ helm install gomods/athens-proxy -n athens
+$ helm install gomods/athens-proxy -n athens --namespace athens
 ```
 
 This will deploy a single Athens instance in the `default` namespace with `disk` storage enabled. Additionally, a `ClusterIP` service will be created.
 
+By default, the chart will install Athens with a replica count of 1. To change this, change the `replicaCount` value:
+
+```console
+helm install gomods/athens-proxy -n athens --namespace athens --set replicaCount=3
+```
+
 ## Advanced Configuration
 
+### Replicas
+
+By default, the chart will install Athens with a replica count of 1. To change this, change the `replicaCount` value:
+
+```console
+helm install gomods/athens-proxy -n athens --namespace athens --set replicaCount=3
+```
+
 ### Give Athens access to private repositories via Github Token (Optional)
+
 1. Create a token at https://github.com/settings/tokens
-2. Provide the token to the Athens proxy either through the [config.toml](https://github.com/gomods/athens/blob/master/config.dev.toml#L111) file or by setting the `ATHENS_GITHUB_TOKEN` environment variable.
+2. Provide the token to the Athens proxy either through the [config.toml](https://github.com/gomods/athens/blob/master/config.dev.toml) file (the `GithubToken` field) or by setting the `ATHENS_GITHUB_TOKEN` environment variable.
 
 ### Storage Providers
 
@@ -115,6 +131,12 @@ persistence:
   storageClass:
 ```
 
+Add it to `override-values.yaml` file and run:
+
+```console
+helm install gomods/athens-proxy -n athens --namespace athens -f override-values.yaml
+```
+
 `enabled` is used to turn on the PVC feature of the chart, while the other values relate directly to the values defined in the PersistentVolumeClaim documentation.
 
 #### Mongo DB Configuration
@@ -122,7 +144,7 @@ persistence:
 To use the Mongo DB storage provider, you will first need a MongoDB instance. Once you have deployed MongoDB, you can configure Athens using the connection string via `storage.mongo.url`. You will also need to set `storage.type` to "mongo".
 
 ```
-helm install ./charts/proxy -n athens --set storage.type=mongo --set storage.mongo.url=<some-mongodb-connection-string>
+helm install gomods/athens-proxy -n athens --namespace athens --set storage.type=mongo --set storage.mongo.url=<some-mongodb-connection-string>
 ```
 
 ### Kubernetes Service
@@ -130,7 +152,7 @@ helm install ./charts/proxy -n athens --set storage.type=mongo --set storage.mon
 By default, a Kubernetes `ClusterIP` service is created for the Athens proxy. "ClusterIP" is sufficient in the case when the Athens proxy will be used from within the cluster. To expose Athens outside of the cluster, consider using a "NodePort" or "LoadBalancer" service. This can be changed by setting the `service.type` value when installing the chart. For example, to deploy Athens using a NodePort service, the following command could be used:
 
 ```console
-helm install ./charts/proxy -n athens --set service.type=NodePort
+helm install gomods/athens-proxy -n athens --namespace athens --set service.type=NodePort
 ```
 
 ### Ingress Resource
@@ -138,28 +160,53 @@ helm install ./charts/proxy -n athens --set service.type=NodePort
 The chart can optionally create a Kubernetes [Ingress Resource](https://kubernetes.io/docs/concepts/services-networking/ingress/#the-ingress-resource) for you as well. To enable this feature, set the `ingress.enabled` resource to true. 
 
 ```console
-helm install ./charts/proxy -n athens --set ingress.enabled=true
+helm install gomods/athens-proxy -n athens --namespace athens --set ingress.enabled=true
 ```
 
 Further configuration values are available in the `values.yaml` file:
 
 ```yaml
 ingress:
-  enabled: false
-  # provie key/value annotations
+  enabled: true
   annotations:
-  # Provide an array of values for the ingress host mapping
-  hosts:
-  # Provide a base64 encoded cert for TLS use 
-  tls: 
+    certmanager.k8s.io/cluster-issuer: "letsencrypt-prod"
+    kubernetes.io/tls-acme: "true"
+    ingress.kubernetes.io/force-ssl-redirect: "true"
+    kubernetes.io/ingress.class: nginx
+  hosts: 
+    - athens.mydomain.com
+  tls:
+    - secretName: athens.mydomain.com
+      hosts:
+        - "athens.mydomain.com
 ```
 
-### Replicas
+Example above sets automatic creation/retrieval of TLS certificates from [Let's Encrypt](https://letsencrypt.org/) with [cert-manager](https://hub.helm.sh/charts/jetstack/cert-manager) and uses [nginx-ingress controller](https://hub.helm.sh/charts/stable/nginx-ingress) to expose Athens externally to internet.
 
-By default, the chart will install Athens with a replica count of 1. To change this, change the `replicaCount` value:
+Add it to `override-values.yaml` file and run:
 
 ```console
-helm install ./charts/proxy -n athens --set replicaCount=3
+helm install gomods/athens-proxy -n athens --namespace athens -f override-values.yaml
+```
+
+### Upstream module repository
+
+You can set the `URL` for the [upstream module repository](https://docs.gomods.io/configuration/upstream/) then Athens will try to download modules from the upstream when it doesn't find them in its own storage.
+
+You can use `https://gocenter.io` to use JFrog's GoCenter as an upstream here, or you can also use another Athens server as well.
+
+The example below shows you how to set GoCenter up as upstream module repository:
+
+```yaml
+upstreamProxy:
+  enabled: true
+  url: "https://gocenter.io"
+```
+
+Add it to `override-values.yaml` file and run:
+
+```console
+helm install gomods/athens-proxy -n athens --namespace athens -f override-values.yaml
 ```
 
 ### .netrc file support
@@ -174,5 +221,5 @@ kubectl create secret generic netrcsecret --from-file=./netrc
 In order to instruct athens to fetch and use the secret, `netrc.enabled` flag must be set to true:
 
 ```console
-helm install ./charts/proxy -n athens --set netrc.enabled=true
+helm install gomods/athens-proxy -n athens --namespace athens --set netrc.enabled=true
 ```
