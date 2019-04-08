@@ -160,13 +160,13 @@ func envOverride(config *Config) error {
 	if err != nil {
 		return err
 	}
+	portEnv := os.Getenv("PORT")
+	// ATHENS_PORT takes precedence over PORT
+	if portEnv != "" && os.Getenv("ATHENS_PORT") == "" {
+		config.Port = portEnv
+	}
 	if config.Port == "" {
-		portEnv := os.Getenv("PORT")
-		if portEnv != "" {
-			config.Port = portEnv
-		} else {
-			config.Port = defaultPort
-		}
+		config.Port = defaultPort
 	}
 	return nil
 }
