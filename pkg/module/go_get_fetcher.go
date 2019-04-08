@@ -185,6 +185,11 @@ func PrepareEnv(gopath string) []string {
 		gitSSHCmd,
 	}
 
+	if sshAuthSockVal, hasSSHAuthSock := os.Getenv("SSH_AUTH_SOCK"); hasSSHAuthSock {
+		sshAuthSock := fmt.Sprintf("SSH_AUTH_SOCK=%s", sshAuthSockVal)
+		cmdEnv = append(cmdEnv, sshAuthSock)
+	}
+
 	// add Windows specific ENV VARS
 	if runtime.GOOS == "windows" {
 		cmdEnv = append(cmdEnv, fmt.Sprintf("USERPROFILE=%s", os.Getenv("USERPROFILE")))
