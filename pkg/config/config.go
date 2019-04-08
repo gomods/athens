@@ -161,9 +161,24 @@ func envOverride(config *Config) error {
 		return err
 	}
 	if config.Port == "" {
-		config.Port = defaultPort
+		portEnv := os.Getenv("PORT")
+		if portEnv != "" {
+			config.Port = portEnv
+		} else {
+			config.Port = defaultPort
+		}
 	}
 	return nil
+}
+
+func ensurePortFormat(s string) string {
+	if len(s) == 0 {
+		return ""
+	}
+	if s[0] != ':' {
+		return ":" + s
+	}
+	return s
 }
 
 func validateConfig(config Config) error {
