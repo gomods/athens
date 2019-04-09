@@ -8,14 +8,20 @@ metadata:
     release: "{{ .Release.Name }}"
     heritage: "{{ .Release.Service }}"
 spec:
-  
   replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ template "fullname" . }}
+      chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+      release: "{{ .Release.Name }}"
   template:
     metadata:
       labels:
         app: {{ template "fullname" . }}
         chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
         release: "{{ .Release.Name }}"
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/config-upstream.yaml") . | sha256sum }}
     spec:
       containers:
       - name: {{ template "fullname" . }}
@@ -23,7 +29,7 @@ spec:
         imagePullPolicy: {{ .Values.image.pullPolicy | quote }}
         livenessProbe:
           httpGet:
-            path: "{{ template "livenessPath" . }}"
+            path: "/healthz"
             port: 3000
         readinessProbe:
           httpGet:
@@ -43,6 +49,12 @@ spec:
         - name: ATHENS_NETRC_PATH
           value: "/etc/netrc/netrc"
         {{- end }}
+        {{- if .Values.upstreamProxy.enabled }}
+        - name: ATHENS_FILTER_FILE
+          value: "/usr/local/lib/FilterForUpstreamProxy"
+        - name: ATHENS_GLOBAL_ENDPOINT
+          value: {{ .Values.upstreamProxy.url | quote }}
+        {{- end }}
         {{- if .Values.jaeger.enabled }}
         - name: ATHENS_TRACE_EXPORTER_URL
           value: {{ .Values.jaeger.url | quote }}
@@ -55,6 +67,11 @@ spec:
         volumeMounts:
         - name: storage-volume
           mountPath: {{ .Values.storage.disk.storageRoot | quote }}
+        {{- end }}
+        {{- if .Values.upstreamProxy.enabled}}
+        - name: upstream-config
+          mountPath: "/usr/local/lib"
+          readOnly: true
         {{- end }}
         {{- if .Values.netrc.enabled}}
         - name: netrc
@@ -69,8 +86,25 @@ spec:
       {{- else }}
         emptyDir: {}
       {{- end }}
+      {{- if .Values.upstreamProxy.enabled }}
+      - name: upstream-config
+        configMap:
+          name: {{ template "fullname" . }}-upstream
+      {{- end }}
       {{- if .Values.netrc.enabled }}
       - name: netrc
         secret:
-          secretName: netrcsecret
+          secretName: {{ .Values.netrc.existingSecret }}
       {{- end }}
+    {{- with .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.affinity }}
+      affinity:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+{{ toYaml . | indent 8 }}
+    {{- end }}

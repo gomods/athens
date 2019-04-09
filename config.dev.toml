@@ -59,7 +59,7 @@ FilterFile = ""
 Timeout = 300
 
 # StorageType sets the type of storage backend the proxy will use.
-# Possible values are memory, disk, mongo, gcp, minio, s3
+# Possible values are memory, disk, mongo, gcp, minio, s3, azureblob
 # Defaults to memory
 # Env override: ATHENS_STORAGE_TYPE
 StorageType = "memory"
@@ -71,8 +71,8 @@ StorageType = "memory"
 #TLSKeyFile = "server.key"
 
 # Port sets the port the proxy listens on
-# Env override: ATHENS_PORT
-# Note that PORT needs to be prefixed by :
+# Env override: ATHENS_PORT or PORT
+# The PORT must be a number or a number prefixed by ":"
 Port = ":3000"
 
 # The endpoint for a package registry in case of a proxy cache miss
@@ -169,10 +169,16 @@ StatsExporter = "prometheus"
 # we want to make sure only the first request gets to store the module, 
 # and the second request will wait for the first one to finish so that 
 # it doesn't override the storage. 
-# Options are ["memory", "etcd", "redis", "gcp"]
+
+# Options are ["memory", "etcd", "redis", "gcp", "azureblob"]
+
 # The default option is "memory" which means that only one instance of Athens 
 # should be used.
 # The "gcp" single flight will assume that you have a "gcp" StorageType 
+# and therefore it will use its strong-consistency features to ensure 
+# that only one module is ever written even when concurrent saves happen 
+# at the same time.
+# The "azureblob" single flight will assume that you have a "azureblob" StorageType 
 # and therefore it will use its strong-consistency features to ensure 
 # that only one module is ever written even when concurrent saves happen 
 # at the same time.
