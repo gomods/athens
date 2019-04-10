@@ -282,3 +282,27 @@ IdentityFile /root/.ssh/id_rsa
 ```
 
 Now, builds executed through the Athens proxy should be able to clone the `git.example.com/golibs/logo` dependency over authenticated SSH.
+
+### `SSH_AUTH_SOCK` and `ssh-agent` Support
+
+As an alternative to passwordless SSH keys, one can use an [`ssh-agent`](https://en.wikipedia.org/wiki/Ssh-agent).
+The `ssh-agent`-set `SSH_AUTH_SOCK` environment variable will propagate to
+`go mod download` if it contains a path to a valid unix socket (after
+following symlinks).
+
+As a result, if running with a working ssh agent (and a shell with
+`SSH_AUTH_SOCK` set), after setting up a `gitconfig` as mentioned in the
+previous section, one can run athens in docker as such:
+
+
+```bash
+$ mkdir -p storage
+$ ssh-add .ssh/id_rsa_something
+$ ATHENS_STORAGE=storage
+$ docker run --rm -d \
+    -v $(pwd)/$ATHENS_STORAGE:/var/lib/athens \
+    -v $(pwd)/gitconfig/.gitconfig:/root/.gitconfig \
+    -v "${SSH_AUTH_SOCK}":/.ssh_agent_sock \
+    -e "SSH_AUTH_SOCK=/.ssh_agent_sock" \
+    -e ATHENS_DISK_STORAGE_ROOT=/var/lib/athens -e ATHENS_STORAGE_TYPE=disk --name athens-proxy -p 3000:3000 gomods/athens:canary
+```
