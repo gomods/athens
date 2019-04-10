@@ -13,6 +13,8 @@ import (
 	validator "gopkg.in/go-playground/validator.v9"
 )
 
+const defaultConfigFile = "athens.toml"
+
 // Config provides configuration values for all components
 type Config struct {
 	TimeoutConf
@@ -47,14 +49,23 @@ type Config struct {
 // Load loads the config from a file.
 // If file is not present returns default config
 func Load(configFile string) (*Config, error) {
-	if configFile == "" {
-		log.Print("config file not provided - using default settings")
-		return createDefault(), nil
+	// User explicitly specified a config file
+	if configFile != "" {
+		return ParseConfigFile(configFile)
 	}
-	return ParseConfigFile(configFile)
+
+	// There is a config in the current directory
+	if fi, err := os.Stat(defaultConfigFile); err == nil {
+		return ParseConfigFile(fi.Name())
+	}
+
+	// Use default values
+	log.Println("Running dev mode with default settings, consult config when you're ready to run in production")
+	cfg := defaultConfig()
+	return cfg, envOverride(cfg)
 }
 
-func createDefault() *Config {
+func defaultConfig() *Config {
 	return &Config{
 		GoBinary:         "go",
 		GoEnv:            "development",
@@ -149,10 +160,25 @@ func envOverride(config *Config) error {
 	if err != nil {
 		return err
 	}
+	portEnv := os.Getenv("PORT")
+	// ATHENS_PORT takes precedence over PORT
+	if portEnv != "" && os.Getenv("ATHENS_PORT") == "" {
+		config.Port = portEnv
+	}
 	if config.Port == "" {
 		config.Port = defaultPort
 	}
 	return nil
+}
+
+func ensurePortFormat(s string) string {
+	if len(s) == 0 {
+		return ""
+	}
+	if s[0] != ':' {
+		return ":" + s
+	}
+	return s
 }
 
 func validateConfig(config Config) error {

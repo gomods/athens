@@ -2,7 +2,7 @@
 
 ![Athens Banner](./docs/static/banner.png)
 
-[![Build Status](https://travis-ci.org/gomods/athens.svg?branch=master)](https://travis-ci.org/gomods/athens)
+[![Build Status](https://cloud.drone.io/api/badges/gomods/athens/status.svg)](https://cloud.drone.io/gomods/athens)
 [![Build Status](https://dev.azure.com/gomods/athens/_apis/build/status/gomods.athens?branchName=master)](https://dev.azure.com/gomods/athens/_build/latest?definitionId=1&branchName=master)
 [![GoDoc](https://godoc.org/github.com/gomods/athens?status.svg)](https://godoc.org/github.com/gomods/athens)
 [![Go Report Card](https://goreportcard.com/badge/github.com/gomods/athens)](https://goreportcard.com/report/github.com/gomods/athens)

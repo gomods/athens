@@ -18,11 +18,13 @@ import (
 // against the interface.
 func RunTests(t *testing.T, b storage.Backend, clearBackend func() error) {
 	require.NoError(t, clearBackend(), "pre-clearing backend failed")
-	defer require.NoError(t, clearBackend(), "post-clearning backend failed")
+	defer require.NoError(t, clearBackend(), "post-clearing backend failed")
 	testNotFound(t, b)
 	testList(t, b)
+	testListSuffix(t, b)
 	testDelete(t, b)
 	testGet(t, b)
+	testExists(t, b)
 	testCatalog(t, b)
 }
 
@@ -52,6 +54,48 @@ func testNotFound(t *testing.T, b storage.Backend) {
 	_, err = b.Zip(ctx, mod, ver)
 	require.Error(t, err)
 	require.Equal(t, errors.KindNotFound, errors.Kind(err))
+}
+
+// testListPrefixes makes sure that if you have two modules, such as
+// github.com/one/two and github.com/one/two-suffix, then the versions
+// should not be mixed just because they share a similar prefix.
+func testListSuffix(t *testing.T, b storage.Backend) {
+	ctx := context.Background()
+
+	otherMod := "github.com/one/two-other"
+	mock := getMockModule()
+	err := b.Save(
+		ctx,
+		otherMod,
+		"v0.9.0",
+		mock.Mod,
+		mock.Zip,
+		mock.Info,
+	)
+	require.NoError(t, err, "Save for storage failed")
+	modname := "github.com/one/two"
+	versions := []string{"v1.1.0", "v1.2.0", "v1.3.0"}
+	for _, version := range versions {
+		mock := getMockModule()
+		err := b.Save(
+			ctx,
+			modname,
+			version,
+			mock.Mod,
+			mock.Zip,
+			mock.Info,
+		)
+		require.NoError(t, err, "Save for storage failed")
+	}
+	defer func() {
+		b.Delete(ctx, otherMod, "v0.9.0")
+		for _, ver := range versions {
+			b.Delete(ctx, modname, ver)
+		}
+	}()
+	retVersions, err := b.List(ctx, modname)
+	require.NoError(t, err)
+	require.Equal(t, versions, retVersions)
 }
 
 // testList tests that a storage Backend returns
@@ -106,6 +150,20 @@ func testGet(t *testing.T, b storage.Backend) {
 	givenZipBts, err := ioutil.ReadAll(zip)
 	require.NoError(t, err)
 	require.Equal(t, zipBts, givenZipBts)
+}
+
+func testExists(t *testing.T, b storage.Backend) {
+	ctx := context.Background()
+	modname := "getTestModule"
+	ver := "v1.2.3"
+	mock := getMockModule()
+	zipBts, _ := ioutil.ReadAll(mock.Zip)
+	b.Save(ctx, modname, ver, mock.Mod, bytes.NewReader(zipBts), mock.Info)
+	defer b.Delete(ctx, modname, ver)
+
+	exists, err := b.Exists(ctx, modname, ver)
+	require.NoError(t, err)
+	require.Equal(t, true, exists)
 }
 
 // testDelete tests that a module can be deleted from a

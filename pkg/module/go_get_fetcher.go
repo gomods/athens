@@ -167,9 +167,32 @@ func PrepareEnv(gopath string) []string {
 	noProxy := fmt.Sprintf("NO_PROXY=%s", os.Getenv("NO_PROXY"))
 	gopathEnv := fmt.Sprintf("GOPATH=%s", gopath)
 	cacheEnv := fmt.Sprintf("GOCACHE=%s", filepath.Join(gopath, "cache"))
+	gitSSH := fmt.Sprintf("GIT_SSH=%s", os.Getenv("GIT_SSH"))
+	gitSSHCmd := fmt.Sprintf("GIT_SSH_COMMAND=%s", os.Getenv("GIT_SSH_COMMAND"))
 	disableCgo := "CGO_ENABLED=0"
 	enableGoModules := "GO111MODULE=on"
-	cmdEnv := []string{pathEnv, homeEnv, gopathEnv, cacheEnv, disableCgo, enableGoModules, httpProxy, httpsProxy, noProxy}
+	cmdEnv := []string{
+		pathEnv,
+		homeEnv,
+		gopathEnv,
+		cacheEnv,
+		disableCgo,
+		enableGoModules,
+		httpProxy,
+		httpsProxy,
+		noProxy,
+		gitSSH,
+		gitSSHCmd,
+	}
+
+	if sshAuthSockVal, hasSSHAuthSock := os.LookupEnv("SSH_AUTH_SOCK"); hasSSHAuthSock {
+		// Verify that the ssh agent unix socket exists and is a unix socket.
+		st, err := os.Stat(sshAuthSockVal)
+		if err == nil && st.Mode()&os.ModeSocket != 0 {
+			sshAuthSock := fmt.Sprintf("SSH_AUTH_SOCK=%s", sshAuthSockVal)
+			cmdEnv = append(cmdEnv, sshAuthSock)
+		}
+	}
 
 	// add Windows specific ENV VARS
 	if runtime.GOOS == "windows" {

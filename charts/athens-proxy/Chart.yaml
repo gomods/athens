@@ -1,6 +1,6 @@
 name: athens-proxy
-version: 0.2.0
-appVersion: 0.2.0
+version: 0.2.1
+appVersion: 0.3.1
 description: The proxy server for Go modules
 icon: https://bitnami.com/assets/stacks/wordpress/img/wordpress-stack-220x234.png
 keywords:
