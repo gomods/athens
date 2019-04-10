@@ -1,4 +1,4 @@
-FROM golang:1.12-windowsservercore-1803
+FROM gomods.azurecr.io/athens-win-test:1038
 
 RUN powershell New-Item C:\tests -ItemType directory
 
