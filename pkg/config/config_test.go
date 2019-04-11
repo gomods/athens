@@ -117,6 +117,34 @@ func TestEnvOverridesPreservingPort(t *testing.T) {
 	}
 }
 
+func TestEnvOverridesPORT(t *testing.T) {
+	conf := &Config{Port: ""}
+	oldVal := os.Getenv("PORT")
+	defer os.Setenv("PORT", oldVal)
+	os.Setenv("PORT", "5000")
+	err := envOverride(conf)
+	if err != nil {
+		t.Fatalf("Env override failed: %v", err)
+	}
+	if conf.Port != "5000" {
+		t.Fatalf("expected PORT env to be 5000 but got %v", conf.Port)
+	}
+}
+
+func TestEnsurePortFormat(t *testing.T) {
+	port := "3000"
+	expected := ":3000"
+	given := ensurePortFormat(port)
+	if given != expected {
+		t.Fatalf("expected ensurePortFormat to add a colon to %v but got %v", port, given)
+	}
+	port = ":3000"
+	given = ensurePortFormat(port)
+	if given != expected {
+		t.Fatalf("expected ensurePortFormat to not add a colon when it's present but got %v", given)
+	}
+}
+
 func TestStorageEnvOverrides(t *testing.T) {
 	expStorage := &StorageConfig{
 		Disk: &DiskConfig{

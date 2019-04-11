@@ -71,8 +71,8 @@ StorageType = "memory"
 #TLSKeyFile = "server.key"
 
 # Port sets the port the proxy listens on
-# Env override: ATHENS_PORT
-# Note that PORT needs to be prefixed by :
+# Env override: ATHENS_PORT or PORT
+# The PORT must be a number or a number prefixed by ":"
 Port = ":3000"
 
 # The endpoint for a package registry in case of a proxy cache miss
