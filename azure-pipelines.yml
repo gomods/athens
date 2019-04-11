@@ -12,8 +12,8 @@ variables:
 steps:
 - powershell: |
     choco install azure-cli
-    & "C:\Program Files (x86)\Microsoft SDKs\Azure\CLI2\wbin\az.cmd" login --service-principal -u $(acr-appId) -p $(acr-password) --tenant $(acr-tenant)
-    & "C:\Program Files (x86)\Microsoft SDKs\Azure\CLI2\wbin\az.cmd" acr login --name $(acrRegistryName)
+    #& "C:\Program Files (x86)\Microsoft SDKs\Azure\CLI2\wbin\az.cmd" login --service-principal -u $(acr-appId) -p $(acr-password) --tenant $(acr-tenant)
+    #& "C:\Program Files (x86)\Microsoft SDKs\Azure\CLI2\wbin\az.cmd" acr login --name $(acrRegistryName)
     docker-compose -p athensunit up --exit-code-from=testunit-win --build testunit-win
   displayName: 'Unit tests'
 
