@@ -249,20 +249,20 @@ for use by the root user
 $ mkdir -p storage
 $ ATHENS_STORAGE=storage
 $ docker run --rm -d \
-    -v $(pwd)/$ATHENS_STORAGE:/var/lib/athens \
-    -v $(pwd)/gitconfig/.gitconfig:/root/.gitconfig \
-    -v $(pwd)/ssh-keys:/root/.ssh \
+    -v "$PWD/$ATHENS_STORAGE:/var/lib/athens" \
+    -v "$PWD/gitconfig/.gitconfig:/root/.gitconfig" \
+    -v "$PWD/ssh-keys:/root/.ssh" \
     -e ATHENS_DISK_STORAGE_ROOT=/var/lib/athens -e ATHENS_STORAGE_TYPE=disk --name athens-proxy -p 3000:3000 gomods/athens:canary
 ```
 
-`$(pwd)/gitconfig/.gitconfig` contains the http to ssh rewrite rule
+`$PWD/gitconfig/.gitconfig` contains the http to ssh rewrite rule
 
 ```
 [url "ssh://git@git.example.com:7999"]
 	insteadOf = https://git.example.com/scm
 ```
 
-`$(pwd)/ssh-keys` contains the aforementioned private key and a minimal ssh-config
+`$PWD/ssh-keys` contains the aforementioned private key and a minimal ssh-config
 
 ```bash
 $ ls ssh-keys/
@@ -272,7 +272,7 @@ config		id_rsa
 We also provide an ssh config to bypass host SSH key verification
 and to show how to bind different hosts to different SSH keys
 
-`$(pwd)/ssh-keys/config` contains
+`$PWD/ssh-keys/config` contains
 
 ```
 Host git.example.com
@@ -300,9 +300,9 @@ $ mkdir -p storage
 $ ssh-add .ssh/id_rsa_something
 $ ATHENS_STORAGE=storage
 $ docker run --rm -d \
-    -v $(pwd)/$ATHENS_STORAGE:/var/lib/athens \
-    -v $(pwd)/gitconfig/.gitconfig:/root/.gitconfig \
-    -v "${SSH_AUTH_SOCK}":/.ssh_agent_sock \
+    -v "$PWD/$ATHENS_STORAGE:/var/lib/athens" \
+    -v "$PWD/gitconfig/.gitconfig:/root/.gitconfig" \
+    -v "${SSH_AUTH_SOCK}:/.ssh_agent_sock" \
     -e "SSH_AUTH_SOCK=/.ssh_agent_sock" \
     -e ATHENS_DISK_STORAGE_ROOT=/var/lib/athens -e ATHENS_STORAGE_TYPE=disk --name athens-proxy -p 3000:3000 gomods/athens:canary
 ```
