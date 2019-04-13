@@ -19,6 +19,7 @@ services:
       context: .
       dockerfile: Dockerfile.win.test
     command: go test -mod=vendor ./...
+    isolation: 'hyperv'
     environment:
       - GO_ENV=test
       - GO111MODULE=on
