@@ -123,8 +123,8 @@ func TestEnvOverridesPORT(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Env override failed: %v", err)
 	}
-	if conf.Port != "5000" {
-		t.Fatalf("expected PORT env to be 5000 but got %v", conf.Port)
+	if conf.Port != ":5000" {
+		t.Fatalf("expected PORT env to be :5000 but got %v", conf.Port)
 	}
 }
 
