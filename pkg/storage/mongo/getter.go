@@ -19,7 +19,9 @@ func (s *ModuleStore) Info(ctx context.Context, module, vsn string) ([]byte, err
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 	c := s.client.Database(s.db).Collection(s.coll)
+
 	result := &storage.Module{}
+
 	tctx, cancel := context.WithTimeout(ctx, s.timeout)
 	defer cancel()
 
@@ -28,7 +30,7 @@ func (s *ModuleStore) Info(ctx context.Context, module, vsn string) ([]byte, err
 		return nil, errors.E(op, queryErr, errors.M(module), errors.V(vsn))
 	}
 
-	if err := queryResult.Decode(result); err != nil {
+	if err := queryResult.Decode(&result); err != nil {
 		kind := errors.KindUnexpected
 		if err == mongo.ErrNoDocuments {
 			kind = errors.KindNotFound

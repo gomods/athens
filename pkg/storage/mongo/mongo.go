@@ -107,9 +107,9 @@ func (m *ModuleStore) newClient(conf *config.MongoConfig) (*mongo.Client, error)
 		}
 
 		tlsConfig.ClientCAs = roots
+		clientOptions = clientOptions.SetTLSConfig(tlsConfig)
 	}
-
-	clientOptions = clientOptions.SetTLSConfig(tlsConfig).SetConnectTimeout(m.timeout)
+	clientOptions = clientOptions.SetConnectTimeout(m.timeout)
 	client, err := mongo.NewClient(clientOptions)
 	if err != nil {
 		return nil, err
