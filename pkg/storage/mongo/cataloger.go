@@ -36,7 +36,7 @@ func (s *ModuleStore) Catalog(ctx context.Context, token string, pageSize int) (
 	var errs error
 	for cursor.Next(ctx) {
 		var module storage.Module
-		if err := cursor.Decode(module); err != nil {
+		if err := cursor.Decode(&module); err != nil {
 			errs = multierror.Append(errs, err)
 		} else {
 			modules = append(modules, module)
