@@ -2,7 +2,6 @@ package mongo
 
 import (
 	"context"
-	"fmt"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/paths"
 	"github.com/gomods/athens/pkg/storage"
@@ -43,7 +42,6 @@ func (s *ModuleStore) Catalog(ctx context.Context, token string, pageSize int) (
 	for cursor.Next(ctx) {
 		var module storage.Module
 		if err := cursor.Decode(&module); err != nil {
-			fmt.Println(module)
 			errs = multierror.Append(errs, err)
 		} else {
 			modules = append(modules, module)
