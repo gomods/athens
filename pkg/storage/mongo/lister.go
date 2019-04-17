@@ -19,7 +19,7 @@ func (s *ModuleStore) List(ctx context.Context, moduleName string) ([]string, er
 	defer span.End()
 	c := s.client.Database(s.db).Collection(s.coll)
 	projection := bson.M{"version": 1, "_id": 0}
-	query := bson.D{{"module", moduleName}}
+	query := bson.M{"module": moduleName}
 	tctx, cancel := context.WithTimeout(ctx, s.timeout)
 	defer cancel()
 
