@@ -44,7 +44,6 @@ type Config struct {
 	SingleFlightType string `envconfig:"ATHENS_SINGLE_FLIGHT_TYPE"`
 	SingleFlight     *SingleFlight
 	Storage          *StorageConfig
-	Insecure         bool
 }
 
 // Load loads the config from a file.

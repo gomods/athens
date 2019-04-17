@@ -40,8 +40,8 @@ require (
 	github.com/smartystreets/goconvey v0.0.0-20180222194500-ef6db91d284a // indirect
 	github.com/spf13/afero v1.1.2
 	github.com/stretchr/testify v1.3.0
-	github.com/tidwall/pretty v0.0.0-20180105212114-65a9db5fad51 // indirect
 	github.com/technosophos/moniker v0.0.0-20180509230615-a5dbd03a2245
+	github.com/tidwall/pretty v0.0.0-20180105212114-65a9db5fad51 // indirect
 	github.com/tinylib/msgp v1.0.2 // indirect
 	github.com/unrolled/secure v0.0.0-20181221173256-0d6b5bb13069
 	github.com/xdg/scram v0.0.0-20180814205039-7eeb5667e42c // indirect

@@ -30,7 +30,7 @@ func getStorage(tb testing.TB) *ModuleStore {
 	if url == "" {
 		tb.SkipNow()
 	}
-	backend, err := NewStorage(&config.MongoConfig{URL: url}, config.GetTimeoutDuration(300), false)
+	backend, err := NewStorage(&config.MongoConfig{URL: url}, config.GetTimeoutDuration(300))
 	require.NoError(tb, err)
 
 	return backend
