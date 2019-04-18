@@ -1,24 +1,25 @@
 package mongo
 
 import (
+	"context"
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
 	"io/ioutil"
-	"net"
 	"strings"
 	"time"
 
-	"github.com/globalsign/mgo"
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/errors"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 // ModuleStore represents a mongo backed storage backend.
 type ModuleStore struct {
-	s        *mgo.Session
-	d        string // database
-	c        string // collection
+	client   *mongo.Client
+	db       string // database
+	coll     string // collection
 	url      string
 	certPath string
 	insecure bool // Only to be used for development instances
@@ -32,9 +33,16 @@ func NewStorage(conf *config.MongoConfig, timeout time.Duration) (*ModuleStore, 
 	if conf == nil {
 		return nil, errors.E(op, "No Mongo Configuration provided")
 	}
-	ms := &ModuleStore{url: conf.URL, certPath: conf.CertPath, timeout: timeout}
+	ms := &ModuleStore{url: conf.URL, certPath: conf.CertPath, timeout: timeout, insecure: conf.InsecureConn}
+	client, err := ms.newClient(conf)
+	ms.client = client
 
-	err := ms.connect(conf)
+	if err != nil {
+		return nil, errors.E(op, err)
+	}
+
+	_, err = ms.connect(conf)
+
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
@@ -42,54 +50,48 @@ func NewStorage(conf *config.MongoConfig, timeout time.Duration) (*ModuleStore, 
 	return ms, nil
 }
 
-func (m *ModuleStore) connect(conf *config.MongoConfig) error {
+func (m *ModuleStore) connect(conf *config.MongoConfig) (*mongo.Collection, error) {
 	const op errors.Op = "mongo.connect"
 
 	var err error
-	m.s, err = m.newSession(m.timeout, m.insecure, conf)
+	err = m.client.Connect(context.Background())
 
 	if err != nil {
-		return errors.E(op, err)
+		return nil, errors.E(op, err)
 	}
 
-	return m.initDatabase()
+	return m.initDatabase(), nil
 }
 
-func (m *ModuleStore) initDatabase() error {
-	m.c = "modules"
+func (m *ModuleStore) initDatabase() *mongo.Collection {
+	// TODO: database and collection as env vars, or params to New()? together with user/mongo
+	m.db = "athens"
+	m.coll = "modules"
 
-	index := mgo.Index{
-		Key:        []string{"base_url", "module", "version"},
-		Unique:     true,
-		Background: true,
-		Sparse:     true,
-	}
-	c := m.s.DB(m.d).C(m.c)
-	return c.EnsureIndex(index)
+	c := m.client.Database(m.db).Collection(m.coll)
+	indexView := c.Indexes()
+	keys := make(map[string]int)
+	keys["base_url"] = 1
+	keys["module"] = 1
+	keys["version"] = 1
+	indexOptions := options.Index().SetBackground(true).SetSparse(true).SetUnique(true)
+	indexView.CreateOne(context.Background(), mongo.IndexModel{Keys: keys, Options: indexOptions}, options.CreateIndexes())
+
+	return c
 }
 
-func (m *ModuleStore) newSession(timeout time.Duration, insecure bool, conf *config.MongoConfig) (*mgo.Session, error) {
+func (m *ModuleStore) newClient(conf *config.MongoConfig) (*mongo.Client, error) {
 	tlsConfig := &tls.Config{}
-
-	dialInfo, err := mgo.ParseURL(m.url)
-	if err != nil {
-		return nil, err
-	}
-
-	dialInfo.Timeout = timeout
-
-	if dialInfo.Database != "" {
-		m.d = dialInfo.Database
-	} else {
-		m.d = conf.DefaultDBName
-	}
+	clientOptions := options.Client()
+	// Maybe check for error using Validate()?
+	clientOptions = clientOptions.ApplyURI(m.url)
 
 	if m.certPath != "" {
 		// Sets only when the env var is setup in config.dev.toml
-		tlsConfig.InsecureSkipVerify = insecure
+		tlsConfig.InsecureSkipVerify = m.insecure
 		var roots *x509.CertPool
 		// See if there is a system cert pool
-		roots, err = x509.SystemCertPool()
+		roots, err := x509.SystemCertPool()
 		if err != nil {
 			// If there is no system cert pool, create a new one
 			roots = x509.NewCertPool()
@@ -105,13 +107,15 @@ func (m *ModuleStore) newSession(timeout time.Duration, insecure bool, conf *con
 		}
 
 		tlsConfig.ClientCAs = roots
-
-		dialInfo.DialServer = func(addr *mgo.ServerAddr) (net.Conn, error) {
-			return tls.Dial("tcp", addr.String(), tlsConfig)
-		}
+		clientOptions = clientOptions.SetTLSConfig(tlsConfig)
+	}
+	clientOptions = clientOptions.SetConnectTimeout(m.timeout)
+	client, err := mongo.NewClient(clientOptions)
+	if err != nil {
+		return nil, err
 	}
 
-	return mgo.DialWithInfo(dialInfo)
+	return client, nil
 }
 
 func (m *ModuleStore) gridFileName(mod, ver string) string {

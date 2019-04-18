@@ -5,4 +5,4 @@
 set -euo pipefail
 
 GO_FILES=$(find . -iname '*.go' -type f | grep -v /vendor/)   # All the .go files, excluding vendor/
-test -z $(gofmt -s -l $GO_FILES | tee /dev/stderr)
+test -z $(gofmt -s -d $GO_FILES | tee /dev/stderr)
