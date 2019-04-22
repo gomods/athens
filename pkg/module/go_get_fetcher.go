@@ -165,6 +165,10 @@ func PrepareEnv(gopath string) []string {
 	httpProxy := fmt.Sprintf("HTTP_PROXY=%s", os.Getenv("HTTP_PROXY"))
 	httpsProxy := fmt.Sprintf("HTTPS_PROXY=%s", os.Getenv("HTTPS_PROXY"))
 	noProxy := fmt.Sprintf("NO_PROXY=%s", os.Getenv("NO_PROXY"))
+	// need to also check the lower case version of just these three env variables
+	httpProxyLower := fmt.Sprintf("http_proxy=%s", os.Getenv("http_proxy"))
+	httpsProxyLower := fmt.Sprintf("https_proxy=%s", os.Getenv("https_proxy"))
+	noProxyLower := fmt.Sprintf("no_proxy=%s", os.Getenv("no_proxy"))
 	gopathEnv := fmt.Sprintf("GOPATH=%s", gopath)
 	cacheEnv := fmt.Sprintf("GOCACHE=%s", filepath.Join(gopath, "cache"))
 	gitSSH := fmt.Sprintf("GIT_SSH=%s", os.Getenv("GIT_SSH"))
@@ -181,6 +185,9 @@ func PrepareEnv(gopath string) []string {
 		httpProxy,
 		httpsProxy,
 		noProxy,
+		httpProxyLower,
+		httpsProxyLower,
+		noProxyLower,
 		gitSSH,
 		gitSSHCmd,
 	}
