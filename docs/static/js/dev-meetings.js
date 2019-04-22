@@ -15,15 +15,6 @@ const nextThurs20 = new Date(Date.UTC(
     20
 ));
 
-
-// get next thursday in moment format for each time
-// (so that we can more easily print it out)
-const time20 = moment().
-    year(nextThurs20.getFullYear()).
-    month(nextThurs20.getMonth()).
-    date(nextThurs20.getDate()).
-    hour(nextThurs20.getHours()).
-    minute(nextThurs20.getMinutes());
 const time22 = moment().
     year(nextThurs22.getFullYear()).
     month(nextThurs22.getMonth()).
@@ -47,9 +38,3 @@ if (time22.day() == 4) {
 } else {
     time22ID.innerHTML = time22Str + " (Friday)";
 }
-// const tz = jstz.guess();
-// console.log("you are in timezone " + tz.name());
-// var utc20 = moment(now).hour(20);
-// var utc22 = moment().hour(22);
-// time20.innerHTML = utc20.add(6).format("hz");
-// time22.innerHTML = utc22.add(6).format("hz");
