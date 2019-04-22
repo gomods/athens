@@ -85,6 +85,17 @@ Port = ":3000"
 # that contains the letter `D` (for "Direct Access") in the first line.
 GlobalEndpoint = "http://localhost:3001"
 
+# Enables webhooks that allow you to two things outside of the standard 
+# module download protocol:
+#
+#   - Trigger Athens to download a module asynchronously, without downloading
+#       any module code or metadata yourself
+#   - Tell Athens that a vanity module path is backed by a given VCS path.
+#       When you do this, Athens will download at the version in the /@latest
+#       endpoint for the given VCS path, store it, and register the given VCS
+#       path with the vanity domain forever
+EnableWebhooks = false
+
 # BASIC AUTH OPTIONS 
 # ==================
 # PLASE NOTE THAT THIS IS A BAD HACK AROUND 

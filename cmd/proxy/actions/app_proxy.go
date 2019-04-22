@@ -73,6 +73,9 @@ func addProxyRoutes(
 	handlerOpts := &download.HandlerOpts{Protocol: dp, Logger: l}
 	download.RegisterHandlers(r, handlerOpts)
 
+	if c.EnableWebhooks {
+		download.AddWebhookHandlers(r, handlerOpts)
+	}
 	return nil
 }
 

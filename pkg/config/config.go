@@ -42,6 +42,7 @@ type Config struct {
 	TLSCertFile      string `envconfig:"ATHENS_TLSCERT_FILE"`
 	TLSKeyFile       string `envconfig:"ATHENS_TLSKEY_FILE"`
 	SingleFlightType string `envconfig:"ATHENS_SINGLE_FLIGHT_TYPE"`
+	EnableWebhooks   bool   `envconfig:"ATHENS_ENABLE_WEBHOOKS" default:"false"`
 	SingleFlight     *SingleFlight
 	Storage          *StorageConfig
 }
