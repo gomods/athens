@@ -5,9 +5,8 @@ clone_folder: c:\gopath\src\github.com\gomods\athens
 environment:
   GOPATH: c:\gopath
   GO111MODULE: on
-  CGO_ENABLED: 0
 
 stack: go 1.12
 
 test_script:
-  - go test -mod=vendor -race ./...
+  - go test -mod=vendor ./...
