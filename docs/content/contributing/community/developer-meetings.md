@@ -2,31 +2,41 @@
 title: "Developer Meetings"
 date: 2018-09-28T10:40:50-07:00
 weight: 3
-
 ---
 
-We hold our weekly developer meetings every Thursday at 11am US Pacific Time. They start with a quick update on the project from the maintainers, and then we discuss things on the agenda.
+Every Thursday, Athens developers get together for one hour on a video chat to discuss the state of the project, and any specific development topics that are going on.
 
-Absolutely everyone is invited to attend, suggest topics for the agenda, and participate! You don’t have to be a contributor or maintainer to show up and share your perspective, ideas, feelings, etc.
+We meet at this [zoom](https://zoom.us/) video Chat URL: [https://aka.ms/athensdevzoom](https://aka.ms/athensdevzoom)
 
-### Meeting Details
+>**Absolutely everybody is welcome to attend these meetings, suggest topics to talk about, share your perspective, and participate as little or much as they'd like**.
+>
+>You don't have to be a contributor to attend
 
-They're every Thursday at 11am to 12pm US Pacific Time and you can join the meeting here by following this link: [https://aka.ms/athensdevzoom](https://aka.ms/athensdevzoom)
+## Meeting Details
 
-### Agenda
+We rotate the time of the meeting weekly, so that as many people as possible get a chance to attend the meeting at a time appropriate for their time zone. The rotation of times is below:
+
+- Thursday on odd week numbers of each month: 22:00 UTC (<span id="time22"></span> locally)
+- Thursday on even week numbers of each month: 20:00 UTC (<span id="time20"></span> locally)
+
+Each developer meeting starts with a quick update on the project from the maintainers, and then we discuss things on the agenda.
+
+>All developer meetings happen using the [zoom](https://zoom.us) software. Before you come to the meeting, please make sure you have installed the zoom client using this link: https://zoom.us/support/download.
+
+## Agenda
 
 The [agenda google doc](https://docs.google.com/document/d/1xpvgmR1Fq4iy1j975Tb4H_XjeXUQUOAvn0FximUzvIk/edit#heading=h.f24qbjkyfv6v)
- is where you'll can suggest topics and look at all the topics discussed in previous meetings.
-
-If you want to suggest a topic, just add a bullet point (under the appropriate meeting day) with your first name and the topic.
-
-Here's an example of how to suggest a topic:
+ is where we keep track of what to talk about each week. Anybody can edit it, so if you want to talk about a topic, write it down in a bullet point under the appropriate week, and we'll talk about it if time permits. Please follow these guidelines when you add your topic:
+ 
+- If there are already topics listed, please add yours to the bottom of the list
+- If the date of the next meeting is not listed, please add it as a heading above all the previous dates. Copy the format of the previous date when you add it
+ 
+ Here's an example of how to suggest a topic:
 
 > * (Bob) Let’s talk about something cool!
-
 > * (Alice) Let’s talk about cool thing #2!
 
-### Past Meetings
-
-Don't worry if you can't make them but want to catch up! All past development meetings available on [YouTube](https://www.youtube.com/playlist?list=PLAk08AWjk5sekD-FRjU4VVe97nltUyZ4W).
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.23/moment-timezone.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jstimezonedetect/1.0.4/jstz.min.js"></script>
+<script src="/js/dev-meetings.js"></script>
