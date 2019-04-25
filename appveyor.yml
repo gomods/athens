@@ -1,7 +1,11 @@
-version: 1.0.{build}
-image: Visual Studio 2017
+build: off
 
-build_script:
-    - ps: |
-        Get-NetNat | Remove-NetNat
-        docker-compose -p athensunit up --exit-code-from=testunit-win --build testunit-win
+clone_folder: c:\gopath\src\github.com\$username\$project
+
+environment:
+  GOPATH: c:\gopath
+
+stack: go 1.12
+
+test_script:
+  - go test -mod=vendor -race ./...
