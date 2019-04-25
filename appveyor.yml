@@ -2,4 +2,5 @@ version: 1.0.{build}
 image: Visual Studio 2017
 
 build_script:
+  - Get-NetNat | Remove-NetNat
   - docker-compose -p athensunit up --exit-code-from=testunit-win --build testunit-win
