@@ -68,6 +68,9 @@ jaeger:
   # for example, you need to run 'helm install --set jaeger.url=myurl ...'
   url: "SET THIS ON THE COMMAND LINE"
 
+serviceAccount:
+  create: false
+
 nodeSelector: {}
 
 tolerations: []
