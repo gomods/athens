@@ -71,6 +71,9 @@ jaeger:
 serviceAccount:
   create: false
 
+rbac:
+  create: false
+
 nodeSelector: {}
 
 tolerations: []
