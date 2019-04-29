@@ -73,13 +73,13 @@ func (p *protocol) List(ctx context.Context, mod string) ([]string, error) {
 	wg.Add(2)
 
 	go func() {
-		defer wg.Done()
 		strList, sErr = p.storage.List(ctx, mod)
+		wg.Done()
 	}()
 
 	go func() {
-		defer wg.Done()
 		_, goList, goErr = p.lister.List(ctx, mod)
+		wg.Done()
 	}()
 
 	wg.Wait()
