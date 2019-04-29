@@ -11,7 +11,7 @@ COPY . .
 ARG VERSION="unset"
 
 RUN DATE="$(date -u +%Y-%m-%d-%H:%M:%S-%Z)" && \
-	CGO_ENABLED=0 go build -mod=vendor -ldflags "-X github.com/gomods/athens/pkg/build.version=$VERSION -X github.com/gomods/athens/pkg/build.buildDate=$DATE" -o /bin/athens-proxy ./cmd/proxy
+	go build -mod=vendor -ldflags "-X github.com/gomods/athens/pkg/build.version=$VERSION -X github.com/gomods/athens/pkg/build.buildDate=$DATE" -o /bin/athens-proxy ./cmd/proxy
 
 # Add tini, see https://github.com/gomods/athens/issues/1155 for details.
 ENV TINI_VERSION v0.18.0
