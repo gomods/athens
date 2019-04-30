@@ -28,7 +28,6 @@ function teardown () {
   if ($origGOPATH) {$env:GOPATH = $origGOPATH} else {Remove-Item env:GOPATH}
   if ($origGOPROXY) {$env:GOPROXY = $origGOPROXY} else {Remove-Item env:GOPROXY}
   if ($origGO111MODULE) {$env:GO111MODULE = $origGO111MODULE} else {Remove-Item env:GO111MODULE}
-  # stop buffalo
   stopProcesses
   # clear test gopath
   Get-ChildItem -Path $testGoPath -Recurse | Remove-Item -Recurse -Force -Confirm:$false
