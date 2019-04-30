@@ -168,6 +168,7 @@ func envOverride(config *Config) error {
 	if config.Port == "" {
 		config.Port = defaultPort
 	}
+	config.Port = ensurePortFormat(config.Port)
 	return nil
 }
 
