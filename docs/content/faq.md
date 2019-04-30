@@ -74,5 +74,4 @@ To try out tracing with Jaeger, do the following:
 - Run the walkthrough tutorial
 - Open `http://localhost:16686/search`
 
-Observability is not a hard requirement for the Athens proxy. So, if the infrastructure is not properly set up, they will fail with an information log. For eg. if Jaeger is not running / if the wrong URL to the exporter is provided, proxy will continue to run. However, it will not collect any traces or metrics (when the exporter backend is unavailable).
-
+Observability is not a hard requirement for the Athens proxy. So, if the infrastructure is not properly set up, it will fail with an information log. For example, if Jaeger is not running or if the wrong URL to the exporter is provided, the proxy will continue to run. However, it will not collect any traces or metrics while the exporter backend is unavailable.
