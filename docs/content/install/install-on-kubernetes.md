@@ -94,12 +94,6 @@ $ helm install gomods/athens-proxy -n athens --namespace athens
 
 This will deploy a single Athens instance in the `default` namespace with `disk` storage enabled. Additionally, a `ClusterIP` service will be created.
 
-By default, the chart will install Athens with a replica count of 1. To change this, change the `replicaCount` value:
-
-```console
-helm install gomods/athens-proxy -n athens --namespace athens --set replicaCount=3
-```
-
 ## Advanced Configuration
 
 ### Replicas
