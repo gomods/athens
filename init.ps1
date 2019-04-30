@@ -72,7 +72,6 @@ if ($build.IsPresent) {
 
 if ($run.IsPresent) {
 	Set-Location $(Join-Path cmd proxy)
-	& buffalo dev
 }
 
 if ($docs.IsPresent) {
@@ -101,7 +100,6 @@ if ($dev.IsPresent) {
 if ($test.IsPresent) {
 	try {
 		Push-Location  $(Join-Path cmd proxy)
-		& buffalo test
 	}
 	finally {
 		Pop-Location
