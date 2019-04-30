@@ -2,4 +2,3 @@
 # Ensure that the tools needed to build locally are present
 
 & go get github.com/golang/lint/golint
-& go get github.com/gobuffalo/buffalo/buffalo
