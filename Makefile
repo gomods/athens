@@ -41,10 +41,6 @@ verify:
 	./scripts/check_deps.sh
 	./scripts/check_conflicts.sh
 
-.PHONY: test
-test:
-	cd cmd/proxy && buffalo test
-
 .PHONY: test-unit
 test-unit:
 	./scripts/test_unit.sh
