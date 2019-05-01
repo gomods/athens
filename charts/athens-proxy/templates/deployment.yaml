@@ -36,6 +36,12 @@ spec:
             path: "{{ template "readinessPath" . }}"
             port: 3000
         env:
+        - name: ATHENS_GOGET_WORKERS
+        {{ if .Values.goGetWorkers -}}
+          value: {{ .Values.goGetWorkers }}
+        {{ else -}}
+          value: 3
+        {{ end }}
         - name: ATHENS_STORAGE_TYPE
           value: {{ .Values.storage.type | quote }}
         {{- if eq .Values.storage.type "disk"}}
