@@ -8,7 +8,7 @@ weight: 5
 
 ### 客户端
 
-客户端必须是一个支持 module 的 go.编写该文档时，它是 `go1.11`
+客户端必须是一个支持 module 的 go.编写该文档时，它是 [Go v1.12+](https://golang.org/dl).
 
 ### VCS
 
