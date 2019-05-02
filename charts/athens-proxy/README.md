@@ -46,3 +46,24 @@ Available options:
 - [Ingress Resource](https://docs.gomods.io/install/install-on-kubernetes/#ingress-resource)
 - [Upstream module repository](https://docs.gomods.io/install/install-on-kubernetes/#upstream-module-repository)
 - [.netrc file support](https://docs.gomods.io/install/install-on-kubernetes/#netrc-file-support)
+
+## Private git servers over ssh support
+
+One or more of git servers can added to `sshGitServers`, and the corresponding config files (git config and ssh config) and ssh keys will be created. Athens then will use these configs and keys to download the source from the git servers.
+
+```yaml
+sshGitServers: 
+  ## Private git servers over ssh
+  ## to enable uncomment lines with single hash below
+  ## hostname of the git server
+  - host: git.example.com
+    ## ssh username
+    user: git
+    ## ssh private key for the user
+    privateKey: |
+      -----BEGIN RSA PRIVATE KEY-----
+      ...
+      -----END RSA PRIVATE KEY-----
+    ## ssh port
+    port: 22
+```
