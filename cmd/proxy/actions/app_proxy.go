@@ -11,6 +11,7 @@ import (
 	"github.com/gomods/athens/pkg/module"
 	"github.com/gomods/athens/pkg/stash"
 	"github.com/gomods/athens/pkg/storage"
+	"github.com/gomods/athens/pkg/webhooks"
 	"github.com/gorilla/mux"
 	"github.com/spf13/afero"
 )
@@ -74,7 +75,7 @@ func addProxyRoutes(
 	download.RegisterHandlers(r, handlerOpts)
 
 	if c.EnableWebhooks {
-		download.AddWebhookHandlers(r, handlerOpts)
+		webhooks.RegisterHandlers(r, handlerOpts)
 	}
 	return nil
 }
