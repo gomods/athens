@@ -56,7 +56,7 @@ CONTAINER ID        IMAGE                               COMMAND           PORTS 
 f0429b81a4f9        gomods/athens:latest   "/bin/app"        0.0.0.0:3000->3000/tcp   athens-proxy
 ```
 
-Now, we can use Athens from any development machine that has Go 1.11 installed. To verify this, try the following example:
+Now, we can use Athens from any development machine that has Go v1.12+ installed. To verify this, try the following example:
 
 **Bash**
 ```console
