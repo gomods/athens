@@ -1,0 +1,26 @@
+{{- if .Values.sshGitServers -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "fullname" . }}-ssh-git-servers
+  labels:
+    app: {{ template "fullname" . }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+data:
+  ssh_config: |
+    {{- range $server := .Values.sshGitServers }}
+    Host {{ $server.host }}
+      Hostname {{ $server.host }}
+      User {{ $server.user }}
+      Port {{ $server.port }}
+      StrictHostKeyChecking no
+      IdentityFile /ssh-keys/id_rsa-{{ $server.host }}
+    {{- end }}
+  git_config: |
+    {{- range $server := .Values.sshGitServers }}
+    [url "ssh://{{ $server.user }}@{{ $server.host }}:{{ $server.port}}"]
+      insteadOf = https://{{ $server.host }}
+    {{- end }}
+{{- end -}}

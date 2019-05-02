@@ -55,7 +55,7 @@ upstreamProxy:
   # If 'enabled' is set to true, Athens will try to download modules from the upstream when it doesn't find them in its own storage.
   # You can use 'https://gocenter.io' to use JFrog's GoCenter as an upstream here, or you can also use another Athens server as well.
   enabled: false
-  url: "https://upstreamproxy_url"
+  url: "https://gocenter.io"
 
 jaeger:
   ## Type of service; valid values are "ClusterIP", "LoadBalancer", and "NodePort".
@@ -67,6 +67,20 @@ jaeger:
   # you must set this on the command line when you run 'helm install'
   # for example, you need to run 'helm install --set jaeger.url=myurl ...'
   url: "SET THIS ON THE COMMAND LINE"
+
+sshGitServers: {}
+  ## Private git servers over ssh
+  ## to enable uncomment lines with single hash below
+  ## hostname of the git server
+  #- host: git.example.com
+    ## ssh username
+  #  user: git
+    ## ssh private key for the user
+  #  privateKey: |
+  #    -----BEGIN RSA PRIVATE KEY-----
+  #    -----END RSA PRIVATE KEY-----
+    ## ssh port
+  #  port: 22
 
 goGetWorkers: 3
 
