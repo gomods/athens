@@ -54,7 +54,7 @@ upstreamProxy:
   # This is where you can set the URL for the upstream module repository.
   # If 'enabled' is set to true, Athens will try to download modules from the upstream when it doesn't find them in its own storage.
   # You can use 'https://gocenter.io' to use JFrog's GoCenter as an upstream here, or you can also use another Athens server as well.
-  enabled: true
+  enabled: false
   url: "https://gocenter.io"
 
 jaeger:
