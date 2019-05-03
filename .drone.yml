@@ -7,7 +7,7 @@ steps:
 - name: chart-lint
   image: quay.io/helmpack/chart-testing:v2.3.3
   commands: 
-  - ct lint --config .test/ct.yaml
+  - ct lint --config ./.test/ct.yaml
   when:
     event:
       - pull_request
