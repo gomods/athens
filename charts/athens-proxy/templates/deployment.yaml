@@ -1,4 +1,4 @@
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ template "fullname" . }}
@@ -22,7 +22,26 @@ spec:
         release: "{{ .Release.Name }}"
       annotations:
         checksum/config: {{ include (print $.Template.BasePath "/config-upstream.yaml") . | sha256sum }}
+        checksum/config: {{ include (print $.Template.BasePath "/config-ssh-git-servers.yaml") . | sha256sum }}
+        checksum/secret: {{ include (print $.Template.BasePath "/secret-ssh-git-servers.yaml") . | sha256sum }}
     spec:
+      {{- if .Values.sshGitServers }}
+      initContainers:
+        - name: copy-key-files
+          image: alpine:3.9
+          command:
+            - sh
+            - -c
+          args: ["cp /root/.ssh/id_rsa* /ssh-keys && chmod 400 /ssh-keys/*"]
+          volumeMounts:
+          - name: ssh-keys
+            mountPath: /ssh-keys
+          {{- range $server := .Values.sshGitServers }}
+          - name: ssh-git-servers-secret
+            mountPath: /root/.ssh/id_rsa-{{ $server.host }}
+            subPath: id_rsa-{{ $server.host }}
+          {{- end }}
+      {{- end }}
       containers:
       - name: {{ template "fullname" . }}
         image: "{{ .Values.image.registry }}/{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -36,6 +55,12 @@ spec:
             path: "{{ template "readinessPath" . }}"
             port: 3000
         env:
+        - name: ATHENS_GOGET_WORKERS
+        {{- if .Values.goGetWorkers }}
+          value: {{ .Values.goGetWorkers }}
+        {{- else }}
+          value: 3
+        {{- end }}
         - name: ATHENS_STORAGE_TYPE
           value: {{ .Values.storage.type | quote }}
         {{- if eq .Values.storage.type "disk"}}
@@ -68,15 +93,25 @@ spec:
         - name: storage-volume
           mountPath: {{ .Values.storage.disk.storageRoot | quote }}
         {{- end }}
-        {{- if .Values.upstreamProxy.enabled}}
+        {{- if .Values.upstreamProxy.enabled }}
         - name: upstream-config
           mountPath: "/usr/local/lib"
           readOnly: true
         {{- end }}
-        {{- if .Values.netrc.enabled}}
+        {{- if .Values.netrc.enabled }}
         - name: netrc
           mountPath: "/etc/netrc"
           readOnly: true
+        {{- end }}
+        {{- if .Values.sshGitServers }}
+        - name: ssh-git-servers-config
+          mountPath: /root/.ssh/config
+          subPath: ssh_config
+        - name: ssh-git-servers-config
+          mountPath: /root/.gitconfig
+          subPath: git_config
+        - name: ssh-keys
+          mountPath: /ssh-keys
         {{- end }}
       volumes:
       - name: storage-volume
@@ -95,6 +130,16 @@ spec:
       - name: netrc
         secret:
           secretName: {{ .Values.netrc.existingSecret }}
+      {{- end }}
+      {{- if .Values.sshGitServers }}
+      - name: ssh-keys
+        emptyDir: {}
+      - name: ssh-git-servers-config
+        configMap:
+          name: {{ template "fullname" . }}-ssh-git-servers
+      - name: ssh-git-servers-secret
+        secret:
+          secretName: {{ template "fullname" . }}-ssh-git-servers
       {{- end }}
     {{- with .Values.nodeSelector }}
       nodeSelector:

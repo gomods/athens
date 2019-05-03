@@ -65,12 +65,6 @@ func (g *goGetFetcher) Fetch(ctx context.Context, mod, ver string) (*storage.Ver
 		return nil, errors.E(op, err)
 	}
 
-	// setup the module with barebones stuff
-	if err := Dummy(g.fs, modPath); err != nil {
-		ClearFiles(g.fs, goPathRoot)
-		return nil, errors.E(op, err)
-	}
-
 	m, err := downloadModule(g.goBinaryName, g.fs, goPathRoot, modPath, mod, ver)
 	if err != nil {
 		ClearFiles(g.fs, goPathRoot)
@@ -102,23 +96,6 @@ func (g *goGetFetcher) Fetch(ctx context.Context, mod, ver string) (*storage.Ver
 	storageVer.Zip = &zipReadCloser{zip, g.fs, goPathRoot}
 
 	return &storageVer, nil
-}
-
-// Dummy Hacky thing makes vgo not to complain
-func Dummy(fs afero.Fs, repoRoot string) error {
-	const op errors.Op = "module.Dummy"
-	// vgo expects go.mod file present with module statement or .go file with import comment
-	gomodPath := filepath.Join(repoRoot, "go.mod")
-	gomodContent := []byte("module mod")
-	if err := afero.WriteFile(fs, gomodPath, gomodContent, 0666); err != nil {
-		return errors.E(op, err)
-	}
-	sourcePath := filepath.Join(repoRoot, "mod.go")
-	sourceContent := []byte("package mod")
-	if err := afero.WriteFile(fs, sourcePath, sourceContent, 0666); err != nil {
-		return errors.E(op, err)
-	}
-	return nil
 }
 
 // given a filesystem, gopath, repository root, module and version, runs 'go mod download -json'
@@ -165,6 +142,10 @@ func PrepareEnv(gopath string) []string {
 	httpProxy := fmt.Sprintf("HTTP_PROXY=%s", os.Getenv("HTTP_PROXY"))
 	httpsProxy := fmt.Sprintf("HTTPS_PROXY=%s", os.Getenv("HTTPS_PROXY"))
 	noProxy := fmt.Sprintf("NO_PROXY=%s", os.Getenv("NO_PROXY"))
+	// need to also check the lower case version of just these three env variables
+	httpProxyLower := fmt.Sprintf("http_proxy=%s", os.Getenv("http_proxy"))
+	httpsProxyLower := fmt.Sprintf("https_proxy=%s", os.Getenv("https_proxy"))
+	noProxyLower := fmt.Sprintf("no_proxy=%s", os.Getenv("no_proxy"))
 	gopathEnv := fmt.Sprintf("GOPATH=%s", gopath)
 	cacheEnv := fmt.Sprintf("GOCACHE=%s", filepath.Join(gopath, "cache"))
 	gitSSH := fmt.Sprintf("GIT_SSH=%s", os.Getenv("GIT_SSH"))
@@ -181,6 +162,9 @@ func PrepareEnv(gopath string) []string {
 		httpProxy,
 		httpsProxy,
 		noProxy,
+		httpProxyLower,
+		httpsProxyLower,
+		noProxyLower,
 		gitSSH,
 		gitSSHCmd,
 	}

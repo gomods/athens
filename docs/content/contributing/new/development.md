@@ -7,16 +7,16 @@ weight: 3
 
 The proxy is written in idiomatic Go and uses standard tools. If you know Go, you'll be able to read the code and run the server.
 
-Athens uses [Go Modules](https://golang.org/cmd/go/#hdr-Modules__module_versions__and_more) for dependency management. You will need Go [v1.11](https://golang.org/dl) or later to get started on Athens.
+Athens uses [Go Modules](https://golang.org/cmd/go/#hdr-Modules__module_versions__and_more) for dependency management. You will need [Go v1.12+](https://golang.org/dl) to get started on Athens.
 
 See our [Contributing Guide](https://github.com/gomods/athens/blob/master/CONTRIBUTING.md) for tips on how to submit a pull request when you are ready.
 
 ### Go version
-Athens is developed on Go1.11+.
+Athens is developed on Go v1.12+.
 
 To point Athens to a different version of Go set the following environment variable
 ```
-GO_BINARY_PATH=go1.11.X
+GO_BINARY_PATH=go1.12.X
 # or whichever binary you want to use with athens
 ```
 
