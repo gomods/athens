@@ -9,10 +9,7 @@ steps:
   commands: 
   - ct lint --config .test/ct.yaml
   when:
-    branch:
-      - master
     event:
-      - push
       - pull_request
 
 - name: build
