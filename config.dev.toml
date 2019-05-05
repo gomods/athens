@@ -162,6 +162,19 @@ TraceExporterURL = "http://localhost:14268"
 # Env override: ATHENS_STATS_EXPORTER
 StatsExporter = "prometheus"
 
+# SumDBs specifies a list of fully qualified URLs that Athens will proxy 
+# so that the go command can use as a checksum verifier.
+# See NoSumDB for enforcing the go command to use 
+# GONOSUMDB.
+# Env override: ATHENS_SUM_DBS
+SumDBs = ["https://sum.golang.org"]
+
+# NoSumPatterns specifies a list of patterns that will make the 
+# Sum DB proxy return a 403 if any of those patterns match. 
+# This will enforce the client to run GONOSUMDB
+# Env override: ATHENS_GONOSUM_PATTERNS
+NoSumPatterns = []
+
 # SingleFlightType determines what mechanism Athens uses 
 # to manage concurrency flowing into the Athens Backend. 
 # This is important for the following scenario: if two concurrent requests 
