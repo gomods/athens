@@ -72,7 +72,7 @@ sshGitServers: {}
   ## Private git servers over ssh
   ## to enable uncomment lines with single hash below
   ## hostname of the git server
-  #- host: git.example.com
+  # - host: git.example.com
     ## ssh username
   #  user: git
     ## ssh private key for the user
