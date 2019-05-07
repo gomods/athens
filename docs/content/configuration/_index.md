@@ -34,7 +34,7 @@ So for example, if you run the following command:
 GOPORXY=<athens-url> go build
 ```
 
-The Go command will proxy a requests to `sum.golang.org` like this: `<athens-url>/sumdb/sum.golang.org`. Feel free to read the linked proposal above for the exact requests that makes Athens succesfully proxy Checksum DB APIs. 
+The Go command will proxy requests to `sum.golang.org` like this: `<athens-url>/sumdb/sum.golang.org`. Feel free to read the linked proposal above for the exact requests that makes Athens succesfully proxy Checksum DB APIs. 
 
 Note that as of this documentation (May 2019), you need to explicitly set `GOSUMDB=https://sum.golang.org`, but the Go team is planning on enabling this by defualt. 
 
