@@ -1,6 +1,6 @@
 {{- if .Values.ingress.enabled }}
 {{- range .Values.ingress.hosts }}
-  http://{{ . }}
+  https://{{ . }}
 {{- end }}
 {{- else if contains "NodePort" .Values.service.type }}
   export NODE_PORT=$(kubectl get --namespace {{ .Release.Namespace }} -o jsonpath="{.spec.ports[0].nodePort}" services {{ template "fullname" . }})
