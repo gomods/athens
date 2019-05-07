@@ -31,7 +31,7 @@ Athens by defualt will accept proxying `https://sum.golang.org`. However, if you
 So for example, if you run the following command: 
 
 ```bash
-GOPORXY=<athens-url> go build
+GOPROXY=<athens-url> go build
 ```
 
 The Go command will proxy requests to `sum.golang.org` like this: `<athens-url>/sumdb/sum.golang.org`. Feel free to read the linked proposal above for the exact requests that makes Athens successfully proxy Checksum DB APIs. 
