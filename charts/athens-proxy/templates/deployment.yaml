@@ -57,9 +57,9 @@ spec:
         env:
         - name: ATHENS_GOGET_WORKERS
         {{- if .Values.goGetWorkers }}
-          value: {{ .Values.goGetWorkers }}
+          value: {{ .Values.goGetWorkers | quote }}
         {{- else }}
-          value: 3
+          value: "3"
         {{- end }}
         - name: ATHENS_STORAGE_TYPE
           value: {{ .Values.storage.type | quote }}
