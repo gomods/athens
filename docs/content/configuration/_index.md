@@ -53,7 +53,7 @@ GONOSUMDB=github.com/mycompany/* go build
 ```
 
 This will make sure that Go does not send any requests to the Checksum DB for your private import paths. 
-However, how can you ensure that all of your employees are building private code with the right confiugration? 
+However, how can you ensure that all of your employees are building private code with the right configuration? 
 
 Athens, in this case can help ensure that all private code flowing through it never goes to the Checksum DB. So as long as your employees are using Athens, then they will get a helpful reminder to ensure Their GONOSUMDB is rightly configured. 
 
