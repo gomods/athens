@@ -9,4 +9,6 @@ keywords:
 home: https://github.com/gomods/athens
 sources:
 maintainers:
+- rimusz
+- arschles
 engine: gotpl
