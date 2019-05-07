@@ -46,7 +46,7 @@ The reasons for needing a Checksum DB is explained in the linked proposal above.
 
 This is quite important. Say you are a company that is running an Athens instance, and you don't want the world to konw about where your 
 repositories live. For example, say you have a private repo under `github.com/mycompany/secret-repo`. In order to ensure that the Go client 
-does not send a request to `https://sum.golang.org/look/github.com/mycompany/secret-repo@v1.0.0` and therefore leaking your private import path to the public, you need to ensure that you tell Go to skip particular import paths as such: 
+does not send a request to `https://sum.golang.org/lookup/github.com/mycompany/secret-repo@v1.0.0` and therefore leaking your private import path to the public, you need to ensure that you tell Go to skip particular import paths as such: 
 
 ```
 GONOSUMDB=github.com/mycompany/* go build
