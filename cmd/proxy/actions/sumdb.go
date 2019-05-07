@@ -14,7 +14,6 @@ func sumdbPoxy(url *url.URL, nosumPatterns []string) http.Handler {
 		req.Host = url.Host
 		req.URL.Scheme = url.Scheme
 		req.URL.Host = url.Host
-		req.URL.Path = strings.Replace(req.URL.Path, "/sumdb/"+url.Host, "", 1)
 	}
 	if len(nosumPatterns) > 0 {
 		return noSumWrapper(rp, url.Host, nosumPatterns)
