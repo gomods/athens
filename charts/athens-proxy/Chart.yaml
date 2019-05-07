@@ -9,6 +9,8 @@ keywords:
 home: https://github.com/gomods/athens
 sources:
 maintainers:
-- rimusz
-- arschles
+- name: rimusz
+  email: rmocius@gmail.com
+- name: arschles
+  email: aaron@ecomaz.net
 engine: gotpl
