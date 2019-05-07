@@ -26,7 +26,7 @@ In Athens we support many storage options. In this section we'll describe how th
 ### Proxying A Checksum DB
 The Athens Proxy has the ability to proxy a Checksum Database as defined by [this proposal](https://go.googlesource.com/proposal/+/master/design/25530-sumdb.md) by the Go team.
 
-Athens by defualt will accept proxying `https://sum.golang.org`. However, if you'd like to override that behavior or proxy more Checksum DBs you can do so through the `SumDBs` config or its equivalent Enviroenment Variable: `ATHENS_SUM_DBS` 
+Athens by defualt will accept proxying `https://sum.golang.org`. However, if you'd like to override that behavior or proxy more Checksum DBs you can do so through the `SumDBs` config or its equivalent Environment Variable: `ATHENS_SUM_DBS` 
 
 So for example, if you run the following command: 
 
