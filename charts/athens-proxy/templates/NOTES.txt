@@ -1,6 +1,10 @@
-{{- if .Values.ingress.enabled }}
+{{- if (and .Values.ingress.enabled .Values.ingress.tls) }}
 {{- range .Values.ingress.hosts }}
   https://{{ . }}
+{{- end }}
+{{- else if .Values.ingress.enabled }}
+{{- range .Values.ingress.hosts }}
+  http://{{ . }}
 {{- end }}
 {{- else if contains "NodePort" .Values.service.type }}
   export NODE_PORT=$(kubectl get --namespace {{ .Release.Namespace }} -o jsonpath="{.spec.ports[0].nodePort}" services {{ template "fullname" . }})
@@ -16,4 +20,3 @@
   echo "Visit http://127.0.0.1:8080 to use your application"
   kubectl port-forward $POD_NAME 8080:3000
 {{- end }}
-
