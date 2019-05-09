@@ -264,6 +264,8 @@ func TestParseExampleConfig(t *testing.T) {
 		StatsExporter:    "prometheus",
 		SingleFlightType: "memory",
 		SingleFlight:     &SingleFlight{},
+		SumDBs:           []string{"https://sum.golang.org"},
+		NoSumPatterns:    []string{},
 	}
 
 	absPath, err := filepath.Abs(testConfigFile(t))

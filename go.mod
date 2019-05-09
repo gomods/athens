@@ -11,7 +11,6 @@ require (
 	github.com/bsm/redis-lock v8.0.0+incompatible
 	github.com/codegangsta/negroni v1.0.0 // indirect
 	github.com/fatih/color v1.7.0
-	github.com/globalsign/mgo v0.0.0-20180828104044-6f9f54af1356
 	github.com/go-playground/locales v0.12.1 // indirect
 	github.com/go-playground/universal-translator v0.16.0 // indirect
 	github.com/go-redis/redis v6.15.2+incompatible
