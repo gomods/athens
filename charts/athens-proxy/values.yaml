@@ -2,7 +2,7 @@ replicaCount: 1
 image:
   registry: docker.io
   repository: gomods/athens
-  tag: v0.3.1
+  tag: v0.4.0
 
   ## Specify a imagePullPolicy
   ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
@@ -24,7 +24,7 @@ service:
 
 ingress:
   enabled: false
-  # provie key/value annotations
+  # Provide key/value annotations
   annotations:
   # Provide an array of values for the ingress host mapping
   hosts:
