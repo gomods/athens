@@ -14,10 +14,9 @@ We meet at this [zoom](https://zoom.us/) video Chat URL: [https://aka.ms/athensd
 
 ## Meeting Details
 
-We rotate the time of the meeting weekly, so that as many people as possible get a chance to attend the meeting at a time appropriate for their time zone. The rotation of times is below:
+We rotate the time of the meeting weekly, so that as many people as possible get a chance to attend the meeting at a time appropriate for their time zone. 
 
-- Thursday on odd week numbers of each month: 22:00 UTC (<span id="time22"></span> locally)
-- Thursday on even week numbers of each month: 20:00 UTC (<span id="time20"></span> locally)
+>We schedule and keep track of all of the meetings via meetup.com, so check out our meetup page: https://www.meetup.com/The-Athens-Developer-Meeting to keep up to date on the next meeting.
 
 Each developer meeting starts with a quick update on the project from the maintainers, and then we discuss things on the agenda.
 
@@ -39,4 +38,3 @@ The [agenda google doc](https://docs.google.com/document/d/1xpvgmR1Fq4iy1j975Tb4
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.23/moment-timezone.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jstimezonedetect/1.0.4/jstz.min.js"></script>
-<script src="/js/dev-meetings.js"></script>
