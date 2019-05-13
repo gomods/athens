@@ -34,14 +34,13 @@ func (s *Storage) Catalog(ctx context.Context, token string, pageSize int) ([]pa
 	}
 
 	for _, attr := range attrs {
-		if !strings.HasSuffix(attr.Name, ".info") {
-			continue
+		if strings.HasSuffix(attr.Name, ".info") {
+			p, err := parsModVer(attr.Name)
+			if err != nil {
+				continue
+			}
+			res = append(res, p)
 		}
-		p, err := parsModVer(attr.Name)
-		if err != nil {
-			continue
-		}
-		res = append(res, p)
 	}
 	return res, nextToken, nil
 }
