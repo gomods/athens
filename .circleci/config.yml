@@ -7,7 +7,7 @@ jobs:
       - checkout
       - run:
           command: |
-            shellcheck -x .test/e2e-kind.sh
+            shellcheck -x test/e2e-kind.sh
           
   lint-install-charts:
     machine: true
