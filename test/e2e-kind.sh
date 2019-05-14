@@ -82,7 +82,7 @@ install_tiller() {
 }
 
 install_charts() {
-    docker_exec ct install --config /workdir/test/ct.yaml
+    docker_exec ct lint-and-install --config /workdir/test/ct.yaml
     echo
 }
 
