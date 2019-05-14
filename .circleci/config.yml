@@ -1,33 +1,8 @@
-version: 2.1
+version: 2
 jobs:
-  lint-scripts:
+  build:
     docker:
-      - image: koalaman/shellcheck-alpine
+      - image: circleci/ruby:2.4.1
     steps:
       - checkout
-      - run:
-          command: |
-            shellcheck -x test/e2e-kind.sh
-          
-  lint-install-charts:
-    machine: true
-    environment:
-      CHART_TESTING_IMAGE: quay.io/helmpack/chart-testing
-      CHART_TESTING_TAG: v2.3.3
-      CHARTS_REPO: https://github.com/rimusz/charts
-      K8S_VERSION: v1.13.4
-      KIND_VERSION: 0.2.1
-    steps:
-      - checkout
-      - run:
-          command: test/e2e-kind.sh
-          no_output_timeout: 3600
-          
-workflows:
-  version: 2
-  lint_and_install:
-    jobs:
-      - lint-scripts
-      - lint-install-charts:
-          requires:
-            - lint-scripts
+      - run: echo "A first hello"
