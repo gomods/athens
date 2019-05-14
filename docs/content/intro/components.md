@@ -4,11 +4,11 @@ date: 2018-02-11T16:57:56-05:00
 weight: 5
 ---
 
-From a very high-level view, we recognize 4 major components of the system.
+From a very high-level view, there are 3 major components of the system.
 
 ### Client
 
-The client is a user, powered by go binary with module support. At the moment of writing this document, it is `go1.11`
+The client is a user, powered by go binary with module support. At the moment of writing this document, it is [Go v1.12+](https://golang.org/dl).
 
 ### VCS
 

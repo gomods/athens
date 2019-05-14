@@ -13,33 +13,37 @@ import (
 	validator "gopkg.in/go-playground/validator.v9"
 )
 
+const defaultConfigFile = "athens.toml"
+
 // Config provides configuration values for all components
 type Config struct {
 	TimeoutConf
-	GoEnv            string `validate:"required" envconfig:"GO_ENV"`
-	GoBinary         string `validate:"required" envconfig:"GO_BINARY_PATH"`
-	GoGetWorkers     int    `validate:"required" envconfig:"ATHENS_GOGET_WORKERS"`
-	ProtocolWorkers  int    `validate:"required" envconfig:"ATHENS_PROTOCOL_WORKERS"`
-	LogLevel         string `validate:"required" envconfig:"ATHENS_LOG_LEVEL"`
-	CloudRuntime     string `validate:"required" envconfig:"ATHENS_CLOUD_RUNTIME"`
-	FilterFile       string `envconfig:"ATHENS_FILTER_FILE"`
-	TraceExporterURL string `envconfig:"ATHENS_TRACE_EXPORTER_URL"`
-	TraceExporter    string `envconfig:"ATHENS_TRACE_EXPORTER"`
-	StatsExporter    string `envconfig:"ATHENS_STATS_EXPORTER"`
-	StorageType      string `validate:"required" envconfig:"ATHENS_STORAGE_TYPE"`
-	GlobalEndpoint   string `envconfig:"ATHENS_GLOBAL_ENDPOINT"` // This feature is not yet implemented
-	Port             string `envconfig:"ATHENS_PORT"`
-	BasicAuthUser    string `envconfig:"BASIC_AUTH_USER"`
-	BasicAuthPass    string `envconfig:"BASIC_AUTH_PASS"`
-	ForceSSL         bool   `envconfig:"PROXY_FORCE_SSL"`
-	ValidatorHook    string `envconfig:"ATHENS_PROXY_VALIDATOR"`
-	PathPrefix       string `envconfig:"ATHENS_PATH_PREFIX"`
-	NETRCPath        string `envconfig:"ATHENS_NETRC_PATH"`
-	GithubToken      string `envconfig:"ATHENS_GITHUB_TOKEN"`
-	HGRCPath         string `envconfig:"ATHENS_HGRC_PATH"`
-	TLSCertFile      string `envconfig:"ATHENS_TLSCERT_FILE"`
-	TLSKeyFile       string `envconfig:"ATHENS_TLSKEY_FILE"`
-	SingleFlightType string `envconfig:"ATHENS_SINGLE_FLIGHT_TYPE"`
+	GoEnv            string   `validate:"required" envconfig:"GO_ENV"`
+	GoBinary         string   `validate:"required" envconfig:"GO_BINARY_PATH"`
+	GoGetWorkers     int      `validate:"required" envconfig:"ATHENS_GOGET_WORKERS"`
+	ProtocolWorkers  int      `validate:"required" envconfig:"ATHENS_PROTOCOL_WORKERS"`
+	LogLevel         string   `validate:"required" envconfig:"ATHENS_LOG_LEVEL"`
+	CloudRuntime     string   `validate:"required" envconfig:"ATHENS_CLOUD_RUNTIME"`
+	FilterFile       string   `envconfig:"ATHENS_FILTER_FILE"`
+	TraceExporterURL string   `envconfig:"ATHENS_TRACE_EXPORTER_URL"`
+	TraceExporter    string   `envconfig:"ATHENS_TRACE_EXPORTER"`
+	StatsExporter    string   `envconfig:"ATHENS_STATS_EXPORTER"`
+	StorageType      string   `validate:"required" envconfig:"ATHENS_STORAGE_TYPE"`
+	GlobalEndpoint   string   `envconfig:"ATHENS_GLOBAL_ENDPOINT"` // This feature is not yet implemented
+	Port             string   `envconfig:"ATHENS_PORT"`
+	BasicAuthUser    string   `envconfig:"BASIC_AUTH_USER"`
+	BasicAuthPass    string   `envconfig:"BASIC_AUTH_PASS"`
+	ForceSSL         bool     `envconfig:"PROXY_FORCE_SSL"`
+	ValidatorHook    string   `envconfig:"ATHENS_PROXY_VALIDATOR"`
+	PathPrefix       string   `envconfig:"ATHENS_PATH_PREFIX"`
+	NETRCPath        string   `envconfig:"ATHENS_NETRC_PATH"`
+	GithubToken      string   `envconfig:"ATHENS_GITHUB_TOKEN"`
+	HGRCPath         string   `envconfig:"ATHENS_HGRC_PATH"`
+	TLSCertFile      string   `envconfig:"ATHENS_TLSCERT_FILE"`
+	TLSKeyFile       string   `envconfig:"ATHENS_TLSKEY_FILE"`
+	SumDBs           []string `envconfig:"ATHENS_SUM_DBS"`
+	NoSumPatterns    []string `envconfig:"ATHENS_GONOSUM_PATTERNS"`
+	SingleFlightType string   `envconfig:"ATHENS_SINGLE_FLIGHT_TYPE"`
 	SingleFlight     *SingleFlight
 	Storage          *StorageConfig
 }
@@ -47,14 +51,23 @@ type Config struct {
 // Load loads the config from a file.
 // If file is not present returns default config
 func Load(configFile string) (*Config, error) {
-	if configFile == "" {
-		log.Print("config file not provided - using default settings")
-		return createDefault(), nil
+	// User explicitly specified a config file
+	if configFile != "" {
+		return ParseConfigFile(configFile)
 	}
-	return ParseConfigFile(configFile)
+
+	// There is a config in the current directory
+	if fi, err := os.Stat(defaultConfigFile); err == nil {
+		return ParseConfigFile(fi.Name())
+	}
+
+	// Use default values
+	log.Println("Running dev mode with default settings, consult config when you're ready to run in production")
+	cfg := defaultConfig()
+	return cfg, envOverride(cfg)
 }
 
-func createDefault() *Config {
+func defaultConfig() *Config {
 	return &Config{
 		GoBinary:         "go",
 		GoEnv:            "development",
@@ -69,7 +82,12 @@ func createDefault() *Config {
 		SingleFlightType: "memory",
 		GlobalEndpoint:   "http://localhost:3001",
 		TraceExporterURL: "http://localhost:14268",
-		SingleFlight:     &SingleFlight{&Etcd{"localhost:2379,localhost:22379,localhost:32379"}},
+		SumDBs:           []string{"https://sum.golang.org"},
+		NoSumPatterns:    []string{},
+		SingleFlight: &SingleFlight{
+			Etcd:  &Etcd{"localhost:2379,localhost:22379,localhost:32379"},
+			Redis: &Redis{"127.0.0.1:6379"},
+		},
 	}
 }
 
@@ -146,10 +164,26 @@ func envOverride(config *Config) error {
 	if err != nil {
 		return err
 	}
+	portEnv := os.Getenv("PORT")
+	// ATHENS_PORT takes precedence over PORT
+	if portEnv != "" && os.Getenv("ATHENS_PORT") == "" {
+		config.Port = portEnv
+	}
 	if config.Port == "" {
 		config.Port = defaultPort
 	}
+	config.Port = ensurePortFormat(config.Port)
 	return nil
+}
+
+func ensurePortFormat(s string) string {
+	if len(s) == 0 {
+		return ""
+	}
+	if s[0] != ':' {
+		return ":" + s
+	}
+	return s
 }
 
 func validateConfig(config Config) error {

@@ -17,7 +17,8 @@ func (s *Storage) List(ctx context.Context, module string) ([]string, error) {
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 
-	it := s.bucket.Objects(ctx, &storage.Query{Prefix: module})
+	modulePrefix := strings.TrimSuffix(module, "/") + "/@v"
+	it := s.bucket.Objects(ctx, &storage.Query{Prefix: modulePrefix})
 	paths := []string{}
 	for {
 		attrs, err := it.Next()

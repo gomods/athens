@@ -2,6 +2,9 @@ package actions
 
 import (
 	"fmt"
+	"net/http"
+	"net/url"
+	"path"
 	"strings"
 
 	"github.com/gomods/athens/pkg/config"
@@ -26,6 +29,25 @@ func addProxyRoutes(
 	r.HandleFunc("/readyz", getReadinessHandler(s))
 	r.HandleFunc("/version", versionHandler)
 	r.HandleFunc("/catalog", catalogHandler(s))
+
+	for _, sumdb := range c.SumDBs {
+		sumdbURL, err := url.Parse(sumdb)
+		if err != nil {
+			return err
+		}
+		if sumdbURL.Scheme != "https" {
+			return fmt.Errorf("sumdb: %v must have an https scheme", sumdb)
+		}
+		supportPath := path.Join("/sumdb", sumdbURL.Host, "/supported")
+		r.HandleFunc(supportPath, func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(200)
+		})
+		sumHandler := sumdbPoxy(sumdbURL, c.NoSumPatterns)
+		pathPrefix := "/sumdb/" + sumdbURL.Host
+		r.PathPrefix(pathPrefix + "/").Handler(
+			http.StripPrefix(pathPrefix, sumHandler),
+		)
+	}
 
 	// Download Protocol
 	// the download.Protocol and the stash.Stasher interfaces are composable
@@ -86,6 +108,21 @@ func getSingleFlight(c *config.Config, checker storage.Checker) (stash.Wrapper, 
 		}
 		endpoints := strings.Split(c.SingleFlight.Etcd.Endpoints, ",")
 		return stash.WithEtcd(endpoints, checker)
+	case "redis":
+		if c.SingleFlight == nil || c.SingleFlight.Redis == nil {
+			return nil, fmt.Errorf("Redis config must be present")
+		}
+		return stash.WithRedisLock(c.SingleFlight.Redis.Endpoint, checker)
+	case "gcp":
+		if c.StorageType != "gcp" {
+			return nil, fmt.Errorf("gcp SingleFlight only works with a gcp storage type and not: %v", c.StorageType)
+		}
+		return stash.WithGCSLock, nil
+	case "azureblob":
+		if c.StorageType != "azureblob" {
+			return nil, fmt.Errorf("azureblob SingleFlight only works with a azureblob storage type and not: %v", c.StorageType)
+		}
+		return stash.WithAzureBlobLock(c.Storage.AzureBlob, c.TimeoutDuration(), checker)
 	default:
 		return nil, fmt.Errorf("unrecognized single flight type: %v", c.SingleFlightType)
 	}

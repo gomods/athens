@@ -8,7 +8,7 @@ menu: shortcuts
 
 To quickly see Athens in action, follow these steps:
 
-First, make sure you have [Go 1.11 installed](https://gophersource.com/setup/),
+First, make sure you have [Go v1.12+ installed](https://gophersource.com/setup/),
 that GOPATH/bin is on your path, and that you have enabled the [Go
 Modules](https://github.com/golang/go/wiki/Modules) feature.
 

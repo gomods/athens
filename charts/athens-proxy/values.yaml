@@ -2,14 +2,17 @@ replicaCount: 1
 image:
   registry: docker.io
   repository: gomods/athens
-  tag: v0.2.0
+  tag: v0.4.0
+
   ## Specify a imagePullPolicy
   ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
   ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
   ##
-  pullPolicy: Always
+  pullPolicy: IfNotPresent
 
 service:
+  ## Port as exposed by the service
+  servicePort: 80
   ## Type of service; valid values are "ClusterIP", "LoadBalancer", and
   ## "NodePort". "ClusterIP" is sufficient in the case when the Proxy will be used
   ## from within the cluster. To expose externally, consider a "NodePort" or "LoadBalancer" service.
@@ -21,7 +24,7 @@ service:
 
 ingress:
   enabled: false
-  # provie key/value annotations
+  # Provide key/value annotations
   annotations:
   # Provide an array of values for the ingress host mapping
   hosts:
@@ -45,6 +48,14 @@ storage:
 netrc:
   # if enabled, it expects to find the content of a valid .netrc file imported as a secret named netrcsecret
   enabled: false
+  existingSecret: netrcsecret
+
+upstreamProxy:
+  # This is where you can set the URL for the upstream module repository.
+  # If 'enabled' is set to true, Athens will try to download modules from the upstream when it doesn't find them in its own storage.
+  # You can use 'https://gocenter.io' to use JFrog's GoCenter as an upstream here, or you can also use another Athens server as well.
+  enabled: false
+  url: "https://gocenter.io"
 
 jaeger:
   ## Type of service; valid values are "ClusterIP", "LoadBalancer", and "NodePort".
@@ -56,3 +67,25 @@ jaeger:
   # you must set this on the command line when you run 'helm install'
   # for example, you need to run 'helm install --set jaeger.url=myurl ...'
   url: "SET THIS ON THE COMMAND LINE"
+
+sshGitServers: {}
+  ## Private git servers over ssh
+  ## to enable uncomment lines with single hash below
+  ## hostname of the git server
+  # - host: git.example.com
+    ## ssh username
+  #  user: git
+    ## ssh private key for the user
+  #  privateKey: |
+  #    -----BEGIN RSA PRIVATE KEY-----
+  #    -----END RSA PRIVATE KEY-----
+    ## ssh port
+  #  port: 22
+
+goGetWorkers: 3
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

@@ -9,13 +9,15 @@ metadata:
     heritage: "{{ .Release.Service }}"
 spec:
   type: {{ .Values.service.type }}
-  selector:
-    app: {{ template "fullname" . }}
   ports:
   - name: http
-    port: 80
+    port: {{ .Values.service.servicePort }}
     targetPort: 3000
     protocol: TCP
     {{- if eq .Values.service.type "NodePort" }}
     nodePort: {{ .Values.service.nodePort.port }}
     {{- end }}
+  selector:
+    app: {{ template "fullname" . }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: "{{ .Release.Name }}"

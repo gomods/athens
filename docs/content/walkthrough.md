@@ -4,10 +4,10 @@ description: Understanding the Athens proxy and Go Modules
 menu: shortcuts
 ---
 
-First, make sure you have [Go 1.11 installed](https://gophersource.com/setup/) and that GOPATH/bin is on your path.
+First, make sure you have [Go v1.12+ installed](https://gophersource.com/setup/) and that GOPATH/bin is on your path.
 
 ## Without the Athens proxy
-Let's review what everything looks like in Go 1.11 without the Athens proxy in the picture:
+Let's review what everything looks like in Go without the Athens proxy in the picture:
 
 **Bash**
 ```console

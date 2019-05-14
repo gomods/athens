@@ -16,3 +16,14 @@ There are numerous version control systems available to us as developers.  In th
 In Athens we support many storage options. In this section we'll describe how they can be configured
 
  - [Storage](/configuration/storage)
+
+
+ ### Upstream proxy
+ In this section we'll describe how the upstream proxy can be configured to fetch all modules from a Go Modules Repository such as [GoCenter](https://gocenter.io) or another Athens Server.
+
+  - [Upstream](/configuration/upstream)
+
+### Proxying A Checksum DB
+In this section we'll describe how to proxy a Checksum DB as per https://go.googlesource.com/proposal/+/master/design/25530-sumdb.md
+
+- [Checksum](/configuration/sumdb)

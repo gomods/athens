@@ -1,12 +1,17 @@
 name: athens-proxy
-version: 0.2.0
-appVersion: 0.2.0
+version: 0.2.5
+appVersion: 0.4.0
 description: The proxy server for Go modules
-icon: https://bitnami.com/assets/stacks/wordpress/img/wordpress-stack-220x234.png
+icon: https://raw.githubusercontent.com/gomods/athens/master/docs/static/banner.png
 keywords:
 - Golang
 - Package Management
+- Goproxy
 home: https://github.com/gomods/athens
 sources:
 maintainers:
+- name: rimusz
+  email: rmocius@gmail.com
+- name: arschles
+  email: aaron@ecomaz.net
 engine: gotpl

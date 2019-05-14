@@ -17,14 +17,10 @@ func (s *storageImpl) Catalog(ctx context.Context, token string, pageSize int) (
 	const op errors.Op = "minio.Catalog"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
-	queryToken := token
 	res := make([]paths.AllPathParams, 0)
-	startAfter := token
-	token = ""
-
 	count := pageSize
 	for count > 0 {
-		loo, err := s.minioCore.ListObjectsV2(s.bucketName, token, "", false, "", 0, startAfter)
+		loo, err := s.minioCore.ListObjectsV2(s.bucketName, "", token, false, "", 0, "")
 		if err != nil {
 			return nil, "", errors.E(op, err)
 		}
@@ -33,17 +29,16 @@ func (s *storageImpl) Catalog(ctx context.Context, token string, pageSize int) (
 
 		res = append(res, m...)
 		count -= len(m)
-		queryToken = lastKey
-
+		token = lastKey
 		if !loo.IsTruncated { // not truncated, there is no point in asking more
 			if count > 0 { // it means we reached the end, no subsequent requests are necessary
-				queryToken = ""
+				token = ""
 			}
 			break
 		}
 	}
 
-	return res, queryToken, nil
+	return res, token, nil
 }
 
 func fetchModsAndVersions(objects []minio.ObjectInfo, elementsNum int) ([]paths.AllPathParams, string) {

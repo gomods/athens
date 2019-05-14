@@ -19,31 +19,13 @@ func (s *Storage) Catalog(ctx context.Context, token string, pageSize int) ([]pa
 	const op errors.Op = "gcp.Catalog"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
+
 	res := make([]paths.AllPathParams, 0)
-	var resToken string
-	count := pageSize
 
-	for count > 0 {
-		var catalog []string
-		var err error
-		catalog, resToken, err = nextPage(ctx, s.bucket, token, 3*count)
-		if err != nil {
-			return nil, "", errors.E(op, err)
-		}
-		pathsAndVers := fetchModsAndVersions(catalog)
-		res = append(res, pathsAndVers...)
-		count -= len(pathsAndVers)
-
-		if resToken == "" { // meaning we reached the end
-			break
-		}
-	}
-	return res, resToken, nil
-}
-
-func nextPage(ctx context.Context, bkt *storage.BucketHandle, token string, pageSize int) ([]string, string, error) {
-	it := bkt.Objects(ctx, nil)
-	p := iterator.NewPager(it, pageSize, token)
+	it := s.bucket.Objects(ctx, nil)
+	// one module@version consists of 3 pieces - info, mod, zip
+	objCount := 3 * pageSize
+	p := iterator.NewPager(it, objCount, token)
 
 	attrs := make([]*storage.ObjectAttrs, 0)
 	nextToken, err := p.NextPage(&attrs)
@@ -51,29 +33,19 @@ func nextPage(ctx context.Context, bkt *storage.BucketHandle, token string, page
 		return nil, "", err
 	}
 
-	res := []string{}
 	for _, attr := range attrs {
-		res = append(res, attr.Name)
+		if strings.HasSuffix(attr.Name, ".info") {
+			p, err := parsModVer(attr.Name)
+			if err != nil {
+				continue
+			}
+			res = append(res, p)
+		}
 	}
 	return res, nextToken, nil
 }
 
-func fetchModsAndVersions(catalog []string) []paths.AllPathParams {
-	res := make([]paths.AllPathParams, 0)
-	for _, p := range catalog {
-		if !strings.HasSuffix(p, ".info") {
-			continue
-		}
-		p, err := parseGcpKey(p)
-		if err != nil {
-			continue
-		}
-		res = append(res, p)
-	}
-	return res
-}
-
-func parseGcpKey(p string) (paths.AllPathParams, error) {
+func parsModVer(p string) (paths.AllPathParams, error) {
 	const op errors.Op = "gcp.parseS3Key"
 	// github.com/gomods/testCatalogModule/@v/v1.2.0976.info
 	m, v := config.ModuleVersionFromPath(p)
