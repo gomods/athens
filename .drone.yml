@@ -13,6 +13,10 @@ steps:
   environment:
     GO111MODULE: on
     GOPROXY: http://athens-proxy:3000
+  volumes:
+  - name: cache
+    path: /go
+
 
 - name: build
   image: golang:1.12
@@ -50,6 +54,9 @@ steps:
     event:
       - push
       - pull_request
+  volumes:
+  - name: cache
+    path: /go
 
 - name: docker-latest
   image: plugins/docker
@@ -130,7 +137,9 @@ services:
     ATHENS_STORAGE_GCP_BUCKET: "athens_ci_build"
     ATHENS_STORAGE_GCP_JSON_KEY:
       from_secret: GCS_SERVICE_ACCOUNT
-
+volumes:
+  - name: cache
+    temp: {}
 ---
 kind: signature
 hmac: 8ee2a04fedfd1a0c1ab3da19a3441485bf447de3e04fe057f626c83454a042b6
