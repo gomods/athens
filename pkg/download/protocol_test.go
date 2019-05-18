@@ -44,7 +44,7 @@ func getDP(t *testing.T) Protocol {
 		t.Fatal(err)
 	}
 	st := stash.New(mf, s)
-	return New(&Opts{s, st, NewVCSLister(goBin, fs)})
+	return New(&Opts{s, st, NewVCSLister(goBin, fs), nil})
 }
 
 type listTest struct {
@@ -280,7 +280,7 @@ func TestDownloadProtocol(t *testing.T) {
 	}
 	mp := &mockFetcher{}
 	st := stash.New(mp, s)
-	dp := New(&Opts{s, st, nil})
+	dp := New(&Opts{s, st, nil, nil})
 	ctx := context.Background()
 
 	var eg errgroup.Group
@@ -332,7 +332,7 @@ func TestDownloadProtocolWhenFetchFails(t *testing.T) {
 	}
 	mp := &notFoundFetcher{}
 	st := stash.New(mp, s)
-	dp := New(&Opts{s, st, nil})
+	dp := New(&Opts{s, st, nil, nil})
 	ctx := context.Background()
 	_, err = dp.GoMod(ctx, fakeMod.mod, fakeMod.ver)
 	if err != nil {
