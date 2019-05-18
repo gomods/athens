@@ -25,6 +25,7 @@ func RunTests(t *testing.T, b storage.Backend, clearBackend func() error) {
 	testDelete(t, b)
 	testGet(t, b)
 	testExists(t, b)
+	testShouldNotExist(t, b)
 	testCatalog(t, b)
 }
 
@@ -164,6 +165,24 @@ func testExists(t *testing.T, b storage.Backend) {
 	exists, err := b.Exists(ctx, modname, ver)
 	require.NoError(t, err)
 	require.Equal(t, true, exists)
+}
+
+func testShouldNotExist(t *testing.T, b storage.Backend) {
+	ctx := context.Background()
+	mod := "shouldNotExist"
+	ver := "v1.2.3-pre.1"
+	mock := getMockModule()
+	zipBts, _ := ioutil.ReadAll(mock.Zip)
+	err := b.Save(ctx, mod, ver, mock.Mod, bytes.NewReader(zipBts), mock.Info)
+	require.NoError(t, err, "should successfully safe a mock module")
+	defer b.Delete(ctx, mod, ver)
+
+	prefixVer := "v1.2.3-pre"
+	exists, err := b.Exists(ctx, mod, prefixVer)
+	require.NoError(t, err)
+	if exists {
+		t.Fatal("a non existing version that has the same prefix of an existing version should not exist")
+	}
 }
 
 // testDelete tests that a module can be deleted from a
