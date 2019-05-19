@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/gomods/athens/pkg/config"
+	"github.com/gomods/athens/pkg/download/mode"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/module"
 	"github.com/gomods/athens/pkg/stash"
@@ -338,6 +339,40 @@ func TestDownloadProtocolWhenFetchFails(t *testing.T) {
 	if err != nil {
 		t.Errorf("Download protocol should succeed, instead it gave error %s \n", err)
 	}
+}
+
+func TestAsyncRedirect(t *testing.T) {
+	s, err := mem.NewStorage()
+	require.NoError(t, err)
+	ms := &mockStasher{s, make(chan bool)}
+	dp := New(&Opts{
+		Stasher: ms,
+		Storage: s,
+		DownloadFile: &mode.DownloadFile{
+			Mode:        mode.Async,
+			DownloadURL: "https://gomods.io",
+		},
+	})
+	mod, ver := "github.com/athens-artifacts/happy-path", "v0.0.1"
+	_, err = dp.Info(context.Background(), mod, ver)
+	if errors.Kind(err) != errors.KindNotFound {
+		t.Fatalf("expected async_redirect to enforce a 404 but got %v", errors.Kind(err))
+	}
+	<-ms.ch
+	info, err := dp.Info(context.Background(), mod, ver)
+	require.NoError(t, err)
+	require.Equal(t, string(info), "info", "expected async fetch to be successful")
+}
+
+type mockStasher struct {
+	s  storage.Backend
+	ch chan bool
+}
+
+func (ms *mockStasher) Stash(ctx context.Context, mod string, ver string) (string, error) {
+	err := ms.s.Save(ctx, mod, ver, []byte("mod"), strings.NewReader("zip"), []byte("info"))
+	ms.ch <- true // signal async stashing is done
+	return ver, err
 }
 
 type notFoundFetcher struct{}
