@@ -110,13 +110,10 @@ func (d *DownloadFile) validate() error {
 // exist or match.
 func (d *DownloadFile) Match(mod string) Mode {
 	for _, p := range d.Paths {
-		fmt.Println("YO!", p.Pattern, mod)
-		fmt.Println(path.Match(p.Pattern, mod))
 		if hasMatch, err := path.Match(p.Pattern, mod); hasMatch && err == nil {
 			return p.Mode
 		}
 	}
-	fmt.Println("HELLO?")
 	return d.Mode
 }
 
