@@ -30,6 +30,17 @@ func (s *Storage) Exists(ctx context.Context, module, version string) (bool, err
 	if err != nil {
 		return false, errors.E(op, err, errors.M(module), errors.V(version))
 	}
-
-	return len(loo.Contents) == 3, nil
+	var count int
+	for _, o := range loo.Contents {
+		// sane assumption: no duplicate keys.
+		switch *o.Key {
+		case config.PackageVersionedName(module, version, "info"):
+			count++
+		case config.PackageVersionedName(module, version, "mod"):
+			count++
+		case config.PackageVersionedName(module, version, "zip"):
+			count++
+		}
+	}
+	return count == 3, nil
 }
