@@ -27,12 +27,13 @@ GO_BINARY_PATH=go1.11.X
 
 # Run the Proxy
 
-We provide two ways to run the proxy on your local machine:
+We provide three ways to run the proxy on your local machine:
 
 1. Using [Docker](https://www.docker.com/) and [Docker Compose](https://docs.docker.com/compose/) (_we suggest this one if you're getting started_)
 2. Natively on your host
+3. Using [Sail](https://sail.dev)
 
-.See below for insrtuctions to do both!
+.See below for instructions for each option!
 
 ## Using Docker
 
@@ -95,6 +96,16 @@ After the server starts, you'll see some console output like:
 ```console
 Starting application at 127.0.0.1:3000
 ```
+
+## Using Sail
+
+Follow instructions at [sail.dev](https://sail.dev) to setup the sail CLI. Then simply run:
+
+```
+sail run gomods/athens
+```
+
+The command will automatically clone the athens repo and give you a local URL that you can use to open an editor and development environment directly in your browser.
 
 ### Dependencies
 
