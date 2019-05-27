@@ -29,10 +29,9 @@ func catalogHandler(s storage.Backend) http.HandlerFunc {
 		}
 
 		lggr := log.EntryFromContext(r.Context())
-		urlQuery := r.URL.Query()
-		token := urlQuery.Get("token")
+		token := r.FormValue("token")
 
-		pageSize, err := getLimitFromParam(urlQuery.Get("pagesize"))
+		pageSize, err := getLimitFromParam(r.FormValue("pagesize"))
 		if err != nil {
 			lggr.SystemErr(err)
 			w.WriteHeader(http.StatusInternalServerError)
