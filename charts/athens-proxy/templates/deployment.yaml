@@ -113,6 +113,10 @@ spec:
         - name: ssh-keys
           mountPath: /ssh-keys
         {{- end }}
+      {{- with .Values.resources }}
+        resources:
+{{ toYaml . | indent 10 }}
+      {{- end }}
       volumes:
       - name: storage-volume
       {{- if .Values.storage.disk.persistence.enabled }}
