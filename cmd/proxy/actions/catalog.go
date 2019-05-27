@@ -9,7 +9,6 @@ import (
 	"github.com/gomods/athens/pkg/log"
 	"github.com/gomods/athens/pkg/paths"
 	"github.com/gomods/athens/pkg/storage"
-	"github.com/gorilla/mux"
 )
 
 const defaultPageSize = 1000
@@ -28,10 +27,12 @@ func catalogHandler(s storage.Backend) http.HandlerFunc {
 			w.WriteHeader(errors.KindNotImplemented)
 			return
 		}
+
 		lggr := log.EntryFromContext(r.Context())
-		vars := mux.Vars(r)
-		token := vars["token"]
-		pageSize, err := getLimitFromParam(vars["pagesize"])
+		urlQuery := r.URL.Query()
+		token := urlQuery.Get("token")
+
+		pageSize, err := getLimitFromParam(urlQuery.Get("pagesize"))
 		if err != nil {
 			lggr.SystemErr(err)
 			w.WriteHeader(http.StatusInternalServerError)
@@ -53,6 +54,8 @@ func catalogHandler(s storage.Backend) http.HandlerFunc {
 	return http.HandlerFunc(f)
 }
 
+// getLimitFromParam converts a URL query parameter into an int
+// otherwise converts defaultPageSize constant
 func getLimitFromParam(param string) (int, error) {
 	if param == "" {
 		return defaultPageSize, nil
