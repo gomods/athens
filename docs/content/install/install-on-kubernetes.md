@@ -187,7 +187,11 @@ helm install gomods/athens-proxy -n athens --namespace athens -f override-values
 
 You can set the `URL` for the [upstream module repository](https://docs.gomods.io/configuration/upstream/) then Athens will try to download modules from the upstream when it doesn't find them in its own storage.
 
-You can use `https://gocenter.io` to use JFrog's GoCenter as an upstream here, or you can also use another Athens server as well.
+You have a few good options for what you can set as an upstream:
+
+-  `https://gocenter.io` to use JFrog's GoCenter
+-  `https://proxy.golang.org` to use the Go Module Mirror
+-  The URL to any other Athens server
 
 The example below shows you how to set GoCenter up as upstream module repository:
 
