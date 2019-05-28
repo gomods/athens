@@ -17,6 +17,7 @@ make build-ver VERSION="0.2.0"
 git clone https://github.com/gomods/athens
 cd athens
 $env:GO111MODULE="on"
+$env:GOPROXY="https://proxy.golang.org"
 $version = "0.2.0"
 $date = (Get-Date).ToUniversalTime()
 go build -ldflags "-X github.com/gomods/athens/pkg/build.version=$version -X github.com/gomods/athens/pkg/build.buildDate=$date" -o athens ./cmd/proxy
