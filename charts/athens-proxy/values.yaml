@@ -53,7 +53,11 @@ netrc:
 upstreamProxy:
   # This is where you can set the URL for the upstream module repository.
   # If 'enabled' is set to true, Athens will try to download modules from the upstream when it doesn't find them in its own storage.
-  # You can use 'https://gocenter.io' to use JFrog's GoCenter as an upstream here, or you can also use another Athens server as well.
+  # Here's a non-exhaustive list of options you can set here:
+  #
+  # - https://gocenter.io
+  # - https://proxy.golang.org
+  # - another Athens server
   enabled: false
   url: "https://gocenter.io"
 
