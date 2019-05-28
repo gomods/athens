@@ -19,6 +19,7 @@ Additionally in the current or new config file, set the following parameters as 
     FilterFile = "/usr/local/lib/FilterForGoCenter"
     GlobalEndpoint = "https://<url_to_uptream>"
     # To use GoCenter for example, replace <url_to_upstream> with gocenter.io
+    # You can also use https://proxy.golang.org to use the Go Module mirror
     ```
 1. Restart Athens specifying the updated current or new config file.
 
