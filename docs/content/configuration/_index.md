@@ -17,7 +17,7 @@ In Athens we support many storage options. In this section we'll describe how th
 
  - [Storage](/configuration/storage)
 
- ### Upstream proxy
+### Upstream proxy
  In this section we'll describe how the upstream proxy can be configured to fetch all modules from a Go Modules Repository such as [GoCenter](https://gocenter.io), [The Go Module Mirror](https://proxy.golang.org), or another Athens Server.
 
   - [Upstream](/configuration/upstream)
