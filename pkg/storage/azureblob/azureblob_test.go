@@ -18,11 +18,11 @@ func TestBackend(t *testing.T) {
 	compliance.RunTests(t, backend, backend.clear)
 }
 
-/*func BenchmarkBackend(b *testing.B) {
+func BenchmarkBackend(b *testing.B) {
 	backend := getStorage(b)
 	defer backend.client.containerURL.Delete(context.Background(), azblob.ContainerAccessConditions{})
 	compliance.RunBenchmarks(b, backend, backend.clear)
-}*/
+}
 
 func (s *Storage) clear() error {
 	ctx, cancel := context.WithTimeout(context.Background(), s.timeout)
