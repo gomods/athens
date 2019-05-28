@@ -19,7 +19,7 @@ cd athens
 $env:GO111MODULE="on"
 $version = "0.2.0"
 $date = (Get-Date).ToUniversalTime()
-go build -mod=vendor -ldflags "-X github.com/gomods/athens/pkg/build.version=$version -X github.com/gomods/athens/pkg/build.buildDate=$date" -o athens ./cmd/proxy
+go build -ldflags "-X github.com/gomods/athens/pkg/build.version=$version -X github.com/gomods/athens/pkg/build.buildDate=$date" -o athens ./cmd/proxy
 ```
 
 This will give you a binary named `athens`. You can print the version and time information by running:
