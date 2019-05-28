@@ -30,6 +30,8 @@ Athens is easy to run yourself. We give you a few options:
 
 We also run an experimental version of Athens so you can get started without even installing anything. To get started, set `GOPROXY="https://athens.azurefd.net"`.
 
+>This is not a production-ready proxy deployment, though. Please deploy your own Athens instance for your builds. _If you need a hosted proxy for public code, consider using either `https://gocenter.io` or `https://proxy.golang.org`_.
+
 **[Like what you hear? Try Athens Now!](/try-out)**
 
 
