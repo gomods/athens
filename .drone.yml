@@ -87,6 +87,9 @@ steps:
       - ${DRONE_TAG}
       - latest
     dockerfile: cmd/proxy/Dockerfile
+    build_args:
+      - VERSION=${DRONE_TAG}
+
   when:
     event:
       - tag
