@@ -48,7 +48,7 @@ Then the `Fetcher`:
 - invokes `go mod download -json {module}`
 
 This command downloads the module into the storage. Once the download is completed, 
-- the `Fetch` function reads the module bits from stroage and returns them to the caller. 
+- the `Fetch` function reads the module bits from storage and returns them to the caller. 
 - The exact path of module files is returned by `go mod` as part of `JSON` response.
 
 ### Stash
