@@ -11,7 +11,7 @@ See our [Contributing Guide](CONTRIBUTING.md) for tips on how to submit a pull r
 If you haven't done that, please do with the below command before you proceed:
 
 ```console
-$ https://github.com/gomods/athens.git
+$ git clone https://github.com/gomods/athens.git
 ```
 
 ### Go version
