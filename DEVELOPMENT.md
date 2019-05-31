@@ -11,7 +11,7 @@ See our [Contributing Guide](CONTRIBUTING.md) for tips on how to submit a pull r
 If you haven't done that, please do with the below command before you proceed:
 
 ```console
-$ https://github.com/gomods/athens.git
+$ git clone https://github.com/gomods/athens.git
 ```
 
 ### Go version
@@ -32,7 +32,7 @@ We provide two ways to run the proxy on your local machine:
 1. Using [Docker](https://www.docker.com/) and [Docker Compose](https://docs.docker.com/compose/) (_we suggest this one if you're getting started_)
 2. Natively on your host
 
-.See below for insrtuctions to do both!
+See below for instructions to do both!
 
 ## Using Docker
 
@@ -82,7 +82,7 @@ $ make run-docker-teardown
 
 If you're inside GOPATH, make sure `GO111MODULE=on`, if you're outside GOPATH, then Go Modules are on by default.
 
-The main package is inside `cmd/proxy` and is run like any go project as follows: 
+The main package is inside `cmd/proxy` and is run like any go project as follows:
 
 ```console
 $ cd cmd/proxy
@@ -113,8 +113,8 @@ That's it! After the `make dev` command is done, everything will be up and runni
 
 If you want to stop everything at any time, run `make down`.
 
->Note: `make dev` only runs the minimum dependencies needed for things to work. If you'd like to run all the possible dependencies, run `make alldeps`. Keep in mind, though, that `make alldeps` does not start up Athens, but **only** its dependencies.
->All the services that get started by `make alldeps` are also available in the `docker-compose.yml` file, so if you're familiar with Docker Compose, you can also start up services as you need.
+> Note: `make dev` only runs the minimum dependencies needed for things to work. If you'd like to run all the possible dependencies, run `make alldeps`. Keep in mind, though, that `make alldeps` does not start up Athens, but **only** its dependencies.
+> All the services that get started by `make alldeps` are also available in the `docker-compose.yml` file, so if you're familiar with Docker Compose, you can also start up services as you need.
 
 # Run unit tests
 
@@ -122,7 +122,7 @@ There are two methods for running unit tests:
 
 ## Completely In Containers
 
-This method uses [Docker Compose](https://docs.docker.com/compose/) to set up and run all the unit tests completely inside Docker containers. 
+This method uses [Docker Compose](https://docs.docker.com/compose/) to set up and run all the unit tests completely inside Docker containers.
 
 **We highly recommend you use this approach to run unit tests on your local machine.**
 
