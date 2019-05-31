@@ -69,6 +69,8 @@ steps:
     tags:
       - canary
     dockerfile: cmd/proxy/Dockerfile
+    build_args:
+      - VERSION=${DRONE_COMMIT}
   when:
     branch:
       - master
@@ -87,6 +89,9 @@ steps:
       - ${DRONE_TAG}
       - latest
     dockerfile: cmd/proxy/Dockerfile
+    build_args:
+      - VERSION=${DRONE_TAG}
+
   when:
     event:
       - tag
