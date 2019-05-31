@@ -6,6 +6,11 @@ download "github.com/gomods/*" {
     mode = "sync"
 }
 
-download "marwan.io/*" {
+download "golang.org/x/*" {
     mode = "none"
+}
+
+download "github.com/pkg/*" {
+    mode = "redirect"
+    downloadURL = "https://gocenter.io"
 }
