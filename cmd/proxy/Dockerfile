@@ -28,6 +28,6 @@ ENV GO_ENV=production
 
 EXPOSE 3000
 
-ENTRYPOINT [ "/sbin/tini", "--" ]
+ENTRYPOINT [ "/sbin/tini", "-s", "--" ]
 
 CMD ["athens-proxy", "-config_file=/config/config.toml"]
