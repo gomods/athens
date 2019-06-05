@@ -143,8 +143,8 @@ helm install gomods/athens-proxy -n athens --namespace athens --set storage.type
 
 #### S3 Configuration
 
-To use S3 storage with, set `storage.type` to `s3` and set `storage.s3.region` and `storage.s3.bucket` to the desired AWS region and
-S3 bucket name, respectively. By default, Athens will attempt to load AWS credentials using the AWS SDK from a the chain of environment
+To use S3 storage with Athens, set `storage.type` to `s3` and set `storage.s3.region` and `storage.s3.bucket` to the desired AWS region and
+S3 bucket name, respectively. By default, Athens will attempt to load AWS credentials using the AWS SDK from the chain of environment
 variables, shared credentials files, and EC2 instance credentials. To manually specify AWS credentials, set `storage.s3.access_key_id`,
 `storage.s3.secret_access_key`, and change `storage.s3.useDefaultConfiguration` to `false`.
 
