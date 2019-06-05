@@ -12,11 +12,6 @@ ARG VERSION="unset"
 
 RUN DATE="$(date -u +%Y-%m-%d-%H:%M:%S-%Z)" && GO111MODULE=on CGO_ENABLED=0 go build -mod=vendor -ldflags "-X github.com/gomods/athens/pkg/build.version=$VERSION -X github.com/gomods/athens/pkg/build.buildDate=$DATE" -o /bin/athens-proxy ./cmd/proxy
 
-# Add tini, see https://github.com/gomods/athens/issues/1155 for details.
-ENV TINI_VERSION v0.18.0
-ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini-static /tini
-RUN chmod +x /tini
-
 FROM alpine
 
 ENV GO111MODULE=on
@@ -24,15 +19,15 @@ ENV GO111MODULE=on
 COPY --from=builder /bin/athens-proxy /bin/athens-proxy
 COPY --from=builder /go/src/github.com/gomods/athens/config.dev.toml /config/config.toml
 COPY --from=builder /usr/local/go/bin/go /bin/go
-COPY --from=builder /tini /bin/tini
 
-RUN apk add --update bzr git mercurial openssh-client subversion procps fossil && \
+# Add tini, see https://github.com/gomods/athens/issues/1155 for details.
+RUN apk add --update bzr git mercurial openssh-client subversion procps fossil tini && \
 	mkdir -p /usr/local/go
 
 ENV GO_ENV=production
 
 EXPOSE 3000
 
-ENTRYPOINT [ "tini", "--" ]
+ENTRYPOINT [ "/sbin/tini", "--" ]
 
 CMD ["athens-proxy", "-config_file=/config/config.toml"]
