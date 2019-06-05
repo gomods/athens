@@ -30,6 +30,8 @@ Athens es fácil de ejecutar. Te ofrecemos algunas opciones:
 
 También tenemos una versión experimental de Athens que puedes utilizar sin necesidad de instalar nada. Para utilizarla, establece la variable de entorno `GOPROXY="https://athens.azurefd.net"`.
 
+>Sin embargo, no lo recomendamos para producción. Por favor, despliega tu propia instancia de Athens para tus builds. _Si por el contrario, prefieres un proxy en la nube con el objetivo de alojar únicamente código público, considera utilizar `https://gocenter.io` o `https://proxy.golang.org`_
+
 **[¿Te gusta lo que ves? ¡Prueba athens ahora! (en inglés)](/try-out)**
 
 ## ¿Todavía no te ves utilizando Athens?
