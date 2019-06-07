@@ -22,7 +22,10 @@ func (v *storageImpl) Exists(ctx context.Context, module, version string) (bool,
 	zipPath := fmt.Sprintf("%s/source.zip", versionedPath)
 
 	var count int
-	objectCh, _ := v.minioCore.ListObjectsV2(v.bucketName, versionedPath, "", false, "", 0, "")
+	objectCh, err := v.minioCore.ListObjectsV2(v.bucketName, versionedPath, "", false, "", 0, "")
+	if err != nil {
+		return false, errors.E(op, err, errors.M(module), errors.V(version))
+	}
 	for _, object := range objectCh.Contents {
 		if object.Err != nil {
 			return false, errors.E(op, object.Err, errors.M(module), errors.V(version))
