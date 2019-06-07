@@ -94,7 +94,7 @@ spec:
         {{- end }}
         {{- if .Values.netrc.enabled }}
         - name: ATHENS_NETRC_PATH
-          value: "/etc/netrc/netrc"
+          value: "/etc/netrc/.netrc"
         {{- end }}
         {{- if .Values.upstreamProxy.enabled }}
         - name: ATHENS_FILTER_FILE
@@ -110,8 +110,10 @@ spec:
         {{- end }}
         ports:
         - containerPort: 3000
-        {{- if eq .Values.storage.type "disk" }}
+        {{- if or (eq .Values.storage.type "disk") .Values.upstreamProxy.enabled .Values.netrc.enabled }}
         volumeMounts:
+        {{- end }}
+        {{- if eq .Values.storage.type "disk" }}
         - name: storage-volume
           mountPath: {{ .Values.storage.disk.storageRoot | quote }}
         {{- end }}
