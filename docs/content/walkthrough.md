@@ -71,7 +71,8 @@ $ cd "$(go env GOPATH)\src\github.com\gomods"
 $ git clone https://github.com/gomods/athens.git
 $ cd athens
 $ $env:GO111MODULE = "on"
-$ Start-Process -NoNewWindow go 'run -mod=vendor .\cmd\proxy -config_file=".\config.dev.toml"'
+$ $env:GOPROXY = "https://proxy.golang.org"
+$ Start-Process -NoNewWindow go 'run .\cmd\proxy -config_file=".\config.dev.toml"'
 [1] 25243
 INFO[0000] Starting application at 127.0.0.1:3000
 ```
@@ -114,6 +115,17 @@ docker run -d -v "$($env:ATHENS_STORAGE):/var/lib/athens" `
    -p 3000:3000 `
    gomods/athens:latest
 ```
+
+Athens docker image uses [tini](https://github.com/krallin/tini) so that defunct processes get reaped.
+Since Docker 1.13 and greater includes `tini` and lets you enable it by passing the `--init` flag to `docker run` or by configuring the docker deamon with `"init": true`, you may see a warning like this:
+
+```console
+[WARN  tini (6)] Tini is not running as PID 1 and isn't registered as a child subreaper.
+ Zombie processes will not be re-parented to Tini, so zombie reaping won't work.
+ To fix the problem, use the -s option or set the environment variable TINI_SUBREAPER to register Tini as a child subreaper, or run Tini as PID 1.
+```
+This is the "Athens-tini" complaining that it's not running as PID 1.
+There is no harm in that, since the zombie processes will be reaped by the `tini` included in Docker.
 
 Next, you will need to enable the [Go Modules](https://github.com/golang/go/wiki/Modules)
 feature and configure Go to use the Athens proxy!
@@ -164,7 +176,7 @@ Let's break down what is happening here:
 
 1. Before Go runs our code, it detects that our code depends on the **github.com/athens-artifacts/samplelib** package
    which is not present in the Go Modules local storage.
-1. At this point the Go Modules feature comes into play because we have it enabled.
+2. At this point the Go Modules feature comes into play because we have it enabled.
     Instead of looking in the GOPATH for the package, Go reads our **go.mod** file
     and sees that we want a particular version of that package, v1.0.0.
 
@@ -173,17 +185,17 @@ Let's break down what is happening here:
     
     require github.com/athens-artifacts/samplelib v1.0.0
     ```
-1. Go first checks for **github.com/athens-artifacts/samplelib@v1.0.0** in the Go Modules local storage,
+3. Go first checks for **github.com/athens-artifacts/samplelib@v1.0.0** in the Go Modules local storage,
     located in GOPATH/pkg/mod. If that version of the package is already local storage,
     then Go will use it and stop looking. But since this is our first time
     running this, our local storage is empty and Go keeps looking.
-1. Go requests **github.com/athens-artifacts/samplelib@v1.0.0** from our proxy because
+4. Go requests **github.com/athens-artifacts/samplelib@v1.0.0** from our proxy because
     it is set in the GOPROXY environment variable.
-1. The Athens proxy checks its own storage (in this case is in-memory) for the package and doesn't find it. So it
+5. The Athens proxy checks its own storage (in this case is in-memory) for the package and doesn't find it. So it
     retrieves it from github.com and then saves it for subsequent requests.
-1. Go downloads the module zip and puts it in the Go Modules local storage
+6. Go downloads the module zip and puts it in the Go Modules local storage
     GOPATH/pkg/mod.
-1. Go will use the module and build our application!
+7. Go will use the module and build our application!
 
 Subsequent calls to `go run .` will be much less verbose:
 

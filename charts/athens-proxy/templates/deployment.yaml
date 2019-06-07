@@ -72,10 +72,29 @@ spec:
         {{- else if eq .Values.storage.type "mongo"}}
         - name: ATHENS_MONGO_STORAGE_URL
           value: {{ .Values.storage.mongo.url | quote }}
+        {{- else if eq .Values.storage.type "s3" }}
+        - name: AWS_REGION
+          value: {{ .Values.storage.s3.region | quote }}
+        - name: ATHENS_S3_BUCKET_NAME
+          value: {{ .Values.storage.s3.bucket | quote }}
+        - name: AWS_USE_DEFAULT_CONFIGURATION
+          value: {{ .Values.storage.s3.useDefaultConfiguration | quote }}
+        {{- if .Values.storage.s3.access_key_id }}
+        - name: AWS_ACCESS_KEY_ID
+          value: {{ .Values.storage.s3.access_key_id | quote }}
+        {{- end }}
+        {{- if .Values.storage.s3.secret_access_key }}
+        - name: AWS_SECRET_ACCESS_KEY
+          value: {{ .Values.storage.s3.secret_access_key | quote }}
+        {{- end }}
+        {{- if .Values.storage.s3.session_token }}
+        - name: AWS_SESSION_TOKEN
+          value: {{ .Values.storage.s3.session_token | quote }}
+        {{- end }}
         {{- end }}
         {{- if .Values.netrc.enabled }}
         - name: ATHENS_NETRC_PATH
-          value: "/etc/netrc/netrc"
+          value: "/etc/netrc/.netrc"
         {{- end }}
         {{- if .Values.upstreamProxy.enabled }}
         - name: ATHENS_FILTER_FILE
@@ -91,8 +110,10 @@ spec:
         {{- end }}
         ports:
         - containerPort: 3000
-        {{- if eq .Values.storage.type "disk" }}
+        {{- if or (eq .Values.storage.type "disk") .Values.upstreamProxy.enabled .Values.netrc.enabled }}
         volumeMounts:
+        {{- end }}
+        {{- if eq .Values.storage.type "disk" }}
         - name: storage-volume
           mountPath: {{ .Values.storage.disk.storageRoot | quote }}
         {{- end }}
@@ -119,7 +140,7 @@ spec:
       volumes:
       - name: storage-volume
       {{- if .Values.storage.disk.persistence.enabled }}
-        persistentVolumeClaim: 
+        persistentVolumeClaim:
           claimName: {{ template "fullname" . }}-storage
       {{- else }}
         emptyDir: {}
