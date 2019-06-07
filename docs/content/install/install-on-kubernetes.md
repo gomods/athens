@@ -86,7 +86,7 @@ $ helm repo add gomods https://athens.blob.core.windows.net/charts
 $ helm repo update
 ```
 
-Next, install the chart with default values to `athens` namespace:  
+Next, install the chart with default values to `athens` namespace:
 
 ```
 $ helm install gomods/athens-proxy -n athens --namespace athens
@@ -141,6 +141,17 @@ To use the Mongo DB storage provider, you will first need a MongoDB instance. On
 helm install gomods/athens-proxy -n athens --namespace athens --set storage.type=mongo --set storage.mongo.url=<some-mongodb-connection-string>
 ```
 
+#### S3 Configuration
+
+To use S3 storage with Athens, set `storage.type` to `s3` and set `storage.s3.region` and `storage.s3.bucket` to the desired AWS region and
+S3 bucket name, respectively. By default, Athens will attempt to load AWS credentials using the AWS SDK from the chain of environment
+variables, shared credentials files, and EC2 instance credentials. To manually specify AWS credentials, set `storage.s3.access_key_id`,
+`storage.s3.secret_access_key`, and change `storage.s3.useDefaultConfiguration` to `false`.
+
+```
+helm install gomods/athens-proxy -n athens --namespace athens --set storage.type=s3 --set storage.s3.region=<your-aws-region> --set storage.s3.bucket=<your-bucket>
+```
+
 ### Kubernetes Service
 
 By default, a Kubernetes `ClusterIP` service is created for the Athens proxy. "ClusterIP" is sufficient in the case when the Athens proxy will be used from within the cluster. To expose Athens outside of the cluster, consider using a "NodePort" or "LoadBalancer" service. This can be changed by setting the `service.type` value when installing the chart. For example, to deploy Athens using a NodePort service, the following command could be used:
@@ -151,7 +162,7 @@ helm install gomods/athens-proxy -n athens --namespace athens --set service.type
 
 ### Ingress Resource
 
-The chart can optionally create a Kubernetes [Ingress Resource](https://kubernetes.io/docs/concepts/services-networking/ingress/#the-ingress-resource) for you as well. To enable this feature, set the `ingress.enabled` resource to true. 
+The chart can optionally create a Kubernetes [Ingress Resource](https://kubernetes.io/docs/concepts/services-networking/ingress/#the-ingress-resource) for you as well. To enable this feature, set the `ingress.enabled` resource to true.
 
 ```console
 helm install gomods/athens-proxy -n athens --namespace athens --set ingress.enabled=true
@@ -167,7 +178,7 @@ ingress:
     kubernetes.io/tls-acme: "true"
     ingress.kubernetes.io/force-ssl-redirect: "true"
     kubernetes.io/ingress.class: nginx
-  hosts: 
+  hosts:
     - athens.mydomain.com
   tls:
     - secretName: athens.mydomain.com
