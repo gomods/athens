@@ -2,7 +2,9 @@ package download
 
 import (
 	"net/http"
+	"net/url"
 
+	"github.com/gomods/athens/pkg/download/mode"
 	"github.com/gomods/athens/pkg/log"
 	"github.com/gomods/athens/pkg/middleware"
 	"github.com/gorilla/mux"
@@ -10,13 +12,14 @@ import (
 
 // ProtocolHandler is a function that takes all that it needs to return
 // a ready-to-go http handler that serves up cmd/go's download protocol.
-type ProtocolHandler func(dp Protocol, lggr log.Entry) http.Handler
+type ProtocolHandler func(dp Protocol, lggr log.Entry, df *mode.DownloadFile) http.Handler
 
 // HandlerOpts are the generic options
 // for a ProtocolHandler
 type HandlerOpts struct {
-	Protocol Protocol
-	Logger   *log.Logger
+	Protocol     Protocol
+	Logger       *log.Logger
+	DownloadFile *mode.DownloadFile
 }
 
 // LogEntryHandler pulls a log entry from the request context. Thanks to the
@@ -26,7 +29,7 @@ type HandlerOpts struct {
 func LogEntryHandler(ph ProtocolHandler, opts *HandlerOpts) http.Handler {
 	f := func(w http.ResponseWriter, r *http.Request) {
 		ent := log.EntryFromContext(r.Context())
-		handler := ph(opts.Protocol, ent)
+		handler := ph(opts.Protocol, ent, opts.DownloadFile)
 		handler.ServeHTTP(w, r)
 	}
 	return http.HandlerFunc(f)
@@ -50,4 +53,10 @@ func RegisterHandlers(r *mux.Router, opts *HandlerOpts) {
 	r.Handle(PathVersionInfo, LogEntryHandler(InfoHandler, opts)).Methods(http.MethodGet)
 	r.Handle(PathVersionModule, LogEntryHandler(ModuleHandler, opts)).Methods(http.MethodGet)
 	r.Handle(PathVersionZip, LogEntryHandler(ZipHandler, opts)).Methods(http.MethodGet)
+}
+
+func getRedirectURL(base, path string) string {
+	url, _ := url.Parse(base)
+	url.Path = path
+	return url.String()
 }

@@ -81,7 +81,7 @@ Port = ":3000"
 #
 # To point Athens to an upstream proxy to fetch modules,
 # set GlobalEndpoint to "https://<url_to_upstream>"
-# and also ensure that FilterFile is  set to a fully qualified file name 
+# and also ensure that FilterFile is set to a fully qualified file name 
 # that contains the letter `D` (for "Direct Access") in the first line.
 GlobalEndpoint = "http://localhost:3001"
 
@@ -175,6 +175,31 @@ SumDBs = ["https://sum.golang.org"]
 # Example pattern: NoSumPatterns = ["github.com/mycompany/*"]
 # Env override: ATHENS_GONOSUM_PATTERNS
 NoSumPatterns = []
+
+# DownloadMode defines how Athens behaves when a module@version
+# is not found in storage. There are 4 options:
+# 1. "sync" (default): download the module synchronously and
+# return the results to the client.
+# 2. "async": return 404, but asynchronously store the module
+# in the storage backend.
+# 3. "redirect": return a 301 redirect status to the client
+# with the base URL as the DownloadRedirectURL from below.
+# 4. "async_redirect": same as option number 3 but it will
+# asynchronously store the module to the backend.
+# 5. "none": return 404 if a module is not found and do nothing.
+# 6. "file:<path>": will point to an HCL file that specifies
+# any of the 5 options above based on different import paths.
+# 7. "custom:<base64-encoded-hcl>" is the same as option 6 
+# but the file is fully encoded in the option. This is 
+# useful for using an environment variable in serverless 
+# deployments.
+# Env override: ATHENS_DOWNLOAD_MODE
+DownloadMode = "sync"
+
+# DownloadURL is the URL that will be used if 
+# DownloadMode is set to "redirect" 
+# Env override: ATHENS_DOWNLOAD_URL
+DownloadURL = ""
 
 # SingleFlightType determines what mechanism Athens uses 
 # to manage concurrency flowing into the Athens Backend. 

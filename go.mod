@@ -26,10 +26,10 @@ require (
 	github.com/gopherjs/gopherjs v0.0.0-20180825215210-0210a2f0f73c // indirect
 	github.com/gorilla/mux v1.6.2
 	github.com/hashicorp/go-multierror v1.0.0
+	github.com/hashicorp/hcl2 v0.0.0-20190503213020-640445e16309
 	github.com/jtolds/gls v4.2.1+incompatible // indirect
 	github.com/kelseyhightower/envconfig v1.3.0
 	github.com/konsorten/go-windows-terminal-sequences v1.0.1 // indirect
-	github.com/kr/pretty v0.1.0 // indirect
 	github.com/minio/minio-go v6.0.5+incompatible
 	github.com/mitchellh/go-homedir v1.0.0
 	github.com/philhofer/fwd v1.0.0 // indirect
@@ -48,15 +48,11 @@ require (
 	go.etcd.io/etcd v0.0.0-20190215181705-784daa04988c
 	go.mongodb.org/mongo-driver v1.0.0
 	go.opencensus.io v0.17.0
-	golang.org/x/crypto v0.0.0-20181029103014-dab2b1051b5d // indirect
-	golang.org/x/net v0.0.0-20181029044818-c44066c5c816 // indirect
 	golang.org/x/oauth2 v0.0.0-20180620175406-ef147856a6dd
-	golang.org/x/sync v0.0.0-20180314180146-1d60e4601c6f
-	golang.org/x/sys v0.0.0-20181031143558-9b800f95dbbc // indirect
+	golang.org/x/sync v0.0.0-20190423024810-112230192c58
 	google.golang.org/api v0.0.0-20180910000450-7ca32eb868bf
 	google.golang.org/appengine v1.3.0 // indirect
 	gopkg.in/DataDog/dd-trace-go.v1 v1.10.0 // indirect
-	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 // indirect
 	gopkg.in/go-playground/assert.v1 v1.2.1 // indirect
 	gopkg.in/go-playground/validator.v9 v9.20.2
 )

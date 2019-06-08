@@ -266,6 +266,7 @@ func TestParseExampleConfig(t *testing.T) {
 		SingleFlight:     &SingleFlight{},
 		SumDBs:           []string{"https://sum.golang.org"},
 		NoSumPatterns:    []string{},
+		DownloadMode:     "sync",
 	}
 
 	absPath, err := filepath.Abs(testConfigFile(t))
