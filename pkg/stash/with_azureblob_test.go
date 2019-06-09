@@ -12,6 +12,7 @@ import (
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/storage"
 	"github.com/gomods/athens/pkg/storage/mem"
+	"github.com/technosophos/moniker"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -108,4 +109,3 @@ func randomContainerName(prefix string) string {
 	}
 	return namer.NameSep("")
 }
-
