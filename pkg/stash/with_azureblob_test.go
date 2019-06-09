@@ -19,7 +19,8 @@ import (
 // and it will ensure that saving to modules at the same time
 // is done synchronously so that only the first module gets saved.
 func TestWithAzureBlob(t *testing.T) {
-	cfg := getAzureTestConfig()
+	containerName := randomContainerName(os.Getenv("DRONE_PULL_REQUEST"))
+	cfg := getAzureTestConfig(containerName)
 	if cfg == nil {
 		t.SkipNow()
 	}
@@ -82,14 +83,29 @@ func (ms *mockAzureBlobStasher) Stash(ctx context.Context, mod, ver string) (str
 	return "", fmt.Errorf("second time error")
 }
 
-func getAzureTestConfig() *config.AzureBlobConfig {
+func getAzureTestConfig(containerName string) *config.AzureBlobConfig {
 	key := os.Getenv("ATHENS_AZURE_ACCOUNT_KEY")
 	if key == "" {
 		return nil
 	}
+	name := os.Getenv("ATHENS_AZURE_ACCOUNT_NAME")
+	if name == "" {
+		return nil
+	}
 	return &config.AzureBlobConfig{
-		AccountName:   "athens_drone_azure_account",
+		AccountName:   name,
 		AccountKey:    key,
-		ContainerName: "athens_drone_azure_container",
+		ContainerName: containerName,
 	}
 }
+
+func randomContainerName(prefix string) string {
+	// moniker is a cool library to produce mostly unique, human-readable names
+	// see https://github.com/technosophos/moniker for more details
+	namer := moniker.New()
+	if prefix != "" {
+		return fmt.Sprintf("%s_%s", prefix, namer.NameSep(""))
+	}
+	return namer.NameSep("")
+}
+
