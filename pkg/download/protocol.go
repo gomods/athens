@@ -8,6 +8,7 @@ import (
 	"sync"
 
 	"github.com/gomods/athens/pkg/errors"
+	"github.com/gomods/athens/pkg/log"
 	"github.com/gomods/athens/pkg/observ"
 	"github.com/gomods/athens/pkg/stash"
 	"github.com/gomods/athens/pkg/storage"
@@ -20,16 +21,16 @@ type Protocol interface {
 	List(ctx context.Context, mod string) ([]string, error)
 
 	// Info implements GET /{module}/@v/{version}.info
-	Info(ctx context.Context, mod, ver string) ([]byte, error)
+	Info(ctx context.Context, mod, ver string, lggr log.Entry) ([]byte, error)
 
 	// Latest implements GET /{module}/@latest
 	Latest(ctx context.Context, mod string) (*storage.RevInfo, error)
 
 	// GoMod implements GET /{module}/@v/{version}.mod
-	GoMod(ctx context.Context, mod, ver string) ([]byte, error)
+	GoMod(ctx context.Context, mod, ver string, lggr log.Entry) ([]byte, error)
 
 	// Zip implements GET /{module}/@v/{version}.zip
-	Zip(ctx context.Context, mod, ver string) (io.ReadCloser, error)
+	Zip(ctx context.Context, mod, ver string, lggr log.Entry) (io.ReadCloser, error)
 }
 
 // Wrapper helps extend the main protocol's functionality with addons.
@@ -146,13 +147,14 @@ func (p *protocol) Latest(ctx context.Context, mod string) (*storage.RevInfo, er
 	return lr, nil
 }
 
-func (p *protocol) Info(ctx context.Context, mod, ver string) ([]byte, error) {
+func (p *protocol) Info(ctx context.Context, mod, ver string, lggr log.Entry) ([]byte, error) {
 	const op errors.Op = "protocol.Info"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 	info, err := p.storage.Info(ctx, mod, ver)
 	var newVer string
 	if errors.IsNotFoundErr(err) {
+		lggr.Warnf("missing info file for module: %s restoring entire module from vcs this will overwrite anything existing for version: %s of module: %s in storage", mod, ver, mod)
 		newVer, err = p.stasher.Stash(ctx, mod, ver)
 		if err != nil {
 			return nil, errors.E(op, err)
@@ -166,13 +168,14 @@ func (p *protocol) Info(ctx context.Context, mod, ver string) ([]byte, error) {
 	return info, nil
 }
 
-func (p *protocol) GoMod(ctx context.Context, mod, ver string) ([]byte, error) {
+func (p *protocol) GoMod(ctx context.Context, mod, ver string, lggr log.Entry) ([]byte, error) {
 	const op errors.Op = "protocol.GoMod"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 	goMod, err := p.storage.GoMod(ctx, mod, ver)
 	var newVer string
 	if errors.IsNotFoundErr(err) {
+		lggr.Warnf("missing mod file for module: %s restoring entire module from vcs this will overwrite anything existing for version: %s of module: %s in storage", mod, ver, mod)
 		newVer, err = p.stasher.Stash(ctx, mod, ver)
 		if err != nil {
 			return nil, errors.E(op, err)
@@ -186,13 +189,14 @@ func (p *protocol) GoMod(ctx context.Context, mod, ver string) ([]byte, error) {
 	return goMod, nil
 }
 
-func (p *protocol) Zip(ctx context.Context, mod, ver string) (io.ReadCloser, error) {
+func (p *protocol) Zip(ctx context.Context, mod, ver string, lggr log.Entry) (io.ReadCloser, error) {
 	const op errors.Op = "protocol.Zip"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 	zip, err := p.storage.Zip(ctx, mod, ver)
 	var newVer string
 	if errors.IsNotFoundErr(err) {
+		lggr.Warnf("missing zip file for module: %s restoring entire module from vcs this will overwrite anything existing for version: %s of module: %s in storage", mod, ver, mod)
 		newVer, err = p.stasher.Stash(ctx, mod, ver)
 		if err != nil {
 			return nil, errors.E(op, err)

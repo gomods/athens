@@ -14,10 +14,12 @@ import (
 
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/errors"
+	"github.com/gomods/athens/pkg/log"
 	"github.com/gomods/athens/pkg/module"
 	"github.com/gomods/athens/pkg/stash"
 	"github.com/gomods/athens/pkg/storage"
 	"github.com/gomods/athens/pkg/storage/mem"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/afero"
 	"github.com/stretchr/testify/require"
 	"golang.org/x/sync/errgroup"
@@ -183,12 +185,13 @@ var infoTests = []infoTest{
 }
 
 func TestInfo(t *testing.T) {
+	lggr := log.New("none", logrus.DebugLevel)
 	dp := getDP(t)
 	ctx := context.Background()
 
 	for _, tc := range infoTests {
 		t.Run(tc.name, func(t *testing.T) {
-			bts, err := dp.Info(ctx, tc.path, tc.version)
+			bts, err := dp.Info(ctx, tc.path, tc.version, lggr)
 			require.NoError(t, err)
 
 			var info storage.RevInfo
@@ -234,12 +237,13 @@ func rmNewLine(input string) string {
 }
 
 func TestGoMod(t *testing.T) {
+	lggr := log.New("none", logrus.DebugLevel)
 	dp := getDP(t)
 	ctx := context.Background()
 
 	for _, tc := range modTests {
 		t.Run(tc.name, func(t *testing.T) {
-			mod, err := dp.GoMod(ctx, tc.path, tc.version)
+			mod, err := dp.GoMod(ctx, tc.path, tc.version, lggr)
 			require.Equal(t, tc.err, err != nil, err)
 
 			if tc.err {
@@ -274,6 +278,7 @@ var mods = []testMod{
 }
 
 func TestDownloadProtocol(t *testing.T) {
+	lggr := log.New("none", logrus.DebugLevel)
 	s, err := mem.NewStorage()
 	if err != nil {
 		t.Fatal(err)
@@ -287,7 +292,7 @@ func TestDownloadProtocol(t *testing.T) {
 	for i := 0; i < len(mods); i++ {
 		m := mods[i]
 		eg.Go(func() error {
-			_, err := dp.GoMod(ctx, m.mod, m.ver)
+			_, err := dp.GoMod(ctx, m.mod, m.ver, lggr)
 			return err
 		})
 	}
@@ -298,7 +303,7 @@ func TestDownloadProtocol(t *testing.T) {
 	}
 
 	for _, m := range mods {
-		bts, err := dp.GoMod(ctx, m.mod, m.ver)
+		bts, err := dp.GoMod(ctx, m.mod, m.ver, lggr)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -320,6 +325,7 @@ func (m *mockFetcher) Fetch(ctx context.Context, mod, ver string) (*storage.Vers
 }
 
 func TestDownloadProtocolWhenFetchFails(t *testing.T) {
+	lggr := log.New("none", logrus.DebugLevel)
 	s, err := mem.NewStorage()
 	if err != nil {
 		t.Fatal(err)
@@ -334,7 +340,7 @@ func TestDownloadProtocolWhenFetchFails(t *testing.T) {
 	st := stash.New(mp, s)
 	dp := New(&Opts{s, st, nil})
 	ctx := context.Background()
-	_, err = dp.GoMod(ctx, fakeMod.mod, fakeMod.ver)
+	_, err = dp.GoMod(ctx, fakeMod.mod, fakeMod.ver, lggr)
 	if err != nil {
 		t.Errorf("Download protocol should succeed, instead it gave error %s \n", err)
 	}

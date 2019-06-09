@@ -21,7 +21,7 @@ func ZipHandler(dp Protocol, lggr log.Entry) http.Handler {
 			w.WriteHeader(errors.Kind(err))
 			return
 		}
-		zip, err := dp.Zip(r.Context(), mod, ver)
+		zip, err := dp.Zip(r.Context(), mod, ver, lggr)
 		if err != nil {
 			lggr.SystemErr(err)
 			w.WriteHeader(errors.Kind(err))

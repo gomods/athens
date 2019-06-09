@@ -11,8 +11,10 @@ import (
 	"time"
 
 	"github.com/gomods/athens/pkg/download"
+	"github.com/gomods/athens/pkg/log"
 	"github.com/gomods/athens/pkg/paths"
 	"github.com/gomods/athens/pkg/storage"
+	"github.com/sirupsen/logrus"
 )
 
 // TestPoolLogic ensures that no
@@ -55,6 +57,7 @@ func (m *mockPool) List(ctx context.Context, mod string) ([]string, error) {
 // TestPoolWrapper ensures all upstream methods
 // are successfully called.
 func TestPoolWrapper(t *testing.T) {
+	lggr := log.New("none", logrus.DebugLevel)
 	m := &mockDP{}
 	dp := WithPool(1)(m)
 	ctx := context.Background()
@@ -74,7 +77,7 @@ func TestPoolWrapper(t *testing.T) {
 		t.Fatalf("dp.List: expected %v and %v to be equal", m.list, givenList)
 	}
 	m.info = []byte("info response")
-	givenInfo, err := dp.Info(ctx, mod, ver)
+	givenInfo, err := dp.Info(ctx, mod, ver, lggr)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -82,11 +85,11 @@ func TestPoolWrapper(t *testing.T) {
 		t.Fatalf("dp.Info: expected %s and %s to be equal", m.info, givenInfo)
 	}
 	m.err = fmt.Errorf("mod err")
-	_, err = dp.GoMod(ctx, mod, ver)
+	_, err = dp.GoMod(ctx, mod, ver, lggr)
 	if m.err.Error() != err.Error() {
 		t.Fatalf("dp.GoMod: expected err to be `%v` but got `%v`", m.err, err)
 	}
-	_, err = dp.Zip(ctx, mod, ver)
+	_, err = dp.Zip(ctx, mod, ver, lggr)
 	if m.err.Error() != err.Error() {
 		t.Fatalf("dp.Zip: expected err to be `%v` but got `%v`", m.err, err)
 	}
@@ -113,7 +116,7 @@ func (m *mockDP) List(ctx context.Context, mod string) ([]string, error) {
 }
 
 // Info implements GET /{module}/@v/{version}.info
-func (m *mockDP) Info(ctx context.Context, mod, ver string) ([]byte, error) {
+func (m *mockDP) Info(ctx context.Context, mod, ver string, lggr log.Entry) ([]byte, error) {
 	if m.inputMod != mod {
 		return nil, fmt.Errorf("expected mod input %v but got %v", m.inputMod, mod)
 	}
@@ -132,7 +135,7 @@ func (m *mockDP) Latest(ctx context.Context, mod string) (*storage.RevInfo, erro
 }
 
 // GoMod implements GET /{module}/@v/{version}.mod
-func (m *mockDP) GoMod(ctx context.Context, mod, ver string) ([]byte, error) {
+func (m *mockDP) GoMod(ctx context.Context, mod, ver string, lggr log.Entry) ([]byte, error) {
 	if m.inputMod != mod {
 		return nil, fmt.Errorf("expected mod input %v but got %v", m.inputMod, mod)
 	}
@@ -143,7 +146,7 @@ func (m *mockDP) GoMod(ctx context.Context, mod, ver string) ([]byte, error) {
 }
 
 // Zip implements GET /{module}/@v/{version}.zip
-func (m *mockDP) Zip(ctx context.Context, mod, ver string) (io.ReadCloser, error) {
+func (m *mockDP) Zip(ctx context.Context, mod, ver string, lggr log.Entry) (io.ReadCloser, error) {
 	if m.inputMod != mod {
 		return nil, fmt.Errorf("expected mod input %v but got %v", m.inputMod, mod)
 	}

@@ -20,7 +20,7 @@ func InfoHandler(dp Protocol, lggr log.Entry) http.Handler {
 			w.WriteHeader(errors.Kind(err))
 			return
 		}
-		info, err := dp.Info(r.Context(), mod, ver)
+		info, err := dp.Info(r.Context(), mod, ver, lggr)
 		if err != nil {
 			lggr.SystemErr(errors.E(op, err, errors.M(mod), errors.V(ver)))
 			w.WriteHeader(errors.Kind(err))

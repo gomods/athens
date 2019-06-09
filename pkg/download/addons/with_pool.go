@@ -6,6 +6,7 @@ import (
 
 	"github.com/gomods/athens/pkg/download"
 	"github.com/gomods/athens/pkg/errors"
+	"github.com/gomods/athens/pkg/log"
 	"github.com/gomods/athens/pkg/storage"
 )
 
@@ -64,13 +65,13 @@ func (p *withpool) List(ctx context.Context, mod string) ([]string, error) {
 	return vers, nil
 }
 
-func (p *withpool) Info(ctx context.Context, mod, ver string) ([]byte, error) {
+func (p *withpool) Info(ctx context.Context, mod, ver string, lggr log.Entry) ([]byte, error) {
 	const op errors.Op = "pool.Info"
 	var info []byte
 	var err error
 	done := make(chan struct{}, 1)
 	p.jobCh <- func() {
-		info, err = p.dp.Info(ctx, mod, ver)
+		info, err = p.dp.Info(ctx, mod, ver, lggr)
 		close(done)
 	}
 	<-done
@@ -96,13 +97,13 @@ func (p *withpool) Latest(ctx context.Context, mod string) (*storage.RevInfo, er
 	return info, nil
 }
 
-func (p *withpool) GoMod(ctx context.Context, mod, ver string) ([]byte, error) {
+func (p *withpool) GoMod(ctx context.Context, mod, ver string, lggr log.Entry) ([]byte, error) {
 	const op errors.Op = "pool.GoMod"
 	var goMod []byte
 	var err error
 	done := make(chan struct{}, 1)
 	p.jobCh <- func() {
-		goMod, err = p.dp.GoMod(ctx, mod, ver)
+		goMod, err = p.dp.GoMod(ctx, mod, ver, lggr)
 		close(done)
 	}
 	<-done
@@ -112,13 +113,13 @@ func (p *withpool) GoMod(ctx context.Context, mod, ver string) ([]byte, error) {
 	return goMod, nil
 }
 
-func (p *withpool) Zip(ctx context.Context, mod, ver string) (io.ReadCloser, error) {
+func (p *withpool) Zip(ctx context.Context, mod, ver string, lggr log.Entry) (io.ReadCloser, error) {
 	const op errors.Op = "pool.Zip"
 	var zip io.ReadCloser
 	var err error
 	done := make(chan struct{}, 1)
 	p.jobCh <- func() {
-		zip, err = p.dp.Zip(ctx, mod, ver)
+		zip, err = p.dp.Zip(ctx, mod, ver, lggr)
 		close(done)
 	}
 	<-done

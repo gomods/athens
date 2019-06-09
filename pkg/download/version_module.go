@@ -20,7 +20,7 @@ func ModuleHandler(dp Protocol, lggr log.Entry) http.Handler {
 			w.WriteHeader(errors.Kind(err))
 			return
 		}
-		modBts, err := dp.GoMod(r.Context(), mod, ver)
+		modBts, err := dp.GoMod(r.Context(), mod, ver, lggr)
 		if err != nil {
 			err = errors.E(op, errors.M(mod), errors.V(ver), err)
 			lggr.SystemErr(err)
