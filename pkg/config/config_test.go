@@ -87,6 +87,7 @@ func TestEnvOverrides(t *testing.T) {
 		HGRCPath:       "/test/path/.hgrc",
 		Storage:        &StorageConfig{},
 		SingleFlight:   &SingleFlight{},
+		RobotsContent:  "user-agent: *\ndisallow: /",
 	}
 
 	envVars := getEnvMap(expConf)
@@ -267,6 +268,7 @@ func TestParseExampleConfig(t *testing.T) {
 		SumDBs:           []string{"https://sum.golang.org"},
 		NoSumPatterns:    []string{},
 		DownloadMode:     "sync",
+		RobotsContent:    "user-agent: *\ndisallow: /",
 	}
 
 	absPath, err := filepath.Abs(testConfigFile(t))
@@ -304,6 +306,7 @@ func getEnvMap(config *Config) map[string]string {
 	envVars["ATHENS_PATH_PREFIX"] = config.PathPrefix
 	envVars["ATHENS_NETRC_PATH"] = config.NETRCPath
 	envVars["ATHENS_HGRC_PATH"] = config.HGRCPath
+	envVars["ROBOTS_CONTENT"] = config.RobotsContent
 
 	storage := config.Storage
 	if storage != nil {

@@ -85,6 +85,11 @@ Port = ":3000"
 # that contains the letter `D` (for "Direct Access") in the first line.
 GlobalEndpoint = "http://localhost:3001"
 
+# RobotsContent sets the response of the /robots.txt.
+# SEE https://developers.google.com/search/reference/robots_txt
+# default to disallow all web crawlers.
+RobotsContent = "user-agent: *\ndisallow: /"
+
 # BASIC AUTH OPTIONS 
 # ==================
 # PLASE NOTE THAT THIS IS A BAD HACK AROUND 

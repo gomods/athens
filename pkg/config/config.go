@@ -47,6 +47,7 @@ type Config struct {
 	DownloadMode     mode.Mode `envconfig:"ATHENS_DOWNLOAD_MODE"`
 	DownloadURL      string    `envconfig:"ATHENS_DOWNLOAD_URL"`
 	SingleFlightType string    `envconfig:"ATHENS_SINGLE_FLIGHT_TYPE"`
+	RobotsContent    string    `envconfig:"ROBOTS_CONTENT"`
 	SingleFlight     *SingleFlight
 	Storage          *StorageConfig
 }
@@ -89,6 +90,7 @@ func defaultConfig() *Config {
 		NoSumPatterns:    []string{},
 		DownloadMode:     "sync",
 		DownloadURL:      "",
+		RobotsContent:    "user-agent: *\ndisallow: /",
 		SingleFlight: &SingleFlight{
 			Etcd:  &Etcd{"localhost:2379,localhost:22379,localhost:32379"},
 			Redis: &Redis{"127.0.0.1:6379"},
