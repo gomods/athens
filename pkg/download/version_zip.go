@@ -4,6 +4,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/gomods/athens/pkg/download/mode"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/log"
 )
@@ -12,7 +13,7 @@ import (
 const PathVersionZip = "/{module:.+}/@v/{version}.zip"
 
 // ZipHandler implements GET baseURL/module/@v/version.zip
-func ZipHandler(dp Protocol, lggr log.Entry) http.Handler {
+func ZipHandler(dp Protocol, lggr log.Entry, df *mode.DownloadFile) http.Handler {
 	const op errors.Op = "download.ZipHandler"
 	f := func(w http.ResponseWriter, r *http.Request) {
 		mod, ver, err := getModuleParams(r, op)
@@ -24,6 +25,10 @@ func ZipHandler(dp Protocol, lggr log.Entry) http.Handler {
 		zip, err := dp.Zip(r.Context(), mod, ver)
 		if err != nil {
 			lggr.SystemErr(err)
+			if errors.Kind(err) == errors.KindRedirect {
+				http.Redirect(w, r, getRedirectURL(df.URL(mod), r.URL.Path), errors.KindRedirect)
+				return
+			}
 			w.WriteHeader(errors.Kind(err))
 			return
 		}
