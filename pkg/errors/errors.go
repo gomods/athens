@@ -17,6 +17,7 @@ const (
 	KindAlreadyExists  = http.StatusConflict
 	KindRateLimit      = http.StatusTooManyRequests
 	KindNotImplemented = http.StatusNotImplemented
+	KindRedirect       = http.StatusMovedPermanently
 )
 
 // Error is an Athens system error.

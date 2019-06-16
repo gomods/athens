@@ -7,6 +7,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/gomods/athens/pkg/download/mode"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/observ"
 	"github.com/gomods/athens/pkg/stash"
@@ -37,9 +38,10 @@ type Wrapper func(Protocol) Protocol
 
 // Opts specifies download protocol options to avoid long func signature.
 type Opts struct {
-	Storage storage.Backend
-	Stasher stash.Stasher
-	Lister  UpstreamLister
+	Storage      storage.Backend
+	Stasher      stash.Stasher
+	Lister       UpstreamLister
+	DownloadFile *mode.DownloadFile
 }
 
 // New returns a full implementation of the download.Protocol
@@ -48,7 +50,10 @@ type Opts struct {
 // The wrappers are applied in order, meaning the last wrapper
 // passed is the Protocol that gets hit first.
 func New(opts *Opts, wrappers ...Wrapper) Protocol {
-	var p Protocol = &protocol{opts.Storage, opts.Stasher, opts.Lister}
+	if opts.DownloadFile == nil {
+		opts.DownloadFile = &mode.DownloadFile{Mode: mode.Sync}
+	}
+	var p Protocol = &protocol{opts.DownloadFile, opts.Storage, opts.Stasher, opts.Lister}
 	for _, w := range wrappers {
 		p = w(p)
 	}
@@ -57,6 +62,7 @@ func New(opts *Opts, wrappers ...Wrapper) Protocol {
 }
 
 type protocol struct {
+	df      *mode.DownloadFile
 	storage storage.Backend
 	stasher stash.Stasher
 	lister  UpstreamLister
@@ -151,13 +157,11 @@ func (p *protocol) Info(ctx context.Context, mod, ver string) ([]byte, error) {
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 	info, err := p.storage.Info(ctx, mod, ver)
-	var newVer string
 	if errors.IsNotFoundErr(err) {
-		newVer, err = p.stasher.Stash(ctx, mod, ver)
-		if err != nil {
-			return nil, errors.E(op, err)
-		}
-		info, err = p.storage.Info(ctx, mod, newVer)
+		err = p.processDownload(ctx, mod, ver, func(newVer string) error {
+			info, err = p.storage.Info(ctx, mod, newVer)
+			return err
+		})
 	}
 	if err != nil {
 		return nil, errors.E(op, err)
@@ -171,18 +175,15 @@ func (p *protocol) GoMod(ctx context.Context, mod, ver string) ([]byte, error) {
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 	goMod, err := p.storage.GoMod(ctx, mod, ver)
-	var newVer string
 	if errors.IsNotFoundErr(err) {
-		newVer, err = p.stasher.Stash(ctx, mod, ver)
-		if err != nil {
-			return nil, errors.E(op, err)
-		}
-		goMod, err = p.storage.GoMod(ctx, mod, newVer)
+		err = p.processDownload(ctx, mod, ver, func(newVer string) error {
+			goMod, err = p.storage.GoMod(ctx, mod, newVer)
+			return err
+		})
 	}
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
-
 	return goMod, nil
 }
 
@@ -191,19 +192,40 @@ func (p *protocol) Zip(ctx context.Context, mod, ver string) (io.ReadCloser, err
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 	zip, err := p.storage.Zip(ctx, mod, ver)
-	var newVer string
 	if errors.IsNotFoundErr(err) {
-		newVer, err = p.stasher.Stash(ctx, mod, ver)
-		if err != nil {
-			return nil, errors.E(op, err)
-		}
-		zip, err = p.storage.Zip(ctx, mod, newVer)
+		err = p.processDownload(ctx, mod, ver, func(newVer string) error {
+			zip, err = p.storage.Zip(ctx, mod, newVer)
+			return err
+		})
 	}
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
 
 	return zip, nil
+}
+
+func (p *protocol) processDownload(ctx context.Context, mod, ver string, f func(newVer string) error) error {
+	const op errors.Op = "protocol.processDownload"
+	switch p.df.Match(mod) {
+	case mode.Sync:
+		newVer, err := p.stasher.Stash(ctx, mod, ver)
+		if err != nil {
+			return errors.E(op, err)
+		}
+		return f(newVer)
+	case mode.Async:
+		go p.stasher.Stash(ctx, mod, ver)
+		return errors.E(op, "async: module not found", errors.KindNotFound)
+	case mode.Redirect:
+		return errors.E(op, "redirect", errors.KindRedirect)
+	case mode.AsyncRedirect:
+		go p.stasher.Stash(ctx, mod, ver)
+		return errors.E(op, "async_redirect: module not found", errors.KindRedirect)
+	case mode.None:
+		return errors.E(op, "none", errors.KindNotFound)
+	}
+	return nil
 }
 
 // union concatenates two version lists and removes duplicates
