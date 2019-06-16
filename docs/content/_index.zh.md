@@ -14,7 +14,7 @@ date: 2018-12-07T11:44:36+00:00
 #### 如何开始？
     运行 `docker run -p '3000:3000' gomods/athens:latest`
 
-然后，设置你的 `GOPROXY` 和 `go get` 去!
+然后，设置你的 `GOPROXY` 并 `go get` 去!
 
     export GOPROXY=http://localhost:3000 && go get module@v1
 
