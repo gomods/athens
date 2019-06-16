@@ -12,9 +12,9 @@ date: 2019-03-14T08:44:12+00:00
 En esta página web, está documentado Athens en detalle. Te enseñaremos que hace, por que es necesario, y como puedes ejecutarlo por tu cuenta. A continuación te mostramos un breve listado.
 
 #### ¿Cómo empezar?
-    Correr `docker run -p '3000:3000' gomods/athens:latest`
+    Ejecutar `docker run -p '3000:3000' gomods/athens:latest`
 
-Luego, configura tu `GOPROXY` y `go get` go!
+Ahora configura tu `GOPROXY` y a darle al `go get`!
 
     export GOPROXY=http://localhost:3000 && go get module@v1
 
