@@ -17,6 +17,13 @@ func ModuleHandler(dp Protocol, lggr log.Entry, df *mode.DownloadFile) http.Hand
 	f := func(w http.ResponseWriter, r *http.Request) {
 		mod, ver, err := getModuleParams(r, op)
 		if err != nil {
+			err = errors.E(op, errors.M(mod), errors.V(ver), err)
+			lggr.SystemErr(err)
+			w.WriteHeader(errors.Kind(err))
+			return
+		}
+		modBts, err := dp.GoMod(r.Context(), mod, ver)
+		if err != nil {
 			lggr.SystemErr(err)
 			if errors.Kind(err) == errors.KindRedirect {
 				http.Redirect(w, r, getRedirectURL(df.URL(mod), r.URL.Path), errors.KindRedirect)
@@ -25,13 +32,7 @@ func ModuleHandler(dp Protocol, lggr log.Entry, df *mode.DownloadFile) http.Hand
 			w.WriteHeader(errors.Kind(err))
 			return
 		}
-		modBts, err := dp.GoMod(r.Context(), mod, ver)
-		if err != nil {
-			err = errors.E(op, errors.M(mod), errors.V(ver), err)
-			lggr.SystemErr(err)
-			w.WriteHeader(errors.Kind(err))
-			return
-		}
+
 		w.Write(modBts)
 	}
 	return http.HandlerFunc(f)
