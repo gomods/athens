@@ -32,7 +32,7 @@ ingress:
   tls:
 
 storage:
-  type: disk
+  type: minio
   disk:
     storageRoot: "/var/lib/athens"
     persistence:
@@ -49,6 +49,12 @@ storage:
     region: ""
     bucket: ""
     useDefaultConfiguration: true
+  minio:
+    # All these variables needs to be set when configuring athens to run with minio backend
+    endpoint: ""
+    accessKey: ""
+    secretKey: ""
+    bucket: ""
 
 # Extra environment variables to be passed
 # Commented lines below, show how to set username/password for basic auth
