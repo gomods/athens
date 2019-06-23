@@ -32,7 +32,7 @@ ingress:
   tls:
 
 storage:
-  type: minio
+  type: disk
   disk:
     storageRoot: "/var/lib/athens"
     persistence:
