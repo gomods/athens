@@ -56,7 +56,7 @@ configEnvVars: {}
 
 # HTTP basic auth
 basicAuth:
-  enabled: true
+  enabled: false
   user: "some_user"
   password: "some_password"
 
