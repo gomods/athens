@@ -53,7 +53,7 @@ spec:
             {{- if .Values.basicAuth.enabled }}
             httpHeaders:
               - name: Authorization
-                value: "Basic {{ (printf "%s:%s" .Values.basicAuth.user .Values.basicAuth.password | b64enc) }}"
+                value: "Basic {{ (printf "%s:%s" (default "gomod" .Values.basicAuth.user) (default "gomod" .Values.basicAuth.password) | b64enc) }}"
             {{- end }}
         readinessProbe:
           httpGet:
@@ -62,7 +62,7 @@ spec:
             {{- if .Values.basicAuth.enabled }}
             httpHeaders:
               - name: Authorization
-                value: "Basic {{ (printf "%s:%s" .Values.basicAuth.user .Values.basicAuth.password | b64enc) }}"
+                value: "Basic {{ (printf "%s:%s" (default "gomod" .Values.basicAuth.user) (default "gomod" .Values.basicAuth.password) | b64enc) }}"
             {{- end }}
         env:
         - name: ATHENS_GOGET_WORKERS
