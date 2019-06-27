@@ -2,6 +2,7 @@ package download
 
 import (
 	"context"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -22,16 +23,22 @@ func TestRedirect(t *testing.T) {
 			DownloadURL: "https://gomods.io",
 		},
 	})
-	req := httptest.NewRequest("GET", "/github.com/gomods/athens/@v/v0.4.0.info", nil)
-	w := httptest.NewRecorder()
-	r.ServeHTTP(w, req)
-	if w.Code != http.StatusMovedPermanently {
-		t.Fatalf("expected a redirect status (301) but got %v", w.Code)
-	}
-	expectedRedirect := "https://gomods.io/github.com/gomods/athens/@v/v0.4.0.info"
-	givenRedirect := w.HeaderMap.Get("location")
-	if expectedRedirect != givenRedirect {
-		t.Fatalf("expected the handler to redirect to %q but got %q", expectedRedirect, givenRedirect)
+	for _, path := range [...]string{
+		"/github.com/gomods/athens/@v/v0.4.0.info",
+		"/github.com/gomods/athens/@v/v0.4.0.mod",
+		"/github.com/gomods/athens/@v/v0.4.0.zip",
+	} {
+		req := httptest.NewRequest("GET", path, nil)
+		w := httptest.NewRecorder()
+		r.ServeHTTP(w, req)
+		if w.Code != http.StatusMovedPermanently {
+			t.Fatalf("expected a redirect status (301) but got %v", w.Code)
+		}
+		expectedRedirect := "https://gomods.io" + path
+		givenRedirect := w.HeaderMap.Get("location")
+		if expectedRedirect != givenRedirect {
+			t.Fatalf("expected the handler to redirect to %q but got %q", expectedRedirect, givenRedirect)
+		}
 	}
 }
 
@@ -41,5 +48,15 @@ type mockProtocol struct {
 
 func (mp *mockProtocol) Info(ctx context.Context, mod, ver string) ([]byte, error) {
 	const op errors.Op = "mockProtocol.Info"
+	return nil, errors.E(op, "not found", errors.KindRedirect)
+}
+
+func (mp *mockProtocol) GoMod(ctx context.Context, mod, ver string) ([]byte, error) {
+	const op errors.Op = "mockProtocol.GoMod"
+	return nil, errors.E(op, "not found", errors.KindRedirect)
+}
+
+func (mp *mockProtocol) Zip(ctx context.Context, mod, ver string) (io.ReadCloser, error) {
+	const op errors.Op = "mockProtocol.Zip"
 	return nil, errors.E(op, "not found", errors.KindRedirect)
 }
