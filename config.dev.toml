@@ -43,6 +43,14 @@ LogLevel = "debug"
 # Env override: ATHENS_CLOUD_RUNTIME
 CloudRuntime = "none"
 
+# EnablePprof specifies if the pprof endpoints should be exposed.
+# Note that this option is not meant to be activated forever on a server
+# and should be desactivated once not needed.
+EnablePprof = false
+
+# PprofPort specifies the port on which pprof will be exposed if activated.
+PprofPort = ":3001"
+
 # The filename for the include exclude filter.
 # Env override: ATHENS_FILTER_FILE
 #
