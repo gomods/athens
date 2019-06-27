@@ -25,6 +25,8 @@ type Config struct {
 	ProtocolWorkers  int       `validate:"required" envconfig:"ATHENS_PROTOCOL_WORKERS"`
 	LogLevel         string    `validate:"required" envconfig:"ATHENS_LOG_LEVEL"`
 	CloudRuntime     string    `validate:"required" envconfig:"ATHENS_CLOUD_RUNTIME"`
+	EnablePprof      bool      `envconfig:"ATHENS_ENABLE_PPROF"`
+	PprofPort        string    `envconfig:"ATHENS_PPROF_PORT"`
 	FilterFile       string    `envconfig:"ATHENS_FILTER_FILE"`
 	TraceExporterURL string    `envconfig:"ATHENS_TRACE_EXPORTER_URL"`
 	TraceExporter    string    `envconfig:"ATHENS_TRACE_EXPORTER"`
@@ -78,6 +80,8 @@ func defaultConfig() *Config {
 		ProtocolWorkers:  30,
 		LogLevel:         "debug",
 		CloudRuntime:     "none",
+		EnablePprof:      false,
+		PprofPort:        ":3001",
 		StatsExporter:    "prometheus",
 		TimeoutConf:      TimeoutConf{Timeout: 300},
 		StorageType:      "memory",
