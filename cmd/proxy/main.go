@@ -10,6 +10,8 @@ import (
 	"os/signal"
 	"time"
 
+	_ "net/http/pprof"
+
 	"github.com/gomods/athens/cmd/proxy/actions"
 	"github.com/gomods/athens/pkg/build"
 	"github.com/gomods/athens/pkg/config"
@@ -60,6 +62,15 @@ func main() {
 		}
 		close(idleConnsClosed)
 	}()
+
+	if conf.EnablePprof {
+		go func() {
+			// pprof to be exposed on a different port than the application for security matters, not to expose profiling data and avoid DoS attacks (profiling slows down the service)
+			// https://www.farsightsecurity.com/txt-record/2016/10/28/cmikk-go-remote-profiling/
+			log.Printf("Starting `pprof` at port %v", conf.PprofPort)
+			log.Fatal(http.ListenAndServe(conf.PprofPort, nil))
+		}()
+	}
 
 	log.Printf("Starting application at port %v", conf.Port)
 	if cert != "" && key != "" {
