@@ -50,10 +50,20 @@ spec:
           httpGet:
             path: "/healthz"
             port: 3000
+            {{- if .Values.basicAuth.enabled }}
+            httpHeaders:
+              - name: Authorization
+                value: "Basic {{ (printf "%s:%s" (default "gomod" .Values.basicAuth.user) (default "gomod" .Values.basicAuth.password) | b64enc) }}"
+            {{- end }}
         readinessProbe:
           httpGet:
             path: "{{ template "readinessPath" . }}"
             port: 3000
+            {{- if .Values.basicAuth.enabled }}
+            httpHeaders:
+              - name: Authorization
+                value: "Basic {{ (printf "%s:%s" (default "gomod" .Values.basicAuth.user) (default "gomod" .Values.basicAuth.password) | b64enc) }}"
+            {{- end }}
         env:
         - name: ATHENS_GOGET_WORKERS
         {{- if .Values.goGetWorkers }}
@@ -107,6 +117,12 @@ spec:
           value: {{ .Values.jaeger.url | quote }}
         - name: ATHENS_TRACE_EXPORTER
           value: "jaeger"
+        {{- end }}
+        {{- if .Values.basicAuth.enabled }}
+        - name: BASIC_AUTH_USER
+          value: "{{ default "gomod" .Values.basicAuth.user | quote }}"
+        - name: BASIC_AUTH_PASS
+          value: "{{ default "gomod" .Values.basicAuth.password | quote }}"
         {{- end }}
         ports:
         - containerPort: 3000
