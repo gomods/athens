@@ -350,6 +350,9 @@ SingleFlightType = "memory"
         # https://godoc.org/github.com/aws/aws-sdk-go/aws/session#hdr-Environment_Variables
         # for environment variables that will affect the aws configuration.
         UseDefaultConfiguration = false
+
+        AWS_ENDPOINT_CREDENTIALS = ""
+
    [Storage.AzureBlob]
         # Storage Account name for Azure Blob
         # Env override: ATHENS_AZURE_ACCOUNT_NAME

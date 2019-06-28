@@ -5,11 +5,14 @@ import (
 	"net/url"
 	"time"
 
+	"github.com/aws/aws-sdk-go/service/s3/s3manager"
+
+	"github.com/aws/aws-sdk-go/aws/credentials/endpointcreds"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3/s3iface"
-	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager/s3manageriface"
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/errors"
@@ -39,22 +42,19 @@ func New(s3Conf *config.S3Config, timeout time.Duration, options ...func(*aws.Co
 		return nil, errors.E(op, err)
 	}
 
-	creds := buildAWSCredentials(s3Conf)
-
-	awsConfig := &aws.Config{
-		Credentials: creds,
-		Region:      aws.String(s3Conf.Region),
-	}
-
-	for _, o := range options {
-		o(awsConfig)
-	}
-
-	// create a session
-	sess, err := session.NewSession(awsConfig)
+	creds, err := buildAWSCredentials(s3Conf)
 	if err != nil {
-		return nil, errors.E(op, err)
+		return nil, err
 	}
+
+	// create a session with creds
+	sess, err := session.NewSession(&aws.Config{
+		Region:                        aws.String(s3Conf.Region),
+		Credentials:                   creds,
+		CredentialsChainVerboseErrors: aws.Bool(true),
+		MaxRetries:                    aws.Int(3),
+	})
+
 	uploader := s3manager.NewUploader(sess)
 
 	return &Storage{
@@ -76,10 +76,28 @@ func New(s3Conf *config.S3Config, timeout time.Duration, options ...func(*aws.Co
 // https://godoc.org/github.com/aws/aws-sdk-go#hdr-Configuring_Credentials and
 // https://godoc.org/github.com/aws/aws-sdk-go/aws/session#hdr-Environment_Variables
 // for environment variables that will affect the aws configuration.
-func buildAWSCredentials(s3Conf *config.S3Config) *credentials.Credentials {
-	if !s3Conf.UseDefaultConfiguration && s3Conf.Key != "" && s3Conf.Secret != "" {
-		return credentials.NewStaticCredentials(s3Conf.Key, s3Conf.Secret, s3Conf.Token)
+func buildAWSCredentials(s3Conf *config.S3Config) (*credentials.Credentials, error) {
+	const op errors.Op = "s3.buildAWSCredentials"
+
+	awsConfig := &aws.Config{
+		Region: aws.String(s3Conf.Region),
 	}
 
-	return nil
+	sess, err := session.NewSession(awsConfig)
+	if err != nil {
+		return nil, errors.E(op, err)
+	}
+
+	providers := []credentials.Provider{
+		endpointcreds.NewProviderClient(*awsConfig, sess.Handlers, s3Conf.Endpoint),
+		&credentials.StaticProvider{
+			Value: credentials.Value{
+				AccessKeyID:     s3Conf.Key,
+				SecretAccessKey: s3Conf.Secret,
+				SessionToken:    s3Conf.Token,
+			},
+		},
+		&credentials.EnvProvider{},
+	}
+	return credentials.NewChainCredentials(providers), nil
 }
