@@ -2,6 +2,7 @@ package s3
 
 import (
 	"fmt"
+	"github.com/aws/aws-sdk-go/aws/defaults"
 	"net/url"
 	"time"
 
@@ -42,18 +43,36 @@ func New(s3Conf *config.S3Config, timeout time.Duration, options ...func(*aws.Co
 		return nil, errors.E(op, err)
 	}
 
-	creds, err := buildAWSCredentials(s3Conf)
+
+	awsConfig := aws.NewConfig()
+	awsConfig.Region = aws.String(s3Conf.Region)
+	for _, o := range options {
+		o(awsConfig)
+	}
+
+	providers := []credentials.Provider{
+		endpointcreds.NewProviderClient(*awsConfig, defaults.Handlers(), s3Conf.Endpoint),
+		&credentials.StaticProvider{
+			Value: credentials.Value{
+				AccessKeyID:     s3Conf.Key,
+				SecretAccessKey: s3Conf.Secret,
+				SessionToken:    s3Conf.Token,
+			},
+		},
+		&credentials.EnvProvider{},
+	}
+
+
+	credentials, err := credentials.NewChainCredentials(providers), nil
 	if err != nil {
 		return nil, err
 	}
 
+	awsConfig.Credentials = credentials
+	awsConfig.CredentialsChainVerboseErrors = aws.Bool(true)
+
 	// create a session with creds
-	sess, err := session.NewSession(&aws.Config{
-		Region:                        aws.String(s3Conf.Region),
-		Credentials:                   creds,
-		CredentialsChainVerboseErrors: aws.Bool(true),
-		MaxRetries:                    aws.Int(3),
-	})
+	sess, err := session.NewSession(awsConfig)
 
 	uploader := s3manager.NewUploader(sess)
 
@@ -64,40 +83,4 @@ func New(s3Conf *config.S3Config, timeout time.Duration, options ...func(*aws.Co
 		baseURI:  u,
 		timeout:  timeout,
 	}, nil
-}
-
-// buildAWSCredentials builds the credentials required to create a new AWS
-// session.  It will prefer the access key ID and secret access key if specified
-// in the S3Config unless UseDefaultConfiguration is true. If the key ID and
-// secret access key are unspecified or UseDefaultConfiguration is true, then
-// the default aws configuration will be used. This will attempt to find
-// credentials in the environment, in the shared configuration
-// (~/.aws/credentials) and from ec2 instance role credentials. See
-// https://godoc.org/github.com/aws/aws-sdk-go#hdr-Configuring_Credentials and
-// https://godoc.org/github.com/aws/aws-sdk-go/aws/session#hdr-Environment_Variables
-// for environment variables that will affect the aws configuration.
-func buildAWSCredentials(s3Conf *config.S3Config) (*credentials.Credentials, error) {
-	const op errors.Op = "s3.buildAWSCredentials"
-
-	awsConfig := &aws.Config{
-		Region: aws.String(s3Conf.Region),
-	}
-
-	sess, err := session.NewSession(awsConfig)
-	if err != nil {
-		return nil, errors.E(op, err)
-	}
-
-	providers := []credentials.Provider{
-		endpointcreds.NewProviderClient(*awsConfig, sess.Handlers, s3Conf.Endpoint),
-		&credentials.StaticProvider{
-			Value: credentials.Value{
-				AccessKeyID:     s3Conf.Key,
-				SecretAccessKey: s3Conf.Secret,
-				SessionToken:    s3Conf.Token,
-			},
-		},
-		&credentials.EnvProvider{},
-	}
-	return credentials.NewChainCredentials(providers), nil
 }
