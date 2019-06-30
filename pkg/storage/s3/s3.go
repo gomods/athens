@@ -2,18 +2,16 @@ package s3
 
 import (
 	"fmt"
-	"github.com/aws/aws-sdk-go/aws/defaults"
 	"net/url"
 	"time"
 
-	"github.com/aws/aws-sdk-go/service/s3/s3manager"
-
-	"github.com/aws/aws-sdk-go/aws/credentials/endpointcreds"
-
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
+	"github.com/aws/aws-sdk-go/aws/credentials/endpointcreds"
+	"github.com/aws/aws-sdk-go/aws/defaults"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3/s3iface"
+	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager/s3manageriface"
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/errors"
@@ -44,7 +42,6 @@ func New(s3Conf *config.S3Config, timeout time.Duration, options ...func(*aws.Co
 		return nil, errors.E(op, err)
 	}
 
-
 	awsConfig := aws.NewConfig()
 	awsConfig.Region = aws.String(s3Conf.Region)
 	for _, o := range options {
@@ -52,7 +49,7 @@ func New(s3Conf *config.S3Config, timeout time.Duration, options ...func(*aws.Co
 	}
 
 	providers := []credentials.Provider{
-		endpointcreds.NewProviderClient(*awsConfig, defaults.Handlers(), s3Conf.Endpoint),
+		endpointcreds.NewProviderClient(*awsConfig, defaults.Handlers(), s3Conf.CredentialsEndpoint),
 		&credentials.StaticProvider{
 			Value: credentials.Value{
 				AccessKeyID:     s3Conf.Key,
@@ -63,13 +60,7 @@ func New(s3Conf *config.S3Config, timeout time.Duration, options ...func(*aws.Co
 		&credentials.EnvProvider{},
 	}
 
-
-	credentials, err := credentials.NewChainCredentials(providers), nil
-	if err != nil {
-		return nil, errors.E(op, err)
-	}
-
-	awsConfig.Credentials = credentials
+	awsConfig.Credentials = credentials.NewChainCredentials(providers)
 	awsConfig.CredentialsChainVerboseErrors = aws.Bool(true)
 
 	// create a session with creds
