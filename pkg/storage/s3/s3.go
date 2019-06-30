@@ -1,7 +1,6 @@
 package s3
 
 import (
-	"net/url"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -24,7 +23,6 @@ import (
 // For information how to get your keyId and access key turn to official aws docs: https://docs.aws.amazon.com/sdk-for-go/v1/developer-guide/setting-up.html
 type Storage struct {
 	bucket   string
-	baseURI  *url.URL
 	uploader s3manageriface.UploaderAPI
 	s3API    s3iface.S3API
 	timeout  time.Duration
