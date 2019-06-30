@@ -1,7 +1,6 @@
 package s3
 
 import (
-	"fmt"
 	"net/url"
 	"time"
 
@@ -34,10 +33,6 @@ type Storage struct {
 // New creates a new AWS S3 CDN saver
 func New(s3Conf *config.S3Config, timeout time.Duration, options ...func(*aws.Config)) (*Storage, error) {
 	const op errors.Op = "s3.New"
-	u, err := url.Parse(fmt.Sprintf("https://%s.s3.amazonaws.com", s3Conf.Bucket))
-	if err != nil {
-		return nil, errors.E(op, err)
-	}
 
 	creds := buildAWSCredentials(s3Conf)
 
@@ -61,7 +56,6 @@ func New(s3Conf *config.S3Config, timeout time.Duration, options ...func(*aws.Co
 		bucket:   s3Conf.Bucket,
 		uploader: uploader,
 		s3API:    uploader.S3,
-		baseURI:  u,
 		timeout:  timeout,
 	}, nil
 }
