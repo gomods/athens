@@ -51,13 +51,14 @@ storage:
     useDefaultConfiguration: true
 
 # Extra environment variables to be passed
-# Commented lines below, show how to set username/password for basic auth
 # You can add any new ones at the bottom
 configEnvVars: {}
-#  - name: BASIC_AUTH_USER
-#    value: "some_user"
-#  - name: BASIC_AUTH_PASS
-#    value: "some_password"
+
+# HTTP basic auth
+basicAuth:
+  enabled: false
+  user: "some_user"
+  password: "some_password"
 
 netrc:
   # if enabled, it expects to find the content of a valid .netrc file imported as a secret named netrcsecret
