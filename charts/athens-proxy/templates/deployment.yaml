@@ -101,6 +101,23 @@ spec:
         - name: AWS_SESSION_TOKEN
           value: {{ .Values.storage.s3.session_token | quote }}
         {{- end }}
+        {{- else if eq .Values.storage.type "minio" }}
+        {{- if .Values.storage.minio.endpoint }}
+        - name: ATHENS_MINIO_ENDPOINT
+          value: {{ .Values.storage.minio.endpoint | quote }}
+        {{- end }}
+        {{- if .Values.storage.minio.accessKey }}
+        - name: ATHENS_MINIO_ACCESS_KEY_ID
+          value: {{ .Values.storage.minio.accessKey | quote }}
+        {{- end }}
+        {{- if .Values.storage.minio.secretKey }}
+        - name: ATHENS_MINIO_SECRET_ACCESS_KEY
+          value: {{ .Values.storage.minio.secretKey | quote }}
+        {{- end }}
+        {{- if .Values.storage.minio.bucket }}
+        - name: ATHENS_MINIO_BUCKET_NAME
+          value: {{ .Values.storage.minio.bucket | quote }}
+        {{- end }}
         {{- end }}
         {{- if .Values.netrc.enabled }}
         - name: ATHENS_NETRC_PATH
