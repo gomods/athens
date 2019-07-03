@@ -104,6 +104,20 @@ By default, the chart will install Athens with a replica count of 1. To change t
 helm install gomods/athens-proxy -n athens --namespace athens --set replicaCount=3
 ```
 
+### Resources
+
+By default, the chart will install Athens without specific resource requests or limits. To change this, change the `resources` value:
+
+```console
+helm install gomods/athens-proxy -n athens --namespace athens \
+  --set resources.requests.cpu=100m \
+  --set resources.requests.memory=64Mi \
+  --set resources.limits.cpu=100m \
+  --set resources.limits.memory=64Mi
+```
+
+For more information, see [Managing Compute Resources for Containers](https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/) in the Kubernetes documentation.
+
 ### Give Athens access to private repositories via Github Token (Optional)
 
 1. Create a token at https://github.com/settings/tokens
