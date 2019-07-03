@@ -5,7 +5,7 @@ build: ## build the athens proxy
 	cd cmd/proxy && go build
 
 build-ver: ## build the athens proxy with version number
-	GO111MODULE=on CGO_ENABLED=0 go build -mod=vendor -ldflags "-X github.com/gomods/athens/pkg/build.version=$(VERSION) -X github.com/gomods/athens/pkg/build.buildDate=$(DATE)" -o athens ./cmd/proxy
+	GO111MODULE=on CGO_ENABLED=0 GOPROXY="https://proxy.golang.org" go build -ldflags "-X github.com/gomods/athens/pkg/build.version=$(VERSION) -X github.com/gomods/athens/pkg/build.buildDate=$(DATE)" -o athens ./cmd/proxy
 
 # The build-image step creates a docker image that has all the tools required
 # to perform some CI build steps, instead of relying on them being installed locally

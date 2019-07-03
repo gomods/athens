@@ -44,6 +44,27 @@ storage:
     # you must set this on the command line when you run 'helm install'
     # for example, you need to run 'helm install --set storage.mongo.url=myurl ...'
     url: "SET THIS ON THE COMMAND LINE"
+  s3:
+    # you must set s3 bucket and region when running 'helm install'
+    region: ""
+    bucket: ""
+    useDefaultConfiguration: true
+  minio:
+    # All these variables needs to be set when configuring athens to run with minio backend
+    endpoint: ""
+    accessKey: ""
+    secretKey: ""
+    bucket: ""
+
+# Extra environment variables to be passed
+# You can add any new ones at the bottom
+configEnvVars: {}
+
+# HTTP basic auth
+basicAuth:
+  enabled: false
+  user: "some_user"
+  password: "some_password"
 
 netrc:
   # if enabled, it expects to find the content of a valid .netrc file imported as a secret named netrcsecret

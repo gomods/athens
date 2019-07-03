@@ -50,16 +50,29 @@ spec:
           httpGet:
             path: "/healthz"
             port: 3000
+            {{- if .Values.basicAuth.enabled }}
+            httpHeaders:
+              - name: Authorization
+                value: "Basic {{ (printf "%s:%s" (default "gomod" .Values.basicAuth.user) (default "gomod" .Values.basicAuth.password) | b64enc) }}"
+            {{- end }}
         readinessProbe:
           httpGet:
             path: "{{ template "readinessPath" . }}"
             port: 3000
+            {{- if .Values.basicAuth.enabled }}
+            httpHeaders:
+              - name: Authorization
+                value: "Basic {{ (printf "%s:%s" (default "gomod" .Values.basicAuth.user) (default "gomod" .Values.basicAuth.password) | b64enc) }}"
+            {{- end }}
         env:
         - name: ATHENS_GOGET_WORKERS
         {{- if .Values.goGetWorkers }}
           value: {{ .Values.goGetWorkers | quote }}
         {{- else }}
           value: "3"
+        {{- end }}
+        {{- if .Values.configEnvVars }}
+{{ toYaml .Values.configEnvVars | indent 8 }}
         {{- end }}
         - name: ATHENS_STORAGE_TYPE
           value: {{ .Values.storage.type | quote }}
@@ -69,10 +82,46 @@ spec:
         {{- else if eq .Values.storage.type "mongo"}}
         - name: ATHENS_MONGO_STORAGE_URL
           value: {{ .Values.storage.mongo.url | quote }}
+        {{- else if eq .Values.storage.type "s3" }}
+        - name: AWS_REGION
+          value: {{ .Values.storage.s3.region | quote }}
+        - name: ATHENS_S3_BUCKET_NAME
+          value: {{ .Values.storage.s3.bucket | quote }}
+        - name: AWS_USE_DEFAULT_CONFIGURATION
+          value: {{ .Values.storage.s3.useDefaultConfiguration | quote }}
+        {{- if .Values.storage.s3.access_key_id }}
+        - name: AWS_ACCESS_KEY_ID
+          value: {{ .Values.storage.s3.access_key_id | quote }}
+        {{- end }}
+        {{- if .Values.storage.s3.secret_access_key }}
+        - name: AWS_SECRET_ACCESS_KEY
+          value: {{ .Values.storage.s3.secret_access_key | quote }}
+        {{- end }}
+        {{- if .Values.storage.s3.session_token }}
+        - name: AWS_SESSION_TOKEN
+          value: {{ .Values.storage.s3.session_token | quote }}
+        {{- end }}
+        {{- else if eq .Values.storage.type "minio" }}
+        {{- if .Values.storage.minio.endpoint }}
+        - name: ATHENS_MINIO_ENDPOINT
+          value: {{ .Values.storage.minio.endpoint | quote }}
+        {{- end }}
+        {{- if .Values.storage.minio.accessKey }}
+        - name: ATHENS_MINIO_ACCESS_KEY_ID
+          value: {{ .Values.storage.minio.accessKey | quote }}
+        {{- end }}
+        {{- if .Values.storage.minio.secretKey }}
+        - name: ATHENS_MINIO_SECRET_ACCESS_KEY
+          value: {{ .Values.storage.minio.secretKey | quote }}
+        {{- end }}
+        {{- if .Values.storage.minio.bucket }}
+        - name: ATHENS_MINIO_BUCKET_NAME
+          value: {{ .Values.storage.minio.bucket | quote }}
+        {{- end }}
         {{- end }}
         {{- if .Values.netrc.enabled }}
         - name: ATHENS_NETRC_PATH
-          value: "/etc/netrc/netrc"
+          value: "/etc/netrc/.netrc"
         {{- end }}
         {{- if .Values.upstreamProxy.enabled }}
         - name: ATHENS_FILTER_FILE
@@ -86,10 +135,18 @@ spec:
         - name: ATHENS_TRACE_EXPORTER
           value: "jaeger"
         {{- end }}
+        {{- if .Values.basicAuth.enabled }}
+        - name: BASIC_AUTH_USER
+          value: "{{ default "gomod" .Values.basicAuth.user | quote }}"
+        - name: BASIC_AUTH_PASS
+          value: "{{ default "gomod" .Values.basicAuth.password | quote }}"
+        {{- end }}
         ports:
         - containerPort: 3000
-        {{- if eq .Values.storage.type "disk" }}
+        {{- if or (eq .Values.storage.type "disk") .Values.upstreamProxy.enabled .Values.netrc.enabled }}
         volumeMounts:
+        {{- end }}
+        {{- if eq .Values.storage.type "disk" }}
         - name: storage-volume
           mountPath: {{ .Values.storage.disk.storageRoot | quote }}
         {{- end }}
@@ -120,7 +177,7 @@ spec:
       volumes:
       - name: storage-volume
       {{- if .Values.storage.disk.persistence.enabled }}
-        persistentVolumeClaim: 
+        persistentVolumeClaim:
           claimName: {{ template "fullname" . }}-storage
       {{- else }}
         emptyDir: {}
