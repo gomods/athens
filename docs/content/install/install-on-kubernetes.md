@@ -257,3 +257,34 @@ In order to instruct athens to fetch and use the secret, `netrc.enabled` flag mu
 ```console
 helm install gomods/athens-proxy -n athens --namespace athens --set netrc.enabled=true
 ```
+
+### gitconfig support
+
+A [gitconfig](https://git-scm.com/book/en/v2/Customizing-Git-Git-Configuration) file can be shared as a secret to allow
+the access to modules in private git repositories. For example, you can configure access to private repositories via HTTPS
+using personal access tokens on GitHub, GitLab and other git services.
+
+First of all, prepare your gitconfig file:
+
+```console
+cat << EOF > /tmp/gitconfig
+[url "https://user:token@git.example.com/"]
+    insteadOf = ssh://git@git.example.com/
+    insteadOf = https://git.example.com/
+EOF
+```
+
+Next, create the secret using the file created above:
+
+```console
+kubectl create secret generic athens-proxy-gitconfig --from-file=gitconfig=/tmp/gitconfig
+```
+
+In order to instruct athens to use the secret, set appropriate flags (or parameters in `values.yaml`):
+
+```console
+helm install gomods/athens-proxy --name athens --namespace athens \
+    --set gitconfig.enabled=true \
+    --set gitconfig.secretName=athens-proxy-gitconfig \
+    --set gitconfig.secretKey=gitconfig
+```

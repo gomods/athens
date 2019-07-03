@@ -170,6 +170,11 @@ spec:
         - name: ssh-keys
           mountPath: /ssh-keys
         {{- end }}
+        {{- if .Values.gitconfig.enabled }}
+        - name: gitconfig
+          mountPath: "/etc/gitconfig"
+          subPath: "gitconfig"
+        {{- end }}
       {{- with .Values.resources }}
         resources:
 {{ toYaml . | indent 10 }}
@@ -201,6 +206,14 @@ spec:
       - name: ssh-git-servers-secret
         secret:
           secretName: {{ template "fullname" . }}-ssh-git-servers
+      {{- end }}
+      {{- if .Values.gitconfig.enabled }}
+      - name: gitconfig
+        secret:
+          secretName: {{ .Values.gitconfig.secretName }}
+          items:
+          - key: {{ .Values.gitconfig.secretKey }}
+            path: "gitconfig"
       {{- end }}
     {{- with .Values.nodeSelector }}
       nodeSelector:
