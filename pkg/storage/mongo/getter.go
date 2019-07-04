@@ -16,26 +16,11 @@ import (
 // Info implements storage.Getter
 func (s *ModuleStore) Info(ctx context.Context, module, vsn string) ([]byte, error) {
 	const op errors.Op = "mongo.Info"
-	ctx, span := observ.StartSpan(ctx, op.String())
-	defer span.End()
-	c := s.client.Database(s.db).Collection(s.coll)
 
-	result := &storage.Module{}
+	result, err := Query(ctx, s, module, vsn, op)
 
-	tctx, cancel := context.WithTimeout(ctx, s.timeout)
-	defer cancel()
-
-	queryResult := c.FindOne(tctx, bson.M{"module": module, "version": vsn})
-	if queryErr := queryResult.Err(); queryErr != nil {
-		return nil, errors.E(op, queryErr, errors.M(module), errors.V(vsn))
-	}
-
-	if err := queryResult.Decode(&result); err != nil {
-		kind := errors.KindUnexpected
-		if err == mongo.ErrNoDocuments {
-			kind = errors.KindNotFound
-		}
-		return nil, errors.E(op, err, kind, errors.M(module), errors.V(vsn))
+	if err != nil {
+		return nil, errors.E(op, err)
 	}
 
 	return result.Info, nil
@@ -44,24 +29,11 @@ func (s *ModuleStore) Info(ctx context.Context, module, vsn string) ([]byte, err
 // GoMod implements storage.Getter
 func (s *ModuleStore) GoMod(ctx context.Context, module, vsn string) ([]byte, error) {
 	const op errors.Op = "mongo.GoMod"
-	ctx, span := observ.StartSpan(ctx, op.String())
-	defer span.End()
-	c := s.client.Database(s.db).Collection(s.coll)
-	result := &storage.Module{}
-	tctx, cancel := context.WithTimeout(ctx, s.timeout)
-	defer cancel()
 
-	queryResult := c.FindOne(tctx, bson.M{"module": module, "version": vsn})
-	if queryErr := queryResult.Err(); queryErr != nil {
-		return nil, errors.E(op, queryErr, errors.M(module), errors.V(vsn))
-	}
+	result, err := Query(ctx, s, module, vsn, op)
 
-	if err := queryResult.Decode(result); err != nil {
-		kind := errors.KindUnexpected
-		if err == mongo.ErrNoDocuments {
-			kind = errors.KindNotFound
-		}
-		return nil, errors.E(op, err, kind, errors.M(module), errors.V(vsn))
+	if err != nil {
+		return nil, errors.E(op, err)
 	}
 
 	return result.Mod, nil
@@ -90,4 +62,31 @@ func (s *ModuleStore) Zip(ctx context.Context, module, vsn string) (io.ReadClose
 	}
 
 	return dStream, nil
+}
+
+// Query connects and queries storage module
+func Query(ctx context.Context, s *ModuleStore, module, vsn string, op errors.Op) (*storage.Module, error) {
+	ctx, span := observ.StartSpan(ctx, op.String())
+	defer span.End()
+	c := s.client.Database(s.db).Collection(s.coll)
+
+	result := &storage.Module{}
+
+	tctx, cancel := context.WithTimeout(ctx, s.timeout)
+	defer cancel()
+
+	queryResult := c.FindOne(tctx, bson.M{"module": module, "version": vsn})
+	if queryErr := queryResult.Err(); queryErr != nil {
+		return nil, errors.E(op, queryErr, errors.M(module), errors.V(vsn))
+	}
+
+	if err := queryResult.Decode(result); err != nil {
+		kind := errors.KindUnexpected
+		if err == mongo.ErrNoDocuments {
+			kind = errors.KindNotFound
+		}
+		return nil, errors.E(op, err, kind, errors.M(module), errors.V(vsn))
+	}
+
+	return result, nil
 }
