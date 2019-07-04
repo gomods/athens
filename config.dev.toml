@@ -321,6 +321,12 @@ SingleFlightType = "memory"
         Insecure = false
 
     [Storage.S3]
+
+        ### The authentication model is as below for S3 in the following order
+        ### If AWS_CREDENTIALS_ENDPOINT is specified and it returns valid results, then it is used
+        ### If config variables are specified and they are valid, then they return valid results, then it is used
+        ### It will check if the environment has credentials, then it will be used.
+
         # Region for S3 storage
         # Env override: AWS_REGION
         Region = "MY_AWS_REGION"
@@ -351,6 +357,7 @@ SingleFlightType = "memory"
         # for environment variables that will affect the aws configuration.
         UseDefaultConfiguration = false
 
+        # https://docs.aws.amazon.com/sdk-for-go/api/aws/credentials/endpointcreds/
         AWS_CREDENTIALS_ENDPOINT = ""
 
    [Storage.AzureBlob]
