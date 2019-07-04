@@ -104,6 +104,20 @@ By default, the chart will install Athens with a replica count of 1. To change t
 helm install gomods/athens-proxy -n athens --namespace athens --set replicaCount=3
 ```
 
+### Resources
+
+By default, the chart will install Athens without specific resource requests or limits. To change this, change the `resources` value:
+
+```console
+helm install gomods/athens-proxy -n athens --namespace athens \
+  --set resources.requests.cpu=100m \
+  --set resources.requests.memory=64Mi \
+  --set resources.limits.cpu=100m \
+  --set resources.limits.memory=64Mi
+```
+
+For more information, see [Managing Compute Resources for Containers](https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/) in the Kubernetes documentation.
+
 ### Give Athens access to private repositories via Github Token (Optional)
 
 1. Create a token at https://github.com/settings/tokens
@@ -150,6 +164,17 @@ variables, shared credentials files, and EC2 instance credentials. To manually s
 
 ```
 helm install gomods/athens-proxy -n athens --namespace athens --set storage.type=s3 --set storage.s3.region=<your-aws-region> --set storage.s3.bucket=<your-bucket>
+```
+
+#### Minio Configuration
+
+To use S3 storage with Athens, set `storage.type` to `minio`. You need to set `storage.minio.endpoint` as the URL of your minio-installation.
+This URL can also be an kubernetes-internal one (e.g. something like `minio-service.default.svc`).
+You need to create a bucket inside your minio-installation or use an existing one. The bucket needs to be referenced in `storage.minio.bucket`.
+Last athens need authentication credentials for your minio in `storage.minio.accessKey` and `storage.minio.secretKey`.
+
+```
+helm install gomods/athens-proxy -n athens --namespace athens --set storage.type=minio --set storage.minio.endpoint=<your-minio-endpoint> --set storage.minio.bucket=<your-bucket> --set storage.minio.accessKey=<your-minio-access-key> --set storage.minio.secretKey=<your-minio-secret-key>
 ```
 
 ### Kubernetes Service

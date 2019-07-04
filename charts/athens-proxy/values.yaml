@@ -49,6 +49,12 @@ storage:
     region: ""
     bucket: ""
     useDefaultConfiguration: true
+  minio:
+    # All these variables needs to be set when configuring athens to run with minio backend
+    endpoint: ""
+    accessKey: ""
+    secretKey: ""
+    bucket: ""
 
 # Extra environment variables to be passed
 # You can add any new ones at the bottom
@@ -108,3 +114,11 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
+
+resources: {}
+#  limits:
+#    cpu: 100m
+#    memory: 64Mi
+#  requests:
+#    cpu: 100m
+#    memory: 64Mi
