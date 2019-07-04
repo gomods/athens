@@ -1,8 +1,6 @@
 package s3
 
 import (
-	"fmt"
-	"net/url"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -27,7 +25,6 @@ import (
 // For information how to get your keyId and access key turn to official aws docs: https://docs.aws.amazon.com/sdk-for-go/v1/developer-guide/setting-up.html
 type Storage struct {
 	bucket   string
-	baseURI  *url.URL
 	uploader s3manageriface.UploaderAPI
 	s3API    s3iface.S3API
 	timeout  time.Duration
@@ -36,11 +33,6 @@ type Storage struct {
 // New creates a new AWS S3 CDN saver
 func New(s3Conf *config.S3Config, timeout time.Duration, options ...func(*aws.Config)) (*Storage, error) {
 	const op errors.Op = "s3.New"
-
-	u, err := url.Parse(fmt.Sprintf("https://%s.s3.amazonaws.com", s3Conf.Bucket))
-	if err != nil {
-		return nil, errors.E(op, err)
-	}
 
 	awsConfig := aws.NewConfig()
 	awsConfig.Region = aws.String(s3Conf.Region)
@@ -75,7 +67,6 @@ func New(s3Conf *config.S3Config, timeout time.Duration, options ...func(*aws.Co
 		bucket:   s3Conf.Bucket,
 		uploader: uploader,
 		s3API:    uploader.S3,
-		baseURI:  u,
 		timeout:  timeout,
 	}, nil
 }
