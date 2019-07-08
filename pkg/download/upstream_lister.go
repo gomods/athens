@@ -39,22 +39,18 @@ func (l *vcsLister) List(ctx context.Context, mod string) (*storage.RevInfo, []s
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 
-	hackyPath, err := afero.TempDir(l.fs, "", "hackymod")
+	tmpDir, err := afero.TempDir(l.fs, "", "go-list")
 	if err != nil {
 		return nil, nil, errors.E(op, err)
 	}
-	defer l.fs.RemoveAll(hackyPath)
-	err = module.Dummy(l.fs, hackyPath)
-	if err != nil {
-		return nil, nil, errors.E(op, err)
-	}
+	defer l.fs.RemoveAll(tmpDir)
 
 	cmd := exec.Command(
 		l.goBinPath,
 		"list", "-m", "-versions", "-json",
 		config.FmtModVer(mod, "latest"),
 	)
-	cmd.Dir = hackyPath
+	cmd.Dir = tmpDir
 	stdout := &bytes.Buffer{}
 	stderr := &bytes.Buffer{}
 	cmd.Stdout = stdout
@@ -70,7 +66,14 @@ func (l *vcsLister) List(ctx context.Context, mod string) (*storage.RevInfo, []s
 	err = cmd.Run()
 	if err != nil {
 		err = fmt.Errorf("%v: %s", err, stderr)
-		return nil, nil, errors.E(op, err)
+		// as of now, we can't recognize between a true NotFound
+		// and an unexpected error, so we choose the more
+		// hopeful path of NotFound. This way the Go command
+		// will not log en error and we still get to log
+		// what happened here if someone wants to dig in more.
+		// Once, https://github.com/golang/go/issues/30134 is
+		// resolved, we can hopefully differentiate.
+		return nil, nil, errors.E(op, err, errors.KindNotFound)
 	}
 
 	var lr listResp

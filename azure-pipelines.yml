@@ -7,7 +7,7 @@ pool:
   vmImage: 'vs2017-win2016'
 
 variables:
-  GOBIN:  '$(GOPATH)\bin' # Go binaries path
+  GOBIN:  'C:\Go\bin' # Go binaries path
   GOPATH: '$(system.defaultWorkingDirectory)\gopath' # Go workspace path
   GO111MODULE: 'on'
   modulePath: '$(GOPATH)\src\github.com\$(build.repository.name)' # Path to the module's code
@@ -15,7 +15,6 @@ variables:
 steps:
 - powershell: |
     choco upgrade golang
-    mkdir "$env:GOBIN" | out-null
     mkdir "$env:GOPATH\pkg" | out-null
     mkdir "$env:modulePath" | out-null
     robocopy "$env:system_defaultWorkingDirectory\" "$env:modulePath\" /E /Z /ZB /R:5 /W:5 /TBD /NP /V /XD "$env:GOPATH"
@@ -23,6 +22,6 @@ steps:
   displayName: 'set up the Go workspace'
 
 - powershell: |
-    go test -mod=vendor -race ./...
+    & "C:\\Go\\bin\\go.exe" test -mod=vendor -race ./...
   workingDirectory: '$(modulePath)'
   displayName: 'run tests'

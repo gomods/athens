@@ -2,7 +2,7 @@ replicaCount: 1
 image:
   registry: docker.io
   repository: gomods/athens
-  tag: v0.3.1
+  tag: v0.4.0
 
   ## Specify a imagePullPolicy
   ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
@@ -24,7 +24,7 @@ service:
 
 ingress:
   enabled: false
-  # provie key/value annotations
+  # Provide key/value annotations
   annotations:
   # Provide an array of values for the ingress host mapping
   hosts:
@@ -44,18 +44,52 @@ storage:
     # you must set this on the command line when you run 'helm install'
     # for example, you need to run 'helm install --set storage.mongo.url=myurl ...'
     url: "SET THIS ON THE COMMAND LINE"
+  s3:
+    # you must set s3 bucket and region when running 'helm install'
+    region: ""
+    bucket: ""
+    useDefaultConfiguration: true
+  minio:
+    # All these variables needs to be set when configuring athens to run with minio backend
+    endpoint: ""
+    accessKey: ""
+    secretKey: ""
+    bucket: ""
+
+# Extra environment variables to be passed
+# You can add any new ones at the bottom
+configEnvVars: {}
+
+# HTTP basic auth
+basicAuth:
+  enabled: false
+  user: "some_user"
+  password: "some_password"
 
 netrc:
   # if enabled, it expects to find the content of a valid .netrc file imported as a secret named netrcsecret
   enabled: false
   existingSecret: netrcsecret
 
+# gitconfig section provides a way to inject git config file to make athens able to fetch modules from private git repos.
+gitconfig:
+  # By default, gitconfig is disabled.
+  enabled: false
+  # Name of the kubernetes secret (in the same namespace as athens-proxy) that contains git config.
+  secretName: athens-proxy-gitconfig
+  # Key in the kubernetes secret that contains git config data.
+  secretKey: gitconfig
+
 upstreamProxy:
   # This is where you can set the URL for the upstream module repository.
   # If 'enabled' is set to true, Athens will try to download modules from the upstream when it doesn't find them in its own storage.
-  # You can use 'https://gocenter.io' to use JFrog's GoCenter as an upstream here, or you can also use another Athens server as well.
+  # Here's a non-exhaustive list of options you can set here:
+  #
+  # - https://gocenter.io
+  # - https://proxy.golang.org
+  # - another Athens server
   enabled: false
-  url: "https://upstreamproxy_url"
+  url: "https://gocenter.io"
 
 jaeger:
   ## Type of service; valid values are "ClusterIP", "LoadBalancer", and "NodePort".
@@ -68,8 +102,32 @@ jaeger:
   # for example, you need to run 'helm install --set jaeger.url=myurl ...'
   url: "SET THIS ON THE COMMAND LINE"
 
+sshGitServers: {}
+  ## Private git servers over ssh
+  ## to enable uncomment lines with single hash below
+  ## hostname of the git server
+  # - host: git.example.com
+    ## ssh username
+  #  user: git
+    ## ssh private key for the user
+  #  privateKey: |
+  #    -----BEGIN RSA PRIVATE KEY-----
+  #    -----END RSA PRIVATE KEY-----
+    ## ssh port
+  #  port: 22
+
+goGetWorkers: 3
+
 nodeSelector: {}
 
 tolerations: []
 
 affinity: {}
+
+resources: {}
+#  limits:
+#    cpu: 100m
+#    memory: 64Mi
+#  requests:
+#    cpu: 100m
+#    memory: 64Mi

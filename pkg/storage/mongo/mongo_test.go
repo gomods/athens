@@ -1,6 +1,7 @@
 package mongo
 
 import (
+	"context"
 	"os"
 	"testing"
 
@@ -15,8 +16,8 @@ func TestBackend(t *testing.T) {
 }
 
 func (m *ModuleStore) clear() error {
-	m.s.DB(m.d).DropDatabase()
-	return m.initDatabase()
+	m.client.Database(m.db).Drop(context.Background())
+	return nil
 }
 
 func BenchmarkBackend(b *testing.B) {

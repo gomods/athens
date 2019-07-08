@@ -6,7 +6,16 @@ Athens uses [Go Modules](https://golang.org/cmd/go/#hdr-Modules__module_versions
 
 See our [Contributing Guide](CONTRIBUTING.md) for tips on how to submit a pull request when you are ready.
 
+**All the instructions in this document assume that you have checked out the code to your local machine.**
+
+If you haven't done that, please do with the below command before you proceed:
+
+```console
+$ git clone https://github.com/gomods/athens.git
+```
+
 ### Go version
+
 Athens is developed on Go 1.11+.
 
 To point Athens to a different version of Go set the following environment variable:
@@ -17,13 +26,68 @@ GO_BINARY_PATH=go1.11.X
 ```
 
 # Run the Proxy
-If you're inside GOPATH, make sure `GO111MODULE=on`, if you're outside GOPATH, then Go Modules are on by default.
-The main package is inside `cmd/proxy` and is run like any go project as follows: 
 
+We provide two ways to run the proxy on your local machine:
+
+1. Using [Docker](https://www.docker.com/) and [Docker Compose](https://docs.docker.com/compose/) (_we suggest this one if you're getting started_)
+2. Natively on your host
+
+See below for instructions to do both!
+
+## Using Docker
+
+As we said above, we suggest that you use this approach because it simulates a more realistic Athens deployment. This technique does the following, completely inside containers:
+
+1. Builds Athens from scratch
+2. Starts up [MongoDB](https://www.mongodb.com/) and [Jaeger](https://www.jaegertracing.io/)
+3. Configures Athens to use MongoDB for its storage and Jaeger for its distributed tracing
+4. Runs Athens
+
+You'll need [Docker](https://www.docker.com/) and [Docker Compose](https://docs.docker.com/compose/) installed. Once you do, run the below command to set everything up:
+
+```console
+$ make run-docker
 ```
-cd cmd/proxy
-go build
-./proxy
+
+You should see some output that look like this:
+
+```console
+docker-compose -p athensdockerdev up -d dev
+Creating network "athensdockerdev_default" with the default driver
+Creating athensdockerdev_jaeger_1 ... done
+Creating athensdockerdev_minio_1  ... done
+Creating athensdockerdev_mongo_1  ... done
+Creating athensdockerdev_dev_1    ... done
+```
+
+After that runs, Athens should be up and running and serving on port 3000. To test it out, run this command:
+
+```console
+$ curl localhost:3000
+```
+
+... and you should see the standard Athens response:
+
+```console
+"Welcome to The Athens Proxy"
+```
+
+When you're ready to stop Athens and all its dependencies, run this command:
+
+```console
+$ make run-docker-teardown
+```
+
+## Natively on Your Host
+
+If you're inside GOPATH, make sure `GO111MODULE=on`, if you're outside GOPATH, then Go Modules are on by default.
+
+The main package is inside `cmd/proxy` and is run like any go project as follows:
+
+```console
+$ cd cmd/proxy
+$ go build
+$ ./proxy
 ```
 
 After the server starts, you'll see some console output like:
@@ -36,19 +100,21 @@ Starting application at 127.0.0.1:3000
 
 # Services that Athens Needs
 
-Athens relies on several services (i.e. databases, etc...) to function properly. We use [Docker](http://docker.com/) images to configure and run those services. **However, Athens does not require any storage dependencies by default**. The default storage is in memory, you can opt-in to using the `fs` which would also require no dependencies. But if you'd like to test out Athens against a real storage backend (such as MongoDB, Minio, S3 etc), continue reading this section:
+Depending on its configuration, Athens may rely on several external services (i.e. databases, etc...) to function properly. We use [Docker](http://docker.com/) images to configure and run those services. **However, Athens does not require any of these external services by default**. For example, the default storage driver is memory, but you can opt-in to using the `fs` driver. Neither would require any external service dependencies.
 
-If you're not familiar with Docker, that's ok. We've tried to make it easy to get up and running:
+But if you'd like to test out Athens against a different storage backend like MongoDB, Minio, or a cloud blob storage system, this section is for you.
+
+If you're not familiar with Docker, that's ok. We've tried to make it easy to get up and running with the below steps.
 
 1. [Download and install docker-compose](https://docs.docker.com/compose/install/) (docker-compose is a tool for easily starting and stopping lots of services at once)
 2. Run `make dev` from the root of this repository
 
-That's it! After the `make dev` command is done, everything will be up and running and you can move
-on to the next step.
+That's it! After the `make dev` command is done, everything will be up and running and you can move on to the next step.
 
 If you want to stop everything at any time, run `make down`.
 
-Note that `make dev` only runs the minimum amount of dependencies needed for things to work. If you'd like to run all the possible dependencies run `make alldeps` or directly the services available in the `docker-compose.yml` file. Keep in mind, though, that `make alldeps` does not start up Athens, but **only** its dependencies.
+> Note: `make dev` only runs the minimum dependencies needed for things to work. If you'd like to run all the possible dependencies, run `make alldeps`. Keep in mind, though, that `make alldeps` does not start up Athens, but **only** its dependencies.
+> All the services that get started by `make alldeps` are also available in the `docker-compose.yml` file, so if you're familiar with Docker Compose, you can also start up services as you need.
 
 # Run unit tests
 
@@ -56,7 +122,7 @@ There are two methods for running unit tests:
 
 ## Completely In Containers
 
-This method uses [Docker Compose](https://docs.docker.com/compose/) to set up and run all the unit tests completely inside Docker containers. 
+This method uses [Docker Compose](https://docs.docker.com/compose/) to set up and run all the unit tests completely inside Docker containers.
 
 **We highly recommend you use this approach to run unit tests on your local machine.**
 

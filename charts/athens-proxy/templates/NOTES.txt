@@ -1,4 +1,13 @@
 {{- if .Values.ingress.enabled }}
+The Athens can be accessed via URL:
+{{- else }}
+Get the Athens URL by running these commands:
+{{- end }}
+{{- if (and .Values.ingress.enabled .Values.ingress.tls) }}
+{{- range .Values.ingress.hosts }}
+  https://{{ . }}
+{{- end }}
+{{- else if .Values.ingress.enabled }}
 {{- range .Values.ingress.hosts }}
   http://{{ . }}
 {{- end }}
@@ -16,4 +25,3 @@
   echo "Visit http://127.0.0.1:8080 to use your application"
   kubectl port-forward $POD_NAME 8080:3000
 {{- end }}
-

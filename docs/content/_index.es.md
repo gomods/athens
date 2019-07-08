@@ -11,6 +11,13 @@ date: 2019-03-14T08:44:12+00:00
 
 En esta página web, está documentado Athens en detalle. Te enseñaremos que hace, por que es necesario, y como puedes ejecutarlo por tu cuenta. A continuación te mostramos un breve listado.
 
+#### ¿Cómo empezar?
+    Ejecutar `docker run -p '3000:3000' gomods/athens:latest`
+
+Ahora configura tu `GOPROXY` y a darle al `go get`!
+
+    export GOPROXY=http://localhost:3000 && go get module@v1
+
 #### ¿Qué hace Athens?
 
 Athens proporciona un servidor para [Go Modules](https://github.com/golang/go/wiki/Modules) que puedes ejecutar tú mismo. Almacena código fuente público y privado por tí, para que no tengas que obtenerlo directamente desde un sistema de control de código fuente (VCS) como GitHub o GitLab.
@@ -29,6 +36,8 @@ Athens es fácil de ejecutar. Te ofrecemos algunas opciones:
 - Puedes ejecutarlo en [Kubernetes](https://kubernetes.io) (echa un vistazo [aquí (en inglés)](./install/install-on-kubernetes/) para saber como hacer esto)
 
 También tenemos una versión experimental de Athens que puedes utilizar sin necesidad de instalar nada. Para utilizarla, establece la variable de entorno `GOPROXY="https://athens.azurefd.net"`.
+
+>Sin embargo, no lo recomendamos para producción. Por favor, despliega tu propia instancia de Athens para tus builds. _Si por el contrario, prefieres un proxy en la nube con el objetivo de alojar únicamente código público, considera utilizar `https://gocenter.io` o `https://proxy.golang.org`_
 
 **[¿Te gusta lo que ves? ¡Prueba athens ahora! (en inglés)](/try-out)**
 

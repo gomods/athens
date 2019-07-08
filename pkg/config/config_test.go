@@ -78,6 +78,8 @@ func TestEnvOverrides(t *testing.T) {
 		StorageType:    "minio",
 		GlobalEndpoint: "mytikas.gomods.io",
 		Port:           ":7000",
+		EnablePprof:    false,
+		PprofPort:      ":3001",
 		BasicAuthUser:  "testuser",
 		BasicAuthPass:  "testpass",
 		ForceSSL:       true,
@@ -123,8 +125,8 @@ func TestEnvOverridesPORT(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Env override failed: %v", err)
 	}
-	if conf.Port != "5000" {
-		t.Fatalf("expected PORT env to be 5000 but got %v", conf.Port)
+	if conf.Port != ":5000" {
+		t.Fatalf("expected PORT env to be :5000 but got %v", conf.Port)
 	}
 }
 
@@ -256,6 +258,8 @@ func TestParseExampleConfig(t *testing.T) {
 		StorageType:      "memory",
 		GlobalEndpoint:   "http://localhost:3001",
 		Port:             ":3000",
+		EnablePprof:      false,
+		PprofPort:        ":3001",
 		BasicAuthUser:    "",
 		BasicAuthPass:    "",
 		Storage:          expStorage,
@@ -264,6 +268,9 @@ func TestParseExampleConfig(t *testing.T) {
 		StatsExporter:    "prometheus",
 		SingleFlightType: "memory",
 		SingleFlight:     &SingleFlight{},
+		SumDBs:           []string{"https://sum.golang.org"},
+		NoSumPatterns:    []string{},
+		DownloadMode:     "sync",
 	}
 
 	absPath, err := filepath.Abs(testConfigFile(t))
@@ -294,6 +301,8 @@ func getEnvMap(config *Config) map[string]string {
 	envVars["ATHENS_STORAGE_TYPE"] = config.StorageType
 	envVars["ATHENS_GLOBAL_ENDPOINT"] = config.GlobalEndpoint
 	envVars["ATHENS_PORT"] = config.Port
+	envVars["ATHENS_ENABLE_PPROF"] = strconv.FormatBool(config.EnablePprof)
+	envVars["ATHENS_PPROF_PORT"] = config.PprofPort
 	envVars["BASIC_AUTH_USER"] = config.BasicAuthUser
 	envVars["BASIC_AUTH_PASS"] = config.BasicAuthPass
 	envVars["PROXY_FORCE_SSL"] = strconv.FormatBool(config.ForceSSL)

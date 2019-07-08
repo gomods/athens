@@ -2,11 +2,15 @@ package actions
 
 import (
 	"fmt"
+	"net/http"
+	"net/url"
+	"path"
 	"strings"
 
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/download"
 	"github.com/gomods/athens/pkg/download/addons"
+	"github.com/gomods/athens/pkg/download/mode"
 	"github.com/gomods/athens/pkg/log"
 	"github.com/gomods/athens/pkg/module"
 	"github.com/gomods/athens/pkg/stash"
@@ -26,6 +30,25 @@ func addProxyRoutes(
 	r.HandleFunc("/readyz", getReadinessHandler(s))
 	r.HandleFunc("/version", versionHandler)
 	r.HandleFunc("/catalog", catalogHandler(s))
+
+	for _, sumdb := range c.SumDBs {
+		sumdbURL, err := url.Parse(sumdb)
+		if err != nil {
+			return err
+		}
+		if sumdbURL.Scheme != "https" {
+			return fmt.Errorf("sumdb: %v must have an https scheme", sumdb)
+		}
+		supportPath := path.Join("/sumdb", sumdbURL.Host, "/supported")
+		r.HandleFunc(supportPath, func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(200)
+		})
+		sumHandler := sumdbPoxy(sumdbURL, c.NoSumPatterns)
+		pathPrefix := "/sumdb/" + sumdbURL.Host
+		r.PathPrefix(pathPrefix + "/").Handler(
+			http.StripPrefix(pathPrefix, sumHandler),
+		)
+	}
 
 	// Download Protocol
 	// the download.Protocol and the stash.Stasher interfaces are composable
@@ -63,14 +86,21 @@ func addProxyRoutes(
 	}
 	st := stash.New(mf, s, stash.WithPool(c.GoGetWorkers), withSingleFlight)
 
-	dpOpts := &download.Opts{
-		Storage: s,
-		Stasher: st,
-		Lister:  lister,
+	df, err := mode.NewFile(c.DownloadMode, c.DownloadURL)
+	if err != nil {
+		return err
 	}
+
+	dpOpts := &download.Opts{
+		Storage:      s,
+		Stasher:      st,
+		Lister:       lister,
+		DownloadFile: df,
+	}
+
 	dp := download.New(dpOpts, addons.WithPool(c.ProtocolWorkers))
 
-	handlerOpts := &download.HandlerOpts{Protocol: dp, Logger: l}
+	handlerOpts := &download.HandlerOpts{Protocol: dp, Logger: l, DownloadFile: df}
 	download.RegisterHandlers(r, handlerOpts)
 
 	return nil
