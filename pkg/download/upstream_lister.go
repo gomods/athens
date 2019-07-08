@@ -66,7 +66,14 @@ func (l *vcsLister) List(ctx context.Context, mod string) (*storage.RevInfo, []s
 	err = cmd.Run()
 	if err != nil {
 		err = fmt.Errorf("%v: %s", err, stderr)
-		return nil, nil, errors.E(op, err)
+		// as of now, we can't recognize between a true NotFound
+		// and an unexpected error, so we choose the more
+		// hopeful path of NotFound. This way the Go command
+		// will not log en error and we still get to log
+		// what happened here if someone wants to dig in more.
+		// Once, https://github.com/golang/go/issues/30134 is
+		// resolved, we can hopefully differentiate.
+		return nil, nil, errors.E(op, err, errors.KindNotFound)
 	}
 
 	var lr listResp
