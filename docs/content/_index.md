@@ -11,6 +11,13 @@ Welcome, Gophers! We're looking forward to introducing you to Athens..
 
 On this site, we document Athens in detail. We'll teach you what it does, why it matters, what you can do with it, and how you can run it yourself. Below is a brief summary for you.
 
+#### How To Get Started?
+    Run `docker run -p '3000:3000' gomods/athens:latest`
+
+Then, set up your `GOPROXY` and `go get` going!
+
+    export GOPROXY=http://localhost:3000 && go get module@v1
+
 #### What Does Athens Do?
 
 Athens provides a server for [Go Modules](https://github.com/golang/go/wiki/Modules) that you can run. It serves public code and your private code for you, so you don't have to pull directly from a version control system (VCS) like GitHub or GitLab.
@@ -29,6 +36,8 @@ Athens is easy to run yourself. We give you a few options:
 - You can run it on [Kubernetes](https://kubernetes.io) (see [here](./install/install-on-kubernetes/) for how to do that)
 
 We also run an experimental version of Athens so you can get started without even installing anything. To get started, set `GOPROXY="https://athens.azurefd.net"`.
+
+>This is not a production-ready proxy deployment, though. Please deploy your own Athens instance for your builds. _If you need a hosted proxy for public code, consider using either `https://gocenter.io` or `https://proxy.golang.org`_.
 
 **[Like what you hear? Try Athens Now!](/try-out)**
 

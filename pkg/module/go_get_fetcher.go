@@ -115,11 +115,15 @@ func downloadModule(goBinaryName string, fs afero.Fs, gopath, repoRoot, module, 
 	err := cmd.Run()
 	if err != nil {
 		err = fmt.Errorf("%v: %s", err, stderr)
-		// github quota exceeded
-		if isLimitHit(err.Error()) {
-			return goModule{}, errors.E(op, err, errors.KindRateLimit)
+		var m goModule
+		if jsonErr := json.NewDecoder(stdout).Decode(&m); jsonErr != nil {
+			return goModule{}, errors.E(op, err)
 		}
-		return goModule{}, errors.E(op, err)
+		// github quota exceeded
+		if isLimitHit(m.Error) {
+			return goModule{}, errors.E(op, m.Error, errors.KindRateLimit)
+		}
+		return goModule{}, errors.E(op, m.Error, errors.KindNotFound)
 	}
 
 	var m goModule
