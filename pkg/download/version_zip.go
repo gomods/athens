@@ -24,6 +24,8 @@ func ZipHandler(dp Protocol, lggr log.Entry, df *mode.DownloadFile) http.Handler
 		}
 		zip, err := dp.Zip(r.Context(), mod, ver)
 		if err != nil {
+			severityLevel := errors.Expect(err, errors.KindNotFound, errors.KindRedirect)
+			err = errors.E(op, err, severityLevel)
 			lggr.SystemErr(err)
 			if errors.Kind(err) == errors.KindRedirect {
 				http.Redirect(w, r, getRedirectURL(df.URL(mod), r.URL.Path), errors.KindRedirect)

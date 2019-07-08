@@ -46,6 +46,7 @@ Available options:
 - [Ingress Resource](https://docs.gomods.io/install/install-on-kubernetes/#ingress-resource)
 - [Upstream module repository](https://docs.gomods.io/install/install-on-kubernetes/#upstream-module-repository)
 - [.netrc file support](https://docs.gomods.io/install/install-on-kubernetes/#netrc-file-support)
+- [gitconfig support](https://docs.gomods.io/install/install-on-kubernetes/#gitconfig-support)
 
 ### Pass extra configuration environment variables
 
