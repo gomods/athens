@@ -25,7 +25,7 @@ func GetVersion(r *http.Request) (string, error) {
 	if version == "" {
 		return "", errors.E(op, "missing version parameter")
 	}
-	return version, nil
+	return DecodePath(version)
 }
 
 // AllPathParams holds the module and version in the path of a ?go-get=1
