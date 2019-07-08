@@ -1,5 +1,7 @@
 module github.com/gomods/athens
 
+go 1.12
+
 require (
 	cloud.google.com/go v0.26.0
 	contrib.go.opencensus.io/exporter/stackdriver v0.6.0
