@@ -24,6 +24,8 @@ func ModuleHandler(dp Protocol, lggr log.Entry, df *mode.DownloadFile) http.Hand
 		}
 		modBts, err := dp.GoMod(r.Context(), mod, ver)
 		if err != nil {
+			severityLevel := errors.Expect(err, errors.KindNotFound, errors.KindRedirect)
+			err = errors.E(op, err, severityLevel)
 			lggr.SystemErr(err)
 			if errors.Kind(err) == errors.KindRedirect {
 				http.Redirect(w, r, getRedirectURL(df.URL(mod), r.URL.Path), errors.KindRedirect)
