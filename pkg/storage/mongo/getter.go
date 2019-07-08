@@ -16,8 +16,10 @@ import (
 // Info implements storage.Getter
 func (s *ModuleStore) Info(ctx context.Context, module, vsn string) ([]byte, error) {
 	const op errors.Op = "mongo.Info"
+	ctx, span := observ.StartSpan(ctx, op.String())
+	defer span.End()
 
-	result, err := Query(ctx, s, module, vsn, op)
+	result, err := query(ctx, s, module, vsn)
 
 	if err != nil {
 		return nil, errors.E(op, err)
@@ -29,8 +31,10 @@ func (s *ModuleStore) Info(ctx context.Context, module, vsn string) ([]byte, err
 // GoMod implements storage.Getter
 func (s *ModuleStore) GoMod(ctx context.Context, module, vsn string) ([]byte, error) {
 	const op errors.Op = "mongo.GoMod"
+	ctx, span := observ.StartSpan(ctx, op.String())
+	defer span.End()
 
-	result, err := Query(ctx, s, module, vsn, op)
+	result, err := query(ctx, s, module, vsn)
 
 	if err != nil {
 		return nil, errors.E(op, err)
@@ -64,10 +68,12 @@ func (s *ModuleStore) Zip(ctx context.Context, module, vsn string) (io.ReadClose
 	return dStream, nil
 }
 
-// Query connects and queries storage module
-func Query(ctx context.Context, s *ModuleStore, module, vsn string, op errors.Op) (*storage.Module, error) {
+// Query connects to and queries storage module
+func query(ctx context.Context, s *ModuleStore, module, vsn string) (*storage.Module, error) {
+	const op errors.Op = "mongo.query"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
+
 	c := s.client.Database(s.db).Collection(s.coll)
 
 	result := &storage.Module{}
