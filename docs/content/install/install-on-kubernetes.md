@@ -86,7 +86,7 @@ $ helm repo add gomods https://athens.blob.core.windows.net/charts
 $ helm repo update
 ```
 
-Next, install the chart with default values to `athens` namespace:  
+Next, install the chart with default values to `athens` namespace:
 
 ```
 $ helm install gomods/athens-proxy -n athens --namespace athens
@@ -103,6 +103,20 @@ By default, the chart will install Athens with a replica count of 1. To change t
 ```console
 helm install gomods/athens-proxy -n athens --namespace athens --set replicaCount=3
 ```
+
+### Resources
+
+By default, the chart will install Athens without specific resource requests or limits. To change this, change the `resources` value:
+
+```console
+helm install gomods/athens-proxy -n athens --namespace athens \
+  --set resources.requests.cpu=100m \
+  --set resources.requests.memory=64Mi \
+  --set resources.limits.cpu=100m \
+  --set resources.limits.memory=64Mi
+```
+
+For more information, see [Managing Compute Resources for Containers](https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/) in the Kubernetes documentation.
 
 ### Give Athens access to private repositories via Github Token (Optional)
 
@@ -141,6 +155,28 @@ To use the Mongo DB storage provider, you will first need a MongoDB instance. On
 helm install gomods/athens-proxy -n athens --namespace athens --set storage.type=mongo --set storage.mongo.url=<some-mongodb-connection-string>
 ```
 
+#### S3 Configuration
+
+To use S3 storage with Athens, set `storage.type` to `s3` and set `storage.s3.region` and `storage.s3.bucket` to the desired AWS region and
+S3 bucket name, respectively. By default, Athens will attempt to load AWS credentials using the AWS SDK from the chain of environment
+variables, shared credentials files, and EC2 instance credentials. To manually specify AWS credentials, set `storage.s3.access_key_id`,
+`storage.s3.secret_access_key`, and change `storage.s3.useDefaultConfiguration` to `false`.
+
+```
+helm install gomods/athens-proxy -n athens --namespace athens --set storage.type=s3 --set storage.s3.region=<your-aws-region> --set storage.s3.bucket=<your-bucket>
+```
+
+#### Minio Configuration
+
+To use S3 storage with Athens, set `storage.type` to `minio`. You need to set `storage.minio.endpoint` as the URL of your minio-installation.
+This URL can also be an kubernetes-internal one (e.g. something like `minio-service.default.svc`).
+You need to create a bucket inside your minio-installation or use an existing one. The bucket needs to be referenced in `storage.minio.bucket`.
+Last athens need authentication credentials for your minio in `storage.minio.accessKey` and `storage.minio.secretKey`.
+
+```
+helm install gomods/athens-proxy -n athens --namespace athens --set storage.type=minio --set storage.minio.endpoint=<your-minio-endpoint> --set storage.minio.bucket=<your-bucket> --set storage.minio.accessKey=<your-minio-access-key> --set storage.minio.secretKey=<your-minio-secret-key>
+```
+
 ### Kubernetes Service
 
 By default, a Kubernetes `ClusterIP` service is created for the Athens proxy. "ClusterIP" is sufficient in the case when the Athens proxy will be used from within the cluster. To expose Athens outside of the cluster, consider using a "NodePort" or "LoadBalancer" service. This can be changed by setting the `service.type` value when installing the chart. For example, to deploy Athens using a NodePort service, the following command could be used:
@@ -151,7 +187,7 @@ helm install gomods/athens-proxy -n athens --namespace athens --set service.type
 
 ### Ingress Resource
 
-The chart can optionally create a Kubernetes [Ingress Resource](https://kubernetes.io/docs/concepts/services-networking/ingress/#the-ingress-resource) for you as well. To enable this feature, set the `ingress.enabled` resource to true. 
+The chart can optionally create a Kubernetes [Ingress Resource](https://kubernetes.io/docs/concepts/services-networking/ingress/#the-ingress-resource) for you as well. To enable this feature, set the `ingress.enabled` resource to true.
 
 ```console
 helm install gomods/athens-proxy -n athens --namespace athens --set ingress.enabled=true
@@ -167,7 +203,7 @@ ingress:
     kubernetes.io/tls-acme: "true"
     ingress.kubernetes.io/force-ssl-redirect: "true"
     kubernetes.io/ingress.class: nginx
-  hosts: 
+  hosts:
     - athens.mydomain.com
   tls:
     - secretName: athens.mydomain.com
@@ -187,7 +223,11 @@ helm install gomods/athens-proxy -n athens --namespace athens -f override-values
 
 You can set the `URL` for the [upstream module repository](https://docs.gomods.io/configuration/upstream/) then Athens will try to download modules from the upstream when it doesn't find them in its own storage.
 
-You can use `https://gocenter.io` to use JFrog's GoCenter as an upstream here, or you can also use another Athens server as well.
+You have a few good options for what you can set as an upstream:
+
+-  `https://gocenter.io` to use JFrog's GoCenter
+-  `https://proxy.golang.org` to use the Go Module Mirror
+-  The URL to any other Athens server
 
 The example below shows you how to set GoCenter up as upstream module repository:
 
@@ -216,4 +256,35 @@ In order to instruct athens to fetch and use the secret, `netrc.enabled` flag mu
 
 ```console
 helm install gomods/athens-proxy -n athens --namespace athens --set netrc.enabled=true
+```
+
+### gitconfig support
+
+A [gitconfig](https://git-scm.com/book/en/v2/Customizing-Git-Git-Configuration) file can be shared as a secret to allow
+the access to modules in private git repositories. For example, you can configure access to private repositories via HTTPS
+using personal access tokens on GitHub, GitLab and other git services.
+
+First of all, prepare your gitconfig file:
+
+```console
+cat << EOF > /tmp/gitconfig
+[url "https://user:token@git.example.com/"]
+    insteadOf = ssh://git@git.example.com/
+    insteadOf = https://git.example.com/
+EOF
+```
+
+Next, create the secret using the file created above:
+
+```console
+kubectl create secret generic athens-proxy-gitconfig --from-file=gitconfig=/tmp/gitconfig
+```
+
+In order to instruct athens to use the secret, set appropriate flags (or parameters in `values.yaml`):
+
+```console
+helm install gomods/athens-proxy --name athens --namespace athens \
+    --set gitconfig.enabled=true \
+    --set gitconfig.secretName=athens-proxy-gitconfig \
+    --set gitconfig.secretKey=gitconfig
 ```

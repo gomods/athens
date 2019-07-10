@@ -46,8 +46,22 @@ Available options:
 - [Ingress Resource](https://docs.gomods.io/install/install-on-kubernetes/#ingress-resource)
 - [Upstream module repository](https://docs.gomods.io/install/install-on-kubernetes/#upstream-module-repository)
 - [.netrc file support](https://docs.gomods.io/install/install-on-kubernetes/#netrc-file-support)
+- [gitconfig support](https://docs.gomods.io/install/install-on-kubernetes/#gitconfig-support)
 
-## Private git servers over ssh support
+### Pass extra configuration environment variables
+
+You can pass any extra environment variables supported in [config.dev.toml](https://github.com/gomods/athens/blob/master/config.dev.toml).
+The example below shows how to set username/password for basic auth:
+
+```yaml
+configEnvVars:
+  - name: BASIC_AUTH_USER
+    value: "some_user"
+  - name: BASIC_AUTH_PASS
+    value: "some_password"
+```
+
+### Private git servers over ssh support
 
 One or more of git servers can added to `sshGitServers`, and the corresponding config files (git config and ssh config) and ssh keys will be created. Athens then will use these configs and keys to download the source from the git servers.
 
