@@ -71,6 +71,15 @@ netrc:
   enabled: false
   existingSecret: netrcsecret
 
+# gitconfig section provides a way to inject git config file to make athens able to fetch modules from private git repos.
+gitconfig:
+  # By default, gitconfig is disabled.
+  enabled: false
+  # Name of the kubernetes secret (in the same namespace as athens-proxy) that contains git config.
+  secretName: athens-proxy-gitconfig
+  # Key in the kubernetes secret that contains git config data.
+  secretKey: gitconfig
+
 upstreamProxy:
   # This is where you can set the URL for the upstream module repository.
   # If 'enabled' is set to true, Athens will try to download modules from the upstream when it doesn't find them in its own storage.

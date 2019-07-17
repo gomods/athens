@@ -31,6 +31,7 @@ type listResp struct {
 
 type vcsLister struct {
 	goBinPath string
+	goProxy   string
 	fs        afero.Fs
 }
 
@@ -61,12 +62,19 @@ func (l *vcsLister) List(ctx context.Context, mod string) (*storage.RevInfo, []s
 		return nil, nil, errors.E(op, err)
 	}
 	defer module.ClearFiles(l.fs, gopath)
-	cmd.Env = module.PrepareEnv(gopath)
+	cmd.Env = module.PrepareEnv(gopath, l.goProxy)
 
 	err = cmd.Run()
 	if err != nil {
 		err = fmt.Errorf("%v: %s", err, stderr)
-		return nil, nil, errors.E(op, err)
+		// as of now, we can't recognize between a true NotFound
+		// and an unexpected error, so we choose the more
+		// hopeful path of NotFound. This way the Go command
+		// will not log en error and we still get to log
+		// what happened here if someone wants to dig in more.
+		// Once, https://github.com/golang/go/issues/30134 is
+		// resolved, we can hopefully differentiate.
+		return nil, nil, errors.E(op, err, errors.KindNotFound)
 	}
 
 	var lr listResp
@@ -82,6 +90,6 @@ func (l *vcsLister) List(ctx context.Context, mod string) (*storage.RevInfo, []s
 }
 
 // NewVCSLister creates an UpstreamLister which uses VCS to fetch a list of available versions
-func NewVCSLister(goBinPath string, fs afero.Fs) UpstreamLister {
-	return &vcsLister{goBinPath: goBinPath, fs: fs}
+func NewVCSLister(goBinPath, goProxy string, fs afero.Fs) UpstreamLister {
+	return &vcsLister{goBinPath: goBinPath, goProxy: goProxy, fs: fs}
 }

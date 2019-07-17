@@ -20,6 +20,7 @@ import (
 type goGetFetcher struct {
 	fs           afero.Fs
 	goBinaryName string
+	goProxy      string
 }
 
 type goModule struct {
@@ -35,7 +36,7 @@ type goModule struct {
 }
 
 // NewGoGetFetcher creates fetcher which uses go get tool to fetch modules
-func NewGoGetFetcher(goBinaryName string, fs afero.Fs) (Fetcher, error) {
+func NewGoGetFetcher(goBinaryName string, goProxy string, fs afero.Fs) (Fetcher, error) {
 	const op errors.Op = "module.NewGoGetFetcher"
 	if err := validGoBinary(goBinaryName); err != nil {
 		return nil, errors.E(op, err)
@@ -43,6 +44,7 @@ func NewGoGetFetcher(goBinaryName string, fs afero.Fs) (Fetcher, error) {
 	return &goGetFetcher{
 		fs:           fs,
 		goBinaryName: goBinaryName,
+		goProxy:      goProxy,
 	}, nil
 }
 
@@ -65,7 +67,7 @@ func (g *goGetFetcher) Fetch(ctx context.Context, mod, ver string) (*storage.Ver
 		return nil, errors.E(op, err)
 	}
 
-	m, err := downloadModule(g.goBinaryName, g.fs, goPathRoot, modPath, mod, ver)
+	m, err := downloadModule(g.goBinaryName, g.goProxy, g.fs, goPathRoot, modPath, mod, ver)
 	if err != nil {
 		ClearFiles(g.fs, goPathRoot)
 		return nil, errors.E(op, err)
@@ -100,13 +102,13 @@ func (g *goGetFetcher) Fetch(ctx context.Context, mod, ver string) (*storage.Ver
 
 // given a filesystem, gopath, repository root, module and version, runs 'go mod download -json'
 // on module@version from the repoRoot with GOPATH=gopath, and returns a non-nil error if anything went wrong.
-func downloadModule(goBinaryName string, fs afero.Fs, gopath, repoRoot, module, version string) (goModule, error) {
+func downloadModule(goBinaryName, goProxy string, fs afero.Fs, gopath, repoRoot, module, version string) (goModule, error) {
 	const op errors.Op = "module.downloadModule"
 	uri := strings.TrimSuffix(module, "/")
 	fullURI := fmt.Sprintf("%s@%s", uri, version)
 
 	cmd := exec.Command(goBinaryName, "mod", "download", "-json", fullURI)
-	cmd.Env = PrepareEnv(gopath)
+	cmd.Env = PrepareEnv(gopath, goProxy)
 	cmd.Dir = repoRoot
 	stdout := &bytes.Buffer{}
 	stderr := &bytes.Buffer{}
@@ -115,11 +117,15 @@ func downloadModule(goBinaryName string, fs afero.Fs, gopath, repoRoot, module, 
 	err := cmd.Run()
 	if err != nil {
 		err = fmt.Errorf("%v: %s", err, stderr)
-		// github quota exceeded
-		if isLimitHit(err.Error()) {
-			return goModule{}, errors.E(op, err, errors.KindRateLimit)
+		var m goModule
+		if jsonErr := json.NewDecoder(stdout).Decode(&m); jsonErr != nil {
+			return goModule{}, errors.E(op, err)
 		}
-		return goModule{}, errors.E(op, err)
+		// github quota exceeded
+		if isLimitHit(m.Error) {
+			return goModule{}, errors.E(op, m.Error, errors.KindRateLimit)
+		}
+		return goModule{}, errors.E(op, m.Error, errors.KindNotFound)
 	}
 
 	var m goModule
@@ -136,7 +142,7 @@ func downloadModule(goBinaryName string, fs afero.Fs, gopath, repoRoot, module, 
 // PrepareEnv will return all the appropriate
 // environment variables for a Go Command to run
 // successfully (such as GOPATH, GOCACHE, PATH etc)
-func PrepareEnv(gopath string) []string {
+func PrepareEnv(gopath, goProxy string) []string {
 	pathEnv := fmt.Sprintf("PATH=%s", os.Getenv("PATH"))
 	homeEnv := fmt.Sprintf("HOME=%s", os.Getenv("HOME"))
 	httpProxy := fmt.Sprintf("HTTP_PROXY=%s", os.Getenv("HTTP_PROXY"))
@@ -147,6 +153,7 @@ func PrepareEnv(gopath string) []string {
 	httpsProxyLower := fmt.Sprintf("https_proxy=%s", os.Getenv("https_proxy"))
 	noProxyLower := fmt.Sprintf("no_proxy=%s", os.Getenv("no_proxy"))
 	gopathEnv := fmt.Sprintf("GOPATH=%s", gopath)
+	goProxyEnv := fmt.Sprintf("GOPROXY=%s", goProxy)
 	cacheEnv := fmt.Sprintf("GOCACHE=%s", filepath.Join(gopath, "cache"))
 	gitSSH := fmt.Sprintf("GIT_SSH=%s", os.Getenv("GIT_SSH"))
 	gitSSHCmd := fmt.Sprintf("GIT_SSH_COMMAND=%s", os.Getenv("GIT_SSH_COMMAND"))
@@ -156,6 +163,7 @@ func PrepareEnv(gopath string) []string {
 		pathEnv,
 		homeEnv,
 		gopathEnv,
+		goProxyEnv,
 		cacheEnv,
 		disableCgo,
 		enableGoModules,

@@ -26,7 +26,9 @@ func LatestHandler(dp Protocol, lggr log.Entry, df *mode.DownloadFile) http.Hand
 
 		info, err := dp.Latest(r.Context(), mod)
 		if err != nil {
-			lggr.SystemErr(errors.E(op, err))
+			severityLevel := errors.Expect(err, errors.KindNotFound)
+			err = errors.E(op, err, severityLevel)
+			lggr.SystemErr(err)
 			w.WriteHeader(errors.Kind(err))
 			return
 		}

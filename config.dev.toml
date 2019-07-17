@@ -15,6 +15,13 @@ GoBinary = "go"
 # Env override: GO_ENV
 GoEnv = "development"
 
+# GoProxy specifies GOPROXY env for go list or mod download inside athens
+# which can be configured totally same with GOPROXY of Go Command.
+# Notes that the comma-separated GOPROXY (e.g. <proxy1>,<proxy2>,direct) is only available in Go 1.13 or higher,
+# otherwise only single proxy URL can be set.
+# Env override: GOPROXY
+GoProxy = "direct"
+
 # GoGetWorkers specifies how many times you can concurrently
 # go mod download, this is so that low performance instances
 # can manage go get more sanely and not run out of disk or memory.
