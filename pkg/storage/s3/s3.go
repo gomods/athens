@@ -40,19 +40,25 @@ func New(s3Conf *config.S3Config, timeout time.Duration, options ...func(*aws.Co
 		o(awsConfig)
 	}
 
-	providers := []credentials.Provider{
-		endpointcreds.NewProviderClient(*awsConfig, defaults.Handlers(), s3Conf.CredentialsEndpoint),
-		&credentials.StaticProvider{
-			Value: credentials.Value{
-				AccessKeyID:     s3Conf.Key,
-				SecretAccessKey: s3Conf.Secret,
-				SessionToken:    s3Conf.Token,
+	credProviders := defaults.CredProviders(awsConfig, defaults.Handlers())
+
+	if !s3Conf.UseDefaultConfiguration {
+		endpointcreds := []credentials.Provider{
+			endpointcreds.NewProviderClient(*awsConfig, defaults.Handlers(), s3Conf.CredentialsEndpoint),
+			&credentials.StaticProvider{
+				Value: credentials.Value{
+					AccessKeyID:     s3Conf.Key,
+					SecretAccessKey: s3Conf.Secret,
+					SessionToken:    s3Conf.Token,
+				},
 			},
-		},
-		&credentials.EnvProvider{},
+			&credentials.EnvProvider{},
+		}
+
+		credProviders = append(endpointcreds, credProviders...)
 	}
 
-	awsConfig.Credentials = credentials.NewChainCredentials(providers)
+	awsConfig.Credentials = credentials.NewChainCredentials(credProviders)
 	awsConfig.CredentialsChainVerboseErrors = aws.Bool(true)
 
 	// create a session with creds
