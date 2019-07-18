@@ -52,7 +52,6 @@ func New(s3Conf *config.S3Config, timeout time.Duration, options ...func(*aws.Co
 					SessionToken:    s3Conf.Token,
 				},
 			},
-			&credentials.EnvProvider{},
 		}
 
 		credProviders = append(endpointcreds, credProviders...)
