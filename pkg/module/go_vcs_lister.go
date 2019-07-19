@@ -1,11 +1,9 @@
 package module
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
-	"os/exec"
 	"time"
 
 	"github.com/gomods/athens/pkg/config"
@@ -23,9 +21,9 @@ type listResp struct {
 }
 
 type vcsLister struct {
-	goBinPath string
-	goProxy   string
-	fs        afero.Fs
+	fs afero.Fs
+
+	goTool
 }
 
 func (l *vcsLister) List(ctx context.Context, mod string) (*storage.RevInfo, []string, error) {
@@ -33,33 +31,15 @@ func (l *vcsLister) List(ctx context.Context, mod string) (*storage.RevInfo, []s
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 
-	tmpDir, err := afero.TempDir(l.fs, "", "go-list")
+	runtime, err := prepareRuntime(l.fs, l.goTool, "")
 	if err != nil {
 		return nil, nil, errors.E(op, err)
 	}
-	defer l.fs.RemoveAll(tmpDir)
+	defer runtime.clean()
 
-	cmd := exec.Command(
-		l.goBinPath,
-		"list", "-m", "-versions", "-json",
-		config.FmtModVer(mod, "latest"),
-	)
-	cmd.Dir = tmpDir
-	stdout := &bytes.Buffer{}
-	stderr := &bytes.Buffer{}
-	cmd.Stdout = stdout
-	cmd.Stderr = stderr
-
-	gopath, err := afero.TempDir(l.fs, "", "athens")
+	err = runtime.run("list", "-m", "-versions", "-json", config.FmtModVer(mod, "latest"))
 	if err != nil {
-		return nil, nil, errors.E(op, err)
-	}
-	defer ClearFiles(l.fs, gopath)
-	cmd.Env = PrepareEnv(gopath, l.goProxy)
-
-	err = cmd.Run()
-	if err != nil {
-		err = fmt.Errorf("%v: %s", err, stderr)
+		err = fmt.Errorf("%v: %s", err, runtime.stderr)
 		// as of now, we can't recognize between a true NotFound
 		// and an unexpected error, so we choose the more
 		// hopeful path of NotFound. This way the Go command
@@ -71,7 +51,7 @@ func (l *vcsLister) List(ctx context.Context, mod string) (*storage.RevInfo, []s
 	}
 
 	var lr listResp
-	err = json.NewDecoder(stdout).Decode(&lr)
+	err = json.NewDecoder(runtime.stdout).Decode(&lr)
 	if err != nil {
 		return nil, nil, errors.E(op, err)
 	}
@@ -84,5 +64,5 @@ func (l *vcsLister) List(ctx context.Context, mod string) (*storage.RevInfo, []s
 
 // NewVCSLister creates an UpstreamLister which uses VCS to fetch a list of available versions
 func NewVCSLister(goBinPath, goProxy string, fs afero.Fs) UpstreamLister {
-	return &vcsLister{goBinPath: goBinPath, goProxy: goProxy, fs: fs}
+	return &vcsLister{goTool: goTool{goBin: goBinPath, goProxy: goProxy}, fs: fs}
 }

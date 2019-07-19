@@ -9,16 +9,19 @@ import (
 )
 
 type zipReadCloser struct {
-	zip    io.ReadCloser
-	fs     afero.Fs
-	goPath string
+	zip   io.ReadCloser
+	fs    afero.Fs
+	clean runtimeClean
 }
 
 // Close closes the zip file handle and clears up disk space used by the underlying disk ref
 // It is the caller's responsibility to call this method to free up utilized disk space
 func (rc *zipReadCloser) Close() error {
 	rc.zip.Close()
-	return ClearFiles(rc.fs, rc.goPath)
+	if rc.clean == nil {
+		return nil
+	}
+	return rc.clean()
 }
 
 func (rc *zipReadCloser) Read(p []byte) (n int, err error) {

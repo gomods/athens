@@ -1,11 +1,9 @@
 package module
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
-	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
@@ -17,9 +15,9 @@ import (
 )
 
 type goGetFetcher struct {
-	fs           afero.Fs
-	goBinaryName string
-	goProxy      string
+	fs afero.Fs
+
+	goTool
 }
 
 type goModule struct {
@@ -41,9 +39,11 @@ func NewGoGetFetcher(goBinaryName string, goProxy string, fs afero.Fs) (Fetcher,
 		return nil, errors.E(op, err)
 	}
 	return &goGetFetcher{
-		fs:           fs,
-		goBinaryName: goBinaryName,
-		goProxy:      goProxy,
+		fs: fs,
+		goTool: goTool{
+			goBin:   goBinaryName,
+			goProxy: goProxy,
+		},
 	}, nil
 }
 
@@ -54,21 +54,8 @@ func (g *goGetFetcher) Fetch(ctx context.Context, mod, ver string) (*storage.Ver
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 
-	// setup the GOPATH
-	goPathRoot, err := afero.TempDir(g.fs, "", "athens")
+	m, cleanFunc, err := downloadModule(g.goTool, g.fs, mod, ver)
 	if err != nil {
-		return nil, errors.E(op, err)
-	}
-	sourcePath := filepath.Join(goPathRoot, "src")
-	modPath := filepath.Join(sourcePath, getRepoDirName(mod, ver))
-	if err := g.fs.MkdirAll(modPath, os.ModeDir|os.ModePerm); err != nil {
-		ClearFiles(g.fs, goPathRoot)
-		return nil, errors.E(op, err)
-	}
-
-	m, err := downloadModule(g.goBinaryName, g.goProxy, g.fs, goPathRoot, modPath, mod, ver)
-	if err != nil {
-		ClearFiles(g.fs, goPathRoot)
 		return nil, errors.E(op, err)
 	}
 
@@ -94,48 +81,50 @@ func (g *goGetFetcher) Fetch(ctx context.Context, mod, ver string) (*storage.Ver
 	//
 	// if we close, then the caller will panic, and the alternative to make this work is
 	// that we read into memory and return an io.ReadCloser that reads out of memory
-	storageVer.Zip = &zipReadCloser{zip, g.fs, goPathRoot}
+	storageVer.Zip = &zipReadCloser{zip, g.fs, cleanFunc}
 
 	return &storageVer, nil
 }
 
 // given a filesystem, gopath, repository root, module and version, runs 'go mod download -json'
 // on module@version from the repoRoot with GOPATH=gopath, and returns a non-nil error if anything went wrong.
-func downloadModule(goBinaryName, goProxy string, fs afero.Fs, gopath, repoRoot, module, version string) (goModule, error) {
+func downloadModule(goTool goTool, fs afero.Fs, module, version string,
+) (m *goModule, cleanFunc runtimeClean, err error) {
 	const op errors.Op = "module.downloadModule"
 	uri := strings.TrimSuffix(module, "/")
 	fullURI := fmt.Sprintf("%s@%s", uri, version)
-
-	cmd := exec.Command(goBinaryName, "mod", "download", "-json", fullURI)
-	cmd.Env = PrepareEnv(gopath, goProxy)
-	cmd.Dir = repoRoot
-	stdout := &bytes.Buffer{}
-	stderr := &bytes.Buffer{}
-	cmd.Stdout = stdout
-	cmd.Stderr = stderr
-	err := cmd.Run()
+	repoRoot := filepath.Join("src", getRepoDirName(module, version))
+	runtime, err := prepareRuntime(fs, goTool, repoRoot)
 	if err != nil {
-		err = fmt.Errorf("%v: %s", err, stderr)
-		var m goModule
-		if jsonErr := json.NewDecoder(stdout).Decode(&m); jsonErr != nil {
-			return goModule{}, errors.E(op, err)
+		return nil, nil, errors.E(op, err)
+	}
+	defer func() {
+		if err != nil {
+			runtime.clean()
+		}
+	}()
+
+	m = &goModule{}
+	err = runtime.run("mod", "download", "-json", fullURI)
+	if err != nil {
+		err = fmt.Errorf("%v: %s", err, runtime.stderr)
+
+		if jsonErr := json.NewDecoder(runtime.stdout).Decode(m); jsonErr != nil {
+			return nil, nil, errors.E(op, err)
 		}
 		// github quota exceeded
 		if isLimitHit(m.Error) {
-			return goModule{}, errors.E(op, m.Error, errors.KindRateLimit)
+			return nil, nil, errors.E(op, m.Error, errors.KindRateLimit)
 		}
-		return goModule{}, errors.E(op, m.Error, errors.KindNotFound)
+		return nil, nil, errors.E(op, m.Error, errors.KindNotFound)
 	}
-
-	var m goModule
-	if err = json.NewDecoder(stdout).Decode(&m); err != nil {
-		return goModule{}, errors.E(op, err)
+	if err = json.NewDecoder(runtime.stdout).Decode(m); err != nil {
+		return nil, nil, errors.E(op, err)
 	}
 	if m.Error != "" {
-		return goModule{}, errors.E(op, m.Error)
+		return nil, nil, errors.E(op, m.Error)
 	}
-
-	return m, nil
+	return m, runtime.clean, nil
 }
 
 func isLimitHit(o string) bool {

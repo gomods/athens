@@ -18,6 +18,9 @@ func (m *ModuleSuite) TestZipReadCloser() {
 
 	fs := afero.NewMemMapFs()
 	gopath, err := afero.TempDir(fs, "", "athens-test")
+	clean := func() error {
+		return ClearFiles(fs, gopath)
+	}
 	r.NoError(err)
 	packagePath := filepath.Join(gopath, "pkg", "mod", "cache", "download", mod, "@v")
 	// create all the files the disk ref expects
@@ -27,7 +30,7 @@ func (m *ModuleSuite) TestZipReadCloser() {
 
 	ziprc, err := fs.Open(filepath.Join(packagePath, version+".zip"))
 	r.NoError(err)
-	cl := &zipReadCloser{fs: fs, goPath: gopath, zip: ziprc}
+	cl := &zipReadCloser{fs: fs, clean: clean, zip: ziprc}
 
 	fInfo, err := fs.Stat(gopath)
 	r.NotNil(fInfo)
