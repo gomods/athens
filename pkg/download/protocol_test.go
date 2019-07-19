@@ -46,7 +46,7 @@ func getDP(t *testing.T) Protocol {
 		t.Fatal(err)
 	}
 	st := stash.New(mf, s)
-	return New(&Opts{s, st, NewVCSLister(goBin, goProxy, fs), nil})
+	return New(&Opts{s, st, module.NewVCSLister(goBin, goProxy, fs), nil})
 }
 
 type listTest struct {
