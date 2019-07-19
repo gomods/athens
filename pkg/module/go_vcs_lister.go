@@ -1,4 +1,4 @@
-package download
+package module
 
 import (
 	"bytes"
@@ -10,17 +10,10 @@ import (
 
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/errors"
-	"github.com/gomods/athens/pkg/module"
 	"github.com/gomods/athens/pkg/observ"
 	"github.com/gomods/athens/pkg/storage"
 	"github.com/spf13/afero"
 )
-
-// UpstreamLister retrieves a list of available module versions from upstream
-// i.e. VCS, and a Storage backend.
-type UpstreamLister interface {
-	List(ctx context.Context, mod string) (*storage.RevInfo, []string, error)
-}
 
 type listResp struct {
 	Path     string
@@ -61,8 +54,8 @@ func (l *vcsLister) List(ctx context.Context, mod string) (*storage.RevInfo, []s
 	if err != nil {
 		return nil, nil, errors.E(op, err)
 	}
-	defer module.ClearFiles(l.fs, gopath)
-	cmd.Env = module.PrepareEnv(gopath, l.goProxy)
+	defer ClearFiles(l.fs, gopath)
+	cmd.Env = PrepareEnv(gopath, l.goProxy)
 
 	err = cmd.Run()
 	if err != nil {
