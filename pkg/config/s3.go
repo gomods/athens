@@ -8,4 +8,5 @@ type S3Config struct {
 	Token                   string `envconfig:"AWS_SESSION_TOKEN"`
 	Bucket                  string `validate:"required" envconfig:"ATHENS_S3_BUCKET_NAME"`
 	UseDefaultConfiguration bool   `envconfig:"AWS_USE_DEFAULT_CONFIGURATION"`
+	CredentialsEndpoint     string `envconfig:"AWS_CREDENTIALS_ENDPOINT"`
 }
