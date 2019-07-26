@@ -9,6 +9,7 @@ import (
 
 	"github.com/gomods/athens/pkg/download/mode"
 	"github.com/gomods/athens/pkg/errors"
+	"github.com/gomods/athens/pkg/module"
 	"github.com/gomods/athens/pkg/observ"
 	"github.com/gomods/athens/pkg/stash"
 	"github.com/gomods/athens/pkg/storage"
@@ -40,7 +41,7 @@ type Wrapper func(Protocol) Protocol
 type Opts struct {
 	Storage      storage.Backend
 	Stasher      stash.Stasher
-	Lister       UpstreamLister
+	Lister       module.UpstreamLister
 	DownloadFile *mode.DownloadFile
 }
 
@@ -65,7 +66,7 @@ type protocol struct {
 	df      *mode.DownloadFile
 	storage storage.Backend
 	stasher stash.Stasher
-	lister  UpstreamLister
+	lister  module.UpstreamLister
 }
 
 func (p *protocol) List(ctx context.Context, mod string) ([]string, error) {
