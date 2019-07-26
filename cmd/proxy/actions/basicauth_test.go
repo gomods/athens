@@ -50,7 +50,7 @@ var basicAuthTests = [...]struct {
 		pass:           "wrongPassword",
 		path:           "/healthz",
 		logs:           healthWarning,
-		expectedStatus: 401,
+		expectedStatus: 200,
 	},
 }
 
