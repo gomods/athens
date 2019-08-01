@@ -92,7 +92,7 @@ Next, install the chart with default values to `athens` namespace:
 $ helm install gomods/athens-proxy -n athens --namespace athens
 ```
 
-This will deploy a single Athens instance in the `default` namespace with `disk` storage enabled. Additionally, a `ClusterIP` service will be created.
+This will deploy a single Athens instance in the `athens` namespace with `disk` storage enabled. Additionally, a `ClusterIP` service will be created.
 
 ## Advanced Configuration
 
