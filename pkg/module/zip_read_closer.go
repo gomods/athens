@@ -18,16 +18,16 @@ type zipReadCloser struct {
 // It is the caller's responsibility to call this method to free up utilized disk space
 func (rc *zipReadCloser) Close() error {
 	rc.zip.Close()
-	return ClearFiles(rc.fs, rc.goPath)
+	return clearFiles(rc.fs, rc.goPath)
 }
 
 func (rc *zipReadCloser) Read(p []byte) (n int, err error) {
 	return rc.zip.Read(p)
 }
 
-// ClearFiles deletes all data from the given fs at path root
+// clearFiles deletes all data from the given fs at path root
 // This function must be called when zip is closed to cleanup the entire GOPATH created by the diskref
-func ClearFiles(fs afero.Fs, root string) error {
+func clearFiles(fs afero.Fs, root string) error {
 	const op errors.Op = "module.ClearFiles"
 	// This is required because vgo ensures dependencies are read-only
 	// See https://github.com/golang/go/issues/24111 and
