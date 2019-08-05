@@ -14,14 +14,14 @@ var ctx = context.Background()
 
 func (s *ModuleSuite) TestNewGoGetFetcher() {
 	r := s.Require()
-	fetcher, err := NewGoGetFetcher(s.goBinaryName, s.fs)
+	fetcher, err := NewGoGetFetcher(s.goBinaryName, s.goProxy, s.fs)
 	r.NoError(err)
 	_, ok := fetcher.(*goGetFetcher)
 	r.True(ok)
 }
 
 func (s *ModuleSuite) TestGoGetFetcherError() {
-	fetcher, err := NewGoGetFetcher("invalidpath", afero.NewOsFs())
+	fetcher, err := NewGoGetFetcher("invalidpath", "", afero.NewOsFs())
 
 	assert.Nil(s.T(), fetcher)
 	if runtime.GOOS == "windows" {
@@ -35,7 +35,7 @@ func (s *ModuleSuite) TestGoGetFetcherFetch() {
 	r := s.Require()
 	// we need to use an OS filesystem because fetch executes vgo on the command line, which
 	// always writes to the filesystem
-	fetcher, err := NewGoGetFetcher(s.goBinaryName, afero.NewOsFs())
+	fetcher, err := NewGoGetFetcher(s.goBinaryName, s.goProxy, afero.NewOsFs())
 	r.NoError(err)
 	ver, err := fetcher.Fetch(ctx, repoURI, version)
 	r.NoError(err)
@@ -55,7 +55,7 @@ func (s *ModuleSuite) TestGoGetFetcherFetch() {
 
 func (s *ModuleSuite) TestNotFoundFetches() {
 	r := s.Require()
-	fetcher, err := NewGoGetFetcher(s.goBinaryName, afero.NewOsFs())
+	fetcher, err := NewGoGetFetcher(s.goBinaryName, s.goProxy, afero.NewOsFs())
 	r.NoError(err)
 	// when someone buys laks47dfjoijskdvjxuyyd.com, and implements
 	// a git server on top of it, this test will fail :)

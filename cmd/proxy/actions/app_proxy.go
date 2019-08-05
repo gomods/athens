@@ -73,12 +73,12 @@ func addProxyRoutes(
 	// 3. The stashpool manages limiting concurrent requests and passes them to stash.
 	// 4. The plain stash.New just takes a request from upstream and saves it into storage.
 	fs := afero.NewOsFs()
-	mf, err := module.NewGoGetFetcher(c.GoBinary, fs)
+	mf, err := module.NewGoGetFetcher(c.GoBinary, c.GoProxy, fs)
 	if err != nil {
 		return err
 	}
 
-	lister := download.NewVCSLister(c.GoBinary, fs)
+	lister := module.NewVCSLister(c.GoBinary, c.GoProxy, fs)
 
 	withSingleFlight, err := getSingleFlight(c, s)
 	if err != nil {
