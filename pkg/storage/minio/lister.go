@@ -2,6 +2,7 @@ package minio
 
 import (
 	"context"
+	"fmt"
 	"sort"
 	"strings"
 
@@ -13,8 +14,6 @@ func (l *storageImpl) List(ctx context.Context, module string) ([]string, error)
 	const op errors.Op = "minio.List"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
-	dict := make(map[string]struct{})
-
 	doneCh := make(chan struct{})
 	defer close(doneCh)
 	searchPrefix := module + "/"
@@ -23,20 +22,17 @@ func (l *storageImpl) List(ctx context.Context, module string) ([]string, error)
 	if err != nil {
 		return nil, errors.E(op, err, errors.M(module))
 	}
+	ret := []string{}
 	for _, object := range objectCh.Contents {
 		if object.Err != nil {
 			return nil, errors.E(op, object.Err, errors.M(module))
 		}
 		parts := strings.Split(object.Key, "/")
 		ver := parts[len(parts)-2]
-		if _, ok := dict[ver]; !ok {
-			dict[ver] = struct{}{}
+		goModKey := fmt.Sprintf("%s/go.mod", l.versionLocation(module, ver))
+		if goModKey == object.Key {
+			ret = append(ret, ver)
 		}
-	}
-
-	ret := []string{}
-	for ver := range dict {
-		ret = append(ret, ver)
 	}
 	sort.Strings(ret)
 	return ret, nil
