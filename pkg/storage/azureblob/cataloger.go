@@ -23,7 +23,9 @@ func (s *Storage) Catalog(ctx context.Context, token string, pageSize int) ([]pa
 	// one module@version consists of 3 pieces - info, mod, zip
 	objCount := 3 * pageSize
 
-	marker := azblob.Marker{&token}
+	marker := azblob.Marker{
+		Val: &token,
+	}
 	blobs, err := s.client.containerURL.ListBlobsFlatSegment(ctx, marker, azblob.ListBlobsSegmentOptions{
 		MaxResults: int32(objCount),
 	})
