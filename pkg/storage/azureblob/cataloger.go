@@ -34,13 +34,13 @@ func (s *Storage) Catalog(ctx context.Context, token string, pageSize int) ([]pa
 	nextToken := *blobs.NextMarker.Val
 
 	for _, blob := range blobs.Segment.BlobItems {
-	        if strings.HasSuffix(blob.Name, ".info") {
-		        p, err := parsModVer(blob.Name)
-		        if err != nil {
-		                continue
-		        }
-		        res = append(res, p)
-	        }
+		if strings.HasSuffix(blob.Name, ".info") {
+			p, err := parsModVer(blob.Name)
+			if err != nil {
+				continue
+			}
+			res = append(res, p)
+		}
 	}
 
 	return res, nextToken, nil
