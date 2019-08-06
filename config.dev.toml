@@ -328,6 +328,21 @@ SingleFlightType = "memory"
         Insecure = false
 
     [Storage.S3]
+
+        ### The authentication model is as below for S3 in the following order
+        ### If AWS_CREDENTIALS_ENDPOINT is specified and it returns valid results, then it is used
+        ### If config variables are specified and they are valid, then they return valid results, then it is used
+        ### Otherwise, it will default to default configurations which is as follows
+        # attempt to find credentials in the environment, in the shared
+        # configuration (~/.aws/credentials) and from ec2 instance role
+        # credentials. See
+        # https://godoc.org/github.com/aws/aws-sdk-go#hdr-Configuring_Credentials
+        # and
+        # https://godoc.org/github.com/aws/aws-sdk-go/aws/session#hdr-Environment_Variables
+        # for environment variables that will affect the aws configuration.
+        # Setting UseDefaultConfiguration would only use default configuration. It will be deprecated in future releases 
+        # and is recommended not to use it.
+
         # Region for S3 storage
         # Env override: AWS_REGION
         Region = "MY_AWS_REGION"
@@ -357,6 +372,10 @@ SingleFlightType = "memory"
         # https://godoc.org/github.com/aws/aws-sdk-go/aws/session#hdr-Environment_Variables
         # for environment variables that will affect the aws configuration.
         UseDefaultConfiguration = false
+
+        # https://docs.aws.amazon.com/sdk-for-go/api/aws/credentials/endpointcreds/
+        CredentialsEndpoint = ""
+
    [Storage.AzureBlob]
         # Storage Account name for Azure Blob
         # Env override: ATHENS_AZURE_ACCOUNT_NAME
