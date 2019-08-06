@@ -3,12 +3,12 @@ package azureblob
 import (
 	"context"
 	"fmt"
-	"strings"
 	"github.com/Azure/azure-storage-blob-go/azblob"
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/observ"
 	"github.com/gomods/athens/pkg/paths"
+	"strings"
 )
 
 // Catalog implements the (./pkg/storage).Catalog interface
@@ -28,19 +28,19 @@ func (s *Storage) Catalog(ctx context.Context, token string, pageSize int) ([]pa
 		MaxResults: int32(objCount),
 	})
 	if err != nil {
-		return nil, "",  errors.E(op, err)
+		return nil, "", errors.E(op, err)
 	}
 
 	nextToken := *blobs.NextMarker.Val
 
 	for _, blob := range blobs.Segment.BlobItems {
-	    if strings.HasSuffix(blob.Name, ".info") {
-		p, err := parsModVer(blob.Name)
-		if err != nil {
-		    continue
-		}
-		res = append(res, p)
-	    }
+	        if strings.HasSuffix(blob.Name, ".info") {
+		        p, err := parsModVer(blob.Name)
+		        if err != nil {
+		                continue
+		        }
+		        res = append(res, p)
+	        }
 	}
 
 	return res, nextToken, nil
