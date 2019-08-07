@@ -27,11 +27,39 @@ func BenchmarkBackend(b *testing.B) {
 
 func getStorage(tb testing.TB) *ModuleStore {
 	url := os.Getenv("ATHENS_MONGO_STORAGE_URL")
+
 	if url == "" {
 		tb.SkipNow()
 	}
+
 	backend, err := NewStorage(&config.MongoConfig{URL: url}, config.GetTimeoutDuration(300))
 	require.NoError(tb, err)
 
 	return backend
+}
+
+func TestNewStorageWithNonDefaultDBName(t *testing.T) {
+	url := os.Getenv("ATHENS_MONGO_STORAGE_URL")
+
+	if url == "" {
+		t.SkipNow()
+	}
+
+	testCases := []struct {
+		name      string
+		dbName    string
+		expDbName string
+	}{
+		{"Test Default 'Athens' DB Name", "athens", "athens"}, //Tests the default database name
+		{"Test Custom DB Name", "testAthens", "testAthens"},   //Tests a non-default database name
+		{"Test Blank DB Name", "", "athens"},                  //Tests the blank database name edge-case
+	}
+
+	for _, test := range testCases {
+		t.Run(test.name, func(t *testing.T) {
+			backend, err := NewStorage(&config.MongoConfig{URL: url, DefaultDBName: test.dbName}, config.GetTimeoutDuration(300))
+			require.NoError(t, err)
+			require.Equal(t, test.expDbName, backend.db)
+		})
+	}
 }

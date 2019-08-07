@@ -165,7 +165,7 @@ func TestStorageEnvOverrides(t *testing.T) {
 		Mongo: &MongoConfig{
 			URL:           "mongoURL",
 			CertPath:      "/test/path",
-			DefaultDBName: "athens",
+			DefaultDBName: "test",
 		},
 		S3: &S3Config{
 			Region: "s3Region",
@@ -233,9 +233,10 @@ func TestParseExampleConfig(t *testing.T) {
 			Bucket:    "gomods",
 		},
 		Mongo: &MongoConfig{
-			URL:          "mongodb://127.0.0.1:27017",
-			CertPath:     "",
-			InsecureConn: false,
+			URL:           "mongodb://127.0.0.1:27017",
+			CertPath:      "",
+			InsecureConn:  false,
+			DefaultDBName: "athens",
 		},
 		S3: &S3Config{
 			Region: "MY_AWS_REGION",
@@ -335,6 +336,7 @@ func getEnvMap(config *Config) map[string]string {
 			envVars["ATHENS_MONGO_STORAGE_URL"] = storage.Mongo.URL
 			envVars["ATHENS_MONGO_CERT_PATH"] = storage.Mongo.CertPath
 			envVars["ATHENS_MONGO_INSECURE"] = strconv.FormatBool(storage.Mongo.InsecureConn)
+			envVars["ATHENS_MONGO_DEFAULT_DATABASE"] = storage.Mongo.DefaultDBName
 		}
 		if storage.S3 != nil {
 			envVars["AWS_REGION"] = storage.S3.Region
