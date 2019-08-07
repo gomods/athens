@@ -17,7 +17,7 @@ Additionally in the current or new config file, set the following parameters as 
 
     ```
     FilterFile = "/usr/local/lib/FilterForGoCenter"
-    GlobalEndpoint = "https://<url_to_uptream>"
+    GlobalEndpoint = "https://<url_to_upstream>"
     # To use GoCenter for example, replace <url_to_upstream> with gocenter.io
     # You can also use https://proxy.golang.org to use the Go Module mirror
     ```
@@ -26,4 +26,4 @@ Additionally in the current or new config file, set the following parameters as 
     ```
      <path_to_athens>/proxy  -config_file <path-to updated  current or new configfile>
     ```
-1. Verify the new configuration using the steps mentioned in ("Try out Athens" document)[/try-out], and go through the same walkthrough example.
+1. Verify the new configuration using the steps mentioned in ["Try out Athens" document](/try-out), and go through the same walkthrough example.
