@@ -3,12 +3,13 @@ package azureblob
 import (
 	"context"
 	"fmt"
+	"strings"
+
 	"github.com/Azure/azure-storage-blob-go/azblob"
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/observ"
 	"github.com/gomods/athens/pkg/paths"
-	"strings"
 )
 
 // Catalog implements the (./pkg/storage).Catalog interface
