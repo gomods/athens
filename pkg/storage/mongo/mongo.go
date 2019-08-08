@@ -37,6 +37,7 @@ func NewStorage(conf *config.MongoConfig, timeout time.Duration) (*ModuleStore, 
 	client, err := ms.newClient(conf)
 	ms.client = client
 	ms.db = conf.DefaultDBName
+	ms.coll = conf.DefaultCollectionName
 
 	if err != nil {
 		return nil, errors.E(op, err)
@@ -68,7 +69,10 @@ func (m *ModuleStore) initDatabase() *mongo.Collection {
 	if m.db == "" {
 		m.db = "athens"
 	}
-	m.coll = "modules"
+
+	if m.coll == "" {
+		m.coll = "modules"
+	}
 
 	c := m.client.Database(m.db).Collection(m.coll)
 	indexView := c.Indexes()

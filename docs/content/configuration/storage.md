@@ -80,6 +80,10 @@ This driver uses a [Mongo](https://www.mongodb.com/) server as data storage. On 
             # Env override: ATHENS_MONGO_DEFAULT_DATABASE
             DefaultDBName = athens
 
+            # Not required parameter
+            # Allows for use of custom collection 
+            # Env override: ATHENS_MONGO_DEFAULT_COLLECTION
+            DefaultCollectionName = modules
 ## Google Cloud Storage
 
 This driver uses [Google Cloud Storage](https://cloud.google.com/storage/) and assumes that you already have an `account` and `bucket` in it.
