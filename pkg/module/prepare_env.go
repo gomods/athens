@@ -37,16 +37,16 @@ func prepareEnv(gopath, goProxy string) []string {
 		gitSSH,
 		gitSSHCmd,
 	}
-	
+
 	// need to also check the lower case version of just these three env variables
 	if httpProxyLower, exist := os.LookupEnv("http_proxy"); exist {
-	    cmdEnv = append(cmdEnv, fmt.Sprintf("http_proxy=%s", httpProxyLower))
+		cmdEnv = append(cmdEnv, fmt.Sprintf("http_proxy=%s", httpProxyLower))
 	}
 	if httpsProxyLower, exist := os.LookupEnv("https_proxy"); exist {
-	    cmdEnv = append(cmdEnv, fmt.Sprintf("https_proxy=%s", httpsProxyLower))
+		cmdEnv = append(cmdEnv, fmt.Sprintf("https_proxy=%s", httpsProxyLower))
 	}
 	if noProxyLower, exist := os.LookupEnv("no_proxy"); exist {
-	    cmdEnv = append(cmdEnv, fmt.Sprintf("no_proxy=%s", noProxyLower))
+		cmdEnv = append(cmdEnv, fmt.Sprintf("no_proxy=%s", noProxyLower))
 	}
 
 	if sshAuthSockVal, hasSSHAuthSock := os.LookupEnv("SSH_AUTH_SOCK"); hasSSHAuthSock {
