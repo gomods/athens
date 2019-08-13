@@ -44,14 +44,6 @@ var basicAuthTests = [...]struct {
 		logs:           "",
 		expectedStatus: 401,
 	},
-	{
-		name:           "log_on_healthz",
-		user:           "wrongUser",
-		pass:           "wrongPassword",
-		path:           "/healthz",
-		logs:           healthWarning,
-		expectedStatus: 200,
-	},
 }
 
 func TestBasicAuth(t *testing.T) {
