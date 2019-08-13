@@ -44,7 +44,7 @@ func New(s3Conf *config.S3Config, timeout time.Duration, options ...func(*aws.Co
 
 	if !s3Conf.UseDefaultConfiguration {
 		endpointcreds := []credentials.Provider{
-			endpointcreds.NewProviderClient(*awsConfig, defaults.Handlers(), s3Conf.CredentialsEndpoint),
+			endpointcreds.NewProviderClient(*awsConfig, defaults.Handlers(), endpointFrom(s3Conf.CredentialsEndpoint, s3Conf.AwsContainerCredentialsRelativeURI)),
 			&credentials.StaticProvider{
 				Value: credentials.Value{
 					AccessKeyID:     s3Conf.Key,
@@ -74,4 +74,11 @@ func New(s3Conf *config.S3Config, timeout time.Duration, options ...func(*aws.Co
 		s3API:    uploader.S3,
 		timeout:  timeout,
 	}, nil
+}
+
+func endpointFrom(credentialsEndpoint string, relativeURI string) string {
+	if relativeURI == "" {
+		return credentialsEndpoint
+	}
+	return credentialsEndpoint + "$" + relativeURI
 }
