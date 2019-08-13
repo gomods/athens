@@ -87,3 +87,23 @@ Which currently includes:
 - hg
 - bzr
 - fossil
+
+### When should I use a vendor directory, and when should I use Athens?
+
+ It was a combination of the following:
+
+- waiting for 1.13 for better config (e.g. multiple values in GOPROXY & easier config for private modules)
+- vendoring sped up the build more than using the google go proxy
+
+
+ I expect at that point it will be about the build time as we don't use any advanced features yet such as validation hooks or access control.
+
+I think the speed benefits of Athens vary greatly depending on the context. if you’re a developer, you probably already have the vendor directory checked out, so Athens won’t beat that for sure. in CI/CD the story might be different if it has to check out vendor from source control on each run. in that case, concurrently downloading some zip files over a (fast-ish?) network is often faster than the checkout. sometimes the same goes for docker builds and copying the vendor directory into the build environment
+
+ For me, I think the value comes from guaranteed builds and less noise for the developer. To clarify, I assume in your context, it is the responsibility of the developer to check in the vendor folder. Otherwise, your CI/CD would need to run go mod vendor and would need to download the dependencies anyway. So if you put the responsibility on the developer to include the vendor folder, it's possible for them to modify the contents of vendor (which no one should do, but yeah, devs do silly things). I'd also think your PRs could get a little noisy when adding or removing packages as its no longer contained within your go.mod
+
+ We've had similar conversations relating to client stubs generated from .proto files for Go gRPC services. Do developers maintain their own copy of generated stubs in their project, or just depend on a known distributed set of clients. We chose the latter as we didn't want devs messing with the client definitions and felt it was a better overall experience
+
+ @Fraser the developers also benefit from athens since they don't have to clone all dependencies each time they clone the git repo. Personally I have loads of different folders with the same repo, but different branches. If I had to have (in our case) ~200 dependencies in each of them it would be more painful than today 
+
+
