@@ -90,7 +90,19 @@ Which currently includes:
 
 ### When should I use a vendor directory, and when should I use Athens?
 
- It was a combination of the following:
+Vendor (without a proxy) valuable when:
+
+- CI/CD systems don't have access to an Athens (even if it's internal)
+- When vendor is so small, it's still faster to check it out from your repo than it is to pull zip files from the server
+- If you're coming from glide/dep or another "older" dependency management system that leveraged the vendor directory
+
+Athens valuable when:
+
+- You have a new project
+- You want to, or your system admin / CTO / etc.. requires, that you use Athens (i.e. for isolation or dependency auditing)
+- Your vendor checkout speeds are getting "slow" (for some value of slow, IDK) and downloading from Athens speeds the build up
+
+It was a combination of the following:
 
 - waiting for 1.13 for better config (e.g. multiple values in GOPROXY & easier config for private modules)
 - vendoring sped up the build more than using the google go proxy
