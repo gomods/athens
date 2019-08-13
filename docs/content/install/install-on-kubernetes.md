@@ -4,7 +4,7 @@ description: Installing an Athens Instance on Kubernetes
 weight: 1
 ---
 
-When you follow the instructions in the [Walkthrough](/walkthrough), you end up with an Athens Proxy that uses in-memory storage. This is only suitable for trying out the Athens proxy for a short period of time, as you will quickly run out of memory and Athens won't persist modules between restarts. In order to run a more production-like proxy, you may with to run Athens on a [Kubernetes](https://kubernetes.io/) cluster. To aid in deployment of the Athens proxy on Kubernetes, a [Helm](https://www.helm.sh/) chart has been provided. This guide will walk you through installing Athens on a Kubernetes cluster using Helm.
+When you follow the instructions in the [Walkthrough](/walkthrough), you end up with an Athens Proxy that uses in-memory storage. This is only suitable for trying out the Athens proxy for a short period of time, as you will quickly run out of memory and Athens won't persist modules between restarts. In order to run a more production-like proxy, you may want to run Athens on a [Kubernetes](https://kubernetes.io/) cluster. To aid in deployment of the Athens proxy on Kubernetes, a [Helm](https://www.helm.sh/) chart has been provided. This guide will walk you through installing Athens on a Kubernetes cluster using Helm.
 
 * [Prerequisites](#prerequisites)
 * [Configure Helm](#configure-helm)
@@ -211,7 +211,7 @@ ingress:
         - "athens.mydomain.com
 ```
 
-Example above sets automatic creation/retrieval of TLS certificates from [Let's Encrypt](https://letsencrypt.org/) with [cert-manager](https://hub.helm.sh/charts/jetstack/cert-manager) and uses [nginx-ingress controller](https://hub.helm.sh/charts/stable/nginx-ingress) to expose Athens externally to internet.
+Example above sets automatic creation/retrieval of TLS certificates from [Let's Encrypt](https://letsencrypt.org/) with [cert-manager](https://hub.helm.sh/charts/jetstack/cert-manager) and uses [nginx-ingress controller](https://hub.helm.sh/charts/stable/nginx-ingress) to expose Athens externally to the Internet.
 
 Add it to `override-values.yaml` file and run:
 
