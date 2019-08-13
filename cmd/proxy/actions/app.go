@@ -75,7 +75,7 @@ func App(conf *config.Config) (http.Handler, error) {
 		subRouter = r.PathPrefix(prefix).Subrouter()
 	}
 
-	r.PathPrefix("/healthz").Subrouter();
+	r.PathPrefix("/healthz").Subrouter()
 
 	// RegisterExporter will register an exporter where we will export our traces to.
 	// The error from the RegisterExporter would be nil if the tracer was specified by
