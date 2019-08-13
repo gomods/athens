@@ -72,9 +72,10 @@ func App(conf *config.Config) (http.Handler, error) {
 		// can not send custom headers and therefore if the proxy
 		// is running behind a prefix as well as some authentication
 		// mechanism, we should allow the plain / to return 200.
-		r.HandleFunc("/", healthHandler).Methods(http.MethodGet)
 		subRouter = r.PathPrefix(prefix).Subrouter()
 	}
+
+	r.PathPrefix("/healthz").Subrouter();
 
 	// RegisterExporter will register an exporter where we will export our traces to.
 	// The error from the RegisterExporter would be nil if the tracer was specified by
