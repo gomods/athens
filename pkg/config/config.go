@@ -3,9 +3,11 @@ package config
 import (
 	"fmt"
 	"log"
+	"net"
 	"os"
 	"path/filepath"
 	"runtime"
+	"strings"
 
 	"github.com/BurntSushi/toml"
 	"github.com/gomods/athens/pkg/download/mode"
@@ -187,14 +189,16 @@ func envOverride(config *Config) error {
 	return nil
 }
 
-func ensurePortFormat(s string) string {
-	if len(s) == 0 {
+func ensurePortFormat(hostport string) string {
+	host, port, err := net.SplitHostPort(hostport)
+	if err != nil && strings.Contains(err.Error(), "missing port in address") {
+		hostport = ":" + hostport
+		host, port, err = net.SplitHostPort(hostport)
+	}
+	if err != nil {
 		return ""
 	}
-	if s[0] != ':' {
-		return ":" + s
-	}
-	return s
+	return host + ":" + port
 }
 
 func validateConfig(config Config) error {

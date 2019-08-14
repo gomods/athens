@@ -143,6 +143,12 @@ func TestEnsurePortFormat(t *testing.T) {
 	if given != expected {
 		t.Fatalf("expected ensurePortFormat to not add a colon when it's present but got %v", given)
 	}
+	port = "127.0.0.1:3000"
+	expected = "127.0.0.1:3000"
+	given = ensurePortFormat(port)
+	if given != expected {
+		t.Fatalf("expected ensurePortFormat to not add a colon when it's present but got %v", given)
+	}
 }
 
 func TestStorageEnvOverrides(t *testing.T) {
