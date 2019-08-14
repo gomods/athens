@@ -377,7 +377,7 @@ SingleFlightType = "memory"
         CredentialsEndpoint = ""
 
         # conainer relative url (used by fargate) /v2/....
-        # If this is present, it will concatenate to giCredentialsEndpoint
+        # If this is present, it will concatenate to CredentialsEndpoint
         AwsContainerCredentialsRelativeURI = ""
 
    [Storage.AzureBlob]
