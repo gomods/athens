@@ -2,16 +2,17 @@ package config
 
 import (
 	"fmt"
-	"github.com/BurntSushi/toml"
-	"github.com/gomods/athens/pkg/download/mode"
-	"github.com/gomods/athens/pkg/errors"
-	"github.com/kelseyhightower/envconfig"
-	"gopkg.in/go-playground/validator.v9"
 	"log"
 	"os"
 	"path/filepath"
 	"runtime"
 	"strconv"
+
+	"github.com/BurntSushi/toml"
+	"github.com/gomods/athens/pkg/download/mode"
+	"github.com/gomods/athens/pkg/errors"
+	"github.com/kelseyhightower/envconfig"
+	"gopkg.in/go-playground/validator.v9"
 )
 
 const defaultConfigFile = "athens.toml"
