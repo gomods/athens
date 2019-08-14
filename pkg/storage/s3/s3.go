@@ -80,5 +80,5 @@ func endpointFrom(credentialsEndpoint string, relativeURI string) string {
 	if relativeURI == "" {
 		return credentialsEndpoint
 	}
-	return credentialsEndpoint + "$" + relativeURI
+	return credentialsEndpoint + relativeURI
 }
