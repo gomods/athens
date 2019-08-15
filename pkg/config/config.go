@@ -6,12 +6,13 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"strconv"
 
 	"github.com/BurntSushi/toml"
 	"github.com/gomods/athens/pkg/download/mode"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/kelseyhightower/envconfig"
-	validator "gopkg.in/go-playground/validator.v9"
+	"gopkg.in/go-playground/validator.v9"
 )
 
 const defaultConfigFile = "athens.toml"
@@ -188,10 +189,7 @@ func envOverride(config *Config) error {
 }
 
 func ensurePortFormat(s string) string {
-	if len(s) == 0 {
-		return ""
-	}
-	if s[0] != ':' {
+	if _, err := strconv.Atoi(s); err == nil {
 		return ":" + s
 	}
 	return s
