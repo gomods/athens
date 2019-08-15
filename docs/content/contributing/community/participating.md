@@ -32,7 +32,7 @@ interested in
 - Submit a [pull request](https://github.com/gomods/athens/pulls) (PR) to fix
 an issue, or to improve something that doesn't have an issue
 - Review a PR that you're interested in
-- Join us at a weekly [development meeting](/contributing/community/developer-meetings/)
+- Join us at [office hours](/contributing/community/office-hours/)
 (or more than one!)
     - See [here](https://www.youtube.com/playlist?list=PLAk08AWjk5sekD-FRjU4VVe97nltUyZ4W) for recordings of all our past meetings
 - Come chat with us in the [gophers slack](https://invite.slack.golangbridge.org/) in the `#athens` channel
