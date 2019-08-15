@@ -68,8 +68,9 @@ func TestNewStorageWithDefaultOverrides(t *testing.T) {
 			require.NoError(t, err)
 			require.Equal(t, test.expDbName, backend.db)
 			require.Equal(t, test.expCollName, backend.coll)
-	 })
- }
+	    })
+    }
+}
   
 func TestMongoConfigVerification(t *testing.T) {
 	testCases := []struct {
