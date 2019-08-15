@@ -36,6 +36,8 @@ func NewStorage(conf *config.MongoConfig, timeout time.Duration) (*ModuleStore, 
 	ms := &ModuleStore{url: conf.URL, certPath: conf.CertPath, timeout: timeout, insecure: conf.InsecureConn}
 	client, err := ms.newClient()
 	ms.client = client
+	ms.db = conf.DefaultDBName
+	ms.coll = conf.DefaultCollectionName
 
 	if err != nil {
 		return nil, errors.E(op, err)
@@ -64,9 +66,13 @@ func (m *ModuleStore) connect(conf *config.MongoConfig) (*mongo.Collection, erro
 }
 
 func (m *ModuleStore) initDatabase() *mongo.Collection {
-	// TODO: database and collection as env vars, or params to New()? together with user/mongo
-	m.db = "athens"
-	m.coll = "modules"
+	if m.db == "" {
+		m.db = "athens"
+	}
+
+	if m.coll == "" {
+		m.coll = "modules"
+	}
 
 	c := m.client.Database(m.db).Collection(m.coll)
 	indexView := c.Indexes()
