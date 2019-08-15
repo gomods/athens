@@ -137,9 +137,9 @@ spec:
         {{- end }}
         {{- if .Values.basicAuth.enabled }}
         - name: BASIC_AUTH_USER
-          value: "{{ default "gomod" .Values.basicAuth.user | quote }}"
+          value: {{ default "gomod" .Values.basicAuth.user | quote }}
         - name: BASIC_AUTH_PASS
-          value: "{{ default "gomod" .Values.basicAuth.password | quote }}"
+          value: {{ default "gomod" .Values.basicAuth.password | quote }}
         {{- end }}
         ports:
         - containerPort: 3000
