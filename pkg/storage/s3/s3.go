@@ -77,8 +77,5 @@ func New(s3Conf *config.S3Config, timeout time.Duration, options ...func(*aws.Co
 }
 
 func endpointFrom(credentialsEndpoint string, relativeURI string) string {
-	if relativeURI == "" {
-		return credentialsEndpoint
-	}
 	return credentialsEndpoint + relativeURI
 }
