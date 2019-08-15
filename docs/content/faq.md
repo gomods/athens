@@ -90,6 +90,8 @@ Which currently includes:
 
 ### When should I use a vendor directory, and when should I use Athens?
 
+The Go community has used vendor directories for a long time before module proxies like Athens came along, so naturally each group collaborating on code should decide for themselves whether they want to use a vendor directory, not use a vendor directory and just use Athens, or do both!
+
 Vendor (without a proxy) valuable when:
 
 - CI/CD systems don't have access to an Athens (even if it's internal)
