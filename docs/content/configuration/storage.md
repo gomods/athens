@@ -141,6 +141,7 @@ After this you can pass your credentials inside `config.toml` file.  If the acce
         Secret = "MY_AWS_SECRET_ACCESS_KEY"
 
         # Session Token for S3 storage
+        # Not required parameter
         # Env override: AWS_SESSION_TOKEN
         Token = ""
 
