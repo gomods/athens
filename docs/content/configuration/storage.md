@@ -114,6 +114,12 @@ After this you can pass your credentials inside `config.toml` file.  If the acce
 
 ##### Configuration:
 
+    # StorageType sets the type of storage backend the proxy will use.
+    # Env override: ATHENS_STORAGE_TYPE
+    StorageType = "s3"
+    
+    [Storage]
+        [Storage.S3]
         ### The authentication model is as below for S3 in the following order
         ### If AWS_CREDENTIALS_ENDPOINT is specified and it returns valid results, then it is used
         ### If config variables are specified and they are valid, then they return valid results, then it is used
