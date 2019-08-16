@@ -90,19 +90,23 @@ Which currently includes:
 
 ### When should I use a vendor directory, and when should I use Athens?
 
-The Go community has used vendor directories for a long time before module proxies like Athens came along, so naturally each group collaborating on code should decide for themselves whether they want to use a vendor directory, not use a vendor directory and just use Athens, or do both!
+The Go community has used vendor directories for a long time before module proxies like Athens came along, so naturally each group collaborating on code should decide for themselves whether they want to use a vendor directory, use Athens, or do both!
 
-Vendor (without a proxy) valuable when:
+Vendor (without a proxy) are valuable when:
 
 - CI/CD systems don't have access to an Athens (even if it's internal)
-- When vendor is so small, it's still faster to check it out from your repo than it is to pull zip files from the server
-- If you're coming from glide/dep or another "older" dependency management system that leveraged the vendor directory
+- When the vendor directory is so small that it is still faster to check it out from a repo than it is to pull zip files from the server
+- If you're coming from glide/dep or another dependency management system that leveraged the vendor directory
 
 Athens valuable when:
 
 - You have a new project
-- You want to, or your system admin / CTO / etc.. requires, that you use Athens (i.e. for isolation or dependency auditing)
-- Your vendor checkout speeds are getting "slow" (for some value of slow, IDK) and downloading from Athens speeds the build up
+- Your team requires that you use Athens (i.e. for isolation or dependency auditing)
+- Your vendor directory is large and causing slow checkouts and downloading from Athens speeds the build up
+  - For developers slow checkouts will not be as much of a problem as for ci tools which frequently need to checkout fresh copies of the project
+- You do not want to pollute your project with the vendor directory
+  - Extra noise in pull requests
+  - Extra difficulty doing fuzzy file searching in your project
 
 It was a combination of the following:
 
