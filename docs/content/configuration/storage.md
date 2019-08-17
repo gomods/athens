@@ -119,62 +119,62 @@ After this you can pass your credentials inside `config.toml` file.  If the acce
     StorageType = "s3"
     
     [Storage]
-        [Storage.S3]
-        ### The authentication model is as below for S3 in the following order
-        ### If AWS_CREDENTIALS_ENDPOINT is specified and it returns valid results, then it is used
-        ### If config variables are specified and they are valid, then they return valid results, then it is used
-        ### Otherwise, it will default to default configurations which is as follows
-        # attempt to find credentials in the environment, in the shared
-        # configuration (~/.aws/credentials) and from ec2 instance role
-        # credentials. See
-        # https://godoc.org/github.com/aws/aws-sdk-go#hdr-Configuring_Credentials
-        # and
-        # https://godoc.org/github.com/aws/aws-sdk-go/aws/session#hdr-Environment_Variables
-        # for environment variables that will affect the aws configuration.
-        # Setting UseDefaultConfiguration would only use default configuration. It will be deprecated in future releases 
-        # and is recommended not to use it.
-
-        # Region for S3 storage
-        # Env override: AWS_REGION
-        Region = "MY_AWS_REGION"
-
-        # Access Key for S3 storage
-        # Env override: AWS_ACCESS_KEY_ID
-        Key = "MY_AWS_ACCESS_KEY_ID"
-
-        # Secret Key for S3 storage
-        # Env override: AWS_SECRET_ACCESS_KEY
-        Secret = "MY_AWS_SECRET_ACCESS_KEY"
-
-        # Session Token for S3 storage
-        # Not required parameter
-        # Env override: AWS_SESSION_TOKEN
-        Token = ""
-
-        # S3 Bucket to use for storage
-        # Env override: ATHENS_S3_BUCKET_NAME
-        Bucket = "MY_S3_BUCKET_NAME"
-
-        # If true then the default aws configuration will be used. This will
-        # attempt to find credentials in the environment, in the shared
-        # configuration (~/.aws/credentials) and from ec2 instance role
-        # credentials. See
-        # https://godoc.org/github.com/aws/aws-sdk-go#hdr-Configuring_Credentials
-        # and
-        # https://godoc.org/github.com/aws/aws-sdk-go/aws/session#hdr-Environment_Variables
-        # for environment variables that will affect the aws configuration.
-        # Env override: AWS_USE_DEFAULT_CONFIGURATION
-        UseDefaultConfiguration = false
-
-        # https://docs.aws.amazon.com/sdk-for-go/api/aws/credentials/endpointcreds/
-        # Note that this the URI should not end with / when AwsContainerCredentialsRelativeURI is set
-        # Env override: AWS_CREDENTIALS_ENDPOINT
-        CredentialsEndpoint = ""
-
-        # conainer relative url (used by AWS Fargate) /v2/....
-        # If this is present, it will concatenate to CredentialsEndpoint
-        # Env override: AWS_CONTAINER_CREDENTIALS_RELATIVE_URI
-        AwsContainerCredentialsRelativeURI = ""
+            [Storage.S3]
+            ### The authentication model is as below for S3 in the following order
+            ### If AWS_CREDENTIALS_ENDPOINT is specified and it returns valid results, then it is used
+            ### If config variables are specified and they are valid, then they return valid results, then it is used
+            ### Otherwise, it will default to default configurations which is as follows
+            # attempt to find credentials in the environment, in the shared
+            # configuration (~/.aws/credentials) and from ec2 instance role
+            # credentials. See
+            # https://godoc.org/github.com/aws/aws-sdk-go#hdr-Configuring_Credentials
+            # and
+            # https://godoc.org/github.com/aws/aws-sdk-go/aws/session#hdr-Environment_Variables
+            # for environment variables that will affect the aws configuration.
+            # Setting UseDefaultConfiguration would only use default configuration. It will be deprecated in future releases 
+            # and is recommended not to use it.
+    
+            # Region for S3 storage
+            # Env override: AWS_REGION
+            Region = "MY_AWS_REGION"
+    
+            # Access Key for S3 storage
+            # Env override: AWS_ACCESS_KEY_ID
+            Key = "MY_AWS_ACCESS_KEY_ID"
+    
+            # Secret Key for S3 storage
+            # Env override: AWS_SECRET_ACCESS_KEY
+            Secret = "MY_AWS_SECRET_ACCESS_KEY"
+    
+            # Session Token for S3 storage
+            # Not required parameter
+            # Env override: AWS_SESSION_TOKEN
+            Token = ""
+    
+            # S3 Bucket to use for storage
+            # Env override: ATHENS_S3_BUCKET_NAME
+            Bucket = "MY_S3_BUCKET_NAME"
+    
+            # If true then the default aws configuration will be used. This will
+            # attempt to find credentials in the environment, in the shared
+            # configuration (~/.aws/credentials) and from ec2 instance role
+            # credentials. See
+            # https://godoc.org/github.com/aws/aws-sdk-go#hdr-Configuring_Credentials
+            # and
+            # https://godoc.org/github.com/aws/aws-sdk-go/aws/session#hdr-Environment_Variables
+            # for environment variables that will affect the aws configuration.
+            # Env override: AWS_USE_DEFAULT_CONFIGURATION
+            UseDefaultConfiguration = false
+    
+            # https://docs.aws.amazon.com/sdk-for-go/api/aws/credentials/endpointcreds/
+            # Note that this the URI should not end with / when AwsContainerCredentialsRelativeURI is set
+            # Env override: AWS_CREDENTIALS_ENDPOINT
+            CredentialsEndpoint = ""
+    
+            # conainer relative url (used by AWS Fargate) /v2/....
+            # If this is present, it will concatenate to CredentialsEndpoint
+            # Env override: AWS_CONTAINER_CREDENTIALS_RELATIVE_URI
+            AwsContainerCredentialsRelativeURI = ""
 
 ## Minio
 
