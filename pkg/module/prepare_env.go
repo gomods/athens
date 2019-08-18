@@ -23,6 +23,7 @@ func prepareEnv(gopath, goProxy string) []string {
 	gopathEnv := fmt.Sprintf("GOPATH=%s", gopath)
 	goProxyEnv := fmt.Sprintf("GOPROXY=%s", goProxy)
 	cacheEnv := fmt.Sprintf("GOCACHE=%s", filepath.Join(gopath, "cache"))
+	goRoot := fmt.Sprintf("GOROOT=%s", os.Getenv("GOROOT"))
 	gitSSH := fmt.Sprintf("GIT_SSH=%s", os.Getenv("GIT_SSH"))
 	gitSSHCmd := fmt.Sprintf("GIT_SSH_COMMAND=%s", os.Getenv("GIT_SSH_COMMAND"))
 	disableCgo := "CGO_ENABLED=0"
@@ -31,6 +32,7 @@ func prepareEnv(gopath, goProxy string) []string {
 		pathEnv,
 		homeEnv,
 		gopathEnv,
+		goRoot,
 		goProxyEnv,
 		cacheEnv,
 		disableCgo,
