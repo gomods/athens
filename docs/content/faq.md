@@ -74,4 +74,16 @@ To try out tracing with Jaeger, do the following:
 - Run the walkthrough tutorial
 - Open `http://localhost:16686/search`
 
-Observability is not a hard requirement for the Athens proxy. So, if the infrastructure is not properly set up, it will fail with an information log. For example, if Jaeger is not running or if the wrong URL to the exporter is provided, the proxy will continue to run. However, it will not collect any traces or metrics while the exporter backend is unavailable.
+    Observability is not a hard requirement for the Athens proxy. So, if the infrastructure is not properly set up, it will fail with an information log. For example, if Jaeger is not running or if the wrong URL to the exporter is provided, the proxy will continue to run. However, it will not collect any traces or metrics while the exporter backend is unavailable.
+
+### What VCS servers does Athens support?
+
+Athens uses `go mod download` under the hood, so it supports anything `go mod` suppports.
+
+Which currently includes:
+
+- git
+- svn
+- hg
+- bzr
+- fossil
