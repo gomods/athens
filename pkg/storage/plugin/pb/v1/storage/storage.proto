@@ -1,0 +1,79 @@
+syntax = "proto3";
+
+package athens.v1.storage;
+
+option go_package = "github.com/gomods/athens/pkg/storage/plugin/pb/v1/storage;stpb";
+
+// ListRequest gives a module name to get list of versions in storage.
+message ListRequest {
+ string module  = 1;
+}
+
+// ListResponse gives a list of versions for the given module.
+message ListResponse {
+ repeated string versions       = 1;
+}
+
+// GetModuleRequest defines a module and a version to fetch from storage.
+message GetModuleRequest {
+  string module         = 1;
+  string version        = 2;
+}
+
+// GetModuleResponse hold all or part of the requested file.
+message GetModuleResponse {
+ bytes data     = 1;
+}
+
+// ExistsRequest gives a module to check for in storage.
+message ExistsRequest {
+  string module         = 1;
+  string version        = 2;
+}
+
+// ExistsResponse reports if the module version exists in storage.
+message ExistsResponse {
+  bool exists   = 1;
+}
+
+// SaveRequest gives a module definition and resources for saving a file to storage.
+message SaveRequest {
+  message Module {
+    string module       = 1;
+    string version      = 2;
+    bytes mod           = 3;
+    bytes info          = 4;
+  }
+  Module mod_definition = 1; // first message only
+
+  bytes zip             = 2;
+}
+
+// SaveResponse reports the success of saving to storage.
+message SaveResponse {}
+
+// DeleteRequest gives a module definition to be removed from storage.
+message DeleteRequest {
+  string module         = 1;
+  string version        = 2;
+}
+
+// DeleteResponse reports the success of deleting from storage.
+message DeleteResponse {}
+
+// StorageBackendService provides an api for interacting with module storage backend.
+service StorageBackendService {
+  rpc List(ListRequest) returns (ListResponse);
+  
+  rpc GetInfo(GetModuleRequest) returns (GetModuleResponse);
+
+  rpc GetMod(GetModuleRequest) returns (GetModuleResponse);
+
+  rpc GetZip(GetModuleRequest) returns (stream GetModuleResponse);
+
+  rpc Exists(ExistsRequest) returns (ExistsResponse);
+
+  rpc Save(stream SaveRequest) returns (SaveResponse);
+
+  rpc Delete(DeleteRequest) returns (DeleteResponse);
+}
