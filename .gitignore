@@ -19,11 +19,12 @@ tmp/*
 vgp
 bin/*
 .envrc
+athens
 cmd/proxy/proxy
+cmd/proxy/bin
 test-keys.json
 tmp
 .vs
-cmd/proxy/bin
 .idea
 .DS_Store
 .vscode

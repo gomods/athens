@@ -4,8 +4,12 @@ DATE=$(shell date -u +%Y-%m-%d-%H:%M:%S-%Z)
 build: ## build the athens proxy
 	cd cmd/proxy && go build
 
+.PHONY: build-ver
 build-ver: ## build the athens proxy with version number
 	GO111MODULE=on CGO_ENABLED=0 GOPROXY="https://proxy.golang.org" go build -ldflags "-X github.com/gomods/athens/pkg/build.version=$(VERSION) -X github.com/gomods/athens/pkg/build.buildDate=$(DATE)" -o athens ./cmd/proxy
+
+athens:
+	$(MAKE) build-ver
 
 # The build-image step creates a docker image that has all the tools required
 # to perform some CI build steps, instead of relying on them being installed locally
@@ -101,6 +105,10 @@ down:
 .PHONY: dev-teardown
 dev-teardown:
 	docker-compose -p athensdev down -v
+
+.PHONY: clean
+clean: ## delete all locally-built artefacts (not including docker images)
+	rm -f athens cmd/proxy/proxy
 
 .PHONY: help
 help: ## display help page
