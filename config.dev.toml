@@ -67,6 +67,14 @@ PprofPort = ":3001"
 # that contains the letter `D` (for "Direct Access") in the first line.
 FilterFile = ""
 
+# The filename for the robots.txt.
+# ENV override: ATHENS_ROBOTS_FILE
+#
+# To provide /robots.txt for net crawler.
+# Default is empty, will return 404.
+# Content details to see https://support.google.com/webmasters/answer/6062608
+ROBOTSFILE = ""
+
 # Timeout is the timeout for external network calls in seconds
 # This value is used as the default for storage backends if they don't specify timeouts
 # Defaults to 300
