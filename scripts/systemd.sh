@@ -159,7 +159,7 @@ case $1 in
     ensureSystemdIsPresent; doInstall ;;
 
   remove|uninstall)
-    ensureSystemdIsPresent; dostatusRemove  ;;
+    ensureSystemdIsPresent; doRemove  ;;
 
   status)
     ensureSystemdIsPresent; doStatus  ;;
