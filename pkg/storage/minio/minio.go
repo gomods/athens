@@ -42,7 +42,10 @@ func NewStorage(conf *config.MinioConfig, timeout time.Duration) (storage.Backen
 	err = minioClient.MakeBucket(bucketName, region)
 	if err != nil {
 		// Check to see if we already own this bucket
-		exists, _ := minioClient.BucketExists(bucketName)
+		exists, err := minioClient.BucketExists(bucketName)
+		if err != nil {
+			return nil, errors.E(op, err)
+		}
 		if !exists {
 			// MakeBucket Error takes priority
 			return nil, errors.E(op, err)
