@@ -55,8 +55,11 @@ func RegisterHandlers(r *mux.Router, opts *HandlerOpts) {
 	r.Handle(PathVersionZip, LogEntryHandler(ZipHandler, opts)).Methods(http.MethodGet)
 }
 
-func getRedirectURL(base, path string) string {
-	url, _ := url.Parse(base)
+func getRedirectURL(base, path string) (string, error) {
+	url, err := url.Parse(base)
+	if err != nil {
+		return "", err
+	}
 	url.Path = path
-	return url.String()
+	return url.String(), nil
 }
