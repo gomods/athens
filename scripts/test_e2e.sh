@@ -2,7 +2,7 @@
 
 # test_e2e.sh
 # Execute end-to-end (e2e) tests to verify that everything is working right
-# from the end user perpsective
+# from the end user perspective
 set -xeuo pipefail
 
 REPO_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )/.."
