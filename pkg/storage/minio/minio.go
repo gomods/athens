@@ -31,6 +31,9 @@ func NewStorage(conf *config.MinioConfig, timeout time.Duration) (storage.Backen
 	region := conf.Region
 	useSSL := conf.EnableSSL
 	minioCore, err := minio.NewCore(endpoint, accessKeyID, secretAccessKey, useSSL)
+	if err != nil {
+		return nil, errors.E(op, err)
+	}
 	minioClient, err := minio.New(endpoint, accessKeyID, secretAccessKey, useSSL)
 	if err != nil {
 		return nil, errors.E(op, err)
