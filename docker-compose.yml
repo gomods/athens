@@ -17,6 +17,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.test
+      args:
+        GOLANG_VERSION: latest
     command: ["./scripts/test_unit.sh"]
     environment:
       - GO_ENV=test
@@ -31,6 +33,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.test
+      args:
+        GOLANG_VERSION: latest
     command: ["./scripts/test_e2e.sh"]
   azurite:
     image: arafato/azurite:2.6.5

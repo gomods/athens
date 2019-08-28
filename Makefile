@@ -1,5 +1,10 @@
 VERSION = "unset"
 DATE=$(shell date -u +%Y-%m-%d-%H:%M:%S-%Z)
+
+ifndef GOLANG_VERSION
+override GOLANG_VERSION = latest
+endif
+
 .PHONY: build
 build: ## build the athens proxy
 	cd cmd/proxy && go build
@@ -47,7 +52,8 @@ test-unit: ## run unit tests with race detector and code coverage enabled
 
 .PHONY: test-unit-docker
 test-unit-docker: ## run unit tests with docker
-	docker-compose -p athensunit up --exit-code-from=testunit --build testunit
+	docker-compose -p athensunit build --build-arg GOLANG_VERSION=${GOLANG_VERSION} testunit	
+	docker-compose -p athensunit up --exit-code-from=testunit testunit
 	docker-compose -p athensunit down
 
 .PHONY: test-e2e
@@ -56,7 +62,8 @@ test-e2e:
 
 .PHONY: test-e2e-docker
 test-e2e-docker:
-	docker-compose -p athense2e up --build --exit-code-from=teste2e teste2e
+        docker-compose -p athense2e build --build-arg GOLANG_VERSION=${GOLANG_VERSION} teste2e
+	docker-compose -p athense2e up --exit-code-from=teste2e teste2e
 	docker-compose -p athense2e down
 
 .PHONY: docker
