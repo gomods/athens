@@ -2,7 +2,7 @@ VERSION = "unset"
 DATE=$(shell date -u +%Y-%m-%d-%H:%M:%S-%Z)
 
 ifndef GOLANG_VERSION
-override GOLANG_VERSION = latest
+override GOLANG_VERSION = 1.12
 endif
 
 .PHONY: build
