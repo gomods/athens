@@ -130,7 +130,7 @@ func (c *Config) TLSCertFiles() (cert, key string, err error) {
 	}
 
 	if keyFile.Mode()&077 != 0 && runtime.GOOS != "windows" {
-		return "", "", fmt.Errorf("TLSKeyFile should not be accessable by others")
+		return "", "", fmt.Errorf("TLSKeyFile should not be accessible by others")
 	}
 
 	return certFile.Name(), keyFile.Name(), nil
