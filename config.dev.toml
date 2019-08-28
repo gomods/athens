@@ -386,6 +386,8 @@ SingleFlightType = "memory"
 
         # conainer relative url (used by fargate) /v2/....
         # If this is present, it will concatenate to CredentialsEndpoint
+        # If you are planning to use AWS Fargate, please use http://169.254.170.2 for CredentialsEndpoint
+        # Ref: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-metadata-endpoint-v2.html
         AwsContainerCredentialsRelativeURI = ""
 
    [Storage.AzureBlob]
