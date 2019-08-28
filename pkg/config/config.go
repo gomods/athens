@@ -6,11 +6,13 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"strconv"
 
 	"github.com/BurntSushi/toml"
+	"github.com/gomods/athens/pkg/download/mode"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/kelseyhightower/envconfig"
-	validator "gopkg.in/go-playground/validator.v9"
+	"gopkg.in/go-playground/validator.v9"
 )
 
 const defaultConfigFile = "athens.toml"
@@ -18,32 +20,37 @@ const defaultConfigFile = "athens.toml"
 // Config provides configuration values for all components
 type Config struct {
 	TimeoutConf
-	GoEnv            string   `validate:"required" envconfig:"GO_ENV"`
-	GoBinary         string   `validate:"required" envconfig:"GO_BINARY_PATH"`
-	GoGetWorkers     int      `validate:"required" envconfig:"ATHENS_GOGET_WORKERS"`
-	ProtocolWorkers  int      `validate:"required" envconfig:"ATHENS_PROTOCOL_WORKERS"`
-	LogLevel         string   `validate:"required" envconfig:"ATHENS_LOG_LEVEL"`
-	CloudRuntime     string   `validate:"required" envconfig:"ATHENS_CLOUD_RUNTIME"`
-	FilterFile       string   `envconfig:"ATHENS_FILTER_FILE"`
-	TraceExporterURL string   `envconfig:"ATHENS_TRACE_EXPORTER_URL"`
-	TraceExporter    string   `envconfig:"ATHENS_TRACE_EXPORTER"`
-	StatsExporter    string   `envconfig:"ATHENS_STATS_EXPORTER"`
-	StorageType      string   `validate:"required" envconfig:"ATHENS_STORAGE_TYPE"`
-	GlobalEndpoint   string   `envconfig:"ATHENS_GLOBAL_ENDPOINT"` // This feature is not yet implemented
-	Port             string   `envconfig:"ATHENS_PORT"`
-	BasicAuthUser    string   `envconfig:"BASIC_AUTH_USER"`
-	BasicAuthPass    string   `envconfig:"BASIC_AUTH_PASS"`
-	ForceSSL         bool     `envconfig:"PROXY_FORCE_SSL"`
-	ValidatorHook    string   `envconfig:"ATHENS_PROXY_VALIDATOR"`
-	PathPrefix       string   `envconfig:"ATHENS_PATH_PREFIX"`
-	NETRCPath        string   `envconfig:"ATHENS_NETRC_PATH"`
-	GithubToken      string   `envconfig:"ATHENS_GITHUB_TOKEN"`
-	HGRCPath         string   `envconfig:"ATHENS_HGRC_PATH"`
-	TLSCertFile      string   `envconfig:"ATHENS_TLSCERT_FILE"`
-	TLSKeyFile       string   `envconfig:"ATHENS_TLSKEY_FILE"`
-	SumDBs           []string `envconfig:"ATHENS_SUM_DBS"`
-	NoSumPatterns    []string `envconfig:"ATHENS_GONOSUM_PATTERNS"`
-	SingleFlightType string   `envconfig:"ATHENS_SINGLE_FLIGHT_TYPE"`
+	GoEnv            string    `validate:"required" envconfig:"GO_ENV"`
+	GoBinary         string    `validate:"required" envconfig:"GO_BINARY_PATH"`
+	GoProxy          string    `envconfig:"GOPROXY"`
+	GoGetWorkers     int       `validate:"required" envconfig:"ATHENS_GOGET_WORKERS"`
+	ProtocolWorkers  int       `validate:"required" envconfig:"ATHENS_PROTOCOL_WORKERS"`
+	LogLevel         string    `validate:"required" envconfig:"ATHENS_LOG_LEVEL"`
+	CloudRuntime     string    `validate:"required" envconfig:"ATHENS_CLOUD_RUNTIME"`
+	EnablePprof      bool      `envconfig:"ATHENS_ENABLE_PPROF"`
+	PprofPort        string    `envconfig:"ATHENS_PPROF_PORT"`
+	FilterFile       string    `envconfig:"ATHENS_FILTER_FILE"`
+	TraceExporterURL string    `envconfig:"ATHENS_TRACE_EXPORTER_URL"`
+	TraceExporter    string    `envconfig:"ATHENS_TRACE_EXPORTER"`
+	StatsExporter    string    `envconfig:"ATHENS_STATS_EXPORTER"`
+	StorageType      string    `validate:"required" envconfig:"ATHENS_STORAGE_TYPE"`
+	GlobalEndpoint   string    `envconfig:"ATHENS_GLOBAL_ENDPOINT"` // This feature is not yet implemented
+	Port             string    `envconfig:"ATHENS_PORT"`
+	BasicAuthUser    string    `envconfig:"BASIC_AUTH_USER"`
+	BasicAuthPass    string    `envconfig:"BASIC_AUTH_PASS"`
+	ForceSSL         bool      `envconfig:"PROXY_FORCE_SSL"`
+	ValidatorHook    string    `envconfig:"ATHENS_PROXY_VALIDATOR"`
+	PathPrefix       string    `envconfig:"ATHENS_PATH_PREFIX"`
+	NETRCPath        string    `envconfig:"ATHENS_NETRC_PATH"`
+	GithubToken      string    `envconfig:"ATHENS_GITHUB_TOKEN"`
+	HGRCPath         string    `envconfig:"ATHENS_HGRC_PATH"`
+	TLSCertFile      string    `envconfig:"ATHENS_TLSCERT_FILE"`
+	TLSKeyFile       string    `envconfig:"ATHENS_TLSKEY_FILE"`
+	SumDBs           []string  `envconfig:"ATHENS_SUM_DBS"`
+	NoSumPatterns    []string  `envconfig:"ATHENS_GONOSUM_PATTERNS"`
+	DownloadMode     mode.Mode `envconfig:"ATHENS_DOWNLOAD_MODE"`
+	DownloadURL      string    `envconfig:"ATHENS_DOWNLOAD_URL"`
+	SingleFlightType string    `envconfig:"ATHENS_SINGLE_FLIGHT_TYPE"`
 	SingleFlight     *SingleFlight
 	Storage          *StorageConfig
 }
@@ -71,10 +78,13 @@ func defaultConfig() *Config {
 	return &Config{
 		GoBinary:         "go",
 		GoEnv:            "development",
+		GoProxy:          "direct",
 		GoGetWorkers:     10,
 		ProtocolWorkers:  30,
 		LogLevel:         "debug",
 		CloudRuntime:     "none",
+		EnablePprof:      false,
+		PprofPort:        ":3001",
 		StatsExporter:    "prometheus",
 		TimeoutConf:      TimeoutConf{Timeout: 300},
 		StorageType:      "memory",
@@ -84,6 +94,8 @@ func defaultConfig() *Config {
 		TraceExporterURL: "http://localhost:14268",
 		SumDBs:           []string{"https://sum.golang.org"},
 		NoSumPatterns:    []string{},
+		DownloadMode:     "sync",
+		DownloadURL:      "",
 		SingleFlight: &SingleFlight{
 			Etcd:  &Etcd{"localhost:2379,localhost:22379,localhost:32379"},
 			Redis: &Redis{"127.0.0.1:6379"},
@@ -118,7 +130,7 @@ func (c *Config) TLSCertFiles() (cert, key string, err error) {
 	}
 
 	if keyFile.Mode()&077 != 0 && runtime.GOOS != "windows" {
-		return "", "", fmt.Errorf("TLSKeyFile should not be accessable by others")
+		return "", "", fmt.Errorf("TLSKeyFile should not be accessible by others")
 	}
 
 	return certFile.Name(), keyFile.Name(), nil
@@ -177,10 +189,7 @@ func envOverride(config *Config) error {
 }
 
 func ensurePortFormat(s string) string {
-	if len(s) == 0 {
-		return ""
-	}
-	if s[0] != ':' {
+	if _, err := strconv.Atoi(s); err == nil {
 		return ":" + s
 	}
 	return s

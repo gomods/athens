@@ -1,3 +1,8 @@
+{{- if .Values.ingress.enabled }}
+The Athens can be accessed via URL:
+{{- else }}
+Get the Athens URL by running these commands:
+{{- end }}
 {{- if (and .Values.ingress.enabled .Values.ingress.tls) }}
 {{- range .Values.ingress.hosts }}
   https://{{ . }}

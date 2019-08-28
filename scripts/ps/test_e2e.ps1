@@ -1,5 +1,5 @@
 # Execute end-to-end (e2e) tests to verify that everything is working right
-# from the end user perpsective
+# from the end user perspective
 $repoDir = Join-Path $PSScriptRoot ".." | Join-Path -ChildPath ".."
 if (-not (Test-Path env:GO_BINARY_PATH)) { $env:GO_BINARY_PATH = "go" }
 

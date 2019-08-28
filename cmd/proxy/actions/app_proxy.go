@@ -10,6 +10,7 @@ import (
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/download"
 	"github.com/gomods/athens/pkg/download/addons"
+	"github.com/gomods/athens/pkg/download/mode"
 	"github.com/gomods/athens/pkg/log"
 	"github.com/gomods/athens/pkg/module"
 	"github.com/gomods/athens/pkg/stash"
@@ -72,12 +73,12 @@ func addProxyRoutes(
 	// 3. The stashpool manages limiting concurrent requests and passes them to stash.
 	// 4. The plain stash.New just takes a request from upstream and saves it into storage.
 	fs := afero.NewOsFs()
-	mf, err := module.NewGoGetFetcher(c.GoBinary, fs)
+	mf, err := module.NewGoGetFetcher(c.GoBinary, c.GoProxy, fs)
 	if err != nil {
 		return err
 	}
 
-	lister := download.NewVCSLister(c.GoBinary, fs)
+	lister := module.NewVCSLister(c.GoBinary, c.GoProxy, fs)
 
 	withSingleFlight, err := getSingleFlight(c, s)
 	if err != nil {
@@ -85,14 +86,21 @@ func addProxyRoutes(
 	}
 	st := stash.New(mf, s, stash.WithPool(c.GoGetWorkers), withSingleFlight)
 
-	dpOpts := &download.Opts{
-		Storage: s,
-		Stasher: st,
-		Lister:  lister,
+	df, err := mode.NewFile(c.DownloadMode, c.DownloadURL)
+	if err != nil {
+		return err
 	}
+
+	dpOpts := &download.Opts{
+		Storage:      s,
+		Stasher:      st,
+		Lister:       lister,
+		DownloadFile: df,
+	}
+
 	dp := download.New(dpOpts, addons.WithPool(c.ProtocolWorkers))
 
-	handlerOpts := &download.HandlerOpts{Protocol: dp, Logger: l}
+	handlerOpts := &download.HandlerOpts{Protocol: dp, Logger: l, DownloadFile: df}
 	download.RegisterHandlers(r, handlerOpts)
 
 	return nil

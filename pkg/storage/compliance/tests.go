@@ -25,6 +25,7 @@ func RunTests(t *testing.T, b storage.Backend, clearBackend func() error) {
 	testDelete(t, b)
 	testGet(t, b)
 	testExists(t, b)
+	testShouldNotExist(t, b)
 	testCatalog(t, b)
 }
 
@@ -62,40 +63,42 @@ func testNotFound(t *testing.T, b storage.Backend) {
 func testListSuffix(t *testing.T, b storage.Backend) {
 	ctx := context.Background()
 
-	otherMod := "github.com/one/two-other"
-	mock := getMockModule()
-	err := b.Save(
-		ctx,
-		otherMod,
-		"v0.9.0",
-		mock.Mod,
-		mock.Zip,
-		mock.Info,
-	)
-	require.NoError(t, err, "Save for storage failed")
-	modname := "github.com/one/two"
-	versions := []string{"v1.1.0", "v1.2.0", "v1.3.0"}
-	for _, version := range versions {
-		mock := getMockModule()
-		err := b.Save(
-			ctx,
-			modname,
-			version,
-			mock.Mod,
-			mock.Zip,
-			mock.Info,
-		)
-		require.NoError(t, err, "Save for storage failed")
+	modVers := map[string][]string{
+		"github.com/one/two":       {"v1.1.0", "v1.2.0", "v1.3.0"},
+		"github.com/one/two/v2":    {"v2.1.0"},
+		"github.com/one/two-other": {"v0.9.0"},
+		"github.com/one":           {}, // not a module but a valid query, so no versions
+	}
+	for modname, versions := range modVers {
+		for _, version := range versions {
+			mock := getMockModule()
+			err := b.Save(
+				ctx,
+				modname,
+				version,
+				mock.Mod,
+				mock.Zip,
+				mock.Info,
+			)
+			require.NoError(t, err, "Save for storage failed")
+		}
 	}
 	defer func() {
-		b.Delete(ctx, otherMod, "v0.9.0")
-		for _, ver := range versions {
-			b.Delete(ctx, modname, ver)
+		for modname, versions := range modVers {
+			for _, version := range versions {
+				b.Delete(ctx, modname, version)
+			}
 		}
 	}()
-	retVersions, err := b.List(ctx, modname)
-	require.NoError(t, err)
-	require.Equal(t, versions, retVersions)
+	for modname, versions := range modVers {
+		retVersions, err := b.List(ctx, modname)
+		require.NoError(t, err)
+		if len(versions) == 0 {
+			require.Empty(t, retVersions)
+		} else {
+			require.Equal(t, versions, retVersions)
+		}
+	}
 }
 
 // testList tests that a storage Backend returns
@@ -166,8 +169,26 @@ func testExists(t *testing.T, b storage.Backend) {
 	require.Equal(t, true, exists)
 }
 
+func testShouldNotExist(t *testing.T, b storage.Backend) {
+	ctx := context.Background()
+	mod := "shouldNotExist"
+	ver := "v1.2.3-pre.1"
+	mock := getMockModule()
+	zipBts, _ := ioutil.ReadAll(mock.Zip)
+	err := b.Save(ctx, mod, ver, mock.Mod, bytes.NewReader(zipBts), mock.Info)
+	require.NoError(t, err, "should successfully safe a mock module")
+	defer b.Delete(ctx, mod, ver)
+
+	prefixVer := "v1.2.3-pre"
+	exists, err := b.Exists(ctx, mod, prefixVer)
+	require.NoError(t, err)
+	if exists {
+		t.Fatal("a non existing version that has the same prefix of an existing version should not exist")
+	}
+}
+
 // testDelete tests that a module can be deleted from a
-// storage Backend and the the Exists method returns false
+// storage Backend and the Exists method returns false
 // afterwards.
 func testDelete(t *testing.T, b storage.Backend) {
 	ctx := context.Background()

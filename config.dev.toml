@@ -15,6 +15,13 @@ GoBinary = "go"
 # Env override: GO_ENV
 GoEnv = "development"
 
+# GoProxy specifies GOPROXY env for go list or mod download inside athens
+# which can be configured totally same with GOPROXY of Go Command.
+# Notes that the comma-separated GOPROXY (e.g. <proxy1>,<proxy2>,direct) is only available in Go 1.13 or higher,
+# otherwise only single proxy URL can be set.
+# Env override: GOPROXY
+GoProxy = "direct"
+
 # GoGetWorkers specifies how many times you can concurrently
 # go mod download, this is so that low performance instances
 # can manage go get more sanely and not run out of disk or memory.
@@ -42,6 +49,14 @@ LogLevel = "debug"
 # Currently available options are "GCP", or "none". Defaults to "none"
 # Env override: ATHENS_CLOUD_RUNTIME
 CloudRuntime = "none"
+
+# EnablePprof specifies if the pprof endpoints should be exposed.
+# Note that this option is not meant to be activated forever on a server
+# and should be desactivated once not needed.
+EnablePprof = false
+
+# PprofPort specifies the port on which pprof will be exposed if activated.
+PprofPort = ":3001"
 
 # The filename for the include exclude filter.
 # Env override: ATHENS_FILTER_FILE
@@ -81,7 +96,7 @@ Port = ":3000"
 #
 # To point Athens to an upstream proxy to fetch modules,
 # set GlobalEndpoint to "https://<url_to_upstream>"
-# and also ensure that FilterFile is  set to a fully qualified file name 
+# and also ensure that FilterFile is set to a fully qualified file name 
 # that contains the letter `D` (for "Direct Access") in the first line.
 GlobalEndpoint = "http://localhost:3001"
 
@@ -175,6 +190,31 @@ SumDBs = ["https://sum.golang.org"]
 # Example pattern: NoSumPatterns = ["github.com/mycompany/*"]
 # Env override: ATHENS_GONOSUM_PATTERNS
 NoSumPatterns = []
+
+# DownloadMode defines how Athens behaves when a module@version
+# is not found in storage. There are 4 options:
+# 1. "sync" (default): download the module synchronously and
+# return the results to the client.
+# 2. "async": return 404, but asynchronously store the module
+# in the storage backend.
+# 3. "redirect": return a 301 redirect status to the client
+# with the base URL as the DownloadRedirectURL from below.
+# 4. "async_redirect": same as option number 3 but it will
+# asynchronously store the module to the backend.
+# 5. "none": return 404 if a module is not found and do nothing.
+# 6. "file:<path>": will point to an HCL file that specifies
+# any of the 5 options above based on different import paths.
+# 7. "custom:<base64-encoded-hcl>" is the same as option 6 
+# but the file is fully encoded in the option. This is 
+# useful for using an environment variable in serverless 
+# deployments.
+# Env override: ATHENS_DOWNLOAD_MODE
+DownloadMode = "sync"
+
+# DownloadURL is the URL that will be used if 
+# DownloadMode is set to "redirect" 
+# Env override: ATHENS_DOWNLOAD_URL
+DownloadURL = ""
 
 # SingleFlightType determines what mechanism Athens uses 
 # to manage concurrency flowing into the Athens Backend. 
@@ -288,6 +328,21 @@ SingleFlightType = "memory"
         Insecure = false
 
     [Storage.S3]
+
+        ### The authentication model is as below for S3 in the following order
+        ### If AWS_CREDENTIALS_ENDPOINT is specified and it returns valid results, then it is used
+        ### If config variables are specified and they are valid, then they return valid results, then it is used
+        ### Otherwise, it will default to default configurations which is as follows
+        # attempt to find credentials in the environment, in the shared
+        # configuration (~/.aws/credentials) and from ec2 instance role
+        # credentials. See
+        # https://godoc.org/github.com/aws/aws-sdk-go#hdr-Configuring_Credentials
+        # and
+        # https://godoc.org/github.com/aws/aws-sdk-go/aws/session#hdr-Environment_Variables
+        # for environment variables that will affect the aws configuration.
+        # Setting UseDefaultConfiguration would only use default configuration. It will be deprecated in future releases 
+        # and is recommended not to use it.
+
         # Region for S3 storage
         # Env override: AWS_REGION
         Region = "MY_AWS_REGION"
@@ -317,6 +372,14 @@ SingleFlightType = "memory"
         # https://godoc.org/github.com/aws/aws-sdk-go/aws/session#hdr-Environment_Variables
         # for environment variables that will affect the aws configuration.
         UseDefaultConfiguration = false
+
+        # https://docs.aws.amazon.com/sdk-for-go/api/aws/credentials/endpointcreds/
+        CredentialsEndpoint = ""
+
+        # conainer relative url (used by fargate) /v2/....
+        # If this is present, it will concatenate to CredentialsEndpoint
+        AwsContainerCredentialsRelativeURI = ""
+
    [Storage.AzureBlob]
         # Storage Account name for Azure Blob
         # Env override: ATHENS_AZURE_ACCOUNT_NAME
