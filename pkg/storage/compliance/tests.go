@@ -188,7 +188,7 @@ func testShouldNotExist(t *testing.T, b storage.Backend) {
 }
 
 // testDelete tests that a module can be deleted from a
-// storage Backend and the the Exists method returns false
+// storage Backend and the Exists method returns false
 // afterwards.
 func testDelete(t *testing.T, b storage.Backend) {
 	ctx := context.Background()
