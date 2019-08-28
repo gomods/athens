@@ -376,6 +376,10 @@ SingleFlightType = "memory"
         # https://docs.aws.amazon.com/sdk-for-go/api/aws/credentials/endpointcreds/
         CredentialsEndpoint = ""
 
+        # conainer relative url (used by fargate) /v2/....
+        # If this is present, it will concatenate to CredentialsEndpoint
+        AwsContainerCredentialsRelativeURI = ""
+
    [Storage.AzureBlob]
         # Storage Account name for Azure Blob
         # Env override: ATHENS_AZURE_ACCOUNT_NAME
