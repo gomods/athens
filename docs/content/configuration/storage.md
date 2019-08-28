@@ -171,9 +171,9 @@ After this you can pass your credentials inside `config.toml` file.  If the acce
             # Env override: AWS_CREDENTIALS_ENDPOINT
             CredentialsEndpoint = ""
 
-            # conainer relative url (used by AWS Fargate) /v2/....
-            # If this is present, it will concatenate to CredentialsEndpoint
             # Env override: AWS_CONTAINER_CREDENTIALS_RELATIVE_URI
+            # If you are planning to use AWS Fargate, please use http://169.254.170.2 for CredentialsEndpoint
+            # Ref: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-metadata-endpoint-v2.html
             AwsContainerCredentialsRelativeURI = ""
 
 ## Minio
