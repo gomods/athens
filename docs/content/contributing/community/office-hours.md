@@ -1,6 +1,6 @@
 ---
 title: "Office Hours"
-date: 2018-09-28T10:40:50-07:00
+date: 2019-08-28T10:40:50-07:00
 weight: 3
 ---
 
@@ -8,7 +8,7 @@ Athens developers get together for an hour or so approximately every week on a v
 
 This is a great opportunity for new community members to get more involved with the project in a low-pressure setting. It's also a great setting for existing community members to gain a deeper understanding into the codebase.
 
-We meet at this [zoom](https://zoom.us/) video Chat URL: [https://arschles.com/zoom](https://arschles.com/zoom)
+We meet at this [zoom](https://zoom.us/) video chat URL: [https://arschles.com/zoom](https://arschles.com/zoom)
 
 >**Absolutely everybody is welcome to attend these meetings. You're free to suggest topics to talk about, share your perspective, and participate as little or much as you'd like**.
 >
