@@ -2,7 +2,7 @@
 
 # test_e2e.sh
 # Execute end-to-end (e2e) tests to verify that everything is working right
-# from the end user perpsective
+# from the end user perspective
 set -xeuo pipefail
 
 REPO_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )/.."
@@ -40,7 +40,7 @@ export GO111MODULE=on
 # Start the proxy in the background and wait for it to be ready
 cd $REPO_DIR/cmd/proxy
 pkill athens-proxy || true # cleanup proxy if it is running
-go build -mod=vendor -o athens-proxy && ./athens-proxy &
+go build -o athens-proxy && ./athens-proxy &
 while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' localhost:3000/readyz)" != "200" ]]; do sleep 1; done
 
 # Clone our test repo
