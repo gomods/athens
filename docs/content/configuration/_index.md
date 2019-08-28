@@ -7,6 +7,8 @@ weight: 3
 ## Configuring Athens
 Here we'll cover how to configure the Athens application utilizing various configuration scenarios.
 
+>This section covers some of the more commonly used configuration variables, but there are more! If you want to see all the configuration variables you can set, we've documented them all in [this configuration file](https://github.com/gomods/athens/blob/master/config.dev.toml).
+
 ### Authentication
 There are numerous version control systems available to us as developers.  In this section we'll outline how they can be used by supplying required credentials in various formats for the Athens project.
 
