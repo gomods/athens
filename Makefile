@@ -62,7 +62,7 @@ test-e2e:
 
 .PHONY: test-e2e-docker
 test-e2e-docker:
-        docker-compose -p athense2e build --build-arg GOLANG_VERSION=${GOLANG_VERSION} teste2e
+	docker-compose -p athense2e build --build-arg GOLANG_VERSION=${GOLANG_VERSION} teste2e
 	docker-compose -p athense2e up --exit-code-from=teste2e teste2e
 	docker-compose -p athense2e down
 
