@@ -21,7 +21,8 @@ import (
 // is done synchronously so that only the first module gets saved.
 func TestWithAzureBlob(t *testing.T) {
 	containerName := randomContainerName(os.Getenv("DRONE_PULL_REQUEST"))
-	cfg := getAzureTestConfig(containerName)
+
+	cfg := getAzureTestConfig(t, containerName)
 	if cfg == nil {
 		t.SkipNow()
 	}
@@ -84,13 +85,15 @@ func (ms *mockAzureBlobStasher) Stash(ctx context.Context, mod, ver string) (str
 	return "", fmt.Errorf("second time error")
 }
 
-func getAzureTestConfig(containerName string) *config.AzureBlobConfig {
+func getAzureTestConfig(t *testing.T, containerName string) *config.AzureBlobConfig {
 	key := os.Getenv("ATHENS_AZURE_ACCOUNT_KEY")
 	if key == "" {
+		t.Log("ATHENS_AZURE_ACCOUNT_KEY not provided.")
 		return nil
 	}
 	name := os.Getenv("AZURE_ACCOUNT_NAME")
 	if name == "" {
+		t.Log("AZURE_ACCOUNT_NAME not provided.")
 		return nil
 	}
 	return &config.AzureBlobConfig{
