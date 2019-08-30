@@ -5,6 +5,8 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
+	"github.com/aws/aws-sdk-go/aws/credentials/endpointcreds"
+	"github.com/aws/aws-sdk-go/aws/defaults"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3/s3iface"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
@@ -32,22 +34,38 @@ type Storage struct {
 func New(s3Conf *config.S3Config, timeout time.Duration, options ...func(*aws.Config)) (*Storage, error) {
 	const op errors.Op = "s3.New"
 
-	creds := buildAWSCredentials(s3Conf)
-
-	awsConfig := &aws.Config{
-		Credentials: creds,
-		Region:      aws.String(s3Conf.Region),
-	}
-
+	awsConfig := defaults.Config()
+	awsConfig.Region = aws.String(s3Conf.Region)
 	for _, o := range options {
 		o(awsConfig)
 	}
 
-	// create a session
+	credProviders := defaults.CredProviders(awsConfig, defaults.Handlers())
+
+	if !s3Conf.UseDefaultConfiguration {
+		endpointcreds := []credentials.Provider{
+			endpointcreds.NewProviderClient(*awsConfig, defaults.Handlers(), endpointFrom(s3Conf.CredentialsEndpoint, s3Conf.AwsContainerCredentialsRelativeURI)),
+			&credentials.StaticProvider{
+				Value: credentials.Value{
+					AccessKeyID:     s3Conf.Key,
+					SecretAccessKey: s3Conf.Secret,
+					SessionToken:    s3Conf.Token,
+				},
+			},
+		}
+
+		credProviders = append(endpointcreds, credProviders...)
+	}
+
+	awsConfig.Credentials = credentials.NewChainCredentials(credProviders)
+	awsConfig.CredentialsChainVerboseErrors = aws.Bool(true)
+
+	// create a session with creds
 	sess, err := session.NewSession(awsConfig)
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
+
 	uploader := s3manager.NewUploader(sess)
 
 	return &Storage{
@@ -58,20 +76,6 @@ func New(s3Conf *config.S3Config, timeout time.Duration, options ...func(*aws.Co
 	}, nil
 }
 
-// buildAWSCredentials builds the credentials required to create a new AWS
-// session.  It will prefer the access key ID and secret access key if specified
-// in the S3Config unless UseDefaultConfiguration is true. If the key ID and
-// secret access key are unspecified or UseDefaultConfiguration is true, then
-// the default aws configuration will be used. This will attempt to find
-// credentials in the environment, in the shared configuration
-// (~/.aws/credentials) and from ec2 instance role credentials. See
-// https://godoc.org/github.com/aws/aws-sdk-go#hdr-Configuring_Credentials and
-// https://godoc.org/github.com/aws/aws-sdk-go/aws/session#hdr-Environment_Variables
-// for environment variables that will affect the aws configuration.
-func buildAWSCredentials(s3Conf *config.S3Config) *credentials.Credentials {
-	if !s3Conf.UseDefaultConfiguration && s3Conf.Key != "" && s3Conf.Secret != "" {
-		return credentials.NewStaticCredentials(s3Conf.Key, s3Conf.Secret, s3Conf.Token)
-	}
-
-	return nil
+func endpointFrom(credentialsEndpoint string, relativeURI string) string {
+	return credentialsEndpoint + relativeURI
 }

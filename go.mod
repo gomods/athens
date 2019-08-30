@@ -5,7 +5,7 @@ go 1.12
 require (
 	cloud.google.com/go v0.26.0
 	contrib.go.opencensus.io/exporter/stackdriver v0.6.0
-	github.com/Azure/azure-storage-blob-go v0.0.0-20181022225951-5152f14ace1c
+	github.com/Azure/azure-storage-blob-go v0.7.0
 	github.com/BurntSushi/toml v0.3.1
 	github.com/DataDog/datadog-go v0.0.0-20180822151419-281ae9f2d895 // indirect
 	github.com/DataDog/opencensus-go-exporter-datadog v0.0.0-20180917103902-e6c7f767dc57
@@ -50,6 +50,7 @@ require (
 	go.etcd.io/etcd v0.0.0-20190215181705-784daa04988c
 	go.mongodb.org/mongo-driver v1.0.0
 	go.opencensus.io v0.17.0
+	golang.org/x/mod v0.1.0
 	golang.org/x/oauth2 v0.0.0-20180620175406-ef147856a6dd
 	golang.org/x/sync v0.0.0-20190423024810-112230192c58
 	google.golang.org/api v0.0.0-20180910000450-7ca32eb868bf

@@ -6,12 +6,13 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"strconv"
 
 	"github.com/BurntSushi/toml"
 	"github.com/gomods/athens/pkg/download/mode"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/kelseyhightower/envconfig"
-	validator "gopkg.in/go-playground/validator.v9"
+	"gopkg.in/go-playground/validator.v9"
 )
 
 const defaultConfigFile = "athens.toml"
@@ -21,6 +22,7 @@ type Config struct {
 	TimeoutConf
 	GoEnv            string    `validate:"required" envconfig:"GO_ENV"`
 	GoBinary         string    `validate:"required" envconfig:"GO_BINARY_PATH"`
+	GoProxy          string    `envconfig:"GOPROXY"`
 	GoGetWorkers     int       `validate:"required" envconfig:"ATHENS_GOGET_WORKERS"`
 	ProtocolWorkers  int       `validate:"required" envconfig:"ATHENS_PROTOCOL_WORKERS"`
 	LogLevel         string    `validate:"required" envconfig:"ATHENS_LOG_LEVEL"`
@@ -76,6 +78,7 @@ func defaultConfig() *Config {
 	return &Config{
 		GoBinary:         "go",
 		GoEnv:            "development",
+		GoProxy:          "direct",
 		GoGetWorkers:     10,
 		ProtocolWorkers:  30,
 		LogLevel:         "debug",
@@ -127,7 +130,7 @@ func (c *Config) TLSCertFiles() (cert, key string, err error) {
 	}
 
 	if keyFile.Mode()&077 != 0 && runtime.GOOS != "windows" {
-		return "", "", fmt.Errorf("TLSKeyFile should not be accessable by others")
+		return "", "", fmt.Errorf("TLSKeyFile should not be accessible by others")
 	}
 
 	return certFile.Name(), keyFile.Name(), nil
@@ -186,10 +189,7 @@ func envOverride(config *Config) error {
 }
 
 func ensurePortFormat(s string) string {
-	if len(s) == 0 {
-		return ""
-	}
-	if s[0] != ':' {
+	if _, err := strconv.Atoi(s); err == nil {
 		return ":" + s
 	}
 	return s
