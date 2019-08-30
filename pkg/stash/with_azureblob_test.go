@@ -91,7 +91,7 @@ func getAzureTestConfig(t *testing.T, containerName string) *config.AzureBlobCon
 		t.Log("ATHENS_AZURE_ACCOUNT_KEY not provided.")
 		return nil
 	}
-	name := os.Getenv("AZURE_ACCOUNT_NAME")
+	name := "athens" //os.Getenv("AZURE_ACCOUNT_NAME")
 	if name == "" {
 		t.Log("AZURE_ACCOUNT_NAME not provided.")
 		return nil
