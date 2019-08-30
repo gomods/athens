@@ -89,7 +89,7 @@ func getAzureTestConfig(containerName string) *config.AzureBlobConfig {
 	if key == "" {
 		return nil
 	}
-	name := os.Getenv("ATHENS_AZURE_ACCOUNT_NAME")
+	name := os.Getenv("AZURE_ACCOUNT_NAME")
 	if name == "" {
 		return nil
 	}
