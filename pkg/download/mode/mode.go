@@ -2,6 +2,7 @@ package mode
 
 import (
 	"encoding/base64"
+	e "errors"
 	"fmt"
 	"io/ioutil"
 	"path"
@@ -18,12 +19,16 @@ type Mode string
 
 // DownloadMode constants. For more information see config.dev.toml
 const (
-	Sync          Mode = "sync"
-	Async         Mode = "async"
-	Redirect      Mode = "redirect"
-	AsyncRedirect Mode = "async_redirect"
-	None          Mode = "none"
+	Sync           Mode = "sync"
+	Async          Mode = "async"
+	Redirect       Mode = "redirect"
+	AsyncRedirect  Mode = "async_redirect"
+	None           Mode = "none"
+	invalidModeErr      = "unrecognized download mode: %s"
 )
+
+// ErrNoDownloadMode is returned if the specified mode is empty string
+var ErrNoDownloadMode = e.New("download mode is not set")
 
 // DownloadFile represents a custom HCL format of
 // how to handle module@version requests that are
@@ -64,11 +69,16 @@ func NewFile(m Mode, downloadURL string) (*DownloadFile, error) {
 		}
 		return parseFile(bts)
 	}
+
+	if m == "" {
+		return nil, errors.E(op, ErrNoDownloadMode)
+	}
+
 	switch m {
 	case Sync, Async, Redirect, AsyncRedirect, None:
 		return &DownloadFile{Mode: m, DownloadURL: downloadURL}, nil
 	default:
-		return nil, errors.E(op, "unrecognized download mode: "+m, errors.KindBadRequest)
+		return nil, errors.E(op, fmt.Sprintf(invalidModeErr, m))
 	}
 }
 

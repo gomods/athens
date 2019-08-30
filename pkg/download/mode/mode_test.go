@@ -1,6 +1,7 @@
 package mode
 
 import (
+	"fmt"
 	"testing"
 )
 
@@ -90,6 +91,33 @@ func TestMode(t *testing.T) {
 			givenURL := tc.file.URL(tc.input)
 			if givenURL != tc.expectedURL {
 				t.Fatalf("expected matched DownloadURL to be %q but got %q", tc.expectedURL, givenURL)
+			}
+		})
+	}
+}
+
+func TestNewFile_err(t *testing.T) {
+	tc := []struct {
+		name     string
+		mode     Mode
+		expected string
+	}{
+		{
+			name:     "empty mode",
+			mode:     "",
+			expected: ErrNoDownloadMode.Error(),
+		},
+		{
+			name:     "invalid mode",
+			mode:     "invalidMode",
+			expected: fmt.Sprintf(invalidModeErr, "invalidMode"),
+		},
+	}
+	for _, c := range tc {
+		t.Run(c.name, func(subT *testing.T) {
+			_, err := NewFile(c.mode, "github.com/gomods/athens")
+			if err.Error() != c.expected {
+				t.Fatalf("expected error %s from NewFile, got %s", c.expected, err.Error())
 			}
 		})
 	}
