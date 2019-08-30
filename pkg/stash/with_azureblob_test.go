@@ -105,7 +105,7 @@ func randomContainerName(prefix string) string {
 	// see https://github.com/technosophos/moniker for more details
 	namer := moniker.New()
 	if prefix != "" {
-		return fmt.Sprintf("%s_%s", prefix, namer.NameSep(""))
+		return fmt.Sprintf("%s-%s", prefix, namer.NameSep(""))
 	}
 	return namer.NameSep("")
 }
