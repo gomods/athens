@@ -105,7 +105,7 @@ func TestNewFile_err(t *testing.T) {
 		{
 			name:     "empty mode",
 			mode:     "",
-			expected: ErrNoDownloadMode.Error(),
+			expected: downloadModeErr,
 		},
 		{
 			name:     "invalid mode",
