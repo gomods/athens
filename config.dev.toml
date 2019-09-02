@@ -71,9 +71,9 @@ FilterFile = ""
 # ENV override: ATHENS_ROBOTS_FILE
 #
 # To provide /robots.txt for net crawler.
-# Default is empty, will return 404.
+# Default disallow all crawler.
 # Content details to see https://support.google.com/webmasters/answer/6062608
-ROBOTSFILE = ""
+RobotsFile = "robots.txt"
 
 # Timeout is the timeout for external network calls in seconds
 # This value is used as the default for storage backends if they don't specify timeouts
