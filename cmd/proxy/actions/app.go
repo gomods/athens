@@ -136,6 +136,12 @@ func App(conf *config.Config) (http.Handler, error) {
 		return nil, err
 	}
 
+	// TODO:
+	//
+	// - Probably create a new subrouter, similar to proxyRouter
+	// - Put this behind a config flag
+	addWebhooks(proxyRouter, store, lggr, conf)
+
 	h := &ochttp.Handler{
 		Handler: r,
 	}
