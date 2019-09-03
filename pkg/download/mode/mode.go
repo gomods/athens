@@ -18,11 +18,13 @@ type Mode string
 
 // DownloadMode constants. For more information see config.dev.toml
 const (
-	Sync          Mode = "sync"
-	Async         Mode = "async"
-	Redirect      Mode = "redirect"
-	AsyncRedirect Mode = "async_redirect"
-	None          Mode = "none"
+	Sync            Mode = "sync"
+	Async           Mode = "async"
+	Redirect        Mode = "redirect"
+	AsyncRedirect   Mode = "async_redirect"
+	None            Mode = "none"
+	downloadModeErr      = "download mode is not set"
+	invalidModeErr       = "unrecognized download mode: %s"
 )
 
 // DownloadFile represents a custom HCL format of
@@ -50,6 +52,11 @@ type DownloadPath struct {
 // directly.
 func NewFile(m Mode, downloadURL string) (*DownloadFile, error) {
 	const op errors.Op = "downloadMode.NewFile"
+
+	if m == "" {
+		return nil, errors.E(op, downloadModeErr)
+	}
+
 	if strings.HasPrefix(string(m), "file:") {
 		filePath := string(m[5:])
 		bts, err := ioutil.ReadFile(filePath)
@@ -64,11 +71,12 @@ func NewFile(m Mode, downloadURL string) (*DownloadFile, error) {
 		}
 		return parseFile(bts)
 	}
+
 	switch m {
 	case Sync, Async, Redirect, AsyncRedirect, None:
 		return &DownloadFile{Mode: m, DownloadURL: downloadURL}, nil
 	default:
-		return nil, errors.E(op, "unrecognized download mode: "+m, errors.KindBadRequest)
+		return nil, errors.E(op, errors.KindBadRequest, fmt.Sprintf(invalidModeErr, m))
 	}
 }
 
