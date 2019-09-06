@@ -72,6 +72,7 @@ func TestEnvOverrides(t *testing.T) {
 		LogLevel:        "info",
 		GoBinary:        "go11",
 		GoProxy:         "direct",
+		GoPrivate:       "*.private.com",
 		CloudRuntime:    "gcp",
 		TimeoutConf: TimeoutConf{
 			Timeout: 30,
@@ -260,6 +261,7 @@ func TestParseExampleConfig(t *testing.T) {
 		LogLevel:        "debug",
 		GoBinary:        "go",
 		GoProxy:         "direct",
+		GoPrivate:       "",
 		GoGetWorkers:    10,
 		ProtocolWorkers: 30,
 		CloudRuntime:    "none",
@@ -303,6 +305,7 @@ func getEnvMap(config *Config) map[string]string {
 		"GO_ENV":                  config.GoEnv,
 		"GO_BINARY_PATH":          config.GoBinary,
 		"GOPROXY":                 config.GoProxy,
+		"GOPRIVATE":               config.GoPrivate,
 		"ATHENS_GOGET_WORKERS":    strconv.Itoa(config.GoGetWorkers),
 		"ATHENS_PROTOCOL_WORKERS": strconv.Itoa(config.ProtocolWorkers),
 		"ATHENS_LOG_LEVEL":        config.LogLevel,

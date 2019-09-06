@@ -20,6 +20,7 @@ type ModuleSuite struct {
 	fs           afero.Fs
 	goBinaryName string
 	goProxy      string
+	goPrivate    string
 }
 
 func (m *ModuleSuite) SetupTest() {
@@ -28,5 +29,9 @@ func (m *ModuleSuite) SetupTest() {
 
 func TestModules(t *testing.T) {
 	goBinaryPath := envy.Get("GO_BINARY_PATH", "go")
-	suite.Run(t, &ModuleSuite{goBinaryName: goBinaryPath, goProxy: "direct"})
+	suite.Run(t, &ModuleSuite{
+		goBinaryName: goBinaryPath,
+		goProxy: "direct",
+		goPrivate: "",
+	})
 }

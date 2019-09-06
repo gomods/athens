@@ -20,6 +20,7 @@ type goGetFetcher struct {
 	fs           afero.Fs
 	goBinaryName string
 	goProxy      string
+	goPrivate    string
 }
 
 type goModule struct {
@@ -35,7 +36,7 @@ type goModule struct {
 }
 
 // NewGoGetFetcher creates fetcher which uses go get tool to fetch modules
-func NewGoGetFetcher(goBinaryName string, goProxy string, fs afero.Fs) (Fetcher, error) {
+func NewGoGetFetcher(goBinaryName, goProxy, goPrivate string, fs afero.Fs) (Fetcher, error) {
 	const op errors.Op = "module.NewGoGetFetcher"
 	if err := validGoBinary(goBinaryName); err != nil {
 		return nil, errors.E(op, err)
@@ -44,6 +45,7 @@ func NewGoGetFetcher(goBinaryName string, goProxy string, fs afero.Fs) (Fetcher,
 		fs:           fs,
 		goBinaryName: goBinaryName,
 		goProxy:      goProxy,
+		goPrivate:    goPrivate,
 	}, nil
 }
 
@@ -66,7 +68,7 @@ func (g *goGetFetcher) Fetch(ctx context.Context, mod, ver string) (*storage.Ver
 		return nil, errors.E(op, err)
 	}
 
-	m, err := downloadModule(g.goBinaryName, g.goProxy, g.fs, goPathRoot, modPath, mod, ver)
+	m, err := g.downloadModule(goPathRoot, modPath, mod, ver)
 	if err != nil {
 		clearFiles(g.fs, goPathRoot)
 		return nil, errors.E(op, err)
@@ -99,15 +101,15 @@ func (g *goGetFetcher) Fetch(ctx context.Context, mod, ver string) (*storage.Ver
 	return &storageVer, nil
 }
 
-// given a filesystem, gopath, repository root, module and version, runs 'go mod download -json'
+// given a gopath, repository root, module and version, runs 'go mod download -json'
 // on module@version from the repoRoot with GOPATH=gopath, and returns a non-nil error if anything went wrong.
-func downloadModule(goBinaryName, goProxy string, fs afero.Fs, gopath, repoRoot, module, version string) (goModule, error) {
+func (g *goGetFetcher) downloadModule(gopath, repoRoot, module, version string) (goModule, error) {
 	const op errors.Op = "module.downloadModule"
 	uri := strings.TrimSuffix(module, "/")
 	fullURI := fmt.Sprintf("%s@%s", uri, version)
 
-	cmd := exec.Command(goBinaryName, "mod", "download", "-json", fullURI)
-	cmd.Env = prepareEnv(gopath, goProxy)
+	cmd := exec.Command(g.goBinaryName, "mod", "download", "-json", fullURI)
+	cmd.Env = prepareEnv(gopath, g.goProxy, g.goPrivate)
 	cmd.Dir = repoRoot
 	stdout := &bytes.Buffer{}
 	stderr := &bytes.Buffer{}

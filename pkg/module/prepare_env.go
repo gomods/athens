@@ -10,7 +10,7 @@ import (
 // prepareEnv will return all the appropriate
 // environment variables for a Go Command to run
 // successfully (such as GOPATH, GOCACHE, PATH etc)
-func prepareEnv(gopath, goProxy string) []string {
+func prepareEnv(gopath, goProxy, goPrivate string) []string {
 	pathEnv := fmt.Sprintf("PATH=%s", os.Getenv("PATH"))
 	homeEnv := fmt.Sprintf("HOME=%s", os.Getenv("HOME"))
 	httpProxy := fmt.Sprintf("HTTP_PROXY=%s", os.Getenv("HTTP_PROXY"))
@@ -22,6 +22,7 @@ func prepareEnv(gopath, goProxy string) []string {
 	noProxyLower := fmt.Sprintf("no_proxy=%s", os.Getenv("no_proxy"))
 	gopathEnv := fmt.Sprintf("GOPATH=%s", gopath)
 	goProxyEnv := fmt.Sprintf("GOPROXY=%s", goProxy)
+	goPrivateEnv := fmt.Sprintf("GOPRIVATE=%s", goPrivate)
 	cacheEnv := fmt.Sprintf("GOCACHE=%s", filepath.Join(gopath, "cache"))
 	gitSSH := fmt.Sprintf("GIT_SSH=%s", os.Getenv("GIT_SSH"))
 	gitSSHCmd := fmt.Sprintf("GIT_SSH_COMMAND=%s", os.Getenv("GIT_SSH_COMMAND"))
@@ -32,6 +33,7 @@ func prepareEnv(gopath, goProxy string) []string {
 		homeEnv,
 		gopathEnv,
 		goProxyEnv,
+		goPrivateEnv,
 		cacheEnv,
 		disableCgo,
 		enableGoModules,

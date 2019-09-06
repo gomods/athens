@@ -23,6 +23,7 @@ type Config struct {
 	GoEnv            string    `validate:"required" envconfig:"GO_ENV"`
 	GoBinary         string    `validate:"required" envconfig:"GO_BINARY_PATH"`
 	GoProxy          string    `envconfig:"GOPROXY"`
+	GoPrivate        string    `envconfig:"GOPRIVATE"`
 	GoGetWorkers     int       `validate:"required" envconfig:"ATHENS_GOGET_WORKERS"`
 	ProtocolWorkers  int       `validate:"required" envconfig:"ATHENS_PROTOCOL_WORKERS"`
 	LogLevel         string    `validate:"required" envconfig:"ATHENS_LOG_LEVEL"`
@@ -79,6 +80,7 @@ func defaultConfig() *Config {
 		GoBinary:         "go",
 		GoEnv:            "development",
 		GoProxy:          "direct",
+		GoPrivate:        "",
 		GoGetWorkers:     10,
 		ProtocolWorkers:  30,
 		LogLevel:         "debug",

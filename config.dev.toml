@@ -22,6 +22,11 @@ GoEnv = "development"
 # Env override: GOPROXY
 GoProxy = "direct"
 
+# GoPrivate specifies GOPRIVATE env for go command inside athens introduced in Go 1.13
+# which can be configured totally same with GOPRIVATE of Go Command.
+# Env override: GOPRIVATE
+GoPrivate = ""
+
 # GoGetWorkers specifies how many times you can concurrently
 # go mod download, this is so that low performance instances
 # can manage go get more sanely and not run out of disk or memory.

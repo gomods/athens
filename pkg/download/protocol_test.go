@@ -36,8 +36,9 @@ func getDP(t *testing.T) Protocol {
 	}
 	goBin := conf.GoBinary
 	goProxy := conf.GoProxy
+	goPrivate := conf.GoPrivate
 	fs := afero.NewOsFs()
-	mf, err := module.NewGoGetFetcher(goBin, goProxy, fs)
+	mf, err := module.NewGoGetFetcher(goBin, goProxy, goPrivate, fs)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -46,7 +47,7 @@ func getDP(t *testing.T) Protocol {
 		t.Fatal(err)
 	}
 	st := stash.New(mf, s)
-	return New(&Opts{s, st, module.NewVCSLister(goBin, goProxy, fs), nil})
+	return New(&Opts{s, st, module.NewVCSLister(goBin, goProxy, goPrivate, fs), nil})
 }
 
 type listTest struct {
