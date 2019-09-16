@@ -4,7 +4,7 @@ name: default
 
 steps:
 - name: download-dependencies
-  image: golang:1.12
+  image: golang:1.13
   commands:
     # wait for services to be ready.
     - sleep 5
@@ -19,7 +19,7 @@ steps:
 
 
 - name: build
-  image: golang:1.12
+  image: golang:1.13
   commands:
 
   # build
