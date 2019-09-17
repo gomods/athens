@@ -59,3 +59,5 @@ require (
 	gopkg.in/go-playground/assert.v1 v1.2.1 // indirect
 	gopkg.in/go-playground/validator.v9 v9.20.2
 )
+
+replace git.apache.org/thrift.git => github.com/apache/thrift v0.12.0
