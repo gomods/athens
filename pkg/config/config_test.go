@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"strconv"
+	"strings"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -76,21 +77,22 @@ func TestEnvOverrides(t *testing.T) {
 		TimeoutConf: TimeoutConf{
 			Timeout: 30,
 		},
-		StorageType:    "minio",
-		GlobalEndpoint: "mytikas.gomods.io",
-		Port:           ":7000",
-		EnablePprof:    false,
-		PprofPort:      ":3001",
-		BasicAuthUser:  "testuser",
-		BasicAuthPass:  "testpass",
-		ForceSSL:       true,
-		ValidatorHook:  "testhook.io",
-		PathPrefix:     "prefix",
-		NETRCPath:      "/test/path/.netrc",
-		HGRCPath:       "/test/path/.hgrc",
-		Storage:        &StorageConfig{},
-		SingleFlight:   &SingleFlight{},
-		RobotsFile:     "robots.txt",
+		StorageType:     "minio",
+		GlobalEndpoint:  "mytikas.gomods.io",
+		Port:            ":7000",
+		EnablePprof:     false,
+		PprofPort:       ":3001",
+		BasicAuthUser:   "testuser",
+		BasicAuthPass:   "testpass",
+		ForceSSL:        true,
+		ValidatorHook:   "testhook.io",
+		PathPrefix:      "prefix",
+		NETRCPath:       "/test/path/.netrc",
+		HGRCPath:        "/test/path/.hgrc",
+		Storage:         &StorageConfig{},
+		GoBinaryEnvVars: []string{"GOPROXY=direct"},
+		SingleFlight:    &SingleFlight{},
+		RobotsFile:      "robots.txt",
 	}
 
 	envVars := getEnvMap(expConf)
@@ -279,6 +281,7 @@ func TestParseExampleConfig(t *testing.T) {
 		TraceExporter:    "",
 		StatsExporter:    "prometheus",
 		SingleFlightType: "memory",
+		GoBinaryEnvVars:  []string{"GOPROXY=direct"},
 		SingleFlight:     &SingleFlight{},
 		SumDBs:           []string{"https://sum.golang.org"},
 		NoSumPatterns:    []string{},
@@ -325,6 +328,7 @@ func getEnvMap(config *Config) map[string]string {
 	envVars["ATHENS_NETRC_PATH"] = config.NETRCPath
 	envVars["ATHENS_HGRC_PATH"] = config.HGRCPath
 	envVars["ATHENS_ROBOTS_FILE"] = config.RobotsFile
+	envVars["ATHENS_GO_BINARY_ENV_VARS"] = strings.Join(config.GoBinaryEnvVars, ",")
 
 	storage := config.Storage
 	if storage != nil {
