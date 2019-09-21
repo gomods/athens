@@ -481,3 +481,24 @@ func TestDefaultConfigMatchesConfigFile(t *testing.T) {
 		t.Errorf("Default values from the config file: %v should equal to the default values returned in case the config file isn't provided %v", parsedConf, defConf)
 	}
 }
+
+func TestEnvList(t *testing.T) {
+	el := EnvList{"KEY=VALUE"}
+	if !el.HasKey("KEY") {
+		t.Fatal("expected KEY to be present")
+	}
+	if el.HasKey("KEY=") {
+		t.Fatal("expected KEYX to not be found")
+	}
+	el.Add("HELLO", "WORLD")
+	if !el.HasKey("HELLO") {
+		t.Fatal("expected HELLO key to be found")
+	}
+	if err := el.Validate(); err != nil {
+		t.Fatalf("expected err to be nil but got %v", err)
+	}
+	el = EnvList{"HELLO"}
+	if err := el.Validate(); err == nil {
+		t.Fatal("expected a validation error for incorrect formatting but got nil")
+	}
+}

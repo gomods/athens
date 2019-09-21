@@ -65,8 +65,8 @@ type EnvList []string
 // HasKey returns whether a key-value entry
 // is present by only checking the left of
 // key=value
-func (ge EnvList) HasKey(key string) bool {
-	for _, env := range ge {
+func (el EnvList) HasKey(key string) bool {
+	for _, env := range el {
 		if strings.HasPrefix(env, key+"=") {
 			return true
 		}
@@ -76,15 +76,15 @@ func (ge EnvList) HasKey(key string) bool {
 
 // Add adds a key=value entry to the environment
 // list
-func (ge *EnvList) Add(key, value string) {
-	*ge = append(*ge, key+"="+value)
+func (el *EnvList) Add(key, value string) {
+	*el = append(*el, key+"="+value)
 }
 
 // Validate validates that all strings inside the
 // list are of the key=value format
-func (ge EnvList) Validate() error {
+func (el EnvList) Validate() error {
 	const op errors.Op = "EnvList.Validate"
-	for _, env := range ge {
+	for _, env := range el {
 		if strings.Count(env, "=") != 1 {
 			return errors.E(op, fmt.Errorf("incorrect env format: %v", env))
 		}
