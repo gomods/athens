@@ -488,7 +488,7 @@ func TestEnvList(t *testing.T) {
 		t.Fatal("expected KEY to be present")
 	}
 	if el.HasKey("KEY=") {
-		t.Fatal("expected KEYX to not be found")
+		t.Fatal("expected KEY= to not be found")
 	}
 	el.Add("HELLO", "WORLD")
 	if !el.HasKey("HELLO") {
