@@ -6,7 +6,7 @@ environment:
   GOPATH: c:\gopath
   GO111MODULE: on
   GOPROXY: https://proxy.golang.org
-  FAILING_TEST: true
+  SKIP_UNTIL_113: true
 
 stack: go 1.13
 
