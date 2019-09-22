@@ -5,6 +5,8 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"os"
+	"os/exec"
 	"runtime"
 
 	"github.com/gomods/athens/pkg/errors"
@@ -72,6 +74,11 @@ func (s *ModuleSuite) TestNotFoundFetches() {
 
 func (s *ModuleSuite) TestGoGetFetcherSumDB() {
 	r := s.Require()
+	if os.Getenv("FAILING_TEST") != "" {
+		bts, err := exec.Command(s.goBinaryName, "version").Output()
+		r.NoError(err)
+		s.T().Fatal(string(bts))
+	}
 	zipBytes, err := ioutil.ReadFile("test_data/mockmod.xyz@v1.2.3.zip")
 	r.NoError(err)
 	mp := &mockProxy{paths: map[string][]byte{
