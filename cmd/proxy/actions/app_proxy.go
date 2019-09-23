@@ -77,7 +77,7 @@ func addProxyRoutes(
 
 	// TODO: remove before we release v0.7.0
 	if c.GoProxy != "direct" && c.GoProxy != "" {
-		fmt.Println("GoProxy is deprecated, please use GoBinaryEnvVars")
+		l.Error("GoProxy is deprecated, please use GoBinaryEnvVars")
 	}
 	if !c.GoBinaryEnvVars.HasKey("GONOSUMDB") {
 		c.GoBinaryEnvVars.Add("GONOSUMDB", strings.Join(c.NoSumPatterns, ","))
