@@ -7,7 +7,7 @@ weight: 2
 ## Proxying A Checksum DB
 The Athens Proxy has the ability to proxy a Checksum Database as defined by [this proposal](https://go.googlesource.com/proposal/+/master/design/25530-sumdb.md) by the Go team.
 
-Athens by defualt will accept proxying `https://sum.golang.org`. However, if you'd like to override that behavior or proxy more Checksum DBs you can do so through the `SumDBs` config or its equivalent Environment Variable: `ATHENS_SUM_DBS` 
+Athens by default will accept proxying `https://sum.golang.org`. However, if you'd like to override that behavior or proxy more Checksum DBs you can do so through the `SumDBs` config or its equivalent Environment Variable: `ATHENS_SUM_DBS` 
 
 So for example, if you run the following command: 
 
@@ -17,7 +17,7 @@ GOPROXY=<athens-url> go build
 
 The Go command will proxy requests to `sum.golang.org` like this: `<athens-url>/sumdb/sum.golang.org`. Feel free to read the linked proposal above for the exact requests that makes Athens successfully proxy Checksum DB APIs. 
 
-Note that as of this documentation (May 2019), you need to explicitly set `GOSUMDB=https://sum.golang.org`, but the Go team is planning on enabling this by defualt. 
+Note that as of this documentation (May 2019), you need to explicitly set `GOSUMDB=https://sum.golang.org`, but the Go team is planning on enabling this by default.
 
 ### Why a Checksum DB? 
 

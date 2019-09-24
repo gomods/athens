@@ -6,12 +6,14 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"strconv"
+	"strings"
 
 	"github.com/BurntSushi/toml"
 	"github.com/gomods/athens/pkg/download/mode"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/kelseyhightower/envconfig"
-	validator "gopkg.in/go-playground/validator.v9"
+	"gopkg.in/go-playground/validator.v9"
 )
 
 const defaultConfigFile = "athens.toml"
@@ -22,6 +24,7 @@ type Config struct {
 	GoEnv            string    `validate:"required" envconfig:"GO_ENV"`
 	GoBinary         string    `validate:"required" envconfig:"GO_BINARY_PATH"`
 	GoProxy          string    `envconfig:"GOPROXY"`
+	GoBinaryEnvVars  EnvList   `envconfig:"ATHENS_GO_BINARY_ENV_VARS"`
 	GoGetWorkers     int       `validate:"required" envconfig:"ATHENS_GOGET_WORKERS"`
 	ProtocolWorkers  int       `validate:"required" envconfig:"ATHENS_PROTOCOL_WORKERS"`
 	LogLevel         string    `validate:"required" envconfig:"ATHENS_LOG_LEVEL"`
@@ -50,8 +53,43 @@ type Config struct {
 	DownloadMode     mode.Mode `envconfig:"ATHENS_DOWNLOAD_MODE"`
 	DownloadURL      string    `envconfig:"ATHENS_DOWNLOAD_URL"`
 	SingleFlightType string    `envconfig:"ATHENS_SINGLE_FLIGHT_TYPE"`
+	RobotsFile       string    `envconfig:"ATHENS_ROBOTS_FILE"`
 	SingleFlight     *SingleFlight
 	Storage          *StorageConfig
+}
+
+// EnvList is a list of key-value environment
+// variables that are passed to the Go command
+type EnvList []string
+
+// HasKey returns whether a key-value entry
+// is present by only checking the left of
+// key=value
+func (el EnvList) HasKey(key string) bool {
+	for _, env := range el {
+		if strings.HasPrefix(env, key+"=") {
+			return true
+		}
+	}
+	return false
+}
+
+// Add adds a key=value entry to the environment
+// list
+func (el *EnvList) Add(key, value string) {
+	*el = append(*el, key+"="+value)
+}
+
+// Validate validates that all strings inside the
+// list are of the key=value format
+func (el EnvList) Validate() error {
+	const op errors.Op = "EnvList.Validate"
+	for _, env := range el {
+		if strings.Count(env, "=") != 1 {
+			return errors.E(op, fmt.Errorf("incorrect env format: %v", env))
+		}
+	}
+	return nil
 }
 
 // Load loads the config from a file.
@@ -76,6 +114,7 @@ func Load(configFile string) (*Config, error) {
 func defaultConfig() *Config {
 	return &Config{
 		GoBinary:         "go",
+		GoBinaryEnvVars:  EnvList{"GOPROXY=direct"},
 		GoEnv:            "development",
 		GoProxy:          "direct",
 		GoGetWorkers:     10,
@@ -95,6 +134,7 @@ func defaultConfig() *Config {
 		NoSumPatterns:    []string{},
 		DownloadMode:     "sync",
 		DownloadURL:      "",
+		RobotsFile:       "robots.txt",
 		SingleFlight: &SingleFlight{
 			Etcd:  &Etcd{"localhost:2379,localhost:22379,localhost:32379"},
 			Redis: &Redis{"127.0.0.1:6379"},
@@ -129,7 +169,7 @@ func (c *Config) TLSCertFiles() (cert, key string, err error) {
 	}
 
 	if keyFile.Mode()&077 != 0 && runtime.GOOS != "windows" {
-		return "", "", fmt.Errorf("TLSKeyFile should not be accessable by others")
+		return "", "", fmt.Errorf("TLSKeyFile should not be accessible by others")
 	}
 
 	return certFile.Name(), keyFile.Name(), nil
@@ -188,10 +228,7 @@ func envOverride(config *Config) error {
 }
 
 func ensurePortFormat(s string) string {
-	if len(s) == 0 {
-		return ""
-	}
-	if s[0] != ':' {
+	if _, err := strconv.Atoi(s); err == nil {
 		return ":" + s
 	}
 	return s

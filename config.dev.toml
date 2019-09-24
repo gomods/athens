@@ -15,12 +15,27 @@ GoBinary = "go"
 # Env override: GO_ENV
 GoEnv = "development"
 
+# GoProxy IS DEPRECATED and will be removed in v0.7.0: PLEASE USE GoBinaryEnvVars
 # GoProxy specifies GOPROXY env for go list or mod download inside athens
 # which can be configured totally same with GOPROXY of Go Command.
 # Notes that the comma-separated GOPROXY (e.g. <proxy1>,<proxy2>,direct) is only available in Go 1.13 or higher,
 # otherwise only single proxy URL can be set.
 # Env override: GOPROXY
 GoProxy = "direct"
+
+# GoBinaryEnvVars are environment variables that you'd like 
+# to pass directly to the Go command that Athens runs under the 
+# hood. Athens primarily runs two Go commands: 
+# 1. `go mod download -json <module>@<version>`
+# 2. `go list -m -json <module>@latest`
+# The go command accepts multiple environment variables that 
+# can affect the two processes above such as GONOSUMDB and GOPROXY. 
+# Note that athens passes the NoSumPatterns to the two commands above,
+# but the existence of GONOSUMDB in this configuration takes precedence.
+# Although you can pass any key=value to the Go command here, you can see 
+# the list of possible env vars by running `go env`.
+# Env override: ATHENS_GO_BINARY_ENV_VARS
+GoBinaryEnvVars = ["GOPROXY=direct"]
 
 # GoGetWorkers specifies how many times you can concurrently
 # go mod download, this is so that low performance instances
@@ -66,6 +81,14 @@ PprofPort = ":3001"
 # and also ensure that FilterFile is  set to a fully qualified file name 
 # that contains the letter `D` (for "Direct Access") in the first line.
 FilterFile = ""
+
+# The filename for the robots.txt.
+# ENV override: ATHENS_ROBOTS_FILE
+#
+# To provide /robots.txt for net crawler.
+# Default disallow all crawler.
+# Content details to see https://support.google.com/webmasters/answer/6062608
+RobotsFile = "robots.txt"
 
 # Timeout is the timeout for external network calls in seconds
 # This value is used as the default for storage backends if they don't specify timeouts
@@ -375,6 +398,12 @@ SingleFlightType = "memory"
 
         # https://docs.aws.amazon.com/sdk-for-go/api/aws/credentials/endpointcreds/
         CredentialsEndpoint = ""
+
+        # conainer relative url (used by fargate) /v2/....
+        # If this is present, it will concatenate to CredentialsEndpoint
+        # If you are planning to use AWS Fargate, please use http://169.254.170.2 for CredentialsEndpoint
+        # Ref: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-metadata-endpoint-v2.html
+        AwsContainerCredentialsRelativeURI = ""
 
    [Storage.AzureBlob]
         # Storage Account name for Azure Blob
