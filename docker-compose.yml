@@ -18,11 +18,10 @@ services:
       context: .
       dockerfile: Dockerfile.test
       args:
-        GOLANG_VERSION: 1.12
+        GOLANG_VERSION: 1.13
     command: ["./scripts/test_unit.sh"]
     environment:
       - GO_ENV=test
-      - GOPROXY=https://proxy.golang.org
       - ATHENS_MINIO_ENDPOINT=minio:9000
       - ATHENS_MONGO_STORAGE_URL=mongodb://mongo:27017
       - TIMEOUT=20 # in case the mongo dependency takes longer to start up
@@ -35,10 +34,8 @@ services:
       context: .
       dockerfile: Dockerfile.test
       args:
-        GOLANG_VERSION: 1.12
+        GOLANG_VERSION: 1.13
     command: ["./scripts/test_e2e.sh"]
-    environment:
-      - GOPROXY=https://proxy.golang.org
   azurite:
     image: arafato/azurite:2.6.5
     ports:
