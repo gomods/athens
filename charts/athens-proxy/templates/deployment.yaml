@@ -74,6 +74,10 @@ spec:
         {{- if .Values.configEnvVars }}
 {{ toYaml .Values.configEnvVars | indent 8 }}
         {{- end }}
+        {{- if .Values.goNoSumPatterns }}
+        - name: ATHENS_GONOSUM_PATTERNS
+          value: {{ .Values.goNoSumPatterns | join "," }}
+        {{- end }}
         - name: ATHENS_STORAGE_TYPE
           value: {{ .Values.storage.type | quote }}
         {{- if eq .Values.storage.type "disk"}}

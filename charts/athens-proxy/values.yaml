@@ -116,6 +116,11 @@ sshGitServers: {}
     ## ssh port
   #  port: 22
 
+goNoSumPatterns: []
+  ## List of patterns for which not to issue checksum requests.
+  # - github.com/mycompany/*
+  # - github.com/mycompany2/*
+
 goGetWorkers: 3
 
 nodeSelector: {}
