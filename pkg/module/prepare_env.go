@@ -16,10 +16,6 @@ func prepareEnv(gopath string, envVars []string) []string {
 	httpProxy := fmt.Sprintf("HTTP_PROXY=%s", os.Getenv("HTTP_PROXY"))
 	httpsProxy := fmt.Sprintf("HTTPS_PROXY=%s", os.Getenv("HTTPS_PROXY"))
 	noProxy := fmt.Sprintf("NO_PROXY=%s", os.Getenv("NO_PROXY"))
-	// need to also check the lower case version of just these three env variables
-	httpProxyLower := fmt.Sprintf("http_proxy=%s", os.Getenv("http_proxy"))
-	httpsProxyLower := fmt.Sprintf("https_proxy=%s", os.Getenv("https_proxy"))
-	noProxyLower := fmt.Sprintf("no_proxy=%s", os.Getenv("no_proxy"))
 	gopathEnv := fmt.Sprintf("GOPATH=%s", gopath)
 	cacheEnv := fmt.Sprintf("GOCACHE=%s", filepath.Join(gopath, "cache"))
 	gitSSH := fmt.Sprintf("GIT_SSH=%s", os.Getenv("GIT_SSH"))
@@ -36,13 +32,21 @@ func prepareEnv(gopath string, envVars []string) []string {
 		httpProxy,
 		httpsProxy,
 		noProxy,
-		httpProxyLower,
-		httpsProxyLower,
-		noProxyLower,
 		gitSSH,
 		gitSSHCmd,
 	}
 	cmdEnv = append(cmdEnv, envVars...)
+
+	// need to also check the lower case version of just these three env variables
+	if httpProxyLower, exist := os.LookupEnv("http_proxy"); exist {
+		cmdEnv = append(cmdEnv, fmt.Sprintf("http_proxy=%s", httpProxyLower))
+	}
+	if httpsProxyLower, exist := os.LookupEnv("https_proxy"); exist {
+		cmdEnv = append(cmdEnv, fmt.Sprintf("https_proxy=%s", httpsProxyLower))
+	}
+	if noProxyLower, exist := os.LookupEnv("no_proxy"); exist {
+		cmdEnv = append(cmdEnv, fmt.Sprintf("no_proxy=%s", noProxyLower))
+	}
 
 	if sshAuthSockVal, hasSSHAuthSock := os.LookupEnv("SSH_AUTH_SOCK"); hasSSHAuthSock {
 		// Verify that the ssh agent unix socket exists and is a unix socket.
