@@ -13,13 +13,8 @@ import (
 func prepareEnv(gopath string, envVars []string) []string {
 	pathEnv := fmt.Sprintf("PATH=%s", os.Getenv("PATH"))
 	homeEnv := fmt.Sprintf("HOME=%s", os.Getenv("HOME"))
-	httpProxy := fmt.Sprintf("HTTP_PROXY=%s", os.Getenv("HTTP_PROXY"))
-	httpsProxy := fmt.Sprintf("HTTPS_PROXY=%s", os.Getenv("HTTPS_PROXY"))
-	noProxy := fmt.Sprintf("NO_PROXY=%s", os.Getenv("NO_PROXY"))
 	gopathEnv := fmt.Sprintf("GOPATH=%s", gopath)
 	cacheEnv := fmt.Sprintf("GOCACHE=%s", filepath.Join(gopath, "cache"))
-	gitSSH := fmt.Sprintf("GIT_SSH=%s", os.Getenv("GIT_SSH"))
-	gitSSHCmd := fmt.Sprintf("GIT_SSH_COMMAND=%s", os.Getenv("GIT_SSH_COMMAND"))
 	disableCgo := "CGO_ENABLED=0"
 	enableGoModules := "GO111MODULE=on"
 	cmdEnv := []string{
@@ -29,24 +24,24 @@ func prepareEnv(gopath string, envVars []string) []string {
 		cacheEnv,
 		disableCgo,
 		enableGoModules,
-		httpProxy,
-		httpsProxy,
-		noProxy,
-		gitSSH,
-		gitSSHCmd,
+	}
+	for _, key := range []string{
+		"GIT_SSH",
+		"GIT_SSH_COMMAND",
+		"HTTP_PROXY",
+		"HTTPS_PROXY",
+		"NO_PROXY",
+		// Need to also check the lower case version of just these three env variables.
+		"http_proxy",
+		"https_proxy",
+		"no_proxy",
+	} {
+		// Prepend only if environment variable is present.
+		if v, ok := os.LookupEnv(key); ok {
+			cmdEnv = append(cmdEnv, fmt.Sprintf("%s=%s", key, v))
+		}
 	}
 	cmdEnv = append(cmdEnv, envVars...)
-
-	// need to also check the lower case version of just these three env variables
-	if httpProxyLower, exist := os.LookupEnv("http_proxy"); exist {
-		cmdEnv = append(cmdEnv, fmt.Sprintf("http_proxy=%s", httpProxyLower))
-	}
-	if httpsProxyLower, exist := os.LookupEnv("https_proxy"); exist {
-		cmdEnv = append(cmdEnv, fmt.Sprintf("https_proxy=%s", httpsProxyLower))
-	}
-	if noProxyLower, exist := os.LookupEnv("no_proxy"); exist {
-		cmdEnv = append(cmdEnv, fmt.Sprintf("no_proxy=%s", noProxyLower))
-	}
 
 	if sshAuthSockVal, hasSSHAuthSock := os.LookupEnv("SSH_AUTH_SOCK"); hasSSHAuthSock {
 		// Verify that the ssh agent unix socket exists and is a unix socket.
