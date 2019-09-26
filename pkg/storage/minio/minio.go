@@ -31,6 +31,9 @@ func NewStorage(conf *config.MinioConfig, timeout time.Duration) (storage.Backen
 	region := conf.Region
 	useSSL := conf.EnableSSL
 	minioCore, err := minio.NewCore(endpoint, accessKeyID, secretAccessKey, useSSL)
+	if err != nil {
+		return nil, errors.E(op, err)
+	}
 	minioClient, err := minio.New(endpoint, accessKeyID, secretAccessKey, useSSL)
 	if err != nil {
 		return nil, errors.E(op, err)
@@ -39,7 +42,10 @@ func NewStorage(conf *config.MinioConfig, timeout time.Duration) (storage.Backen
 	err = minioClient.MakeBucket(bucketName, region)
 	if err != nil {
 		// Check to see if we already own this bucket
-		exists, _ := minioClient.BucketExists(bucketName)
+		exists, err := minioClient.BucketExists(bucketName)
+		if err != nil {
+			return nil, errors.E(op, err)
+		}
 		if !exists {
 			// MakeBucket Error takes priority
 			return nil, errors.E(op, err)

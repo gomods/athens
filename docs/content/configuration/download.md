@@ -4,9 +4,14 @@ description: What to do when a module is not in storage
 weight: 2
 ---
 
-Athens accepts an HCL formatted Download File that serves as the source of truth for answering the following question: 
+Athens accepts an HCL formatted Download File that has instructions for how it should behave when a module@version isn't found in its storage.
 
-### What should Athens do when a module@version is not found in storage? 
+You configure this download file by setting the `ATHENS_DOWNLOAD_MODE` environment variable in one of two ways:
+
+1. Set its value to `file:$FILE_PATH`, where `FILE_PATH` is the path to the HCL file
+1. Set its value to `custom$BASE_64` where `BASE_64` is the base64 encoded HCL file
+
+## What should Athens do when a module@version is not found in storage?
 
 Say a client sends an HTTP request with the path `/github.com/pkg/errors/@v/v0.8.1` and Athens
 does not have this module in storage. Athens will look at the Download File for one of the following Modes:
