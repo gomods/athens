@@ -35,9 +35,8 @@ func getDP(t *testing.T) Protocol {
 		t.Fatalf("Unable to parse config file: %s", err.Error())
 	}
 	goBin := conf.GoBinary
-	goProxy := conf.GoProxy
 	fs := afero.NewOsFs()
-	mf, err := module.NewGoGetFetcher(goBin, goProxy, fs)
+	mf, err := module.NewGoGetFetcher(goBin, conf.GoBinaryEnvVars, fs)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -46,7 +45,7 @@ func getDP(t *testing.T) Protocol {
 		t.Fatal(err)
 	}
 	st := stash.New(mf, s)
-	return New(&Opts{s, st, module.NewVCSLister(goBin, goProxy, fs), nil})
+	return New(&Opts{s, st, module.NewVCSLister(goBin, conf.GoBinaryEnvVars, fs), nil})
 }
 
 type listTest struct {
