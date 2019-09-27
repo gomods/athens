@@ -511,8 +511,4 @@ func TestEnvList(t *testing.T) {
 	if err := el.Validate(); err != nil {
 		t.Fatalf("expected err to be nil but got %v", err)
 	}
-	el = EnvList{"KEY=VALUE1=VALUE2"}
-	if err := el.Validate(); err == nil {
-		t.Fatal("expected a validation error for incorrect formatting but got nil")
-	}
 }
