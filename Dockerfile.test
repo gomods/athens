@@ -1,4 +1,7 @@
-FROM golang:1.12
+ARG GOLANG_VERSION=1.12
+FROM golang:$GOLANG_VERSION
+
+RUN echo $GOLANG_VERSION
 
 RUN mkdir -p /athens/tests
 

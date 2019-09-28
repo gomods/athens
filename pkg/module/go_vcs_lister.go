@@ -24,7 +24,7 @@ type listResp struct {
 
 type vcsLister struct {
 	goBinPath string
-	goProxy   string
+	env       []string
 	fs        afero.Fs
 }
 
@@ -55,7 +55,7 @@ func (l *vcsLister) List(ctx context.Context, mod string) (*storage.RevInfo, []s
 		return nil, nil, errors.E(op, err)
 	}
 	defer clearFiles(l.fs, gopath)
-	cmd.Env = prepareEnv(gopath, l.goProxy)
+	cmd.Env = prepareEnv(gopath, l.env)
 
 	err = cmd.Run()
 	if err != nil {
@@ -83,6 +83,6 @@ func (l *vcsLister) List(ctx context.Context, mod string) (*storage.RevInfo, []s
 }
 
 // NewVCSLister creates an UpstreamLister which uses VCS to fetch a list of available versions
-func NewVCSLister(goBinPath, goProxy string, fs afero.Fs) UpstreamLister {
-	return &vcsLister{goBinPath: goBinPath, goProxy: goProxy, fs: fs}
+func NewVCSLister(goBinPath string, env []string, fs afero.Fs) UpstreamLister {
+	return &vcsLister{goBinPath: goBinPath, env: env, fs: fs}
 }
