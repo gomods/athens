@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"strconv"
+	"strings"
 
 	"github.com/BurntSushi/toml"
 	"github.com/gomods/athens/pkg/download/mode"
@@ -23,6 +24,7 @@ type Config struct {
 	GoEnv            string    `validate:"required" envconfig:"GO_ENV"`
 	GoBinary         string    `validate:"required" envconfig:"GO_BINARY_PATH"`
 	GoProxy          string    `envconfig:"GOPROXY"`
+	GoBinaryEnvVars  EnvList   `envconfig:"ATHENS_GO_BINARY_ENV_VARS"`
 	GoGetWorkers     int       `validate:"required" envconfig:"ATHENS_GOGET_WORKERS"`
 	ProtocolWorkers  int       `validate:"required" envconfig:"ATHENS_PROTOCOL_WORKERS"`
 	LogLevel         string    `validate:"required" envconfig:"ATHENS_LOG_LEVEL"`
@@ -56,6 +58,41 @@ type Config struct {
 	Storage          *StorageConfig
 }
 
+// EnvList is a list of key-value environment
+// variables that are passed to the Go command
+type EnvList []string
+
+// HasKey returns whether a key-value entry
+// is present by only checking the left of
+// key=value
+func (el EnvList) HasKey(key string) bool {
+	for _, env := range el {
+		if strings.HasPrefix(env, key+"=") {
+			return true
+		}
+	}
+	return false
+}
+
+// Add adds a key=value entry to the environment
+// list
+func (el *EnvList) Add(key, value string) {
+	*el = append(*el, key+"="+value)
+}
+
+// Validate validates that all strings inside the
+// list are of the key=value format
+func (el EnvList) Validate() error {
+	const op errors.Op = "EnvList.Validate"
+	for _, env := range el {
+		// some strings can have multiple "=", such as GODEBUG=netdns=cgo
+		if strings.Count(env, "=") < 1 {
+			return errors.E(op, fmt.Errorf("incorrect env format: %v", env))
+		}
+	}
+	return nil
+}
+
 // Load loads the config from a file.
 // If file is not present returns default config
 func Load(configFile string) (*Config, error) {
@@ -78,6 +115,7 @@ func Load(configFile string) (*Config, error) {
 func defaultConfig() *Config {
 	return &Config{
 		GoBinary:         "go",
+		GoBinaryEnvVars:  EnvList{"GOPROXY=direct"},
 		GoEnv:            "development",
 		GoProxy:          "direct",
 		GoGetWorkers:     10,
