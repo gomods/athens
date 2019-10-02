@@ -16,6 +16,7 @@ The Athens proxy supports many storage types:
     1. [DigitalOcean Spaces](#digitalocean-spaces)
     1. [Alibaba OSS](#alibaba-oss)
     1. and other S3 / Minio compatible interfaces
+1. [Azure Blob Storage](#azure-blob-storage)
 
 All of them can be configured using `config.toml` file. You need to set a valid driver in `StorageType` value or you can set it in environment variable `ATHENS_STORAGE_TYPE` on your server.
 Also for most of the drivers you need to provide additional configuration data which will be described below.
@@ -278,3 +279,36 @@ Also configuration for this storage looks almost the same in our proxy as for [M
             # Parent folder in your Alibaba OSS storage
             # Env override: ATHENS_MINIO_BUCKET_NAME
             Bucket = "YOUR_OSS_FOLDER_PREFIX"
+
+## Azure Blob Storage
+
+This driver uses [Azure Blob Storage](https://azure.microsoft.com/services/storage/blobs/) 
+
+> If you never used Azure Blog Storage, here is a [quickstart](https://aka.ms/azureblob-quickstart)
+
+It assumes that you already have the following:
+
+- [An Azure storage account](https://docs.microsoft.com/azure/storage/common/storage-account-overview?toc=%2fazure%2fstorage%2fblobs%2ftoc.json)
+- [The credentials (storage account key)](https://docs.microsoft.com/rest/api/storageservices/authorize-with-shared-key)  
+- A container (to store blobs)
+
+
+##### Configuration:
+
+    # StorageType sets the type of storage backend the proxy will use.
+    # Env override: ATHENS_STORAGE_TYPE
+    StorageType = "azureblob"
+
+    [Storage]
+        [Storage.AzureBlob]
+            # Storage Account name for Azure Blob
+            # Env override: ATHENS_AZURE_ACCOUNT_NAME
+            AccountName = "MY_AZURE_BLOB_ACCOUNT_NAME"
+
+            # Account Key to use with the storage account
+            # Env override: ATHENS_AZURE_ACCOUNT_KEY
+            AccountKey = "MY_AZURE_BLOB_ACCOUNT_KEY"
+
+            # Name of container in the blob storage
+            # Env override: ATHENS_AZURE_CONTAINER_NAME
+            ContainerName = "MY_AZURE_BLOB_CONTAINER_NAME"
