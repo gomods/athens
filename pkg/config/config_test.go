@@ -501,4 +501,14 @@ func TestEnvList(t *testing.T) {
 	if err := el.Validate(); err == nil {
 		t.Fatal("expected a validation error for incorrect formatting but got nil")
 	}
+	el = EnvList{"GODEBUG=netdns=cgo"}
+	if !el.HasKey("GODEBUG") {
+		t.Fatal("expected GODEBUG key to be present")
+	}
+	if el.HasKey("GODEBUG=") {
+		t.Fatal("expected GODEBUG= key not to be found")
+	}
+	if err := el.Validate(); err != nil {
+		t.Fatalf("expected err to be nil but got %v", err)
+	}
 }

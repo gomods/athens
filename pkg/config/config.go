@@ -85,7 +85,8 @@ func (el *EnvList) Add(key, value string) {
 func (el EnvList) Validate() error {
 	const op errors.Op = "EnvList.Validate"
 	for _, env := range el {
-		if strings.Count(env, "=") != 1 {
+		// some strings can have multiple "=", such as GODEBUG=netdns=cgo
+		if strings.Count(env, "=") < 1 {
 			return errors.E(op, fmt.Errorf("incorrect env format: %v", env))
 		}
 	}
