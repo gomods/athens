@@ -1,0 +1,89 @@
+---
+title: Pre-filling the Disk Cache
+description: How to pre-fill the disk cache
+weight: 4
+---
+
+One of the popular features of Athens is that it can be run completely cut off to the internet. In this case, though, it can't reach out to an upstream (e.g. a VCS or another module proxy) to fetch modules that it doesn't have in storage. So, we need to manually fill up the disk partition that Athens uses with the dependencies that we need.
+
+This document will guide you through packaging up a single module called `github.com/my/module`, and inserting it into the Athens disk storage.
+
+# First, Get the Tools
+
+You'll need to produce the following assets from module source code:
+
+- `source.zip` - just the Go source code, packaged in a zip file
+- `go.mod` - just the `go.mod` file from the module
+- `$VERSION.info` - metadata about the module
+
+The `source.zip` file has a specific directory structure and the `$VERSION.info` has a JSON structure, both of which you'll need to get right in order for Athens to serve up the right dependency formats that the Go toolchain will accept.
+
+>We don't recommend that you create these assets yourself. Instead, use [pacmod](https://github.com/plexsystems/pacmod)
+
+To install the `pacmod` tool, run `go install` like this:
+
+```console
+$ go install github.com/plexsystems/pacmod/cmd/pacmod
+```
+
+This command will install the `pacmod` binary to your `$GOPATH/bin/pacmod` directory, so make sure that is in your `$PATH`.
+
+# Run `pacmod` to create assets
+
+After you have `pacmod`, you'll need the module source code that you want to package. Before you run the command, configure your environment with these variables:
+
+- `MODULE_NAME`: the name of the module. This should be the same as the top-level module name in the `go.mod` file in this directory
+- `VERSION`: the version of the module that you want to generate assets for
+
+Below is an example for how to configure these variables.
+
+```console
+$ export MODULE_NAME="github.com/my/module"
+$ export VERSION="v1.0.0
+```
+
+>Note: make sure your `VERSION` variable starts with a `v`
+
+Next, navigate to the top-level directory of the module source code, and run `pacmod` like this:
+
+```console
+$ pacmod pack $MODULE_NAME $VERSION
+```
+
+Once this command is done, you'll notice a directory in the same directory called `$VERSION`. This directory will have the following assets in it:
+
+- `go.mod`
+- `$VERSION.info`
+- `$VERSION.zip`
+
+# Move Assets Into Athens Storage Directory
+
+Now that you have assets built, you need to move them into the location of the Athens disk storage. In the below commands, we'll assume `$STORAGE_ROOT` is the environment variable that points to the top-level directory that Athens uses for its on-disk.
+
+>If you set up Athens with the `$ATHENS_DISK_STORAGE_ROOT` environment variable, the root of this storage location is the value of this environment variable. Use `export STORAGE_ROOT=$ATHENS_DISK_STORAGE_ROOT` to prepare your environment for the below commands.
+
+First create the subdirectory into which you'll move the assets you created:
+
+```console
+$ mkdir -p $STORAGE_ROOT/github.com/my/module/$VERSION
+```
+
+Finally, make sure that you're in the directory in which you created the assets (above) and move them into the new directory that you just created. Note that we're changing the names of the `.zip` file:
+
+```console
+$ mv go.mod $STORAGE_ROOT/github.com/my/module/$VERSION/go.mod
+$ mv $VERSION.info $STORAGE_ROOT/github.com/my/module/$VERSION/$VERSION.info
+$ mv $VERSION.zip $STORAGE_ROOT/github.com/my/module/$VERSION/source.zip
+```
+
+# Test
+
+At this point, your Athens server should have its disk-based cache filled with the `github.com/my/module` module at version `$VERSION`. Next time you request this module, Athens will find it in its disk storage and will not try to fetch it from an upstream source.
+
+You can quickly test this behavior by running below `curl` command, assuming your Athens server is running on `http://localhost:3000` and is already configured to use the same disk storage that you pre-filled above.
+
+```console
+$ curl localhost:3000/github.com/my/module/@v/$VERSION.info
+```
+
+When you run this command, Athens should immediately return, without contacting any other network services.
