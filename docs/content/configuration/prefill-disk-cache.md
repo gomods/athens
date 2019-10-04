@@ -8,7 +8,7 @@ One of the popular features of Athens is that it can be run completely cut off t
 
 This document will guide you through packaging up a single module called `github.com/my/module`, and inserting it into the Athens disk storage.
 
-# First, Get the Tools
+# First, get the tools
 
 You'll need to produce the following assets from module source code:
 
@@ -28,7 +28,7 @@ $ go install github.com/plexsystems/pacmod/cmd/pacmod
 
 This command will install the `pacmod` binary to your `$GOPATH/bin/pacmod` directory, so make sure that is in your `$PATH`.
 
-# Run `pacmod` to create assets
+# Next, run `pacmod` to create assets
 
 After you have `pacmod`, you'll need the module source code that you want to package. Before you run the command, configure your environment with these variables:
 
@@ -56,7 +56,7 @@ Once this command is done, you'll notice a directory in the same directory calle
 - `$VERSION.info`
 - `$VERSION.zip`
 
-# Move Assets Into Athens Storage Directory
+# Next, move assets into Athens storage directory
 
 Now that you have assets built, you need to move them into the location of the Athens disk storage. In the below commands, we'll assume `$STORAGE_ROOT` is the environment variable that points to the top-level directory that Athens uses for its on-disk.
 
@@ -76,7 +76,7 @@ $ mv $VERSION.info $STORAGE_ROOT/github.com/my/module/$VERSION/$VERSION.info
 $ mv $VERSION.zip $STORAGE_ROOT/github.com/my/module/$VERSION/source.zip
 ```
 
-# Test
+# Finally, test your setup
 
 At this point, your Athens server should have its disk-based cache filled with the `github.com/my/module` module at version `$VERSION`. Next time you request this module, Athens will find it in its disk storage and will not try to fetch it from an upstream source.
 
