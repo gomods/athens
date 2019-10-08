@@ -9,7 +9,7 @@ import (
 
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/observ"
-	minio "github.com/minio/minio-go"
+	minio "github.com/minio/minio-go/v6"
 )
 
 func (v *storageImpl) Info(ctx context.Context, module, vsn string) ([]byte, error) {
