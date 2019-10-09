@@ -23,22 +23,18 @@ The `source.zip` file has a specific directory structure and the `$VERSION.info`
 To install the `pacmod` tool, run `go install` like this:
 
 ```console
-$ go install github.com/plexsystems/pacmod/cmd/pacmod
+$ go install github.com/plexsystems/pacmod
 ```
 
 This command will install the `pacmod` binary to your `$GOPATH/bin/pacmod` directory, so make sure that is in your `$PATH`.
 
 # Next, run `pacmod` to create assets
 
-After you have `pacmod`, you'll need the module source code that you want to package. Before you run the command, configure your environment with these variables:
+After you have `pacmod`, you'll need the module source code that you want to package. Before you run the command, set the `VERSION` variable in your environment to the version of the module you want to generate assets for.
 
-- `MODULE_NAME`: the name of the module. This should be the same as the top-level module name in the `go.mod` file in this directory
-- `VERSION`: the version of the module that you want to generate assets for
-
-Below is an example for how to configure these variables.
+Below is an example for how to configure it.
 
 ```console
-$ export MODULE_NAME="github.com/my/module"
 $ export VERSION="v1.0.0
 ```
 
@@ -47,10 +43,10 @@ $ export VERSION="v1.0.0
 Next, navigate to the top-level directory of the module source code, and run `pacmod` like this:
 
 ```console
-$ pacmod pack $MODULE_NAME $VERSION
+$ pacmod pack $VERSION .
 ```
 
-Once this command is done, you'll notice a directory in the same directory called `$VERSION`. This directory will have the following assets in it:
+Once this command is done, you'll notice three new files in the same same directory you ran the command from:
 
 - `go.mod`
 - `$VERSION.info`
@@ -68,13 +64,15 @@ First create the subdirectory into which you'll move the assets you created:
 $ mkdir -p $STORAGE_ROOT/github.com/my/module/$VERSION
 ```
 
-Finally, make sure that you're in the directory in which you created the assets (above) and move them into the new directory that you just created. Note that we're changing the names of the `.zip` file:
+Finally, make sure that you're still in the module source repository root directory (the same as you were in when you ran the `pacmod` command), and move your three new files into the new directory you just created:
 
 ```console
 $ mv go.mod $STORAGE_ROOT/github.com/my/module/$VERSION/go.mod
 $ mv $VERSION.info $STORAGE_ROOT/github.com/my/module/$VERSION/$VERSION.info
 $ mv $VERSION.zip $STORAGE_ROOT/github.com/my/module/$VERSION/source.zip
 ```
+
+>Note that we've changed the name of the `.zip` file
 
 # Finally, test your setup
 
