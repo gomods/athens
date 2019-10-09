@@ -11,6 +11,8 @@ image:
   pullPolicy: IfNotPresent
 
 service:
+  ## Additional annotations to apply to the service
+  annotations: {}
   ## Port as exposed by the service
   servicePort: 80
   ## Type of service; valid values are "ClusterIP", "LoadBalancer", and
