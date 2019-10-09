@@ -11,21 +11,19 @@ import (
 // environment variables for a Go Command to run
 // successfully (such as GOPATH, GOCACHE, PATH etc)
 func prepareEnv(gopath string, envVars []string) []string {
-	pathEnv := fmt.Sprintf("PATH=%s", os.Getenv("PATH"))
-	homeEnv := fmt.Sprintf("HOME=%s", os.Getenv("HOME"))
 	gopathEnv := fmt.Sprintf("GOPATH=%s", gopath)
 	cacheEnv := fmt.Sprintf("GOCACHE=%s", filepath.Join(gopath, "cache"))
 	disableCgo := "CGO_ENABLED=0"
 	enableGoModules := "GO111MODULE=on"
 	cmdEnv := []string{
-		pathEnv,
-		homeEnv,
 		gopathEnv,
 		cacheEnv,
 		disableCgo,
 		enableGoModules,
 	}
-	for _, key := range []string{
+	keys := []string{
+		"PATH",
+		"HOME",
 		"GIT_SSH",
 		"GIT_SSH_COMMAND",
 		"HTTP_PROXY",
@@ -35,7 +33,18 @@ func prepareEnv(gopath string, envVars []string) []string {
 		"http_proxy",
 		"https_proxy",
 		"no_proxy",
-	} {
+	}
+	if runtime.GOOS == "windows" {
+		windowsSpecificKeys := []string{
+			"USERPROFILE",
+			"SystemRoot",
+			"ALLUSERSPROFILE",
+			"HOMEDRIVE",
+			"HOMEPATH",
+		}
+		keys = append(keys, windowsSpecificKeys...)
+	}
+	for _, key := range keys {
 		// Prepend only if environment variable is present.
 		if v, ok := os.LookupEnv(key); ok {
 			cmdEnv = append(cmdEnv, fmt.Sprintf("%s=%s", key, v))
@@ -51,15 +60,5 @@ func prepareEnv(gopath string, envVars []string) []string {
 			cmdEnv = append(cmdEnv, sshAuthSock)
 		}
 	}
-
-	// add Windows specific ENV VARS
-	if runtime.GOOS == "windows" {
-		cmdEnv = append(cmdEnv, fmt.Sprintf("USERPROFILE=%s", os.Getenv("USERPROFILE")))
-		cmdEnv = append(cmdEnv, fmt.Sprintf("SystemRoot=%s", os.Getenv("SystemRoot")))
-		cmdEnv = append(cmdEnv, fmt.Sprintf("ALLUSERSPROFILE=%s", os.Getenv("ALLUSERSPROFILE")))
-		cmdEnv = append(cmdEnv, fmt.Sprintf("HOMEDRIVE=%s", os.Getenv("HOMEDRIVE")))
-		cmdEnv = append(cmdEnv, fmt.Sprintf("HOMEPATH=%s", os.Getenv("HOMEPATH")))
-	}
-
 	return cmdEnv
 }
