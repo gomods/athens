@@ -37,6 +37,28 @@ var testCases = []struct {
 		expectedMode: None,
 	},
 	{
+		name: "multiple depth pattern match",
+		file: &DownloadFile{
+			Mode: Sync,
+			Paths: []*DownloadPath{
+				{Pattern: "github.com/*", Mode: None},
+			},
+		},
+		input:        "github.com/gomods/athens/pkg/mode",
+		expectedMode: None,
+	},
+	{
+		name: "subdomain pattern match",
+		file: &DownloadFile{
+			Mode: Sync,
+			Paths: []*DownloadPath{
+				{Pattern: "*.github.com/gomods/*", Mode: None},
+			},
+		},
+		input:        "athens.github.com/gomods/pkg/mode",
+		expectedMode: None,
+	},
+	{
 		name: "pattern fallback",
 		file: &DownloadFile{
 			Mode: Sync,
