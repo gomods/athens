@@ -10,7 +10,7 @@ weight: 4
 
 ## Selecting a Storage Provider
 
-Athens currently supports a number of storage drivers. For quick and easy use on GAE, we recommend using the local disk provider. For more permanent use, we recommend using MongoDB or other more persistent infrastructure. For other providers, please see the [storage provider documentation](/configuration/storage).
+There is documentaion about how to use environment variables to configure a large number of storage providers; however, for this prarticular example we will use [Google Cloud Storage](https://cloud.google.com/storage/)(GCS) because it fits nicely with Cloud Run.
 
 ## Before You Begin
 
@@ -21,64 +21,22 @@ This guide assumes you have completed the following tasks:
 
 ## Setup
 
-First, create a directory. We will be adding two files to the directory. `app.yaml` will provide configuration for GAE, and `Dockerfile` will provide instructions on how to create an athens container.
+First clone the Athens repository
 
-Copy the following source into the files
-
-```yaml
-# app.yaml
-
-# General settings
-runtime: custom
-env: flex
-service: your-service-name
-
-# Network settings
-network:
-  instance_tag: athens
-  forwarded_ports:
-    - 3000/tcp
-
-# Compute settings
-resources:
-  cpu: 1
-  memory_gb: 0.6
-  disk_size_gb: 100
-
-# Health and liveness check settings
-liveness_check:
-  path: "/healthz"
-  check_interval_sec: 30
-  failure_threshold: 2
-  success_threshold: 2
-
-readiness_check:
-  path: "/readyz"
-  check_interval_sec: 5
-  failure_threshold: 2
-  success_threshold: 2
-  app_start_timeout_sec: 10
-
-# Scaling instructions
-automatic_scaling:
-  min_num_instances: 1
-  max_num_instances: 15
-  cool_down_period_sec: 180
-  cpu_utilization:
-    target_utilization: 0.6
-
-# Environment variables configuring athens
-env_variables:
-  ATHENS_STORAGE_TYPE: disk
-  ATHENS_DISK_STORAGE_ROOT: /athens
+```bash
+git clone https://github.com/gomods/athens.git
 ```
 
-```Dockerfile
-# Dockerfile
+There is already a Google Application Engine scaffold set up for you. Copy it into a new file and make changes to the environment variables.
 
-FROM gomods/athens:v0.5.0
-
-RUN mkdir /athens
+```bash
+cd athens
+cp scripts/gae/app.sample.yaml scripts/gae/app.yaml
+code scripts/gae/app.yaml
 ```
 
-You can now run `gcloud app deploy` to deploy Athens.
+Once you have configured the environment variables you can build a GAE service
+
+```bash
+make deploy-gae
+```
