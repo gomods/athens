@@ -288,3 +288,22 @@ helm install gomods/athens-proxy --name athens --namespace athens \
     --set gitconfig.secretName=athens-proxy-gitconfig \
     --set gitconfig.secretKey=gitconfig
 ```
+
+### Overriding the default `config.toml`
+
+The [Docker images for Athens](https://hub.docker.com/r/gomods/athens) come with a default `config.toml` file (which is the same as the [`config.dev.toml`](https://github.com/gomods/athens/blob/master/config.dev.toml)) in the repository). We've added lots of common configuration values to the Helm chart that you might like to override, but if you're interested in setting a huge set of configuration values,  or values that the chart doesn't currently let you set, you might want to set up your own `config.toml` and inject that into your Athens pods in your Kubernetes deployment.
+
+The Athens chart supports doing that via a `configToml.enabled` and `configToml.data` value. Since your `config.toml` file will have newlines in it and will likely be large, we recommend that you add your complete `config.toml` to an `override-values.yaml` file above. Here is what the relevant section of your `override-values.yaml` file should look like:
+
+```yaml
+configToml:
+  enabled: true
+  data: |-
+    <your config.toml here>
+```
+
+After you have your complete `override-values.yaml` set up, including your new `configToml` section, you can run your `helm install` command as above:
+
+```console
+$ helm install gomods/athens-proxy -n athens --namespace athens -f override-values.yaml
+```
