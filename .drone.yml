@@ -81,6 +81,25 @@ steps:
     event:
       - push
 
+- name: docker-latest-commit-sha
+  image: plugins/docker
+  settings:
+    username:
+      from_secret: DOCKER_USER
+    password:
+      from_secret: DOCKER_PASSWORD
+    repo: gomods/athens-dev
+    tags:
+      - ${DRONE_COMMIT:0:7}
+    dockerfile: cmd/proxy/Dockerfile
+    build_args:
+      - VERSION=${DRONE_COMMIT}
+  when:
+    branch:
+      - master
+    event:
+      - push
+
 - name: docker-release
   image: plugins/docker
   settings:

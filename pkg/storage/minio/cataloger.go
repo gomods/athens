@@ -8,7 +8,7 @@ import (
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/observ"
 	"github.com/gomods/athens/pkg/paths"
-	"github.com/minio/minio-go"
+	"github.com/minio/minio-go/v6"
 )
 
 // Catalog implements the (./pkg/storage).Cataloger interface
