@@ -30,6 +30,7 @@ func addProxyRoutes(
 	r.HandleFunc("/readyz", getReadinessHandler(s))
 	r.HandleFunc("/version", versionHandler)
 	r.HandleFunc("/catalog", catalogHandler(s))
+	r.HandleFunc("/robots.txt", robotsHandler(c))
 
 	for _, sumdb := range c.SumDBs {
 		sumdbURL, err := url.Parse(sumdb)
@@ -73,12 +74,23 @@ func addProxyRoutes(
 	// 3. The stashpool manages limiting concurrent requests and passes them to stash.
 	// 4. The plain stash.New just takes a request from upstream and saves it into storage.
 	fs := afero.NewOsFs()
-	mf, err := module.NewGoGetFetcher(c.GoBinary, c.GoProxy, fs)
+
+	// TODO: remove before we release v0.7.0
+	if c.GoProxy != "direct" && c.GoProxy != "" {
+		l.Error("GoProxy is deprecated, please use GoBinaryEnvVars")
+	}
+	if !c.GoBinaryEnvVars.HasKey("GONOSUMDB") {
+		c.GoBinaryEnvVars.Add("GONOSUMDB", strings.Join(c.NoSumPatterns, ","))
+	}
+	if err := c.GoBinaryEnvVars.Validate(); err != nil {
+		return err
+	}
+	mf, err := module.NewGoGetFetcher(c.GoBinary, c.GoBinaryEnvVars, fs)
 	if err != nil {
 		return err
 	}
 
-	lister := module.NewVCSLister(c.GoBinary, c.GoProxy, fs)
+	lister := module.NewVCSLister(c.GoBinary, c.GoBinaryEnvVars, fs)
 
 	withSingleFlight, err := getSingleFlight(c, s)
 	if err != nil {
