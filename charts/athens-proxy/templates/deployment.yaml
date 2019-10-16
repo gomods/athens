@@ -155,6 +155,11 @@ spec:
           mountPath: "/usr/local/lib"
           readOnly: true
         {{- end }}
+        {{- if .Values.configToml}}
+        - name: configtoml
+          mountPath: "/config"
+          readOnly: true
+        {{- end }}
         {{- if .Values.netrc.enabled }}
         - name: netrc
           mountPath: "/etc/netrc"
@@ -191,6 +196,11 @@ spec:
       - name: upstream-config
         configMap:
           name: {{ template "fullname" . }}-upstream
+      {{- end }}
+      {{- if .Values.configToml.enabled }}
+      - name: configtoml-config
+        configMap:
+          name: {{ template "fullname" .}}-configtoml
       {{- end }}
       {{- if .Values.netrc.enabled }}
       - name: netrc

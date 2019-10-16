@@ -82,6 +82,16 @@ gitconfig:
   # Key in the kubernetes secret that contains git config data.
   secretKey: gitconfig
 
+configToml:
+  enabled: false
+  data: |-
+    # See https://docs.gomods.io/configuration/ for an introduction on what
+    # values you can put in here.
+    # 
+    # Otherwise, for an exhaustive list of the configuration values you 
+    # can put here, see config.dev.toml at the root of the 
+    # github.com/gomods/athens repository 
+    
 upstreamProxy:
   # This is where you can set the URL for the upstream module repository.
   # If 'enabled' is set to true, Athens will try to download modules from the upstream when it doesn't find them in its own storage.
