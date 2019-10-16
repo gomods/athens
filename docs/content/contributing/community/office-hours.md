@@ -16,7 +16,7 @@ We meet at this [zoom](https://zoom.us/) video chat URL: [https://arschles.com/z
 
 # Logistics
 
-All office hours happen using the [zoom](https://zoom.us) software. Before you come to the meeting, please make sure you have installed the zoom client using this link: https://zoom.us/support/download.
+All office hours happen using the [zoom](https://zoom.us) software. Before you come to the meeting, please make sure you have installed the zoom client using this link: [https://zoom.us/support/download](https://zoom.us/support/download).
 
 >If you'd like to attend an office hours, please join the `#athens` channel in the [Gophers Slack Group](https://invite.slack.golangbridge.org/). An announcement will be made on Tuesday mornings to remind folks before the office hours start. You can also follow [@arschles](https://twitter.com/arschles) and/or [@gomods](https://twitter.com/gomods) on Twitter to get these announcements.
 >
