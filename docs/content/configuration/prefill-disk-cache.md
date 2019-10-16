@@ -4,7 +4,7 @@ description: How to pre-fill the disk cache
 weight: 4
 ---
 
-One of the popular features of Athens is that it can be run completely cut off to the internet. In this case, though, it can't reach out to an upstream (e.g. a VCS or another module proxy) to fetch modules that it doesn't have in storage. So, we need to manually fill up the disk partition that Athens uses with the dependencies that we need.
+One of the popular features of Athens is that it can be run completely cut off from the internet. In this case, though, it can't reach out to an upstream (e.g. a VCS or another module proxy) to fetch modules that it doesn't have in storage. So, we need to manually fill up the disk partition that Athens uses with the dependencies that we need.
 
 This document will guide you through packaging up a single module called `github.com/my/module`, and inserting it into the Athens disk storage.
 
@@ -20,10 +20,10 @@ The `source.zip` file has a specific directory structure and the `$VERSION.info`
 
 >We don't recommend that you create these assets yourself. Instead, use [pacmod](https://github.com/plexsystems/pacmod)
 
-To install the `pacmod` tool, run `go install` like this:
+To install the `pacmod` tool, run `go get` like this:
 
 ```console
-$ go install github.com/plexsystems/pacmod
+$ go get github.com/plexsystems/pacmod
 ```
 
 This command will install the `pacmod` binary to your `$GOPATH/bin/pacmod` directory, so make sure that is in your `$PATH`.
