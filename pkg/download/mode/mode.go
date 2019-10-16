@@ -4,10 +4,10 @@ import (
 	"encoding/base64"
 	"fmt"
 	"io/ioutil"
-	"path"
 	"strings"
 
 	"github.com/gomods/athens/pkg/errors"
+	"github.com/gomods/athens/pkg/paths"
 	"github.com/hashicorp/hcl2/gohcl"
 	"github.com/hashicorp/hcl2/hclparse"
 )
@@ -18,11 +18,13 @@ type Mode string
 
 // DownloadMode constants. For more information see config.dev.toml
 const (
-	Sync          Mode = "sync"
-	Async         Mode = "async"
-	Redirect      Mode = "redirect"
-	AsyncRedirect Mode = "async_redirect"
-	None          Mode = "none"
+	Sync            Mode = "sync"
+	Async           Mode = "async"
+	Redirect        Mode = "redirect"
+	AsyncRedirect   Mode = "async_redirect"
+	None            Mode = "none"
+	downloadModeErr      = "download mode is not set"
+	invalidModeErr       = "unrecognized download mode: %s"
 )
 
 // DownloadFile represents a custom HCL format of
@@ -50,6 +52,11 @@ type DownloadPath struct {
 // directly.
 func NewFile(m Mode, downloadURL string) (*DownloadFile, error) {
 	const op errors.Op = "downloadMode.NewFile"
+
+	if m == "" {
+		return nil, errors.E(op, downloadModeErr)
+	}
+
 	if strings.HasPrefix(string(m), "file:") {
 		filePath := string(m[5:])
 		bts, err := ioutil.ReadFile(filePath)
@@ -64,11 +71,12 @@ func NewFile(m Mode, downloadURL string) (*DownloadFile, error) {
 		}
 		return parseFile(bts)
 	}
+
 	switch m {
 	case Sync, Async, Redirect, AsyncRedirect, None:
 		return &DownloadFile{Mode: m, DownloadURL: downloadURL}, nil
 	default:
-		return nil, errors.E(op, "unrecognized download mode: "+m, errors.KindBadRequest)
+		return nil, errors.E(op, errors.KindBadRequest, fmt.Sprintf(invalidModeErr, m))
 	}
 }
 
@@ -110,7 +118,7 @@ func (d *DownloadFile) validate() error {
 // exist or match.
 func (d *DownloadFile) Match(mod string) Mode {
 	for _, p := range d.Paths {
-		if hasMatch, err := path.Match(p.Pattern, mod); hasMatch && err == nil {
+		if paths.MatchesPattern(p.Pattern, mod) {
 			return p.Mode
 		}
 	}
@@ -122,7 +130,7 @@ func (d *DownloadFile) Match(mod string) Mode {
 // the top level downloadURL is returned.
 func (d *DownloadFile) URL(mod string) string {
 	for _, p := range d.Paths {
-		if hasMatch, err := path.Match(p.Pattern, mod); hasMatch && err == nil {
+		if paths.MatchesPattern(p.Pattern, mod) {
 			if p.DownloadURL != "" {
 				return p.DownloadURL
 			}
