@@ -4,10 +4,10 @@ import (
 	"encoding/base64"
 	"fmt"
 	"io/ioutil"
-	"path"
 	"strings"
 
 	"github.com/gomods/athens/pkg/errors"
+	"github.com/gomods/athens/pkg/paths"
 	"github.com/hashicorp/hcl2/gohcl"
 	"github.com/hashicorp/hcl2/hclparse"
 )
@@ -118,7 +118,7 @@ func (d *DownloadFile) validate() error {
 // exist or match.
 func (d *DownloadFile) Match(mod string) Mode {
 	for _, p := range d.Paths {
-		if hasMatch, err := path.Match(p.Pattern, mod); hasMatch && err == nil {
+		if paths.MatchesPattern(p.Pattern, mod) {
 			return p.Mode
 		}
 	}
@@ -130,7 +130,7 @@ func (d *DownloadFile) Match(mod string) Mode {
 // the top level downloadURL is returned.
 func (d *DownloadFile) URL(mod string) string {
 	for _, p := range d.Paths {
-		if hasMatch, err := path.Match(p.Pattern, mod); hasMatch && err == nil {
+		if paths.MatchesPattern(p.Pattern, mod) {
 			if p.DownloadURL != "" {
 				return p.DownloadURL
 			}

@@ -2,7 +2,7 @@ replicaCount: 1
 image:
   registry: docker.io
   repository: gomods/athens
-  tag: v0.6.0
+  tag: v0.6.1
 
   ## Specify a imagePullPolicy
   ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
@@ -11,6 +11,8 @@ image:
   pullPolicy: IfNotPresent
 
 service:
+  ## Additional annotations to apply to the service
+  annotations: {}
   ## Port as exposed by the service
   servicePort: 80
   ## Type of service; valid values are "ClusterIP", "LoadBalancer", and

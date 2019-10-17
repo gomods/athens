@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"strconv"
+	"strings"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -76,21 +77,22 @@ func TestEnvOverrides(t *testing.T) {
 		TimeoutConf: TimeoutConf{
 			Timeout: 30,
 		},
-		StorageType:    "minio",
-		GlobalEndpoint: "mytikas.gomods.io",
-		Port:           ":7000",
-		EnablePprof:    false,
-		PprofPort:      ":3001",
-		BasicAuthUser:  "testuser",
-		BasicAuthPass:  "testpass",
-		ForceSSL:       true,
-		ValidatorHook:  "testhook.io",
-		PathPrefix:     "prefix",
-		NETRCPath:      "/test/path/.netrc",
-		HGRCPath:       "/test/path/.hgrc",
-		Storage:        &StorageConfig{},
-		SingleFlight:   &SingleFlight{},
-		RobotsFile:     "robots.txt",
+		StorageType:     "minio",
+		GlobalEndpoint:  "mytikas.gomods.io",
+		Port:            ":7000",
+		EnablePprof:     false,
+		PprofPort:       ":3001",
+		BasicAuthUser:   "testuser",
+		BasicAuthPass:   "testpass",
+		ForceSSL:        true,
+		ValidatorHook:   "testhook.io",
+		PathPrefix:      "prefix",
+		NETRCPath:       "/test/path/.netrc",
+		HGRCPath:        "/test/path/.hgrc",
+		Storage:         &StorageConfig{},
+		GoBinaryEnvVars: []string{"GOPROXY=direct"},
+		SingleFlight:    &SingleFlight{},
+		RobotsFile:      "robots.txt",
 	}
 
 	envVars := getEnvMap(expConf)
@@ -279,6 +281,7 @@ func TestParseExampleConfig(t *testing.T) {
 		TraceExporter:    "",
 		StatsExporter:    "prometheus",
 		SingleFlightType: "memory",
+		GoBinaryEnvVars:  []string{"GOPROXY=direct"},
 		SingleFlight:     &SingleFlight{},
 		SumDBs:           []string{"https://sum.golang.org"},
 		NoSumPatterns:    []string{},
@@ -325,6 +328,7 @@ func getEnvMap(config *Config) map[string]string {
 	envVars["ATHENS_NETRC_PATH"] = config.NETRCPath
 	envVars["ATHENS_HGRC_PATH"] = config.HGRCPath
 	envVars["ATHENS_ROBOTS_FILE"] = config.RobotsFile
+	envVars["ATHENS_GO_BINARY_ENV_VARS"] = strings.Join(config.GoBinaryEnvVars, ",")
 
 	storage := config.Storage
 	if storage != nil {
@@ -475,5 +479,36 @@ func TestDefaultConfigMatchesConfigFile(t *testing.T) {
 	eq := cmp.Equal(defConf, parsedConf, ignoreStorageOpts, ignoreGoEnvOpts)
 	if !eq {
 		t.Errorf("Default values from the config file: %v should equal to the default values returned in case the config file isn't provided %v", parsedConf, defConf)
+	}
+}
+
+func TestEnvList(t *testing.T) {
+	el := EnvList{"KEY=VALUE"}
+	if !el.HasKey("KEY") {
+		t.Fatal("expected KEY to be present")
+	}
+	if el.HasKey("KEY=") {
+		t.Fatal("expected KEY= to not be found")
+	}
+	el.Add("HELLO", "WORLD")
+	if !el.HasKey("HELLO") {
+		t.Fatal("expected HELLO key to be found")
+	}
+	if err := el.Validate(); err != nil {
+		t.Fatalf("expected err to be nil but got %v", err)
+	}
+	el = EnvList{"HELLO"}
+	if err := el.Validate(); err == nil {
+		t.Fatal("expected a validation error for incorrect formatting but got nil")
+	}
+	el = EnvList{"GODEBUG=netdns=cgo"}
+	if !el.HasKey("GODEBUG") {
+		t.Fatal("expected GODEBUG key to be present")
+	}
+	if el.HasKey("GODEBUG=") {
+		t.Fatal("expected GODEBUG= key not to be found")
+	}
+	if err := el.Validate(); err != nil {
+		t.Fatalf("expected err to be nil but got %v", err)
 	}
 }
