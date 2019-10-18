@@ -6,11 +6,12 @@ import (
 )
 
 var testCases = []struct {
-	name         string
-	file         *DownloadFile
-	input        string
-	expectedMode Mode
-	expectedURL  string
+	name              string
+	file              *DownloadFile
+	input             string
+	expectedMode      Mode
+	expectedURL       string
+	expectedSourceURL string
 }{
 	{
 		name:         "sync",
@@ -101,6 +102,18 @@ var testCases = []struct {
 		expectedMode: Redirect,
 		expectedURL:  "proxy.golang.org",
 	},
+	{
+		name: "alias",
+		file: &DownloadFile{
+			Mode: Sync,
+			Aliases: []*ModAlias{
+				{Name: "github.com/gomods/athens-proxy", SourceURL: "github.com/gomods/athens"},
+			},
+		},
+		input:             "github.com/gomods/athens-proxy",
+		expectedSourceURL: "github.com/gomods/athens",
+		expectedMode:      Sync,
+	},
 }
 
 func TestMode(t *testing.T) {
@@ -113,6 +126,12 @@ func TestMode(t *testing.T) {
 			givenURL := tc.file.URL(tc.input)
 			if givenURL != tc.expectedURL {
 				t.Fatalf("expected matched DownloadURL to be %q but got %q", tc.expectedURL, givenURL)
+			}
+			if tc.expectedSourceURL != "" {
+				givenSourceURL := tc.file.Alias(tc.input)
+				if givenSourceURL != tc.expectedSourceURL {
+					t.Fatalf("expected matched source url to be %q but got %q", tc.expectedSourceURL, givenSourceURL)
+				}
 			}
 		})
 	}
