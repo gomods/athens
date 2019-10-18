@@ -5,7 +5,7 @@ draft: false
 weight: 4
 ---
 
-[Google Cloud Run](https://cloud.google.com/run/) is a service that aims to bridge the gap between the maintainance benefits of serverless architecture and the flexibility of Kubernetes. It is built on top of the opensource [Knative](https://knative.dev/) project. Deploying using Cloud Run is similar to deploying using [Google App Engine](/install/install-on-gae) with the benefits of a free tier and a simpler build process. 
+[Google Cloud Run](https://cloud.google.com/run/) is a service that aims to bridge the gap between the maintainance benefits of serverless architecture and the flexibility of Kubernetes. It is built on top of the opensource [Knative](https://knative.dev/) project. Deploying using Cloud Run is similar to deploying using [Google App Engine](/install/install-on-gae) with the benefits of a free tier and a simpler build process.
 
 ## Selecting a Storage Provider
 
@@ -16,13 +16,23 @@ There is documentaion about how to use environment variables to configure a larg
 This guide assumes you have completed the following tasks:
 
 - Signed up for Google Cloud
-- Installed the [gcloud](https://cloud.google.com/sdk/install) command line tool 
+- Installed the [gcloud](https://cloud.google.com/sdk/install) command line tool
 - Installed the beta plugin for ghe gcloud command line tool ([this is how to set it up](https://cloud.google.com/run/docs/setup))
 - Created a (GCS) bucket for your go modules
 
+### Setup a GCS Bucket
+
+If you do not already have GCS bucket you can set one up using the [gsutil tool](https://cloud.google.com/storage/docs/gsutil).
+
+First select a [region](https://cloud.google.com/about/locations/?tab=americas) you would like to have your storage in. You can then create a bucket in that region using the following command substituting your in your region and bucket name.
+
+```bash
+gsutil mb -l europe-west-4 gs://some-bucket
+```
+
 ## Setup
 
-First set up configuration environment variables
+Change the values of these environment variables to be appropriate for your application. For `GOOGLE_CLOUD_PROJECT`, this needs to be the name of the project that has your cloud run deployment in it. `ATHENS_REGION` should be the [region](https://cloud.google.com/about/locations/?tab=americas) that your cloud run instance will be in, and `GCS_BUCKET` should be the Google Cloud Storage bucket that Athens will store module code and metadata in..
 
 ```bash
 export GOOGLE_CLOUD_PROJECT=your-project
@@ -33,7 +43,7 @@ export GCS_BUCKET=your-bucket-name
 You will then need to push a copy of the Athens docker image to your google cloud container registry.
 
 ```bash
-docker pull gomods/athens:v0.6.0 
+docker pull gomods/athens:v0.6.0
 
 docker tag gomods/athens:v0.6.0 gcr.io/$GOOGLE_CLOUD_PROJECT/athens:v0.6.0
 
