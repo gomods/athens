@@ -22,6 +22,9 @@ func ModuleHandler(dp Protocol, lggr log.Entry, df *mode.DownloadFile) http.Hand
 			w.WriteHeader(errors.Kind(err))
 			return
 		}
+
+		mod = df.Alias(mod)
+
 		modBts, err := dp.GoMod(r.Context(), mod, ver)
 		if err != nil {
 			severityLevel := errors.Expect(err, errors.KindNotFound, errors.KindRedirect)

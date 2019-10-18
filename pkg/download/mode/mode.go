@@ -34,6 +34,7 @@ type DownloadFile struct {
 	Mode        Mode            `hcl:"mode"`
 	DownloadURL string          `hcl:"downloadURL"`
 	Paths       []*DownloadPath `hcl:"download,block"`
+	Aliases     []*ModAlias     `hcl:"alias,block"`
 }
 
 // DownloadPath represents a custom Mode for
@@ -42,6 +43,13 @@ type DownloadPath struct {
 	Pattern     string `hcl:"pattern,label"`
 	Mode        Mode   `hcl:"mode"`
 	DownloadURL string `hcl:"downloadURL,optional"`
+}
+
+// ModAlias represents a custom source URL for
+// a module name.
+type ModAlias struct {
+	Name      string `hcl:"name,label"`
+	SourceURL string `hcl:"sourceURL"`
 }
 
 // NewFile takes a mode and returns a DownloadFile.
@@ -123,6 +131,20 @@ func (d *DownloadFile) Match(mod string) Mode {
 		}
 	}
 	return d.Mode
+}
+
+// Alias returns the SourceURL that matches the given
+// module. A name is prioritized by order in
+// which it appears in the HCL file, while the
+// original URL will be returned if no aliases
+// exist.
+func (d *DownloadFile) Alias(mod string) string {
+	for _, p := range d.Aliases {
+		if p.Name == mod {
+			return p.SourceURL
+		}
+	}
+	return mod
 }
 
 // URL returns the redirect URL that applies

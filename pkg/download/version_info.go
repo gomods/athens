@@ -21,6 +21,9 @@ func InfoHandler(dp Protocol, lggr log.Entry, df *mode.DownloadFile) http.Handle
 			w.WriteHeader(errors.Kind(err))
 			return
 		}
+
+		mod = df.Alias(mod)
+
 		info, err := dp.Info(r.Context(), mod, ver)
 		if err != nil {
 			severityLevel := errors.Expect(err, errors.KindNotFound, errors.KindRedirect)

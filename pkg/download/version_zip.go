@@ -22,6 +22,9 @@ func ZipHandler(dp Protocol, lggr log.Entry, df *mode.DownloadFile) http.Handler
 			w.WriteHeader(errors.Kind(err))
 			return
 		}
+
+		mod = df.Alias(mod)
+
 		zip, err := dp.Zip(r.Context(), mod, ver)
 		if err != nil {
 			severityLevel := errors.Expect(err, errors.KindNotFound, errors.KindRedirect)

@@ -25,6 +25,8 @@ func ListHandler(dp Protocol, lggr log.Entry, df *mode.DownloadFile) http.Handle
 			return
 		}
 
+		mod = df.Alias(mod)
+
 		versions, err := dp.List(r.Context(), mod)
 		if err != nil {
 			severityLevel := errors.Expect(err, errors.KindNotFound)
