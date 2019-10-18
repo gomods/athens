@@ -33,7 +33,7 @@ We provide three ways to run the proxy on your local machine:
 2. Natively on your host
 3. Using [Sail](https://sail.dev)
 
-.See below for instructions for each option!
+See below for instructions for each option!
 
 ## Using Docker
 
