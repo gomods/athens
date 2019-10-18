@@ -15,6 +15,6 @@ download "github.com/pkg/*" {
     downloadURL = "https://gocenter.io"
 }
 
-alias "my.private.repo.com/pkg/example" {
-    sourceURL = "my.private.repo.com/pkg/exaple-service"
+alias "github.com/gomods/athens-proxy" {
+    sourceURL = "github.com/gomods/athens"
 }

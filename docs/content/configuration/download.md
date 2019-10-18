@@ -41,6 +41,10 @@ download "github.com/pkg/*" {
     mode = "redirect"
     downloadURL = "https://gocenter.io"
 }
+
+alias "github.com/gomods/athens-proxy" {
+    sourceURL = "github.com/gomods/athens"
+}
 ```
 
 The first two lines describe the behavior and the destination of all packages: redirect to `https://proxy.golang.org` and asynchronously persist the module to storage. 
