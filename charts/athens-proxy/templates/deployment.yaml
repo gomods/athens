@@ -105,6 +105,15 @@ spec:
         - name: AWS_SESSION_TOKEN
           value: {{ .Values.storage.s3.session_token | quote }}
         {{- end }}
+        {{- else if eq .Values.storage.type "gcp"}}
+        - name: GOOGLE_CLOUD_PROJECT
+          value: {{ .Values.storage.gcp.projectID | quote }}
+        - name: ATHENS_STORAGE_GCP_BUCKET
+          value: {{ .Values.storage.gcp.bucket | quote }}
+        {{- if .Values.storage.gcp.serviceAccount }}
+        - name: ATHENS_STORAGE_GCP_JSON_KEY
+          value: {{ .Values.storage.gcp.serviceAccount | quote }}
+        {{- end }}
         {{- else if eq .Values.storage.type "minio" }}
         {{- if .Values.storage.minio.endpoint }}
         - name: ATHENS_MINIO_ENDPOINT

@@ -64,6 +64,17 @@ storage:
     accessKey: ""
     secretKey: ""
     bucket: ""
+  gcp:
+  # For more information, see:
+  # https://docs.gomods.io/install/install-on-kubernetes/#google-cloud-storage
+    # you must set gcp projectID and bucket when running 'helm install'
+    projectID: ""
+    bucket: ""
+    # set serviceAccount to a base64 encoded service account key which has
+    # read/write access to the GCS bucket. If you are running Athens inside
+    # GCP, you will most likely not need this as GCP figures out internal
+    # authentication between products for you.
+    serviceAccount: ""
 
 # Extra environment variables to be passed
 # You can add any new ones at the bottom
