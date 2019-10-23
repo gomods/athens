@@ -48,7 +48,7 @@ Here are some other ways to get involved:
 
 - Read the full [walkthrough](/walkthrough) with setting up, running and testing the Athens proxy
 explores this in greater depth.
-* Join our [weekly development meeting](/contributing/community/developer-meetings/)! It's a great way to meet folks working on the project, ask questions or just hang out. All are welcome to join and participate.
+* Join our [office hours](/contributing/community/office-hours/)! It's a great way to meet folks working on the project, ask questions or just hang out. All are welcome to join and participate.
 * Check out our issue queue for [good first issues](https://github.com/gomods/athens/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22)
 * Join us in the `#athens` channel on the [Gophers Slack](https://invite.slack.golangbridge.org/)
 
