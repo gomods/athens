@@ -21,9 +21,9 @@ spec:
         chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
         release: "{{ .Release.Name }}"
       annotations:
-        checksum/config: {{ include (print $.Template.BasePath "/config-upstream.yaml") . | sha256sum }}
-        checksum/config: {{ include (print $.Template.BasePath "/config-ssh-git-servers.yaml") . | sha256sum }}
-        checksum/secret: {{ include (print $.Template.BasePath "/secret-ssh-git-servers.yaml") . | sha256sum }}
+        checksum/upstream: {{ include (print $.Template.BasePath "/config-upstream.yaml") . | sha256sum }}
+        checksum/ssh-config: {{ include (print $.Template.BasePath "/config-ssh-git-servers.yaml") . | sha256sum }}
+        checksum/ssh-secret: {{ include (print $.Template.BasePath "/secret-ssh-git-servers.yaml") . | sha256sum }}
     spec:
       {{- if .Values.sshGitServers }}
       initContainers:
