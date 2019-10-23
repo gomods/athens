@@ -26,34 +26,34 @@ If you do not already have GCS bucket you can set one up using the [gsutil tool]
 
 First select a [region](https://cloud.google.com/about/locations/?tab=americas) you would like to have your storage in. You can then create a bucket in that region using the following command substituting your in your region and bucket name.
 
-```bash
-gsutil mb -l europe-west-4 gs://some-bucket
+```console
+$ gsutil mb -l europe-west-4 gs://some-bucket
 ```
 
 ## Setup
 
 Change the values of these environment variables to be appropriate for your application. For `GOOGLE_CLOUD_PROJECT`, this needs to be the name of the project that has your cloud run deployment in it. `ATHENS_REGION` should be the [region](https://cloud.google.com/about/locations/?tab=americas) that your cloud run instance will be in, and `GCS_BUCKET` should be the Google Cloud Storage bucket that Athens will store module code and metadata in..
 
-```bash
-export GOOGLE_CLOUD_PROJECT=your-project
-export ATHENS_REGION=asia-northeast1
-export GCS_BUCKET=your-bucket-name
+```console
+$ export GOOGLE_CLOUD_PROJECT=your-project
+$ export ATHENS_REGION=asia-northeast1
+$ export GCS_BUCKET=your-bucket-name
 ```
 
 You will then need to push a copy of the Athens docker image to your google cloud container registry.
 
-```bash
-docker pull gomods/athens:v0.6.0
+```console
+$ docker pull gomods/athens:v0.6.0
 
-docker tag gomods/athens:v0.6.0 gcr.io/$GOOGLE_CLOUD_PROJECT/athens:v0.6.0
+$ docker tag gomods/athens:v0.6.0 gcr.io/$GOOGLE_CLOUD_PROJECT/athens:v0.6.0
 
-gcloud builds submit --tag gcr.io/$GOOGLE_CLOUD_PROJECT/athens:v0.6.0
+$ gcloud builds submit --tag gcr.io/$GOOGLE_CLOUD_PROJECT/athens:v0.6.0
 ```
 
 Once you have the container image in your registry you can use `gcloud` to provision your Athens instance.
 
-```
-gcloud beta run deploy \
+```console
+$ gcloud beta run deploy \
     --image gcr.io/$GOOGLE_CLOUD_PROJECT/athens:v0.6.0 \
     --platform managed \
     --region $ATHENS_REGION \
@@ -66,6 +66,6 @@ gcloud beta run deploy \
 
 Once this command finishes is will provide a url to your instance, but you can always find this through the cli:
 
-```
-gcloud beta run services describe athens --platform managed --region $ATHENS_REGION | grep hostname
+```console
+$ gcloud beta run services describe athens --platform managed --region $ATHENS_REGION | grep hostname
 ```

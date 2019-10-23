@@ -24,28 +24,28 @@ If you do not already have GCS bucket you can set one up using the [gsutil tool]
 
 First select a [global region](https://cloud.google.com/about/locations/?tab=americas) you would like to have your storage in. You can then create a bucket in that region using the following command substituting your in your region and bucket name.
 
-```bash
-gsutil mb -l europe-west-4 gs://some-bucket
+```console
+$ gsutil mb -l europe-west-4 gs://some-bucket
 ```
 
 ## Setup
 
 First clone the Athens repository
 
-```bash
-git clone https://github.com/gomods/athens.git
+```console
+$ git clone https://github.com/gomods/athens.git
 ```
 
 There is already a Google Application Engine scaffold set up for you. Copy it into a new file and make changes to the environment variables.
 
-```bash
-cd athens
-cp scripts/gae/app.sample.yaml scripts/gae/app.yaml
-code scripts/gae/app.yaml
+```console
+$ cd athens
+$ cp scripts/gae/app.sample.yaml scripts/gae/app.yaml
+$ code scripts/gae/app.yaml
 ```
 
 Once you have configured the environment variables you can deploy Athens as a GAE service.
 
-```bash
-make deploy-gae
+```console
+$ make deploy-gae
 ```
