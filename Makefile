@@ -73,6 +73,12 @@ docker: proxy-docker
 proxy-docker:
 	docker build -t gomods/athens -f cmd/proxy/Dockerfile .
 
+.PHONY: release
+release:
+	$(MAKE) docker-push
+	./script/update-chart-version.sh
+	$(MAKE) charts-push
+
 .PHONY: docker-push
 docker-push:
 	./scripts/push-docker-images.sh
