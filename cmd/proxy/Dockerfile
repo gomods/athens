@@ -22,9 +22,9 @@ COPY --from=builder /usr/local/go/bin/go /bin/go
 
 # Add tini, see https://github.com/gomods/athens/issues/1155 for details.
 RUN apk add --update bzr git mercurial openssh-client subversion procps fossil tini && \
-	mkdir -p /usr/local/go
-
-ENV GO_ENV=production
+	mkdir -p /usr/local/go && \
+	sed -i -r -e 's/(GoEnv\s*=\s*)"development"/\1"production"/' /config/config.toml && \
+	chmod 600 /config/config.toml
 
 EXPOSE 3000
 
