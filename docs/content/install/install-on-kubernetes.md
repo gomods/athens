@@ -182,7 +182,7 @@ helm install gomods/athens-proxy -n athens --namespace athens --set storage.type
  To use Google Cloud Storage storage with Athens, set `storage.type` to `gcp`. You need to set `storage.gcp.projectID` and `storage.gcp.bucket` to the
  desired GCP project and bucket name, respectively.
 
- Depending on your deployment environment you will also need to set `storage.gcp.serviceAccount` to a base64 encoded service account key which has access to
+ Depending on your deployment environment you will also need to set `storage.gcp.serviceAccount` to a key which has read/write access to
  the GCS bucket. If you are running Athens inside GCP, you will most likely not need this as GCP figures out internal authentication between products for you.
 
  ```
