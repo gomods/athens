@@ -24,6 +24,7 @@ run: ## run the athens proxy with dev configs
 
 .PHONY: run-docker
 run-docker:
+	docker-compose -p athensdockerdev build --build-arg GOLANG_VERSION=${GOLANG_VERSION} dev
 	docker-compose -p athensdockerdev up -d dev
 
 .PHONY: run-docker-teardown
