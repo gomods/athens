@@ -121,7 +121,7 @@ func getTestConfig() *config.GCPConfig {
 		return nil
 	}
 	return &config.GCPConfig{
-		Bucket:  "athens_drone_stash_bucket",
-		JSONKey: creds,
+		Bucket:         "athens_drone_stash_bucket",
+		ServiceAccount: creds,
 	}
 }
