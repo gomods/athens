@@ -14,7 +14,7 @@ weight: 1
 
 ## 前提条件
 
-为了在Kubernetes集群上安装Athens，您必须满足一些前提条件.如果您已经完成以下步骤，请继续执行[配置Helm](#configure-helm). 本指南假设您已经创建了Kubernetes集群.
+为了在Kubernetes集群上安装Athens，您必须满足一些前提条件.如果您已经完成以下步骤，请继续执行[配置Helm](#配置Helm). 本指南假设您已经创建了Kubernetes集群.
 
 * 安装 [Kubernetes CLI](#安装Kubernetes-CLI).
 * 安装 [Helm CLI](#安装Helm-CLI).
@@ -48,7 +48,7 @@ curl https://raw.githubusercontent.com/kubernetes/helm/master/scripts/get | bash
 
 ## 配置Helm
 
-如果您的集群已配置为使用Helm，请继续[部署Athens](#deploy-athens).
+如果您的集群已配置为使用Helm，请继续[部署Athens](#部署Athens).
 
 如果没有，请继续阅读。
 
@@ -63,7 +63,7 @@ helm init --service-account tiller
 
 ### 非RBAC 集群
 
-如果您的集群没有启用rbac，则可以QINGSONG初始化helm。
+如果您的集群没有启用rbac，则可以轻松初始化helm。
 
 ```console
 helm init

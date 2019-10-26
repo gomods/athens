@@ -5,7 +5,7 @@ weight: 2
 ---
 当您按照[Walkthrough](/walkthrough)中的说明进行操作时，Athens最终使用的是本地存储空间。 这仅适用于短期试用Athens，因为您将很快耗尽内存，并且Athens在两次重启之间不会保留模块。 本指南将帮助您以一种更适合的方式运行Athens，以用于提供一个实例供开发团队共享的场景。
 
-我们将使用Docker来运行Athens，因此首先请确保您已安装Docker[installed](https://docs.docker.com/install/).
+我们将使用Docker来运行Athens，因此首先请确保您已经[安装Docker](https://docs.docker.com/install/).
 
 ## 选择存储提供程序
 
