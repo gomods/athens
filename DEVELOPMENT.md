@@ -88,7 +88,7 @@ There are many service execution environments. On Linux, two important ones are 
 
 If you're inside GOPATH, make sure `GO111MODULE=on`, if you're outside GOPATH, then Go Modules are on by default.
 
-The Makefile builds the necessary binary, `athens`. Then a script sets up the service for you.
+The Makefile builds the necessary `athens` binary. Then a script sets up the service for you.
 
 ```console
 $ make athens
@@ -100,6 +100,13 @@ After the server starts, you can manage it as usual via `systemctl`, e.g.:
 ```console
 sudo systemctl status athens
 ```
+which is the same as
+
+```console
+$ sudo ./scripts/systemd.sh status
+```
+
+The `systemd.sh` script also has a `remove` option to uninstall the service.
 
 SystemD allows logs to be collected and inspected; more information is in 
 [this tutorial by Digital Ocean](https://www.digitalocean.com/community/tutorials/how-to-use-journalctl-to-view-and-manipulate-systemd-logs), amongst others. So tailing the logs can be done like this:
