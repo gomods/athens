@@ -24,6 +24,8 @@ func (s *ModuleSuite) TestNewGoGetFetcher() {
 }
 
 func (s *ModuleSuite) TestGoGetFetcherError() {
+	// need the real binary since it's not possible to mock an executable not exists error
+	s.useRealGoBin()
 	fetcher, err := NewGoGetFetcher("invalidpath", s.env, afero.NewOsFs())
 
 	assert.Nil(s.T(), fetcher)
@@ -72,6 +74,9 @@ func (s *ModuleSuite) TestNotFoundFetches() {
 }
 
 func (s *ModuleSuite) TestGoGetFetcherSumDB() {
+	// need the real binary since we are testing the interaction with a local proxy
+	s.useRealGoBin()
+
 	if os.Getenv("SKIP_UNTIL_113") != "" {
 		return
 	}
@@ -83,7 +88,7 @@ func (s *ModuleSuite) TestGoGetFetcherSumDB() {
 		"/mockmod.xyz/@v/v1.2.3.mod":  []byte(`{"module mod}`),
 		"/mockmod.xyz/@v/v1.2.3.zip":  zipBytes,
 	}}
-	proxyAddr, close := s.getProxy(mp)
+	proxyAddr, close := getProxy(mp)
 	defer close()
 
 	fetcher, err := NewGoGetFetcher(s.goBinaryName, []string{"GOPROXY=" + proxyAddr}, afero.NewOsFs())
@@ -98,7 +103,7 @@ func (s *ModuleSuite) TestGoGetFetcherSumDB() {
 	r.NoError(err, "expected the go sum to not be consulted but got an error")
 }
 
-func (s *ModuleSuite) getProxy(h http.Handler) (addr string, close func()) {
+func getProxy(h http.Handler) (addr string, close func()) {
 	srv := httptest.NewServer(h)
 	return srv.URL, srv.Close
 }
