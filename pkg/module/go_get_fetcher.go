@@ -105,7 +105,7 @@ func downloadModule(goBinaryName string, envVars []string, fs afero.Fs, gopath, 
 	const op errors.Op = "module.downloadModule"
 	uri := strings.TrimSuffix(module, "/")
 	fullURI := fmt.Sprintf("%s@%s", uri, version)
-	cmd := cmd(goBinaryName, "mod", "download", "-json", fullURI)
+	cmd := newCmd(goBinaryName, "mod", "download", "-json", fullURI)
 	cmd.Env = prepareEnv(gopath, envVars)
 	cmd.Dir = repoRoot
 	stdout := &bytes.Buffer{}
@@ -150,7 +150,7 @@ func getRepoDirName(repoURI, version string) string {
 
 func validGoBinary(name string) error {
 	const op errors.Op = "module.validGoBinary"
-	err := cmd(name).Run()
+	err := newCmd(name).Run()
 	_, ok := err.(*exec.ExitError)
 	if err != nil && !ok {
 		return errors.E(op, err)
@@ -158,6 +158,6 @@ func validGoBinary(name string) error {
 	return nil
 }
 
-var cmd = func(args ...string) *exec.Cmd {
+var newCmd = func(args ...string) *exec.Cmd {
 	return exec.Command(args[0], args[1:]...)
 }

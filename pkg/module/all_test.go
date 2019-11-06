@@ -25,21 +25,21 @@ type ModuleSuite struct {
 	fs           afero.Fs
 	goBinaryName string
 	env          []string
-	realCmdFunc  cmdFunc
+	realNewCmd   cmdFunc
 }
 
 func (s *ModuleSuite) SetupTest() {
 	s.fs = afero.NewMemMapFs()
-	s.realCmdFunc = cmd
-	cmd = helperProcess
+	s.realNewCmd = newCmd
+	newCmd = helperProcess
 }
 
 func (s *ModuleSuite) AfterTest(suiteName, testName string) {
-	cmd = s.realCmdFunc
+	newCmd = s.realNewCmd
 }
 
 func (s *ModuleSuite) useRealGoBin() {
-	cmd = s.realCmdFunc
+	newCmd = s.realNewCmd
 }
 
 func TestModules(t *testing.T) {
