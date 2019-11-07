@@ -28,8 +28,6 @@ COPY --from=builder /usr/local/go/bin/go /bin/go
 RUN apk add --update bzr git mercurial openssh-client subversion procps fossil tini && \
 	mkdir -p /usr/local/go
 
-ENV GO_ENV=production
-
 EXPOSE 3000
 
 ENTRYPOINT [ "/sbin/tini", "--" ]
