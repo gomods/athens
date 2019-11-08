@@ -34,33 +34,43 @@ type Storage struct {
 func New(s3Conf *config.S3Config, timeout time.Duration, options ...func(*aws.Config)) (*Storage, error) {
 	const op errors.Op = "s3.New"
 
-	awsConfig := defaults.Config()
-	awsConfig.Region = aws.String(s3Conf.Region)
-	for _, o := range options {
-		o(awsConfig)
-	}
+	var awsConfig *aws.Config
+	if s3Conf.UseIAMProxy {
+		// if set to use an IAM proxy (like KIAM), Credentials aren't set up in the environment where Athens is running
+		// but are instead attached to aws requests via a proxy, typically running as a sidecar.
 
-	credProviders := defaults.CredProviders(awsConfig, defaults.Handlers())
-
-	if !s3Conf.UseDefaultConfiguration {
-		endpointcreds := []credentials.Provider{
-			endpointcreds.NewProviderClient(*awsConfig, defaults.Handlers(), endpointFrom(s3Conf.CredentialsEndpoint, s3Conf.AwsContainerCredentialsRelativeURI)),
-			&credentials.StaticProvider{
-				Value: credentials.Value{
-					AccessKeyID:     s3Conf.Key,
-					SecretAccessKey: s3Conf.Secret,
-					SessionToken:    s3Conf.Token,
-				},
-			},
+		// To use the IAM proxy, we don't need to set the config (except for the region) as all other AWS settings are
+		// inherited from the proxy
+		awsConfig = aws.NewConfig().WithRegion(s3Conf.Region)
+	} else {
+		awsConfig = defaults.Config()
+		awsConfig.Region = aws.String(s3Conf.Region)
+		for _, o := range options {
+			o(awsConfig)
 		}
 
-		credProviders = append(endpointcreds, credProviders...)
-	}
+		credProviders := defaults.CredProviders(awsConfig, defaults.Handlers())
 
-	awsConfig.Credentials = credentials.NewChainCredentials(credProviders)
-	awsConfig.CredentialsChainVerboseErrors = aws.Bool(true)
-	if s3Conf.Endpoint != "" {
-		awsConfig.Endpoint = aws.String(s3Conf.Endpoint)
+		if !s3Conf.UseDefaultConfiguration {
+			endpointcreds := []credentials.Provider{
+				endpointcreds.NewProviderClient(*awsConfig, defaults.Handlers(), endpointFrom(s3Conf.CredentialsEndpoint, s3Conf.AwsContainerCredentialsRelativeURI)),
+				&credentials.StaticProvider{
+					Value: credentials.Value{
+						AccessKeyID:     s3Conf.Key,
+						SecretAccessKey: s3Conf.Secret,
+						SessionToken:    s3Conf.Token,
+					},
+				},
+			}
+
+			credProviders = append(endpointcreds, credProviders...)
+		}
+
+		awsConfig.Credentials = credentials.NewChainCredentials(credProviders)
+		awsConfig.CredentialsChainVerboseErrors = aws.Bool(true)
+		if s3Conf.Endpoint != "" {
+			awsConfig.Endpoint = aws.String(s3Conf.Endpoint)
+		}
 	}
 
 	// create a session with creds
