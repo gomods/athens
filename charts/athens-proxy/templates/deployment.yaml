@@ -24,6 +24,9 @@ spec:
         checksum/config: {{ include (print $.Template.BasePath "/config-upstream.yaml") . | sha256sum }}
         checksum/config: {{ include (print $.Template.BasePath "/config-ssh-git-servers.yaml") . | sha256sum }}
         checksum/secret: {{ include (print $.Template.BasePath "/secret-ssh-git-servers.yaml") . | sha256sum }}
+        {{- if .Values.storage.s3.iamRole }}
+        iam.amazonaws.com/role: {{ .Values.storage.s3.iamRole | quote }}
+        {{- end }}
     spec:
       {{- if .Values.sshGitServers }}
       initContainers:
@@ -104,6 +107,10 @@ spec:
         {{- if .Values.storage.s3.session_token }}
         - name: AWS_SESSION_TOKEN
           value: {{ .Values.storage.s3.session_token | quote }}
+        {{- end }}
+        {{- if .Values.storage.s3.use_iam_proxy }}
+        - name: AWS_USE_IAM_PROXY
+          value: {{ .Values.storage.s3.use_iam_proxy | quote }}
         {{- end }}
         {{- else if eq .Values.storage.type "minio" }}
         {{- if .Values.storage.minio.endpoint }}
