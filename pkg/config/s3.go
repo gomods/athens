@@ -2,6 +2,8 @@ package config
 
 // S3Config specifies the properties required to use S3 as the storage backend
 type S3Config struct {
+	Endpoint                           string `envconfig:"AWS_ENDPOINT"`
+	S3ForcePathStyle                   bool   `envconfig:"AWS_FORCE_PATH_STYLE"`
 	Region                             string `validate:"required" envconfig:"AWS_REGION"`
 	Key                                string `envconfig:"AWS_ACCESS_KEY_ID"`
 	Secret                             string `envconfig:"AWS_SECRET_ACCESS_KEY"`
@@ -10,4 +12,5 @@ type S3Config struct {
 	UseDefaultConfiguration            bool   `envconfig:"AWS_USE_DEFAULT_CONFIGURATION"`
 	CredentialsEndpoint                string `envconfig:"AWS_CREDENTIALS_ENDPOINT"`
 	AwsContainerCredentialsRelativeURI string `envconfig:"AWS_CONTAINER_CREDENTIALS_RELATIVE_URI"`
+	UseStaticCredentials               bool   `envconfig:"AWS_USE_STATIC_CREDENTIALS"`
 }

@@ -36,6 +36,8 @@ func New(s3Conf *config.S3Config, timeout time.Duration, options ...func(*aws.Co
 
 	awsConfig := defaults.Config()
 	awsConfig.Region = aws.String(s3Conf.Region)
+	options = append(options, overrideEndpoint(s3Conf), enforceS3PathStyle(s3Conf))
+
 	for _, o := range options {
 		o(awsConfig)
 	}
@@ -57,8 +59,12 @@ func New(s3Conf *config.S3Config, timeout time.Duration, options ...func(*aws.Co
 		credProviders = append(endpointcreds, credProviders...)
 	}
 
-	awsConfig.Credentials = credentials.NewChainCredentials(credProviders)
-	awsConfig.CredentialsChainVerboseErrors = aws.Bool(true)
+	if s3Conf.UseStaticCredentials {
+		awsConfig.Credentials = credentials.NewStaticCredentials(s3Conf.Key, s3Conf.Secret, s3Conf.Token)
+	} else {
+		awsConfig.Credentials = credentials.NewChainCredentials(credProviders)
+		awsConfig.CredentialsChainVerboseErrors = aws.Bool(true)
+	}
 
 	// create a session with creds
 	sess, err := session.NewSession(awsConfig)
@@ -74,6 +80,22 @@ func New(s3Conf *config.S3Config, timeout time.Duration, options ...func(*aws.Co
 		s3API:    uploader.S3,
 		timeout:  timeout,
 	}, nil
+}
+
+func overrideEndpoint(s3Conf *config.S3Config) func(*aws.Config) {
+	return func(cfg *aws.Config) {
+		if s3Conf.Endpoint != "" {
+			cfg.Endpoint = aws.String(s3Conf.Endpoint)
+		}
+	}
+}
+
+func enforceS3PathStyle(s3Conf *config.S3Config) func(*aws.Config) {
+	return func(cfg *aws.Config) {
+		if s3Conf.S3ForcePathStyle {
+			cfg.S3ForcePathStyle = aws.Bool(s3Conf.S3ForcePathStyle)
+		}
+	}
 }
 
 func endpointFrom(credentialsEndpoint string, relativeURI string) string {
