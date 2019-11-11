@@ -2,7 +2,7 @@ VERSION = "unset"
 DATE=$(shell date -u +%Y-%m-%d-%H:%M:%S-%Z)
 
 ifndef GOLANG_VERSION
-override GOLANG_VERSION = 1.12
+override GOLANG_VERSION = 1.13
 endif
 
 .PHONY: build
@@ -28,6 +28,7 @@ run: ## run the athens proxy with dev configs
 
 .PHONY: run-docker
 run-docker:
+	docker-compose -p athensdockerdev build --build-arg GOLANG_VERSION=${GOLANG_VERSION} dev
 	docker-compose -p athensdockerdev up -d dev
 
 .PHONY: run-docker-teardown
@@ -75,7 +76,7 @@ docker: proxy-docker
 
 .PHONY: proxy-docker
 proxy-docker:
-	docker build -t gomods/athens -f cmd/proxy/Dockerfile .
+	docker build -t gomods/athens -f cmd/proxy/Dockerfile --build-arg GOLANG_VERSION=${GOLANG_VERSION} .
 
 .PHONY: docker-push
 docker-push:
