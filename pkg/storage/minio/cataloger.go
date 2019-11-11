@@ -3,6 +3,7 @@ package minio
 import (
 	"context"
 	"fmt"
+	"net/url"
 	"strings"
 
 	"github.com/gomods/athens/pkg/errors"
@@ -68,7 +69,13 @@ func fetchModsAndVersions(objects []minio.ObjectInfo, elementsNum int) ([]paths.
 
 func parseMinioKey(o *minio.ObjectInfo) (paths.AllPathParams, error) {
 	const op errors.Op = "minio.parseMinioKey"
-	parts := strings.Split(o.Key, "/")
+
+	key, err := url.PathUnescape(o.Key)
+	if err != nil {
+		key = o.Key
+	}
+
+	parts := strings.Split(key, "/")
 	v := parts[len(parts)-2]
 	m := strings.Replace(o.Key, v, "", -2)
 	m = strings.Replace(m, "//.info", "", -1)
