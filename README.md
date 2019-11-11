@@ -12,9 +12,9 @@
 
 Welcome to the Athens project! We are a proxy server for the [Go Modules download API](https://docs.gomods.io/intro/protocol/).
 
-|<img src="docs/static/meeting-icon.svg" alt="Developer Meetings" width="20" height="20" />Developer Meetings|
+|<img src="docs/static/meeting-icon.svg" alt="Office Hours" width="20" height="20" />Office Hours|
 |------------------|
-|We hold weekly developer meetings every Thursday. To join them, watch previous meeting recordings or find more information, please see [the docs](https://docs.gomods.io/contributing/community/developer-meetings/). Absolutely everyone is invited to attend these, suggest topics, and participate!|
+|We hold office hours approximately weekly. To find out what they're all about, join them, watch previous meetings, or just find out more, see [the docs](https://docs.gomods.io/contributing/community/office-hours/). Absolutely everyone is invited to attend these, suggest topics, and participate!|
 </br>
 
 See our documentation site [https://docs.gomods.io](https://docs.gomods.io) for more details on the project.
