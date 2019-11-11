@@ -9,7 +9,7 @@ import (
 	datadog "github.com/DataDog/opencensus-go-exporter-datadog"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gorilla/mux"
-	"go.opencensus.io/exporter/prometheus"
+	"contrib.go.opencensus.io/exporter/prometheus"
 	"go.opencensus.io/plugin/ochttp"
 	"go.opencensus.io/stats/view"
 )

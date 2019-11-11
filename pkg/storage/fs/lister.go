@@ -3,10 +3,12 @@ package fs
 import (
 	"context"
 	"os"
+	"strings"
 
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/observ"
 	"github.com/spf13/afero"
+	"golang.org/x/mod/semver"
 )
 
 func (l *storageImpl) List(ctx context.Context, module string) ([]string, error) {
@@ -24,8 +26,12 @@ func (l *storageImpl) List(ctx context.Context, module string) ([]string, error)
 	}
 	ret := []string{}
 	for _, fileInfo := range fileInfos {
-		if fileInfo.IsDir() {
-			ret = append(ret, fileInfo.Name())
+		if !fileInfo.IsDir() {
+			continue
+		}
+		ver := fileInfo.Name()
+		if v := semver.Canonical(ver); v != "" && strings.HasPrefix(ver, v) {
+			ret = append(ret, ver)
 		}
 	}
 	return ret, nil

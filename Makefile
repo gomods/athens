@@ -1,11 +1,16 @@
 VERSION = "unset"
 DATE=$(shell date -u +%Y-%m-%d-%H:%M:%S-%Z)
+
+ifndef GOLANG_VERSION
+override GOLANG_VERSION = 1.13
+endif
+
 .PHONY: build
 build: ## build the athens proxy
 	cd cmd/proxy && go build
 
 build-ver: ## build the athens proxy with version number
-	GO111MODULE=on CGO_ENABLED=0 go build -mod=vendor -ldflags "-X github.com/gomods/athens/pkg/build.version=$(VERSION) -X github.com/gomods/athens/pkg/build.buildDate=$(DATE)" -o athens ./cmd/proxy
+	GO111MODULE=on CGO_ENABLED=0 GOPROXY="https://proxy.golang.org" go build -ldflags "-X github.com/gomods/athens/pkg/build.version=$(VERSION) -X github.com/gomods/athens/pkg/build.buildDate=$(DATE)" -o athens ./cmd/proxy
 
 # The build-image step creates a docker image that has all the tools required
 # to perform some CI build steps, instead of relying on them being installed locally
@@ -19,6 +24,7 @@ run: ## run the athens proxy with dev configs
 
 .PHONY: run-docker
 run-docker:
+	docker-compose -p athensdockerdev build --build-arg GOLANG_VERSION=${GOLANG_VERSION} dev
 	docker-compose -p athensdockerdev up -d dev
 
 .PHONY: run-docker-teardown
@@ -47,7 +53,8 @@ test-unit: ## run unit tests with race detector and code coverage enabled
 
 .PHONY: test-unit-docker
 test-unit-docker: ## run unit tests with docker
-	docker-compose -p athensunit up --exit-code-from=testunit --build testunit
+	docker-compose -p athensunit build --build-arg GOLANG_VERSION=${GOLANG_VERSION} testunit	
+	docker-compose -p athensunit up --exit-code-from=testunit testunit
 	docker-compose -p athensunit down
 
 .PHONY: test-e2e
@@ -56,7 +63,8 @@ test-e2e:
 
 .PHONY: test-e2e-docker
 test-e2e-docker:
-	docker-compose -p athense2e up --build --exit-code-from=teste2e teste2e
+	docker-compose -p athense2e build --build-arg GOLANG_VERSION=${GOLANG_VERSION} teste2e
+	docker-compose -p athense2e up --exit-code-from=teste2e teste2e
 	docker-compose -p athense2e down
 
 .PHONY: docker
@@ -64,7 +72,7 @@ docker: proxy-docker
 
 .PHONY: proxy-docker
 proxy-docker:
-	docker build -t gomods/athens -f cmd/proxy/Dockerfile .
+	docker build -t gomods/athens -f cmd/proxy/Dockerfile --build-arg GOLANG_VERSION=${GOLANG_VERSION} .
 
 .PHONY: docker-push
 docker-push:

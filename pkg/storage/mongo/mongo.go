@@ -34,8 +34,10 @@ func NewStorage(conf *config.MongoConfig, timeout time.Duration) (*ModuleStore, 
 		return nil, errors.E(op, "No Mongo Configuration provided")
 	}
 	ms := &ModuleStore{url: conf.URL, certPath: conf.CertPath, timeout: timeout, insecure: conf.InsecureConn}
-	client, err := ms.newClient(conf)
+	client, err := ms.newClient()
 	ms.client = client
+	ms.db = conf.DefaultDBName
+	ms.coll = conf.DefaultCollectionName
 
 	if err != nil {
 		return nil, errors.E(op, err)
@@ -64,9 +66,13 @@ func (m *ModuleStore) connect(conf *config.MongoConfig) (*mongo.Collection, erro
 }
 
 func (m *ModuleStore) initDatabase() *mongo.Collection {
-	// TODO: database and collection as env vars, or params to New()? together with user/mongo
-	m.db = "athens"
-	m.coll = "modules"
+	if m.db == "" {
+		m.db = "athens"
+	}
+
+	if m.coll == "" {
+		m.coll = "modules"
+	}
 
 	c := m.client.Database(m.db).Collection(m.coll)
 	indexView := c.Indexes()
@@ -80,11 +86,17 @@ func (m *ModuleStore) initDatabase() *mongo.Collection {
 	return c
 }
 
-func (m *ModuleStore) newClient(conf *config.MongoConfig) (*mongo.Client, error) {
+func (m *ModuleStore) newClient() (*mongo.Client, error) {
+	const op errors.Op = "mongo.newClient"
+
 	tlsConfig := &tls.Config{}
 	clientOptions := options.Client()
-	// Maybe check for error using Validate()?
 	clientOptions = clientOptions.ApplyURI(m.url)
+
+	err := clientOptions.Validate()
+	if err != nil {
+		return nil, errors.E(op, err)
+	}
 
 	if m.certPath != "" {
 		// Sets only when the env var is setup in config.dev.toml
@@ -99,7 +111,7 @@ func (m *ModuleStore) newClient(conf *config.MongoConfig) (*mongo.Client, error)
 
 		cert, err := ioutil.ReadFile(m.certPath)
 		if err != nil {
-			return nil, err
+			return nil, errors.E(op, err)
 		}
 
 		if ok := roots.AppendCertsFromPEM(cert); !ok {
@@ -112,7 +124,7 @@ func (m *ModuleStore) newClient(conf *config.MongoConfig) (*mongo.Client, error)
 	clientOptions = clientOptions.SetConnectTimeout(m.timeout)
 	client, err := mongo.NewClient(clientOptions)
 	if err != nil {
-		return nil, err
+		return nil, errors.E(op, err)
 	}
 
 	return client, nil

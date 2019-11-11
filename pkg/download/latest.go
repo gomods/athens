@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/gomods/athens/pkg/download/mode"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/log"
 	"github.com/gomods/athens/pkg/paths"
@@ -13,7 +14,7 @@ import (
 const PathLatest = "/{module:.+}/@latest"
 
 // LatestHandler implements GET baseURL/module/@latest
-func LatestHandler(dp Protocol, lggr log.Entry) http.Handler {
+func LatestHandler(dp Protocol, lggr log.Entry, df *mode.DownloadFile) http.Handler {
 	const op errors.Op = "download.LatestHandler"
 	f := func(w http.ResponseWriter, r *http.Request) {
 		mod, err := paths.GetModule(r)
@@ -25,7 +26,9 @@ func LatestHandler(dp Protocol, lggr log.Entry) http.Handler {
 
 		info, err := dp.Latest(r.Context(), mod)
 		if err != nil {
-			lggr.SystemErr(errors.E(op, err))
+			severityLevel := errors.Expect(err, errors.KindNotFound)
+			err = errors.E(op, err, severityLevel)
+			lggr.SystemErr(err)
 			w.WriteHeader(errors.Kind(err))
 			return
 		}

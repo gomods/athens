@@ -11,6 +11,13 @@ date: 2018-12-07T11:44:36+00:00
 
 在这个站点上，我们详细地记录了 Athens 的细节。我们将会告诉您它都做了什么，它为什么有意义，你可以用它来做什么，以及你如何运行它。下面是简单的概要。
 
+#### 如何开始？
+    运行 `docker run -p '3000:3000' gomods/athens:latest`
+
+然后，设置你的 `GOPROXY` 并 `go get` 去!
+
+    export GOPROXY=http://localhost:3000 && go get module@v1
+
 #### Athens 做了什么？
 
 Athens 为你运行 [Go 模块](https://github.com/golang/go/wiki/Modules) 提供服务。它可以为你提供公有和私有的代码，因此，你不需要直接从像 GitHub 或 GitLab 等版本控制系统（VCS）上拉取。

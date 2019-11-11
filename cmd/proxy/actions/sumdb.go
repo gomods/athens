@@ -4,8 +4,9 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
-	"path"
 	"strings"
+
+	"github.com/gomods/athens/pkg/paths"
 )
 
 func sumdbPoxy(url *url.URL, nosumPatterns []string) http.Handler {
@@ -25,7 +26,7 @@ func noSumWrapper(h http.Handler, host string, patterns []string) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if strings.HasPrefix(r.URL.Path, "/lookup/") {
 			for _, p := range patterns {
-				if isMatch, err := path.Match(p, r.URL.Path[len("/lookup/"):]); err == nil && isMatch {
+				if paths.MatchesPattern(p, r.URL.Path[len("/lookup/"):]) {
 					w.WriteHeader(http.StatusForbidden)
 					return
 				}

@@ -80,3 +80,19 @@ func (op *OpTests) TestString() {
 	const op1 Op = "testOps.op1"
 	require.Equal(op.T(), op1.String(), "testOps.op1")
 }
+
+func TestExpect(t *testing.T) {
+	err := E("TestExpect", "error message", KindBadRequest)
+
+	severity := Expect(err, KindBadRequest)
+	require.Equalf(t, severity, logrus.InfoLevel, "expected an info level log but got %v", severity)
+
+	severity = Expect(err, KindAlreadyExists)
+	require.Equalf(t, severity, logrus.ErrorLevel, "expected an error level but got %v", severity)
+
+	severity = Expect(err, KindAlreadyExists, KindBadRequest)
+	require.Equalf(t, severity, logrus.InfoLevel, "expected an info level log but got %v", severity)
+
+	severity = Expect(err, KindAlreadyExists, KindNotImplemented)
+	require.Equalf(t, severity, logrus.ErrorLevel, "expected an error level but got %v", severity)
+}

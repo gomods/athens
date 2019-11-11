@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"strconv"
+	"strings"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -71,22 +72,27 @@ func TestEnvOverrides(t *testing.T) {
 		ProtocolWorkers: 10,
 		LogLevel:        "info",
 		GoBinary:        "go11",
+		GoProxy:         "direct",
 		CloudRuntime:    "gcp",
 		TimeoutConf: TimeoutConf{
 			Timeout: 30,
 		},
-		StorageType:    "minio",
-		GlobalEndpoint: "mytikas.gomods.io",
-		Port:           ":7000",
-		BasicAuthUser:  "testuser",
-		BasicAuthPass:  "testpass",
-		ForceSSL:       true,
-		ValidatorHook:  "testhook.io",
-		PathPrefix:     "prefix",
-		NETRCPath:      "/test/path/.netrc",
-		HGRCPath:       "/test/path/.hgrc",
-		Storage:        &StorageConfig{},
-		SingleFlight:   &SingleFlight{},
+		StorageType:     "minio",
+		GlobalEndpoint:  "mytikas.gomods.io",
+		Port:            ":7000",
+		EnablePprof:     false,
+		PprofPort:       ":3001",
+		BasicAuthUser:   "testuser",
+		BasicAuthPass:   "testpass",
+		ForceSSL:        true,
+		ValidatorHook:   "testhook.io",
+		PathPrefix:      "prefix",
+		NETRCPath:       "/test/path/.netrc",
+		HGRCPath:        "/test/path/.hgrc",
+		Storage:         &StorageConfig{},
+		GoBinaryEnvVars: []string{"GOPROXY=direct"},
+		SingleFlight:    &SingleFlight{},
+		RobotsFile:      "robots.txt",
 	}
 
 	envVars := getEnvMap(expConf)
@@ -140,6 +146,12 @@ func TestEnsurePortFormat(t *testing.T) {
 	if given != expected {
 		t.Fatalf("expected ensurePortFormat to not add a colon when it's present but got %v", given)
 	}
+	port = "127.0.0.1:3000"
+	expected = "127.0.0.1:3000"
+	given = ensurePortFormat(port)
+	if given != expected {
+		t.Fatalf("expected ensurePortFormat to not add a colon when it's present but got %v", given)
+	}
 }
 
 func TestStorageEnvOverrides(t *testing.T) {
@@ -160,9 +172,10 @@ func TestStorageEnvOverrides(t *testing.T) {
 			Region:    "us-west-1",
 		},
 		Mongo: &MongoConfig{
-			URL:           "mongoURL",
-			CertPath:      "/test/path",
-			DefaultDBName: "athens",
+			URL:                   "mongoURL",
+			CertPath:              "/test/path",
+			DefaultDBName:         "test",
+			DefaultCollectionName: "testModules",
 		},
 		S3: &S3Config{
 			Region: "s3Region",
@@ -230,9 +243,11 @@ func TestParseExampleConfig(t *testing.T) {
 			Bucket:    "gomods",
 		},
 		Mongo: &MongoConfig{
-			URL:          "mongodb://127.0.0.1:27017",
-			CertPath:     "",
-			InsecureConn: false,
+			URL:                   "mongodb://127.0.0.1:27017",
+			CertPath:              "",
+			InsecureConn:          false,
+			DefaultDBName:         "athens",
+			DefaultCollectionName: "modules",
 		},
 		S3: &S3Config{
 			Region: "MY_AWS_REGION",
@@ -247,6 +262,7 @@ func TestParseExampleConfig(t *testing.T) {
 		GoEnv:           "development",
 		LogLevel:        "debug",
 		GoBinary:        "go",
+		GoProxy:         "direct",
 		GoGetWorkers:    10,
 		ProtocolWorkers: 30,
 		CloudRuntime:    "none",
@@ -256,6 +272,8 @@ func TestParseExampleConfig(t *testing.T) {
 		StorageType:      "memory",
 		GlobalEndpoint:   "http://localhost:3001",
 		Port:             ":3000",
+		EnablePprof:      false,
+		PprofPort:        ":3001",
 		BasicAuthUser:    "",
 		BasicAuthPass:    "",
 		Storage:          expStorage,
@@ -263,9 +281,12 @@ func TestParseExampleConfig(t *testing.T) {
 		TraceExporter:    "",
 		StatsExporter:    "prometheus",
 		SingleFlightType: "memory",
+		GoBinaryEnvVars:  []string{"GOPROXY=direct"},
 		SingleFlight:     &SingleFlight{},
 		SumDBs:           []string{"https://sum.golang.org"},
 		NoSumPatterns:    []string{},
+		DownloadMode:     "sync",
+		RobotsFile:       "robots.txt",
 	}
 
 	absPath, err := filepath.Abs(testConfigFile(t))
@@ -286,6 +307,7 @@ func getEnvMap(config *Config) map[string]string {
 	envVars := map[string]string{
 		"GO_ENV":                  config.GoEnv,
 		"GO_BINARY_PATH":          config.GoBinary,
+		"GOPROXY":                 config.GoProxy,
 		"ATHENS_GOGET_WORKERS":    strconv.Itoa(config.GoGetWorkers),
 		"ATHENS_PROTOCOL_WORKERS": strconv.Itoa(config.ProtocolWorkers),
 		"ATHENS_LOG_LEVEL":        config.LogLevel,
@@ -296,6 +318,8 @@ func getEnvMap(config *Config) map[string]string {
 	envVars["ATHENS_STORAGE_TYPE"] = config.StorageType
 	envVars["ATHENS_GLOBAL_ENDPOINT"] = config.GlobalEndpoint
 	envVars["ATHENS_PORT"] = config.Port
+	envVars["ATHENS_ENABLE_PPROF"] = strconv.FormatBool(config.EnablePprof)
+	envVars["ATHENS_PPROF_PORT"] = config.PprofPort
 	envVars["BASIC_AUTH_USER"] = config.BasicAuthUser
 	envVars["BASIC_AUTH_PASS"] = config.BasicAuthPass
 	envVars["PROXY_FORCE_SSL"] = strconv.FormatBool(config.ForceSSL)
@@ -303,6 +327,8 @@ func getEnvMap(config *Config) map[string]string {
 	envVars["ATHENS_PATH_PREFIX"] = config.PathPrefix
 	envVars["ATHENS_NETRC_PATH"] = config.NETRCPath
 	envVars["ATHENS_HGRC_PATH"] = config.HGRCPath
+	envVars["ATHENS_ROBOTS_FILE"] = config.RobotsFile
+	envVars["ATHENS_GO_BINARY_ENV_VARS"] = strings.Join(config.GoBinaryEnvVars, ",")
 
 	storage := config.Storage
 	if storage != nil {
@@ -325,6 +351,9 @@ func getEnvMap(config *Config) map[string]string {
 			envVars["ATHENS_MONGO_STORAGE_URL"] = storage.Mongo.URL
 			envVars["ATHENS_MONGO_CERT_PATH"] = storage.Mongo.CertPath
 			envVars["ATHENS_MONGO_INSECURE"] = strconv.FormatBool(storage.Mongo.InsecureConn)
+			envVars["ATHENS_MONGO_DEFAULT_DATABASE"] = storage.Mongo.DefaultDBName
+			envVars["ATHENS_MONGO_DEFAULT_COLLECTION"] = storage.Mongo.DefaultCollectionName
+
 		}
 		if storage.S3 != nil {
 			envVars["AWS_REGION"] = storage.S3.Region
@@ -450,5 +479,36 @@ func TestDefaultConfigMatchesConfigFile(t *testing.T) {
 	eq := cmp.Equal(defConf, parsedConf, ignoreStorageOpts, ignoreGoEnvOpts)
 	if !eq {
 		t.Errorf("Default values from the config file: %v should equal to the default values returned in case the config file isn't provided %v", parsedConf, defConf)
+	}
+}
+
+func TestEnvList(t *testing.T) {
+	el := EnvList{"KEY=VALUE"}
+	if !el.HasKey("KEY") {
+		t.Fatal("expected KEY to be present")
+	}
+	if el.HasKey("KEY=") {
+		t.Fatal("expected KEY= to not be found")
+	}
+	el.Add("HELLO", "WORLD")
+	if !el.HasKey("HELLO") {
+		t.Fatal("expected HELLO key to be found")
+	}
+	if err := el.Validate(); err != nil {
+		t.Fatalf("expected err to be nil but got %v", err)
+	}
+	el = EnvList{"HELLO"}
+	if err := el.Validate(); err == nil {
+		t.Fatal("expected a validation error for incorrect formatting but got nil")
+	}
+	el = EnvList{"GODEBUG=netdns=cgo"}
+	if !el.HasKey("GODEBUG") {
+		t.Fatal("expected GODEBUG key to be present")
+	}
+	if el.HasKey("GODEBUG=") {
+		t.Fatal("expected GODEBUG= key not to be found")
+	}
+	if err := el.Validate(); err != nil {
+		t.Fatalf("expected err to be nil but got %v", err)
 	}
 }

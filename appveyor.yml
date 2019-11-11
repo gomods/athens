@@ -5,8 +5,10 @@ clone_folder: c:\gopath\src\github.com\gomods\athens
 environment:
   GOPATH: c:\gopath
   GO111MODULE: on
+  GOPROXY: https://proxy.golang.org
+  SKIP_UNTIL_113: true
 
-stack: go 1.12
+stack: go 1.13
 
 test_script:
-  - go test -mod=vendor ./...
+  - go test ./...

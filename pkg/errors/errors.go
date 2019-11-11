@@ -17,6 +17,7 @@ const (
 	KindAlreadyExists  = http.StatusConflict
 	KindRateLimit      = http.StatusTooManyRequests
 	KindNotImplemented = http.StatusNotImplemented
+	KindRedirect       = http.StatusMovedPermanently
 )
 
 // Error is an Athens system error.
@@ -127,6 +128,18 @@ func Severity(err error) logrus.Level {
 	}
 
 	return e.Severity
+}
+
+// Expect is a helper that returns an Info level
+// if the error has the expected kind, otherwise
+// it returns an Error level.
+func Expect(err error, kinds ...int) logrus.Level {
+	for _, kind := range kinds {
+		if Kind(err) == kind {
+			return logrus.InfoLevel
+		}
+	}
+	return logrus.ErrorLevel
 }
 
 // Kind recursively searches for the

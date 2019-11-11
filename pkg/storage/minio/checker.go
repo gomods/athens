@@ -6,7 +6,6 @@ import (
 
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/observ"
-	minio "github.com/minio/minio-go"
 )
 
 const (
@@ -19,15 +18,28 @@ func (v *storageImpl) Exists(ctx context.Context, module, version string) (bool,
 	defer span.End()
 	versionedPath := v.versionLocation(module, version)
 	modPath := fmt.Sprintf("%s/go.mod", versionedPath)
-	_, err := v.minioClient.StatObject(v.bucketName, modPath, minio.StatObjectOptions{})
+	infoPath := fmt.Sprintf("%s/%s.info", versionedPath, version)
+	zipPath := fmt.Sprintf("%s/source.zip", versionedPath)
 
-	if minio.ToErrorResponse(err).Code == minioErrorCodeNoSuchKey {
-		return false, nil
-	}
-
+	var count int
+	objectCh, err := v.minioCore.ListObjectsV2(v.bucketName, versionedPath, "", false, "", 0, "")
 	if err != nil {
 		return false, errors.E(op, err, errors.M(module), errors.V(version))
 	}
+	for _, object := range objectCh.Contents {
+		if object.Err != nil {
+			return false, errors.E(op, object.Err, errors.M(module), errors.V(version))
+		}
 
-	return true, nil
+		switch object.Key {
+		case infoPath:
+			count++
+		case modPath:
+			count++
+		case zipPath:
+			count++
+		}
+	}
+
+	return count == 3, nil
 }

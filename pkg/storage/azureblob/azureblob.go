@@ -46,7 +46,7 @@ func newBlobStoreClient(accountURL *url.URL, accountName, accountKey, containerN
 // Storage implements (github.com/gomods/athens/pkg/storage).Saver and
 // also provides a function to fetch the location of a module
 type Storage struct {
-	client  client
+	client  *azureBlobStoreClient
 	timeout time.Duration
 }
 
