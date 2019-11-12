@@ -36,7 +36,7 @@ func (l *storageImpl) List(ctx context.Context, module string) ([]string, error)
 		parts := strings.Split(key, "/")
 		ver := parts[len(parts)-2]
 		goModKey := fmt.Sprintf("%s/go.mod", l.versionLocation(module, ver))
-		if goModKey == object.Key {
+		if goModKey == key {
 			ret = append(ret, ver)
 		}
 	}
