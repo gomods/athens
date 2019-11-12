@@ -156,7 +156,7 @@ spec:
         {{- end }}
         ports:
         - containerPort: 3000
-        {{- if or (eq .Values.storage.type "disk") .Values.upstreamProxy.enabled .Values.netrc.enabled }}
+        {{- if or (eq .Values.storage.type "disk") .Values.upstreamProxy.enabled .Values.netrc.enabled .Values.sshGitServers .Values.gitconfig.enabled}}
         volumeMounts:
         {{- end }}
         {{- if eq .Values.storage.type "disk" }}
