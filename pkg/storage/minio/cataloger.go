@@ -3,7 +3,6 @@ package minio
 import (
 	"context"
 	"fmt"
-	"net/url"
 	"strings"
 
 	"github.com/gomods/athens/pkg/errors"
@@ -70,17 +69,11 @@ func fetchModsAndVersions(objects []minio.ObjectInfo, elementsNum int) ([]paths.
 func parseMinioKey(o *minio.ObjectInfo) (paths.AllPathParams, error) {
 	const op errors.Op = "minio.parseMinioKey"
 
-	key, err := url.PathUnescape(o.Key)
-	if err != nil {
-		key = o.Key
-	}
+	_, m, v := extractKey(o.Key)
 
-	parts := strings.Split(key, "/")
-	v := parts[len(parts)-2]
-	m := strings.Replace(key, v, "", -2)
-	m = strings.Replace(m, "//.info", "", -1)
 	if m == "" || v == "" {
 		return paths.AllPathParams{}, errors.E(op, fmt.Errorf("invalid object key format %s", o.Key))
 	}
+
 	return paths.AllPathParams{Module: m, Version: v}, nil
 }
