@@ -77,7 +77,7 @@ func parseMinioKey(o *minio.ObjectInfo) (paths.AllPathParams, error) {
 
 	parts := strings.Split(key, "/")
 	v := parts[len(parts)-2]
-	m := strings.Replace(o.Key, v, "", -2)
+	m := strings.Replace(key, v, "", -2)
 	m = strings.Replace(m, "//.info", "", -1)
 	if m == "" || v == "" {
 		return paths.AllPathParams{}, errors.E(op, fmt.Errorf("invalid object key format %s", o.Key))
