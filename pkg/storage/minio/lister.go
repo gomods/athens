@@ -3,6 +3,7 @@ package minio
 import (
 	"context"
 	"fmt"
+	"net/url"
 	"sort"
 	"strings"
 
@@ -27,7 +28,12 @@ func (l *storageImpl) List(ctx context.Context, module string) ([]string, error)
 		if object.Err != nil {
 			return nil, errors.E(op, object.Err, errors.M(module))
 		}
-		parts := strings.Split(object.Key, "/")
+
+		key, err := url.PathUnescape(object.Key)
+		if err != nil {
+			key = object.Key
+		}
+		parts := strings.Split(key, "/")
 		ver := parts[len(parts)-2]
 		goModKey := fmt.Sprintf("%s/go.mod", l.versionLocation(module, ver))
 		if goModKey == object.Key {
