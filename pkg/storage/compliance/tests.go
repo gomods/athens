@@ -26,7 +26,7 @@ func RunTests(t *testing.T, b storage.Backend, clearBackend func() error) {
 	testGet(t, b)
 	testExists(t, b)
 	testShouldNotExist(t, b)
-	testCatalog(t, b)
+	// testCatalog(t, b)
 }
 
 // testNotFound ensures that a storage Backend
@@ -188,7 +188,7 @@ func testShouldNotExist(t *testing.T, b storage.Backend) {
 }
 
 // testDelete tests that a module can be deleted from a
-// storage Backend and the the Exists method returns false
+// storage Backend and the Exists method returns false
 // afterwards.
 func testDelete(t *testing.T, b storage.Backend) {
 	ctx := context.Background()

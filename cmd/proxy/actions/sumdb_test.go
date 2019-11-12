@@ -62,6 +62,30 @@ var noSumTestCases = []struct {
 		http.StatusForbidden,
 	},
 	{
+		"multi slash star",
+		[]string{"github.com/private/*"},
+		"github.com/private/repo/sub@v0.0.1",
+		http.StatusForbidden,
+	},
+	{
+		"multi star",
+		[]string{"github.com/*/*"},
+		"github.com/private/repo@v0.0.1",
+		http.StatusForbidden,
+	},
+	{
+		"multi star ok",
+		[]string{"github.com/private/*/*"},
+		"github.com/private/repo@v0.0.1",
+		http.StatusOK,
+	},
+	{
+		"multi star forbidden",
+		[]string{"github.com/private/*/*"},
+		"github.com/private/repo/sub@v0.0.1",
+		http.StatusForbidden,
+	},
+	{
 		"any version",
 		[]string{"github.com/private/repo*"},
 		"github.com/private/repo@v0.0.1",

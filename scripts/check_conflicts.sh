@@ -2,7 +2,7 @@
 
 # check_conflicts.sh
 # this script checks for changes to files OTHER THAN *.go, go.mod and go.sum
-# ensuring no git merge conflict artifacts are being commited.
+# ensuring no git merge conflict artifacts are being committed.
 # i.e. <<<<<<<HEAD or ======= or >>>>>>>branch-name
 #
 # this is intended to be used in your CI tests

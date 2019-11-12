@@ -4,10 +4,10 @@ name: default
 
 steps:
 - name: download-dependencies
-  image: golang:1.12
+  image: golang:1.13
   commands:
     # wait for services to be ready.
-    - sleep 5
+    - sleep 10
     - go mod download
     - go mod vendor # this is for when the Dockerfile gets built
   environment:
@@ -19,7 +19,7 @@ steps:
 
 
 - name: build
-  image: golang:1.12
+  image: golang:1.13
   commands:
 
   # build
@@ -48,6 +48,10 @@ steps:
       from_secret: GCS_SERVICE_ACCOUNT
     GCS_PROJECT_ID: 
       from_secret: GOOGLE_CLOUD_PROJECT
+    ATHENS_AZURE_ACCOUNT_NAME:
+      from_secret: ATHENS_AZURE_ACCOUNT_NAME
+    ATHENS_AZURE_ACCOUNT_KEY: 
+      from_secret: ATHENS_AZURE_ACCOUNT_KEY
   when:
     branch:
       - master
@@ -68,6 +72,25 @@ steps:
     repo: gomods/athens
     tags:
       - canary
+    dockerfile: cmd/proxy/Dockerfile
+    build_args:
+      - VERSION=${DRONE_COMMIT}
+  when:
+    branch:
+      - master
+    event:
+      - push
+
+- name: docker-latest-commit-sha
+  image: plugins/docker
+  settings:
+    username:
+      from_secret: DOCKER_USER
+    password:
+      from_secret: DOCKER_PASSWORD
+    repo: gomods/athens-dev
+    tags:
+      - ${DRONE_COMMIT:0:7}
     dockerfile: cmd/proxy/Dockerfile
     build_args:
       - VERSION=${DRONE_COMMIT}

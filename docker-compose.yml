@@ -4,6 +4,8 @@ services:
     build:
       context: .
       dockerfile: cmd/proxy/Dockerfile
+      args:
+        GOLANG_VERSION: 1.13
     environment:
       - ATHENS_MONGO_STORAGE_URL=mongodb://mongo:27017
       - TIMEOUT=20 # in case the mongo dependency takes longer to start up
@@ -17,6 +19,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.test
+      args:
+        GOLANG_VERSION: 1.13
     command: ["./scripts/test_unit.sh"]
     environment:
       - GO_ENV=test
@@ -31,6 +35,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.test
+      args:
+        GOLANG_VERSION: 1.13
     command: ["./scripts/test_e2e.sh"]
   azurite:
     image: arafato/azurite:2.6.5
