@@ -190,16 +190,16 @@ func ParseConfigFile(configFile string) (*Config, error) {
 		return nil, err
 	}
 
+	// override values with environment variables if specified
+	if err := envOverride(&config); err != nil {
+		return nil, err
+	}
+
 	// Check file perms from config
 	if config.GoEnv == "production" {
 		if err := checkFilePerms(configFile, config.FilterFile); err != nil {
 			return nil, err
 		}
-	}
-
-	// override values with environment variables if specified
-	if err := envOverride(&config); err != nil {
-		return nil, err
 	}
 
 	// validate all required fields have been populated
