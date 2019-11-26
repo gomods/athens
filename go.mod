@@ -30,7 +30,7 @@ require (
 	github.com/hashicorp/go-multierror v1.0.0
 	github.com/hashicorp/hcl2 v0.0.0-20190503213020-640445e16309
 	github.com/kelseyhightower/envconfig v1.3.0
-	github.com/minio/minio-go/v6 v6.0.38
+	github.com/minio/minio-go/v6 v6.0.43
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/philhofer/fwd v1.0.0 // indirect
 	github.com/sirupsen/logrus v1.4.2
