@@ -21,9 +21,9 @@ spec:
         chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
         release: "{{ .Release.Name }}"
       annotations:
-        checksum/config: {{ include (print $.Template.BasePath "/config-upstream.yaml") . | sha256sum }}
-        checksum/config: {{ include (print $.Template.BasePath "/config-ssh-git-servers.yaml") . | sha256sum }}
-        checksum/secret: {{ include (print $.Template.BasePath "/secret-ssh-git-servers.yaml") . | sha256sum }}
+        checksum/upstream: {{ include (print $.Template.BasePath "/config-upstream.yaml") . | sha256sum }}
+        checksum/ssh-config: {{ include (print $.Template.BasePath "/config-ssh-git-servers.yaml") . | sha256sum }}
+        checksum/ssh-secret: {{ include (print $.Template.BasePath "/secret-ssh-git-servers.yaml") . | sha256sum }}
     spec:
       {{- if .Values.sshGitServers }}
       initContainers:
@@ -47,9 +47,13 @@ spec:
         image: "{{ .Values.image.registry }}/{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         imagePullPolicy: {{ .Values.image.pullPolicy | quote }}
         livenessProbe:
+          failureThreshold: {{ .Values.livenessProbe.failureThreshold }}
           httpGet:
             path: "/healthz"
             port: 3000
+          periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
+          successThreshold: {{ .Values.livenessProbe.successThreshold }}
+          timeoutSeconds: {{ .Values.livenessProbe.timeoutSeconds }}
             {{- if .Values.basicAuth.enabled }}
             httpHeaders:
               - name: Authorization
@@ -143,7 +147,7 @@ spec:
         {{- end }}
         ports:
         - containerPort: 3000
-        {{- if or (eq .Values.storage.type "disk") .Values.upstreamProxy.enabled .Values.netrc.enabled }}
+        {{- if or (eq .Values.storage.type "disk") .Values.upstreamProxy.enabled .Values.netrc.enabled .Values.sshGitServers .Values.gitconfig.enabled}}
         volumeMounts:
         {{- end }}
         {{- if eq .Values.storage.type "disk" }}

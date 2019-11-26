@@ -1,0 +1,1 @@
+FROM gomods/athens:v0.6.0
