@@ -72,8 +72,9 @@ configEnvVars: {}
 # HTTP basic auth
 basicAuth:
   enabled: false
-  user: "some_user"
-  password: "some_password"
+  secretName: athens-proxy-basic-auth
+  passwordSecretKey: password
+  usernameSecretKey: username
 
 netrc:
   # if enabled, it expects to find the content of a valid .netrc file imported as a secret named netrcsecret

@@ -3,26 +3,20 @@ package actions
 import (
 	"crypto/subtle"
 	"net/http"
-	"strings"
+	"regexp"
 
-	"github.com/gomods/athens/pkg/log"
 	"github.com/gorilla/mux"
 )
 
-const healthWarning = "/healthz received none or incorrect Basic-Auth headers"
+var (
+	// basicAuthExcludedPaths is a regular expression that matches paths that should not be protected by HTTP basic authentication.
+	basicAuthExcludedPaths = regexp.MustCompile("^/(health|ready)z$")
+)
 
 func basicAuth(user, pass string) mux.MiddlewareFunc {
 	return func(h http.Handler) http.Handler {
 		f := func(w http.ResponseWriter, r *http.Request) {
-			if !checkAuth(r, user, pass) {
-				// Helpful hint for Kubernetes users:
-				// if they forget to send auth headers
-				// kubernetes silently fails, so a log
-				// might help them.
-				if strings.HasSuffix(r.URL.Path, "/healthz") {
-					lggr := log.EntryFromContext(r.Context())
-					lggr.Warnf(healthWarning)
-				}
+			if !basicAuthExcludedPaths.MatchString(r.URL.Path) && !checkAuth(r, user, pass) {
 				w.Header().Set("WWW-Authenticate", `Basic realm="basic auth required"`)
 				w.WriteHeader(http.StatusUnauthorized)
 				return
