@@ -68,12 +68,12 @@ func fetchModsAndVersions(objects []minio.ObjectInfo, elementsNum int) ([]paths.
 
 func parseMinioKey(o *minio.ObjectInfo) (paths.AllPathParams, error) {
 	const op errors.Op = "minio.parseMinioKey"
-	parts := strings.Split(o.Key, "/")
-	v := parts[len(parts)-2]
-	m := strings.Replace(o.Key, v, "", -2)
-	m = strings.Replace(m, "//.info", "", -1)
+
+	_, m, v := extractKey(o.Key)
+
 	if m == "" || v == "" {
 		return paths.AllPathParams{}, errors.E(op, fmt.Errorf("invalid object key format %s", o.Key))
 	}
+
 	return paths.AllPathParams{Module: m, Version: v}, nil
 }

@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"sort"
-	"strings"
 
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/observ"
@@ -27,10 +26,10 @@ func (l *storageImpl) List(ctx context.Context, module string) ([]string, error)
 		if object.Err != nil {
 			return nil, errors.E(op, object.Err, errors.M(module))
 		}
-		parts := strings.Split(object.Key, "/")
-		ver := parts[len(parts)-2]
+
+		key, _, ver := extractKey(object.Key)
 		goModKey := fmt.Sprintf("%s/go.mod", l.versionLocation(module, ver))
-		if goModKey == object.Key {
+		if goModKey == key {
 			ret = append(ret, ver)
 		}
 	}
