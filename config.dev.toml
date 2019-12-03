@@ -288,6 +288,11 @@ SingleFlightType = "memory"
         RootPath = "/path/on/disk"
 
     [Storage.GCP]
+        # Required IAM Roles (https://cloud.google.com/storage/docs/access-control/iam-roles):
+        # - roles/storage.objectCreator
+        # - roles/storage.objectViewer
+        # - roles/storage.legacyBucketReader
+
         # ProjectID to use for GCP Storage
         # Env override: GOOGLE_CLOUD_PROJECT
         ProjectID = "MY_GCP_PROJECT_ID"

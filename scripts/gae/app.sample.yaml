@@ -1,0 +1,44 @@
+# General settings
+runtime: custom
+env: flex
+service: athens
+
+# Network settings
+network:
+  instance_tag: athens
+  forwarded_ports:
+    - 3000/tcp
+
+# Compute settings
+resources:
+  cpu: 1
+  memory_gb: 0.6
+  disk_size_gb: 100
+
+# Health and liveness check settings
+liveness_check:
+  path: "/healthz"
+  check_interval_sec: 30
+  failure_threshold: 2
+  success_threshold: 2
+
+readiness_check:
+  path: "/readyz"
+  check_interval_sec: 5
+  failure_threshold: 2
+  success_threshold: 2
+  app_start_timeout_sec: 10
+
+# Scaling instructions
+automatic_scaling:
+  min_num_instances: 1
+  max_num_instances: 15
+  cool_down_period_sec: 180
+  cpu_utilization:
+    target_utilization: 0.6
+
+# Environment variables configuring athens
+env_variables:
+  ATHENS_STORAGE_TYPE: gcp
+  GOOGLE_CLOUD_PROJECT: GOOGLE_CLOUD_PROJECT
+  ATHENS_STORAGE_GCP_BUCKET: ATHENS_STORAGE_GCP_BUCKET
