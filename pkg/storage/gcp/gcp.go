@@ -50,7 +50,7 @@ func newClient(ctx context.Context, gcpConf *config.GCPConfig, timeout time.Dura
 	const op errors.Op = "gcp.newClient"
 	opts := []option.ClientOption{}
 	if gcpConf.JSONKey != "" {
-		key, err := base64.StdEncoding.DecodeString(gcpConf.ServiceAccount)
+		key, err := base64.StdEncoding.DecodeString(gcpConf.JSONKey)
 		if err != nil {
 			return nil, errors.E(op, fmt.Errorf("could not decode base64 json key: %v", err))
 		}
