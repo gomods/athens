@@ -301,15 +301,6 @@ SingleFlightType = "memory"
         # Env override: ATHENS_STORAGE_GCP_BUCKET
         Bucket = "MY_GCP_BUCKET"
 
-        # ServiceAccount is a base64 encoded service account
-        # key that allows Athens to be run outside of GCP
-        # but still be able to access GCS. If you are
-        # running Athens inside GCP, you will most
-        # likely not need this as GCP figures out
-        # internal authentication between products for you.
-        # Env override: ATHENS_STORAGE_GCP_SERVICE_ACCOUNT
-        ServiceAccount = ""
-
         # JSONKey is a base64 encoded service account 
         # key that allows Athens to be run outside of GCP
         # but still be able to access GCS. If you are
