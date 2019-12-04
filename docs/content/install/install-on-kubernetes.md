@@ -177,18 +177,6 @@ Last athens need authentication credentials for your minio in `storage.minio.acc
 helm install gomods/athens-proxy -n athens --namespace athens --set storage.type=minio --set storage.minio.endpoint=<your-minio-endpoint> --set storage.minio.bucket=<your-bucket> --set storage.minio.accessKey=<your-minio-access-key> --set storage.minio.secretKey=<your-minio-secret-key>
 ```
 
-#### Google Cloud Storage
-
- To use Google Cloud Storage storage with Athens, set `storage.type` to `gcp`. You need to set `storage.gcp.projectID` and `storage.gcp.bucket` to the
- desired GCP project and bucket name, respectively.
-
- Depending on your deployment environment you will also need to set `storage.gcp.serviceAccount` to a key which has read/write access to
- the GCS bucket. If you are running Athens inside GCP, you will most likely not need this as GCP figures out internal authentication between products for you.
-
- ```
- helm install gomods/athens-proxy -n athens --namespace athens --set storage.type=gcp --set storage.gcp.projectID=<your-gcp-project> --set storage.gcp.bucket=<your-bucket>
- ```
-
 ### Kubernetes Service
 
 By default, a Kubernetes `ClusterIP` service is created for the Athens proxy. "ClusterIP" is sufficient in the case when the Athens proxy will be used from within the cluster. To expose Athens outside of the cluster, consider using a "NodePort" or "LoadBalancer" service. This can be changed by setting the `service.type` value when installing the chart. For example, to deploy Athens using a NodePort service, the following command could be used:
