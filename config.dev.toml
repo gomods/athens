@@ -307,8 +307,22 @@ SingleFlightType = "memory"
         # running Athens inside GCP, you will most
         # likely not need this as GCP figures out
         # internal authentication between products for you.
-        # Env override: ATHENS_STORAGE_GCP_JSON_KEY
+        # Env override: ATHENS_STORAGE_GCP_SERVICE_ACCOUNT
         ServiceAccount = ""
+
+        # JSONKey is a base64 encoded service account 
+        # key that allows Athens to be run outside of GCP
+        # but still be able to access GCS. If you are
+        # running Athens inside GCP, you will most
+        # likely not need this as GCP figures out
+        # internal authentication between products for you.
+        # 
+        # NOTE: This config value is deprecated in favor of
+        # ServiceAccount above. Athens will check for it,
+        # but please do not rely on it being available forever.
+        #
+        # Env override: ATHENS_STORAGE_GCP_JSON_KEY
+        JSONKey = ""
 
     [Storage.Minio]
         # Endpoint for Minio storage
