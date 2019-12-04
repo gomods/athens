@@ -75,9 +75,9 @@ func getTestConfig(bucket string) *config.GCPConfig {
 		return nil
 	}
 	return &config.GCPConfig{
-		Bucket:         bucket,
-		ServiceAccount: creds,
-		ProjectID:      os.Getenv("GCS_PROJECT_ID"),
+		Bucket:    bucket,
+		JSONKey:   creds,
+		ProjectID: os.Getenv("GCS_PROJECT_ID"),
 	}
 }
 

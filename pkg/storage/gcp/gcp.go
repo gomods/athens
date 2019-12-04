@@ -50,16 +50,7 @@ func newClient(ctx context.Context, gcpConf *config.GCPConfig, timeout time.Dura
 	const op errors.Op = "gcp.newClient"
 	opts := []option.ClientOption{}
 
-	// Get the GCS Key.
-	// First, try the ServiceAccount first. If it's not there,
-	// fall back to the deprecated JSONKey
-	var jsonKey string
-	if gcpConf.ServiceAccount != "" {
-		jsonKey = gcpConf.ServiceAccount
-	} else if gcpConf.JSONKey != "" {
-		jsonKey = gcpConf.JSONKey
-	}
-
+	jsonKey := gcpConf.JSONKey
 	key, err := base64.StdEncoding.DecodeString(jsonKey)
 	if err != nil {
 		return nil, errors.E(op, fmt.Errorf("could not decode base64 json key: %v", err))
