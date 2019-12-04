@@ -31,10 +31,9 @@ steps:
   - go test -v ./...
 
   # end to end test
-  # First, run the just-built athens server
-  # TODO: check for startup failures and fail the build if so
-  - ./main &
+  - ./main & # run the just-built athens server
   - sleep 3 # wait for it to spin up
+  - curl localhost:3000
   - mkdir -p ~/happy
   - mkdir -p ~/emptygopath # ensure the gopath has no modules cached.
   - cd ~/happy
