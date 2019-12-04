@@ -49,17 +49,26 @@ func New(ctx context.Context, gcpConf *config.GCPConfig, timeout time.Duration) 
 func newClient(ctx context.Context, gcpConf *config.GCPConfig, timeout time.Duration) (*Storage, error) {
 	const op errors.Op = "gcp.newClient"
 	opts := []option.ClientOption{}
+
+	// Get the GCS Key.
+	// First, try the ServiceAccount first. If it's not there,
+	// fall back to the deprecated JSONKey
+	var jsonKey string
 	if gcpConf.ServiceAccount != "" {
-		key, err := base64.StdEncoding.DecodeString(gcpConf.ServiceAccount)
-		if err != nil {
-			return nil, errors.E(op, fmt.Errorf("could not decode base64 json key: %v", err))
-		}
-		creds, err := google.CredentialsFromJSON(ctx, key, storage.ScopeReadWrite)
-		if err != nil {
-			return nil, errors.E(op, fmt.Errorf("could not get GCS credentials: %v", err))
-		}
-		opts = append(opts, option.WithCredentials(creds))
+		jsonKey = gcpConf.ServiceAccount
+	} else if gcpConf.JSONKey != "" {
+		jsonKey = gcpConf.JSONKey
 	}
+
+	key, err := base64.StdEncoding.DecodeString(jsonKey)
+	if err != nil {
+		return nil, errors.E(op, fmt.Errorf("could not decode base64 json key: %v", err))
+	}
+	creds, err := google.CredentialsFromJSON(ctx, key, storage.ScopeReadWrite)
+	if err != nil {
+		return nil, errors.E(op, fmt.Errorf("could not get GCS credentials: %v", err))
+	}
+	opts = append(opts, option.WithCredentials(creds))
 	s, err := storage.NewClient(ctx, opts...)
 	if err != nil {
 		return nil, errors.E(op, fmt.Errorf("could not create new storage client: %s", err))
