@@ -101,7 +101,7 @@ spec:
         - name: ATHENS_STORAGE_GCP_BUCKET
           value: {{ .Values.storage.gcp.bucket | quote }}
         {{- if .Values.storage.gcp.serviceAccount }}
-        - name: ATHENS_STORAGE_GCP_SERVICE_ACCOUNT
+        - name: ATHENS_STORAGE_GCP_JSON_KEY
           value: {{ .Values.storage.gcp.serviceAccount | b64enc | quote }}
         {{- end }}
         {{- else if eq .Values.storage.type "minio" }}
