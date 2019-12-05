@@ -177,6 +177,13 @@ After this you can pass your credentials inside `config.toml` file.  If the acce
             # Ref: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-metadata-endpoint-v2.html
             AwsContainerCredentialsRelativeURI = ""
 
+            # An optional endpoint URL (hostname only or fully qualified URI)
+            # that overrides the default generated endpoint for S3 storage client.
+            #
+            # You must still provide a `Region` value when specifying an endpoint.
+            # Env override: AWS_ENDPOINT
+            Endpoint = ""
+
 ## Minio
 
 [Minio](https://www.minio.io/) is an open source object storage server that provides an interface for S3 compatible block storages. If you have never used minio, you can read this [quick start guide](https://docs.minio.io/).  Any S3 compatible object storage is supported by Athens through the minio interface. Below, you can find different configuration options we provide for Minio. Example configuration for Digital Ocean and Alibaba OSS block storages are provided below.
