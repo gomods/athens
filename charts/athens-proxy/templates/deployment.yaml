@@ -106,6 +106,7 @@ spec:
         {{- if .Values.storage.gcp.serviceAccount }}
         - name: ATHENS_STORAGE_GCP_JSON_KEY
           value: {{ .Values.storage.gcp.serviceAccount | b64enc | quote }}
+        {{- end }}
         {{- if .Values.storage.s3.use_iam_proxy }}
         - name: AWS_USE_IAM_PROXY
           value: {{ .Values.storage.s3.use_iam_proxy | quote }}
