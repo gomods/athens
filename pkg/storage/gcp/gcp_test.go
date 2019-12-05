@@ -51,6 +51,9 @@ func getStorage(t testing.TB) *Storage {
 	bucketName := randomBucketName(os.Getenv("DRONE_PULL_REQUEST"))
 	cfg := getTestConfig(bucketName)
 	if cfg == nil {
+		// Don't fail if there's no test config, so that these tests don't
+		// fail when you run them locally
+		t.Log("No GCS Config found")
 		t.SkipNow()
 	}
 
@@ -72,9 +75,9 @@ func getTestConfig(bucket string) *config.GCPConfig {
 		return nil
 	}
 	return &config.GCPConfig{
-		Bucket:         bucket,
-		ServiceAccount: creds,
-		ProjectID:      os.Getenv("GCS_PROJECT_ID"),
+		Bucket:    bucket,
+		JSONKey:   creds,
+		ProjectID: os.Getenv("GCS_PROJECT_ID"),
 	}
 }
 

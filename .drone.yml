@@ -33,6 +33,7 @@ steps:
   # end to end test
   - ./main & # run the just-built athens server
   - sleep 3 # wait for it to spin up
+  - curl localhost:3000
   - mkdir -p ~/happy
   - mkdir -p ~/emptygopath # ensure the gopath has no modules cached.
   - cd ~/happy
@@ -153,7 +154,7 @@ services:
   ports:
     - 6379
 - name: athens-proxy
-  image: gomods/athens:canary
+  image: gomods/athens-dev:221c451 # temporary to make the build pass, revert to gomods/athens:canary after merge.
   pull: always
   ports:
     - 3000
