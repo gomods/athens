@@ -16,4 +16,4 @@ Before we go further, we want you to know two things:
 2. [Absolutely everybody is welcome](https://arschles.com/blog/absolutely-everybody-is-welcome/). You are welcome in our community, regardless of your level of programming experience, number of years writing Go, race, religion, sexual orientation, gender identity, or anything else. If you want to be here, we will do everything we can to help you feel welcome and involved
 
 
-Ready to join us? Head over to the [guide on how to participate](./participating).
+Ready to join us? Head over to the [guide on how to participate](./participating) to get started!
