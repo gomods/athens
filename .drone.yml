@@ -154,7 +154,7 @@ services:
   ports:
     - 6379
 - name: athens-proxy
-  image: gomods/athens-dev:221c451 # temporary to make the build pass, revert to gomods/athens:canary after merge.
+  image: gomods/athens:canary
   pull: always
   ports:
     - 3000
