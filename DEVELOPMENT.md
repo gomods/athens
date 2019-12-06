@@ -27,15 +27,16 @@ GO_BINARY_PATH=go1.11.X
 
 # Run the Proxy
 
-We provide three ways to run the proxy on your local machine:
+We provide four ways to run the proxy on your local machine:
 
 1. Using [Docker](https://www.docker.com/) and [Docker Compose](https://docs.docker.com/compose/) (_we suggest this one if you're getting started_)
-2. Natively on your host
-3. Using [Sail](https://sail.dev)
+2. Natively on your host as a service (only SystemD is currently supported)
+3. Natively on your host as a simple binary
+4. Using [Sail](https://sail.dev)
 
 See below for instructions for each option!
 
-## Using Docker
+## Run Using Docker
 
 As we said above, we suggest that you use this approach because it simulates a more realistic Athens deployment. This technique does the following, completely inside containers:
 
@@ -79,7 +80,42 @@ When you're ready to stop Athens and all its dependencies, run this command:
 $ make run-docker-teardown
 ```
 
-## Natively on Your Host
+## Run Natively on Your Host as a Service
+
+There are many service execution environments. On Linux, two important ones are SystemD and SysV, but at the moment only SystemD is supported; others may follow soon. For other systems, please see the next section. 
+
+### SystemD on Linux
+
+If you're inside GOPATH, make sure `GO111MODULE=on`, if you're outside GOPATH, then Go Modules are on by default.
+
+The Makefile builds the necessary `athens` binary. Then a script sets up the service for you.
+
+```console
+$ make athens
+$ sudo ./scripts/systemd.sh install
+```
+
+After the server starts, you can manage it as usual via `systemctl`, e.g.:
+
+```console
+sudo systemctl status athens
+```
+which is the same as
+
+```console
+$ sudo ./scripts/systemd.sh status
+```
+
+The `systemd.sh` script also has a `remove` option to uninstall the service.
+
+SystemD allows logs to be collected and inspected; more information is in 
+[this tutorial by Digital Ocean](https://www.digitalocean.com/community/tutorials/how-to-use-journalctl-to-view-and-manipulate-systemd-logs), amongst others. So tailing the logs can be done like this:
+
+```console
+$ sudo journalctl -u athens --since today --follow
+```
+
+## Run Natively on Your Host
 
 If you're inside GOPATH, make sure `GO111MODULE=on`, if you're outside GOPATH, then Go Modules are on by default.
 
@@ -97,7 +133,7 @@ After the server starts, you'll see some console output like:
 Starting application at 127.0.0.1:3000
 ```
 
-## Using Sail
+## Run Using Sail
 
 Follow instructions at [sail.dev](https://sail.dev) to setup the sail CLI. Then simply run:
 
