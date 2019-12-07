@@ -10,4 +10,5 @@ type S3Config struct {
 	UseDefaultConfiguration            bool   `envconfig:"AWS_USE_DEFAULT_CONFIGURATION"`
 	CredentialsEndpoint                string `envconfig:"AWS_CREDENTIALS_ENDPOINT"`
 	AwsContainerCredentialsRelativeURI string `envconfig:"AWS_CONTAINER_CREDENTIALS_RELATIVE_URI"`
+	Endpoint                           string `evnconfig:"AWS_ENDPOINT"`
 }

@@ -361,7 +361,6 @@ SingleFlightType = "memory"
         Insecure = false
 
     [Storage.S3]
-
         ### The authentication model is as below for S3 in the following order
         ### If AWS_CREDENTIALS_ENDPOINT is specified and it returns valid results, then it is used
         ### If config variables are specified and they are valid, then they return valid results, then it is used
@@ -414,6 +413,13 @@ SingleFlightType = "memory"
         # If you are planning to use AWS Fargate, please use http://169.254.170.2 for CredentialsEndpoint
         # Ref: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-metadata-endpoint-v2.html
         AwsContainerCredentialsRelativeURI = ""
+
+        # An optional endpoint URL (hostname only or fully qualified URI)
+        # that overrides the default generated endpoint for S3 storage client.
+        #
+        # You must still provide a `Region` value when specifying an endpoint.
+        # Env override: AWS_ENDPOINT
+        Endpoint = ""
 
    [Storage.AzureBlob]
         # Storage Account name for Azure Blob

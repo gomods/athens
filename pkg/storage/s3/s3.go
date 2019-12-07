@@ -59,6 +59,9 @@ func New(s3Conf *config.S3Config, timeout time.Duration, options ...func(*aws.Co
 
 	awsConfig.Credentials = credentials.NewChainCredentials(credProviders)
 	awsConfig.CredentialsChainVerboseErrors = aws.Bool(true)
+	if s3Conf.Endpoint != "" {
+		awsConfig.Endpoint = aws.String(s3Conf.Endpoint)
+	}
 
 	// create a session with creds
 	sess, err := session.NewSession(awsConfig)
