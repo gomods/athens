@@ -18,13 +18,11 @@ type Mode string
 
 // DownloadMode constants. For more information see config.dev.toml
 const (
-	Sync            Mode = "sync"
-	Async           Mode = "async"
-	Redirect        Mode = "redirect"
-	AsyncRedirect   Mode = "async_redirect"
-	None            Mode = "none"
-	downloadModeErr      = "download mode is not set"
-	invalidModeErr       = "unrecognized download mode: %s"
+	Sync          Mode = "sync"
+	Async         Mode = "async"
+	Redirect      Mode = "redirect"
+	AsyncRedirect Mode = "async_redirect"
+	None          Mode = "none"
 )
 
 // DownloadFile represents a custom HCL format of
@@ -50,11 +48,11 @@ type DownloadPath struct {
 // you can either point to a file path by passing
 // file:/path/to/file OR custom:<base64-encoded-hcl>
 // directly.
-func NewFile(m Mode, downloadURL string) (*DownloadFile, error) {
+func NewFile(m Mode, downloadURL string, errFn errors.ConfigErrFn) (*DownloadFile, error) {
 	const op errors.Op = "downloadMode.NewFile"
 
 	if m == "" {
-		return nil, errors.E(op, downloadModeErr)
+		return nil, errFn("You have to pass a value.")
 	}
 
 	if strings.HasPrefix(string(m), "file:") {
@@ -76,7 +74,7 @@ func NewFile(m Mode, downloadURL string) (*DownloadFile, error) {
 	case Sync, Async, Redirect, AsyncRedirect, None:
 		return &DownloadFile{Mode: m, DownloadURL: downloadURL}, nil
 	default:
-		return nil, errors.E(op, errors.KindBadRequest, fmt.Sprintf(invalidModeErr, m))
+		return nil, errFn(fmt.Sprintf("%s isn't a valid value.", m))
 	}
 }
 
