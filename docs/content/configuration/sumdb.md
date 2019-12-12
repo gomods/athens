@@ -4,48 +4,66 @@ description: How to configure Athens to proxy a checksum database API, and why y
 weight: 4
 ---
 
-## Proxying A Checksum DB
+If you run `go get github.com/mycompany/secret-repo@v1.0.0` and that module version is not yet in your `go.sum` file, Go will by default send a request to `https://sum.golang.org/lookup/github.com/mycompany/secret-repo@v1.0.0`. That request will fail because the Go tool requires a checksum, but `sum.golang.org` doesn't have access to your private code.
 
-The Athens Proxy has the ability to proxy a Checksum Database as defined by [this proposal](https://go.googlesource.com/proposal/+/master/design/25530-sumdb.md) by the Go team.
+The result is that *(1) your build will fail*, and *(2) your private module names have been sent over the internet to an opaque public server that you don't control*.
 
-Athens by default will accept proxying `https://sum.golang.org`. However, if you'd like to override that behavior or proxy more Checksum DBs you can do so through the `SumDBs` config or its equivalent Environment Variable: `ATHENS_SUM_DBS`.
+>You can read more about this `sum.golang.org` service [here](https://go.googlesource.com/proposal/+/master/design/25530-sumdb.md)
 
-So for example, if you run the following command:
+## Proxying a checksum DB
+
+Many companies use Athens to host their private code, but Athens is not only a module proxy. It's also a checksum database proxy. That means that anyone inside of your company can configure `go` to send these checksum requests to Athens instead of the public `sum.golang.org` server.
+
+If the Athens server is configured with checksum filters, then you can prevent these problems.
+
+If you run the below command using Go 1.13 or later:
 
 ```bash
-GOPROXY=<athens-url> go build
+$ GOPROXY=<athens-url> go build .
 ```
 
-The Go command will proxy requests to `sum.golang.org` like this: `<athens-url>/sumdb/sum.golang.org`. Feel free to read the linked proposal above for the exact requests that makes Athens successfully proxy Checksum DB APIs.
+... then the Go tool will automatically send all checksum requests to `<athens-url>/sumdb/sum.golang.org` instead of `https://sum.golang.org`.
 
-Note that as of this documentation (May 2019), you need to explicitly set `GOSUMDB=https://sum.golang.org`, but the Go team is planning on enabling this by default.
+By default, when Athens receives a `/sumdb/...` request, it automatically proxies it to `https://sum.golang.org`, even if it's a private module that `sum.golang.org` doesn't and can't know about. So if you are working with private modules, you'll want to change the default behavior.
 
-### Why Proxy a Checksum DB?
+>If you Athens to _not_ send some module names up to the global checksum database, set those module names in the `NoSumPatterns` value in `config.toml` or using the `ATHENS_GONOSUM_PATTERNS` environment variable.
 
-This is quite important. Say you are a company that is running an Athens instance, and you don't want the world to know about where your 
-repositories live. For example, say you have a private repo under `github.com/mycompany/secret-repo`. In order to ensure that the Go client 
-does not send a request to `https://sum.golang.org/lookup/github.com/mycompany/secret-repo@v1.0.0` and therefore leaking your private import path to the public, you need to ensure that you tell Go to skip particular import paths by setting the `GONOSUMDB` environment variable:
+The following sections will go into more detail on how checksum databases work, how Athens fits in, and how this all impacts your workflow.
 
-```
-GONOSUMDB=github.com/mycompany/* go build
-```
+## How to set this all up
 
-This will make sure that Go does not send any requests to the Checksum DB for your private import paths. However, how can you ensure that all of your employees are building private code with the right configuration?
-
-Athens, in this case can help ensure that all private code flowing through it is never checked against the checksum DB. That means that as long as your employees are using Athens, then they will get a helpful reminder to ensure Their GONOSUMDB is rightly configured.
-
-Athens allows the operator running the server to specify a list of patterns to not lookup via the upstream sum provider:
+Before you begin, you'll need to run Athens with configuration values that tell it to not proxy certain modules. If you're using `config.toml`, use this configuration:
 
 ```toml
 NoSumPatterns = ["github.com/mycompany/*", "github.com/secret/*"]
 ```
 
-Or you can do it with an environment variable:
+And if you're using an environment variable, use this configuration:
 
-```console
+```bash
 $ export ATHENS_GONOSUM_PATTERNS="github.com/mycompany/*,github.com/secret/*"
 ```
 
->In both of the above configuration examples, there are two patterns specified, and they are separated by a comma (`,`) in both cases. When you are using the environment variable (`export ATHENS_GONOSUM_PATTERNS`), make sure you don't use brackes (`[` and `]`).
+>You can use any string compatible with [`path.Match`](https://pkg.go.dev/path?tab=doc#Match) in these environment variables
 
-Either way, this configuration will ensure that when Go sends a request to `<athens-url>/sumdb/sum.golang.org/github.com/mycompany/secret-repo@v1.0.0`, Athens will return a 403 and failing the build ensuring that the client knows something is not configured correctly and also never leaking those import paths.
+After you start Athens up with this configuration, all checksum requests for modules that start with `github.com/mycompany` or `github.com/secret` will not be forwarded, and Athens will return an error to the `go` CLI tool. 
+
+This behavior will ensure that none of your private module names leak to the public internet, but your builds will still fail. To fix that problem, set another environment variable on your machine (that you run your `go` commands)
+
+```bash
+$ export GONOSUMDB="github.com/mycompany/*,github.com/secret/*"
+```
+
+Now, your builds will work and you won't be sending information about your private codebase to the internet.
+
+## I'm confused, why is this hard?
+
+When the Go tool has to download _new_ code that isn't currently in the project's `go.sum` file, it tries its hardest to get a checksum from a server it trusts, and compare it to the checksum in the actual code it downloads. It does all of this to ensure _provenance_. That is, to ensure that the code you just downloaded wasn't tampered with.
+
+The trusted checksums are all stored in `sum.golang.org`, and that server is centrally controlled.
+
+>These build failures and potential privacy leaks can only happen when you try to get a module version that is _not_ already in your `go.sum` file.
+
+Athens does its best to respect and use the trusted checksums while also ensuring that your private names don't get leaked to the public server. In some cases, it has to choose whether to fail your build or leak information, so it chooses to fail your build. That's why everybody using that Athens server needs to set up their `GONOSUMDB` environment variable.
+
+We believe that along with good documentation - which we hope this is! - we have struck the right balance between convenience and privacy.
