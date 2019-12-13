@@ -139,7 +139,7 @@ func TestNewFile_err(t *testing.T) {
 	}
 	for _, c := range tc {
 		t.Run(c.name, func(subT *testing.T) {
-			_, err := NewFile(c.mode, "github.com/gomods/athens", dlModeErrFn)
+			_, err := NewFile(c.mode, "github.com/gomods/athens")
 			if err.Error() != c.expected {
 				t.Fatalf("expected error %s from NewFile, got %s", c.expected, err.Error())
 			}
