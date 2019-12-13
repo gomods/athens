@@ -25,6 +25,22 @@ const (
 	None          Mode = "none"
 )
 
+// Validate ensures that m is a valid mode. If this function returns nil, you are
+// guaranteed that m is valid
+func (m Mode) Validate(op errors.Op) error {
+	switch m {
+	case Sync, Async, Redirect, AsyncRedirect, None:
+		return nil
+	default:
+		return errors.Config(
+			op,
+			"mode",
+			fmt.Sprintf("%s isn't a valid value.", m),
+			"https://docs.gomods.io/configuration/download/",
+		)
+	}
+}
+
 // DownloadFile represents a custom HCL format of
 // how to handle module@version requests that are
 // not found in storage.
@@ -42,17 +58,30 @@ type DownloadPath struct {
 	DownloadURL string `hcl:"downloadURL,optional"`
 }
 
+func (d DownloadPath) validate(op errors.Op) error {
+	if d.DownloadURL == "" && (d.Mode == Redirect || d.Mode == AsyncRedirect) {
+		return errors.Config(
+			op,
+			fmt.Sprintf("DownloadURL (inside %s in the download file)", d.Pattern),
+			"You must set a value when the download mode is 'redirect' or 'async_redirect'",
+			"https://docs.gomods.io/configuration/download/",
+		)
+	}
+	return nil
+}
+
 // NewFile takes a mode and returns a DownloadFile.
 // Mode can be one of the constants declared above
 // or a custom HCL file. To pass a custom HCL file,
 // you can either point to a file path by passing
 // file:/path/to/file OR custom:<base64-encoded-hcl>
 // directly.
-func NewFile(m Mode, downloadURL string, errFn errors.ConfigErrFn) (*DownloadFile, error) {
+func NewFile(m Mode, downloadURL string) (*DownloadFile, error) {
+	const downloadModeURL = "https://docs.gomods.io/configuration/download/"
 	const op errors.Op = "downloadMode.NewFile"
 
-	if m == "" {
-		return nil, errFn("You have to pass a value.")
+	if err := m.Validate(op); err != nil {
+		return nil, err
 	}
 
 	if strings.HasPrefix(string(m), "file:") {
@@ -70,12 +99,11 @@ func NewFile(m Mode, downloadURL string, errFn errors.ConfigErrFn) (*DownloadFil
 		return parseFile(bts)
 	}
 
-	switch m {
-	case Sync, Async, Redirect, AsyncRedirect, None:
-		return &DownloadFile{Mode: m, DownloadURL: downloadURL}, nil
-	default:
-		return nil, errFn(fmt.Sprintf("%s isn't a valid value.", m))
+	retFile := &DownloadFile{Mode: m, DownloadURL: downloadURL}
+	if err := retFile.validate(op); err != nil {
+		return nil, err
 	}
+	return retFile, nil
 }
 
 // parseFile parses an HCL file according to the
@@ -91,19 +119,26 @@ func parseFile(file []byte) (*DownloadFile, error) {
 	if dig.HasErrors() {
 		return nil, errors.E(op, dig.Error())
 	}
-	if err := df.validate(); err != nil {
+	if err := df.validate(op); err != nil {
 		return nil, errors.E(op, err)
 	}
 	return &df, nil
 }
 
-func (d *DownloadFile) validate() error {
-	const op errors.Op = "downloadMode.validate"
+func (d *DownloadFile) validate(op errors.Op) error {
 	for _, p := range d.Paths {
+		if err := p.Mode.Validate(op); err != nil {
+			return err
+		}
 		switch p.Mode {
 		case Sync, Async, Redirect, AsyncRedirect, None:
 		default:
-			return errors.E(op, fmt.Errorf("unrecognized mode for %v: %v", p.Pattern, p.Mode))
+			return errors.Config(
+				op,
+				fmt.Sprintf("mode (in pattern %v", p.Pattern),
+				fmt.Sprintf("%s is unrecognized", p.Mode),
+				"https://docs.gomods.io/configuration/download/",
+			)
 		}
 	}
 	return nil

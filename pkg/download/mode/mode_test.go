@@ -1,7 +1,6 @@
 package mode
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/gomods/athens/pkg/errors"
@@ -121,10 +120,7 @@ func TestMode(t *testing.T) {
 }
 
 func TestNewFile_err(t *testing.T) {
-	dlModeErrFn := errors.ConfigError(
-		"DownloadMode",
-		"https://docs.gomods.io/configuration/download/",
-	)
+	const op = errors.Op("downloadMode.NewFile")
 	tc := []struct {
 		name     string
 		mode     Mode
@@ -133,12 +129,12 @@ func TestNewFile_err(t *testing.T) {
 		{
 			name:     "empty mode",
 			mode:     "",
-			expected: dlModeErrFn("You have to pass a value.").Error(),
+			expected: Mode("").Validate(op).Error(),
 		},
 		{
 			name:     "invalid mode",
 			mode:     "invalidMode",
-			expected: dlModeErrFn(fmt.Sprintf("%s isn't a valid value.", "invalidMode")).Error(),
+			expected: Mode("invalidMode").Validate(op).Error(),
 		},
 	}
 	for _, c := range tc {

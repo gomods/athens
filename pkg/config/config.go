@@ -58,6 +58,13 @@ type Config struct {
 	Storage          *StorageConfig
 }
 
+// Validate checks various values in c that are commonly improperly set.
+// This function is not exhaustive, so c is not guaranteed to be valid even if
+// it doesn't return nil
+func (c Config) Validate(op errors.Op) error {
+	return c.DownloadMode.Validate(op)
+}
+
 // EnvList is a list of key-value environment
 // variables that are passed to the Go command
 type EnvList []string
