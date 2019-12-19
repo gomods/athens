@@ -7,7 +7,7 @@ steps:
   image: golang:1.13
   commands:
     # wait for services to be ready.
-    - sleep 5
+    - sleep 10
     - go mod download
     - go mod vendor # this is for when the Dockerfile gets built
   environment:
@@ -33,6 +33,7 @@ steps:
   # end to end test
   - ./main & # run the just-built athens server
   - sleep 3 # wait for it to spin up
+  - curl localhost:3000
   - mkdir -p ~/happy
   - mkdir -p ~/emptygopath # ensure the gopath has no modules cached.
   - cd ~/happy

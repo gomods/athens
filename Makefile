@@ -2,15 +2,19 @@ VERSION = "unset"
 DATE=$(shell date -u +%Y-%m-%d-%H:%M:%S-%Z)
 
 ifndef GOLANG_VERSION
-override GOLANG_VERSION = 1.12
+override GOLANG_VERSION = 1.13
 endif
 
 .PHONY: build
 build: ## build the athens proxy
-	cd cmd/proxy && go build
+	go build -o ./cmd/proxy/proxy ./cmd/proxy
 
+.PHONY: build-ver
 build-ver: ## build the athens proxy with version number
 	GO111MODULE=on CGO_ENABLED=0 GOPROXY="https://proxy.golang.org" go build -ldflags "-X github.com/gomods/athens/pkg/build.version=$(VERSION) -X github.com/gomods/athens/pkg/build.buildDate=$(DATE)" -o athens ./cmd/proxy
+
+athens:
+	$(MAKE) build-ver
 
 # The build-image step creates a docker image that has all the tools required
 # to perform some CI build steps, instead of relying on them being installed locally
@@ -24,6 +28,7 @@ run: ## run the athens proxy with dev configs
 
 .PHONY: run-docker
 run-docker:
+	docker-compose -p athensdockerdev build --build-arg GOLANG_VERSION=${GOLANG_VERSION} dev
 	docker-compose -p athensdockerdev up -d dev
 
 .PHONY: run-docker-teardown
@@ -71,7 +76,7 @@ docker: proxy-docker
 
 .PHONY: proxy-docker
 proxy-docker:
-	docker build -t gomods/athens -f cmd/proxy/Dockerfile .
+	docker build -t gomods/athens -f cmd/proxy/Dockerfile --build-arg GOLANG_VERSION=${GOLANG_VERSION} .
 
 .PHONY: docker-push
 docker-push:
@@ -109,6 +114,14 @@ down:
 dev-teardown:
 	docker-compose -p athensdev down -v
 
+.PHONY: clean
+clean: ## delete all locally-built artefacts (not including docker images)
+	rm -f athens cmd/proxy/proxy
+
 .PHONY: help
 help: ## display help page
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
+
+.PHONY: deploy-gae
+deploy-gae:
+	cd scripts/gae && gcloud app deploy

@@ -2,13 +2,20 @@ replicaCount: 1
 image:
   registry: docker.io
   repository: gomods/athens
-  tag: v0.6.1
+  tag: v0.7.0
 
   ## Specify a imagePullPolicy
   ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
   ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
   ##
   pullPolicy: IfNotPresent
+
+
+livenessProbe:
+  failureThreshold: 3
+  periodSeconds: 10
+  successThreshold: 1
+  timeoutSeconds: 1
 
 service:
   ## Additional annotations to apply to the service
@@ -57,6 +64,16 @@ storage:
     accessKey: ""
     secretKey: ""
     bucket: ""
+  gcp:
+  # For more information, see:
+  # https://docs.gomods.io/install/install-on-kubernetes/#google-cloud-storage
+    # you must set gcp projectID and bucket when running 'helm install'
+    projectID: ""
+    bucket: ""
+    # set serviceAccount to a key which has read/write access to the GCS bucket.
+    # If you are running Athens inside GCP, you will most likely not need this
+    # as GCP figures out internal authentication between products for you.
+    serviceAccount: ""
 
 # Extra environment variables to be passed
 # You can add any new ones at the bottom
@@ -65,8 +82,9 @@ configEnvVars: {}
 # HTTP basic auth
 basicAuth:
   enabled: false
-  user: "some_user"
-  password: "some_password"
+  secretName: athens-proxy-basic-auth
+  passwordSecretKey: password
+  usernameSecretKey: username
 
 netrc:
   # if enabled, it expects to find the content of a valid .netrc file imported as a secret named netrcsecret
