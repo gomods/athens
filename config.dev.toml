@@ -15,6 +15,7 @@ GoBinary = "go"
 # Env override: GO_ENV
 GoEnv = "development"
 
+# GoProxy IS DEPRECATED and will be removed in v0.7.0: PLEASE USE GoBinaryEnvVars
 # GoProxy specifies GOPROXY env for go list or mod download inside athens
 # which can be configured totally same with GOPROXY of Go Command.
 # Notes that the comma-separated GOPROXY (e.g. <proxy1>,<proxy2>,direct) is only available in Go 1.13 or higher,
@@ -22,12 +23,26 @@ GoEnv = "development"
 # Env override: GOPROXY
 GoProxy = "direct"
 
+# GoBinaryEnvVars are environment variables that you'd like
+# to pass directly to the Go command that Athens runs under the
+# hood. Athens primarily runs two Go commands:
+# 1. `go mod download -json <module>@<version>`
+# 2. `go list -m -json <module>@latest`
+# The go command accepts multiple environment variables that
+# can affect the two processes above such as GONOSUMDB and GOPROXY.
+# Note that athens passes the NoSumPatterns to the two commands above,
+# but the existence of GONOSUMDB in this configuration takes precedence.
+# Although you can pass any key=value to the Go command here, you can see
+# the list of possible env vars by running `go env`.
+# Env override: ATHENS_GO_BINARY_ENV_VARS
+GoBinaryEnvVars = ["GOPROXY=direct"]
+
 # GoGetWorkers specifies how many times you can concurrently
 # go mod download, this is so that low performance instances
 # can manage go get more sanely and not run out of disk or memory.
 # One way to think about is: the number of GoGetWorkers corresponds
 # directly to how many parallel "git clones" your underlying machine
-# can handle. 
+# can handle.
 # Env override: ATHENS_GOGET_WORKERS
 GoGetWorkers = 10
 
@@ -63,9 +78,17 @@ PprofPort = ":3001"
 #
 # To point Athens to an upstream proxy to fetch modules,
 # set GlobalEndpoint to "https://<url_to_upstream>"
-# and also ensure that FilterFile is  set to a fully qualified file name 
+# and also ensure that FilterFile is  set to a fully qualified file name
 # that contains the letter `D` (for "Direct Access") in the first line.
 FilterFile = ""
+
+# The filename for the robots.txt.
+# ENV override: ATHENS_ROBOTS_FILE
+#
+# To provide /robots.txt for net crawler.
+# Default disallow all crawler.
+# Content details to see https://support.google.com/webmasters/answer/6062608
+RobotsFile = "robots.txt"
 
 # Timeout is the timeout for external network calls in seconds
 # This value is used as the default for storage backends if they don't specify timeouts
@@ -96,15 +119,15 @@ Port = ":3000"
 #
 # To point Athens to an upstream proxy to fetch modules,
 # set GlobalEndpoint to "https://<url_to_upstream>"
-# and also ensure that FilterFile is set to a fully qualified file name 
+# and also ensure that FilterFile is set to a fully qualified file name
 # that contains the letter `D` (for "Direct Access") in the first line.
 GlobalEndpoint = "http://localhost:3001"
 
-# BASIC AUTH OPTIONS 
+# BASIC AUTH OPTIONS
 # ==================
-# PLASE NOTE THAT THIS IS A BAD HACK AROUND 
-# THE FACT THAT GO DOES NOT SUPPORT PROPER AUTHENTICATION 
-# YET! YOUR BASIC AUTH CREDENTIALS CAN EASILY LEAK 
+# PLASE NOTE THAT THIS IS A BAD HACK AROUND
+# THE FACT THAT GO DOES NOT SUPPORT PROPER AUTHENTICATION
+# YET! YOUR BASIC AUTH CREDENTIALS CAN EASILY LEAK
 # IN ATHENS LOGS AS WELL AS GO COMMAND LOGS.
 # THIS WILL BE ADDRESSED IN 1.13.
 # SEE https://github.com/golang/go/issues/30610
@@ -177,15 +200,15 @@ TraceExporterURL = "http://localhost:14268"
 # Env override: ATHENS_STATS_EXPORTER
 StatsExporter = "prometheus"
 
-# SumDBs specifies a list of fully qualified URLs that Athens will proxy 
+# SumDBs specifies a list of fully qualified URLs that Athens will proxy
 # so that the go command can use as a checksum verifier.
-# See NoSumDB for enforcing the go command to use 
+# See NoSumDB for enforcing the go command to use
 # GONOSUMDB.
 # Env override: ATHENS_SUM_DBS
 SumDBs = ["https://sum.golang.org"]
 
-# NoSumPatterns specifies a list of patterns that will make the 
-# Sum DB proxy return a 403 if any of those patterns match. 
+# NoSumPatterns specifies a list of patterns that will make the
+# Sum DB proxy return a 403 if any of those patterns match.
 # This will enforce the client to run GONOSUMDB
 # Example pattern: NoSumPatterns = ["github.com/mycompany/*"]
 # Env override: ATHENS_GONOSUM_PATTERNS
@@ -204,37 +227,37 @@ NoSumPatterns = []
 # 5. "none": return 404 if a module is not found and do nothing.
 # 6. "file:<path>": will point to an HCL file that specifies
 # any of the 5 options above based on different import paths.
-# 7. "custom:<base64-encoded-hcl>" is the same as option 6 
-# but the file is fully encoded in the option. This is 
-# useful for using an environment variable in serverless 
+# 7. "custom:<base64-encoded-hcl>" is the same as option 6
+# but the file is fully encoded in the option. This is
+# useful for using an environment variable in serverless
 # deployments.
 # Env override: ATHENS_DOWNLOAD_MODE
 DownloadMode = "sync"
 
-# DownloadURL is the URL that will be used if 
-# DownloadMode is set to "redirect" 
+# DownloadURL is the URL that will be used if
+# DownloadMode is set to "redirect"
 # Env override: ATHENS_DOWNLOAD_URL
 DownloadURL = ""
 
-# SingleFlightType determines what mechanism Athens uses 
-# to manage concurrency flowing into the Athens Backend. 
-# This is important for the following scenario: if two concurrent requests 
-# were made to Athens that wanted to store the same module at the same time, 
-# we want to make sure only the first request gets to store the module, 
-# and the second request will wait for the first one to finish so that 
-# it doesn't override the storage. 
+# SingleFlightType determines what mechanism Athens uses
+# to manage concurrency flowing into the Athens Backend.
+# This is important for the following scenario: if two concurrent requests
+# were made to Athens that wanted to store the same module at the same time,
+# we want to make sure only the first request gets to store the module,
+# and the second request will wait for the first one to finish so that
+# it doesn't override the storage.
 
 # Options are ["memory", "etcd", "redis", "gcp", "azureblob"]
 
-# The default option is "memory" which means that only one instance of Athens 
+# The default option is "memory" which means that only one instance of Athens
 # should be used.
-# The "gcp" single flight will assume that you have a "gcp" StorageType 
-# and therefore it will use its strong-consistency features to ensure 
-# that only one module is ever written even when concurrent saves happen 
+# The "gcp" single flight will assume that you have a "gcp" StorageType
+# and therefore it will use its strong-consistency features to ensure
+# that only one module is ever written even when concurrent saves happen
 # at the same time.
-# The "azureblob" single flight will assume that you have a "azureblob" StorageType 
-# and therefore it will use its strong-consistency features to ensure 
-# that only one module is ever written even when concurrent saves happen 
+# The "azureblob" single flight will assume that you have a "azureblob" StorageType
+# and therefore it will use its strong-consistency features to ensure
+# that only one module is ever written even when concurrent saves happen
 # at the same time.
 # Env override: ATHENS_SINGLE_FLIGHT_TYPE
 SingleFlightType = "memory"
@@ -242,7 +265,7 @@ SingleFlightType = "memory"
 [SingleFlight]
     [SingleFlight.Etcd]
         # Endpoints are comma separated URLs that determine all distributed etcd servers.
-        # It defaults to what we have in our docker-compose file. It is by default ignored 
+        # It defaults to what we have in our docker-compose file. It is by default ignored
         # as the SingleFlightType field above determines whether Etcd is used or not.
         # Env override: ATHENS_ETCD_ENDPOINTS
         Endpoints = "localhost:2379,localhost:22379,localhost:32379"
@@ -265,6 +288,11 @@ SingleFlightType = "memory"
         RootPath = "/path/on/disk"
 
     [Storage.GCP]
+        # Required IAM Roles (https://cloud.google.com/storage/docs/access-control/iam-roles):
+        # - roles/storage.objectCreator
+        # - roles/storage.objectViewer
+        # - roles/storage.legacyBucketReader
+
         # ProjectID to use for GCP Storage
         # Env override: GOOGLE_CLOUD_PROJECT
         ProjectID = "MY_GCP_PROJECT_ID"
@@ -275,10 +303,15 @@ SingleFlightType = "memory"
 
         # JSONKey is a base64 encoded service account 
         # key that allows Athens to be run outside of GCP
-        # but still be able to access GCS. If you are 
+        # but still be able to access GCS. If you are
         # running Athens inside GCP, you will most
-        # likely not need this as GCP figures out 
-        # internal authentication between products for you. 
+        # likely not need this as GCP figures out
+        # internal authentication between products for you.
+        # 
+        # NOTE: This config value is deprecated in favor of
+        # ServiceAccount above. Athens will check for it,
+        # but please do not rely on it being available forever.
+        #
         # Env override: ATHENS_STORAGE_GCP_JSON_KEY
         JSONKey = ""
 
@@ -328,7 +361,6 @@ SingleFlightType = "memory"
         Insecure = false
 
     [Storage.S3]
-
         ### The authentication model is as below for S3 in the following order
         ### If AWS_CREDENTIALS_ENDPOINT is specified and it returns valid results, then it is used
         ### If config variables are specified and they are valid, then they return valid results, then it is used
@@ -340,7 +372,7 @@ SingleFlightType = "memory"
         # and
         # https://godoc.org/github.com/aws/aws-sdk-go/aws/session#hdr-Environment_Variables
         # for environment variables that will affect the aws configuration.
-        # Setting UseDefaultConfiguration would only use default configuration. It will be deprecated in future releases 
+        # Setting UseDefaultConfiguration would only use default configuration. It will be deprecated in future releases
         # and is recommended not to use it.
 
         # Region for S3 storage
@@ -381,6 +413,13 @@ SingleFlightType = "memory"
         # If you are planning to use AWS Fargate, please use http://169.254.170.2 for CredentialsEndpoint
         # Ref: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-metadata-endpoint-v2.html
         AwsContainerCredentialsRelativeURI = ""
+
+        # An optional endpoint URL (hostname only or fully qualified URI)
+        # that overrides the default generated endpoint for S3 storage client.
+        #
+        # You must still provide a `Region` value when specifying an endpoint.
+        # Env override: AWS_ENDPOINT
+        Endpoint = ""
 
    [Storage.AzureBlob]
         # Storage Account name for Azure Blob

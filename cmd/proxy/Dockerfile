@@ -1,8 +1,12 @@
 # Links to compare against to ensure we have all VCS's setup in this build
 # https://github.com/docker-library/buildpack-deps/blob/1845b3f918f69b4c97912b0d4d68a5658458e84f/stretch/scm/Dockerfile
 # https://github.com/golang/go/blob/f082dbfd4f23b0c95ee1de5c2b091dad2ff6d930/src/cmd/go/internal/get/vcs.go#L90
-
-FROM golang:1.12-alpine AS builder
+#
+# You can override the Go version used to build the image.
+# See project Makefile if using make.
+# See docker --build-arg if building directly.
+ARG GOLANG_VERSION=1.13
+FROM golang:${GOLANG_VERSION}-alpine AS builder
 
 WORKDIR $GOPATH/src/github.com/gomods/athens
 
@@ -21,10 +25,8 @@ COPY --from=builder /go/src/github.com/gomods/athens/config.dev.toml /config/con
 COPY --from=builder /usr/local/go/bin/go /bin/go
 
 # Add tini, see https://github.com/gomods/athens/issues/1155 for details.
-RUN apk add --update bzr git mercurial openssh-client subversion procps fossil tini && \
+RUN apk add --update bzr git git-lfs mercurial openssh-client subversion procps fossil tini && \
 	mkdir -p /usr/local/go
-
-ENV GO_ENV=production
 
 EXPOSE 3000
 

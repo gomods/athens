@@ -12,7 +12,7 @@ A registry is generally run by one entity, is one logical server that provides a
 
 That's most definitely not what we in the Athens community are going for, and that would harm our community if we did go down that path.
 
-First and foremost, Athens is an _implementation_ of the [Go Modules download API](/intro/protocol). Not only does the standard Go toolchain support any implementation of that API, the Athens proxy is designed to talk to any other server that implements that API as well. That allows Athens to talk to other proxies in the community. 
+First and foremost, Athens is an _implementation_ of the [Go Modules download API](/intro/protocol). Not only does the standard Go toolchain support any implementation of that API, the Athens proxy is designed to talk to any other server that implements that API as well. That allows Athens to talk to other proxies in the community.
 
 Finally, we're purposefully building this project - and working with the toolchain folks - in a way that everyone who wants to write a proxy can participate.
 
@@ -62,7 +62,6 @@ Yes, this is possible. The proxy provides a configuration file that will allow u
 
 Yes, this is possible. Refer to the [filtering modules configuration](/configuration/filter/) provides details about the configuration file and how to exclude certain modules.
 
-
 ### Is there support for monitoring and observability for Proxy?
 
 Right now, we have structured logs for proxy. Along with that, we have added tracing to help developers identify critical code paths and debug latency issues. While there is no setup required for logs, tracing requires some installation. We currently support exporting traces with [Jaeger](https://www.jaegertracing.io/), [GCP Stackdriver](https://cloud.google.com/stackdriver/) & [Datadog](https://docs.datadoghq.com/tracing/) (untested). Further support for other exporters is in progress.
@@ -74,7 +73,7 @@ To try out tracing with Jaeger, do the following:
 - Run the walkthrough tutorial
 - Open `http://localhost:16686/search`
 
-    Observability is not a hard requirement for the Athens proxy. So, if the infrastructure is not properly set up, it will fail with an information log. For example, if Jaeger is not running or if the wrong URL to the exporter is provided, the proxy will continue to run. However, it will not collect any traces or metrics while the exporter backend is unavailable.
+  Observability is not a hard requirement for the Athens proxy. So, if the infrastructure is not properly set up, it will fail with an information log. For example, if Jaeger is not running or if the wrong URL to the exporter is provided, the proxy will continue to run. However, it will not collect any traces or metrics while the exporter backend is unavailable.
 
 ### What VCS servers does Athens support?
 
@@ -87,3 +86,24 @@ Which currently includes:
 - hg
 - bzr
 - fossil
+
+### When should I use a vendor directory, and when should I use Athens?
+
+The Go community has used vendor directories for a long time before module proxies like Athens came along, so naturally each group collaborating on code should decide for themselves whether they want to use a vendor directory, use Athens, or do both!
+
+Using a vendor directory (without a proxy) is valuable when:
+
+- CI/CD systems don't have access to an Athens (even if it's internal)
+- When the vendor directory is so small that it is still faster to check it out from a repo than it is to pull zip files from the server
+- If you're coming from glide/dep or another dependency management system that leveraged the vendor directory
+
+Athens (without a vendor directory) is valuable when:
+
+- You have a new project
+- You are upgrading a Go project to use Go modules
+- Your team requires that you use Athens (i.e. for isolation or dependency auditing)
+- Your vendor directory is large and causing slow checkouts and downloading from Athens speeds the build up
+  - For developers slow checkouts will not be as much of a problem as for ci tools which frequently need to checkout fresh copies of the project
+- You want to remove the vendor directory from your project to:
+  - Reduce noise in pull requests
+  - Reduce difficulty doing fuzzy file searching in your project

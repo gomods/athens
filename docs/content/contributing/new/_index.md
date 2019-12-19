@@ -6,8 +6,9 @@ weight: 2
 
 ---
 
-### Contributing
+# Welcome, New Contributors!
 
-# New Contributors
 
-The following guide is designed to help contributors new to open source.
+This section is all about helping you get started with open source and Athens.
+
+Let's get started with [learning how to use `git`](./git)

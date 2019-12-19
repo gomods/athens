@@ -26,7 +26,7 @@ func RunTests(t *testing.T, b storage.Backend, clearBackend func() error) {
 	testGet(t, b)
 	testExists(t, b)
 	testShouldNotExist(t, b)
-	testCatalog(t, b)
+	// testCatalog(t, b)
 }
 
 // testNotFound ensures that a storage Backend
