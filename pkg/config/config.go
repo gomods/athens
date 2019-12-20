@@ -80,6 +80,37 @@ func (el *EnvList) Add(key, value string) {
 	*el = append(*el, key+"="+value)
 }
 
+// Decode implements envconfig.Decoder. Please see the below link for more information on
+// that interface:
+//
+// https://github.com/kelseyhightower/envconfig#custom-decoders
+//
+// We are doing this to allow for very long lists of assignments to be set inside of
+// a single environment variable. For example:
+//
+//	ATHENS_GO_BINARY_ENV_VARS="GOPRIVATE=*.corp.example.com,rsc.io/private;GOPROXY=direct"
+//
+// See the below link for more information:
+// https://github.com/gomods/athens/issues/1404
+func (el *EnvList) Decode(value string) error {
+	const op errors.Op = "envList.Decode"
+	assignments := strings.Split(value, ";")
+	fmt.Printf("%s assignments = %#v\n", op, assignments)
+	fmt.Printf("envlist: %#v\n", *el)
+	for _, assignment := range assignments {
+		kv := strings.Split(assignment, "=")
+		if len(kv) != 2 {
+			return errors.E(
+				op,
+				errors.KindBadRequest,
+				fmt.Errorf("environment variable assignment %s is invalid", assignment),
+			)
+		}
+		el.Add(kv[0], kv[1])
+	}
+	return nil
+}
+
 // Validate validates that all strings inside the
 // list are of the key=value format
 func (el EnvList) Validate() error {
