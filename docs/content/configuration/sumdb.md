@@ -37,13 +37,15 @@ Athens, in this case can help ensure that all private code flowing through it is
 As the Athens company maintainer, you can run Athens with the following configuration in your `config.toml` file:
 
 ```toml
-NoSumPatterns = ["github.com/mycompany/*"]
+NoSumPatterns = ["github.com/mycompany/*", "github.com/secret/*"]
 ```
 
 Or you can do it with an environment variable:
 
 ```console
-$ export ATHENS_GONOSUM_PATTERNS="['github.com/mycompany/*']"
+$ export ATHENS_GONOSUM_PATTERNS="github.com/mycompany/*,github.com/secret/*"
 ```
+
+>In both of the above configuration examples, there are two patterns specified, and they are separated by a comma (`,`) in both cases. When you are using the environment variable (`export ATHENS_GONOSUM_PATTERNS`), make sure you don't use brackes (`[` and `]`).
 
 Either way, this configuration will ensure that when Go sends a request to `<athens-url>/sumdb/sum.golang.org/github.com/mycompany/secret-repo@v1.0.0`, Athens will return a 403 and failing the build ensuring that the client knows something is not configured correctly and also never leaking those import paths.
