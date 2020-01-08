@@ -3,7 +3,6 @@ package middleware
 import (
 	"bytes"
 	"encoding/json"
-	"io/ioutil"
 	"net/http"
 
 	"github.com/gomods/athens/pkg/errors"
@@ -38,7 +37,7 @@ func NewValidationMiddleware(validatorHook string) mux.MiddlewareFunc {
 
 				if !valid.Success {
 					entry := log.EntryFromContext(r.Context())
-					entry.Warnf("Module %s:%s %s", mod, version, valid.Reason)
+					entry.Warnf("Module %s:%s Reason: %s, Description: %s", mod, version, valid.Reason, valid.Description)
 					w.WriteHeader(http.StatusForbidden)
 					return
 				}
@@ -54,8 +53,9 @@ type validationParams struct {
 }
 
 type ValidationResponse struct {
-	Success bool
-	Reason  string
+	Success     bool
+	Reason      string
+	Description string
 }
 
 func validate(hook, mod, ver string) (ValidationResponse, error) {
@@ -76,19 +76,23 @@ func validate(hook, mod, ver string) (ValidationResponse, error) {
 	case resp.StatusCode == http.StatusOK:
 		return ValidationResponse{Success: true}, nil
 	case resp.StatusCode == http.StatusForbidden:
-		return ValidationResponse{Success: false, Reason: maybeReadResponseReason(resp)}, nil
+		return maybeReadResponseReason(resp), nil
 	default:
 		return ValidationResponse{Success: false}, errors.E(op, "Unexpected status code ", resp.StatusCode)
 	}
 }
 
-func maybeReadResponseReason(resp *http.Response) string {
+func maybeReadResponseReason(resp *http.Response) ValidationResponse {
 	defer resp.Body.Close()
 
-	bodyBytes, _ := ioutil.ReadAll(resp.Body)
-	if len(bodyBytes) > 0 {
-		return string(bodyBytes)
-	}
+	response := ValidationResponse{}
+	decoder := json.NewDecoder(resp.Body)
+	_ = decoder.Decode(&response)
 
-	return "unknown"
+	response.Success = false
+	if response.Reason == "" {
+		response.Reason = "unknown"
+		response.Description = ""
+	}
+	return response
 }
