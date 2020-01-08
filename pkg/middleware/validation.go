@@ -3,6 +3,7 @@ package middleware
 import (
 	"bytes"
 	"encoding/json"
+	"io/ioutil"
 	"net/http"
 
 	"github.com/gomods/athens/pkg/errors"
@@ -35,7 +36,9 @@ func NewValidationMiddleware(validatorHook string) mux.MiddlewareFunc {
 					return
 				}
 
-				if !valid {
+				if !valid.Success {
+					entry := log.EntryFromContext(r.Context())
+					entry.Warnf("Module %s:%s %s", mod, version, valid.Reason)
 					w.WriteHeader(http.StatusForbidden)
 					return
 				}
@@ -50,26 +53,42 @@ type validationParams struct {
 	Version string
 }
 
-func validate(hook, mod, ver string) (bool, error) {
+type ValidationResponse struct {
+	Success bool
+	Reason  string
+}
+
+func validate(hook, mod, ver string) (ValidationResponse, error) {
 	const op errors.Op = "actions.validate"
 
 	toVal := &validationParams{mod, ver}
 	jsonVal, err := json.Marshal(toVal)
 	if err != nil {
-		return false, errors.E(op, err)
+		return ValidationResponse{Success: false}, errors.E(op, err)
 	}
 
 	resp, err := http.Post(hook, "application/json", bytes.NewBuffer(jsonVal))
 	if err != nil {
-		return false, errors.E(op, err)
+		return ValidationResponse{Success: false}, errors.E(op, err)
 	}
 
 	switch {
 	case resp.StatusCode == http.StatusOK:
-		return true, nil
+		return ValidationResponse{Success: true}, nil
 	case resp.StatusCode == http.StatusForbidden:
-		return false, nil
+		return ValidationResponse{Success: false, Reason: maybeReadResponseReason(resp)}, nil
 	default:
-		return false, errors.E(op, "Unexpected status code ", resp.StatusCode)
+		return ValidationResponse{Success: false}, errors.E(op, "Unexpected status code ", resp.StatusCode)
 	}
+}
+
+func maybeReadResponseReason(resp *http.Response) string {
+	defer resp.Body.Close()
+
+	bodyBytes, _ := ioutil.ReadAll(resp.Body)
+	if len(bodyBytes) > 0 {
+		return string(bodyBytes)
+	}
+
+	return "unknown"
 }
