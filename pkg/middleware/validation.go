@@ -92,7 +92,7 @@ func maybeReadResponseReason(resp *http.Response) ValidationResponse {
 	response.Success = false
 	if response.Reason == "" {
 		response.Reason = "unknown"
-		response.Description = ""
+		response.Description = "unknown"
 	}
 	return response
 }
