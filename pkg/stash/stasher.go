@@ -4,6 +4,8 @@ import (
 	"context"
 	"time"
 
+	"github.com/gomods/athens/pkg/log"
+
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/module"
 	"github.com/gomods/athens/pkg/observ"
@@ -44,6 +46,7 @@ func (s *stasher) Stash(ctx context.Context, mod, ver string) (string, error) {
 	const op errors.Op = "stasher.Stash"
 	_, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
+	log.EntryFromContext(ctx).Debugf("saving %s@%s to storage...", mod, ver)
 
 	// create a new context that ditches whatever deadline the caller passed
 	// but keep the tracing info so that we can properly trace the whole thing.
