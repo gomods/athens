@@ -35,19 +35,23 @@ func NewValidationMiddleware(validatorHook string) mux.MiddlewareFunc {
 					return
 				}
 
-				message := valid.ValidationMessage
-				if valid.Success && message.Reason != "" {
-					entry := log.EntryFromContext(r.Context())
-					entry.Warnf("Module %s:%s Reason: %s, Description: %s", mod, version, message.Reason, message.Description)
-				} else if !valid.Success {
-					entry := log.EntryFromContext(r.Context())
-					entry.Warnf("Module %s:%s Reason: %s, Description: %s", mod, version, message.Reason, message.Description)
+				maybeLogValidationReason(valid, r, mod, version)
+
+				if !valid.Success {
 					w.WriteHeader(http.StatusForbidden)
 					return
 				}
 			}
 			h.ServeHTTP(w, r)
 		})
+	}
+}
+
+func maybeLogValidationReason(valid ValidationResponse, r *http.Request, mod string, version string) {
+	message := valid.ValidationMessage
+	if message.Reason != "" {
+		entry := log.EntryFromContext(r.Context())
+		entry.Warnf("Module %s:%s Reason: %s, Description: %s", mod, version, message.Reason, message.Description)
 	}
 }
 
