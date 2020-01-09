@@ -4,9 +4,8 @@ import (
 	"context"
 	"time"
 
-	"github.com/gomods/athens/pkg/log"
-
 	"github.com/gomods/athens/pkg/errors"
+	"github.com/gomods/athens/pkg/log"
 	"github.com/gomods/athens/pkg/module"
 	"github.com/gomods/athens/pkg/observ"
 	"github.com/gomods/athens/pkg/storage"
