@@ -35,9 +35,13 @@ func NewValidationMiddleware(validatorHook string) mux.MiddlewareFunc {
 					return
 				}
 
-				if !valid.Success {
+				message := valid.ValidationMessage
+				if valid.Success && message.Reason != "" {
 					entry := log.EntryFromContext(r.Context())
-					entry.Warnf("Module %s:%s Reason: %s, Description: %s", mod, version, valid.Reason, valid.Description)
+					entry.Warnf("Module %s:%s Reason: %s, Description: %s", mod, version, message.Reason, message.Description)
+				} else if !valid.Success {
+					entry := log.EntryFromContext(r.Context())
+					entry.Warnf("Module %s:%s Reason: %s, Description: %s", mod, version, message.Reason, message.Description)
 					w.WriteHeader(http.StatusForbidden)
 					return
 				}
@@ -52,10 +56,14 @@ type validationParams struct {
 	Version string
 }
 
-type ValidationResponse struct {
-	Success     bool
+type ValidationMessage struct {
 	Reason      string
 	Description string
+}
+
+type ValidationResponse struct {
+	Success           bool
+	ValidationMessage ValidationMessage
 }
 
 func validate(hook, mod, ver string) (ValidationResponse, error) {
@@ -74,7 +82,7 @@ func validate(hook, mod, ver string) (ValidationResponse, error) {
 
 	switch {
 	case resp.StatusCode == http.StatusOK:
-		return ValidationResponse{Success: true}, nil
+		return maybeReadResponseReason(resp), nil
 	case resp.StatusCode == http.StatusForbidden:
 		return maybeReadResponseReason(resp), nil
 	default:
@@ -86,13 +94,9 @@ func maybeReadResponseReason(resp *http.Response) ValidationResponse {
 	defer resp.Body.Close()
 
 	response := ValidationResponse{}
-	decoder := json.NewDecoder(resp.Body)
-	_ = decoder.Decode(&response)
+	response.Success = resp.StatusCode == http.StatusOK
 
-	response.Success = false
-	if response.Reason == "" {
-		response.Reason = "unknown"
-		response.Description = "unknown"
-	}
+	decoder := json.NewDecoder(resp.Body)
+	_ = decoder.Decode(&response.ValidationMessage)
 	return response
 }
