@@ -29,17 +29,19 @@ type devFormatter struct{}
 
 func (devFormatter) Format(e *logrus.Entry) ([]byte, error) {
 	var buf bytes.Buffer
-	sprint := color.CyanString
+	var sprintf func(format string, a ...interface{}) string
 	switch e.Level {
 	case logrus.DebugLevel:
-		sprint = color.New(0xffccc).Sprintf
+		sprintf = color.New(0xffccc).Sprintf
 	case logrus.WarnLevel:
-		sprint = color.YellowString
+		sprintf = color.YellowString
 	case logrus.ErrorLevel:
-		sprint = color.RedString
+		sprintf = color.RedString
+	default:
+		sprintf = color.CyanString
 	}
 	lvl := strings.ToUpper(e.Level.String())
-	buf.WriteString(sprint(lvl))
+	buf.WriteString(sprintf(lvl))
 	buf.WriteString("[" + e.Time.Format(time.Kitchen) + "]")
 	buf.WriteString(": ")
 	buf.WriteString(e.Message)
