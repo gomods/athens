@@ -3,7 +3,7 @@ package log
 import (
 	"bytes"
 	"fmt"
-	sort "sort"
+	"sort"
 	"strings"
 	"time"
 
