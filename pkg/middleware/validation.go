@@ -51,7 +51,7 @@ func maybeLogValidationReason(valid ValidationResponse, r *http.Request, mod str
 	message := valid.ValidationMessage
 	if message.Reason != "" {
 		entry := log.EntryFromContext(r.Context())
-		entry.Warnf("Module %s:%s Reason: %s, Description: %s", mod, version, message.Reason, message.Description)
+		entry.Warnf("Module %s@%s Reason: %s, Description: %s", mod, version, message.Reason, message.Description)
 	}
 }
 
