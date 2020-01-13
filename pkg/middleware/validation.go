@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
@@ -28,7 +29,7 @@ func NewValidationMiddleware(validatorHook string) mux.MiddlewareFunc {
 			// i.e. list requests path is like /{module:.+}/@v/list with no version parameter
 			version, _ := paths.GetVersion(r)
 			if version != "" {
-				valid, err := validate(validatorHook, mod, version)
+				response, err := validate(validatorHook, mod, version)
 				if err != nil {
 					entry := log.EntryFromContext(r.Context())
 					entry.SystemErr(err)
@@ -36,9 +37,9 @@ func NewValidationMiddleware(validatorHook string) mux.MiddlewareFunc {
 					return
 				}
 
-				maybeLogValidationReason(valid, r, mod, version)
+				maybeLogValidationReason(r.Context(), string(response.Message), mod, version)
 
-				if valid.Status != http.StatusOK {
+				if !response.Valid {
 					w.WriteHeader(http.StatusForbidden)
 					return
 				}
@@ -48,10 +49,10 @@ func NewValidationMiddleware(validatorHook string) mux.MiddlewareFunc {
 	}
 }
 
-func maybeLogValidationReason(valid ValidationResponse, r *http.Request, mod string, version string) {
-	if len(valid.Message) > 0 {
-		entry := log.EntryFromContext(r.Context())
-		entry.Warnf("Module %s@%s %s", mod, version, valid.Message)
+func maybeLogValidationReason(context context.Context, message string, mod string, version string) {
+	if len(message) > 0 {
+		entry := log.EntryFromContext(context)
+		entry.Warnf("error validating %s@%s %s", mod, version, message)
 	}
 }
 
@@ -61,7 +62,7 @@ type validationParams struct {
 }
 
 type ValidationResponse struct {
-	Status  int
+	Valid   bool
 	Message []byte
 }
 
@@ -71,21 +72,21 @@ func validate(hook, mod, ver string) (ValidationResponse, error) {
 	toVal := &validationParams{mod, ver}
 	jsonVal, err := json.Marshal(toVal)
 	if err != nil {
-		return ValidationResponse{Status: http.StatusForbidden}, errors.E(op, err)
+		return ValidationResponse{Valid: false}, errors.E(op, err)
 	}
 
 	resp, err := http.Post(hook, "application/json", bytes.NewBuffer(jsonVal))
 	if err != nil {
-		return ValidationResponse{Status: http.StatusForbidden}, errors.E(op, err)
+		return ValidationResponse{Valid: false}, errors.E(op, err)
 	}
 
-	switch {
-	case resp.StatusCode == http.StatusOK:
+	switch resp.StatusCode {
+	case http.StatusOK:
 		return maybeReadResponseReason(resp), nil
-	case resp.StatusCode == http.StatusForbidden:
+	case http.StatusForbidden:
 		return maybeReadResponseReason(resp), nil
 	default:
-		return ValidationResponse{Status: http.StatusForbidden}, errors.E(op, "Unexpected status code ", resp.StatusCode)
+		return ValidationResponse{Valid: false}, errors.E(op, "Unexpected status code ", resp.StatusCode)
 	}
 }
 
@@ -93,5 +94,5 @@ func maybeReadResponseReason(resp *http.Response) ValidationResponse {
 	defer resp.Body.Close()
 
 	body, _ := ioutil.ReadAll(resp.Body)
-	return ValidationResponse{Status: resp.StatusCode, Message: body}
+	return ValidationResponse{Valid: resp.StatusCode == http.StatusOK, Message: body}
 }
