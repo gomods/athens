@@ -4,7 +4,7 @@ description: Configuring modules that are stored on the proxy
 weight: 6
 ---
 
->Note: the filter file that this page documents is deprecated. Please instead see ["Filtering with the download mode file"](./download) for updated instructions on how to filter modules in Athens.
+>Note: the filter file that this page documents is deprecated. Please instead see ["Filtering with the download mode file"](/configuration/download) for updated instructions on how to filter modules in Athens.
 
 The proxy supports the following three use cases
 
