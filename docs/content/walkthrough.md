@@ -86,6 +86,9 @@ for a short period of time, as you will quickly run out of memory and the storag
 doesn't persist between restarts.
 
 ### With Docker
+
+For more details on running Athens in docker, take a look at the [install documentation](/install/using-docker)
+
 In order to run the Athens Proxy using docker, we need first to create a directory that will store the persitant modules.
 In the example below, the new directory is named `athens-storage` and is located in our userspace (i.e. `$HOME`). 
 Then we need to set the `ATHENS_STORAGE_TYPE` and `ATHENS_DISK_STORAGE_ROOT` environment variables when we run the Docker container.
@@ -115,17 +118,6 @@ docker run -d -v "$($env:ATHENS_STORAGE):/var/lib/athens" `
    -p 3000:3000 `
    gomods/athens:latest
 ```
-
-Athens docker image uses [tini](https://github.com/krallin/tini) so that defunct processes get reaped.
-Since Docker 1.13 and greater includes `tini` and lets you enable it by passing the `--init` flag to `docker run` or by configuring the docker deamon with `"init": true`, you may see a warning like this:
-
-```console
-[WARN  tini (6)] Tini is not running as PID 1 and isn't registered as a child subreaper.
- Zombie processes will not be re-parented to Tini, so zombie reaping won't work.
- To fix the problem, use the -s option or set the environment variable TINI_SUBREAPER to register Tini as a child subreaper, or run Tini as PID 1.
-```
-This is the "Athens-tini" complaining that it's not running as PID 1.
-There is no harm in that, since the zombie processes will be reaped by the `tini` included in Docker.
 
 Next, you will need to enable the [Go Modules](https://github.com/golang/go/wiki/Modules)
 feature and configure Go to use the Athens proxy!
