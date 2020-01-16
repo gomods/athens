@@ -12,7 +12,7 @@ Whether setting Athens up using [Kubernetes](./install-on-kubernetes) or using t
 
 The Athens project produces two docker images, available via [Docker Hub](https://hub.docker.com/) 
 
-1. A release version as `gomods/athens`, each tag corresponds with an Athens [release](https://github.com/gomods/athens/releases), e.g. `v0.7.1`
+1. A release version as [`gomods/athens`](https://hub.docker.com/gomods/athens), each tag corresponds with an Athens [release](https://github.com/gomods/athens/releases), e.g. `v0.7.1`
 2. A tip version, as [`gomods/athens-dev`](https://hub.docker.com/r/gomods/athens-dev), tagged with every commit to `master`, e.g. `1573339`
 
 For a detailed tags list, check each image's Docker Hub
