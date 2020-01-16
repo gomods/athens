@@ -1,7 +1,7 @@
 ---
-title: Configuring Authentication
+title: Authentication to private repositories
 description: Configuring Authentication on Athens
-weight: 1
+weight: 2
 ---
 
 ## Authentication

@@ -1,7 +1,7 @@
 ---
-title: Checksum DB
-description: Proxying A Checksum DB API
-weight: 2
+title: Proxying a checksum database API
+description: How to configure Athens to proxy a checksum database API, and why you might want to.
+weight: 4
 ---
 
 ## Proxying A Checksum DB
