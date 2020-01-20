@@ -61,23 +61,23 @@ type validationParams struct {
 	Version string
 }
 
-type ValidationResponse struct {
+type validationResponse struct {
 	Valid   bool
 	Message []byte
 }
 
-func validate(hook, mod, ver string) (ValidationResponse, error) {
+func validate(hook, mod, ver string) (validationResponse, error) {
 	const op errors.Op = "actions.validate"
 
 	toVal := &validationParams{mod, ver}
 	jsonVal, err := json.Marshal(toVal)
 	if err != nil {
-		return ValidationResponse{Valid: false}, errors.E(op, err)
+		return validationResponse{Valid: false}, errors.E(op, err)
 	}
 
 	resp, err := http.Post(hook, "application/json", bytes.NewBuffer(jsonVal))
 	if err != nil {
-		return ValidationResponse{Valid: false}, errors.E(op, err)
+		return validationResponse{Valid: false}, errors.E(op, err)
 	}
 
 	switch resp.StatusCode {
@@ -86,13 +86,13 @@ func validate(hook, mod, ver string) (ValidationResponse, error) {
 	case http.StatusForbidden:
 		return maybeReadResponseReason(resp), nil
 	default:
-		return ValidationResponse{Valid: false}, errors.E(op, "Unexpected status code ", resp.StatusCode)
+		return validationResponse{Valid: false}, errors.E(op, "Unexpected status code ", resp.StatusCode)
 	}
 }
 
-func maybeReadResponseReason(resp *http.Response) ValidationResponse {
+func maybeReadResponseReason(resp *http.Response) validationResponse {
 	defer resp.Body.Close()
 
 	body, _ := ioutil.ReadAll(resp.Body)
-	return ValidationResponse{Valid: resp.StatusCode == http.StatusOK, Message: body}
+	return validationResponse{Valid: resp.StatusCode == http.StatusOK, Message: body}
 }
