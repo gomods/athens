@@ -27,12 +27,14 @@ func getDevFormatter() logrus.Formatter {
 
 type devFormatter struct{}
 
+const lightGrey = 0xffccc
+
 func (devFormatter) Format(e *logrus.Entry) ([]byte, error) {
 	var buf bytes.Buffer
 	var sprintf func(format string, a ...interface{}) string
 	switch e.Level {
 	case logrus.DebugLevel:
-		sprintf = color.New(0xffccc).Sprintf
+		sprintf = color.New(lightGrey).Sprintf
 	case logrus.WarnLevel:
 		sprintf = color.YellowString
 	case logrus.ErrorLevel:
