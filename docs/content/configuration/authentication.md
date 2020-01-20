@@ -183,7 +183,7 @@ weight: 2
      gomods/athens:latest
    ```
 
-## Altassian Bitbucket and SSH-secured git VCS's
+## Atlassian Bitbucket and SSH-secured git VCS's
 
 This section was originally written to describe configuring the
 Athens git client to fetch specific Go imports over SSH instead of
