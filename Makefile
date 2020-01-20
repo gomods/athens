@@ -7,7 +7,7 @@ endif
 
 .PHONY: build
 build: ## build the athens proxy
-	cd cmd/proxy && go build
+	go build -o ./cmd/proxy/proxy ./cmd/proxy
 
 .PHONY: build-ver
 build-ver: ## build the athens proxy with version number

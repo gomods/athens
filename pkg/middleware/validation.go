@@ -2,7 +2,9 @@ package middleware
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
+	"io/ioutil"
 	"net/http"
 
 	"github.com/gomods/athens/pkg/errors"
@@ -27,7 +29,7 @@ func NewValidationMiddleware(validatorHook string) mux.MiddlewareFunc {
 			// i.e. list requests path is like /{module:.+}/@v/list with no version parameter
 			version, _ := paths.GetVersion(r)
 			if version != "" {
-				valid, err := validate(validatorHook, mod, version)
+				response, err := validate(validatorHook, mod, version)
 				if err != nil {
 					entry := log.EntryFromContext(r.Context())
 					entry.SystemErr(err)
@@ -35,7 +37,9 @@ func NewValidationMiddleware(validatorHook string) mux.MiddlewareFunc {
 					return
 				}
 
-				if !valid {
+				maybeLogValidationReason(r.Context(), string(response.Message), mod, version)
+
+				if !response.Valid {
 					w.WriteHeader(http.StatusForbidden)
 					return
 				}
@@ -45,31 +49,50 @@ func NewValidationMiddleware(validatorHook string) mux.MiddlewareFunc {
 	}
 }
 
+func maybeLogValidationReason(context context.Context, message string, mod string, version string) {
+	if len(message) > 0 {
+		entry := log.EntryFromContext(context)
+		entry.Warnf("error validating %s@%s %s", mod, version, message)
+	}
+}
+
 type validationParams struct {
 	Module  string
 	Version string
 }
 
-func validate(hook, mod, ver string) (bool, error) {
+type validationResponse struct {
+	Valid   bool
+	Message []byte
+}
+
+func validate(hook, mod, ver string) (validationResponse, error) {
 	const op errors.Op = "actions.validate"
 
 	toVal := &validationParams{mod, ver}
 	jsonVal, err := json.Marshal(toVal)
 	if err != nil {
-		return false, errors.E(op, err)
+		return validationResponse{Valid: false}, errors.E(op, err)
 	}
 
 	resp, err := http.Post(hook, "application/json", bytes.NewBuffer(jsonVal))
 	if err != nil {
-		return false, errors.E(op, err)
+		return validationResponse{Valid: false}, errors.E(op, err)
 	}
 
-	switch {
-	case resp.StatusCode == http.StatusOK:
-		return true, nil
-	case resp.StatusCode == http.StatusForbidden:
-		return false, nil
+	switch resp.StatusCode {
+	case http.StatusOK:
+		return validationResponseFromRequest(resp), nil
+	case http.StatusForbidden:
+		return validationResponseFromRequest(resp), nil
 	default:
-		return false, errors.E(op, "Unexpected status code ", resp.StatusCode)
+		return validationResponse{Valid: false}, errors.E(op, "Unexpected status code ", resp.StatusCode)
 	}
+}
+
+func validationResponseFromRequest(resp *http.Response) validationResponse {
+	defer resp.Body.Close()
+
+	body, _ := ioutil.ReadAll(resp.Body)
+	return validationResponse{Valid: resp.StatusCode == http.StatusOK, Message: body}
 }

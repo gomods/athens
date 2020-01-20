@@ -307,10 +307,6 @@ SingleFlightType = "memory"
         # running Athens inside GCP, you will most
         # likely not need this as GCP figures out
         # internal authentication between products for you.
-        # 
-        # NOTE: This config value is deprecated in favor of
-        # ServiceAccount above. Athens will check for it,
-        # but please do not rely on it being available forever.
         #
         # Env override: ATHENS_STORAGE_GCP_JSON_KEY
         JSONKey = ""
