@@ -82,15 +82,15 @@ func validate(hook, mod, ver string) (validationResponse, error) {
 
 	switch resp.StatusCode {
 	case http.StatusOK:
-		return maybeReadResponseReason(resp), nil
+		return validationResponseFromRequest(resp), nil
 	case http.StatusForbidden:
-		return maybeReadResponseReason(resp), nil
+		return validationResponseFromRequest(resp), nil
 	default:
 		return validationResponse{Valid: false}, errors.E(op, "Unexpected status code ", resp.StatusCode)
 	}
 }
 
-func maybeReadResponseReason(resp *http.Response) validationResponse {
+func validationResponseFromRequest(resp *http.Response) validationResponse {
 	defer resp.Body.Close()
 
 	body, _ := ioutil.ReadAll(resp.Body)
