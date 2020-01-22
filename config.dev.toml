@@ -43,6 +43,14 @@ GoProxy = "direct"
 # ATHENS_GO_BINARY_ENV_VARS='GOPROXY=proxy.golang.org,direct; GOPRIVATE=github.com/gomods/*'
 # The semi-colon is here used instead of the comma (,) because the comma is a valid value to 
 # separate arguments in certain go env vars such as GOPROXY and GOPRIVATE
+#
+# NOTE that if you use the env var, then whatever you have in this config file will be overridden 
+# and NOT appended/merged. In other words, if the config file value is 
+# GoBinaryEnvVars = ["GOPROXY=direct"]
+# And you pass the following env var: 
+# ATHENS_GO_BINARY_ENV_VARS='GODEBUG=true'
+# Then the final value that the Go binary will receive is [GOBINARY=true] and NOT ["GOPROXY=direct", "GOBINARY=true"]
+# Therefore, whether you use the config file or the env var, make sure you have all the values you need there.
 GoBinaryEnvVars = ["GOPROXY=direct"]
 
 # GoGetWorkers specifies how many times you can concurrently
