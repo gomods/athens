@@ -35,6 +35,14 @@ GoProxy = "direct"
 # Although you can pass any key=value to the Go command here, you can see
 # the list of possible env vars by running `go env`.
 # Env override: ATHENS_GO_BINARY_ENV_VARS
+# 
+# IMPORTANT note about using the env var to override this config:
+#
+# You must use a semi-colon (;) to separate multiple env vars
+# within ATHENS_GO_BINARY_ENV_VARS. For example:
+# ATHENS_GO_BINARY_ENV_VARS='GOPROXY=proxy.golang.org,direct; GOPRIVATE=github.com/gomods/*'
+# The semi-colon is here used instead of the comma (,) because the comma is a valid value to 
+# separate arguments in certain go env vars such as GOPROXY and GOPRIVATE
 GoBinaryEnvVars = ["GOPROXY=direct"]
 
 # GoGetWorkers specifies how many times you can concurrently
