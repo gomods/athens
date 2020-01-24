@@ -11,6 +11,8 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
+	"github.com/kelseyhightower/envconfig"
+	"github.com/stretchr/testify/require"
 )
 
 func testConfigFile(t *testing.T) (testConfigFile string) {
@@ -511,4 +513,121 @@ func TestEnvList(t *testing.T) {
 	if err := el.Validate(); err != nil {
 		t.Fatalf("expected err to be nil but got %v", err)
 	}
+}
+
+type decodeTestCase struct {
+	name     string
+	pre      EnvList
+	given    string
+	valid    bool
+	expected EnvList
+}
+
+var envListDecodeTests = []decodeTestCase{
+	{
+		name:     "empty",
+		pre:      EnvList{},
+		given:    "",
+		valid:    true,
+		expected: EnvList{},
+	},
+	{
+		name:     "unchanged",
+		pre:      EnvList{"GOPROXY=direct"},
+		given:    "",
+		valid:    true,
+		expected: EnvList{"GOPROXY=direct"},
+	},
+	{
+		name:     "must not merge",
+		pre:      EnvList{"GOPROXY=direct"},
+		given:    "GOPRIVATE=github.com/gomods/*",
+		valid:    true,
+		expected: EnvList{"GOPRIVATE=github.com/gomods/*"},
+	},
+	{
+		name:     "must override",
+		pre:      EnvList{"GOPROXY=direct"},
+		given:    "GOPROXY=https://proxy.golang.org",
+		valid:    true,
+		expected: EnvList{"GOPROXY=https://proxy.golang.org"},
+	},
+	{
+		name:  "semi colon separator",
+		pre:   EnvList{"GOPROXY=direct", "GOPRIVATE="},
+		given: "GOPROXY=off; GOPRIVATE=marwan.io/*;GONUTS=lol;GODEBUG=dns=true",
+		valid: true,
+		expected: EnvList{
+			"GOPROXY=off",
+			"GOPRIVATE=marwan.io/*",
+			"GONUTS=lol",
+			"GODEBUG=dns=true",
+		},
+	},
+	{
+		name:  "with commas",
+		pre:   EnvList{"GOPROXY=direct", "GOPRIVATE="},
+		given: "GOPROXY=proxy.golang.org,direct;GOPRIVATE=marwan.io/*;GONUTS=lol;GODEBUG=dns=true",
+		valid: true,
+		expected: EnvList{
+			"GOPROXY=proxy.golang.org,direct",
+			"GOPRIVATE=marwan.io/*",
+			"GONUTS=lol",
+			"GODEBUG=dns=true",
+		},
+	},
+	{
+		name:  "invalid",
+		pre:   EnvList{},
+		given: "GOPROXY=direct; INVALID",
+		valid: false,
+	},
+	{
+		name:     "accept empty value",
+		pre:      EnvList{"GOPROXY=direct"},
+		given:    "GOPROXY=; GOPRIVATE=github.com/*",
+		valid:    true,
+		expected: EnvList{"GOPROXY=", "GOPRIVATE=github.com/*"},
+	},
+}
+
+func TestEnvListDecode(t *testing.T) {
+	for _, tc := range envListDecodeTests {
+		t.Run(tc.name, func(t *testing.T) {
+			testDecode(t, tc)
+		})
+	}
+	cfg := &Config{
+		GoBinaryEnvVars: EnvList{"GOPROXY=direct"},
+	}
+	err := cfg.GoBinaryEnvVars.Decode("GOPROXY=https://proxy.golang.org; GOPRIVATE=github.com/gomods/*")
+	if err != nil {
+		t.Fatal(err)
+	}
+	cfg.GoBinaryEnvVars.Validate()
+}
+
+func testDecode(t *testing.T, tc decodeTestCase) {
+	const envKey = "ATHENS_LIST_TEST"
+
+	os.Setenv(envKey, tc.given)
+	defer func() {
+		require.NoError(t, os.Unsetenv(envKey))
+	}()
+
+	var config struct {
+		GoBinaryEnvVars EnvList `envconfig:"ATHENS_LIST_TEST"`
+	}
+	config.GoBinaryEnvVars = tc.pre
+	err := envconfig.Process("", &config)
+	if tc.valid && err != nil {
+		t.Fatal(err)
+	}
+	if !tc.valid {
+		if err == nil {
+			t.Fatal("expected an error but got nil")
+		}
+		return
+	}
+	require.Equal(t, tc.expected, config.GoBinaryEnvVars)
 }
