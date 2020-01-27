@@ -1,0 +1,40 @@
+$default-layout-width: 1100px;
+$default-layout-margin: 2%;
+
+$default-font-size: 1rem;
+$default-font-color: #000;
+$default-font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+
+$default-line-height: 1.9;
+$default-margin: 2rem;
+$default-padding: 1.2rem;
+
+$default-grid-columns: 12;
+$default-grid-gutter: 2%;
+
+// color
+$default-background-color: #fafafa;
+
+$sidebar-background-color: #f9f9f9;
+$sidebar-hover-color: #eee;
+$sidebar-active-color: #eee;
+
+$default-link-color: #2e7eb3;
+$default-link-hover-color: #38a0e4;
+
+$default-line-color: #f0f0f0;
+
+// code
+$code-font-size: .95rem;
+$code-font-family: Consolas,"Liberation Mono",Menlo,Courier,monospace;
+$code-block-background-color: #f4f6f8;
+$code-border-color: #f0f0f0;
+$code-inline-background-color: #f0f0f0;
+
+// breakpoint
+$default-breakpoints: (
+  lg: 1200px,
+  md: 980px,
+  sm: 767px,
+  xs: 480px
+);

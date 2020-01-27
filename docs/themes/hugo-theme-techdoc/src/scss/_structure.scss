@@ -1,0 +1,45 @@
+/*-----------------------*
+    Structure
+*-----------------------*/
+html,
+body {
+  height: 100%;
+}
+
+.container {
+  width: 100%;
+  height: 100%;
+  @include grid($flex-flow: column nowrap);
+  margin: auto;
+}
+
+.content-container {
+  @include grid-col($flex-grow: 1, $flex-shrink: 0, $flex-basis: auto);
+  @include grid();
+}
+
+main {
+  @include grid-col($col: 9, $flex-shrink: 0 );
+  max-width: 75%;
+}
+.sidebar {
+  @include grid-col($col: 3, $order: -1);
+  // position: fixed;
+  // overflow-x: hidden;
+  overflow-x: hidden;
+  overflow-y: scroll;
+}
+
+@media screen and (max-width: #{map-get($default-breakpoints, xs )} ) {
+  .content-container {
+    @include grid($flex-flow: column nowrap);
+  }
+
+  main {
+    @include grid-col($col: none, $flex-shrink: 0 );
+    max-width: 100%;
+  }
+  .sidebar {
+    @include grid-col($col: none, $order: 1);
+  }
+}
