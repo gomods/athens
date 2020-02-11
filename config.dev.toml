@@ -118,6 +118,11 @@ Timeout = 300
 # Env override: ATHENS_STORAGE_TYPE
 StorageType = "memory"
 
+# StorageEncryptionKey sets encryption key for encrypting and decrypting data sent to and received from the storage layer.
+# Key lenght must equal 32
+# Env override: ATHENS_STORAGE_ENCRYPTION_KEY
+StorageEncryptionKey = ""
+
 # Certificate and key to make athens serve using https instead of plain text http.
 # Set both to enable.
 # Env override: ATHENS_TLSCERT_FILE, ATHENS_TLSKEY_FILE

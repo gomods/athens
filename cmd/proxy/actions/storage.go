@@ -9,6 +9,7 @@ import (
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/storage"
 	"github.com/gomods/athens/pkg/storage/azureblob"
+	"github.com/gomods/athens/pkg/storage/encryption"
 	"github.com/gomods/athens/pkg/storage/fs"
 	"github.com/gomods/athens/pkg/storage/gcp"
 	"github.com/gomods/athens/pkg/storage/mem"
@@ -63,4 +64,8 @@ func GetStorage(storageType string, storageConfig *config.StorageConfig, timeout
 	default:
 		return nil, fmt.Errorf("storage type %s is unknown", storageType)
 	}
+}
+
+func wrapStorageWithEncryption(store storage.Backend, encryptionKey string) (storage.Backend, error) {
+	return encryption.Wrap(store, encryptionKey)
 }
