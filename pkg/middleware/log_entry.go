@@ -16,7 +16,6 @@ func LogEntryMiddleware(lggr *log.Logger) mux.MiddlewareFunc {
 			ent := lggr.WithFields(logrus.Fields{
 				"http-method": r.Method,
 				"http-path":   r.URL.Path,
-				"http-url":    r.URL.String(),
 			})
 
 			ctx := log.SetEntryInContext(r.Context(), ent)

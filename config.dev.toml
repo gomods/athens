@@ -35,6 +35,22 @@ GoProxy = "direct"
 # Although you can pass any key=value to the Go command here, you can see
 # the list of possible env vars by running `go env`.
 # Env override: ATHENS_GO_BINARY_ENV_VARS
+# 
+# IMPORTANT note about using the env var to override this config:
+#
+# You must use a semi-colon (;) to separate multiple env vars
+# within ATHENS_GO_BINARY_ENV_VARS. For example:
+# ATHENS_GO_BINARY_ENV_VARS='GOPROXY=proxy.golang.org,direct; GOPRIVATE=github.com/gomods/*'
+# The semi-colon is here used instead of the comma (,) because the comma is a valid value to 
+# separate arguments in certain go env vars such as GOPROXY and GOPRIVATE
+#
+# NOTE that if you use the env var, then whatever you have in this config file will be overridden 
+# and NOT appended/merged. In other words, if the config file value is 
+# GoBinaryEnvVars = ["GOPROXY=direct"]
+# And you pass the following env var: 
+# ATHENS_GO_BINARY_ENV_VARS='GODEBUG=true'
+# Then the final value that the Go binary will receive is [GOBINARY=true] and NOT ["GOPROXY=direct", "GOBINARY=true"]
+# Therefore, whether you use the config file or the env var, make sure you have all the values you need there.
 GoBinaryEnvVars = ["GOPROXY=direct"]
 
 # GoGetWorkers specifies how many times you can concurrently
@@ -307,10 +323,6 @@ SingleFlightType = "memory"
         # running Athens inside GCP, you will most
         # likely not need this as GCP figures out
         # internal authentication between products for you.
-        # 
-        # NOTE: This config value is deprecated in favor of
-        # ServiceAccount above. Athens will check for it,
-        # but please do not rely on it being available forever.
         #
         # Env override: ATHENS_STORAGE_GCP_JSON_KEY
         JSONKey = ""
@@ -394,6 +406,10 @@ SingleFlightType = "memory"
         # S3 Bucket to use for storage
         # Env override: ATHENS_S3_BUCKET_NAME
         Bucket = "MY_S3_BUCKET_NAME"
+
+        # If true then path style url for s3 endpoint will be used
+        # Env override: AWS_FORCE_PATH_STYLE
+        ForcePathStyle = false
 
         # If true then the default aws configuration will be used. This will
         # attempt to find credentials in the environment, in the shared

@@ -56,10 +56,8 @@ func App(conf *config.Config) (http.Handler, error) {
 	lggr := log.New(conf.CloudRuntime, logLvl)
 
 	r := mux.NewRouter()
-	if conf.GoEnv == "development" {
-		r.Use(mw.RequestLogger)
-	}
 	r.Use(mw.LogEntryMiddleware(lggr))
+	r.Use(mw.RequestLogger)
 	r.Use(secure.New(secure.Options{
 		SSLRedirect:     conf.ForceSSL,
 		SSLProxyHeaders: map[string]string{"X-Forwarded-Proto": "https"},
