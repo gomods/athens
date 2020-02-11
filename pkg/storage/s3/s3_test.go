@@ -77,7 +77,6 @@ func getStorage(t testing.TB) *Storage {
 	options := func(conf *aws.Config) {
 		conf.Endpoint = aws.String(url)
 		conf.DisableSSL = aws.Bool(true)
-		conf.S3ForcePathStyle = aws.Bool(true)
 	}
 	backend, err := New(
 		&config.S3Config{
@@ -85,6 +84,7 @@ func getStorage(t testing.TB) *Storage {
 			Secret: "minio123",
 			Bucket: "gomodsaws",
 			Region: "us-west-1",
+			ForcePathStyle: true,
 		},
 		config.GetTimeoutDuration(300),
 		options,
