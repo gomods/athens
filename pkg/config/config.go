@@ -37,7 +37,7 @@ type Config struct {
 	StatsExporter    string    `envconfig:"ATHENS_STATS_EXPORTER"`
 	StorageType      string    `validate:"required" envconfig:"ATHENS_STORAGE_TYPE"`
 	GlobalEndpoint   string    `envconfig:"ATHENS_GLOBAL_ENDPOINT"` // This feature is not yet implemented
-	Port             string    `envconfig:"ATHENS_PORT"`
+	Port             string    `validate:"startswith=:" envconfig:"ATHENS_PORT"`
 	BasicAuthUser    string    `envconfig:"BASIC_AUTH_USER"`
 	BasicAuthPass    string    `envconfig:"BASIC_AUTH_PASS"`
 	ForceSSL         bool      `envconfig:"PROXY_FORCE_SSL"`
