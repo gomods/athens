@@ -1,7 +1,7 @@
 ---
-title: Pre-filling the Disk Cache
+title: Pre-filling disk storage
 description: How to pre-fill the disk cache
-weight: 4
+weight: 5
 ---
 
 One of the popular features of Athens is that it can be run completely cut off from the internet. In this case, though, it can't reach out to an upstream (e.g. a VCS or another module proxy) to fetch modules that it doesn't have in storage. So, we need to manually fill up the disk partition that Athens uses with the dependencies that we need.

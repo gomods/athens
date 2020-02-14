@@ -79,6 +79,9 @@ storage:
 # You can add any new ones at the bottom
 configEnvVars: {}
 
+# Extra annotations to be added to the athens pods
+annotations: {}
+
 # HTTP basic auth
 basicAuth:
   enabled: false

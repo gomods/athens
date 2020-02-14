@@ -32,7 +32,7 @@ if err != nil {
     return err
 }
 ```
-_app_proxy.go_
+_app\_proxy.go_
 
 When a request for a new module comes, the `Fetch` function is invoked.
 
