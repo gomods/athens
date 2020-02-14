@@ -23,6 +23,9 @@ const (
 	Redirect      Mode = "redirect"
 	AsyncRedirect Mode = "async_redirect"
 	None          Mode = "none"
+	// This is the URL that logs will show when the DownloadMode
+	// config value is invalid
+	downloadModeURL = "https://docs.gomods.io/configuration/download/"
 )
 
 // Validate ensures that m is a valid mode. If this function returns nil, you are
@@ -77,7 +80,6 @@ func (d DownloadPath) validate(op errors.Op) error {
 // file:/path/to/file OR custom:<base64-encoded-hcl>
 // directly.
 func NewFile(m Mode, downloadURL string) (*DownloadFile, error) {
-	const downloadModeURL = "https://docs.gomods.io/configuration/download/"
 	const op errors.Op = "downloadMode.NewFile"
 
 	if err := m.Validate(op); err != nil {
