@@ -15,7 +15,6 @@ import (
 	"github.com/gomods/athens/cmd/proxy/actions"
 	"github.com/gomods/athens/pkg/build"
 	"github.com/gomods/athens/pkg/config"
-	"github.com/gomods/athens/pkg/errors"
 )
 
 var (
@@ -32,9 +31,6 @@ func main() {
 	conf, err := config.Load(*configFile)
 	if err != nil {
 		log.Fatalf("could not load config file: %v", err)
-	}
-	if err := conf.Validate(errors.Op("main")); err != nil {
-		log.Fatal(err)
 	}
 
 	handler, err := actions.App(conf)
