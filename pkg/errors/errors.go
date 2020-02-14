@@ -18,7 +18,7 @@ const (
 	KindRateLimit      = http.StatusTooManyRequests
 	KindNotImplemented = http.StatusNotImplemented
 	KindRedirect       = http.StatusMovedPermanently
-	KindConfigError    = -1
+	KindConfigError    = http.StatusUnprocessableEntity
 )
 
 // Error is an Athens system error.
