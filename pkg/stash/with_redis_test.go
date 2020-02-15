@@ -19,6 +19,7 @@ import (
 // and therefore all 5 responses should have no error.
 func TestWithRedisLock(t *testing.T) {
 	endpoint := os.Getenv("REDIS_TEST_ENDPOINT")
+	password := os.Getenv("ATHENS_REDIS_PASSWORD")
 	if len(endpoint) == 0 {
 		t.SkipNow()
 	}
@@ -27,7 +28,7 @@ func TestWithRedisLock(t *testing.T) {
 		t.Fatal(err)
 	}
 	ms := &mockRedisStasher{strg: strg}
-	wrapper, err := WithRedisLock(endpoint, strg)
+	wrapper, err := WithRedisLock(endpoint, password, strg)
 	if err != nil {
 		t.Fatal(err)
 	}
