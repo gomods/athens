@@ -362,6 +362,7 @@ func getEnvMap(config *Config) map[string]string {
 			envVars["AWS_ACCESS_KEY_ID"] = storage.S3.Key
 			envVars["AWS_SECRET_ACCESS_KEY"] = storage.S3.Secret
 			envVars["AWS_SESSION_TOKEN"] = storage.S3.Token
+			envVars["AWS_FORCE_PATH_STYLE"] = strconv.FormatBool(storage.S3.ForcePathStyle)
 			envVars["ATHENS_S3_BUCKET_NAME"] = storage.S3.Bucket
 		}
 	}
