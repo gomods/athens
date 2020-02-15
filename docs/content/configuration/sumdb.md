@@ -34,7 +34,7 @@ This will make sure that Go does not send any requests to the Checksum DB for yo
 
 Athens, in this case can help ensure that all private code flowing through it is never checked against the checksum DB. That means that as long as your employees are using Athens, then they will get a helpful reminder to ensure Their GONOSUMDB is rightly configured.
 
-Athens allows the user to specify a list of patterns to not lookup via the upstream sum provider:
+Athens allows the operator running the server to specify a list of patterns to not lookup via the upstream sum provider:
 
 ```toml
 NoSumPatterns = ["github.com/mycompany/*", "github.com/secret/*"]
