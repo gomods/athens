@@ -1,3 +1,5 @@
+// +build !unit
+
 package mongo
 
 import (
@@ -6,14 +8,53 @@ import (
 	"io/ioutil"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/storage"
 	"github.com/gomods/athens/pkg/storage/compliance"
-
 	"github.com/stretchr/testify/require"
+	testcontainers "github.com/testcontainers/testcontainers-go"
+	"github.com/testcontainers/testcontainers-go/wait"
 )
+
+var useTestContainers = os.Getenv("ATHENS_USE_TEST_CONTAINERS")
+var mongoEndpoint string
+
+func TestMain(m *testing.M) {
+	if useTestContainers != "1" {
+		mongoEndpoint = os.Getenv("ATHENS_MONGO_STORAGE_URL")
+		os.Exit(m.Run())
+	}
+
+	ctx := context.Background()
+	req := testcontainers.ContainerRequest{
+		Image:        "mongo:3.6",
+		ExposedPorts: []string{"27017/tcp"},
+		WaitingFor:   wait.ForLog("waiting for connections on port 27017").WithStartupTimeout(time.Minute * 5),
+	}
+
+	c, err := testcontainers.GenericContainer(ctx, testcontainers.GenericContainerRequest{
+		ContainerRequest: req,
+		Started:          true,
+	})
+
+	if err != nil {
+		os.Exit(1)
+	}
+
+	ep, err := c.Endpoint(context.Background(), "mongodb")
+	if err != nil {
+		panic(err.Error())
+	}
+
+	mongoEndpoint = ep
+
+	defer c.Terminate(ctx)
+	os.Exit(m.Run())
+
+}
 
 func TestBackend(t *testing.T) {
 	backend := getStorage(t)
@@ -31,13 +72,7 @@ func BenchmarkBackend(b *testing.B) {
 }
 
 func getStorage(tb testing.TB) *ModuleStore {
-	url := os.Getenv("ATHENS_MONGO_STORAGE_URL")
-
-	if url == "" {
-		tb.SkipNow()
-	}
-
-	backend, err := NewStorage(&config.MongoConfig{URL: url}, config.GetTimeoutDuration(300))
+	backend, err := NewStorage(&config.MongoConfig{URL: mongoEndpoint}, config.GetTimeoutDuration(300))
 	require.NoError(tb, err)
 
 	return backend
@@ -98,12 +133,6 @@ func TestQueryKindNotFoundErrorCases(t *testing.T) {
 	}
 }
 func TestNewStorageWithDefaultOverrides(t *testing.T) {
-	url := os.Getenv("ATHENS_MONGO_STORAGE_URL")
-
-	if url == "" {
-		t.SkipNow()
-	}
-
 	testCases := []struct {
 		name        string
 		dbName      string
@@ -122,7 +151,7 @@ func TestNewStorageWithDefaultOverrides(t *testing.T) {
 
 	for _, test := range testCases {
 		t.Run(test.name, func(t *testing.T) {
-			backend, err := NewStorage(&config.MongoConfig{URL: url, DefaultDBName: test.dbName, DefaultCollectionName: test.collName}, config.GetTimeoutDuration(300))
+			backend, err := NewStorage(&config.MongoConfig{URL: mongoEndpoint, DefaultDBName: test.dbName, DefaultCollectionName: test.collName}, config.GetTimeoutDuration(300))
 			require.NoError(t, err)
 			require.Equal(t, test.expDbName, backend.db)
 			require.Equal(t, test.expCollName, backend.coll)

@@ -1,18 +1,20 @@
+image: Visual Studio 2019
 build: off
 
 clone_folder: c:\gopath\src\github.com\gomods\athens
-
-image: Previous Visual Studio 2019
 
 environment:
   GOPATH: c:\gopath
   GO111MODULE: on
   GOPROXY: https://proxy.golang.org
   SKIP_UNTIL_113: true
+  ATHENS_USE_TEST_CONTAINERS: 1
 
-stack: go 1.14
+stack: go 1.13
+
+install:
+  - choco upgrade docker-desktop
 
 test_script:
   - go version
-  - go test ./...
-
+  - go test -v ./...
