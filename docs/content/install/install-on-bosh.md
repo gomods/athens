@@ -1,7 +1,7 @@
 ---
 title: Install Athens with BOSH
 description: Installing an Athens Instance with BOSH
-weight: 11
+weight: 8
 ---
 
 Athens can be deployed in many ways. The following guide explains how to use [BOSH](https://bosh.io), a deployment and lifecycle tool, in order to deploy an Athens server on virtual machines (VMs) on any infrastructure as a service (IaaS) that is supported by BOSH.
@@ -92,4 +92,4 @@ This will deploy a single Athens instance in the `athens` deployment with a pers
 bosh -d athens instances
 ```
 
-which is useful for targeting Athens, e.g. with the `GOPROXY` variable.
+which is useful for targeting Athens, e.g. with the `GOPROXY` variable. You can follow this [quickstart guide](/try-out) for more information.
