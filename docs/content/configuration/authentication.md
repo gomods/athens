@@ -1,7 +1,7 @@
 ---
-title: Configuring Authentication
+title: Authentication to private repositories
 description: Configuring Authentication on Athens
-weight: 1
+weight: 2
 ---
 
 ## Authentication
@@ -183,7 +183,7 @@ weight: 1
      gomods/athens:latest
    ```
 
-## Altassian Bitbucket and SSH-secured git VCS's
+## Atlassian Bitbucket and SSH-secured git VCS's
 
 This section was originally written to describe configuring the
 Athens git client to fetch specific Go imports over SSH instead of
