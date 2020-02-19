@@ -25,7 +25,10 @@ spec:
         checksum/ssh-config: {{ include (print $.Template.BasePath "/config-ssh-git-servers.yaml") . | sha256sum }}
         checksum/ssh-secret: {{ include (print $.Template.BasePath "/secret-ssh-git-servers.yaml") . | sha256sum }}
         {{- if .Values.storage.s3.iamRole }}
-        iam.amazonaws.com/role: {{ .Values.storage.s3.iamRole | quote }}
+        iam.amazonaws.com/role: {{ .Values.storage.s3.iamRole | quote }
+        {{- end }}
+        {{- if .Values.annotations }}
+{{ toYaml .Values.annotations | indent 8 }}
         {{- end }}
     spec:
       {{- if .Values.sshGitServers }}
@@ -86,6 +89,8 @@ spec:
           value: {{ .Values.storage.s3.bucket | quote }}
         - name: AWS_USE_DEFAULT_CONFIGURATION
           value: {{ .Values.storage.s3.useDefaultConfiguration | quote }}
+        - name: AWS_FORCE_PATH_STYLE
+          value: {{ .Values.storage.s3.ForcePathStyle | quote }}
         {{- if .Values.storage.s3.access_key_id }}
         - name: AWS_ACCESS_KEY_ID
           value: {{ .Values.storage.s3.access_key_id | quote }}

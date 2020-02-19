@@ -167,6 +167,10 @@ After this you can pass your credentials inside `config.toml` file.  If the acce
             # S3 Bucket to use for storage
             # Env override: ATHENS_S3_BUCKET_NAME
             Bucket = "MY_S3_BUCKET_NAME"
+            
+            # If true then path style url for s3 endpoint will be used
+            # Env override: AWS_FORCE_PATH_STYLE
+            ForcePathStyle = false
 
             # If true then the default aws configuration will be used. This will
             # attempt to find credentials in the environment, in the shared

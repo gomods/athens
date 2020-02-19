@@ -22,6 +22,7 @@ import (
 // - AWS_ACCESS_KEY_ID		- [optional]
 // - AWS_SECRET_ACCESS_KEY 	- [optional]
 // - AWS_SESSION_TOKEN		- [optional]
+// - AWS_FORCE_PATH_STYLE	- [optional]
 // For information how to get your keyId and access key turn to official aws docs: https://docs.aws.amazon.com/sdk-for-go/v1/developer-guide/setting-up.html
 type Storage struct {
 	bucket   string
@@ -66,6 +67,7 @@ func New(s3Conf *config.S3Config, timeout time.Duration, options ...func(*aws.Co
 			credProviders = append(endpointcreds, credProviders...)
 		}
 
+    awsConfig.S3ForcePathStyle = aws.Bool(s3Conf.ForcePathStyle)
 		awsConfig.Credentials = credentials.NewChainCredentials(credProviders)
 		awsConfig.CredentialsChainVerboseErrors = aws.Bool(true)
 		if s3Conf.Endpoint != "" {
