@@ -12,3 +12,4 @@ stack: go 1.13
 
 test_script:
   - go test ./...
+
