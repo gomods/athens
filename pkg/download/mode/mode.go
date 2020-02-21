@@ -62,6 +62,7 @@ type DownloadPath struct {
 	DownloadURL string `hcl:"downloadURL,optional"`
 }
 
+// Validate implements config.Validator
 func (d DownloadPath) Validate() error {
 	const op errors.Op = "DownloadPath.Validate"
 	if d.DownloadURL == "" && (d.Mode == Redirect || d.Mode == AsyncRedirect) {
