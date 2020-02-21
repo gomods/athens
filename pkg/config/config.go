@@ -37,7 +37,7 @@ type Config struct {
 	StatsExporter    string    `envconfig:"ATHENS_STATS_EXPORTER"`
 	StorageType      string    `validate:"required" envconfig:"ATHENS_STORAGE_TYPE"`
 	GlobalEndpoint   string    `envconfig:"ATHENS_GLOBAL_ENDPOINT"` // This feature is not yet implemented
-	Port             string    `validate:"startswith=:" envconfig:"ATHENS_PORT"`
+	Port             string    `envconfig:"ATHENS_PORT"`
 	BasicAuthUser    string    `envconfig:"BASIC_AUTH_USER"`
 	BasicAuthPass    string    `envconfig:"BASIC_AUTH_PASS"`
 	ForceSSL         bool      `envconfig:"PROXY_FORCE_SSL"`
@@ -56,6 +56,17 @@ type Config struct {
 	RobotsFile       string    `envconfig:"ATHENS_ROBOTS_FILE"`
 	SingleFlight     *SingleFlight
 	Storage          *StorageConfig
+}
+
+// Validate implements Validator
+func (c *Config) Validate() error {
+	const op errors.Op = "Config.Validate"
+	if !strings.HasPrefix(c.Port, ":") {
+		return errors.E(
+			op,
+			"Invalid configuration for Port. This value must start with ':'",
+		)
+	}
 }
 
 // EnvList is a list of key-value environment
@@ -264,6 +275,9 @@ func validateConfig(config Config) error {
 	validate := validator.New()
 	err := validate.StructExcept(config, "Storage")
 	if err != nil {
+		return err
+	}
+	if err := config.Validate(); err != nil {
 		return err
 	}
 	switch config.StorageType {
