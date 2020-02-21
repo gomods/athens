@@ -26,7 +26,7 @@ $ GOPROXY=<athens-url> go build .
 
 By default, when Athens receives a `/sumdb/...` request, it automatically proxies it to `https://sum.golang.org`, even if it's a private module that `sum.golang.org` doesn't and can't know about. So if you are working with private modules, you'll want to change the default behavior.
 
->If you Athens to _not_ send some module names up to the global checksum database, set those module names in the `NoSumPatterns` value in `config.toml` or using the `ATHENS_GONOSUM_PATTERNS` environment variable.
+>If you want Athens to _not_ send some module names up to the global checksum database, set those module names in the `NoSumPatterns` value in `config.toml` or using the `ATHENS_GONOSUM_PATTERNS` environment variable.
 
 The following sections will go into more detail on how checksum databases work, how Athens fits in, and how this all impacts your workflow.
 
