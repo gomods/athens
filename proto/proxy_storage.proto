@@ -1,0 +1,51 @@
+// purposely leaving out delete. that is up to individual external
+// storage server operators to do on their end
+
+service ProxyStorage {
+
+    rpc GetModule (ModuleMetadata) returns (ModuleData) {}
+    rpc SaveModule (ModuleData) returns (ModuleSaveResponse) {}
+    rpc ListVersions (ListVersionsRequest) returns (ListVersionsResponse) {}
+    rpc CheckModuleAndVersion(ModuleMetadata) returns (CheckModuleAndVersionResponse) {}
+    rpc GetModuleCatalog (GetModuleCatalogRequest) returns (GetModuleCatalogResponse) {}
+}
+
+message ModuleMetadata {
+    string name = 1;
+    // this is redundant for GetModuleCatalogResponse but not for 
+    // GetModule and others. Implementations can return this and Athens
+    // may choose to ignore it.
+    string version = 2;
+}
+
+message ModuleData {
+    ModuleMetadata metadata = 1;
+    string mod_file = 1;
+    string info = 2;
+    bytes zip_file = 3;
+
+}
+
+message ModuleSaveResponse {}
+
+message ListVersionsRequest {
+    string module_name = 1;
+}
+
+message ListVersionsResponse {
+    repeated string versions = 1;
+}
+
+message CheckModuleAndVersionResponse {
+    bool exists = 1;
+}
+
+message GetModuleCatalogRequest {
+    string token = 1;
+    uint64 page_size = 2;
+}
+
+message GetModuleCatalogResponse {
+    map<string, ModuleMetadata> modules = 1;
+}
+
