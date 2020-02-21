@@ -129,12 +129,12 @@ func TestNewFile_err(t *testing.T) {
 		{
 			name:     "empty mode",
 			mode:     "",
-			expected: Mode("").Validate(op).Error(),
+			expected: Mode("").Validate().Error(),
 		},
 		{
 			name:     "invalid mode",
 			mode:     "invalidMode",
-			expected: Mode("invalidMode").Validate(op).Error(),
+			expected: Mode("invalidMode").Validate().Error(),
 		},
 	}
 	for _, c := range tc {

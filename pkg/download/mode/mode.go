@@ -30,7 +30,8 @@ const (
 
 // Validate ensures that m is a valid mode. If this function returns nil, you are
 // guaranteed that m is valid
-func (m Mode) Validate(op errors.Op) error {
+func (m Mode) Validate() error {
+	const op errors.Op = "Mode.Validate"
 	switch m {
 	case Sync, Async, Redirect, AsyncRedirect, None:
 		return nil
@@ -61,7 +62,8 @@ type DownloadPath struct {
 	DownloadURL string `hcl:"downloadURL,optional"`
 }
 
-func (d DownloadPath) validate(op errors.Op) error {
+func (d DownloadPath) Validate() error {
+	const op errors.Op = "DownloadPath.Validate"
 	if d.DownloadURL == "" && (d.Mode == Redirect || d.Mode == AsyncRedirect) {
 		return errors.Config(
 			op,
@@ -82,7 +84,7 @@ func (d DownloadPath) validate(op errors.Op) error {
 func NewFile(m Mode, downloadURL string) (*DownloadFile, error) {
 	const op errors.Op = "downloadMode.NewFile"
 
-	if err := m.Validate(op); err != nil {
+	if err := m.Validate(); err != nil {
 		return nil, err
 	}
 
@@ -102,7 +104,7 @@ func NewFile(m Mode, downloadURL string) (*DownloadFile, error) {
 	}
 
 	retFile := &DownloadFile{Mode: m, DownloadURL: downloadURL}
-	if err := retFile.validate(op); err != nil {
+	if err := retFile.Validate(); err != nil {
 		return nil, err
 	}
 	return retFile, nil
@@ -121,15 +123,18 @@ func parseFile(file []byte) (*DownloadFile, error) {
 	if dig.HasErrors() {
 		return nil, errors.E(op, dig.Error())
 	}
-	if err := df.validate(op); err != nil {
+	if err := df.Validate(); err != nil {
 		return nil, errors.E(op, err)
 	}
 	return &df, nil
 }
 
-func (d *DownloadFile) validate(op errors.Op) error {
+// Validate validates the download file. It implements the
+// config.Validator interface
+func (d *DownloadFile) Validate() error {
+	const op errors.Op = "DownloadFile.Validate"
 	for _, p := range d.Paths {
-		if err := p.Mode.Validate(op); err != nil {
+		if err := p.Mode.Validate(); err != nil {
 			return err
 		}
 		switch p.Mode {
