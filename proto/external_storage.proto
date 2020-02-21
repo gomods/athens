@@ -1,3 +1,4 @@
+syntax = "proto3";
 // purposely leaving out delete. that is up to individual external
 // storage server operators to do on their end
 
@@ -20,9 +21,9 @@ message ModuleMetadata {
 
 message ModuleData {
     ModuleMetadata metadata = 1;
-    string mod_file = 1;
-    string info = 2;
-    bytes zip_file = 3;
+    string mod_file = 2;
+    string info = 3;
+    bytes zip_file = 4;
 
 }
 
