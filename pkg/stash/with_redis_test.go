@@ -50,6 +50,63 @@ func TestWithRedisLock(t *testing.T) {
 	}
 }
 
+// Verify with WithRedisLock working with password protected redis
+// Same logic as the TestWithRedisLock test.
+func TestWithRedisLockWithPassword(t *testing.T) {
+	endpoint := os.Getenv("REDIS_TEST_ENDPOINT2")
+	password := os.Getenv("ATHENS_REDIS_PASSWORD2")
+	if len(endpoint) == 0 {
+		t.SkipNow()
+	}
+	strg, err := mem.NewStorage()
+	if err != nil {
+		t.Fatal(err)
+	}
+	ms := &mockRedisStasher{strg: strg}
+	wrapper, err := WithRedisLock(endpoint, password, strg)
+	if err != nil {
+		t.Fatal(err)
+	}
+	s := wrapper(ms)
+
+	var eg errgroup.Group
+	for i := 0; i < 5; i++ {
+		eg.Go(func() error {
+			ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+			defer cancel()
+			_, err := s.Stash(ctx, "mod", "ver")
+			return err
+		})
+	}
+
+	err = eg.Wait()
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+// Verify the WithRedisLock fails with the correct error when trying
+// to connect with the wrong password.
+func TestWithRedisLockWithWrongPassword(t *testing.T) {
+	endpoint := os.Getenv("REDIS_TEST_ENDPOINT2")
+	password := ""
+	if len(endpoint) == 0 {
+		t.SkipNow()
+	}
+	strg, err := mem.NewStorage()
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, err = WithRedisLock(endpoint, password, strg)
+	if err == nil {
+		t.Fatal("Expected Connection Error")
+	}
+
+	if err.Error() != "NOAUTH Authentication required." {
+		t.Fatalf("Wrong error was thrown %s\n", err.Error())
+	}
+}
+
 // mockRedisStasher is like mockStasher
 // but leverages in memory storage
 // so that redis can determine

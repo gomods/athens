@@ -79,8 +79,15 @@ services:
       - 16686:16686
   redis:
     image: redis
-    ports: 
+    ports:
       - 6379:6379
+  redis2:
+    image: redis
+    ports:
+      - "6380:6380"
+    volumes:
+      - "./test/redis.conf:/usr/local/etc/redis/redis.conf"
+    entrypoint: ["redis-server", "/usr/local/etc/redis/redis.conf"]
   etcd0:
     image: quay.io/coreos/etcd
     ports:
