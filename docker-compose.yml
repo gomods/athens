@@ -81,6 +81,14 @@ services:
     image: redis
     ports: 
       - 6379:6379
+  redis-sentinel:
+    image: bitnami/redis-sentinel
+    environment:
+      - REDIS_MASTER_SET=redis-1
+      - REDIS_SENTINEL_PASSWORD=sekret
+      - REDIS_SENTINEL_QUORUM=1
+    ports:
+      - 23679:23679
   etcd0:
     image: quay.io/coreos/etcd
     ports:

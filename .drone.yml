@@ -46,6 +46,9 @@ steps:
     ATHENS_MONGO_STORAGE_URL: mongodb://mongo:27017
     ATHENS_MINIO_ENDPOINT: minio:9000
     REDIS_TEST_ENDPOINT: redis:6379
+    REDIS_SENTINEL_TEST_ENDPOINT: redis-sentinel:23679
+    REDIS_SENTINEL_TEST_MASTER_NAME: redis-1
+    REDIS_SENTINEL_TEST_PASSWORD: sekret
     GCS_SERVICE_ACCOUNT:
       from_secret: GCS_SERVICE_ACCOUNT
     GCS_PROJECT_ID: 
@@ -154,6 +157,14 @@ services:
   image: redis
   ports:
     - 6379
+- name: redis-sentinel
+  image: bitnami/redis-sentinel
+  environment:
+    REDIS_MASTER_SET: redis-1
+    REDIS_SENTINEL_PASSWORD: sekret
+    REDIS_SENTINEL_QUORUM: "1"
+  ports:
+    - 26379
 - name: athens-proxy
   image: gomods/athens:canary
   pull: always

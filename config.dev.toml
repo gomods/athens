@@ -290,6 +290,17 @@ SingleFlightType = "memory"
         # TODO(marwan): enable multiple endpoints for redis clusters.
         # Env override: ATHENS_REDIS_ENDPOINT
         Endpoint = "127.0.0.1:6379"
+    [SingleFlight.RedisSentinel]
+        # Endpoints is the redis sentinel endpoints to discover a redis 
+        # master for a SingleFlight lock.
+        # Env override: ATHENS_REDIS_SENTINEL_ENDPOINTS
+        Endpoint = ["127.0.0.1:26379"]
+        # MasterName is the redis sentinel master name to use to discover
+        # the master for a SingleFlight lock
+        MasterName = "redis-1"
+        # SentinelPassword is an optional password for authenticating with
+        # redis sentinel
+        SentinelPassword = "sekret"
 
 [Storage]
     # Only storage backends that are specified in Proxy.StorageType are required here

@@ -133,6 +133,16 @@ func getSingleFlight(c *config.Config, checker storage.Checker) (stash.Wrapper, 
 			return nil, fmt.Errorf("Redis config must be present")
 		}
 		return stash.WithRedisLock(c.SingleFlight.Redis.Endpoint, checker)
+	case "redis-sentinel":
+		if c.SingleFlight == nil || c.SingleFlight.Redis == nil {
+			return nil, fmt.Errorf("Redis config must be present")
+		}
+		return stash.WithRedisSentinelLock(
+			c.SingleFlight.RedisSentinel.Endpoints,
+			c.SingleFlight.RedisSentinel.MasterName,
+			c.SingleFlight.RedisSentinel.SentinelPassword,
+			checker,
+		)
 	case "gcp":
 		if c.StorageType != "gcp" {
 			return nil, fmt.Errorf("gcp SingleFlight only works with a gcp storage type and not: %v", c.StorageType)

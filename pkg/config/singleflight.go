@@ -4,8 +4,9 @@ package config
 // backend configurations for a distributed
 // lock or single flight mechanism.
 type SingleFlight struct {
-	Etcd  *Etcd
-	Redis *Redis
+	Etcd          *Etcd
+	Redis         *Redis
+	RedisSentinel *RedisSentinel
 }
 
 // Etcd holds client side configuration
@@ -19,4 +20,12 @@ type Etcd struct {
 // to connect to redis as a SingleFlight implementation.
 type Redis struct {
 	Endpoint string `envconfig:"ATHENS_REDIS_ENDPOINT"`
+}
+
+// RedisSentinel is the configuration for using redis with sentinel
+// for SingleFlight
+type RedisSentinel struct {
+	Endpoints        []string `envconfig:"ATHENS_REDIS_SENTINEL_ENDPOINTS"`
+	MasterName       string   `envconfig:"ATHENS_REDIS_SENTINEL_MASTER_NAME"`
+	SentinelPassword string   `envconfig:"ATHENS_REDIS_SENTINEL_PASSWORD"`
 }
