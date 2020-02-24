@@ -89,7 +89,7 @@ services:
       - REDIS_SENTINEL_PASSWORD=sekret
       - REDIS_SENTINEL_QUORUM=1
     ports:
-      - 23679:23679
+      - 26379:26379
   etcd0:
     image: quay.io/coreos/etcd
     ports:
