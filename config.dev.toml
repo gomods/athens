@@ -276,7 +276,7 @@ DownloadURL = ""
 # that only one module is ever written even when concurrent saves happen
 # at the same time.
 # Env override: ATHENS_SINGLE_FLIGHT_TYPE
-SingleFlightType = "redis-sentinel"
+SingleFlightType = "memory"
 
 [SingleFlight]
     [SingleFlight.Etcd]
