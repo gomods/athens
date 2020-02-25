@@ -5,15 +5,15 @@
     2. Put "[WIP]" at the beginning of your PR title if you're not ready to have this merged yet (we have a bot that will tell everyone that it's a work in progress)
 -->
 
-# What is the problem I am trying to address?
+## What is the problem I am trying to address?
 
 Describe the issue you have been trying to solve.
 
-# How is the fix applied?
+## How is the fix applied?
 
 Mention briefly how you have applied the fix.
 
-# What GitHub issue(s) does this PR fix or close?
+## What GitHub issue(s) does this PR fix or close?
 
 <!--
     If it doesn't fix any issues, that's ok. You can leave this blank.
