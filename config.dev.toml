@@ -276,7 +276,7 @@ DownloadURL = ""
 # that only one module is ever written even when concurrent saves happen
 # at the same time.
 # Env override: ATHENS_SINGLE_FLIGHT_TYPE
-SingleFlightType = "memory"
+SingleFlightType = "redis-sentinel"
 
 [SingleFlight]
     [SingleFlight.Etcd]
@@ -294,7 +294,7 @@ SingleFlightType = "memory"
         # Endpoints is the redis sentinel endpoints to discover a redis 
         # master for a SingleFlight lock.
         # Env override: ATHENS_REDIS_SENTINEL_ENDPOINTS
-        Endpoint = ["127.0.0.1:26379"]
+        Endpoints = ["127.0.0.1:26379"]
         # MasterName is the redis sentinel master name to use to discover
         # the master for a SingleFlight lock
         MasterName = "redis-1"
