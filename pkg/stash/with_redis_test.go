@@ -53,8 +53,8 @@ func TestWithRedisLock(t *testing.T) {
 // Verify with WithRedisLock working with password protected redis
 // Same logic as the TestWithRedisLock test.
 func TestWithRedisLockWithPassword(t *testing.T) {
-	endpoint := os.Getenv("REDIS_TEST_ENDPOINT2")
-	password := os.Getenv("ATHENS_REDIS_PASSWORD2")
+	endpoint := os.Getenv("PROTECTED_REDIS_TEST_ENDPOINT")
+	password := os.Getenv("ATHENS_PROTECTED_REDIS_PASSWORD")
 	if len(endpoint) == 0 {
 		t.SkipNow()
 	}
@@ -88,7 +88,7 @@ func TestWithRedisLockWithPassword(t *testing.T) {
 // Verify the WithRedisLock fails with the correct error when trying
 // to connect with the wrong password.
 func TestWithRedisLockWithWrongPassword(t *testing.T) {
-	endpoint := os.Getenv("REDIS_TEST_ENDPOINT2")
+	endpoint := os.Getenv("PROTECTED_REDIS_TEST_ENDPOINT")
 	password := ""
 	if len(endpoint) == 0 {
 		t.SkipNow()

@@ -81,7 +81,7 @@ services:
     image: redis
     ports:
       - 6379:6379
-  redis2:
+  protectedredis:
     image: redis
     ports:
       - "6380:6380"
