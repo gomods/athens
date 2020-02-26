@@ -306,6 +306,10 @@ SingleFlightType = "memory"
         # redis sentinel
         SentinelPassword = "sekret"
 
+        # Password is the password for a redis SingleFlight lock.
+        # Env override: ATHENS_REDIS_PASSWORD
+        Password = ""
+
 [Storage]
     # Only storage backends that are specified in Proxy.StorageType are required here
     [Storage.CDN]
