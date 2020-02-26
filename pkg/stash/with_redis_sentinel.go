@@ -1,16 +1,9 @@
 package stash
 
 import (
-	errs "errors"
-
 	"github.com/go-redis/redis/v7"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/storage"
-)
-
-var (
-	// ErrNoEndpoints is returned when no endpoints were provided
-	ErrNoEndpoints = errs.New("no endpoints provided")
 )
 
 // WithRedisSentinelLock returns a distributed singleflight
@@ -20,7 +13,7 @@ func WithRedisSentinelLock(endpoints []string, master, password string, checker 
 	// The redis client constructor does not return an error when no endpoints
 	// are provided, so we check for ourselves.
 	if len(endpoints) == 0 {
-		return nil, ErrNoEndpoints
+		return nil, errors.E(op, "no endpoints specified")
 	}
 	client := redis.NewFailoverClient(&redis.FailoverOptions{
 		MasterName:       master,

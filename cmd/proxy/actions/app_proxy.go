@@ -134,7 +134,7 @@ func getSingleFlight(c *config.Config, checker storage.Checker) (stash.Wrapper, 
 		}
 		return stash.WithRedisLock(c.SingleFlight.Redis.Endpoint, checker)
 	case "redis-sentinel":
-		if c.SingleFlight == nil || c.SingleFlight.Redis == nil {
+		if c.SingleFlight == nil || c.SingleFlight.RedisSentinel == nil {
 			return nil, fmt.Errorf("Redis config must be present")
 		}
 		return stash.WithRedisSentinelLock(
