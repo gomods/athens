@@ -1,22 +1,32 @@
 ---
 title: Configuring Storage
 description: Configuring Storage in Athens
+weight: 3
 ---
 
 ## Storage
 
 The Athens proxy supports many storage types:
 
-1. [Memory](#memory)
-1. [Disk](#disk)
-1. [Mongo](#mongo)
-1. [Google Cloud Storage](#google-cloud-storage)
-1. [AWS S3](#aws-s3)
-1. [Minio](#minio)
-    1. [DigitalOcean Spaces](#digitalocean-spaces)
-    1. [Alibaba OSS](#alibaba-oss)
-    1. and other S3 / Minio compatible interfaces
-1. [Azure Blob Storage](#azure-blob-storage)
+- [Storage](#storage)
+- [Memory](#memory)
+      - [Configuration:](#configuration)
+- [Disk](#disk)
+      - [Configuration:](#configuration-1)
+- [Mongo](#mongo)
+      - [Configuration:](#configuration-2)
+- [Google Cloud Storage](#google-cloud-storage)
+      - [Configuration:](#configuration-3)
+- [AWS S3](#aws-s3)
+      - [Configuration:](#configuration-4)
+- [Minio](#minio)
+      - [Configuration:](#configuration-5)
+    - [DigitalOcean Spaces](#digitalocean-spaces)
+      - [Configuration:](#configuration-6)
+    - [Alibaba OSS](#alibaba-oss)
+      - [Configuration:](#configuration-7)
+- [Azure Blob Storage](#azure-blob-storage)
+      - [Configuration:](#configuration-8)
 
 All of them can be configured using `config.toml` file. You need to set a valid driver in `StorageType` value or you can set it in environment variable `ATHENS_STORAGE_TYPE` on your server.
 Also for most of the drivers you need to provide additional configuration data which will be described below.
@@ -36,6 +46,8 @@ This storage doesn't need any specific configuration and it's also used by defau
 ## Disk
 
 Disk storage allows modules to be stored on a file system. The location on disk where modules will be stored can be configured.
+
+>You can pre-fill disk-based storage to enable Athens deployments that have no access to the internet. See [here](./prefill-disk-cache) for instructions on how to do that.
 
 ##### Configuration:
 
@@ -155,6 +167,10 @@ After this you can pass your credentials inside `config.toml` file.  If the acce
             # S3 Bucket to use for storage
             # Env override: ATHENS_S3_BUCKET_NAME
             Bucket = "MY_S3_BUCKET_NAME"
+            
+            # If true then path style url for s3 endpoint will be used
+            # Env override: AWS_FORCE_PATH_STYLE
+            ForcePathStyle = false
 
             # If true then the default aws configuration will be used. This will
             # attempt to find credentials in the environment, in the shared
