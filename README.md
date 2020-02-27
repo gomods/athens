@@ -59,7 +59,7 @@ If you'd like to help us tackle some of the technical / code challenges and you'
 
 If you decide to to contribute but aren't sure what to work on, we have a well maintained [list of good first issues](https://github.com/gomods/athens/contribute) that you should look at. If you find one that you would like to work on, please post a comment saying "I want to work on this", and then it's all yours to begin working on.
 
->We do recommend that you choose one of the issues on the above list, but you may also consider a different issue from our [entire issue list](https://github.com/gomods/athens). Many of the issues on that list are more complex and challenging.
+>We do recommend that you choose one of the issues on the above list, but you may also consider a different one from our [entire list](https://github.com/gomods/athens). Many of the issues on that list are more complex and challenging.
 
 Before you do start getting involved or contributing, we want to let you know that we follow a general [philosophy](./PHILOSOPHY.md) in how we work together, and we'd really appreciate you getting familiar with it before you start.
 
