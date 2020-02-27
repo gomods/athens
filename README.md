@@ -53,7 +53,7 @@ If you use Athens for your development workflow, we hope that you'll consider co
 
 The quickest way to get involved is by [filing issues](https://github.com/gomods/athens/issues/new/choose) if you find bugs or find that you need Athens to do something it doesn't.
 
-You also might consider contributing code back to the project. If you're familiar with the GitHub contribution process, you'll probably be familiar with our process. Generally, you may optionally find or submit an issue, and then submit a pull request (PR) to fix that issue. See [here](https://docs.gomods.io/contributing/) for some of the project-specific details.
+If you'd like to help us tackle some of the technical / code challenges and you're familiar with the GitHub contribution process, you'll probably be familiar with our process for contributions. You can optionally find or submit an issue, and then submit a pull request (PR) to fix that issue. See [here](https://docs.gomods.io/contributing/) for more of the project-specific details.
 
 >If you're not familiar with the standard GitHub contribution process, which Athens mostly follows, please see [this section of our documentation](https://docs.gomods.io/contributing/new/) to learn how to contribute. You can also take advantage of [@bketelsen](https://github.com/bketelsen)'s [great video](https://www.youtube.com/watch?v=bgSDcTyysRc) on how to contribute code. The information in these documents and videos will help you not only with this project, but can also help you contribute to many other projects on GitHub.
 
