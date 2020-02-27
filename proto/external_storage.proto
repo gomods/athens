@@ -42,7 +42,7 @@ message ModuleZip {
 message ModuleData {
     ModuleMetadata metadata = 1;
     string mod_file = 2;
-    string info = 3;
+    ModuleInfo info = 3;
     bytes zip_file = 4;
 
 }
