@@ -4,7 +4,7 @@ name: default
 
 steps:
 - name: download-dependencies
-  image: golang:1.13
+  image: golang:1.14
   commands:
     # wait for services to be ready.
     - cd scripts/liveness_probe
@@ -20,7 +20,7 @@ steps:
     path: /go
 
 - name: build
-  image: golang:1.13
+  image: golang:1.14
   commands:
 
   # build
