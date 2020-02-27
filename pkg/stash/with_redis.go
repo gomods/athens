@@ -14,11 +14,12 @@ import (
 
 // WithRedisLock returns a distributed singleflight
 // using an redis cluster. If it cannot connect, it will return an error.
-func WithRedisLock(endpoint string, checker storage.Checker) (Wrapper, error) {
+func WithRedisLock(endpoint string, password string, checker storage.Checker) (Wrapper, error) {
 	const op errors.Op = "stash.WithRedisLock"
 	client := redis.NewClient(&redis.Options{
-		Network: "tcp",
-		Addr:    endpoint,
+		Network:  "tcp",
+		Addr:     endpoint,
+		Password: password,
 	})
 	_, err := client.Ping().Result()
 	if err != nil {

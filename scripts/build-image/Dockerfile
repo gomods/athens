@@ -1,4 +1,4 @@
-FROM golang:1.12-stretch
+FROM golang:1.14-stretch
 
 WORKDIR /tmp
 

@@ -19,4 +19,5 @@ type Etcd struct {
 // to connect to redis as a SingleFlight implementation.
 type Redis struct {
 	Endpoint string `envconfig:"ATHENS_REDIS_ENDPOINT"`
+	Password string `envconfig:"ATHENS_REDIS_PASSWORD"`
 }
