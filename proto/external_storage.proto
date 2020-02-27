@@ -4,19 +4,39 @@ syntax = "proto3";
 
 service ProxyStorage {
 
-    rpc GetModule (ModuleMetadata) returns (ModuleData) {}
+    rpc GetModuleModfile (ModuleMetadata) (ModuleMod) {}
+    rpc GetModuleInfo (ModuleMetadata) (ModuleInfo) {}
+    rpc GetModuleZip (ModuleMetadata) returns (ModuleZip) {}
     rpc SaveModule (ModuleData) returns (ModuleSaveResponse) {}
     rpc ListVersions (ListVersionsRequest) returns (ListVersionsResponse) {}
     rpc CheckModuleAndVersion(ModuleMetadata) returns (CheckModuleAndVersionResponse) {}
     rpc GetModuleCatalog (GetModuleCatalogRequest) returns (GetModuleCatalogResponse) {}
 }
 
+// ModuleMetata is the name and version of a module
 message ModuleMetadata {
     string name = 1;
     // this is redundant for GetModuleCatalogResponse but not for 
     // GetModule and others. Implementations can return this and Athens
     // may choose to ignore it.
     string version = 2;
+}
+
+// ModuleMod is the go.mod file for a module@version
+message ModuleMod {
+    string mod_file = 1;
+}
+
+// ModuleInfo is the JSON metadata that gets returned from
+// the @v/v1.2.3.info endpoint
+message ModuleInfo {
+    string timestamp = 1;
+    string version = 2;
+}
+
+// ModuleZip is the zip file of a module's source code
+message ModuleZip {
+    bytes zip_file = 1;
 }
 
 message ModuleData {
