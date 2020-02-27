@@ -4,8 +4,8 @@ syntax = "proto3";
 
 service ProxyStorage {
 
-    rpc GetModuleModfile (ModuleMetadata) (ModuleMod) {}
-    rpc GetModuleInfo (ModuleMetadata) (ModuleInfo) {}
+    rpc GetModuleModfile (ModuleMetadata) returns (ModuleMod) {}
+    rpc GetModuleInfo (ModuleMetadata) returns (ModuleInfo) {}
     rpc GetModuleZip (ModuleMetadata) returns (ModuleZip) {}
     rpc SaveModule (ModuleData) returns (ModuleSaveResponse) {}
     rpc ListVersions (ListVersionsRequest) returns (ListVersionsResponse) {}
