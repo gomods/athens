@@ -37,6 +37,5 @@ spec:
       targetPort: 16686
   selector:
     app: {{ template "fullname" . }}-jaeger
-    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
     release: "{{ .Release.Name }}"
 {{- end -}}
