@@ -12,7 +12,6 @@ spec:
   selector:
     matchLabels:
       app: {{ template "fullname" . }}
-      chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
       release: "{{ .Release.Name }}"
   template:
     metadata:
