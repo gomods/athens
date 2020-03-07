@@ -2,7 +2,7 @@
 
 Protocol Buffers & gRPC Language References:
 
-- [Language Guide](https://developers.google.com/protocol-buffers/docs/proto)
+- [Language Guide](https://developers.google.com/protocol-buffers/docs/proto3)
 - [Full Language Specification](https://developers.google.com/protocol-buffers/docs/reference/proto3-spec)
 - [gRPC homepage](https://grpc.io)
 
