@@ -4,13 +4,13 @@ syntax = "proto3";
 
 service ProxyStorage {
 
-    rpc GetModuleModfile (ModuleMetadata) returns (ModuleMod) {}
-    rpc GetModuleInfo (ModuleMetadata) returns (ModuleInfo) {}
-    rpc GetModuleZip (ModuleMetadata) returns (ModuleZip) {}
-    rpc SaveModule (ModuleData) returns (ModuleSaveResponse) {}
+    rpc GetModfile (ModuleMetadata) returns (ModuleMod) {}
+    rpc GetInfo (ModuleMetadata) returns (ModuleInfo) {}
+    rpc GetZip (ModuleMetadata) returns (ModuleZip) {}
+    rpc Save (ModuleData) returns (ModuleSaveResponse) {}
     rpc ListVersions (ListVersionsRequest) returns (ListVersionsResponse) {}
-    rpc CheckModuleAndVersion(ModuleMetadata) returns (CheckModuleAndVersionResponse) {}
-    rpc GetModuleCatalog (GetModuleCatalogRequest) returns (GetModuleCatalogResponse) {}
+    rpc Check(ModuleMetadata) returns (CheckModuleAndVersionResponse) {}
+    rpc GetCatalog (GetModuleCatalogRequest) returns (GetModuleCatalogResponse) {}
 }
 
 // ModuleMetata is the name and version of a module
@@ -57,9 +57,7 @@ message ListVersionsResponse {
     repeated string versions = 1;
 }
 
-message CheckModuleAndVersionResponse {
-    bool exists = 1;
-}
+message CheckModuleAndVersionResponse {}
 
 message GetModuleCatalogRequest {
     string token = 1;
