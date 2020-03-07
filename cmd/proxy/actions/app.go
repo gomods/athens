@@ -28,8 +28,15 @@ func App(conf *config.Config) (http.Handler, error) {
 	ENV := conf.GoEnv
 	store, err := GetStorage(conf.StorageType, conf.Storage, conf.TimeoutDuration())
 	if err != nil {
-		err = fmt.Errorf("error getting storage configuration (%s)", err)
-		return nil, err
+		return nil, fmt.Errorf("error getting storage configuration (%s)", err)
+	}
+
+	if conf.StorageEncryptionKey != "" {
+		var err error
+		store, err = wrapStorageWithEncryption(store, conf.StorageEncryptionKey)
+		if err != nil {
+			return nil, fmt.Errorf("error configuring storage encryption (%s)", err)
+		}
 	}
 
 	if conf.GithubToken != "" {
