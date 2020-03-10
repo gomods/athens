@@ -71,6 +71,16 @@ type DownloadPath struct {
 // Validate ensures that the download file is well formed
 func (d DownloadPath) Validate() error {
 	const op errors.Op = "DownloadPath.Validate"
+	switch p.Mode {
+	case Sync, Async, Redirect, AsyncRedirect, None:
+	default:
+		return errors.Config(
+			op,
+			fmt.Sprintf("mode (in pattern %v", d.Pattern),
+			fmt.Sprintf("%s is unrecognized", d.Mode),
+			"https://docs.gomods.io/configuration/download/",
+		)
+	}
 	if d.DownloadURL == "" && (d.Mode == Redirect || d.Mode == AsyncRedirect) {
 		return errors.Config(
 			op,
@@ -152,19 +162,6 @@ func (d *DownloadFile) Validate() error {
 	for _, p := range d.Paths {
 		if err := p.Validate(); err != nil {
 			return err
-		}
-		if err := p.Mode.Validate(); err != nil {
-			return err
-		}
-		switch p.Mode {
-		case Sync, Async, Redirect, AsyncRedirect, None:
-		default:
-			return errors.Config(
-				op,
-				fmt.Sprintf("mode (in pattern %v", p.Pattern),
-				fmt.Sprintf("%s is unrecognized", p.Mode),
-				"https://docs.gomods.io/configuration/download/",
-			)
 		}
 	}
 	return nil
