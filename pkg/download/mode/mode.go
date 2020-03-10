@@ -139,6 +139,16 @@ func parseFile(file []byte) (*DownloadFile, error) {
 // Validate validates the download file
 func (d *DownloadFile) Validate() error {
 	const op errors.Op = "DownloadFile.Validate"
+	if _, err := url.Parse(d.DownloadURL); err != nil {
+		return errors.Config(
+			op, 
+			fmt.Sprintf("DownloadURL %q is invalid (%s)",
+				d.DownloadURL,
+				err,
+			),
+			"https://docs.gomods.io/configuration/download/",
+		)
+	}
 	for _, p := range d.Paths {
 		if err := p.Validate(); err != nil {
 			return err
