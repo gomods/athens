@@ -32,6 +32,12 @@ const (
 // guaranteed that m is valid
 func (m Mode) Validate() error {
 	const op errors.Op = "Mode.Validate"
+	if (
+		strings.HasPrefix(string(m), "file:") || 
+		strings.HasPrefix(string(m), "custom:")
+	) {
+		return nil
+	}
 	switch m {
 	case Sync, Async, Redirect, AsyncRedirect, None:
 		return nil
