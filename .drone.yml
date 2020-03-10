@@ -4,10 +4,12 @@ name: default
 
 steps:
 - name: download-dependencies
-  image: golang:1.13
+  image: golang:1.14
   commands:
     # wait for services to be ready.
-    - sleep 10
+    - cd scripts/liveness_probe
+    - go run .
+    - cd ../..
     - go mod download
     - go mod vendor # this is for when the Dockerfile gets built
   environment:
@@ -17,9 +19,8 @@ steps:
   - name: cache
     path: /go
 
-
 - name: build
-  image: golang:1.13
+  image: golang:1.14
   commands:
 
   # build
@@ -33,6 +34,7 @@ steps:
   # end to end test
   - ./main & # run the just-built athens server
   - sleep 3 # wait for it to spin up
+  - curl localhost:3000
   - mkdir -p ~/happy
   - mkdir -p ~/emptygopath # ensure the gopath has no modules cached.
   - cd ~/happy
@@ -44,6 +46,8 @@ steps:
     ATHENS_MONGO_STORAGE_URL: mongodb://mongo:27017
     ATHENS_MINIO_ENDPOINT: minio:9000
     REDIS_TEST_ENDPOINT: redis:6379
+    PROTECTED_REDIS_TEST_ENDPOINT: protectedredis:6380
+    ATHENS_PROTECTED_REDIS_PASSWORD: AthensPass1
     GCS_SERVICE_ACCOUNT:
       from_secret: GCS_SERVICE_ACCOUNT
     GCS_PROJECT_ID: 
@@ -152,6 +156,13 @@ services:
   image: redis
   ports:
     - 6379
+- name: protectedredis
+  image: redis
+  ports:
+    - 6380
+  commands:
+    - "redis-server ./test/redis.conf"
+
 - name: athens-proxy
   image: gomods/athens:canary
   pull: always

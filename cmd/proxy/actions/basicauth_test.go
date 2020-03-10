@@ -49,8 +49,16 @@ var basicAuthTests = [...]struct {
 		user:           "wrongUser",
 		pass:           "wrongPassword",
 		path:           "/healthz",
-		logs:           healthWarning,
-		expectedStatus: 401,
+		logs:           "",
+		expectedStatus: 200,
+	},
+	{
+		name:           "log_on_readyz",
+		user:           "wrongUser",
+		pass:           "wrongPassword",
+		path:           "/readyz",
+		logs:           "",
+		expectedStatus: 200,
 	},
 }
 
