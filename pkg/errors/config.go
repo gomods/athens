@@ -18,5 +18,5 @@ func Config(op Op, field, helpText, url string) error {
 	if url != "" {
 		slc = append(slc, fmt.Sprintf("Please see %s for more information.", url))
 	}
-	return E(op, KindConfigError, strings.Join(slc, " "))
+	return E(op, KindConfigError, strings.Join(slc, "\n\t"))
 }
