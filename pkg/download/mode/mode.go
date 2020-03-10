@@ -104,11 +104,11 @@ func NewFile(m Mode, downloadURL string) (*DownloadFile, error) {
 		return parseFile(bts)
 	}
 
-	retFile := &DownloadFile{Mode: m, DownloadURL: downloadURL}
-	if err := retFile.Validate(); err != nil {
+	df := &DownloadFile{Mode: m, DownloadURL: downloadURL}
+	if err := df.Validate(); err != nil {
 		return nil, err
 	}
-	return retFile, nil
+	return df, nil
 }
 
 // parseFile parses an HCL file according to the
