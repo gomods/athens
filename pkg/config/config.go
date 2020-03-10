@@ -58,17 +58,6 @@ type Config struct {
 	Storage          *StorageConfig
 }
 
-// Validate implements Validator
-func (c *Config) Validate() error {
-	const op errors.Op = "Config.Validate"
-	if !strings.HasPrefix(c.Port, ":") {
-		return errors.E(
-			op,
-			"Invalid configuration for Port. This value must start with ':'",
-		)
-	}
-}
-
 // EnvList is a list of key-value environment
 // variables that are passed to the Go command
 type EnvList []string
@@ -275,9 +264,6 @@ func validateConfig(config Config) error {
 	validate := validator.New()
 	err := validate.StructExcept(config, "Storage")
 	if err != nil {
-		return err
-	}
-	if err := config.Validate(); err != nil {
 		return err
 	}
 	switch config.StorageType {

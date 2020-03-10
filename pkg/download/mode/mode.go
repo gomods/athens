@@ -62,7 +62,7 @@ type DownloadPath struct {
 	DownloadURL string `hcl:"downloadURL,optional"`
 }
 
-// Validate implements config.Validator
+// Validate ensures that the download file is well formed
 func (d DownloadPath) Validate() error {
 	const op errors.Op = "DownloadPath.Validate"
 	if d.DownloadURL == "" && (d.Mode == Redirect || d.Mode == AsyncRedirect) {
@@ -130,8 +130,7 @@ func parseFile(file []byte) (*DownloadFile, error) {
 	return &df, nil
 }
 
-// Validate validates the download file. It implements the
-// config.Validator interface
+// Validate validates the download file
 func (d *DownloadFile) Validate() error {
 	const op errors.Op = "DownloadFile.Validate"
 	for _, p := range d.Paths {
