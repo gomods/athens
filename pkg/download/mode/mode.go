@@ -134,6 +134,9 @@ func parseFile(file []byte) (*DownloadFile, error) {
 func (d *DownloadFile) Validate() error {
 	const op errors.Op = "DownloadFile.Validate"
 	for _, p := range d.Paths {
+		if err := p.Validate(); err != nil {
+			return err
+		}
 		if err := p.Mode.Validate(); err != nil {
 			return err
 		}
