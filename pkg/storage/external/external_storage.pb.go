@@ -4,8 +4,10 @@
 package external_storage
 
 import (
+	context "context"
 	fmt "fmt"
 	proto "github.com/golang/protobuf/proto"
+	grpc "google.golang.org/grpc"
 	math "math"
 )
 
@@ -543,4 +545,274 @@ var fileDescriptor_18178ef80a1eb6a3 = []byte{
 	0xbb, 0x61, 0x0c, 0xec, 0x65, 0x7b, 0xca, 0x2f, 0x86, 0x96, 0xb3, 0xc3, 0x3f, 0xf6, 0xd1, 0xce,
 	0xf3, 0x32, 0xe3, 0xcb, 0x41, 0xf6, 0x57, 0xf4, 0xec, 0x77, 0x00, 0x00, 0x00, 0xff, 0xff, 0x2f,
 	0x6a, 0xa9, 0x18, 0xa4, 0x04, 0x00, 0x00,
+}
+
+// Reference imports to suppress errors if they are not otherwise used.
+var _ context.Context
+var _ grpc.ClientConn
+
+// This is a compile-time assertion to ensure that this generated file
+// is compatible with the grpc package it is being compiled against.
+const _ = grpc.SupportPackageIsVersion4
+
+// ProxyStorageClient is the client API for ProxyStorage service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
+type ProxyStorageClient interface {
+	GetModfile(ctx context.Context, in *ModuleMetadata, opts ...grpc.CallOption) (*ModuleMod, error)
+	GetInfo(ctx context.Context, in *ModuleMetadata, opts ...grpc.CallOption) (*ModuleInfo, error)
+	GetZip(ctx context.Context, in *ModuleMetadata, opts ...grpc.CallOption) (*ModuleZip, error)
+	Save(ctx context.Context, in *ModuleData, opts ...grpc.CallOption) (*ModuleSaveResponse, error)
+	ListVersions(ctx context.Context, in *ListVersionsRequest, opts ...grpc.CallOption) (*ListVersionsResponse, error)
+	Check(ctx context.Context, in *ModuleMetadata, opts ...grpc.CallOption) (*CheckModuleAndVersionResponse, error)
+	GetCatalog(ctx context.Context, in *GetModuleCatalogRequest, opts ...grpc.CallOption) (*GetModuleCatalogResponse, error)
+}
+
+type proxyStorageClient struct {
+	cc *grpc.ClientConn
+}
+
+func NewProxyStorageClient(cc *grpc.ClientConn) ProxyStorageClient {
+	return &proxyStorageClient{cc}
+}
+
+func (c *proxyStorageClient) GetModfile(ctx context.Context, in *ModuleMetadata, opts ...grpc.CallOption) (*ModuleMod, error) {
+	out := new(ModuleMod)
+	err := c.cc.Invoke(ctx, "/ProxyStorage/GetModfile", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *proxyStorageClient) GetInfo(ctx context.Context, in *ModuleMetadata, opts ...grpc.CallOption) (*ModuleInfo, error) {
+	out := new(ModuleInfo)
+	err := c.cc.Invoke(ctx, "/ProxyStorage/GetInfo", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *proxyStorageClient) GetZip(ctx context.Context, in *ModuleMetadata, opts ...grpc.CallOption) (*ModuleZip, error) {
+	out := new(ModuleZip)
+	err := c.cc.Invoke(ctx, "/ProxyStorage/GetZip", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *proxyStorageClient) Save(ctx context.Context, in *ModuleData, opts ...grpc.CallOption) (*ModuleSaveResponse, error) {
+	out := new(ModuleSaveResponse)
+	err := c.cc.Invoke(ctx, "/ProxyStorage/Save", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *proxyStorageClient) ListVersions(ctx context.Context, in *ListVersionsRequest, opts ...grpc.CallOption) (*ListVersionsResponse, error) {
+	out := new(ListVersionsResponse)
+	err := c.cc.Invoke(ctx, "/ProxyStorage/ListVersions", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *proxyStorageClient) Check(ctx context.Context, in *ModuleMetadata, opts ...grpc.CallOption) (*CheckModuleAndVersionResponse, error) {
+	out := new(CheckModuleAndVersionResponse)
+	err := c.cc.Invoke(ctx, "/ProxyStorage/Check", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *proxyStorageClient) GetCatalog(ctx context.Context, in *GetModuleCatalogRequest, opts ...grpc.CallOption) (*GetModuleCatalogResponse, error) {
+	out := new(GetModuleCatalogResponse)
+	err := c.cc.Invoke(ctx, "/ProxyStorage/GetCatalog", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// ProxyStorageServer is the server API for ProxyStorage service.
+type ProxyStorageServer interface {
+	GetModfile(context.Context, *ModuleMetadata) (*ModuleMod, error)
+	GetInfo(context.Context, *ModuleMetadata) (*ModuleInfo, error)
+	GetZip(context.Context, *ModuleMetadata) (*ModuleZip, error)
+	Save(context.Context, *ModuleData) (*ModuleSaveResponse, error)
+	ListVersions(context.Context, *ListVersionsRequest) (*ListVersionsResponse, error)
+	Check(context.Context, *ModuleMetadata) (*CheckModuleAndVersionResponse, error)
+	GetCatalog(context.Context, *GetModuleCatalogRequest) (*GetModuleCatalogResponse, error)
+}
+
+func RegisterProxyStorageServer(s *grpc.Server, srv ProxyStorageServer) {
+	s.RegisterService(&_ProxyStorage_serviceDesc, srv)
+}
+
+func _ProxyStorage_GetModfile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ModuleMetadata)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProxyStorageServer).GetModfile(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/ProxyStorage/GetModfile",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProxyStorageServer).GetModfile(ctx, req.(*ModuleMetadata))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ProxyStorage_GetInfo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ModuleMetadata)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProxyStorageServer).GetInfo(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/ProxyStorage/GetInfo",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProxyStorageServer).GetInfo(ctx, req.(*ModuleMetadata))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ProxyStorage_GetZip_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ModuleMetadata)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProxyStorageServer).GetZip(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/ProxyStorage/GetZip",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProxyStorageServer).GetZip(ctx, req.(*ModuleMetadata))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ProxyStorage_Save_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ModuleData)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProxyStorageServer).Save(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/ProxyStorage/Save",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProxyStorageServer).Save(ctx, req.(*ModuleData))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ProxyStorage_ListVersions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListVersionsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProxyStorageServer).ListVersions(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/ProxyStorage/ListVersions",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProxyStorageServer).ListVersions(ctx, req.(*ListVersionsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ProxyStorage_Check_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ModuleMetadata)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProxyStorageServer).Check(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/ProxyStorage/Check",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProxyStorageServer).Check(ctx, req.(*ModuleMetadata))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ProxyStorage_GetCatalog_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetModuleCatalogRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProxyStorageServer).GetCatalog(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/ProxyStorage/GetCatalog",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProxyStorageServer).GetCatalog(ctx, req.(*GetModuleCatalogRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+var _ProxyStorage_serviceDesc = grpc.ServiceDesc{
+	ServiceName: "ProxyStorage",
+	HandlerType: (*ProxyStorageServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "GetModfile",
+			Handler:    _ProxyStorage_GetModfile_Handler,
+		},
+		{
+			MethodName: "GetInfo",
+			Handler:    _ProxyStorage_GetInfo_Handler,
+		},
+		{
+			MethodName: "GetZip",
+			Handler:    _ProxyStorage_GetZip_Handler,
+		},
+		{
+			MethodName: "Save",
+			Handler:    _ProxyStorage_Save_Handler,
+		},
+		{
+			MethodName: "ListVersions",
+			Handler:    _ProxyStorage_ListVersions_Handler,
+		},
+		{
+			MethodName: "Check",
+			Handler:    _ProxyStorage_Check_Handler,
+		},
+		{
+			MethodName: "GetCatalog",
+			Handler:    _ProxyStorage_GetCatalog_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "external_storage.proto",
 }

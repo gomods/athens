@@ -18,7 +18,7 @@ Go client code gets generated from [`external_storage.proto`](./external_storage
 After you've done that, you can re-generate the code with this command:
 
 ```bash
-$ protoc -I $PWD external_storage.proto --go_out=$PWD/../pkg/storage/external
+$ protoc -I $PWD external_storage.proto --go_out=plugins=grpc:$PWD/../pkg/storage/external
 ```
 
 >Make sure to run this command from inside of this directory.
