@@ -17,7 +17,7 @@ This guide assumes you have completed the following tasks:
 
 - Signed up for Google Cloud
 - Installed the [gcloud](https://cloud.google.com/sdk/install) command line tool
-- Installed the beta plugin for ghe gcloud command line tool ([this is how to set it up](https://cloud.google.com/run/docs/setup))
+- Installed the beta plugin for the gcloud command line tool ([this is how to set it up](https://cloud.google.com/run/docs/setup))
 - Created a (GCS) bucket for your go modules
 
 ### Setup a GCS Bucket
@@ -42,19 +42,20 @@ $ export GCS_BUCKET=your-bucket-name
 
 You will then need to push a copy of the Athens docker image to your google cloud container registry.
 
+Below is an example using v0.7.2, for the latest version, check out the [athens releases](https://github.com/gomods/athens)
 ```console
-$ docker pull gomods/athens:v0.6.0
+$ docker pull gomods/athens:v0.7.2
 
-$ docker tag gomods/athens:v0.6.0 gcr.io/$GOOGLE_CLOUD_PROJECT/athens:v0.6.0
+$ docker tag gomods/athens:v0.7.2 gcr.io/$GOOGLE_CLOUD_PROJECT/athens:v0.7.2
 
-$ gcloud builds submit --tag gcr.io/$GOOGLE_CLOUD_PROJECT/athens:v0.6.0
+$ gcloud builds submit --tag gcr.io/$GOOGLE_CLOUD_PROJECT/athens:v0.7.2
 ```
 
 Once you have the container image in your registry you can use `gcloud` to provision your Athens instance.
 
 ```console
 $ gcloud beta run deploy \
-    --image gcr.io/$GOOGLE_CLOUD_PROJECT/athens:v0.6.0 \
+    --image gcr.io/$GOOGLE_CLOUD_PROJECT/athens:v0.7.2 \
     --platform managed \
     --region $ATHENS_REGION \
     --allow-unauthenticated \
