@@ -42,7 +42,7 @@ $ export GCS_BUCKET=your-bucket-name
 
 You will then need to push a copy of the Athens docker image to your google cloud container registry.
 
-Below is an example using v0.7.2, for the latest version, check out the [athens releases](https://github.com/gomods/athens)
+Below is an example using v0.7.2, for the latest version, check out the [latest Athens release](https://github.com/gomods/athens/releases)
 ```console
 $ docker pull gomods/athens:v0.7.2
 
