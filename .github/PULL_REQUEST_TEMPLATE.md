@@ -16,9 +16,9 @@ Mention briefly how you have applied the fix.
 ## What GitHub issue(s) does this PR fix or close?
 
 <!--
-    If it doesn't fix any issues, that's ok. You can leave this blank.
+    If it doesn't fix any issues, that's ok. Can you please delete the below "Fixes #" line for us? It would help us out a lot. Thanks!
 
-    If it does, then use the below "Fixes #<issue number>" notation below
+    If your PR does fix an issue, then use the below "Fixes #<issue number>" notation below. If you do that, when this PR is merged, it'll automatically close the issue you reference.
 -->
 
 Fixes #
