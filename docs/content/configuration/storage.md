@@ -335,3 +335,95 @@ It assumes that you already have the following:
             # Name of container in the blob storage
             # Env override: ATHENS_AZURE_CONTAINER_NAME
             ContainerName = "MY_AZURE_BLOB_CONTAINER_NAME"
+
+## Running multiple Athens pointed at the same storage
+
+Athens has the ability to run concurrently pointed at the same storage medium, using
+a distributed locking mechanism called "single flight".
+
+By default, Athens is configured to use the `memory` single flight, which
+stores locks in local memory. This works when running a single Athens instance, given
+the process has access to it's own memory. However, when running multiple Athens instances
+pointed at the same storage, a distributed locking mechansism is required.
+
+Athens supports several distributed locking mechanisms:
+
+- `etcd`
+- `redis`
+- `redis-sentinel`
+- `gcp` (available when using the `gcp` storage type)
+- `azureblob` (available when using the `azureblob` storage type)
+
+Setting the `SingleFlightType` (or `ATHENS_SINGLE_FLIGHT TYPE` in the environment) configuration
+value will enable usage of one of the above mechanisms. The `azureblob` and `gcp` types require
+no extra configuration.
+
+### Using etcd as the single flight mechanism
+
+Using the `etcd` mechanism is very simple, just a comma separated list of etcd endpoints.
+The recommend configuration is 3 endpoints, however, more can be used.
+  
+    SingleFlightType = "etcd"
+
+    [SingleFlight]
+        [SingleFlight.Etcd]
+            # Env override: ATHENS_ETCD_ENDPOINTS
+            Endpoints = "localhost:2379,localhost:22379,localhost:32379"
+
+### Using redis as the single flight mechanism
+
+Athens supports two mechanisms of communicating with redis: direct connection, and
+connecting via redis sentinels.
+
+#### Direct connection to redis
+
+Using a direct connection to redis is simple, and only requires a single `redis-server`.
+You can also optionally specify a password to connect to the redis server with
+
+    SingleFlightType = "redis"
+
+    [SingleFlight]
+        [SingleFlight.Redis]
+            # Endpoint is the redis endpoint for the single flight mechanism
+            # Env override: ATHENS_REDIS_ENDPOINT
+            Endpoint = "127.0.0.1:6379"
+
+            # Password is the password for the redis instance
+            # Env override: ATHENS_REDIS_PASSWORD
+            Password = ""
+
+#### Connecting to redis via redis sentinel
+
+**NOTE**: redis-sentinel requires a working knowledge of redis and is not recommended for
+everyone.
+
+redis sentinel is a high-availability set up for redis, it provides automated monitoring, replication,
+failover and configuration of multiple redis servers in a leader-follower setup. It is more
+complex than running a single redis server and requires multiple disperate instances of redis
+running distributed across nodes.
+
+For more details on redis-sentinel, check out the [documentation](https://redis.io/topics/sentinel)
+
+As redis-sentinel is a more complex set up of redis, it requires more configuration than standard redis.
+
+Required configuration:
+
+- `Endpoints` is a list of redis-sentinel endpoints to connect to, typically 3, but more can be used
+- `MasterName` is the named master instance, as configured in the `redis-sentinel` [configuration](https://redis.io/topics/sentinel#configuring-sentinel)
+
+Optionally, like `redis`, you can also specify a password to connect to the `redis-sentinel` endpoints with
+
+    SingleFlightType = "redis-sentinel"
+
+    [SingleFlight]
+      [SingleFlight.RedisSentinel]
+          # Endpoints is the redis sentinel endpoints to discover a redis
+          # master for a SingleFlight lock.
+          # Env override: ATHENS_REDIS_SENTINEL_ENDPOINTS
+          Endpoints = ["127.0.0.1:26379"]
+          # MasterName is the redis sentinel master name to use to discover
+          # the master for a SingleFlight lock
+          MasterName = "redis-1"
+          # SentinelPassword is an optional password for authenticating with
+          # redis sentinel
+          SentinelPassword = "sekret"

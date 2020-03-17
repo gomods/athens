@@ -4,7 +4,7 @@ name: default
 
 steps:
 - name: download-dependencies
-  image: golang:1.13
+  image: golang:1.14
   commands:
     # wait for services to be ready.
     - cd scripts/liveness_probe
@@ -20,7 +20,7 @@ steps:
     path: /go
 
 - name: build
-  image: golang:1.13
+  image: golang:1.14
   commands:
 
   # build
@@ -46,6 +46,11 @@ steps:
     ATHENS_MONGO_STORAGE_URL: mongodb://mongo:27017
     ATHENS_MINIO_ENDPOINT: minio:9000
     REDIS_TEST_ENDPOINT: redis:6379
+    REDIS_SENTINEL_TEST_ENDPOINT: redis-sentinel:26379
+    REDIS_SENTINEL_TEST_MASTER_NAME: redis-1
+    REDIS_SENTINEL_TEST_PASSWORD: sekret
+    PROTECTED_REDIS_TEST_ENDPOINT: protectedredis:6380
+    ATHENS_PROTECTED_REDIS_PASSWORD: AthensPass1
     GCS_SERVICE_ACCOUNT:
       from_secret: GCS_SERVICE_ACCOUNT
     GCS_PROJECT_ID: 
@@ -154,6 +159,21 @@ services:
   image: redis
   ports:
     - 6379
+- name: redis-sentinel
+  image: bitnami/redis-sentinel
+  environment:
+    REDIS_MASTER_HOST: redis
+    REDIS_MASTER_SET: redis-1
+    REDIS_SENTINEL_PASSWORD: sekret
+    REDIS_SENTINEL_QUORUM: "1"
+  ports:
+    - 26379
+- name: protectedredis
+  image: redis
+  ports:
+    - 6380
+  commands:
+    - "redis-server ./test/redis.conf"
 - name: athens-proxy
   image: gomods/athens:canary
   pull: always

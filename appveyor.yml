@@ -8,7 +8,8 @@ environment:
   GOPROXY: https://proxy.golang.org
   SKIP_UNTIL_113: true
 
-stack: go 1.13
+stack: go 1.14
 
 test_script:
   - go test ./...
+
