@@ -14,7 +14,7 @@ import (
 
 // WithRedisLock returns a distributed singleflight
 // using an redis cluster. If it cannot connect, it will return an error.
-func WithRedisLock(endpoint string, password string, checker storage.Checker) (Wrapper, error) {
+func WithRedisLock(endpoint string, password string, getter storage.Getter) (Wrapper, error) {
 	const op errors.Op = "stash.WithRedisLock"
 	client := redis.NewClient(&redis.Options{
 		Network:  "tcp",
@@ -27,14 +27,14 @@ func WithRedisLock(endpoint string, password string, checker storage.Checker) (W
 	}
 
 	return func(s Stasher) Stasher {
-		return &redisLock{client, s, checker}
+		return &redisLock{client, s, getter}
 	}, nil
 }
 
 type redisLock struct {
 	client  *redis.Client
 	stasher Stasher
-	checker storage.Checker
+	getter  storage.Getter
 }
 
 func (s *redisLock) Stash(ctx context.Context, mod, ver string) (newVer string, err error) {
@@ -57,12 +57,12 @@ func (s *redisLock) Stash(ctx context.Context, mod, ver string) (newVer string, 
 			err = errors.E(op, lockErr)
 		}
 	}()
-	ok, err := s.checker.Exists(ctx, mod, ver)
+	_, err = s.getter.Info(ctx, mod, ver)
+	if err == nil {
+		return ver, nil
+	}
 	if err != nil {
 		return ver, errors.E(op, err)
-	}
-	if ok {
-		return ver, nil
 	}
 	newVer, err = s.stasher.Stash(ctx, mod, ver)
 	if err != nil {

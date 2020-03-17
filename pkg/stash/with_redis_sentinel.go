@@ -8,7 +8,7 @@ import (
 
 // WithRedisSentinelLock returns a distributed singleflight
 // with a redis cluster that utilizes sentinel for quorum and failover
-func WithRedisSentinelLock(endpoints []string, master, password string, checker storage.Checker) (Wrapper, error) {
+func WithRedisSentinelLock(endpoints []string, master, password string, getter storage.Getter) (Wrapper, error) {
 	const op errors.Op = "stash.WithRedisSentinelLock"
 	// The redis client constructor does not return an error when no endpoints
 	// are provided, so we check for ourselves.
@@ -25,6 +25,6 @@ func WithRedisSentinelLock(endpoints []string, master, password string, checker 
 		return nil, errors.E(op, err)
 	}
 	return func(s Stasher) Stasher {
-		return &redisLock{client, s, checker}
+		return &redisLock{client, s, getter}
 	}, nil
 }

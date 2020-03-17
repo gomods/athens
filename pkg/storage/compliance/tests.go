@@ -164,9 +164,9 @@ func testExists(t *testing.T, b storage.Backend) {
 	b.Save(ctx, modname, ver, mock.Mod, bytes.NewReader(zipBts), mock.Info)
 	defer b.Delete(ctx, modname, ver)
 
-	exists, err := b.Exists(ctx, modname, ver)
+	info, err := b.Info(ctx, modname, ver)
 	require.NoError(t, err)
-	require.Equal(t, true, exists)
+	require.NotNil(t, info)
 }
 
 func testShouldNotExist(t *testing.T, b storage.Backend) {
@@ -180,9 +180,9 @@ func testShouldNotExist(t *testing.T, b storage.Backend) {
 	defer b.Delete(ctx, mod, ver)
 
 	prefixVer := "v1.2.3-pre"
-	exists, err := b.Exists(ctx, mod, prefixVer)
-	require.NoError(t, err)
-	if exists {
+	info, err := b.Info(ctx, mod, prefixVer)
+	require.Equal(t, errors.KindNotFound, errors.Kind(err))
+	if info != nil {
 		t.Fatal("a non existing version that has the same prefix of an existing version should not exist")
 	}
 }
@@ -202,9 +202,9 @@ func testDelete(t *testing.T, b storage.Backend) {
 	err = b.Delete(ctx, modname, version)
 	require.NoError(t, err)
 
-	exists, err := b.Exists(ctx, modname, version)
-	require.NoError(t, err)
-	require.Equal(t, false, exists)
+	info, err := b.Info(ctx, modname, version)
+	require.Equal(t, errors.KindNotFound, errors.Kind(err))
+	require.Nil(t, info)
 }
 
 func testCatalog(t *testing.T, b storage.Backend) {

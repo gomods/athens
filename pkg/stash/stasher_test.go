@@ -7,6 +7,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/storage"
 )
 
@@ -90,9 +91,12 @@ func (ms *mockStorage) Save(ctx context.Context, module, version string, mod []b
 	return nil
 }
 
-func (ms *mockStorage) Exists(ctx context.Context, mod, ver string) (bool, error) {
+func (ms *mockStorage) Info(ctx context.Context, mod, ver string) ([]byte, error) {
 	ms.existsCalled = true
-	return ms.existsResponse, nil
+	if ms.existsResponse {
+		return []byte{'e', 'x', 'i', 's', 't', 's'}, nil
+	}
+	return nil, errors.E("mockstorage.info", "not found", errors.KindNotFound)
 }
 
 type mockFetcher struct {

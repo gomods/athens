@@ -16,7 +16,7 @@ import (
 // WithEtcd returns a distributed singleflight
 // using an etcd cluster. If it cannot connect,
 // to any of the endpoints, it will return an error.
-func WithEtcd(endpoints []string, checker storage.Checker) (Wrapper, error) {
+func WithEtcd(endpoints []string, getter storage.Getter) (Wrapper, error) {
 	const op errors.Op = "stash.WithEtcd"
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
@@ -39,14 +39,14 @@ func WithEtcd(endpoints []string, checker storage.Checker) (Wrapper, error) {
 		return nil, errors.E(op, err)
 	}
 	return func(s Stasher) Stasher {
-		return &etcd{c, s, checker}
+		return &etcd{c, s, getter}
 	}, nil
 }
 
 type etcd struct {
 	client  *clientv3.Client
 	stasher Stasher
-	checker storage.Checker
+	getter  storage.Getter
 }
 
 func (s *etcd) Stash(ctx context.Context, mod, ver string) (newVer string, err error) {
@@ -70,12 +70,12 @@ func (s *etcd) Stash(ctx context.Context, mod, ver string) (newVer string, err e
 			err = errors.E(op, lockErr)
 		}
 	}()
-	ok, err := s.checker.Exists(ctx, mod, ver)
-	if err != nil {
-		return ver, errors.E(op, err)
-	}
-	if ok {
+	_, err = s.getter.Info(ctx, mod, ver)
+	if err == nil {
 		return ver, nil
+	}
+	if !errors.Is(err, errors.KindNotFound) {
+		return ver, errors.E(op, err)
 	}
 	newVer, err = s.stasher.Stash(ctx, mod, ver)
 	if err != nil {

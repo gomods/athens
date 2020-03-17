@@ -18,7 +18,7 @@ import (
 
 // WithAzureBlobLock returns a distributed singleflight
 // using a Azure Blob Storage backend. See the config.toml documentation for details.
-func WithAzureBlobLock(conf *config.AzureBlobConfig, timeout time.Duration, checker storage.Checker) (Wrapper, error) {
+func WithAzureBlobLock(conf *config.AzureBlobConfig, timeout time.Duration, getter storage.Getter) (Wrapper, error) {
 	const op errors.Op = "stash.WithAzureBlobLock"
 
 	accountURL, err := url.Parse(fmt.Sprintf("https://%s.blob.core.windows.net", conf.AccountName))
@@ -35,14 +35,14 @@ func WithAzureBlobLock(conf *config.AzureBlobConfig, timeout time.Duration, chec
 	containerURL := serviceURL.NewContainerURL(conf.ContainerName)
 
 	return func(s Stasher) Stasher {
-		return &azblobLock{containerURL, s, checker}
+		return &azblobLock{containerURL, s, getter}
 	}, nil
 }
 
 type azblobLock struct {
 	containerURL azblob.ContainerURL
 	stasher      Stasher
-	checker      storage.Checker
+	getter       storage.Getter
 }
 
 type stashRes struct {
@@ -72,12 +72,12 @@ func (s *azblobLock) Stash(ctx context.Context, mod, ver string) (newVer string,
 			err = errors.E(op, relErr)
 		}
 	}()
-	ok, err := s.checker.Exists(ctx, mod, ver)
-	if err != nil {
-		return ver, errors.E(op, err)
-	}
-	if ok {
+	_, err = s.getter.Info(ctx, mod, ver)
+	if err == nil {
 		return ver, nil
+	}
+	if !errors.Is(err, errors.KindNotFound) {
+		return ver, errors.E(op, err)
 	}
 	sChan := make(chan stashRes)
 	go func() {

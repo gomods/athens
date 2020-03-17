@@ -118,7 +118,7 @@ func addProxyRoutes(
 	return nil
 }
 
-func getSingleFlight(c *config.Config, checker storage.Checker) (stash.Wrapper, error) {
+func getSingleFlight(c *config.Config, getter storage.Getter) (stash.Wrapper, error) {
 	switch c.SingleFlightType {
 	case "", "memory":
 		return stash.WithSingleflight, nil
@@ -127,12 +127,12 @@ func getSingleFlight(c *config.Config, checker storage.Checker) (stash.Wrapper, 
 			return nil, fmt.Errorf("Etcd config must be present")
 		}
 		endpoints := strings.Split(c.SingleFlight.Etcd.Endpoints, ",")
-		return stash.WithEtcd(endpoints, checker)
+		return stash.WithEtcd(endpoints, getter)
 	case "redis":
 		if c.SingleFlight == nil || c.SingleFlight.Redis == nil {
 			return nil, fmt.Errorf("Redis config must be present")
 		}
-		return stash.WithRedisLock(c.SingleFlight.Redis.Endpoint, c.SingleFlight.Redis.Password, checker)
+		return stash.WithRedisLock(c.SingleFlight.Redis.Endpoint, c.SingleFlight.Redis.Password, getter)
 	case "redis-sentinel":
 		if c.SingleFlight == nil || c.SingleFlight.RedisSentinel == nil {
 			return nil, fmt.Errorf("Redis config must be present")
@@ -141,7 +141,7 @@ func getSingleFlight(c *config.Config, checker storage.Checker) (stash.Wrapper, 
 			c.SingleFlight.RedisSentinel.Endpoints,
 			c.SingleFlight.RedisSentinel.MasterName,
 			c.SingleFlight.RedisSentinel.SentinelPassword,
-			checker,
+			getter,
 		)
 	case "gcp":
 		if c.StorageType != "gcp" {
@@ -152,7 +152,7 @@ func getSingleFlight(c *config.Config, checker storage.Checker) (stash.Wrapper, 
 		if c.StorageType != "azureblob" {
 			return nil, fmt.Errorf("azureblob SingleFlight only works with a azureblob storage type and not: %v", c.StorageType)
 		}
-		return stash.WithAzureBlobLock(c.Storage.AzureBlob, c.TimeoutDuration(), checker)
+		return stash.WithAzureBlobLock(c.Storage.AzureBlob, c.TimeoutDuration(), getter)
 	default:
 		return nil, fmt.Errorf("unrecognized single flight type: %v", c.SingleFlightType)
 	}

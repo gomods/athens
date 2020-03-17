@@ -58,12 +58,12 @@ func (s *stasher) Stash(ctx context.Context, mod, ver string) (string, error) {
 	}
 	defer v.Zip.Close()
 	if v.Semver != ver {
-		exists, err := s.storage.Exists(ctx, mod, v.Semver)
-		if err != nil {
-			return "", errors.E(op, err)
-		}
-		if exists {
+		_, err = s.storage.Info(ctx, mod, v.Semver)
+		if err == nil {
 			return v.Semver, nil
+		}
+		if !errors.Is(err, errors.KindNotFound) {
+			return "", errors.E(op, err)
 		}
 	}
 	err = s.storage.Save(ctx, mod, v.Semver, v.Mod, v.Zip, v.Info)
