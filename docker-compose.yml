@@ -81,6 +81,15 @@ services:
     image: redis
     ports:
       - 6379:6379
+  redis-sentinel:
+    image: bitnami/redis-sentinel
+    environment:
+      - REDIS_MASTER_HOST=redis
+      - REDIS_MASTER_SET=redis-1
+      - REDIS_SENTINEL_PASSWORD=sekret
+      - REDIS_SENTINEL_QUORUM=1
+    ports:
+      - 26379:26379
   protectedredis:
     image: redis
     ports:

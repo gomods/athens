@@ -14,11 +14,13 @@ require (
 	github.com/DataDog/opencensus-go-exporter-datadog v0.0.0-20180917103902-e6c7f767dc57
 	github.com/aws/aws-sdk-go v1.15.24
 	github.com/bsm/redis-lock v8.0.0+incompatible
+	github.com/bsm/redislock v0.4.2
 	github.com/codegangsta/negroni v1.0.0 // indirect
 	github.com/fatih/color v1.7.0
 	github.com/go-playground/locales v0.12.1 // indirect
 	github.com/go-playground/universal-translator v0.16.0 // indirect
 	github.com/go-redis/redis v6.15.2+incompatible
+	github.com/go-redis/redis/v7 v7.2.0
 	github.com/gobuffalo/envy v1.6.7
 	github.com/gobuffalo/httptest v1.0.4
 	github.com/golang/snappy v0.0.1 // indirect
