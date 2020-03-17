@@ -338,7 +338,7 @@ It assumes that you already have the following:
 
 ## Running multiple Athens pointed at the same storage
 
-Athens has the abilit to run concurrently pointed at the same storage medium, using
+Athens has the ability to run concurrently pointed at the same storage medium, using
 a distributed locking mechanism called "single flight".
 
 By default, Athens is configured to use the `memory` single flight, which
@@ -383,7 +383,7 @@ You can also optionally specify a password to connect to the redis server with
 
   [SingleFlight]
       [SingleFlight.Redis]
-          # Endpoint is the redis endpoint for the single flgiht mechanism
+          # Endpoint is the redis endpoint for the single flight mechanism
           # Env override: ATHENS_REDIS_ENDPOINT
           Endpoint = "127.0.0.1:6379"
 
@@ -397,7 +397,7 @@ You can also optionally specify a password to connect to the redis server with
 everyone.
 
 redis sentinel is a high-availability set up for redis, it provides automated monitoring, replication,
-failover and configuration of multiple redis servers in a master-follower setup. It is more
+failover and configuration of multiple redis servers in a leader-follower setup. It is more
 complex than running a single redis server and requires multiple disperate instances of redis
 running distributed across nodes.
 
