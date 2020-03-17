@@ -347,11 +347,12 @@ the process has access to it's own memory. However, when running multiple Athens
 pointed at the same storage, a distributed locking mechansism is required.
 
 Athens supports several distributed locking mechanisms:
-  - `etcd`
-  - `redis`
-  - `redis-sentinel`
-  - `gcp` (available when using the `gcp` storage type)
-  - `azureblob` (available when using the `azureblob` storage type)
+
+- `etcd`
+- `redis`
+- `redis-sentinel`
+- `gcp` (available when using the `gcp` storage type)
+- `azureblob` (available when using the `azureblob` storage type)
 
 Setting the `SingleFlightType` (or `ATHENS_SINGLE_FLIGHT TYPE` in the environment) configuration
 value will enable usage of one of the above mechanisms. The `azureblob` and `gcp` types require
@@ -362,12 +363,12 @@ no extra configuration.
 Using the `etcd` mechanism is very simple, just a comma separated list of etcd endpoints.
 The recommend configuration is 3 endpoints, however, more can be used.
   
-  SingleFlightType = "etcd"
+    SingleFlightType = "etcd"
 
-  [SingleFlight]
-      [SingleFlight.Etcd]
-          # Env override: ATHENS_ETCD_ENDPOINTS
-          Endpoints = "localhost:2379,localhost:22379,localhost:32379"
+    [SingleFlight]
+        [SingleFlight.Etcd]
+            # Env override: ATHENS_ETCD_ENDPOINTS
+            Endpoints = "localhost:2379,localhost:22379,localhost:32379"
 
 ### Using redis as the single flight mechanism
 
@@ -379,17 +380,17 @@ connecting via redis sentinels.
 Using a direct connection to redis is simple, and only requires a single `redis-server`.
 You can also optionally specify a password to connect to the redis server with
 
-  SingleFlightType = "redis"
+    SingleFlightType = "redis"
 
-  [SingleFlight]
-      [SingleFlight.Redis]
-          # Endpoint is the redis endpoint for the single flight mechanism
-          # Env override: ATHENS_REDIS_ENDPOINT
-          Endpoint = "127.0.0.1:6379"
+    [SingleFlight]
+        [SingleFlight.Redis]
+            # Endpoint is the redis endpoint for the single flight mechanism
+            # Env override: ATHENS_REDIS_ENDPOINT
+            Endpoint = "127.0.0.1:6379"
 
-          # Password is the password for the redis instance
-          # Env override: ATHENS_REDIS_PASSWORD
-          Password = ""
+            # Password is the password for the redis instance
+            # Env override: ATHENS_REDIS_PASSWORD
+            Password = ""
 
 #### Connecting to redis via redis sentinel
 
@@ -412,17 +413,17 @@ Required configuration:
 
 Optionally, like `redis`, you can also specify a password to connect to the `redis-sentinel` endpoints with
 
-  SingleFlightType = "redis-sentinel"
+    SingleFlightType = "redis-sentinel"
 
-  [SingleFlight]
-    [SingleFlight.RedisSentinel]
-        # Endpoints is the redis sentinel endpoints to discover a redis 
-        # master for a SingleFlight lock.
-        # Env override: ATHENS_REDIS_SENTINEL_ENDPOINTS
-        Endpoints = ["127.0.0.1:26379"]
-        # MasterName is the redis sentinel master name to use to discover
-        # the master for a SingleFlight lock
-        MasterName = "redis-1"
-        # SentinelPassword is an optional password for authenticating with
-        # redis sentinel
-        SentinelPassword = "sekret"
+    [SingleFlight]
+      [SingleFlight.RedisSentinel]
+          # Endpoints is the redis sentinel endpoints to discover a redis
+          # master for a SingleFlight lock.
+          # Env override: ATHENS_REDIS_SENTINEL_ENDPOINTS
+          Endpoints = ["127.0.0.1:26379"]
+          # MasterName is the redis sentinel master name to use to discover
+          # the master for a SingleFlight lock
+          MasterName = "redis-1"
+          # SentinelPassword is an optional password for authenticating with
+          # redis sentinel
+          SentinelPassword = "sekret"
