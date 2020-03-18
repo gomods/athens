@@ -14,11 +14,11 @@ type Checker interface {
 }
 
 // WithChecker wraps the backend with a Checker implementaiton
-func WithChecker(b Backend) Checker {
-	if checker, ok := b.(Checker); ok {
+func WithChecker(strg Backend) Checker {
+	if checker, ok := strg.(Checker); ok {
 		return checker
 	}
-	return &checker{}
+	return &checker{strg}
 }
 
 type checker struct {
