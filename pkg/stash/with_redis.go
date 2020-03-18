@@ -61,7 +61,7 @@ func (s *redisLock) Stash(ctx context.Context, mod, ver string) (newVer string, 
 	if err == nil {
 		return ver, nil
 	}
-	if errors.Is(err, errors.KindNotFound) {
+	if !errors.Is(err, errors.KindNotFound) {
 		return ver, errors.E(op, err)
 	}
 	newVer, err = s.stasher.Stash(ctx, mod, ver)
