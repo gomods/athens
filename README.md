@@ -86,7 +86,7 @@ The Athens project would not be possible without the amazing projects it builds 
 
 We all strive to write nice and readable code which can be understood by every person of the team. To achieve that we follow principles described in Brian's talk `Code like the Go team`.
 
-- [Printed version](https://learn-golang.com/en/goteam/)
+- [Printed version](https://www.brianketelsen.com/slides/gcru18-best/#1)
 - [Gophercon RU talk](https://www.youtube.com/watch?v=MzTcsI6tn-0)
 
 # Code of Conduct
