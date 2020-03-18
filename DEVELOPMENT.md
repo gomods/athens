@@ -248,17 +248,19 @@ Take a look at our [releases page](https://github.com/gomods/athens/releases). T
 
 ## Code freeze
 
-The first step to a release is a code freeze. This is a period of time during which we don't merge anything to the `master` branch. The code in `master` is essentially a release candidate (we don't cut a new branch for RC's at the moment) to test. We'll push bugfixes to `master` only if needed.
+The first step to a release is a code freeze. This is 1-2 weeks (depending on the features and bugfixes we intend to release) during which we don't merge anything but critical bugfixes to the `master` branch. The code in `master` is essentially a release candidate (we don't cut a new branch for RC's at the moment) to test.
 
 ## Release branch
 
-Right before we un-freeze the `master` branch, we will cut a new branch called `release-v1.X.Y`. Make sure the branch name starts with `release-v`, followed by the [semver](https://semver.org) release number.
+Right before we un-freeze the `master` branch, we will cut a new branch called `release-v0.x.y`. Make sure the branch name starts with `release-v`, followed by the [semver](https://semver.org) release number.
+
+>You need to have permissions to create a new branch in origin, whether through the GitHub site or running `push origin release-v0.x.x`
 
 ### Note about the release number
 
-We follow the [semver](https://semver.org) convention for our release numbers. At the moment, we're not at `v1`, so release versions are `v0.x.y`. `x` is the `MINOR` number, and `y` is the `MAJOR` number. You'll need to decide which one to update.
+We follow the [semver](https://semver.org) convention for our release numbers. At the moment, we're not at `v1`, so release versions are `v0.x.y`. `x` is the `MINOR` number, and `y` is the `PATCH` number. You'll need to decide which one to update.
 
-If there are significant new features in this release, choose to update the minor version. Otherwise, choose to update the patch version. Reminder: semver convention looks like this: `v1.$MINOR.$PATCH`.
+If there are significant new features in this release, choose to update the minor version. Otherwise, choose to update the patch version. Reminder: semver convention looks like this: `v0.MINOR.PATCH`.
 
 ## Creating the new release in GitHub
 
