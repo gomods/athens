@@ -28,7 +28,7 @@ type Wrapper func(Stasher) Stasher
 // a module from a download.Protocol and
 // stashes it into a backend.Storage.
 func New(f module.Fetcher, s storage.Backend, wrappers ...Wrapper) Stasher {
-	var st Stasher = &stasher{f, s}
+	var st Stasher = &stasher{f, s, storage.WithChecker(s)}
 	for _, w := range wrappers {
 		st = w(st)
 	}
@@ -39,6 +39,7 @@ func New(f module.Fetcher, s storage.Backend, wrappers ...Wrapper) Stasher {
 type stasher struct {
 	fetcher module.Fetcher
 	storage storage.Backend
+	checker storage.Checker
 }
 
 func (s *stasher) Stash(ctx context.Context, mod, ver string) (string, error) {
@@ -58,7 +59,7 @@ func (s *stasher) Stash(ctx context.Context, mod, ver string) (string, error) {
 	}
 	defer v.Zip.Close()
 	if v.Semver != ver {
-		exists, err := s.storage.Exists(ctx, mod, v.Semver)
+		exists, err := s.checker.Exists(ctx, mod, v.Semver)
 		if err != nil {
 			return "", errors.E(op, err)
 		}
