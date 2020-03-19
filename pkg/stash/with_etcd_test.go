@@ -28,7 +28,7 @@ func TestEtcdSingleFlight(t *testing.T) {
 	}
 	ms := &mockEtcdStasher{strg: strg}
 	endpoints := strings.Split(endpointsStr, ",")
-	wrapper, err := WithEtcd(endpoints, strg)
+	wrapper, err := WithEtcd(endpoints, storage.WithChecker(strg))
 	if err != nil {
 		t.Fatal(err)
 	}
