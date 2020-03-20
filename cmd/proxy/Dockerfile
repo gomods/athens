@@ -17,7 +17,7 @@ ARG VERSION="unset"
 RUN DATE="$(date -u +%Y-%m-%d-%H:%M:%S-%Z)" && GO111MODULE=on CGO_ENABLED=0 GOPROXY="https://proxy.golang.org" go build -ldflags "-X github.com/gomods/athens/pkg/build.version=$VERSION -X github.com/gomods/athens/pkg/build.buildDate=$DATE" -o /bin/athens-proxy ./cmd/proxy
 
 ARG ALPINE_VERSION=3.9.5
-FROM alpine:3.9.5
+FROM alpine:${ALPINE_VERSION}
 
 ENV GO111MODULE=on
 
