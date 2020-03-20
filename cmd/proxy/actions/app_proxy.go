@@ -44,7 +44,7 @@ func addProxyRoutes(
 		r.HandleFunc(supportPath, func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(200)
 		})
-		sumHandler := sumdbPoxy(sumdbURL, c.NoSumPatterns)
+		sumHandler := sumdbProxy(sumdbURL, c.NoSumPatterns)
 		pathPrefix := "/sumdb/" + sumdbURL.Host
 		r.PathPrefix(pathPrefix + "/").Handler(
 			http.StripPrefix(pathPrefix, sumHandler),
@@ -91,8 +91,8 @@ func addProxyRoutes(
 	}
 
 	lister := module.NewVCSLister(c.GoBinary, c.GoBinaryEnvVars, fs)
-
-	withSingleFlight, err := getSingleFlight(c, s)
+	checker := storage.WithChecker(s)
+	withSingleFlight, err := getSingleFlight(c, checker)
 	if err != nil {
 		return err
 	}
