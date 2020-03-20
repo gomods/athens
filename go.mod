@@ -22,11 +22,9 @@ require (
 	github.com/go-redis/redis/v7 v7.2.0
 	github.com/gobuffalo/envy v1.6.7
 	github.com/gobuffalo/httptest v1.0.4
-	github.com/golang/mock v1.4.0 // indirect
 	github.com/golang/protobuf v1.3.3 // indirect
 	github.com/golang/snappy v0.0.1 // indirect
 	github.com/google/go-cmp v0.4.0
-	github.com/google/pprof v0.0.0-20200212024743-f11f1df84d12 // indirect
 	github.com/google/uuid v1.1.1
 	github.com/gorilla/mux v1.6.2
 	github.com/hashicorp/go-multierror v1.0.0
