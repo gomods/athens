@@ -5,7 +5,7 @@
 # You can override the Go version used to build the image.
 # See project Makefile if using make.
 # See docker --build-arg if building directly.
-ARG GOLANG_VERSION=1.13
+ARG GOLANG_VERSION=1.14
 FROM golang:${GOLANG_VERSION}-alpine AS builder
 
 WORKDIR $GOPATH/src/github.com/gomods/athens
@@ -23,6 +23,8 @@ ENV GO111MODULE=on
 COPY --from=builder /bin/athens-proxy /bin/athens-proxy
 COPY --from=builder /go/src/github.com/gomods/athens/config.dev.toml /config/config.toml
 COPY --from=builder /usr/local/go/bin/go /bin/go
+
+RUN chmod 700 /config/config.toml
 
 # Add tini, see https://github.com/gomods/athens/issues/1155 for details.
 RUN apk add --update bzr git git-lfs mercurial openssh-client subversion procps fossil tini && \

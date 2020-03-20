@@ -30,7 +30,7 @@ func TestWithAzureBlob(t *testing.T) {
 		t.Fatal(err)
 	}
 	ms := &mockAzureBlobStasher{strg: strg}
-	wpr, err := WithAzureBlobLock(cfg, time.Second*10, strg)
+	wpr, err := WithAzureBlobLock(cfg, time.Second*10, storage.WithChecker(strg))
 	if err != nil {
 		t.Fatal(err)
 	}

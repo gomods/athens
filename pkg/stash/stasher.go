@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/gomods/athens/pkg/errors"
+	"github.com/gomods/athens/pkg/log"
 	"github.com/gomods/athens/pkg/module"
 	"github.com/gomods/athens/pkg/observ"
 	"github.com/gomods/athens/pkg/storage"
@@ -27,7 +28,7 @@ type Wrapper func(Stasher) Stasher
 // a module from a download.Protocol and
 // stashes it into a backend.Storage.
 func New(f module.Fetcher, s storage.Backend, wrappers ...Wrapper) Stasher {
-	var st Stasher = &stasher{f, s}
+	var st Stasher = &stasher{f, s, storage.WithChecker(s)}
 	for _, w := range wrappers {
 		st = w(st)
 	}
@@ -38,12 +39,14 @@ func New(f module.Fetcher, s storage.Backend, wrappers ...Wrapper) Stasher {
 type stasher struct {
 	fetcher module.Fetcher
 	storage storage.Backend
+	checker storage.Checker
 }
 
 func (s *stasher) Stash(ctx context.Context, mod, ver string) (string, error) {
 	const op errors.Op = "stasher.Stash"
 	_, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
+	log.EntryFromContext(ctx).Debugf("saving %s@%s to storage...", mod, ver)
 
 	// create a new context that ditches whatever deadline the caller passed
 	// but keep the tracing info so that we can properly trace the whole thing.
@@ -56,7 +59,7 @@ func (s *stasher) Stash(ctx context.Context, mod, ver string) (string, error) {
 	}
 	defer v.Zip.Close()
 	if v.Semver != ver {
-		exists, err := s.storage.Exists(ctx, mod, v.Semver)
+		exists, err := s.checker.Exists(ctx, mod, v.Semver)
 		if err != nil {
 			return "", errors.E(op, err)
 		}

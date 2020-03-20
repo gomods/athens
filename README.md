@@ -21,9 +21,11 @@ See our documentation site [https://docs.gomods.io](https://docs.gomods.io) for 
 
 # Project Status
 
-Project Athens is in beta. It's being tested and used on teams and has an experimental deployment for public use.
+Development teams at several companies are using Athens in their everyday development workflows.
 
-We encourage you to [try it out](https://docs.gomods.io/install/), let us know what you think, and [contribute](#contributing) when you can!
+This means that they are running their own Athens servers, hooking them up to their own storage backends (see [here](https://docs.gomods.io/configuration/storage/) for the list of storage backends that Athens supports), and configuring their local Go development environments to use that Athens server.
+
+We encourage you to [try it out](https://docs.gomods.io/install/), consider using it in your development workflow, and letting us know if you are using it by adding a comment to [this GitHub issue](https://github.com/gomods/athens/issues/1323).
 
 # More Details Please!
 
@@ -47,24 +49,28 @@ Speaking of contributing, read on!
 
 # Contributing
 
-This project has plenty of interesting and challenging work to do and a wonderful community.
+If you use Athens for your development workflow, we hope that you'll consider contributing back to the project. Athens is widely used and has plenty of interesting work to do, from technical challenges to technical documentation to release management. We have a wonderful community that we would love you to be a part of. [Absolutely everyone is welcome](https://arschles.com/blog/absolutely-everybody-is-welcome/).
 
-If you find a bug or want to fix a bug, we :heart: PRs and issues! If you see an issue
-in the [queue](https://github.com/gomods/athens/issues) that you'd like to work on, please just post a comment saying that you want to work on it. Something like "I want to work on this" is fine.
+The quickest way to get involved is by [filing issues](https://github.com/gomods/athens/issues/new/choose) if you find bugs or find that you need Athens to do something it doesn't.
 
-If you decide to contribute (we hope you do :smile:), the process is familiar and easy if you've used Github before. There are no long documents to read or complex setup. If you haven't used Github before, the awesome [@bketelsen](https://github.com/bketelsen) has created a good overview on how to contribute code - see [here](https://www.youtube.com/watch?v=bgSDcTyysRc).
+If you'd like to help us tackle some of the technical / code challenges and you're familiar with the GitHub contribution process, you'll probably be familiar with our process for contributions. You can optionally find or submit an issue, and then submit a pull request (PR) to fix that issue. See [here](https://docs.gomods.io/contributing/) for more of the project-specific details.
+
+>If you're not familiar with the standard GitHub contribution process, which Athens mostly follows, please see [this section of our documentation](https://docs.gomods.io/contributing/new/) to learn how to contribute. You can also take advantage of [@bketelsen](https://github.com/bketelsen)'s [great video](https://www.youtube.com/watch?v=bgSDcTyysRc) on how to contribute code. The information in these documents and videos will help you not only with this project, but can also help you contribute to many other projects on GitHub.
+
+If you decide to to contribute but aren't sure what to work on, we have a well maintained [list of good first issues](https://github.com/gomods/athens/contribute) that you should look at. If you find one that you would like to work on, please post a comment saying "I want to work on this", and then it's all yours to begin working on.
+
+>We do recommend that you choose one of the issues on the above list, but you may also consider a different one from our [entire list](https://github.com/gomods/athens/issues). Many of the issues on that list are more complex and challenging.
 
 Before you do start getting involved or contributing, we want to let you know that we follow a general [philosophy](./PHILOSOPHY.md) in how we work together, and we'd really appreciate you getting familiar with it before you start.
 
 It's not too long and it's ok for you to "skim" it (or even just read the first two sections :smile:), just as long as you understand the spirit of who we are and how we work.
 
-# Getting Involved
+# Getting Involved Without Contributing Pull Requests or Issues
 
 If you're not ready to contribute code yet, there are plenty of other great ways to get involved:
 
 - Come talk to us in the `#athens` channel in the [Gophers slack](http://gophers.slack.com/). We’re a really friendly group, so come say hi and join us! Ping me (`@arschles` on slack) in the channel and I’ll give you the lowdown
-- Come to our [weekly development meetings](https://docs.google.com/document/d/1xpvgmR1Fq4iy1j975Tb4H_XjeXUQUOAvn0FximUzvIk/edit#)! They are a great way to meet folks, ask questions, find some stuff to work on, or just hang out if you want to. Just like with this project, absolutely everyone is welcome to join and participate in those
-- Get familiar with the system. There's lots to read about. Here are some places to start:
+- Get familiar with the technology. There's lots to read about. Here are some places to start:
     - [Gentle Introduction to the Project](https://medium.com/@arschles/project-athens-c80606497ce1) - the basics of why we started this project
     - [The Download Protocol](https://medium.com/@arschles/project-athens-the-download-protocol-2b346926a818) - the core API that the proxy implements and the `go` CLI uses to download packages
     - [Proxy Design](https://docs.gomods.io/design/proxy/) - what the proxy is and how it works
@@ -80,7 +86,7 @@ The Athens project would not be possible without the amazing projects it builds 
 
 We all strive to write nice and readable code which can be understood by every person of the team. To achieve that we follow principles described in Brian's talk `Code like the Go team`.
 
-- [Printed version](https://learn-golang.com/en/goteam/)
+- [Printed version](https://www.brianketelsen.com/slides/gcru18-best/#1)
 - [Gophercon RU talk](https://www.youtube.com/watch?v=MzTcsI6tn-0)
 
 # Code of Conduct

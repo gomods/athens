@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
-	lock "github.com/bsm/redis-lock"
-	"github.com/go-redis/redis"
+	lock "github.com/bsm/redislock"
+	"github.com/go-redis/redis/v7"
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/observ"
@@ -14,11 +14,12 @@ import (
 
 // WithRedisLock returns a distributed singleflight
 // using an redis cluster. If it cannot connect, it will return an error.
-func WithRedisLock(endpoint string, checker storage.Checker) (Wrapper, error) {
+func WithRedisLock(endpoint string, password string, checker storage.Checker) (Wrapper, error) {
 	const op errors.Op = "stash.WithRedisLock"
 	client := redis.NewClient(&redis.Options{
-		Network: "tcp",
-		Addr:    endpoint,
+		Network:  "tcp",
+		Addr:     endpoint,
+		Password: password,
 	})
 	_, err := client.Ping().Result()
 	if err != nil {
@@ -43,17 +44,15 @@ func (s *redisLock) Stash(ctx context.Context, mod, ver string) (newVer string, 
 	mv := config.FmtModVer(mod, ver)
 
 	// Obtain a new lock with default settings
-	lock, err := lock.Obtain(s.client, mv, &lock.Options{
-		LockTimeout: time.Minute * 5,
-		RetryCount:  60 * 5,
-		RetryDelay:  time.Second,
+	lock, err := lock.Obtain(s.client, mv, time.Minute*5, &lock.Options{
+		RetryStrategy: lock.LimitRetry(lock.LinearBackoff(time.Second), 60*5),
 	})
 	if err != nil {
 		return ver, errors.E(op, err)
 	}
 	defer func() {
-		const op errors.Op = "redis.Unlock"
-		lockErr := lock.Unlock()
+		const op errors.Op = "redis.Release"
+		lockErr := lock.Release()
 		if err == nil && lockErr != nil {
 			err = errors.E(op, lockErr)
 		}
