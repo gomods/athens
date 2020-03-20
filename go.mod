@@ -1,9 +1,10 @@
 module github.com/gomods/athens
 
-go 1.12
+go 1.14
 
 require (
-	cloud.google.com/go/storage v1.6.0
+	cloud.google.com/go/bigquery v1.4.0 // indirect
+	cloud.google.com/go/storage v1.5.0
 	contrib.go.opencensus.io/exporter/jaeger v0.1.0
 	contrib.go.opencensus.io/exporter/prometheus v0.1.0
 	contrib.go.opencensus.io/exporter/stackdriver v0.6.0
@@ -21,8 +22,11 @@ require (
 	github.com/go-redis/redis/v7 v7.2.0
 	github.com/gobuffalo/envy v1.6.7
 	github.com/gobuffalo/httptest v1.0.4
+	github.com/golang/mock v1.4.0 // indirect
+	github.com/golang/protobuf v1.3.3 // indirect
 	github.com/golang/snappy v0.0.1 // indirect
 	github.com/google/go-cmp v0.4.0
+	github.com/google/pprof v0.0.0-20200212024743-f11f1df84d12 // indirect
 	github.com/google/uuid v1.1.1
 	github.com/gorilla/mux v1.6.2
 	github.com/hashicorp/go-multierror v1.0.0
@@ -46,11 +50,18 @@ require (
 	go.etcd.io/etcd v0.0.0-20190215181705-784daa04988c
 	go.mongodb.org/mongo-driver v1.0.0
 	go.opencensus.io v0.22.3
+	golang.org/x/exp v0.0.0-20200224162631-6cc2880d07d6 // indirect
+	golang.org/x/lint v0.0.0-20200130185559-910be7a94367 // indirect
 	golang.org/x/mod v0.2.0
+	golang.org/x/net v0.0.0-20200222125558-5a598a2470a0 // indirect
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
 	golang.org/x/sync v0.0.0-20200317015054-43a5402ce75a
-	google.golang.org/api v0.20.0
+	golang.org/x/sys v0.0.0-20200223170610-d5e6a3e2c0ae // indirect
+	golang.org/x/time v0.0.0-20191024005414-555d28b269f0 // indirect
+	golang.org/x/tools v0.0.0-20200224181240-023911ca70b2 // indirect
+	google.golang.org/api v0.15.0
 	gopkg.in/DataDog/dd-trace-go.v1 v1.10.0 // indirect
 	gopkg.in/go-playground/assert.v1 v1.2.1 // indirect
 	gopkg.in/go-playground/validator.v9 v9.20.2
+	honnef.co/go/tools v0.0.1-2020.1.3 // indirect
 )
