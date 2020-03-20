@@ -104,7 +104,7 @@ func benchExists(b *testing.B, s storage.Backend, clear func() error) {
 
 	b.Run("exists", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
-			exists, err := s.Exists(ctx, module, version)
+			exists, err := storage.WithChecker(s).Exists(ctx, module, version)
 			require.NoError(b, err)
 			require.True(b, exists)
 		}
