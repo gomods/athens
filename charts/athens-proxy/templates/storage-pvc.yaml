@@ -11,6 +11,9 @@ metadata:
 spec:
   accessModes:
     - {{ .Values.storage.disk.persistence.accessMode | quote }}
+    {{- range .Values.storage.disk.persistence.accessModes }}
+    - {{ . | quote }}
+    {{- end }}
   resources:
     requests:
       storage: {{ .Values.storage.disk.persistence.size | quote }}
