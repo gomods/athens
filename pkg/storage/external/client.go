@@ -23,7 +23,7 @@ type service struct {
 // NewClient returns an external storage client
 func NewClient(url string, c *http.Client) storage.Backend {
 	if c == nil {
-		c = http.DefaultClient
+		c = &http.Client{}
 	}
 	url = strings.TrimSuffix(url, "/")
 	return &service{url, c}
