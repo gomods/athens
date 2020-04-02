@@ -17,6 +17,10 @@ livenessProbe:
   successThreshold: 1
   timeoutSeconds: 1
 
+## Server Deployment Strategy type
+# strategy:
+#   type: Recreate
+
 service:
   ## Additional annotations to apply to the service
   annotations: {}
@@ -46,6 +50,7 @@ storage:
     storageRoot: "/var/lib/athens"
     persistence:
       ## Note if you use disk.persistence.enabled, replicaCount should be set to 1 unless your access mode is ReadWriteMany
+      ## and strategy type must be Recreate
       enabled: false
       accessMode: ReadWriteOnce
       size: 4Gi
