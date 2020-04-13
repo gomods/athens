@@ -2,7 +2,7 @@ VERSION = "unset"
 DATE=$(shell date -u +%Y-%m-%d-%H:%M:%S-%Z)
 
 ifndef GOLANG_VERSION
-override GOLANG_VERSION = 1.13
+override GOLANG_VERSION = 1.14
 endif
 
 .PHONY: build
@@ -63,7 +63,7 @@ test-unit-docker: ## run unit tests with docker
 
 .PHONY: test-e2e
 test-e2e:
-	./scripts/test_e2e.sh
+	cd e2etests && go test --tags e2etests
 
 .PHONY: test-e2e-docker
 test-e2e-docker:

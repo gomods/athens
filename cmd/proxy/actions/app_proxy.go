@@ -44,7 +44,7 @@ func addProxyRoutes(
 		r.HandleFunc(supportPath, func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(200)
 		})
-		sumHandler := sumdbPoxy(sumdbURL, c.NoSumPatterns)
+		sumHandler := sumdbProxy(sumdbURL, c.NoSumPatterns)
 		pathPrefix := "/sumdb/" + sumdbURL.Host
 		r.PathPrefix(pathPrefix + "/").Handler(
 			http.StripPrefix(pathPrefix, sumHandler),
@@ -91,8 +91,8 @@ func addProxyRoutes(
 	}
 
 	lister := module.NewVCSLister(c.GoBinary, c.GoBinaryEnvVars, fs)
-
-	withSingleFlight, err := getSingleFlight(c, s)
+	checker := storage.WithChecker(s)
+	withSingleFlight, err := getSingleFlight(c, checker)
 	if err != nil {
 		return err
 	}
@@ -132,7 +132,17 @@ func getSingleFlight(c *config.Config, checker storage.Checker) (stash.Wrapper, 
 		if c.SingleFlight == nil || c.SingleFlight.Redis == nil {
 			return nil, fmt.Errorf("Redis config must be present")
 		}
-		return stash.WithRedisLock(c.SingleFlight.Redis.Endpoint, checker)
+		return stash.WithRedisLock(c.SingleFlight.Redis.Endpoint, c.SingleFlight.Redis.Password, checker)
+	case "redis-sentinel":
+		if c.SingleFlight == nil || c.SingleFlight.RedisSentinel == nil {
+			return nil, fmt.Errorf("Redis config must be present")
+		}
+		return stash.WithRedisSentinelLock(
+			c.SingleFlight.RedisSentinel.Endpoints,
+			c.SingleFlight.RedisSentinel.MasterName,
+			c.SingleFlight.RedisSentinel.SentinelPassword,
+			checker,
+		)
 	case "gcp":
 		if c.StorageType != "gcp" {
 			return nil, fmt.Errorf("gcp SingleFlight only works with a gcp storage type and not: %v", c.StorageType)
