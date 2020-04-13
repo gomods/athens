@@ -113,7 +113,7 @@ RobotsFile = "robots.txt"
 Timeout = 300
 
 # StorageType sets the type of storage backend the proxy will use.
-# Possible values are memory, disk, mongo, gcp, minio, s3, azureblob
+# Possible values are memory, disk, mongo, gcp, minio, s3, azureblob, external
 # Defaults to memory
 # Env override: ATHENS_STORAGE_TYPE
 StorageType = "memory"
@@ -263,7 +263,7 @@ DownloadURL = ""
 # and the second request will wait for the first one to finish so that
 # it doesn't override the storage.
 
-# Options are ["memory", "etcd", "redis", "gcp", "azureblob"]
+# Options are ["memory", "etcd", "redis", "redis-sentinel", "gcp", "azureblob"]
 
 # The default option is "memory" which means that only one instance of Athens
 # should be used.
@@ -275,6 +275,10 @@ DownloadURL = ""
 # and therefore it will use its strong-consistency features to ensure
 # that only one module is ever written even when concurrent saves happen
 # at the same time.
+# The "redis" single flight will use a single redis instance as a locking mechanism
+# for updating the underlying storage
+# The "redis-sentinel" single flight works similarly to "redis" but obtains a redis connection
+# via a redis-sentinel
 # Env override: ATHENS_SINGLE_FLIGHT_TYPE
 SingleFlightType = "memory"
 
@@ -290,10 +294,20 @@ SingleFlightType = "memory"
         # TODO(marwan): enable multiple endpoints for redis clusters.
         # Env override: ATHENS_REDIS_ENDPOINT
         Endpoint = "127.0.0.1:6379"
-
         # Password is the password for a redis SingleFlight lock.
         # Env override: ATHENS_REDIS_PASSWORD
         Password = ""
+    [SingleFlight.RedisSentinel]
+        # Endpoints is the redis sentinel endpoints to discover a redis 
+        # master for a SingleFlight lock.
+        # Env override: ATHENS_REDIS_SENTINEL_ENDPOINTS
+        Endpoints = ["127.0.0.1:26379"]
+        # MasterName is the redis sentinel master name to use to discover
+        # the master for a SingleFlight lock
+        MasterName = "redis-1"
+        # SentinelPassword is an optional password for authenticating with
+        # redis sentinel
+        SentinelPassword = "sekret"
 
 [Storage]
     # Only storage backends that are specified in Proxy.StorageType are required here
@@ -453,3 +467,11 @@ SingleFlightType = "memory"
         # Name of container in the blob storage
         # Env override: ATHENS_AZURE_CONTAINER_NAME
         ContainerName = "MY_AZURE_BLOB_CONTAINER_NAME"
+
+   [Storage.External]
+        # URL is the external storage URL that Athens 
+        # will use to interact with the backend storage layer.
+        # See https://docs.gomods.io/configuration/storage for implementation 
+        # details.
+        # Env override: ATHENS_EXTERNAL_STORAGE_URL
+        URL = ""
