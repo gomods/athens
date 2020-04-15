@@ -18,7 +18,7 @@ This document will outline how to use this file - called the download mode file 
 First, once you've created your download mode file, you tell Athens to use it by setting the `DownloadMode` configuration parameter in the `config.toml` file, or setting the `ATHENS_DOWNLOAD_MODE` environment variable. You can set this configuration value to one of two values to tell Athens to use your file:
 
 1. Set its value to `file:$FILE_PATH`, where `$FILE_PATH` is the path to the HCL file
-2. Set its value to `custom$BASE_64` where `$BASE_64` is the base64 encoded HCL file
+2. Set its value to `custom:$BASE_64` where `$BASE_64` is the base64 encoded HCL file
 
 >Instead of one of the above two values, you can set this configuration to `sync`, `async`, `none`, `redirect`, or `async_redirect`. If you do, the download mode will be set globally rather than for specific sub-groups of modules. See below for what each of these values mean.
 
@@ -71,6 +71,8 @@ The second block specifies that any module matching `golang.org/x/*` (such as `g
 If a user has their `GOPROXY` environment variable set with a comma separated list, their `go` command line tool will always try the option next in the list. For example, if a user has their `GOPROXY` environment variable set to `https://athens.azurefd.net,direct`, and then runs `go get golang.org/x/text`, they will still download `golang.org/x/text` to their machine. The module just won't come from Athens.
 
 The last block specifies that any module matching `github.com/pkg/*` (such as `github.com/pkg/errors`) will always redirect the `go` tool to https://gocenter.io. In this case, Athens will never persist the given module to its storage.
+
+_NOTE_: https://pkg.go.dev/path/?tab=doc#Match is used to parse the contents of `download` if you are working with a package that contains `-` then you should escape that character, e.g. `test\\-pkg`
 
 ## Use cases
 
