@@ -72,8 +72,6 @@ If a user has their `GOPROXY` environment variable set with a comma separated li
 
 The last block specifies that any module matching `github.com/pkg/*` (such as `github.com/pkg/errors`) will always redirect the `go` tool to https://gocenter.io. In this case, Athens will never persist the given module to its storage.
 
-_NOTE_: https://pkg.go.dev/path/?tab=doc#Match is used to parse the contents of `download` if you are working with a package that contains `-` then you should escape that character, e.g. `test\\-pkg`
-
 ## Use cases
 
 The download mode file is versatile and allows you to configure Athens in a large variety of different ways. Below are some of the mode common.
