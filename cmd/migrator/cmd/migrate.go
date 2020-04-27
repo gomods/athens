@@ -1,10 +1,14 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
+	"time"
 
+	"github.com/gomods/athens/cmd/proxy/actions"
+	"github.com/gomods/athens/pkg/config"
+	"github.com/gomods/athens/pkg/storage"
 	"github.com/spf13/cobra"
-	"github.com/gomods/athens/pkg/storage/s3"
 )
 
 type migrateCmd struct {
@@ -13,17 +17,61 @@ type migrateCmd struct {
 }
 
 func (m *migrateCmd) run(cmd *cobra.Command, args []string) {
-	switch m.from {
-	case "s3":
-		s3Stg := s3.New(cfg, timeout)
+	cfg, err := config.ParseConfigFile(cfgFile)
+	if err != nil {
+		errLog("Couldn't read config file (%s)", err)
 	}
+	// TODO: make this a flag
+	timeout := 1 * time.Second
+	ctx := context.Background()
+
+	fromStorage, err := actions.GetStorage(
+		*m.from,
+		cfg.Storage,
+		timeout,
+	)
+	if err != nil {
+		errLog(
+			"Error getting 'from' storage %s (%s)",
+			*m.from,
+			err,
+		)
+	}
+	toStorage, err := actions.GetStorage(
+		*m.to,
+		cfg.Storage,
+		timeout,
+	)
+	if err != nil {
+		errLog(
+			"Error getting 'to' storage %s (%s)",
+			*m.to,
+			err,
+		)
+	}
+
+	cataloger, ok := fromStorage.(storage.Cataloger)
+	if !ok {
+		errLog(
+			"'from' storage %s doesn't support cataloging, sorry :(",
+			*m.from,
+		)
+	}
+	if err := transfer(
+		ctx,
+		cataloger,
+		fromStorage,
+		toStorage,
+	); err != nil {
+		errLog("Error transfering (%s)", err)
+	}
+
 	fmt.Println("migrate called")
 }
 
 func init() {
 	cmd := &migrateCmd{}
-	
-	rootCmd.AddCommand(cobra.Command{
+	cobraCmd := &cobra.Command{
 		Use:   "migrate",
 		Short: "A brief description of your command",
 		Long: `A longer description that spans multiple lines and likely contains examples
@@ -32,11 +80,12 @@ func init() {
 	Cobra is a CLI library for Go that empowers applications.
 	This application is a tool to generate the needed files
 	to quickly create a Cobra application.`,
-		Run: cmd.run
-	})
+		Run: cmd.run,
+	}
+	rootCmd.AddCommand(cobraCmd)
 
 	// Here you will define your flags and configuration settings.
-	cmd.from = migrateCmd.PersistentFlags().String(
+	cmd.from = cobraCmd.PersistentFlags().String(
 		"from",
 		"disk",
 		"The Athens storage backend to migrate from",
@@ -44,7 +93,7 @@ func init() {
 
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands, e.g.:
-	cmd.to = migrateCmd.PersistentFlags().String(
+	cmd.to = cobraCmd.PersistentFlags().String(
 		"to",
 		"s3",
 		"The Athens storage backend to migrate to",
