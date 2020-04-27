@@ -71,6 +71,4 @@ func transfer(
 		}
 		token = newToken
 	}
-
-	return nil
 }
