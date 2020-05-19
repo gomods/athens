@@ -290,6 +290,7 @@ $ git cherry-pick <commit from master>
 
 Regardless of which branch you created, you'll need to update the helm chart number. After you've cut the branch, make sure to change the versions in the [`Chart.yaml`](https://github.com/gomods/athens/blob/master/charts/athens-proxy/Chart.yaml) file:
 
+- If this is a new release of Athens, make sure to update the Docker image version [value](https://github.com/twexler/athens/blob/master/charts/athens-proxy/values.yaml#L5)
 - Increment the patch number in the [`version` field](https://github.com/gomods/athens/blob/master/charts/athens-proxy/Chart.yaml#L2)
 - Set the [`appVersion` field](https://github.com/gomods/athens/blob/master/charts/athens-proxy/Chart.yaml#L2) to the semver of the new branch. Do not include the `v` prefix
 
@@ -299,7 +300,7 @@ Go to the [create new release page](https://github.com/gomods/athens/releases/ne
 
 - **Tag version** - This should be the same `v0.x.y` number you put into the release branch. Make sure this tag starts with `v` and that the tag target is the proper release branch.
 - **Release Title** - Make sure the title is prefixed by the release number including the `v`. If you want to write something creative in the rest of the title, go for it!
-- **Describe this release** - Make sure to write what features this release includes, and any notable bugfixes. Also, thank all the folks who contributed to the release. You can find that information in a link that looks like this: `https://github.com/gomods/athens/compare/$PREVIOUS_TAG...$CURRENT_TAG`. Substitute `$PREVIOUS_TAG` for the last semver and `$CURRENT_TAG` to this one.
+- **Describe this release** - Make sure to write what features this release includes, and any notable bugfixes. Also, thank all the folks who contributed to the release. You can find that information in a link that looks like this: `https://github.com/gomods/athens/compare/$PREVIOUS_TAG...release-$CURRENT_TAG`. Substitute `$PREVIOUS_TAG` for the last semver and `$CURRENT_TAG` to the version in the new release branch
 
 When you're done, press the "Publish Release" button. After you do, our [Drone](https://cloud.drone.io) job will do almost everything.
 
