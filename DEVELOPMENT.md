@@ -290,6 +290,7 @@ $ git cherry-pick <commit from master>
 
 Regardless of which branch you created, you'll need to update the helm chart number. After you've cut the branch, make sure to change the versions in the [`Chart.yaml`](https://github.com/gomods/athens/blob/master/charts/athens-proxy/Chart.yaml) file:
 
+- If this is a new release of Athens, make sure to update the Docker image version [value](https://github.com/twexler/athens/blob/master/charts/athens-proxy/values.yaml#L5)
 - Increment the patch number in the [`version` field](https://github.com/gomods/athens/blob/master/charts/athens-proxy/Chart.yaml#L2)
 - Set the [`appVersion` field](https://github.com/gomods/athens/blob/master/charts/athens-proxy/Chart.yaml#L2) to the semver of the new branch. Do not include the `v` prefix
 
