@@ -1,0 +1,25 @@
+before:
+  hooks:
+    - go mod download
+env:
+- CGO_ENABLED=0
+project_name: athens
+builds:
+- id: builds
+  goos:
+    - linux
+    - darwin
+  goarch:
+    - amd64
+  main: main.go
+  binary: athens
+checksum:
+  name_template: 'checksums.txt'
+snapshot:
+  name_template: "{{ .Tag }}-next"
+changelog:
+  sort: asc
+  filters:
+    exclude:
+    - '^docs:'
+    - '^test:'
