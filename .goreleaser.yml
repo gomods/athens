@@ -1,4 +1,4 @@
-\before:
+before:
   hooks:
     - go mod download
 env:
