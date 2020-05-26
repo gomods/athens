@@ -3,6 +3,7 @@
     - go mod download
 env:
 - CGO_ENABLED=0
+- GOPROXY=https://proxy.golang.org
 project_name: athens
 builds:
 - id: builds
