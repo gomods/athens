@@ -24,5 +24,6 @@ jobs:
           version: latest
           args: release --rm-dist
         env:
+          VERSION: unset
           DATE: ${{ steps.date.outputs.date }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
