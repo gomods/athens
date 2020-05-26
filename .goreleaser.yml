@@ -1,4 +1,4 @@
-before:
+\before:
   hooks:
     - go mod download
 env:
@@ -11,8 +11,11 @@ builds:
     - darwin
   goarch:
     - amd64
-  main: main.go
+  main: cmd/proxy/main.go
   binary: athens
+  ldflags:
+    - -X "github.com/gomods/athens/pkg/build.version={{ .Tag }}"
+    - -X "github.com/gomods/athens/pkg/build.buildDate={{ .Env.DATE }}"
 checksum:
   name_template: 'checksums.txt'
 snapshot:

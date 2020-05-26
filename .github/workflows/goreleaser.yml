@@ -15,8 +15,13 @@ jobs:
         uses: actions/setup-go@v2
         with:
           go-version: 1.14
+      - name: capture current date
+        id: date
+        run: echo "::set-output name=date::$(date -u '+%Y-%m-%d-%H:%M:%S-%Z')"
       - name: goreleaser
         uses: goreleaser/goreleaser-action@v2
+        env:
+          DATE: ${{ steps.date.outputs.date }}
         with:
           version: latest
           args: release --rm-dist
