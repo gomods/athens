@@ -20,10 +20,9 @@ jobs:
         run: echo "::set-output name=date::$(date -u '+%Y-%m-%d-%H:%M:%S-%Z')"
       - name: goreleaser
         uses: goreleaser/goreleaser-action@v2
-        env:
-          DATE: ${{ steps.date.outputs.date }}
         with:
           version: latest
           args: release --rm-dist
         env:
+          DATE: ${{ steps.date.outputs.date }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
