@@ -29,9 +29,7 @@ func TestProxyRoutes(t *testing.T) {
 	r := mux.NewRouter()
 	s, err := mem.NewStorage()
 	require.NoError(t, err)
-	lggr, hook := testlog.NewNullLogger()
-	require.NotNil(t, hook)
-	l := &log.Logger{Logger: lggr}
+	l := log.NoOpLogger()
 	c, err := config.Load("")
 	require.NoError(t, err)
 	c.NoSumPatterns = []string{"*"} // catch all patterns with noSumWrapper
