@@ -47,7 +47,7 @@ func addProxyRoutes(
 		sumHandler := sumdbProxy(sumdbURL, c.NoSumPatterns)
 		pathPrefix := "/sumdb/" + sumdbURL.Host
 		r.PathPrefix(pathPrefix + "/").Handler(
-			http.StripPrefix(strings.TrimRight(c.PathPrefix, "/")+pathPrefix, sumHandler),
+			http.StripPrefix(strings.TrimSuffix(c.PathPrefix, "/")+pathPrefix, sumHandler),
 		)
 	}
 
