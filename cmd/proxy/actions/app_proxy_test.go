@@ -13,7 +13,6 @@ import (
 	"github.com/gomods/athens/pkg/log"
 	"github.com/gomods/athens/pkg/storage/mem"
 	"github.com/gorilla/mux"
-	testlog "github.com/sirupsen/logrus/hooks/test"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
