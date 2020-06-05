@@ -38,7 +38,7 @@ func TestProxyRoutes(t *testing.T) {
 	err = addProxyRoutes(subRouter, s, l, c)
 	require.NoError(t, err)
 
-	baseURL := "https://athens.azurefd.net/prefix"
+	baseURL := "https://athens.azurefd.net" + c.PathPrefix
 
 	testCases := []routeTest{
 		{"GET", "/", "", func(t *testing.T, resp *http.Response) {
