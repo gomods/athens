@@ -32,7 +32,7 @@ func TestProxyRoutes(t *testing.T) {
 	l := log.NoOpLogger()
 	c, err := config.Load("")
 	require.NoError(t, err)
-	c.NoSumPatterns = []string{"*"} // catch all patterns with noSumWrapper
+	c.NoSumPatterns = []string{"*"} // catch all patterns with noSumWrapper to ensure the sumdb handler doesn't make a real http request to the sumdb server.
 	c.PathPrefix = "/prefix"
 	subRouter := r.PathPrefix(c.PathPrefix).Subrouter()
 	err = addProxyRoutes(subRouter, s, l, c)
