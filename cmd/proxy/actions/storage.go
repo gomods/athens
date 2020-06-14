@@ -3,6 +3,7 @@ package actions
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"time"
 
 	"github.com/gomods/athens/pkg/config"
@@ -20,7 +21,7 @@ import (
 )
 
 // GetStorage returns storage backend based on env configuration
-func GetStorage(storageType string, storageConfig *config.StorageConfig, timeout time.Duration) (storage.Backend, error) {
+func GetStorage(storageType string, storageConfig *config.StorageConfig, timeout time.Duration, client *http.Client) (storage.Backend, error) {
 	const op errors.Op = "actions.GetStorage"
 	switch storageType {
 	case "memory":
@@ -65,8 +66,7 @@ func GetStorage(storageType string, storageConfig *config.StorageConfig, timeout
 		if storageConfig.External == nil {
 			return nil, errors.E(op, "Invalid External Storage Configuration")
 		}
-		// TODO(marwan-at-work): add client tracing
-		return external.NewClient(storageConfig.External.URL, nil), nil
+		return external.NewClient(storageConfig.External.URL, client), nil
 	default:
 		return nil, fmt.Errorf("storage type %s is unknown", storageType)
 	}
