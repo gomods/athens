@@ -118,7 +118,7 @@ func App(conf *config.Config) (http.Handler, error) {
 
 	// Having the hook set means we want to use it
 	if vHook := conf.ValidatorHook; vHook != "" {
-		r.Use(mw.NewValidationMiddleware(vHook))
+		r.Use(mw.NewValidationMiddleware(client, vHook))
 	}
 
 	store, err := GetStorage(conf.StorageType, conf.Storage, conf.TimeoutDuration(), client)

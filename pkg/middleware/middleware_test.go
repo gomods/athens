@@ -95,7 +95,7 @@ func Test_FilterMiddleware(t *testing.T) {
 func hookFilterApp(hook string) *mux.Router {
 	h := func(w http.ResponseWriter, r *http.Request) {}
 	r := mux.NewRouter()
-	r.Use(NewValidationMiddleware(hook))
+	r.Use(NewValidationMiddleware(http.DefaultClient, hook))
 
 	r.HandleFunc(pathList, h)
 	r.HandleFunc(pathVersionInfo, h)
