@@ -288,11 +288,11 @@ $ git cherry-pick <commit from main>
 
 ### Updating the helm chart
 
-Regardless of which branch you created, you'll need to update the helm chart number. After you've cut the branch, make sure to change the versions in the [`Chart.yaml`](https://github.com/gomods/athens/blob/main/charts/athens-proxy/Chart.yaml) file:
+Regardless of which branch you created, you'll need to update the helm chart number. After you've cut the branch, make sure to change the versions in the [`Chart.yaml`](./charts/athens-proxy/Chart.yaml) file:
 
-- If this is a new release of Athens, make sure to update the Docker image version [value](https://github.com/twexler/athens/blob/main/charts/athens-proxy/values.yaml#L5)
-- Increment the patch number in the [`version` field](https://github.com/gomods/athens/blob/main/charts/athens-proxy/Chart.yaml#L2)
-- Set the [`appVersion` field](https://github.com/gomods/athens/blob/main/charts/athens-proxy/Chart.yaml#L2) to the semver of the new branch. Do not include the `v` prefix
+- If this is a new release of Athens, make sure to update the Docker image version [value](./charts/athens-proxy/values.yaml#L5)
+- Increment the patch number in the [`version` field](./charts/athens-proxy/Chart.yaml#L2)
+- Set the [`appVersion` field](./charts/athens-proxy/Chart.yaml#L2) to the semver of the new branch. Do not include the `v` prefix
 
 ## Creating the new release in GitHub
 
@@ -317,8 +317,8 @@ If you are a core maintainer and don't have access to the `@gomods` account, ask
 
 Finally, you'll need to update the helm version number in the `main` branch. Create a new branch called `update-helm-$CURRENT_TAG` and update the following files:
 
-- [charts/athens-proxy/values.yaml](https://github.com/gomods/athens/blob/main/charts/athens-proxy/values.yaml) - update the `image.tag` field to the latest version number you created, including the `v`. This field should be near the top of the file
-- [charts/athens-proxy/Chart.yaml](https://github.com/gomods/athens/blob/main/charts/athens-proxy/Chart.yaml) - update the `version` field and the `appVersion` field
+- [charts/athens-proxy/values.yaml](./charts/athens-proxy/values.yaml) - update the `image.tag` field to the latest version number you created, including the `v`. This field should be near the top of the file
+- [charts/athens-proxy/Chart.yaml](./charts/athens-proxy/Chart.yaml) - update the `version` field and the `appVersion` field
   - Increment the patch number in the `version` field
   - Change the `appVersion` field to the tag name of the GitHub version you created, including the `v`
 
