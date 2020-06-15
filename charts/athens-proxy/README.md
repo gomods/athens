@@ -50,7 +50,7 @@ Available options:
 
 ### Pass extra configuration environment variables
 
-You can pass any extra environment variables supported in [config.dev.toml](https://github.com/gomods/athens/blob/master/config.dev.toml).
+You can pass any extra environment variables supported in [config.dev.toml](https://github.com/gomods/athens/blob/main/config.dev.toml).
 The example below shows how to set username/password for basic auth:
 
 ```yaml

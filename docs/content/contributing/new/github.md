@@ -72,9 +72,7 @@ pull request. You can discuss the changes requested in the pull request itself,
 or if you need help with something in particular you can reach out to us in the
 `#athens` channel on [Gophers Slack](https://gophers.slack.com).
 
-After all requested changes are resolved a maintainer will give it a final look
-and as long as our continuous integration passed they will merge it with the
-master branch.
+After all requested changes are resolved a maintainer will give it a final look and as long as our continuous integration passed they will merge it with the `main` branch.
 
 #### Project process
 
@@ -101,7 +99,7 @@ straight the pull request.
 ##### Open a pull request
 
 After you have created a branch on your fork, and made the changes. Please make
-sure all tests still pass, see [DEVELOPMENT.md](https://github.com/gomods/athens/blob/master/CONTRIBUTING.md#verify-your-work) for details. Then after you push all changes
+sure all tests still pass, see [DEVELOPMENT.md](https://github.com/gomods/athens/blob/main/CONTRIBUTING.md#verify-your-work) for details. Then after you push all changes
 up to your fork, head over to [Athens](https://github.com/gomods/athens) to open a pull request. Usually,
 right after you have pushed a new branch and you visit the original repository,
 GitHub will prompt you to open a new pull request. Otherwise you can do so from

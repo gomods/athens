@@ -7,8 +7,8 @@
 # to check for any conflicts in versions or digests
 # which on any exit code > 0 would suggest that action should be taken
 # before a pull request can be merged.
-git remote set-branches --add origin master ; git fetch
-$ChangedFiles=$(git diff --name-only origin/master)
+git remote set-branches --add origin main ; git fetch
+$ChangedFiles=$(git diff --name-only origin/main)
 
 # in the case that ChangedFiles contains go.mod or go.sum run go mod verify
 $contains= $ChangedFiles | Select-String -Pattern "go.mod|go.sum"
