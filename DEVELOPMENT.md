@@ -256,7 +256,7 @@ If there are significant new features in this release, choose to update `x` and 
 
 ## Code freeze
 
-The first step to a release is a code freeze. This is 1-2 weeks (depending on the features and bugfixes we intend to release) during which we don't merge anything but critical bugfixes to the `master` branch. The code in `master` is essentially a release candidate (we don't cut a new branch for RC's at the moment) to test.
+The first step to a release is a code freeze. This is 1-2 weeks (depending on the features and bugfixes we intend to release) during which we don't merge anything but critical bugfixes to the `main` branch. The code in `main` is essentially a release candidate (we don't cut a new branch for RC's at the moment) to test.
 
 >If you are doing a patch release, you do not need to do a code freeze.
 
@@ -272,27 +272,27 @@ You'll need to have permissions to create a new branch in origin, whether throug
 
 If you're doing a minor release, you'll be incrementing `x` and setting `y` to 0 in the branch name. For example, if the previous release was `v0.1.2`, the previous release branch will be `release-v0.1.2`. Your new version will be `v0.2.0` and new release branch will be `release-v0.2.0`.
 
-Cut minor release branches from the `master` branch.
+Cut minor release branches from the `main` branch.
 
 ### Patch releases
 
 If you're doing a patch release, you'll be incrementing only the `y` version number. In this case, the new version will be `v0.2.1` and new branch will be `release-v0.2.1`.
 
-Cut patch release branches from the most recent release branch. Since these branches will only fix bugs, you'll need to find the commits from `master` that have the fixes in them and cherry pick them into the new patch release branch. For example:
+Cut patch release branches from the most recent release branch. Since these branches will only fix bugs, you'll need to find the commits from `main` that have the fixes in them and cherry pick them into the new patch release branch. For example:
 
 ```console
 $ git checkout -b release-v0.2.1 upstream/release-v0.2.0
-$ git cherry-pick <commit from master>
+$ git cherry-pick <commit from main>
 ....
 ```
 
 ### Updating the helm chart
 
-Regardless of which branch you created, you'll need to update the helm chart number. After you've cut the branch, make sure to change the versions in the [`Chart.yaml`](https://github.com/gomods/athens/blob/master/charts/athens-proxy/Chart.yaml) file:
+Regardless of which branch you created, you'll need to update the helm chart number. After you've cut the branch, make sure to change the versions in the [`Chart.yaml`](./charts/athens-proxy/Chart.yaml) file:
 
-- If this is a new release of Athens, make sure to update the Docker image version [value](https://github.com/twexler/athens/blob/master/charts/athens-proxy/values.yaml#L5)
-- Increment the patch number in the [`version` field](https://github.com/gomods/athens/blob/master/charts/athens-proxy/Chart.yaml#L2)
-- Set the [`appVersion` field](https://github.com/gomods/athens/blob/master/charts/athens-proxy/Chart.yaml#L2) to the semver of the new branch. Do not include the `v` prefix
+- If this is a new release of Athens, make sure to update the Docker image version [value](./charts/athens-proxy/values.yaml#L5)
+- Increment the patch number in the [`version` field](./charts/athens-proxy/Chart.yaml#L2)
+- Set the [`appVersion` field](./charts/athens-proxy/Chart.yaml#L2) to the semver of the new branch. Do not include the `v` prefix
 
 ## Creating the new release in GitHub
 
@@ -311,17 +311,17 @@ Make sure the Drone CI/CD job finished, and check in Docker Hub to make sure the
 The Drone job will do everything except:
 
 - Tweet out about the new release
-- Update the helm chart in the `master` branch
+- Update the helm chart in the `main` branch
 
 If you are a core maintainer and don't have access to the `@gomods` account, ask one of the maintainers to give you access. [Here](https://twitter.com/gomodsio/status/1240016379962691585) is an example showing the general format of these tweets. Obviously you should use your creativity here though!
 
-Finally, you'll need to update the helm version number in the `master` branch. Create a new branch called `update-helm-$CURRENT_TAG` and update the following files:
+Finally, you'll need to update the helm version number in the `main` branch. Create a new branch called `update-helm-$CURRENT_TAG` and update the following files:
 
-- [charts/athens-proxy/values.yaml](https://github.com/gomods/athens/blob/master/charts/athens-proxy/values.yaml) - update the `image.tag` field to the latest version number you created, including the `v`. This field should be near the top of the file
-- [charts/athens-proxy/Chart.yaml](https://github.com/gomods/athens/blob/master/charts/athens-proxy/Chart.yaml) - update the `version` field and the `appVersion` field
+- [charts/athens-proxy/values.yaml](./charts/athens-proxy/values.yaml) - update the `image.tag` field to the latest version number you created, including the `v`. This field should be near the top of the file
+- [charts/athens-proxy/Chart.yaml](./charts/athens-proxy/Chart.yaml) - update the `version` field and the `appVersion` field
   - Increment the patch number in the `version` field
   - Change the `appVersion` field to the tag name of the GitHub version you created, including the `v`
 
 [Here](https://github.com/gomods/athens/pull/1574) is an example of how to do this.
 
-Finally, create a pull request from your new branch into the `master` branch. It will be reviewed and merged as soon as possible.
+Finally, create a pull request from your new branch into the `main` branch. It will be reviewed and merged as soon as possible.

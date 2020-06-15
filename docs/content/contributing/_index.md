@@ -7,7 +7,7 @@ weight: 4
 
 Welcome, Gopher! We're really glad you're considering contributing to Athens. We'd like to briefly introduce you to our community before you get started.
 
-We have some hard-and-fast rules in our community, like our [Code of Conduct](https://github.com/gomods/athens/blob/master/CODE_OF_CONDUCT.md), but instead of making rules pre-emptively, we try to keep in mind a shared philosophy to help us all make decisions and make new rules when we need to.
+We have some hard-and-fast rules in our community, like our [Code of Conduct](https://github.com/gomods/athens/blob/main/CODE_OF_CONDUCT.md), but instead of making rules pre-emptively, we try to keep in mind a shared philosophy to help us all make decisions and make new rules when we need to.
 
 ## Our Philosophy Document
 

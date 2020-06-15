@@ -20,8 +20,8 @@ request in The Athens Project.
 
 ---
 
-Generally we will still want to try and follow the issue template for [bugs](https://github.com/gomods/athens/blob/master/.github/ISSUE_TEMPLATE/bug_report.md) or
-[features](https://github.com/gomods/athens/blob/master/.github/ISSUE_TEMPLATE/feature_request.md). If you are performing issue triage you may need to add more
+Generally we will still want to try and follow the issue template for [bugs](https://github.com/gomods/athens/blob/main/.github/ISSUE_TEMPLATE/bug_report.md) or
+[features](https://github.com/gomods/athens/blob/main/.github/ISSUE_TEMPLATE/feature_request.md). If you are performing issue triage you may need to add more
 information to fulfill the below template.
 
 ## Template
