@@ -35,7 +35,7 @@ After you have `pacmod`, you'll need the module source code that you want to pac
 Below is an example for how to configure it.
 
 ```console
-$ export VERSION="v1.0.0
+$ export VERSION="v1.0.0"
 ```
 
 >Note: make sure your `VERSION` variable starts with a `v`
