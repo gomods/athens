@@ -26,11 +26,6 @@ func App(conf *config.Config) (http.Handler, error) {
 	// ENV is used to help switch settings based on where the
 	// application is being run. Default is "development".
 	ENV := conf.GoEnv
-	store, err := GetStorage(conf.StorageType, conf.Storage, conf.TimeoutDuration())
-	if err != nil {
-		err = fmt.Errorf("error getting storage configuration (%s)", err)
-		return nil, err
-	}
 
 	if conf.GithubToken != "" {
 		if conf.NETRCPath != "" {
@@ -115,9 +110,21 @@ func App(conf *config.Config) (http.Handler, error) {
 		r.Use(mw.NewFilterMiddleware(mf, conf.GlobalEndpoint))
 	}
 
+	client := &http.Client{
+		Transport: &ochttp.Transport{
+			Base: http.DefaultTransport,
+		},
+	}
+
 	// Having the hook set means we want to use it
 	if vHook := conf.ValidatorHook; vHook != "" {
-		r.Use(mw.NewValidationMiddleware(vHook))
+		r.Use(mw.NewValidationMiddleware(client, vHook))
+	}
+
+	store, err := GetStorage(conf.StorageType, conf.Storage, conf.TimeoutDuration(), client)
+	if err != nil {
+		err = fmt.Errorf("error getting storage configuration (%s)", err)
+		return nil, err
 	}
 
 	proxyRouter := r

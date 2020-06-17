@@ -67,4 +67,4 @@ If any of this doesn't make sense, please contact us in the `#athens` channel in
 
 Probably, yes! But we don't know if there are exact criteria on when PRs should be "prompted" and how a bot should do that. Maybe we'll learn those criteria here.
 
-Even still, it's nice to have a human touch as a submitter and reviewer. It matches our [philosophy](https://github.com/gomods/athens/blob/master/PHILOSOPHY.md) very well.
+Even still, it's nice to have a human touch as a submitter and reviewer. It matches our [philosophy](https://github.com/gomods/athens/blob/main/PHILOSOPHY.md) very well.
