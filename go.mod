@@ -17,10 +17,10 @@ require (
 	github.com/bsm/redislock v0.4.2
 	github.com/codegangsta/negroni v1.0.0 // indirect
 	github.com/fatih/color v1.7.0
-	github.com/go-ini/ini v1.25.4 // indirect
 	github.com/go-playground/locales v0.12.1 // indirect
 	github.com/go-playground/universal-translator v0.16.0 // indirect
 	github.com/go-redis/redis/v7 v7.2.0
+	github.com/go-sql-driver/mysql v1.5.0
 	github.com/gobuffalo/envy v1.6.7
 	github.com/gobuffalo/httptest v1.0.4
 	github.com/golang/protobuf v1.3.3 // indirect
@@ -32,6 +32,7 @@ require (
 	github.com/hashicorp/hcl2 v0.0.0-20190503213020-640445e16309
 	github.com/kelseyhightower/envconfig v1.3.0
 	github.com/kylelemons/godebug v1.1.0 // indirect
+	github.com/lib/pq v1.7.0
 	github.com/minio/minio-go/v6 v6.0.43
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/philhofer/fwd v1.0.0 // indirect

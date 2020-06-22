@@ -1,7 +1,7 @@
 package config
 
-// StorageConfig provides configs for various storage backends
-type StorageConfig struct {
+// Storage provides configs for various storage backends
+type Storage struct {
 	Disk      *DiskConfig
 	GCP       *GCPConfig
 	Minio     *MinioConfig
