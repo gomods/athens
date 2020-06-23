@@ -37,7 +37,7 @@ var schema = [...]string{
 	`
 		CREATE TABLE IF NOT EXISTS indexes(
 			id SERIAL PRIMARY KEY,
-			module VARCHAR(255) NOT NULL,
+			path VARCHAR(255) NOT NULL,
 			version VARCHAR(255) NOT NULL,
 			timestamp timestamp NOT NULL
 		)
@@ -46,7 +46,7 @@ var schema = [...]string{
 		CREATE INDEX IF NOT EXISTS idx_timestamp ON indexes (timestamp)
 	`,
 	`
-		CREATE UNIQUE INDEX IF NOT EXISTS idx_module_version ON indexes (module, version)
+		CREATE UNIQUE INDEX IF NOT EXISTS idx_module_version ON indexes (path, version)
 	`,
 }
 
@@ -58,7 +58,7 @@ func (i *indexer) Index(ctx context.Context, mod, ver string) error {
 	const op errors.Op = "postgres.Index"
 	_, err := i.db.ExecContext(
 		ctx,
-		`INSERT INTO indexes (module, version, timestamp) VALUES ($1, $2, $3)`,
+		`INSERT INTO indexes (path, version, timestamp) VALUES ($1, $2, $3)`,
 		mod,
 		ver,
 		time.Now().Format(time.RFC3339Nano),
@@ -75,7 +75,7 @@ func (i *indexer) Lines(ctx context.Context, since time.Time, limit int) ([]*ind
 		since = time.Unix(0, 0)
 	}
 	sinceStr := since.Format(time.RFC3339Nano)
-	rows, err := i.db.QueryContext(ctx, `SELECT module, version, timestamp FROM indexes WHERE timestamp >= $1 LIMIT $2`, sinceStr, limit)
+	rows, err := i.db.QueryContext(ctx, `SELECT path, version, timestamp FROM indexes WHERE timestamp >= $1 LIMIT $2`, sinceStr, limit)
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
@@ -83,7 +83,7 @@ func (i *indexer) Lines(ctx context.Context, since time.Time, limit int) ([]*ind
 	lines := []*index.Line{}
 	for rows.Next() {
 		var line index.Line
-		err = rows.Scan(&line.Module, &line.Version, &line.Timestamp)
+		err = rows.Scan(&line.Path, &line.Version, &line.Timestamp)
 		if err != nil {
 			return nil, errors.E(op, err)
 		}

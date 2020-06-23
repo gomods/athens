@@ -35,19 +35,19 @@ const schema = `
 		PRIMARY KEY
 		COMMENT 'Unique identifier for a module line',
 
-	module VARCHAR(255)
+	path VARCHAR(255)
 		NOT NULL
-		COMMENT 'Name of the module',
+		COMMENT 'Import path of the module',
 
 	version VARCHAR(255)
 		NOT NULL
-		COMMENT 'Name of the module',
+		COMMENT 'Module version',
 
 	timestamp TIMESTAMP(6)
 		COMMENT 'Date and time when the module was first created',
 
 	INDEX (timestamp),
-	UNIQUE INDEX module_version (module, version)
+	UNIQUE INDEX idx_module_version (path, version)
 	) CHARACTER SET utf8;
 `
 
@@ -59,7 +59,7 @@ func (i *indexer) Index(ctx context.Context, mod, ver string) error {
 	const op errors.Op = "mysql.Index"
 	_, err := i.db.ExecContext(
 		ctx,
-		`INSERT INTO indexes (module, version, timestamp) VALUES (?, ?, ?)`,
+		`INSERT INTO indexes (path, version, timestamp) VALUES (?, ?, ?)`,
 		mod,
 		ver,
 		time.Now().Format(time.RFC3339Nano),
@@ -76,7 +76,7 @@ func (i *indexer) Lines(ctx context.Context, since time.Time, limit int) ([]*ind
 		since = time.Unix(0, 0)
 	}
 	sinceStr := since.Format(time.RFC3339Nano)
-	rows, err := i.db.QueryContext(ctx, `SELECT module, version, timestamp FROM indexes WHERE timestamp >= ? LIMIT ?`, sinceStr, limit)
+	rows, err := i.db.QueryContext(ctx, `SELECT path, version, timestamp FROM indexes WHERE timestamp >= ? LIMIT ?`, sinceStr, limit)
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
@@ -84,7 +84,7 @@ func (i *indexer) Lines(ctx context.Context, since time.Time, limit int) ([]*ind
 	lines := []*index.Line{}
 	for rows.Next() {
 		var line index.Line
-		err = rows.Scan(&line.Module, &line.Version, &line.Timestamp)
+		err = rows.Scan(&line.Path, &line.Version, &line.Timestamp)
 		if err != nil {
 			return nil, errors.E(op, err)
 		}

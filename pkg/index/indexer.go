@@ -8,8 +8,8 @@ import (
 // Line represents a module@version line
 // with its metadata such as creation time.
 type Line struct {
-	Module, Version string
-	Timestamp       time.Time
+	Path, Version string
+	Timestamp     time.Time
 }
 
 // Indexer is an interface that can process new module@versions

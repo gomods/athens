@@ -112,7 +112,7 @@ func seed(t *testing.T, indexer index.Indexer, num int) []*index.Line {
 		if err != nil {
 			t.Fatal(err)
 		}
-		lines = append(lines, &index.Line{Module: mod, Version: ver})
+		lines = append(lines, &index.Line{Path: mod, Version: ver})
 	}
 	return lines
 }

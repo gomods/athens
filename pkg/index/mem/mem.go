@@ -23,7 +23,7 @@ func (i *indexer) Index(ctx context.Context, mod, ver string) error {
 	const op errors.Op = "mem.Index"
 	i.mu.Lock()
 	i.lines = append(i.lines, &index.Line{
-		Module:    mod,
+		Path:      mod,
 		Version:   ver,
 		Timestamp: time.Now(),
 	})
