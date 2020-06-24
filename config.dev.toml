@@ -282,6 +282,12 @@ DownloadURL = ""
 # Env override: ATHENS_SINGLE_FLIGHT_TYPE
 SingleFlightType = "memory"
 
+# IndexType sets the type of an index backend Athens will use.
+# Possible values are none, memory, mysql, postgres
+# Defaults to none
+# Env override: ATHENS_INDEX_TYPE
+IndexType = "none"
+
 [SingleFlight]
     [SingleFlight.Etcd]
         # Endpoints are comma separated URLs that determine all distributed etcd servers.
@@ -475,3 +481,65 @@ SingleFlightType = "memory"
         # details.
         # Env override: ATHENS_EXTERNAL_STORAGE_URL
         URL = ""
+
+[Index]
+    [Index.MySQL]
+        # MySQL protocol
+        # Env override: ATHENS_INDEX_MYSQL_PROTOCOL
+        Protocol = "tcp"
+
+        # MySQL user name
+        # Env override: ATHENS_INDEX_MYSQL_HOST
+        Host = "localhost"
+
+        # MySQL user name
+        # Env override: ATHENS_INDEX_MYSQL_PORT
+        Port = 3306
+
+        # MySQL user name
+        # Env override: ATHENS_INDEX_MYSQL_USER
+        User = "root"
+
+        # MySQL user name
+        # Env override: ATHENS_INDEX_MYSQL_PASSWORD
+        Password = ""
+
+        # MySQL database
+        # Env override: ATHENS_INDEX_MYSQL_DATABASE
+        Database = "athens"
+
+        # MySQL query parameters
+        # Environment overrides must be in the following format:
+        # ATHENS_INDEX_MYSQL_PARAMS="parseTime:true,timeout=90s"
+        # Env override: ATHENS_INDEX_MYSQL_PARAMS
+        [Index.MySQL.Params]
+            parseTime = "true"
+            timeout = "30s"
+    [Index.Postgres]
+        # Postgres user name
+        # Env override: ATHENS_INDEX_POSTGRES_HOST
+        Host = "localhost"
+
+        # Postgres user name
+        # Env override: ATHENS_INDEX_POSTGRES_PORT
+        Port = 5432
+
+        # Postgres user name
+        # Env override: ATHENS_INDEX_POSTGRES_USER
+        User = "postgres"
+
+        # Postgres user name
+        # Env override: ATHENS_INDEX_POSTGRES_PASSWORD
+        Password = ""
+
+        # Postgres database
+        # Env override: ATHENS_INDEX_POSTGRES_DATABASE
+        Database = "athens"
+
+        # Postgres query parameters
+        # Environment overrides must be in the following format:
+        # ATHENS_INDEX_POSTGRES_PARAMS="connect_timeout:30s,sslmode=disable"
+        # Env override: ATHENS_INDEX_POSTGRES_PARAMS
+        [Index.Postgres.Params]
+            connect_timeout = "30s"
+            sslmode = "disable"

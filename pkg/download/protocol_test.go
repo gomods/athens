@@ -15,6 +15,7 @@ import (
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/download/mode"
 	"github.com/gomods/athens/pkg/errors"
+	"github.com/gomods/athens/pkg/index/nop"
 	"github.com/gomods/athens/pkg/module"
 	"github.com/gomods/athens/pkg/stash"
 	"github.com/gomods/athens/pkg/storage"
@@ -44,7 +45,7 @@ func getDP(t *testing.T) Protocol {
 	if err != nil {
 		t.Fatal(err)
 	}
-	st := stash.New(mf, s)
+	st := stash.New(mf, s, nop.New())
 	return New(&Opts{s, st, module.NewVCSLister(goBin, conf.GoBinaryEnvVars, fs), nil})
 }
 
@@ -280,7 +281,7 @@ func TestDownloadProtocol(t *testing.T) {
 		t.Fatal(err)
 	}
 	mp := &mockFetcher{}
-	st := stash.New(mp, s)
+	st := stash.New(mp, s, nop.New())
 	dp := New(&Opts{s, st, nil, nil})
 	ctx := context.Background()
 
@@ -332,7 +333,7 @@ func TestDownloadProtocolWhenFetchFails(t *testing.T) {
 		t.Fatal(err)
 	}
 	mp := &notFoundFetcher{}
-	st := stash.New(mp, s)
+	st := stash.New(mp, s, nop.New())
 	dp := New(&Opts{s, st, nil, nil})
 	ctx := context.Background()
 	_, err = dp.GoMod(ctx, fakeMod.mod, fakeMod.ver)

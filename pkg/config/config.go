@@ -54,8 +54,10 @@ type Config struct {
 	DownloadURL      string    `envconfig:"ATHENS_DOWNLOAD_URL"`
 	SingleFlightType string    `envconfig:"ATHENS_SINGLE_FLIGHT_TYPE"`
 	RobotsFile       string    `envconfig:"ATHENS_ROBOTS_FILE"`
+	IndexType        string    `envconfig:"ATHENS_INDEX_TYPE"`
 	SingleFlight     *SingleFlight
-	Storage          *StorageConfig
+	Storage          *Storage
+	Index            *Index
 }
 
 // EnvList is a list of key-value environment
@@ -161,6 +163,7 @@ func defaultConfig() *Config {
 		DownloadMode:     "sync",
 		DownloadURL:      "",
 		RobotsFile:       "robots.txt",
+		IndexType:        "none",
 		SingleFlight: &SingleFlight{
 			Etcd:  &Etcd{"localhost:2379,localhost:22379,localhost:32379"},
 			Redis: &Redis{"127.0.0.1:6379", ""},
@@ -168,6 +171,31 @@ func defaultConfig() *Config {
 				Endpoints:        []string{"127.0.0.1:26379"},
 				MasterName:       "redis-1",
 				SentinelPassword: "sekret",
+			},
+		},
+		Index: &Index{
+			MySQL: &MySQL{
+				Protocol: "tcp",
+				Host:     "localhost",
+				Port:     3306,
+				User:     "root",
+				Password: "",
+				Database: "athens",
+				Params: map[string]string{
+					"parseTime": "true",
+					"timeout":   "30s",
+				},
+			},
+			Postgres: &Postgres{
+				Host:     "localhost",
+				Port:     5432,
+				User:     "postgres",
+				Password: "",
+				Database: "athens",
+				Params: map[string]string{
+					"connect_timeout": "30",
+					"sslmode":         "disable",
+				},
 			},
 		},
 	}
@@ -267,29 +295,54 @@ func ensurePortFormat(s string) string {
 
 func validateConfig(config Config) error {
 	validate := validator.New()
-	err := validate.StructExcept(config, "Storage")
+	err := validate.StructExcept(config, "Storage", "Index")
 	if err != nil {
 		return err
 	}
-	switch config.StorageType {
+	err = validateStorage(validate, config.StorageType, config.Storage)
+	if err != nil {
+		return err
+	}
+	err = validateIndex(validate, config.IndexType, config.Index)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func validateStorage(validate *validator.Validate, storageType string, config *Storage) error {
+	switch storageType {
 	case "memory":
 		return nil
 	case "mongo":
-		return validate.Struct(config.Storage.Mongo)
+		return validate.Struct(config.Mongo)
 	case "disk":
-		return validate.Struct(config.Storage.Disk)
+		return validate.Struct(config.Disk)
 	case "minio":
-		return validate.Struct(config.Storage.Minio)
+		return validate.Struct(config.Minio)
 	case "gcp":
-		return validate.Struct(config.Storage.GCP)
+		return validate.Struct(config.GCP)
 	case "s3":
-		return validate.Struct(config.Storage.S3)
+		return validate.Struct(config.S3)
 	case "azureblob":
-		return validate.Struct(config.Storage.AzureBlob)
+		return validate.Struct(config.AzureBlob)
 	case "external":
-		return validate.Struct(config.Storage.External)
+		return validate.Struct(config.External)
 	default:
-		return fmt.Errorf("storage type %s is unknown", config.StorageType)
+		return fmt.Errorf("storage type %q is unknown", storageType)
+	}
+}
+
+func validateIndex(validate *validator.Validate, indexType string, config *Index) error {
+	switch indexType {
+	case "", "none", "memory":
+		return nil
+	case "mysql":
+		return validate.Struct(config.MySQL)
+	case "postgres":
+		return validate.Struct(config.Postgres)
+	default:
+		return fmt.Errorf("index type %q is unknown", indexType)
 	}
 }
 
