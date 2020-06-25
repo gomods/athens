@@ -96,7 +96,7 @@ func addProxyRoutes(
 	if err := c.GoBinaryEnvVars.Validate(); err != nil {
 		return err
 	}
-	mf, err := module.NewGoGetFetcher(c.GoBinary, c.GoBinaryEnvVars, fs)
+	mf, err := module.NewGoGetFetcher(c.GoBinary, c.GoGetDir, c.GoBinaryEnvVars, fs)
 	if err != nil {
 		return err
 	}

@@ -20,6 +20,7 @@ type goGetFetcher struct {
 	fs           afero.Fs
 	goBinaryName string
 	envVars      []string
+	gogetDir     string
 }
 
 type goModule struct {
@@ -35,7 +36,7 @@ type goModule struct {
 }
 
 // NewGoGetFetcher creates fetcher which uses go get tool to fetch modules
-func NewGoGetFetcher(goBinaryName string, envVars []string, fs afero.Fs) (Fetcher, error) {
+func NewGoGetFetcher(goBinaryName, gogetDir string, envVars []string, fs afero.Fs) (Fetcher, error) {
 	const op errors.Op = "module.NewGoGetFetcher"
 	if err := validGoBinary(goBinaryName); err != nil {
 		return nil, errors.E(op, err)
@@ -44,6 +45,7 @@ func NewGoGetFetcher(goBinaryName string, envVars []string, fs afero.Fs) (Fetche
 		fs:           fs,
 		goBinaryName: goBinaryName,
 		envVars:      envVars,
+		gogetDir:     gogetDir,
 	}, nil
 }
 
@@ -55,7 +57,7 @@ func (g *goGetFetcher) Fetch(ctx context.Context, mod, ver string) (*storage.Ver
 	defer span.End()
 
 	// setup the GOPATH
-	goPathRoot, err := afero.TempDir(g.fs, "", "athens")
+	goPathRoot, err := afero.TempDir(g.fs, g.gogetDir, "athens")
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
