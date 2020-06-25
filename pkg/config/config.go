@@ -26,6 +26,7 @@ type Config struct {
 	GoProxy          string    `envconfig:"GOPROXY"`
 	GoBinaryEnvVars  EnvList   `envconfig:"ATHENS_GO_BINARY_ENV_VARS"`
 	GoGetWorkers     int       `validate:"required" envconfig:"ATHENS_GOGET_WORKERS"`
+	GoGetDir         string    `envconfig:"ATHENS_GOGOET_DIR"`
 	ProtocolWorkers  int       `validate:"required" envconfig:"ATHENS_PROTOCOL_WORKERS"`
 	LogLevel         string    `validate:"required" envconfig:"ATHENS_LOG_LEVEL"`
 	CloudRuntime     string    `validate:"required" envconfig:"ATHENS_CLOUD_RUNTIME"`

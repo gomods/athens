@@ -62,6 +62,16 @@ GoBinaryEnvVars = ["GOPROXY=direct"]
 # Env override: ATHENS_GOGET_WORKERS
 GoGetWorkers = 10
 
+# GoGetDir specifies the temporary directory that Athens
+# will use to fetch modules from VCS prior to persisting
+# them to a storage backend. This is useful if you are in a
+# Kubernetes environment where a specific path is volumed into 
+# a directory that has larger disk resources. If the value is
+# empty, Athens will use the default OS temporary directory.
+# 
+# Env override: ATHENS_GOGOET_DIR
+GoGetDir = ""
+
 # ProtocolWorkers specifies how many concurrent
 # requests can you handle at a time for all
 # download protocol paths. This is different from
