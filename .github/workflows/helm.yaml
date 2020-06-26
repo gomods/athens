@@ -1,0 +1,33 @@
+name: helm-charts
+on:
+    pull_request:
+        types: [opened, reopened, synchronize]
+        # paths:
+        #     - "charts/*"
+        #     - "test/e2e-kind.sh"
+jobs:
+    shellcheck:
+        if: github.event_name == 'pull_request'
+        name: Shellcheck Helm Charts
+        runs-on: ubuntu-latest
+        container: koalaman/shellcheck-alpine
+        steps:
+            - uses: actions/checkout@v2
+            - run: shellcheck -x test/e2e-kind.sh
+    charts-e2e:
+        name: Run E2E Tests on the Helm Chart
+        needs: [shellcheck]
+        runs-on: ubuntu-latest
+        env:
+            CHART_TESTING_IMAGE: quay.io/helmpack/chart-testing
+            CHART_TESTING_TAG: v2.4.1
+            K8S_VERSION: v1.18.0
+            KIND_VERSION: v0.8.1
+        steps:
+            - uses: actions/checkout@v2
+            - run: git fetch --prune --unshallow
+            - run: test/e2e-kind.sh
+    # publish:
+    #   runs-on: ubuntu-latest
+    #   if: github.event_name == 'push'
+    #   container: alpine/helm

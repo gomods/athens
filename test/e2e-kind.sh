@@ -57,9 +57,9 @@ create_kind_cluster() {
     docker_exec mkdir -p /root/.kube
 
     echo 'Copying kubeconfig to container...'
-    local kubeconfig
-    kubeconfig="$(kind get kubeconfig-path --name "$CLUSTER_NAME")"
-    docker cp "$kubeconfig" ct:/root/.kube/config
+    # local kubeconfig
+    kind get kubeconfig --name "$CLUSTER_NAME" > kube-config.yaml
+    docker cp kube-config.yaml ct:/root/.kube/config
 
     docker_exec kubectl cluster-info
     echo
