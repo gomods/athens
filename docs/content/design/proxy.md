@@ -69,9 +69,9 @@ The proxy provides a `/catalog` service endpoint to fetch all the modules and th
 
 A query is of the form
 
-`https://proxyurl/catalog?token=foo&limit=47`
+`https://proxyurl/catalog?token=foo&pagesize=47`
 
-Where token is an optional continuation token and limit is the desired size of the returned page.
+Where token is an optional continuation token and pagesize is the desired size of the returned page.
 The `token` parameter is not required for the first call and it's needed for handling paginated results.
 
 
