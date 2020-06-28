@@ -14,30 +14,32 @@ import (
 )
 
 func TestRedirect(t *testing.T) {
-	r := mux.NewRouter()
-	RegisterHandlers(r, &HandlerOpts{
-		Protocol: &mockProtocol{},
-		Logger:   log.NoOpLogger(),
-		DownloadFile: &mode.DownloadFile{
-			Mode:        mode.Redirect,
-			DownloadURL: "https://gomods.io",
-		},
-	})
-	for _, path := range [...]string{
-		"/github.com/gomods/athens/@v/v0.4.0.info",
-		"/github.com/gomods/athens/@v/v0.4.0.mod",
-		"/github.com/gomods/athens/@v/v0.4.0.zip",
-	} {
-		req := httptest.NewRequest("GET", path, nil)
-		w := httptest.NewRecorder()
-		r.ServeHTTP(w, req)
-		if w.Code != http.StatusMovedPermanently {
-			t.Fatalf("expected a redirect status (301) but got %v", w.Code)
-		}
-		expectedRedirect := "https://gomods.io" + path
-		givenRedirect := w.HeaderMap.Get("location")
-		if expectedRedirect != givenRedirect {
-			t.Fatalf("expected the handler to redirect to %q but got %q", expectedRedirect, givenRedirect)
+	for _, url := range []string{"https://gomods.io", "https://internal.domain/repository/gonexus"} {
+		r := mux.NewRouter()
+		RegisterHandlers(r, &HandlerOpts{
+			Protocol: &mockProtocol{},
+			Logger:   log.NoOpLogger(),
+			DownloadFile: &mode.DownloadFile{
+				Mode:        mode.Redirect,
+				DownloadURL: url,
+			},
+		})
+		for _, path := range [...]string{
+			"/github.com/gomods/athens/@v/v0.4.0.info",
+			"/github.com/gomods/athens/@v/v0.4.0.mod",
+			"/github.com/gomods/athens/@v/v0.4.0.zip",
+		} {
+			req := httptest.NewRequest("GET", path, nil)
+			w := httptest.NewRecorder()
+			r.ServeHTTP(w, req)
+			if w.Code != http.StatusMovedPermanently {
+				t.Fatalf("expected a redirect status (301) but got %v", w.Code)
+			}
+			expectedRedirect := url + path
+			givenRedirect := w.HeaderMap.Get("location")
+			if expectedRedirect != givenRedirect {
+				t.Fatalf("expected the handler to redirect to %q but got %q", expectedRedirect, givenRedirect)
+			}
 		}
 	}
 }

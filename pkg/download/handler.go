@@ -3,6 +3,7 @@ package download
 import (
 	"net/http"
 	"net/url"
+	"path/filepath"
 
 	"github.com/gomods/athens/pkg/download/mode"
 	"github.com/gomods/athens/pkg/log"
@@ -60,6 +61,6 @@ func getRedirectURL(base, path string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	url.Path = path
+	url.Path = filepath.Join(url.Path, path)
 	return url.String(), nil
 }
