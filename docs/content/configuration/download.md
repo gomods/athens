@@ -90,7 +90,7 @@ download "bad/module/repo/*" {
 
 ### Preventing storage overflow
 
-If you are running Athens using a [storage backend](./storage) that has limited space, you may want to prevent Athens from storing certain groups of modules that take up a lot of space. To avoid exhausting Athens storage, while still ensuring that the users of your Athens server still get access to the modules you can't store, you would use a `redirect` directive, as shown below:
+If you are running Athens using a [storage backend](/configuration/storage) that has limited space, you may want to prevent Athens from storing certain groups of modules that take up a lot of space. To avoid exhausting Athens storage, while still ensuring that the users of your Athens server still get access to the modules you can't store, you would use a `redirect` directive, as shown below:
 
 ```hcl
 download "very/large/*" {
