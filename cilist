@@ -1,4 +1,0 @@
-1. Helm (CircleCI)
-    https://github.com/helm/chart-testing-action Testing action we could use
-2. Windows tests (AppVeyor)
-3. Build/Test/DockerPush (DroneCI)

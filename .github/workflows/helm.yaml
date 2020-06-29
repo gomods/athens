@@ -1,21 +1,25 @@
-name: helm-charts
+name: Helm Charts
 on:
+    push:
+      branches:
+        - main
+        
     pull_request:
         types: [opened, reopened, synchronize]
-        # paths:
-        #     - "charts/*"
-        #     - "test/e2e-kind.sh"
+        paths:
+            - "charts/*"
+            - "test/e2e-kind.sh"
 jobs:
     shellcheck:
         if: github.event_name == 'pull_request'
         name: Shellcheck Helm Charts
         runs-on: ubuntu-latest
-        container: koalaman/shellcheck-alpine
         steps:
             - uses: actions/checkout@v2
-            - run: shellcheck -x test/e2e-kind.sh
+            - uses: docker://koalaman/shellcheck-alpine
+              run: shellcheck -x test/e2e-kind.sh
     charts-e2e:
-        name: Run E2E Tests on the Helm Chart
+        name: Run E2E Tests on the Helm Charts
         needs: [shellcheck]
         runs-on: ubuntu-latest
         env:
@@ -26,8 +30,19 @@ jobs:
         steps:
             - uses: actions/checkout@v2
             - run: git fetch --prune --unshallow
-            - run: test/e2e-kind.sh
-    # publish:
-    #   runs-on: ubuntu-latest
-    #   if: github.event_name == 'push'
-    #   container: alpine/helm
+
+            - name: Run linting and chart testing against kind
+              run: test/e2e-kind.sh
+
+    publish:
+      if: success() && github.event_name == 'push' && github.ref == 'refs/heads/main'
+      name: Publish Helm Charts
+      runs-on: ubuntu-latest
+      steps:
+        - uses: actions/checkout@v2
+        - name: Push charts
+          uses: gomods/drone-helm
+          env:
+            CHARTS_REPO: https://athens.blob.core.windows.net
+            AZURE_STORAGE_CONNECTION_STRING: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}
+        
