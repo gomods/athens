@@ -28,3 +28,15 @@ In this section we'll describe how the upstream proxy can be configured to fetch
 In this section we'll describe how to proxy a Checksum DB as per https://go.googlesource.com/proposal/+/master/design/25530-sumdb.md
 
 - [Checksum](/configuration/sumdb)
+
+### Accessing the configuration
+
+By providing an optional `ConfigPort` parameter, Athens will expose a `/config` service endpoint that will return the configuration used by the proxy. 
+
+##### Configuration:
+
+    # ConfigPort optionally enables a config endpoint on the given port
+    # Env override: ATHENS_CONFIG_PORT
+    ConfigPort = ":3001"
+
+The service is exposed on a different port, as the configuration may contain sensitive informations and different access rules may be implemented (i.e., access on the config port may only be granted locally).

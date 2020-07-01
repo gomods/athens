@@ -14,6 +14,7 @@ import (
 	"testing"
 
 	"github.com/gobuffalo/envy"
+	"github.com/gomods/athens/pkg/config"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -121,12 +122,25 @@ func (m *E2eSuite) TestWrongGoProxy() {
 	m.Assert().NotNil(err, "Wrong proxy should fail")
 }
 
+func (m *E2eSuite) TestConfigEndpoint() {
+	resp, err := http.Get("http://localhost:3003/config")
+	if err != nil {
+		m.Fail("failed to read config", err)
+	}
+	var config config.Config
+	err = json.NewDecoder(resp.Body).Decode(&config)
+	if err != nil {
+		m.Fail("failed to decode config res", err)
+	}
+}
+
 func (m *E2eSuite) getEnv() []string {
 	res := []string{
 		fmt.Sprintf("GOPATH=%s", m.goPath),
 		"GO111MODULE=on",
 		fmt.Sprintf("PATH=%s", os.Getenv("PATH")),
 		fmt.Sprintf("GOCACHE=%s", filepath.Join(m.goPath, "cache")),
+		fmt.Sprintf("ATHENS_CONFIG_PORT=:%d", 3003),
 	}
 	return res
 }

@@ -50,7 +50,10 @@ func runAthensAndWait(ctx context.Context, athensBin string, env []string) error
 	for {
 		select {
 		case <-ticker.C:
-			resp, _ := http.Get("http://localhost:3000/readyz")
+			resp, err := http.Get("http://localhost:3000/readyz")
+			if err != nil {
+				continue
+			}
 			if resp.StatusCode == 200 {
 				return nil
 			}

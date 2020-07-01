@@ -72,6 +72,13 @@ func main() {
 		}()
 	}
 
+	if conf.ConfigPort != "" {
+		go func() {
+			log.Printf("Starting serving config at port %v", conf.ConfigPort)
+			log.Fatal(http.ListenAndServe(conf.ConfigPort, actions.ConfigHandler(conf)))
+		}()
+	}
+
 	log.Printf("Starting application at port %v", conf.Port)
 	if cert != "" && key != "" {
 		err = srv.ListenAndServeTLS(conf.TLSCertFile, conf.TLSKeyFile)

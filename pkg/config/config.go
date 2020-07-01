@@ -60,6 +60,7 @@ type Config struct {
 	SingleFlight      *SingleFlight
 	Storage           *Storage
 	Index             *Index
+	ConfigPort        string `envconfig:"ATHENS_CONFIG_PORT"`
 }
 
 // EnvList is a list of key-value environment

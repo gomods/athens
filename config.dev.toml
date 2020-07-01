@@ -99,6 +99,12 @@ EnablePprof = false
 # PprofPort specifies the port on which pprof will be exposed if activated.
 PprofPort = ":3001"
 
+# ConfigPort specifies the port on which the /config endpoint will listen for
+# providing the internal configuration.
+# Note if you have secrets in your configuration, this endpoint will return them in plaintext.
+# This is why they are exposed in a different port and should be used for debugging purposes only.
+ConfigPort = ""
+
 # The filename for the include exclude filter.
 # Env override: ATHENS_FILTER_FILE
 #
