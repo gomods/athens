@@ -24,14 +24,14 @@ func testConfigFile(t *testing.T) (testConfigFile string) {
 }
 
 func compareConfigs(parsedConf *Config, expConf *Config, t *testing.T) {
-	opts := cmpopts.IgnoreTypes(StorageConfig{}, SingleFlight{})
+	opts := cmpopts.IgnoreTypes(Storage{}, SingleFlight{}, Index{})
 	eq := cmp.Equal(parsedConf, expConf, opts)
 	if !eq {
 		t.Errorf("Parsed Example configuration did not match expected values. Expected: %+v. Actual: %+v", expConf, parsedConf)
 	}
 }
 
-func compareStorageConfigs(parsedStorage *StorageConfig, expStorage *StorageConfig, t *testing.T) {
+func compareStorageConfigs(parsedStorage *Storage, expStorage *Storage, t *testing.T) {
 	eq := cmp.Equal(parsedStorage.Mongo, expStorage.Mongo)
 	if !eq {
 		t.Errorf("Parsed Example Storage configuration did not match expected values. Expected: %+v. Actual: %+v", expStorage.Mongo, parsedStorage.Mongo)
@@ -91,10 +91,11 @@ func TestEnvOverrides(t *testing.T) {
 		PathPrefix:      "prefix",
 		NETRCPath:       "/test/path/.netrc",
 		HGRCPath:        "/test/path/.hgrc",
-		Storage:         &StorageConfig{},
+		Storage:         &Storage{},
 		GoBinaryEnvVars: []string{"GOPROXY=direct"},
 		SingleFlight:    &SingleFlight{},
 		RobotsFile:      "robots.txt",
+		Index:           &Index{},
 	}
 
 	envVars := getEnvMap(expConf)
@@ -157,7 +158,7 @@ func TestEnsurePortFormat(t *testing.T) {
 }
 
 func TestStorageEnvOverrides(t *testing.T) {
-	expStorage := &StorageConfig{
+	expStorage := &Storage{
 		Disk: &DiskConfig{
 			RootPath: "/my/root/path",
 		},
@@ -209,7 +210,7 @@ func TestParseExampleConfig(t *testing.T) {
 
 	// initialize all struct pointers so we get all applicable env variables
 	emptyConf := &Config{
-		Storage: &StorageConfig{
+		Storage: &Storage{
 			Disk: &DiskConfig{},
 			GCP:  &GCPConfig{},
 			Minio: &MinioConfig{
@@ -219,6 +220,7 @@ func TestParseExampleConfig(t *testing.T) {
 			S3:    &S3Config{},
 		},
 		SingleFlight: &SingleFlight{},
+		Index:        &Index{},
 	}
 	// unset all environment variables
 	envVars := getEnvMap(emptyConf)
@@ -229,7 +231,7 @@ func TestParseExampleConfig(t *testing.T) {
 		os.Unsetenv(k)
 	}
 
-	expStorage := &StorageConfig{
+	expStorage := &Storage{
 		Disk: &DiskConfig{
 			RootPath: "/path/on/disk",
 		},
@@ -289,6 +291,8 @@ func TestParseExampleConfig(t *testing.T) {
 		NoSumPatterns:    []string{},
 		DownloadMode:     "sync",
 		RobotsFile:       "robots.txt",
+		IndexType:        "none",
+		Index:            &Index{},
 	}
 
 	absPath, err := filepath.Abs(testConfigFile(t))
@@ -477,7 +481,7 @@ func TestDefaultConfigMatchesConfigFile(t *testing.T) {
 
 	defConf := defaultConfig()
 
-	ignoreStorageOpts := cmpopts.IgnoreTypes(&StorageConfig{})
+	ignoreStorageOpts := cmpopts.IgnoreTypes(&Storage{}, &Index{})
 	ignoreGoEnvOpts := cmpopts.IgnoreFields(Config{}, "GoEnv")
 	eq := cmp.Equal(defConf, parsedConf, ignoreStorageOpts, ignoreGoEnvOpts)
 	if !eq {

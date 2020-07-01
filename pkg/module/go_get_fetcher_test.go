@@ -17,14 +17,14 @@ var ctx = context.Background()
 
 func (s *ModuleSuite) TestNewGoGetFetcher() {
 	r := s.Require()
-	fetcher, err := NewGoGetFetcher(s.goBinaryName, s.env, s.fs)
+	fetcher, err := NewGoGetFetcher(s.goBinaryName, "", s.env, s.fs)
 	r.NoError(err)
 	_, ok := fetcher.(*goGetFetcher)
 	r.True(ok)
 }
 
 func (s *ModuleSuite) TestGoGetFetcherError() {
-	fetcher, err := NewGoGetFetcher("invalidpath", s.env, afero.NewOsFs())
+	fetcher, err := NewGoGetFetcher("invalidpath", "", s.env, afero.NewOsFs())
 
 	assert.Nil(s.T(), fetcher)
 	if runtime.GOOS == "windows" {
@@ -38,7 +38,7 @@ func (s *ModuleSuite) TestGoGetFetcherFetch() {
 	r := s.Require()
 	// we need to use an OS filesystem because fetch executes vgo on the command line, which
 	// always writes to the filesystem
-	fetcher, err := NewGoGetFetcher(s.goBinaryName, s.env, afero.NewOsFs())
+	fetcher, err := NewGoGetFetcher(s.goBinaryName, "", s.env, afero.NewOsFs())
 	r.NoError(err)
 	ver, err := fetcher.Fetch(ctx, repoURI, version)
 	r.NoError(err)
@@ -58,7 +58,7 @@ func (s *ModuleSuite) TestGoGetFetcherFetch() {
 
 func (s *ModuleSuite) TestNotFoundFetches() {
 	r := s.Require()
-	fetcher, err := NewGoGetFetcher(s.goBinaryName, s.env, afero.NewOsFs())
+	fetcher, err := NewGoGetFetcher(s.goBinaryName, "", s.env, afero.NewOsFs())
 	r.NoError(err)
 	// when someone buys laks47dfjoijskdvjxuyyd.com, and implements
 	// a git server on top of it, this test will fail :)
@@ -86,16 +86,39 @@ func (s *ModuleSuite) TestGoGetFetcherSumDB() {
 	proxyAddr, close := s.getProxy(mp)
 	defer close()
 
-	fetcher, err := NewGoGetFetcher(s.goBinaryName, []string{"GOPROXY=" + proxyAddr}, afero.NewOsFs())
+	fetcher, err := NewGoGetFetcher(s.goBinaryName, "", []string{"GOPROXY=" + proxyAddr}, afero.NewOsFs())
 	r.NoError(err)
 	_, err = fetcher.Fetch(ctx, "mockmod.xyz", "v1.2.3")
 	if err == nil {
 		s.T().Fatal("expected a gosum error but got nil")
 	}
-	fetcher, err = NewGoGetFetcher(s.goBinaryName, []string{"GONOSUMDB=mockmod.xyz", "GOPROXY=" + proxyAddr}, afero.NewOsFs())
+	fetcher, err = NewGoGetFetcher(s.goBinaryName, "", []string{"GONOSUMDB=mockmod.xyz", "GOPROXY=" + proxyAddr}, afero.NewOsFs())
 	r.NoError(err)
 	_, err = fetcher.Fetch(ctx, "mockmod.xyz", "v1.2.3")
 	r.NoError(err, "expected the go sum to not be consulted but got an error")
+}
+
+func (s *ModuleSuite) TestGoGetDir() {
+	r := s.Require()
+	t := s.T()
+	dir, err := ioutil.TempDir("", "nested")
+	r.NoError(err)
+	t.Cleanup(func() {
+		os.RemoveAll(dir)
+	})
+	fetcher, err := NewGoGetFetcher(s.goBinaryName, dir, s.env, afero.NewOsFs())
+	r.NoError(err)
+
+	ver, err := fetcher.Fetch(ctx, repoURI, version)
+	r.NoError(err)
+	defer ver.Zip.Close()
+
+	dirInfo, err := ioutil.ReadDir(dir)
+	r.NoError(err)
+
+	if len(dirInfo) <= 0 {
+		t.Fatalf("expected the directory %q to have eat least one sub directory but it was empty", dir)
+	}
 }
 
 func (s *ModuleSuite) getProxy(h http.Handler) (addr string, close func()) {
