@@ -154,6 +154,11 @@ func getSingleFlight(c *config.Config, checker storage.Checker) (stash.Wrapper, 
 			c.SingleFlight.RedisSentinel.SentinelPassword,
 			checker,
 		)
+	case "mysql":
+		if c.IndexType != "mysql" {
+			return nil, fmt.Errorf("mysql SingleFlight only works with a mysql index type and not: %v", c.IndexType)
+		}
+		return stash.WithMysqlLock(c.Index.MySQL, checker)
 	case "gcp":
 		if c.StorageType != "gcp" {
 			return nil, fmt.Errorf("gcp SingleFlight only works with a gcp storage type and not: %v", c.StorageType)

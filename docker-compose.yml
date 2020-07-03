@@ -31,6 +31,7 @@ services:
     depends_on:
       - mongo
       - minio
+      - mysql
   teste2e:
     build:
       context: .
@@ -163,6 +164,15 @@ services:
       - http://0.0.0.0:2380
       - -initial-cluster
       - etcd0=http://etcd0:2380,etcd1=http://etcd1:2380,etcd2=http://etcd2:2380
+  mysql:
+    image: percona:5.7.21
+    ports:
+      - "3306"
+    environment:
+      - MYSQL_USER=vgp
+      - MYSQL_PASSWORD=vgp
+      - MYSQL_DATABASE=athens
+      - MYSQL_ALLOW_EMPTY_PASSWORD=yes
 
 volumes:
   etcd0:

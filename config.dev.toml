@@ -273,7 +273,7 @@ DownloadURL = ""
 # and the second request will wait for the first one to finish so that
 # it doesn't override the storage.
 
-# Options are ["memory", "etcd", "redis", "redis-sentinel", "gcp", "azureblob"]
+# Options are ["memory", "etcd", "redis", "redis-sentinel", "gcp", "azureblob", "mysql"]
 
 # The default option is "memory" which means that only one instance of Athens
 # should be used.
@@ -285,6 +285,8 @@ DownloadURL = ""
 # and therefore it will use its strong-consistency features to ensure
 # that only one module is ever written even when concurrent saves happen
 # at the same time.
+# The "mysql" single flight will assume that you have a "mysql" IndexType
+# and therefore it will use values from IndexType to establish a database connection.
 # The "redis" single flight will use a single redis instance as a locking mechanism
 # for updating the underlying storage
 # The "redis-sentinel" single flight works similarly to "redis" but obtains a redis connection

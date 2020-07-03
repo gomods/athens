@@ -98,6 +98,7 @@ alldeps:
 	docker-compose -p athensdev up -d mongo
 	docker-compose -p athensdev up -d minio
 	docker-compose -p athensdev up -d jaeger
+	docker-compose -p athensdev up -d mysql
 	echo "sleeping for a bit to wait for the DB to come up"
 	sleep 5
 

@@ -44,6 +44,7 @@ require (
 	github.com/tidwall/pretty v0.0.0-20180105212114-65a9db5fad51 // indirect
 	github.com/tinylib/msgp v1.0.2 // indirect
 	github.com/unrolled/secure v0.0.0-20181221173256-0d6b5bb13069
+	github.com/willabides/mysqllocker v0.0.0-20200702230931-f6e87a9ac5ca
 	github.com/xdg/scram v0.0.0-20180814205039-7eeb5667e42c // indirect
 	github.com/xdg/stringprep v1.0.0 // indirect
 	go.etcd.io/etcd v0.0.0-20190215181705-784daa04988c
