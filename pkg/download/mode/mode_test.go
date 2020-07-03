@@ -26,6 +26,13 @@ var testCases = []struct {
 		expectedURL:  "gomods.io",
 	},
 	{
+		name:         "redirect with download url suffix",
+		file:         &DownloadFile{Mode: Redirect, DownloadURL: "internal.domain/repository/gonexus"},
+		input:        "github.com/gomods/athens",
+		expectedMode: Redirect,
+		expectedURL:  "internal.domain/repository/gonexus",
+	},
+	{
 		name: "pattern match",
 		file: &DownloadFile{
 			Mode: Sync,
