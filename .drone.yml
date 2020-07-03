@@ -51,6 +51,7 @@ steps:
     REDIS_SENTINEL_TEST_PASSWORD: sekret
     PROTECTED_REDIS_TEST_ENDPOINT: protectedredis:6380
     ATHENS_PROTECTED_REDIS_PASSWORD: AthensPass1
+    ATHENS_MYSQL_TCP_ADDR: mysql:3306
     GCS_SERVICE_ACCOUNT:
       from_secret: GCS_SERVICE_ACCOUNT
     GCS_PROJECT_ID: 
@@ -159,6 +160,15 @@ services:
   image: redis
   ports:
     - 6379
+- name: mysql
+  image: percona:5.7.21
+  ports:
+    - 3306
+  environment:
+    - MYSQL_USER=vgp
+    - MYSQL_PASSWORD=vgp
+    - MYSQL_DATABASE=athens
+    - MYSQL_ALLOW_EMPTY_PASSWORD=yes
 - name: redis-sentinel
   image: bitnami/redis-sentinel
   environment:
