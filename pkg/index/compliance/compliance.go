@@ -6,12 +6,16 @@ import (
 	"testing"
 	"time"
 
+	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/index"
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/technosophos/moniker"
 )
 
+// RunTests runs compliance tests for the given Indexer implementation.
+// clearIndex is a function that must clear the entire storage so that
+// tests can assume a clean state.
 func RunTests(t *testing.T, indexer index.Indexer, clearIndex func() error) {
 	if err := clearIndex(); err != nil {
 		t.Fatal(err)
@@ -79,6 +83,23 @@ func RunTests(t *testing.T, indexer index.Indexer, clearIndex func() error) {
 				return []*index.Line{}, time.Time{}
 			},
 			limit: 0,
+		},
+		{
+			name: "duplicate module version",
+			desc: "if we try to index a module that already exists, a KindAlreadyExists must be returned",
+			preTest: func(t *testing.T) ([]*index.Line, time.Time) {
+				m := &index.Line{Path: "gomods.io/tobeduplicated", Version: "v0.1.0"}
+				err := indexer.Index(context.Background(), m.Path, m.Version)
+				if err != nil {
+					t.Fatal(err)
+				}
+				err = indexer.Index(context.Background(), m.Path, m.Version)
+				if !errors.Is(err, errors.KindAlreadyExists) {
+					t.Fatalf("expected an error of kind AlreadyExists but got %s", errors.KindText(err))
+				}
+				return []*index.Line{m}, time.Time{}
+			},
+			limit: 2000,
 		},
 	}
 	for _, tc := range tests {
