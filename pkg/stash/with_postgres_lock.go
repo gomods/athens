@@ -52,7 +52,7 @@ func (s *postgresLock) Stash(ctx context.Context, mod string, ver string) (strin
 	defer span.End()
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
-	lockErrs, err := pglocker.Lock(ctx, s.db, postgresLockName, 5*time.Minute)
+	lockErrs, err := pglocker.Lock(ctx, s.db, postgresLockName, pglocker.WithTimeout(5*time.Minute))
 	if err != nil {
 		return ver, errors.E(op, err)
 	}

@@ -48,14 +48,11 @@ func (s *mysqlLock) Stash(ctx context.Context, mod string, ver string) (string, 
 	defer span.End()
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
-	lockErrs, ok, err := mysqllocker.Lock(ctx, s.db, mysqlLockName, 10*time.Second, 300)
+	lockErrs, err := mysqllocker.Lock(ctx, s.db, mysqlLockName, mysqllocker.WithTimeout(5*time.Minute))
 	if err != nil {
 		return ver, errors.E(op, err)
 	}
-	if !ok {
-		return ver, errors.E(op, fmt.Errorf("could not acquire lock"))
-	}
-	ok, err = s.checker.Exists(ctx, mod, ver)
+	ok, err := s.checker.Exists(ctx, mod, ver)
 	if err != nil {
 		return ver, errors.E(op, err)
 	}
