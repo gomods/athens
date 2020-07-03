@@ -74,7 +74,7 @@ func (s *stasher) Stash(ctx context.Context, mod, ver string) (string, error) {
 		return "", errors.E(op, err)
 	}
 	err = s.indexer.Index(ctx, mod, v.Semver)
-	if err != nil {
+	if err != nil && !errors.Is(err, errors.KindAlreadyExists) {
 		return "", errors.E(op, err)
 	}
 	return v.Semver, nil
