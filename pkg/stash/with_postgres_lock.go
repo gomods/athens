@@ -46,7 +46,7 @@ type postgresLock struct {
 	checker storage.Checker
 }
 
-func (s *postgresLock) Stash(ctx context.Context, mod string, ver string) (string, error) {
+func (s *postgresLock) Stash(ctx context.Context, mod, ver string) (string, error) {
 	const op errors.Op = "postgresLock.Stash"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
