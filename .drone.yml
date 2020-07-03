@@ -165,10 +165,10 @@ services:
   ports:
     - 3306
   environment:
-    - MYSQL_USER=vgp
-    - MYSQL_PASSWORD=vgp
-    - MYSQL_DATABASE=athens
-    - MYSQL_ALLOW_EMPTY_PASSWORD=yes
+    - MYSQL_USER: vgp
+    - MYSQL_PASSWORD: vgp
+    - MYSQL_DATABASE: athens
+    - MYSQL_ALLOW_EMPTY_PASSWORD: yes
 - name: redis-sentinel
   image: bitnami/redis-sentinel
   environment:
