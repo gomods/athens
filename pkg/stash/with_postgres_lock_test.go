@@ -16,17 +16,30 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
-// TestWithMysqlLock will ensure that 5 concurrent requests will all get the first request's
+var _postgresAddr string
+
+func postgresAddr(t *testing.T) string {
+	addr := os.Getenv("ATHENS_POSTGRES_TCP_ADDR")
+	if addr != "" {
+		return addr
+	}
+	out, err := exec.Command("docker-compose", "-p", "athensdev", "port", "postgres", "5432").Output()
+	require.NoError(t, err)
+	_postgresAddr = strings.TrimSpace(string(out))
+	return _postgresAddr
+}
+
+// TestWithPostgresLock will ensure that 5 concurrent requests will all get the first request's
 // response. We can ensure that because only the first response does not return an error
 // and therefore all 5 responses should have no error.
-func TestWithMysqlLock(t *testing.T) {
-	mysqlConfig := getMysqlTestConfig(t)
+func TestWithPostgresLock(t *testing.T) {
+	postgresConfig := getPostgresTestConfig(t)
 	strg, err := mem.NewStorage()
 	if err != nil {
 		t.Fatal(err)
 	}
 	ms := &mockRedisStasher{strg: strg}
-	wrapper, err := WithMysqlLock(mysqlConfig, storage.WithChecker(strg))
+	wrapper, err := WithPostgresLock(postgresConfig, storage.WithChecker(strg))
 	require.NoError(t, err)
 	s := wrapper(ms)
 
@@ -46,35 +59,23 @@ func TestWithMysqlLock(t *testing.T) {
 	}
 }
 
-var _mysqlAddr string
-
-func mysqlAddr(t *testing.T) string {
+func getPostgresTestConfig(t *testing.T) *config.Postgres {
 	t.Helper()
-	addr := os.Getenv("ATHENS_MYSQL_TCP_ADDR")
-	if addr != "" {
-		return addr
-	}
-	out, err := exec.Command("docker-compose", "-p", "athensdev", "port", "mysql", "3306").Output()
-	require.NoError(t, err)
-	_mysqlAddr = strings.TrimSpace(string(out))
-	return _mysqlAddr
-}
 
-func getMysqlTestConfig(t *testing.T) *config.MySQL {
-	t.Helper()
 	c, err := config.Load("")
 	if err != nil {
 		t.Fatal(err)
 	}
-	cfg := c.Index.MySQL
-	addr := strings.Split(mysqlAddr(t), ":")
+	cfg := c.Index.Postgres
+	addr := strings.Split(postgresAddr(t), ":")
 	if len(addr) != 2 {
-		t.Log("invalid mysql addr", mysqlAddr(t))
+		t.Log("invalid postgres addr", postgresAddr(t))
 		t.FailNow()
 	}
 	cfg.Host = addr[0]
 
 	cfg.Port, err = strconv.Atoi(addr[1])
 	require.NoError(t, err)
+	cfg.Password = "postgres"
 	return cfg
 }

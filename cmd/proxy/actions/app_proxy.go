@@ -159,6 +159,11 @@ func getSingleFlight(c *config.Config, checker storage.Checker) (stash.Wrapper, 
 			return nil, fmt.Errorf("mysql SingleFlight only works with a mysql index type and not: %v", c.IndexType)
 		}
 		return stash.WithMysqlLock(c.Index.MySQL, checker)
+	case "postgres":
+		if c.IndexType != "postgres" {
+			return nil, fmt.Errorf("postgres SingleFlight only works with a postgres index type and not: %v", c.IndexType)
+		}
+		return stash.WithPostgresLock(c.Index.Postgres, checker)
 	case "gcp":
 		if c.StorageType != "gcp" {
 			return nil, fmt.Errorf("gcp SingleFlight only works with a gcp storage type and not: %v", c.StorageType)

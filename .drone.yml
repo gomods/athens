@@ -52,6 +52,7 @@ steps:
     PROTECTED_REDIS_TEST_ENDPOINT: protectedredis:6380
     ATHENS_PROTECTED_REDIS_PASSWORD: AthensPass1
     ATHENS_MYSQL_TCP_ADDR: mysql:3306
+    ATHENS_POSTGRES_TCP_ADDR: postgres:5432
     GCS_SERVICE_ACCOUNT:
       from_secret: GCS_SERVICE_ACCOUNT
     GCS_PROJECT_ID:
@@ -165,10 +166,16 @@ services:
   ports:
     - 3306
   environment:
-    MYSQL_USER: vgp
-    MYSQL_PASSWORD: vgp
     MYSQL_DATABASE: athens
     MYSQL_ALLOW_EMPTY_PASSWORD: yes
+- name: postgres
+  image: postgres:12.3-alpine
+  ports:
+    - 5432
+  environment:
+    POSTGRES_USER: postgres
+    POSTGRES_PASSWORD: postgres
+    POSTGRES_DB: athens
 - name: redis-sentinel
   image: bitnami/redis-sentinel
   environment:

@@ -14,7 +14,6 @@ if [ -z ${ATHENS_MONGO_STORAGE_URL} ]; then
     export ATHENS_MONGO_STORAGE_URL="mongodb://127.0.0.1:27017"
 fi
 
-export ATHENS_MYSQL_TCP_ADDR="${ATHENS_MYSQL_TCP_ADDR:-mysql:3306}"
 export GO111MODULE=on
 
 # Run the unit tests with the race detector and code coverage enabled

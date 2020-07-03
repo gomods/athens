@@ -28,10 +28,13 @@ services:
       - ATHENS_MONGO_STORAGE_URL=mongodb://mongo:27017
       - TIMEOUT=20 # in case the mongo dependency takes longer to start up
       - ATHENS_STORAGE_TYPE=mongo
+      - ATHENS_MYSQL_TCP_ADDR=mysql:3306
+      - ATHENS_POSTGRES_TCP_ADDR=postgres:5432
     depends_on:
       - mongo
       - minio
       - mysql
+      - postgres
   teste2e:
     build:
       context: .
@@ -169,11 +172,16 @@ services:
     ports:
       - "3306"
     environment:
-      - MYSQL_USER=vgp
-      - MYSQL_PASSWORD=vgp
       - MYSQL_DATABASE=athens
       - MYSQL_ALLOW_EMPTY_PASSWORD=yes
-
+  postgres:
+    image: postgres:12.3-alpine
+    ports:
+      - "5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=athens
 volumes:
   etcd0:
   etcd1:

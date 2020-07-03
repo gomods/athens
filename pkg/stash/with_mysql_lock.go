@@ -43,7 +43,7 @@ type mysqlLock struct {
 }
 
 func (s *mysqlLock) Stash(ctx context.Context, mod string, ver string) (string, error) {
-	const op errors.Op = "mysql.Stash"
+	const op errors.Op = "mysqlLock.Stash"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 	ctx, cancel := context.WithCancel(ctx)

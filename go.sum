@@ -352,6 +352,8 @@ github.com/urfave/cli v1.18.0/go.mod h1:70zkFmudgCuE/ngEzBv17Jvp/497gISqfk5gWijb
 github.com/vmihailenco/msgpack v3.3.3+incompatible/go.mod h1:fy3FlTQTDXWkZ7Bh6AcGMlsjHatGryHQYUTf1ShIgkk=
 github.com/willabides/mysqllocker v0.0.0-20200702230931-f6e87a9ac5ca h1:mz9Rf00JnX9TDDSctNsL35Yt6Zd0g1m/cTaYfat0OeQ=
 github.com/willabides/mysqllocker v0.0.0-20200702230931-f6e87a9ac5ca/go.mod h1:zDzqKqhYMBdgHEwuSYw42FpESb3qTmJeHG37H/6HxPo=
+github.com/willabides/pglocker v0.0.0-20200703155005-f176e5b17223 h1:SkVIuIFYZYEJq2UtAOKXY0NV3v1LyyTBh7viSdf32O0=
+github.com/willabides/pglocker v0.0.0-20200703155005-f176e5b17223/go.mod h1:YzUwFazvD8BJdJdtIHjUQfD7nwL34+wXeL0cXi+79M8=
 github.com/xdg/scram v0.0.0-20180814205039-7eeb5667e42c h1:u40Z8hqBAAQyv+vATcGgV0YCnDjqSL7/q/JyPhhJSPk=
 github.com/xdg/scram v0.0.0-20180814205039-7eeb5667e42c/go.mod h1:lB8K/P019DLNhemzwFU4jHLhdvlE6uDZjXFejJXr49I=
 github.com/xdg/stringprep v1.0.0 h1:d9X0esnoa3dFsV0FG35rAT0RIhYFlPq7MiP+DW89La0=
