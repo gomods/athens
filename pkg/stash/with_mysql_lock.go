@@ -79,7 +79,6 @@ func getMySQLSource(cfg *config.MySQL) string {
 	c.Addr = fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
 	c.User = cfg.User
 	c.Passwd = cfg.Password
-	c.DBName = cfg.Database
 	c.Params = cfg.Params
 	return c.FormatDSN()
 }

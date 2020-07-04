@@ -28,8 +28,9 @@ services:
       - ATHENS_MONGO_STORAGE_URL=mongodb://mongo:27017
       - TIMEOUT=20 # in case the mongo dependency takes longer to start up
       - ATHENS_STORAGE_TYPE=mongo
-      - ATHENS_TEST_MYSQL_TCP_ADDR=mysql:3306
-      - ATHENS_TEST_POSTGRES_TCP_ADDR=postgres:5432
+      - ATHENS_INDEX_MYSQL_HOST=mysql
+      - ATHENS_INDEX_POSTGRES_HOST=postgres
+      - STATIC_PORTS=true
     depends_on:
       - mongo
       - minio

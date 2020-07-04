@@ -2,10 +2,11 @@ package stash
 
 import (
 	"context"
+	"os"
 	"testing"
 	"time"
 
-	"github.com/gomods/athens/pkg/internal/testutil"
+	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/storage"
 	"github.com/gomods/athens/pkg/storage/mem"
 	"github.com/stretchr/testify/require"
@@ -16,7 +17,7 @@ import (
 // response. We can ensure that because only the first response does not return an error
 // and therefore all 5 responses should have no error.
 func TestWithPostgresLock(t *testing.T) {
-	postgresConfig := testutil.PostgresTestConfig(t)
+	postgresConfig := postgresTestConfig(t)
 	strg, err := mem.NewStorage()
 	if err != nil {
 		t.Fatal(err)
@@ -40,4 +41,18 @@ func TestWithPostgresLock(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+}
+
+func postgresTestConfig(t *testing.T) *config.Postgres {
+	t.Helper()
+	c, err := config.Load("")
+	require.NoError(t, err)
+	cfg := c.Index.Postgres
+	if cfg.Password == "" {
+		cfg.Password = "postgres"
+	}
+	if os.Getenv("STATIC_PORTS") == "" {
+		cfg.Host, cfg.Port = getServicePort(t, "postgres", 5432)
+	}
+	return cfg
 }

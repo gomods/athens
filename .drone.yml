@@ -43,6 +43,7 @@ steps:
   - GOPATH=~/emptygopath GOPROXY=http://localhost:3000 go build
   environment:
     GO111MODULE: on
+    STATIC_PORTS: true
     ATHENS_MONGO_STORAGE_URL: mongodb://mongo:27017
     ATHENS_MINIO_ENDPOINT: minio:9000
     REDIS_TEST_ENDPOINT: redis:6379
@@ -51,8 +52,8 @@ steps:
     REDIS_SENTINEL_TEST_PASSWORD: sekret
     PROTECTED_REDIS_TEST_ENDPOINT: protectedredis:6380
     ATHENS_PROTECTED_REDIS_PASSWORD: AthensPass1
-    ATHENS_TEST_MYSQL_TCP_ADDR: mysql:3306
-    ATHENS_TEST_POSTGRES_TCP_ADDR: postgres:5432
+    ATHENS_INDEX_MYSQL_HOST: mysql
+    ATHENS_INDEX_POSTGRES_HOST: postgres
     GCS_SERVICE_ACCOUNT:
       from_secret: GCS_SERVICE_ACCOUNT
     GCS_PROJECT_ID:

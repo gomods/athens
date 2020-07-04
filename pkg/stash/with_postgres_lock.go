@@ -82,7 +82,6 @@ func getPostgresSource(cfg *config.Postgres) string {
 	args = append(args, "host="+cfg.Host)
 	args = append(args, "port=", strconv.Itoa(cfg.Port))
 	args = append(args, "user=", cfg.User)
-	args = append(args, "dbname=", cfg.Database)
 	args = append(args, "password="+cfg.Password)
 	for k, v := range cfg.Params {
 		args = append(args, k+"="+v)
