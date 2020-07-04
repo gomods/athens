@@ -24,7 +24,7 @@ var (
 func MySQLTestConfig(t *testing.T) *config.MySQL {
 	t.Helper()
 	mysqlTestConfigOnce.Do(func() {
-		mysqlAddr := os.Getenv("ATHENS_MYSQL_TCP_ADDR")
+		mysqlAddr := os.Getenv("ATHENS_TEST_MYSQL_TCP_ADDR")
 		if mysqlAddr == "" {
 			out, err := exec.Command("docker-compose", "-p", "athensdev", "port", "mysql", "3306").Output()
 			require.NoError(t, err)
@@ -41,11 +41,11 @@ func MySQLTestConfig(t *testing.T) *config.MySQL {
 		mysqlTestConfig.Host = addr[0]
 		mysqlTestConfig.Port, err = strconv.Atoi(addr[1])
 		require.NoError(t, err)
-		if os.Getenv("ATHENS_MYSQL_USER") != "" {
-			mysqlTestConfig.User = os.Getenv("ATHENS_MYSQL_USER")
+		if os.Getenv("ATHENS_TEST_MYSQL_USER") != "" {
+			mysqlTestConfig.User = os.Getenv("ATHENS_TEST_MYSQL_USER")
 		}
-		if os.Getenv("ATHENS_MYSQL_PASSWORD") != "" {
-			mysqlTestConfig.Password = os.Getenv("ATHENS_MYSQL_PASSWORD")
+		if os.Getenv("ATHENS_TEST_MYSQL_PASSWORD") != "" {
+			mysqlTestConfig.Password = os.Getenv("ATHENS_TEST_MYSQL_PASSWORD")
 		}
 		createMySQLTestDatabase(t, mysqlTestConfig)
 	})

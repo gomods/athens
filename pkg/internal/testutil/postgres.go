@@ -24,7 +24,7 @@ var (
 func PostgresTestConfig(t *testing.T) *config.Postgres {
 	t.Helper()
 	postgresTestConfigOnce.Do(func() {
-		pgAddr := os.Getenv("ATHENS_POSTGRES_TCP_ADDR")
+		pgAddr := os.Getenv("ATHENS_TEST_POSTGRES_TCP_ADDR")
 		if pgAddr == "" {
 			out, err := exec.Command("docker-compose", "-p", "athensdev", "port", "postgres", "5432").Output()
 			require.NoError(t, err)
@@ -42,11 +42,11 @@ func PostgresTestConfig(t *testing.T) *config.Postgres {
 		postgresTestConfig.Port, err = strconv.Atoi(addr[1])
 		postgresTestConfig.Password = "postgres"
 		require.NoError(t, err)
-		if os.Getenv("ATHENS_POSTGRES_USER") != "" {
-			postgresTestConfig.User = os.Getenv("ATHENS_POSTGRES_USER")
+		if os.Getenv("ATHENS_TEST_POSTGRES_USER") != "" {
+			postgresTestConfig.User = os.Getenv("ATHENS_TEST_POSTGRES_USER")
 		}
-		if os.Getenv("ATHENS_POSTGRES_PASSWORD") != "" {
-			postgresTestConfig.Password = os.Getenv("ATHENS_POSTGRES_PASSWORD")
+		if os.Getenv("ATHENS_TEST_POSTGRES_PASSWORD") != "" {
+			postgresTestConfig.Password = os.Getenv("ATHENS_TEST_POSTGRES_PASSWORD")
 		}
 		createPostgresTestDatabase(t, postgresTestConfig)
 	})
