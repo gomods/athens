@@ -1,0 +1,22 @@
+version: 2.1
+jobs:
+  lint-scripts:
+    machine: true
+    steps:
+      - run:
+          command: echo hi
+
+  lint-install-charts:
+    machine: true
+    steps:
+      - run:
+          command: echo hello again
+
+workflows:
+  version: 2
+  lint_and_install:
+    jobs:
+      - lint-scripts
+      - lint-install-charts:
+          requires:
+            - lint-scripts
