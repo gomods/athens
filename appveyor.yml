@@ -4,12 +4,19 @@ clone_folder: c:\gopath\src\github.com\gomods\athens
 
 image: Previous Visual Studio 2019
 
+services:
+  - mysql
+  - postgresql101
+
 environment:
   GOPATH: c:\gopath
   GO111MODULE: on
   GOPROXY: https://proxy.golang.org
   SKIP_UNTIL_113: true
   SKIP_ETCD: true
+  STATIC_PORTS: true
+  ATHENS_INDEX_MYSQL_PASSWORD: "Password12!"
+  ATHENS_INDEX_POSTGRES_PASSWORD: "Password12!"
 
 stack: go 1.14
 
