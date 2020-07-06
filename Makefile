@@ -100,6 +100,9 @@ alldeps:
 	docker-compose -p athensdev up -d jaeger
 	docker-compose -p athensdev up -d mysql
 	docker-compose -p athensdev up -d postgres
+	docker-compose -p athensdev up -d etcd0
+	docker-compose -p athensdev up -d etcd1
+	docker-compose -p athensdev up -d etcd2
 	echo "sleeping for a bit to wait for the DB to come up"
 	sleep 5
 

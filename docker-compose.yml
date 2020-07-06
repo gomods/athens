@@ -31,11 +31,15 @@ services:
       - ATHENS_INDEX_MYSQL_HOST=mysql
       - ATHENS_INDEX_POSTGRES_HOST=postgres
       - STATIC_PORTS=true
+      - ATHENS_ETCD_ENDPOINTS=http://etcd0:2379,http://etcd1:2379,http://etcd2:2379
     depends_on:
       - mongo
       - minio
       - mysql
       - postgres
+      - etcd0
+      - etcd1
+      - etcd2
   teste2e:
     build:
       context: .
