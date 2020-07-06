@@ -25,6 +25,10 @@ func (i *indexer) clear() error {
 
 func getTestConfig(t *testing.T) *config.MySQL {
 	t.Helper()
+	if os.Getenv("SKIP_INDEX_MYSQL") != "" {
+		t.SkipNow()
+		return nil
+	}
 	c, err := config.Load("")
 	if err != nil {
 		t.Fatal(err)
