@@ -55,6 +55,7 @@ func etcdTestConfig(t *testing.T) *config.Etcd {
 		t.SkipNow()
 		return nil
 	}
+
 	c, err := config.Load("")
 	require.NoError(t, err)
 	cfg := c.SingleFlight.Etcd
