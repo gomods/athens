@@ -6,12 +6,10 @@ import (
 
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/index/compliance"
+	"github.com/gomods/athens/pkg/internal/testutil"
 )
 
 func TestMySQL(t *testing.T) {
-	if os.Getenv("TEST_INDEX_MYSQL") != "true" {
-		t.SkipNow()
-	}
 	cfg := getTestConfig(t)
 	i, err := New(cfg)
 	if err != nil {
@@ -27,9 +25,13 @@ func (i *indexer) clear() error {
 
 func getTestConfig(t *testing.T) *config.MySQL {
 	t.Helper()
-	cfg, err := config.Load("")
+	c, err := config.Load("")
 	if err != nil {
 		t.Fatal(err)
 	}
-	return cfg.Index.MySQL
+	cfg := c.Index.MySQL
+	if os.Getenv("STATIC_PORTS") == "" {
+		cfg.Host, cfg.Port = testutil.GetServicePort(t, "mysql", 3306)
+	}
+	return cfg
 }
