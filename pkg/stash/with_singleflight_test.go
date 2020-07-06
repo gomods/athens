@@ -9,6 +9,15 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func Test_memoryLock_lock(t *testing.T) {
+	lckr := &memoryLock{
+		locks: map[string]bool{},
+	}
+	for _, test := range lockerTests {
+		t.Run(test.name, test.test(lckr))
+	}
+}
+
 // TestSingleFlight will ensure that 5 concurrent requests will all get the first request's
 // response. We can ensure that because only the first response does not return an error
 // and therefore all 5 responses should have no error.

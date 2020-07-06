@@ -14,7 +14,7 @@ import (
 // requests to stash a module, then
 // it will only do it once and give the first
 // response to both the first and the second client.
-func WithSingleflight(checker storage.Checker) (Wrapper) {
+func WithSingleflight(checker storage.Checker) Wrapper {
 	lckr := &memoryLock{
 		locks: map[string]bool{},
 	}
@@ -27,10 +27,19 @@ type memoryLock struct {
 }
 
 func (m *memoryLock) lock(ctx context.Context, name string) (releaseErrs <-chan error, err error) {
-	deadline := time.Now().Add(defaultGetLockTimeout)
+	timer := time.NewTimer(defaultGetLockTimeout)
+	defer func() {
+		if !timer.Stop() {
+			<-timer.C
+		}
+	}()
 	for {
-		if time.Now().After(deadline) {
+		select {
+		case <-timer.C:
 			return nil, fmt.Errorf("timed out waiting for lock")
+		case <-ctx.Done():
+			return nil, ctx.Err()
+		default:
 		}
 		m.mu.Lock()
 		if m.locks[name] {

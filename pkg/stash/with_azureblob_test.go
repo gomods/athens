@@ -3,18 +3,41 @@ package stash
 import (
 	"context"
 	"fmt"
+	"net/url"
 	"os"
 	"strings"
 	"sync"
 	"testing"
 	"time"
 
+	"github.com/Azure/azure-storage-blob-go/azblob"
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/storage"
 	"github.com/gomods/athens/pkg/storage/mem"
+	"github.com/stretchr/testify/require"
 	"github.com/technosophos/moniker"
 	"golang.org/x/sync/errgroup"
 )
+
+func Test_azBlobLock_lock(t *testing.T) {
+	containerName := randomContainerName(os.Getenv("DRONE_PULL_REQUEST"))
+	conf := getAzureTestConfig(containerName)
+	if conf == nil {
+		t.SkipNow()
+	}
+	accountURL, err := url.Parse(fmt.Sprintf("https://%s.blob.core.windows.net", conf.AccountName))
+	require.NoError(t, err)
+	cred, err := azblob.NewSharedKeyCredential(conf.AccountName, conf.AccountKey)
+	require.NoError(t, err)
+	pipe := azblob.NewPipeline(cred, azblob.PipelineOptions{})
+	serviceURL := azblob.NewServiceURL(*accountURL, pipe)
+	lckr := &azBlobLock{
+		containerURL: serviceURL.NewContainerURL(conf.ContainerName),
+	}
+	for _, test := range lockerTests {
+		t.Run(test.name, test.test(lckr))
+	}
+}
 
 // TestWithAzureBlob requires a real AzureBlob backend implementation
 // and it will ensure that saving to modules at the same time

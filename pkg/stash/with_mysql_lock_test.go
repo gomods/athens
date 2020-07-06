@@ -2,6 +2,7 @@ package stash
 
 import (
 	"context"
+	"database/sql"
 	"os"
 	"os/exec"
 	"strconv"
@@ -15,6 +16,16 @@ import (
 	"github.com/stretchr/testify/require"
 	"golang.org/x/sync/errgroup"
 )
+
+func Test_mysqlLock_lock(t *testing.T) {
+	db, err := sql.Open("mysql", mysqlDSN(mysqlTestConfig(t)))
+	require.NoError(t, err)
+	require.NoError(t, db.Ping())
+	lckr := &mysqlLock{db: db}
+	for _, test := range lockerTests {
+		t.Run(test.name, test.test(lckr))
+	}
+}
 
 // TestWithMysqlLock will ensure that 5 concurrent requests will all get the first request's
 // response. We can ensure that because only the first response does not return an error

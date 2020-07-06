@@ -19,17 +19,8 @@ import (
 // WithPostgresLock returns a distributed singleflight using a postgres advisory lock.
 func WithPostgresLock(cfg *config.Postgres, checker storage.Checker) (Wrapper, error) {
 	const op errors.Op = "stash.WithPostgresLock"
-	dsnArgs := []string{}
-	dsnArgs = append(dsnArgs, "host="+cfg.Host)
-	dsnArgs = append(dsnArgs, "port=", strconv.Itoa(cfg.Port))
-	dsnArgs = append(dsnArgs, "user=", cfg.User)
-	dsnArgs = append(dsnArgs, "password="+cfg.Password)
-	for k, v := range cfg.Params {
-		dsnArgs = append(dsnArgs, k+"="+v)
-	}
-	dsn := strings.Join(dsnArgs, " ")
 
-	db, err := sql.Open("postgres", dsn)
+	db, err := sql.Open("postgres", postgresDSN(cfg))
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
@@ -39,6 +30,18 @@ func WithPostgresLock(cfg *config.Postgres, checker storage.Checker) (Wrapper, e
 	}
 	lckr := &postgresLock{db: db}
 	return withLocker(lckr, checker), nil
+}
+
+func postgresDSN(cfg *config.Postgres) string {
+	args := []string{}
+	args = append(args, "host="+cfg.Host)
+	args = append(args, "port=", strconv.Itoa(cfg.Port))
+	args = append(args, "user=", cfg.User)
+	args = append(args, "password="+cfg.Password)
+	for k, v := range cfg.Params {
+		args = append(args, k+"="+v)
+	}
+	return strings.Join(args, " ")
 }
 
 type postgresLock struct {

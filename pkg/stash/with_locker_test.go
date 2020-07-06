@@ -259,6 +259,99 @@ func TestWithLocker(t *testing.T) {
 	require.Equal(t, 5, checkerCount)
 }
 
+
+var lockerTests = []struct{
+	name string
+	test func(lckr locker) func(t *testing.T)
+}{
+	{
+		name: "locks",
+		test: func(lckr locker) func(t *testing.T) {
+			return func(t *testing.T) {
+				t.Parallel()
+				lockName := t.Name()
+				ctx, cancel := context.WithCancel(context.Background())
+				defer cancel()
+				errs, err := lckr.lock(ctx, lockName)
+				require.NoError(t, err)
+				require.NotNil(t, errs)
+				cancel()
+				require.NoError(t, <-errs)
+			}
+		},
+	},
+	{
+		name: "won't double lock",
+		test: func(lckr locker) func(t *testing.T) {
+			return func(t *testing.T) {
+				t.Parallel()
+				lockName := t.Name()
+				ctx, cancel := context.WithCancel(context.Background())
+				defer cancel()
+				errs1, err := lckr.lock(ctx, lockName)
+				require.NoError(t, err)
+				require.NotNil(t, errs1)
+				ctx2, cancel2 := context.WithTimeout(context.Background(), 5 * time.Millisecond)
+				defer cancel2()
+				errs2, err := lckr.lock(ctx2, lockName)
+				require.Error(t, err)
+				require.Nil(t, errs2)
+				cancel()
+				<- errs1
+			}
+		},
+	},
+	{
+		name: "waits for lock",
+		test: func(lckr locker) func(t *testing.T) {
+			return func(t *testing.T) {
+				t.Parallel()
+				lockName := t.Name()
+				ctx1, cancel1 := context.WithTimeout(context.Background(), 200*time.Millisecond)
+				defer cancel1()
+				errs1, err := lckr.lock(ctx1, lockName)
+				require.NoError(t, err)
+				var wg sync.WaitGroup
+				wg.Add(1)
+				go func() {
+					require.NoError(t, <-errs1)
+					wg.Done()
+				}()
+				ctx2, cancel2 := context.WithCancel(context.Background())
+				defer cancel2()
+				errs2, err := lckr.lock(ctx2, lockName)
+				require.NoError(t, err)
+				cancel2()
+				require.NoError(t, <-errs2)
+				wg.Wait()
+			}
+		},
+	},
+	{
+		name: "release and relock",
+		test: func(lckr locker) func(t *testing.T) {
+			return func(t *testing.T) {
+				t.Parallel()
+				lockName := t.Name()
+				ctx, cancel := context.WithCancel(context.Background())
+				defer cancel()
+				errs, err := lckr.lock(ctx, lockName)
+				require.NoError(t, err)
+				require.NotNil(t, errs)
+				cancel()
+				require.NoError(t, <-errs)
+				ctx2, cancel2 := context.WithCancel(context.Background())
+				defer cancel2()
+				errs, err = lckr.lock(ctx2, lockName)
+				require.NoError(t, err)
+				require.NotNil(t, errs)
+				cancel2()
+				require.NoError(t, <-errs)
+			}
+		},
+	},
+}
+
 func Test_lockHolder_holdAndRelease(t *testing.T) {
 	t.Run("refreshes until ctx.Done()", func(t *testing.T) {
 		refreshCount := 0

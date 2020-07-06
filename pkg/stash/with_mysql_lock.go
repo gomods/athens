@@ -17,15 +17,7 @@ const mysqlLockName = "athens_stash_lock"
 // WithMysqlLock returns a distributed singleflight using a mysql advisory lock.
 func WithMysqlLock(cfg *config.MySQL, checker storage.Checker) (Wrapper, error) {
 	const op errors.Op = "stash.WithMysqlLock"
-
-	mysqlCfg := mysql.NewConfig()
-	mysqlCfg.Net = cfg.Protocol
-	mysqlCfg.Addr = fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
-	mysqlCfg.User = cfg.User
-	mysqlCfg.Passwd = cfg.Password
-	mysqlCfg.Params = cfg.Params
-
-	db, err := sql.Open("mysql", mysqlCfg.FormatDSN())
+	db, err := sql.Open("mysql", mysqlDSN(cfg))
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
@@ -35,6 +27,17 @@ func WithMysqlLock(cfg *config.MySQL, checker storage.Checker) (Wrapper, error) 
 	}
 	lckr := &mysqlLock{db: db}
 	return withLocker(lckr, checker), nil
+}
+
+func mysqlDSN(cfg *config.MySQL) string {
+	mysqlCfg := mysql.NewConfig()
+	mysqlCfg.Net = cfg.Protocol
+	mysqlCfg.Addr = fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
+	mysqlCfg.User = cfg.User
+	mysqlCfg.Passwd = cfg.Password
+	mysqlCfg.Params = cfg.Params
+	dsn := mysqlCfg.FormatDSN()
+	return dsn
 }
 
 type mysqlLock struct {

@@ -9,10 +9,31 @@ import (
 	"testing"
 	"time"
 
+	"github.com/go-redis/redis/v7"
 	"github.com/gomods/athens/pkg/storage"
 	"github.com/gomods/athens/pkg/storage/mem"
+	"github.com/stretchr/testify/require"
 	"golang.org/x/sync/errgroup"
 )
+
+func Test_redisLock_lock(t *testing.T) {
+	endpoint := os.Getenv("REDIS_TEST_ENDPOINT")
+	password := os.Getenv("ATHENS_REDIS_PASSWORD")
+	if endpoint == "" {
+		t.SkipNow()
+	}
+	client := redis.NewClient(&redis.Options{
+		Network:  "tcp",
+		Addr:     endpoint,
+		Password: password,
+	})
+	_, err := client.Ping().Result()
+	require.NoError(t, err)
+	lckr := &redisLock{client: client}
+	for _, test := range lockerTests {
+		t.Run(test.name, test.test(lckr))
+	}
+}
 
 // WithRedisLock will ensure that 5 concurrent requests will all get the first request's
 // response. We can ensure that because only the first response does not return an error

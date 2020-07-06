@@ -11,8 +11,38 @@ import (
 
 	"github.com/gomods/athens/pkg/storage"
 	"github.com/gomods/athens/pkg/storage/mem"
+	"github.com/stretchr/testify/require"
+	"go.etcd.io/etcd/clientv3"
 	"golang.org/x/sync/errgroup"
 )
+
+func Test_etcdLock_lock(t *testing.T) {
+	endpointsStr := os.Getenv("ETCD_TEST_ENDPOINTS")
+	if len(endpointsStr) == 0 {
+		t.SkipNow()
+	}
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	endpoints := strings.Split(endpointsStr, ",")
+	client, err := clientv3.New(clientv3.Config{
+		Endpoints:   endpoints,
+		DialTimeout: time.Second * 5,
+	})
+	require.NoError(t, err)
+	var eg errgroup.Group
+	for _, ep := range endpoints {
+		eg.Go(func() error {
+			_, err := client.Status(ctx, ep)
+			return err
+		})
+	}
+	require.NoError(t, eg.Wait())
+	lckr := &etcdLock{client: client}
+
+	for _, test := range lockerTests {
+		t.Run(test.name, test.test(lckr))
+	}
+}
 
 // TestEtcdSingleFlight will ensure that 5 concurrent requests will all get the first request's
 // response. We can ensure that because only the first response does not return an error
