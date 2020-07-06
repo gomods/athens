@@ -4,11 +4,9 @@ import (
 	"context"
 	"time"
 
-	lock "github.com/bsm/redislock"
+	"github.com/bsm/redislock"
 	"github.com/go-redis/redis/v7"
-	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/errors"
-	"github.com/gomods/athens/pkg/observ"
 	"github.com/gomods/athens/pkg/storage"
 )
 
@@ -25,48 +23,31 @@ func WithRedisLock(endpoint string, password string, checker storage.Checker) (W
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
-
-	return func(s Stasher) Stasher {
-		return &redisLock{client, s, checker}
-	}, nil
+	lckr := &redisLock{client: client}
+	return withLocker(lckr, checker), nil
 }
 
 type redisLock struct {
-	client  *redis.Client
-	stasher Stasher
-	checker storage.Checker
+	client *redis.Client
 }
 
-func (s *redisLock) Stash(ctx context.Context, mod, ver string) (newVer string, err error) {
-	const op errors.Op = "redis.Stash"
-	ctx, span := observ.StartSpan(ctx, op.String())
-	defer span.End()
-	mv := config.FmtModVer(mod, ver)
-
-	// Obtain a new lock with default settings
-	lock, err := lock.Obtain(s.client, mv, time.Minute*5, &lock.Options{
-		RetryStrategy: lock.LimitRetry(lock.LinearBackoff(time.Second), 60*5),
+func (l *redisLock) lock(ctx context.Context, name string) (releaseErrs <-chan error, err error) {
+	ttl := defaultPingInterval * 2
+	lock, err := redislock.Obtain(l.client, name, ttl, &redislock.Options{
+		RetryStrategy: redislock.LimitRetry(redislock.LinearBackoff(time.Second), 60*5),
 	})
 	if err != nil {
-		return ver, errors.E(op, err)
+		return nil, err
 	}
-	defer func() {
-		const op errors.Op = "redis.Release"
-		lockErr := lock.Release()
-		if err == nil && lockErr != nil {
-			err = errors.E(op, lockErr)
-		}
-	}()
-	ok, err := s.checker.Exists(ctx, mod, ver)
-	if err != nil {
-		return ver, errors.E(op, err)
+	holder := &lockHolder{
+		pingInterval: defaultPingInterval,
+		ttl:          ttl,
+		refresh: func(_ context.Context) error {
+			return lock.Refresh(ttl, nil)
+		},
+		release: lock.Release,
 	}
-	if ok {
-		return ver, nil
-	}
-	newVer, err = s.stasher.Stash(ctx, mod, ver)
-	if err != nil {
-		return ver, errors.E(op, err)
-	}
-	return newVer, nil
+	errs := make(chan error, 1)
+	go holder.holdAndRelease(ctx, errs)
+	return errs, nil
 }

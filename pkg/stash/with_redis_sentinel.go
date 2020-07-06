@@ -24,7 +24,6 @@ func WithRedisSentinelLock(endpoints []string, master, password string, checker 
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
-	return func(s Stasher) Stasher {
-		return &redisLock{client, s, checker}
-	}, nil
+	lckr := &redisLock{client: client}
+	return withLocker(lckr, checker), nil
 }

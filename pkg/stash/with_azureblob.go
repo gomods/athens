@@ -32,97 +32,48 @@ func WithAzureBlobLock(conf *config.AzureBlobConfig, timeout time.Duration, chec
 	pipe := azblob.NewPipeline(cred, azblob.PipelineOptions{})
 	serviceURL := azblob.NewServiceURL(*accountURL, pipe)
 
-	containerURL := serviceURL.NewContainerURL(conf.ContainerName)
-
-	return func(s Stasher) Stasher {
-		return &azblobLock{containerURL, s, checker}
-	}, nil
+	lckr := &azBlobLock{
+		containerURL: serviceURL.NewContainerURL(conf.ContainerName),
+	}
+	return withLocker(lckr, checker), nil
 }
 
-type azblobLock struct {
+type azBlobLock struct {
 	containerURL azblob.ContainerURL
-	stasher      Stasher
-	checker      storage.Checker
 }
 
-type stashRes struct {
-	v   string
-	err error
-}
-
-func (s *azblobLock) Stash(ctx context.Context, mod, ver string) (newVer string, err error) {
-	const op errors.Op = "azblobLock.Stash"
+func (l *azBlobLock) lock(ctx context.Context, name string) (releaseErrs <-chan error, err error) {
+	ttl := defaultPingInterval * 2
+	const op errors.Op = "azBlobLock.lock"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
-
-	ctx, cancel := context.WithTimeout(ctx, time.Minute*10)
-	defer cancel()
-
-	leaseBlobName := "lease/" + config.FmtModVer(mod, ver)
-	leaseBlobURL := s.containerURL.NewBlockBlobURL(leaseBlobName)
-
-	leaseID, err := s.acquireLease(ctx, leaseBlobURL)
+	leaseBlobName := "lease/" + name
+	leaseBlobURL := l.containerURL.NewBlockBlobURL(leaseBlobName)
+	acquireCtx, acquireCancel := context.WithTimeout(ctx, defaultGetLockTimeout)
+	defer acquireCancel()
+	leaseID, err := azAcquireLease(acquireCtx, leaseBlobURL, ttl)
 	if err != nil {
-		return ver, errors.E(op, err)
+		return nil, errors.E(op, err)
 	}
-	defer func() {
-		const op errors.Op = "azblobLock.Unlock"
-		relErr := s.releaseLease(ctx, leaseBlobURL, leaseID)
-		if err == nil && relErr != nil {
-			err = errors.E(op, relErr)
-		}
-	}()
-	ok, err := s.checker.Exists(ctx, mod, ver)
-	if err != nil {
-		return ver, errors.E(op, err)
+	holder := &lockHolder{
+		pingInterval: defaultPingInterval,
+		ttl:          ttl,
+		refresh: func(refreshCtx context.Context) error {
+			_, refreshErr := leaseBlobURL.RenewLease(refreshCtx, leaseID, azblob.ModifiedAccessConditions{})
+			return refreshErr
+		},
+		release: func() error {
+			_, releaseErr := leaseBlobURL.ReleaseLease(context.Background(), leaseID, azblob.ModifiedAccessConditions{})
+			return releaseErr
+		},
 	}
-	if ok {
-		return ver, nil
-	}
-	sChan := make(chan stashRes)
-	go func() {
-		v, err := s.stasher.Stash(ctx, mod, ver)
-		sChan <- stashRes{v, err}
-	}()
-
-	for {
-		select {
-		case sr := <-sChan:
-			if sr.err != nil {
-				err = errors.E(op, sr.err)
-				return ver, err
-			}
-			newVer = sr.v
-			return newVer, nil
-		case <-time.After(10 * time.Second):
-			err := s.renewLease(ctx, leaseBlobURL, leaseID)
-			if err != nil {
-				return ver, errors.E(op, err)
-			}
-		case <-ctx.Done():
-			return ver, errors.E(op, ctx.Err())
-		}
-	}
+	errs := make(chan error, 1)
+	go holder.holdAndRelease(ctx, errs)
+	return errs, nil
 }
 
-func (s *azblobLock) releaseLease(ctx context.Context, blobURL azblob.BlockBlobURL, leaseID string) error {
-	const op errors.Op = "azblobLock.releaseLease"
-	ctx, span := observ.StartSpan(ctx, op.String())
-	defer span.End()
-	_, err := blobURL.ReleaseLease(ctx, leaseID, azblob.ModifiedAccessConditions{})
-	return err
-}
-
-func (s *azblobLock) renewLease(ctx context.Context, blobURL azblob.BlockBlobURL, leaseID string) error {
-	const op errors.Op = "azblobLock.renewLease"
-	ctx, span := observ.StartSpan(ctx, op.String())
-	defer span.End()
-	_, err := blobURL.RenewLease(ctx, leaseID, azblob.ModifiedAccessConditions{})
-	return err
-}
-
-func (s *azblobLock) acquireLease(ctx context.Context, blobURL azblob.BlockBlobURL) (string, error) {
-	const op errors.Op = "azblobLock.acquireLease"
+func azAcquireLease(ctx context.Context, blobURL azblob.BlockBlobURL, ttl time.Duration) (string, error) {
+	const op errors.Op = "azAcquireLease"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 	tctx, cancel := context.WithTimeout(ctx, 10*time.Minute)
@@ -142,9 +93,10 @@ func (s *azblobLock) acquireLease(ctx context.Context, blobURL azblob.BlockBlobU
 	if err != nil {
 		return "", errors.E(op, err)
 	}
+	ttlSeconds := int32(ttl / time.Second)
 	for {
-		// acquire lease for 15 sec (it's the min value)
-		res, err := blobURL.AcquireLease(tctx, leaseID.String(), 15, azblob.ModifiedAccessConditions{})
+		// acquire lease for 20 sec
+		res, err := blobURL.AcquireLease(tctx, leaseID.String(), ttlSeconds, azblob.ModifiedAccessConditions{})
 		if err != nil {
 			// if the blob is already leased we will get http.StatusConflict - wait and try again
 			if stgErr, ok := err.(azblob.StorageError); ok && stgErr.Response().StatusCode == http.StatusConflict {

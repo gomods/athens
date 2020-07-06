@@ -4,7 +4,6 @@ import (
 	"context"
 	"time"
 
-	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/observ"
 	"github.com/gomods/athens/pkg/storage"
@@ -38,48 +37,41 @@ func WithEtcd(endpoints []string, checker storage.Checker) (Wrapper, error) {
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
-	return func(s Stasher) Stasher {
-		return &etcd{c, s, checker}
-	}, nil
+	lckr := &etcdLock{client: c}
+	return withLocker(lckr, checker), nil
 }
 
-type etcd struct {
-	client  *clientv3.Client
-	stasher Stasher
-	checker storage.Checker
+type etcdLock struct {
+	client *clientv3.Client
 }
 
-func (s *etcd) Stash(ctx context.Context, mod, ver string) (newVer string, err error) {
-	const op errors.Op = "etcd.Stash"
+func (l *etcdLock) lock(ctx context.Context, name string) (releaseErrs <-chan error, err error) {
+	const op errors.Op = "etcdLock.lock"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
-	sesh, err := concurrency.NewSession(s.client)
+	ttl := defaultPingInterval
+	session, err := concurrency.NewSession(l.client, concurrency.WithTTL(int(ttl/time.Second)))
 	if err != nil {
-		return ver, errors.E(op, err)
+		return nil, errors.E(op, err)
 	}
-	mv := config.FmtModVer(mod, ver)
-	mu := concurrency.NewMutex(sesh, mv)
+	mu := concurrency.NewMutex(session, name)
 	err = mu.Lock(ctx)
 	if err != nil {
-		return ver, errors.E(op, err)
+		return nil, err
 	}
-	defer func() {
-		const op errors.Op = "etcd.Unlock"
-		lockErr := mu.Unlock(ctx)
-		if err == nil && lockErr != nil {
-			err = errors.E(op, lockErr)
-		}
-	}()
-	ok, err := s.checker.Exists(ctx, mod, ver)
-	if err != nil {
-		return ver, errors.E(op, err)
+	holder := &lockHolder{
+		ttl: ttl,
+		release: func() error {
+			_ = mu.Unlock(ctx)  // don't care about this error because the lock will expire when the session is closed below
+			_ = session.Close() // don't care about this error because close blocks long enough for the lock to expire when there is an error
+			return nil
+		},
+		refresh: func(refreshCtx context.Context) error {
+			// etcd does its own keepalive, so there is no need for us to do one too
+			return nil
+		},
 	}
-	if ok {
-		return ver, nil
-	}
-	newVer, err = s.stasher.Stash(ctx, mod, ver)
-	if err != nil {
-		return ver, errors.E(op, err)
-	}
-	return newVer, nil
+	errs := make(chan error, 1)
+	go holder.holdAndRelease(ctx, errs)
+	return errs, nil
 }

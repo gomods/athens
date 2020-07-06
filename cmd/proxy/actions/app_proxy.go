@@ -132,7 +132,7 @@ func addProxyRoutes(
 func getSingleFlight(c *config.Config, checker storage.Checker) (stash.Wrapper, error) {
 	switch c.SingleFlightType {
 	case "", "memory":
-		return stash.WithSingleflight, nil
+		return stash.WithSingleflight(checker), nil
 	case "etcd":
 		if c.SingleFlight == nil || c.SingleFlight.Etcd == nil {
 			return nil, fmt.Errorf("Etcd config must be present")
