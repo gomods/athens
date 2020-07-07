@@ -63,6 +63,14 @@ test-unit-docker: ## run unit tests with docker
 	docker-compose -p athensunit up --exit-code-from=testunit testunit
 	docker-compose -p athensunit down
 
+.PHONY: test-all
+test-all:
+	./scripts/test_all.sh
+
+test-all-docker: testdeps
+	docker-compose -p athenstest up --build --exit-code-from=testall testall
+	$(MAKE) test-teardown
+
 .PHONY: test-e2e
 test-e2e:
 	cd e2etests && go test --tags e2etests
@@ -101,23 +109,24 @@ alldeps:
 	echo "sleeping for a bit to wait for the DB to come up"
 	sleep 5
 
-.PHONY: testdeps
-testdeps: export MONGO_27017 = 0
-testdeps: export MINIO_9000 = 0
-testdeps: export JAEGER_14268 = 0
-testdeps: export JAEGER_9411 = 0
-testdeps: export JAEGER_5775 = 0
-testdeps: export JAEGER_6831 = 0
-testdeps: export JAEGER_6832 = 0
-testdeps: export JAEGER_5778 = 0
-testdeps: export JAEGER_16686 = 0
-testdeps: export REDIS_6379 = 0
-testdeps: export REDIS_SENTINEL_26379 = 0
-testdeps: export PROTECTEDREDIS_6380 = 0
-testdeps: export ETCD0_2379 = 0
-testdeps: export ETCD1_2379 = 0
-testdeps: export ETCD2_2379 = 0
-testdeps: bin/composeconfig
+.PHONY: no-static-ports
+no-static-ports: export MONGO_27017 = 0
+no-static-ports: export MINIO_9000 = 0
+no-static-ports: export JAEGER_14268 = 0
+no-static-ports: export JAEGER_9411 = 0
+no-static-ports: export JAEGER_5775 = 0
+no-static-ports: export JAEGER_6831 = 0
+no-static-ports: export JAEGER_6832 = 0
+no-static-ports: export JAEGER_5778 = 0
+no-static-ports: export JAEGER_16686 = 0
+no-static-ports: export REDIS_6379 = 0
+no-static-ports: export REDIS_SENTINEL_26379 = 0
+no-static-ports: export PROTECTEDREDIS_6380 = 0
+no-static-ports: export ETCD0_2379 = 0
+no-static-ports: export ETCD1_2379 = 0
+no-static-ports: export ETCD2_2379 = 0
+
+testdeps: no-static-ports bin/composeconfig
 	docker-compose -p athenstest up -d \
 mongo minio jaeger mysql postgres etcd0 etcd1 etcd2 redis redis-sentinel protectedredis
 	bin/composeconfig -p athenstest -config-file config.test.toml
