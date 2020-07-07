@@ -5,6 +5,8 @@ ifndef GOLANG_VERSION
 override GOLANG_VERSION = 1.14
 endif
 
+.PHONY: gobuildcache
+
 .PHONY: build
 build: ## build the athens proxy
 	go build -o ./cmd/proxy/proxy ./cmd/proxy
@@ -95,16 +97,30 @@ bench:
 
 .PHONY: alldeps
 alldeps:
-	docker-compose -p athensdev up -d mongo
-	docker-compose -p athensdev up -d minio
-	docker-compose -p athensdev up -d jaeger
-	docker-compose -p athensdev up -d mysql
-	docker-compose -p athensdev up -d postgres
-	docker-compose -p athensdev up -d etcd0
-	docker-compose -p athensdev up -d etcd1
-	docker-compose -p athensdev up -d etcd2
+	docker-compose -p athensdev up -d mongo minio jaeger
 	echo "sleeping for a bit to wait for the DB to come up"
 	sleep 5
+
+.PHONY: testdeps
+testdeps: export MONGO_27017 = 0
+testdeps: export MINIO_9000 = 0
+testdeps: export JAEGER_14268 = 0
+testdeps: export JAEGER_9411 = 0
+testdeps: export JAEGER_5775 = 0
+testdeps: export JAEGER_6831 = 0
+testdeps: export JAEGER_6832 = 0
+testdeps: export JAEGER_5778 = 0
+testdeps: export JAEGER_16686 = 0
+testdeps: export REDIS_6379 = 0
+testdeps: export REDIS_SENTINEL_26379 = 0
+testdeps: export PROTECTEDREDIS_6380 = 0
+testdeps: export ETCD0_2379 = 0
+testdeps: export ETCD1_2379 = 0
+testdeps: export ETCD2_2379 = 0
+testdeps: bin/composeconfig
+	docker-compose -p athenstest up -d \
+mongo minio jaeger mysql postgres etcd0 etcd1 etcd2 redis redis-sentinel protectedredis
+	bin/composeconfig -p athenstest -config-file config.test.toml
 
 .PHONY: dev
 dev:
@@ -119,9 +135,14 @@ down:
 dev-teardown:
 	docker-compose -p athensdev down -v
 
+.PHONY: test-teardown
+test-teardown:
+	docker-compose -p athenstest down -v
+	rm config.test.toml
+
 .PHONY: clean
 clean: ## delete all locally-built artefacts (not including docker images)
-	rm -f athens cmd/proxy/proxy
+	rm -f athens cmd/proxy/proxy bin/composeconfig
 
 .PHONY: help
 help: ## display help page
@@ -130,3 +151,6 @@ help: ## display help page
 .PHONY: deploy-gae
 deploy-gae:
 	cd scripts/gae && gcloud app deploy
+
+bin/composeconfig: gobuildcache
+	go build -o $@ ./cmd/composeconfig

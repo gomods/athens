@@ -40,6 +40,9 @@ services:
       - etcd0
       - etcd1
       - etcd2
+      - redis
+      - redis-sentinel
+      - protectedredis
   teste2e:
     build:
       context: .
@@ -50,18 +53,18 @@ services:
   azurite:
     image: arafato/azurite:2.6.5
     ports:
-      - 10000:10000
+      - ${AZURITE_10000:-10000}:10000
     environment:
       executable: blob
   mongo:
     image: mongo:3.7.9-jessie
     ports:
-      - 27017:27017
+      - ${MONGO_27017:-27017}:27017
   minio:
     image: minio/minio:latest
     command: server /data
     ports:
-      - "9001:9000"
+      - ${MINIO_9000:-9001}:9000
     environment:
       MINIO_ACCESS_KEY: minio
       MINIO_SECRET_KEY: minio123
@@ -73,23 +76,23 @@ services:
     image:
       datadog/agent:latest
     ports:
-      - 8126:8126
+      - ${DATADOG_8126:-8126}:8126
   jaeger:
     environment:
       - COLLECTOR_ZIPKIN_HTTP_PORT=9441
     image: jaegertracing/all-in-one:latest
     ports:
-      - 14268:14268
-      - 9411:9411
-      - 5775:5775/udp
-      - 6831:6831/udp
-      - 6832:6832/udp
-      - 5778:5778
-      - 16686:16686
+      - ${JAEGER_14268:-14268}:14268
+      - ${JAEGER_9411:-9411}:9411
+      - ${JAEGER_5775:-5775}:5775/udp
+      - ${JAEGER_6831:-6831}:6831/udp
+      - ${JAEGER_6832:-6832}:6832/udp
+      - ${JAEGER_5778:-5778}:5778
+      - ${JAEGER_16686:-16686}:16686
   redis:
     image: redis
     ports:
-      - 6379:6379
+      - ${REDIS_6379:-6379}:6379
   redis-sentinel:
     image: bitnami/redis-sentinel
     environment:
@@ -98,18 +101,18 @@ services:
       - REDIS_SENTINEL_PASSWORD=sekret
       - REDIS_SENTINEL_QUORUM=1
     ports:
-      - 26379:26379
+      - ${REDIS_SENTINEL_26379:-26379}:26379
   protectedredis:
     image: redis
     ports:
-      - "6380:6380"
+      - ${PROTECTEDREDIS_6380:-6380}:6380
     volumes:
       - "./test/redis.conf:/usr/local/etc/redis/redis.conf"
     entrypoint: ["redis-server", "/usr/local/etc/redis/redis.conf"]
   etcd0:
     image: quay.io/coreos/etcd
     ports:
-      - "2379:2379"
+      - ${ETCD0_2379:-2379}:2379
     volumes:
       - etcd0:/etcd_data
     command:
@@ -131,7 +134,7 @@ services:
   etcd1:
     image: quay.io/coreos/etcd
     ports:
-      - "22379:2379"
+      - ${ETCD1_2379:-22379}:2379
     volumes:
       - etcd1:/etcd_data
     command:
@@ -153,7 +156,7 @@ services:
   etcd2:
     image: quay.io/coreos/etcd
     ports:
-      - "32379:2379"
+      - ${ETCD2_2379:-32379}:2379
     volumes:
       - etcd2:/etcd_data
     command:
