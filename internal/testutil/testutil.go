@@ -31,7 +31,7 @@ func GetServicePort(t *testing.T, service string, containerPort int) (host strin
 }
 
 // AthensRoot returns the filepath to the root of this repository
-func AthensRoot(t *testing.T) string {
+func AthensRoot(t testing.TB) string {
 	t.Helper()
 	_, file, _, ok := runtime.Caller(0)
 	require.True(t, ok)
@@ -49,6 +49,8 @@ const (
 	TestDependencyRedis
 	TestDependencyProtectedRedis
 	TestDependencyEtcd
+	TestDependencyMinio
+	TestDependencyMongo
 	invalidDependency // keep this at the end so we can iterate through dependencies
 )
 
@@ -58,6 +60,8 @@ var dependencyNames = map[TestDependency]string{
 	TestDependencyRedis:          "redis",
 	TestDependencyProtectedRedis: "protectedredis",
 	TestDependencyEtcd:           "etcd",
+	TestDependencyMinio:          "minio",
+	TestDependencyMongo:          "mongo",
 }
 
 var dependencySkipVars = map[TestDependency]string{
@@ -66,19 +70,21 @@ var dependencySkipVars = map[TestDependency]string{
 	TestDependencyRedis:          "SKIP_REDIS",
 	TestDependencyProtectedRedis: "SKIP_PROTECTEDREDIS",
 	TestDependencyEtcd:           "SKIP_ETCD",
+	TestDependencyMinio:          "SKIP_MINIO",
+	TestDependencyMongo:          "SKIP_MONGO",
 }
 
 func (d TestDependency) String() string {
 	return dependencyNames[d]
 }
 
-func (d TestDependency) Check(t *testing.T) {
+func (d TestDependency) Check(t testing.TB) {
 	if os.Getenv(dependencySkipVars[d]) != "" {
 		t.Skipf("skipping test because %s dependency is not met", d)
 	}
 }
 
-func CheckTestDependencies(t *testing.T, dependencies ...TestDependency) {
+func CheckTestDependencies(t testing.TB, dependencies ...TestDependency) {
 	if os.Getenv("SKIP_ALL_DEPENDENCIES") != "" {
 		t.SkipNow()
 	}

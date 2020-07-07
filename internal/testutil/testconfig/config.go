@@ -12,7 +12,7 @@ import (
 )
 
 // LoadTestConfig loads the config file config.test.toml
-func LoadTestConfig(t *testing.T) *config.Config {
+func LoadTestConfig(t testing.TB) *config.Config {
 	if os.Getenv("USE_DEFAULT_CONFIG") != "" {
 		cfg, err := config.Load("")
 		require.NoError(t, err)

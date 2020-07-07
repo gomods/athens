@@ -40,7 +40,7 @@ func main() {
 	}
 	cfg := config.DefaultConfig()
 
-	svcAddrs, err := getServiceAddresses( dockerComposeProject,
+	svcAddrs, err := getServiceAddresses(dockerComposeProject,
 		"mysql:3306",
 		"postgres:5432",
 		"redis:6379",
@@ -48,6 +48,9 @@ func main() {
 		"etcd0:2379",
 		"etcd1:2379",
 		"etcd2:2379",
+		"redis-sentinel:26379",
+		"minio:9000",
+		"mongo:27017",
 	)
 	if err != nil {
 		log.Fatalf(err.Error())
@@ -71,6 +74,25 @@ func main() {
 	cfg.TraceExporterURL = fmt.Sprintf("http://%s", svcAddrs["jaeger:14268"])
 
 	cfg.SingleFlight.Etcd.Endpoints = fmt.Sprintf("%s,%s,%s", svcAddrs["etcd0:2379"], svcAddrs["etcd1:2379"], svcAddrs["etcd2:2379"])
+
+	sentinel := cfg.SingleFlight.RedisSentinel
+	sentinel.Endpoints = []string{svcAddrs["redis-sentinel:26379"]}
+	sentinel.SentinelPassword = "sekret"
+	sentinel.MasterName = "redis-1"
+
+	cfg.Storage = new(config.Storage)
+	cfg.Storage.Minio = &config.MinioConfig{
+		Endpoint:  svcAddrs["minio:9000"],
+		Key:       "minio",
+		Secret:    "minio123",
+		Bucket:    "gomods",
+		Region:    "",
+		EnableSSL: false,
+	}
+
+	cfg.Storage.Mongo = &config.MongoConfig{
+		URL: fmt.Sprintf("mongodb://%s", svcAddrs["mongo:27017"]),
+	}
 
 	file, err := os.Create(targetFile)
 	if err != nil {

@@ -27,6 +27,10 @@ services:
     environment:
       - GO_ENV=test
       - ATHENS_MINIO_ENDPOINT=minio:9000
+      - ATHENS_MINIO_ACCESS_KEY_ID=minio
+      - ATHENS_MINIO_SECRET_ACCESS_KEY=minio123
+      - ATHENS_MINIO_USE_SSL=false
+      - ATHENS_MINIO_BUCKET_NAME=gomods
       - ATHENS_MONGO_STORAGE_URL=mongodb://mongo:27017
       - TIMEOUT=20 # in case the mongo dependency takes longer to start up
       - ATHENS_STORAGE_TYPE=mongo
