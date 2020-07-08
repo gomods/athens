@@ -1,20 +1,20 @@
 name: ci
 on: [push, pull_request]
 jobs:
-  test-unit:
+  test-all:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-go@v2
         with:
           go-version: '~1.14.4'
-      - run: make alldeps
-      - run: make test-unit
-  test-unit-docker:
+      - run: make testdeps
+      - run: make test-all
+  test-all-docker:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - run: make test-unit-docker
+      - run: make test-all-docker
   test-e2e:
     runs-on: ubuntu-latest
     steps:
