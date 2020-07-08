@@ -17,6 +17,7 @@ environment:
   SKIP_MONGO: true
   SKIP_AZURITE: true
   SKIP_REDIS: true
+  SKIP_PROTECTEDREDIS: true
 
 stack: go 1.14
 
