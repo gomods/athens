@@ -132,6 +132,7 @@ func getAddrHostAndPort(addr string) (string, int, error) {
 
 func getServiceAddresses(dockerComposeProject string, services ...string) (map[string]string, error) {
 	result := map[string]string{}
+	var resultMux sync.Mutex
 	var wg sync.WaitGroup
 	var hasErr bool
 	var hasErrMux sync.Mutex
@@ -155,7 +156,9 @@ func getServiceAddresses(dockerComposeProject string, services ...string) (map[s
 				hasErrMux.Unlock()
 				log.Printf("error getting service port for %s: %v", svc, err)
 			}
+			resultMux.Lock()
 			result[svc] = strings.TrimSpace(string(out))
+			resultMux.Unlock()
 			wg.Done()
 		}()
 	}
