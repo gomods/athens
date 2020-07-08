@@ -40,6 +40,10 @@ services:
       - ATHENS_REDIS_ENDPOINT=redis:6379
       - PROTECTEDREDIS_ENDPOINT=protectedredis:6380
       - ATHENS_ETCD_ENDPOINTS=http://etcd0:2379,http://etcd1:2379,http://etcd2:2379
+      - ATHENS_AZURE_ACCOUNT_NAME=devstoreaccount1
+      - ATHENS_AZURE_ACCOUNT_KEY=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==
+      - ATHENS_AZURE_PORTAL_URL=http://azurite:10000/devstoreaccount1
+      - ATHENS_AZURE_CONTAINER_NAME=athens-test-container
       - USE_DEFAULT_CONFIG=true
       - STATIC_PORTS=true
     depends_on:
@@ -53,6 +57,7 @@ services:
       - redis
       - redis-sentinel
       - protectedredis
+      - azurite
     volumes:
       - go-modules:/go/pkg/mod
   testunit:
@@ -77,6 +82,7 @@ services:
       - SKIP_POSTGRES=true
       - SKIP_PROTECTEDREDIS=true
       - SKIP_ETCD=true
+      - SKIP_AZURITE=true
       - USE_DEFAULT_CONFIG=true
     depends_on:
       - mongo
@@ -91,7 +97,7 @@ services:
         GOLANG_VERSION: 1.14
     command: ["./scripts/test_e2e.sh"]
   azurite:
-    image: arafato/azurite:2.6.5
+    image: mcr.microsoft.com/azure-storage/azurite:3.8.0
     ports:
       - ${AZURITE_10000:-10000}:10000
     environment:

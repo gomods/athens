@@ -51,6 +51,7 @@ const (
 	TestDependencyEtcd
 	TestDependencyMinio
 	TestDependencyMongo
+	TestDependencyAzurite
 	invalidDependency // keep this at the end so we can iterate through dependencies
 )
 
@@ -62,6 +63,7 @@ var dependencyNames = map[TestDependency]string{
 	TestDependencyEtcd:           "etcd",
 	TestDependencyMinio:          "minio",
 	TestDependencyMongo:          "mongo",
+	TestDependencyAzurite:        "azurite",
 }
 
 var dependencySkipVars = map[TestDependency]string{
@@ -72,6 +74,7 @@ var dependencySkipVars = map[TestDependency]string{
 	TestDependencyEtcd:           "SKIP_ETCD",
 	TestDependencyMinio:          "SKIP_MINIO",
 	TestDependencyMongo:          "SKIP_MONGO",
+	TestDependencyAzurite:        "SKIP_AZURITE",
 }
 
 func (d TestDependency) String() string {

@@ -51,6 +51,7 @@ func main() {
 		"redis-sentinel:26379",
 		"minio:9000",
 		"mongo:27017",
+		"azurite:10000",
 	)
 	if err != nil {
 		log.Fatalf(err.Error())
@@ -92,6 +93,12 @@ func main() {
 
 	cfg.Storage.Mongo = &config.MongoConfig{
 		URL: fmt.Sprintf("mongodb://%s", svcAddrs["mongo:27017"]),
+	}
+
+	cfg.Storage.AzureBlob = &config.AzureBlobConfig{
+		AccountName: "devstoreaccount1",
+		AccountKey:  "Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==",
+		PortalURL:   fmt.Sprintf("http://%s/devstoreaccount1", svcAddrs["azurite:10000"]),
 	}
 
 	file, err := os.Create(targetFile)

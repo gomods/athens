@@ -70,6 +70,7 @@ func (s *Storage) createBucket() error {
 }
 
 func getStorage(t testing.TB) *Storage {
+	t.Helper()
 	testutil.CheckTestDependencies(t, testutil.TestDependencyMinio)
 	url := testconfig.LoadTestConfig(t).Storage.Minio.Endpoint
 

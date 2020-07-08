@@ -125,10 +125,11 @@ no-static-ports: export PROTECTEDREDIS_6380 = 0
 no-static-ports: export ETCD0_2379 = 0
 no-static-ports: export ETCD1_2379 = 0
 no-static-ports: export ETCD2_2379 = 0
+no-static-ports: export AZURITE_10000 = 0
 
 testdeps: no-static-ports bin/composeconfig
 	docker-compose -p athenstest up -d \
-mongo minio jaeger mysql postgres etcd0 etcd1 etcd2 redis redis-sentinel protectedredis
+mongo minio jaeger mysql postgres etcd0 etcd1 etcd2 redis redis-sentinel protectedredis azurite
 	bin/composeconfig -p athenstest -config-file config.test.toml
 
 .PHONY: dev
