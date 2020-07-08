@@ -13,6 +13,10 @@ environment:
   SKIP_POSTGRES: true
   SKIP_MYSQL: true
   SKIP_ETCD: true
+  SKIP_MINIO: true
+  SKIP_MONGO: true
+  SKIP_AZURITE: true
+  SKIP_REDIS: true
 
 stack: go 1.14
 
