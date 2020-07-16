@@ -8,13 +8,16 @@ import (
 	"time"
 
 	// register the driver with database/sql
-	_ "github.com/lib/pq"
+	"github.com/lib/pq"
 
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/index"
 )
 
+// New returns a new Indexer with a PostgreSQL implementation.
+// It attempts to connect to the DB and create the index table
+// if it doesn ot already exist.
 func New(cfg *config.Postgres) (index.Indexer, error) {
 	dataSource := getPostgresSource(cfg)
 	db, err := sql.Open("postgres", dataSource)
@@ -64,7 +67,7 @@ func (i *indexer) Index(ctx context.Context, mod, ver string) error {
 		time.Now().Format(time.RFC3339Nano),
 	)
 	if err != nil {
-		return errors.E(op, err)
+		return errors.E(op, err, getKind(err))
 	}
 	return nil
 }
@@ -103,4 +106,16 @@ func getPostgresSource(cfg *config.Postgres) string {
 		args = append(args, k+"="+v)
 	}
 	return strings.Join(args, " ")
+}
+
+func getKind(err error) int {
+	pqerr, ok := err.(*pq.Error)
+	if !ok {
+		return errors.KindUnexpected
+	}
+	switch pqerr.Code {
+	case "23505":
+		return errors.KindAlreadyExists
+	}
+	return errors.KindUnexpected
 }
