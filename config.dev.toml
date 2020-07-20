@@ -170,7 +170,7 @@ BasicAuthPass = ""
 # Headers to the "go mod download" operations. This will allow a user
 # to pass their credentials for a private repository and have Athens be
 # able to download and store it. Note that, once a private repository is stored,
-# Athens will naively serve it to anyone requests it.
+# Athens will naively serve it to anyone who requests it.
 # 
 # Therefore, it is **important** that you
 # make sure you have a ValidatorHook or put Athens behind an auth proxy that always 
