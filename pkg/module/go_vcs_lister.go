@@ -13,6 +13,7 @@ import (
 	"github.com/gomods/athens/pkg/auth"
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/errors"
+	"github.com/gomods/athens/pkg/log"
 	"github.com/gomods/athens/pkg/observ"
 	"github.com/gomods/athens/pkg/storage"
 	"github.com/spf13/afero"
@@ -26,27 +27,39 @@ type listResp struct {
 }
 
 type vcsLister struct {
-	goBinPath     string
-	env           []string
-	fs            afero.Fs
-	propagateAuth bool
+	goBinPath             string
+	env                   []string
+	fs                    afero.Fs
+	propagateAuth         bool
+	propagateAuthPatterns []string
 }
 
 // NewVCSLister creates an UpstreamLister which uses VCS to fetch a list of available versions
-func NewVCSLister(goBinPath string, env []string, fs afero.Fs, propagateAuth bool) UpstreamLister {
-	return &vcsLister{goBinPath: goBinPath, env: env, fs: fs}
+func NewVCSLister(goBinPath string, env []string, fs afero.Fs, propagateAuth bool, propagateAuthPatterns []string) UpstreamLister {
+	return &vcsLister{
+		goBinPath:             goBinPath,
+		env:                   env,
+		fs:                    fs,
+		propagateAuth:         propagateAuth,
+		propagateAuthPatterns: propagateAuthPatterns,
+	}
+}
+
+func (l *vcsLister) shouldPropAuth(module string) bool {
+	return l.propagateAuth && matchesAuthPattern(l.propagateAuthPatterns, module)
 }
 
 func (l *vcsLister) List(ctx context.Context, module string) (*storage.RevInfo, []string, error) {
 	const op errors.Op = "vcsLister.List"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
-	creds, ok := auth.FromContext(ctx)
 	var (
 		netrcDir string
 		err      error
 	)
-	if ok && l.propagateAuth {
+	creds, ok := auth.FromContext(ctx)
+	if ok && l.shouldPropAuth(module) {
+		log.EntryFromContext(ctx).Debugf("propagating authentication")
 		host := strings.Split(module, "/")[0]
 		netrcDir, err = auth.WriteTemporaryNETRC(host, creds.User, creds.Password)
 		if err != nil {

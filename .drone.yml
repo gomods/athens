@@ -59,6 +59,8 @@ steps:
       from_secret: ATHENS_AZURE_ACCOUNT_NAME
     ATHENS_AZURE_ACCOUNT_KEY: 
       from_secret: ATHENS_AZURE_ACCOUNT_KEY
+    PROPAGATE_AUTH_TEST_TOKEN:
+      from_secret: PROPAGATE_AUTH_TEST_TOKEN
   when:
     branch:
       - main

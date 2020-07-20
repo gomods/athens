@@ -21,14 +21,14 @@ var ctx = context.Background()
 
 func (s *ModuleSuite) TestNewGoGetFetcher() {
 	r := s.Require()
-	fetcher, err := NewGoGetFetcher(s.goBinaryName, "", s.env, s.fs, false)
+	fetcher, err := NewGoGetFetcher(s.goBinaryName, "", s.env, s.fs, false, nil)
 	r.NoError(err)
 	_, ok := fetcher.(*goGetFetcher)
 	r.True(ok)
 }
 
 func (s *ModuleSuite) TestGoGetFetcherError() {
-	fetcher, err := NewGoGetFetcher("invalidpath", "", s.env, afero.NewOsFs(), false)
+	fetcher, err := NewGoGetFetcher("invalidpath", "", s.env, afero.NewOsFs(), false, nil)
 
 	assert.Nil(s.T(), fetcher)
 	if runtime.GOOS == "windows" {
@@ -42,7 +42,7 @@ func (s *ModuleSuite) TestGoGetFetcherFetch() {
 	r := s.Require()
 	// we need to use an OS filesystem because fetch executes vgo on the command line, which
 	// always writes to the filesystem
-	fetcher, err := NewGoGetFetcher(s.goBinaryName, "", s.env, afero.NewOsFs(), false)
+	fetcher, err := NewGoGetFetcher(s.goBinaryName, "", s.env, afero.NewOsFs(), false, nil)
 	r.NoError(err)
 	ver, err := fetcher.Fetch(ctx, repoURI, version)
 	r.NoError(err)
@@ -66,11 +66,13 @@ func TestGoGetFetcherFetchPrivate(t *testing.T) {
 		t.SkipNow()
 	}
 	var tests = []struct {
-		name   string
-		desc   string
-		prop   bool
-		auth   auth.BasicAuth
-		hasErr bool
+		name     string
+		desc     string
+		prop     bool
+		patterns []string
+		auth     auth.BasicAuth
+		hasErr   bool
+		preTest  func(t *testing.T, fetcher Fetcher)
 	}{
 		{
 			name:   "private no token",
@@ -80,22 +82,53 @@ func TestGoGetFetcherFetchPrivate(t *testing.T) {
 			hasErr: true,
 		},
 		{
-			name: "prive fetch",
-			desc: "can successfully download private repository with a valid auth header",
-			prop: true,
+			name:     "prive fetch",
+			desc:     "can successfully download private repository with a valid auth header",
+			prop:     true,
+			patterns: []string{"*"},
 			auth: auth.BasicAuth{
 				User:     "athensuser",
 				Password: token,
 			},
 		},
 		{
-			name: "no propagation",
+			name: "disable propagation",
 			desc: "cannot fetch a private repository even if basic auth is provided when propgate option is false",
 			auth: auth.BasicAuth{
 				User:     "athensuser",
 				Password: token,
 			},
-			prop:   false,
+			prop:     false,
+			patterns: []string{"*"},
+			hasErr:   true,
+		},
+		{
+			name: "mismatched auth patterns",
+			desc: "cannot fetch a private repository unless the module matches the provided patterns",
+			auth: auth.BasicAuth{
+				User:     "athensuser",
+				Password: token,
+			},
+			prop:     true,
+			patterns: []string{"github.com/other-artifactes/*"},
+			hasErr:   true,
+		},
+		{
+			name:     "consecutive private fetch",
+			desc:     "this test ensures that the .netrc is removed after a private fetch so credentials are not leakaed to proceeding requests",
+			prop:     true,
+			patterns: []string{"*"},
+			auth:     auth.BasicAuth{},
+			preTest: func(t *testing.T, fetcher Fetcher) {
+				a := auth.BasicAuth{
+					User:     "athensuser",
+					Password: token,
+				}
+				ctx := auth.SetAuthInContext(ctx, a)
+				ver, err := fetcher.Fetch(ctx, privateRepoURI, privateRepoVersion)
+				require.NoError(t, err)
+				require.NoError(t, ver.Zip.Close())
+			},
 			hasErr: true,
 		},
 	}
@@ -108,8 +141,12 @@ func TestGoGetFetcherFetchPrivate(t *testing.T) {
 				[]string{"GOPROXY=direct", "GONOSUMDB=github.com/athens-artifacts/private"},
 				afero.NewOsFs(),
 				tc.prop,
+				tc.patterns,
 			)
 			require.NoError(t, err)
+			if tc.preTest != nil {
+				tc.preTest(t, fetcher)
+			}
 			ctx := auth.SetAuthInContext(ctx, tc.auth)
 			ver, err := fetcher.Fetch(ctx, privateRepoURI, privateRepoVersion)
 			if tc.hasErr {
@@ -138,7 +175,7 @@ func TestGoGetFetcherFetchPrivate(t *testing.T) {
 
 func (s *ModuleSuite) TestNotFoundFetches() {
 	r := s.Require()
-	fetcher, err := NewGoGetFetcher(s.goBinaryName, "", s.env, afero.NewOsFs(), false)
+	fetcher, err := NewGoGetFetcher(s.goBinaryName, "", s.env, afero.NewOsFs(), false, nil)
 	r.NoError(err)
 	// when someone buys laks47dfjoijskdvjxuyyd.com, and implements
 	// a git server on top of it, this test will fail :)
@@ -166,13 +203,13 @@ func (s *ModuleSuite) TestGoGetFetcherSumDB() {
 	proxyAddr, close := s.getProxy(mp)
 	defer close()
 
-	fetcher, err := NewGoGetFetcher(s.goBinaryName, "", []string{"GOPROXY=" + proxyAddr}, afero.NewOsFs(), false)
+	fetcher, err := NewGoGetFetcher(s.goBinaryName, "", []string{"GOPROXY=" + proxyAddr}, afero.NewOsFs(), false, nil)
 	r.NoError(err)
 	_, err = fetcher.Fetch(ctx, "mockmod.xyz", "v1.2.3")
 	if err == nil {
 		s.T().Fatal("expected a gosum error but got nil")
 	}
-	fetcher, err = NewGoGetFetcher(s.goBinaryName, "", []string{"GONOSUMDB=mockmod.xyz", "GOPROXY=" + proxyAddr}, afero.NewOsFs(), false)
+	fetcher, err = NewGoGetFetcher(s.goBinaryName, "", []string{"GONOSUMDB=mockmod.xyz", "GOPROXY=" + proxyAddr}, afero.NewOsFs(), false, nil)
 	r.NoError(err)
 	_, err = fetcher.Fetch(ctx, "mockmod.xyz", "v1.2.3")
 	r.NoError(err, "expected the go sum to not be consulted but got an error")
@@ -186,7 +223,7 @@ func (s *ModuleSuite) TestGoGetDir() {
 	t.Cleanup(func() {
 		os.RemoveAll(dir)
 	})
-	fetcher, err := NewGoGetFetcher(s.goBinaryName, dir, s.env, afero.NewOsFs(), false)
+	fetcher, err := NewGoGetFetcher(s.goBinaryName, dir, s.env, afero.NewOsFs(), false, nil)
 	r.NoError(err)
 
 	ver, err := fetcher.Fetch(ctx, repoURI, version)

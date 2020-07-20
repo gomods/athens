@@ -187,6 +187,14 @@ BasicAuthPass = ""
 # Env override: ATHENS_PROPAGATE_AUTH
 PropagateAuth = false
 
+# PropagateAuthPatterns can be used to limit which modules will have
+# the credentials accompanied when calling "go mod download". Note that
+# this is only when a module is not in storage. See PropagateAuth above
+# for more details.
+# 
+# Env override: ATHENS_PROPAGATE_AUTH_PATTERNS
+PropagateAuthPatterns = ["*"]
+
 # Set to true to force an SSL redirect
 # Env override: PROXY_FORCE_SSL
 ForceSSL = false
