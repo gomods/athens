@@ -7,24 +7,28 @@ import (
 	"net/http/httptest"
 	"os"
 	"runtime"
+	"testing"
 
+	"github.com/gobuffalo/envy"
+	"github.com/gomods/athens/pkg/auth"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/spf13/afero"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 var ctx = context.Background()
 
 func (s *ModuleSuite) TestNewGoGetFetcher() {
 	r := s.Require()
-	fetcher, err := NewGoGetFetcher(s.goBinaryName, "", s.env, s.fs)
+	fetcher, err := NewGoGetFetcher(s.goBinaryName, "", s.env, s.fs, false)
 	r.NoError(err)
 	_, ok := fetcher.(*goGetFetcher)
 	r.True(ok)
 }
 
 func (s *ModuleSuite) TestGoGetFetcherError() {
-	fetcher, err := NewGoGetFetcher("invalidpath", "", s.env, afero.NewOsFs())
+	fetcher, err := NewGoGetFetcher("invalidpath", "", s.env, afero.NewOsFs(), false)
 
 	assert.Nil(s.T(), fetcher)
 	if runtime.GOOS == "windows" {
@@ -38,7 +42,7 @@ func (s *ModuleSuite) TestGoGetFetcherFetch() {
 	r := s.Require()
 	// we need to use an OS filesystem because fetch executes vgo on the command line, which
 	// always writes to the filesystem
-	fetcher, err := NewGoGetFetcher(s.goBinaryName, "", s.env, afero.NewOsFs())
+	fetcher, err := NewGoGetFetcher(s.goBinaryName, "", s.env, afero.NewOsFs(), false)
 	r.NoError(err)
 	ver, err := fetcher.Fetch(ctx, repoURI, version)
 	r.NoError(err)
@@ -56,9 +60,85 @@ func (s *ModuleSuite) TestGoGetFetcherFetch() {
 	r.NoError(ver.Zip.Close())
 }
 
+func TestGoGetFetcherFetchPrivate(t *testing.T) {
+	token := os.Getenv("PROPAGATE_AUTH_TEST_TOKEN")
+	if token == "" {
+		t.SkipNow()
+	}
+	var tests = []struct {
+		name   string
+		desc   string
+		prop   bool
+		auth   auth.BasicAuth
+		hasErr bool
+	}{
+		{
+			name:   "private no token",
+			desc:   "cannot fetch a private repository without a basic auth token",
+			auth:   auth.BasicAuth{User: "", Password: ""},
+			prop:   true,
+			hasErr: true,
+		},
+		{
+			name: "prive fetch",
+			desc: "can successfully download private repository with a valid auth header",
+			prop: true,
+			auth: auth.BasicAuth{
+				User:     "athensuser",
+				Password: token,
+			},
+		},
+		{
+			name: "no propagation",
+			desc: "cannot fetch a private repository even if basic auth is provided when propgate option is false",
+			auth: auth.BasicAuth{
+				User:     "athensuser",
+				Password: token,
+			},
+			prop:   false,
+			hasErr: true,
+		},
+	}
+	goBinaryPath := envy.Get("GO_BINARY_PATH", "go")
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			fetcher, err := NewGoGetFetcher(
+				goBinaryPath,
+				"",
+				[]string{"GOPROXY=direct", "GONOSUMDB=github.com/athens-artifacts/private"},
+				afero.NewOsFs(),
+				tc.prop,
+			)
+			require.NoError(t, err)
+			ctx := auth.SetAuthInContext(ctx, tc.auth)
+			ver, err := fetcher.Fetch(ctx, privateRepoURI, privateRepoVersion)
+			if tc.hasErr {
+				if err == nil {
+					ver.Zip.Close()
+					t.Fatal("expected an error but got nil")
+				}
+				return
+			}
+			require.NoError(t, err)
+			defer ver.Zip.Close()
+
+			require.True(t, len(ver.Info) > 0)
+
+			require.True(t, len(ver.Mod) > 0)
+
+			zipBytes, err := ioutil.ReadAll(ver.Zip)
+			require.NoError(t, err)
+			require.True(t, len(zipBytes) > 0)
+
+			// close the version's zip file (which also cleans up the underlying GOPATH) and expect it to fail again
+			require.NoError(t, ver.Zip.Close())
+		})
+	}
+}
+
 func (s *ModuleSuite) TestNotFoundFetches() {
 	r := s.Require()
-	fetcher, err := NewGoGetFetcher(s.goBinaryName, "", s.env, afero.NewOsFs())
+	fetcher, err := NewGoGetFetcher(s.goBinaryName, "", s.env, afero.NewOsFs(), false)
 	r.NoError(err)
 	// when someone buys laks47dfjoijskdvjxuyyd.com, and implements
 	// a git server on top of it, this test will fail :)
@@ -86,13 +166,13 @@ func (s *ModuleSuite) TestGoGetFetcherSumDB() {
 	proxyAddr, close := s.getProxy(mp)
 	defer close()
 
-	fetcher, err := NewGoGetFetcher(s.goBinaryName, "", []string{"GOPROXY=" + proxyAddr}, afero.NewOsFs())
+	fetcher, err := NewGoGetFetcher(s.goBinaryName, "", []string{"GOPROXY=" + proxyAddr}, afero.NewOsFs(), false)
 	r.NoError(err)
 	_, err = fetcher.Fetch(ctx, "mockmod.xyz", "v1.2.3")
 	if err == nil {
 		s.T().Fatal("expected a gosum error but got nil")
 	}
-	fetcher, err = NewGoGetFetcher(s.goBinaryName, "", []string{"GONOSUMDB=mockmod.xyz", "GOPROXY=" + proxyAddr}, afero.NewOsFs())
+	fetcher, err = NewGoGetFetcher(s.goBinaryName, "", []string{"GONOSUMDB=mockmod.xyz", "GOPROXY=" + proxyAddr}, afero.NewOsFs(), false)
 	r.NoError(err)
 	_, err = fetcher.Fetch(ctx, "mockmod.xyz", "v1.2.3")
 	r.NoError(err, "expected the go sum to not be consulted but got an error")
@@ -106,7 +186,7 @@ func (s *ModuleSuite) TestGoGetDir() {
 	t.Cleanup(func() {
 		os.RemoveAll(dir)
 	})
-	fetcher, err := NewGoGetFetcher(s.goBinaryName, dir, s.env, afero.NewOsFs())
+	fetcher, err := NewGoGetFetcher(s.goBinaryName, dir, s.env, afero.NewOsFs(), false)
 	r.NoError(err)
 
 	ver, err := fetcher.Fetch(ctx, repoURI, version)

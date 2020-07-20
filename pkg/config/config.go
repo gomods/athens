@@ -41,6 +41,7 @@ type Config struct {
 	Port             string    `envconfig:"ATHENS_PORT"`
 	BasicAuthUser    string    `envconfig:"BASIC_AUTH_USER"`
 	BasicAuthPass    string    `envconfig:"BASIC_AUTH_PASS"`
+	PropagateAuth    bool      `envconfig:"ATHENS_PROPAGATE_AUTH"`
 	ForceSSL         bool      `envconfig:"PROXY_FORCE_SSL"`
 	ValidatorHook    string    `envconfig:"ATHENS_PROXY_VALIDATOR"`
 	PathPrefix       string    `envconfig:"ATHENS_PATH_PREFIX"`

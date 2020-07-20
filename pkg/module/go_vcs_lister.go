@@ -5,9 +5,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"os"
 	"os/exec"
+	"strings"
 	"time"
 
+	"github.com/gomods/athens/pkg/auth"
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/observ"
@@ -23,16 +26,34 @@ type listResp struct {
 }
 
 type vcsLister struct {
-	goBinPath string
-	env       []string
-	fs        afero.Fs
+	goBinPath     string
+	env           []string
+	fs            afero.Fs
+	propagateAuth bool
 }
 
-func (l *vcsLister) List(ctx context.Context, mod string) (*storage.RevInfo, []string, error) {
+// NewVCSLister creates an UpstreamLister which uses VCS to fetch a list of available versions
+func NewVCSLister(goBinPath string, env []string, fs afero.Fs, propagateAuth bool) UpstreamLister {
+	return &vcsLister{goBinPath: goBinPath, env: env, fs: fs}
+}
+
+func (l *vcsLister) List(ctx context.Context, module string) (*storage.RevInfo, []string, error) {
 	const op errors.Op = "vcsLister.List"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
-
+	creds, ok := auth.FromContext(ctx)
+	var (
+		netrcDir string
+		err      error
+	)
+	if ok && l.propagateAuth {
+		host := strings.Split(module, "/")[0]
+		netrcDir, err = auth.WriteTemporaryNETRC(host, creds.User, creds.Password)
+		if err != nil {
+			return nil, nil, errors.E(op, err)
+		}
+		defer os.RemoveAll(netrcDir)
+	}
 	tmpDir, err := afero.TempDir(l.fs, "", "go-list")
 	if err != nil {
 		return nil, nil, errors.E(op, err)
@@ -42,7 +63,7 @@ func (l *vcsLister) List(ctx context.Context, mod string) (*storage.RevInfo, []s
 	cmd := exec.Command(
 		l.goBinPath,
 		"list", "-m", "-versions", "-json",
-		config.FmtModVer(mod, "latest"),
+		config.FmtModVer(module, "latest"),
 	)
 	cmd.Dir = tmpDir
 	stdout := &bytes.Buffer{}
@@ -55,7 +76,7 @@ func (l *vcsLister) List(ctx context.Context, mod string) (*storage.RevInfo, []s
 		return nil, nil, errors.E(op, err)
 	}
 	defer clearFiles(l.fs, gopath)
-	cmd.Env = prepareEnv(gopath, l.env)
+	cmd.Env = prepareEnv(gopath, netrcDir, l.env)
 
 	err = cmd.Run()
 	if err != nil {
@@ -80,9 +101,4 @@ func (l *vcsLister) List(ctx context.Context, mod string) (*storage.RevInfo, []s
 		Version: lr.Version,
 	}
 	return &rev, lr.Versions, nil
-}
-
-// NewVCSLister creates an UpstreamLister which uses VCS to fetch a list of available versions
-func NewVCSLister(goBinPath string, env []string, fs afero.Fs) UpstreamLister {
-	return &vcsLister{goBinPath: goBinPath, env: env, fs: fs}
 }
