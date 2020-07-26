@@ -276,7 +276,7 @@ func TestParseExampleConfig(t *testing.T) {
 		StorageType:       "memory",
 		GlobalEndpoint:    "http://localhost:3001",
 		Port:              ":3000",
-		PropagateAuthHost: "github.com",
+		PropagateAuthHost: "",
 		EnablePprof:       false,
 		PprofPort:         ":3001",
 		BasicAuthUser:     "",
