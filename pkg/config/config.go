@@ -157,7 +157,7 @@ func defaultConfig() *Config {
 		TimeoutConf:       TimeoutConf{Timeout: 300},
 		StorageType:       "memory",
 		Port:              ":3000",
-		PropagateAuthHost: "github.com",
+		PropagateAuthHost: "",
 		SingleFlightType:  "memory",
 		GlobalEndpoint:    "http://localhost:3001",
 		TraceExporterURL:  "http://localhost:14268",
