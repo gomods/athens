@@ -96,12 +96,12 @@ func addProxyRoutes(
 	if err := c.GoBinaryEnvVars.Validate(); err != nil {
 		return err
 	}
-	mf, err := module.NewGoGetFetcher(c.GoBinary, c.GoGetDir, c.GoBinaryEnvVars, fs, c.PropagateAuth, c.PropagateAuthPatterns)
+	mf, err := module.NewGoGetFetcher(c.GoBinary, c.GoGetDir, c.GoBinaryEnvVars, fs, c.PropagateAuthHost)
 	if err != nil {
 		return err
 	}
 
-	lister := module.NewVCSLister(c.GoBinary, c.GoBinaryEnvVars, fs, c.PropagateAuth, c.PropagateAuthPatterns)
+	lister := module.NewVCSLister(c.GoBinary, c.GoBinaryEnvVars, fs, c.PropagateAuthHost)
 	checker := storage.WithChecker(s)
 	withSingleFlight, err := getSingleFlight(c, checker)
 	if err != nil {

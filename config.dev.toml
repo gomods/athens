@@ -166,7 +166,7 @@ BasicAuthUser = ""
 # Env override: BASIC_AUTH_PASS
 BasicAuthPass = ""
 
-# PropagateAuth, when set to true, will pass the Basic Authentication
+# PropagateAuth, when set to a hostname such as "github.com", will pass the Basic Authentication
 # Headers to the "go mod download" operations. This will allow a user
 # to pass their credentials for a private repository and have Athens be
 # able to download and store it. Note that, once a private repository is stored,
@@ -183,17 +183,12 @@ BasicAuthPass = ""
 # you must turn this feature off. If you'd like to specify files to be copied from the global
 # $HOME directory to the temporary one, please open an issue at https://github.com/gomods/athens
 # to gauge demand for such a feature before implementing.
+#
+# You must also specify the import path host using PropagateAuthHost so that the .netrc file knows
+# when to forward the credentials and when not to.
 # 
-# Env override: ATHENS_PROPAGATE_AUTH
-PropagateAuth = false
-
-# PropagateAuthPatterns can be used to limit which modules will have
-# the credentials accompanied when calling "go mod download". Note that
-# this is only when a module is not in storage. See PropagateAuth above
-# for more details.
-# 
-# Env override: ATHENS_PROPAGATE_AUTH_PATTERNS
-PropagateAuthPatterns = ["*"]
+# Env override: ATHENS_PROPAGATE_AUTH_HOST
+PropagateAuthHost = ""
 
 # Set to true to force an SSL redirect
 # Env override: PROXY_FORCE_SSL

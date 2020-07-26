@@ -13,18 +13,16 @@ import (
 	"github.com/gomods/athens/pkg/auth"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/observ"
-	"github.com/gomods/athens/pkg/paths"
 	"github.com/gomods/athens/pkg/storage"
 	"github.com/spf13/afero"
 )
 
 type goGetFetcher struct {
-	fs                    afero.Fs
-	goBinaryName          string
-	envVars               []string
-	gogetDir              string
-	propagateAuth         bool
-	propagateAuthPatterns []string
+	fs                afero.Fs
+	goBinaryName      string
+	envVars           []string
+	gogetDir          string
+	propagateAuthHost string
 }
 
 type goModule struct {
@@ -40,18 +38,17 @@ type goModule struct {
 }
 
 // NewGoGetFetcher creates fetcher which uses go get tool to fetch modules
-func NewGoGetFetcher(goBinaryName, gogetDir string, envVars []string, fs afero.Fs, propagateAuth bool, propagateAuthPatterns []string) (Fetcher, error) {
+func NewGoGetFetcher(goBinaryName, gogetDir string, envVars []string, fs afero.Fs, propagateAuthHost string) (Fetcher, error) {
 	const op errors.Op = "module.NewGoGetFetcher"
 	if err := validGoBinary(goBinaryName); err != nil {
 		return nil, errors.E(op, err)
 	}
 	return &goGetFetcher{
-		fs:                    fs,
-		goBinaryName:          goBinaryName,
-		envVars:               envVars,
-		gogetDir:              gogetDir,
-		propagateAuth:         propagateAuth,
-		propagateAuthPatterns: propagateAuthPatterns,
+		fs:                fs,
+		goBinaryName:      goBinaryName,
+		envVars:           envVars,
+		gogetDir:          gogetDir,
+		propagateAuthHost: propagateAuthHost,
 	}, nil
 }
 
@@ -116,10 +113,9 @@ func (g *goGetFetcher) downloadModule(ctx context.Context, gopath, repoRoot, mod
 		err      error
 	)
 	creds, ok := auth.FromContext(ctx)
-	if ok && g.shouldPropAuth(module) {
+	if ok && g.shouldPropAuth() {
 		if ok {
-			host := strings.Split(module, "/")[0]
-			netrcDir, err = auth.WriteTemporaryNETRC(host, creds.User, creds.Password)
+			netrcDir, err = auth.WriteTemporaryNETRC(g.propagateAuthHost, creds.User, creds.Password)
 			if err != nil {
 				return goModule{}, errors.E(op, err)
 			}
@@ -162,17 +158,8 @@ func (g *goGetFetcher) downloadModule(ctx context.Context, gopath, repoRoot, mod
 	return m, nil
 }
 
-func (g *goGetFetcher) shouldPropAuth(module string) bool {
-	return g.propagateAuth && matchesAuthPattern(g.propagateAuthPatterns, module)
-}
-
-func matchesAuthPattern(patterns []string, module string) bool {
-	for _, p := range patterns {
-		if paths.MatchesPattern(p, module) {
-			return true
-		}
-	}
-	return false
+func (g *goGetFetcher) shouldPropAuth() bool {
+	return len(g.propagateAuthHost) > 0
 }
 
 func isLimitHit(o string) bool {
