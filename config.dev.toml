@@ -166,7 +166,7 @@ BasicAuthUser = ""
 # Env override: BASIC_AUTH_PASS
 BasicAuthPass = ""
 
-# PropagateAuth, when set to a hostname such as "github.com", will pass the Basic Authentication
+# PropagateAuthHost, when set to a hostname such as "github.com", will pass the Basic Authentication
 # Headers to the "go mod download" operations. This will allow a user
 # to pass their credentials for a private repository and have Athens be
 # able to download and store it. Note that, once a private repository is stored,
