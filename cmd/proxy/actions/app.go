@@ -51,6 +51,7 @@ func App(conf *config.Config) (http.Handler, error) {
 	lggr := log.New(conf.CloudRuntime, logLvl)
 
 	r := mux.NewRouter()
+	r.Use(mw.WithRequestID)
 	r.Use(mw.LogEntryMiddleware(lggr))
 	r.Use(mw.RequestLogger)
 	r.Use(secure.New(secure.Options{
