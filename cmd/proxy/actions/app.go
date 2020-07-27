@@ -52,7 +52,7 @@ func App(conf *config.Config) (http.Handler, error) {
 
 	r := mux.NewRouter()
 	r.Use(
-    mw.WithRequestID,
+		mw.WithRequestID,
 		mw.LogEntryMiddleware(lggr),
 		mw.RequestLogger,
 		secure.New(secure.Options{
