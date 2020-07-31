@@ -1,16 +1,20 @@
 package actions
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"net/url"
 	"path"
 	"strings"
+	"time"
 
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/download"
 	"github.com/gomods/athens/pkg/download/addons"
 	"github.com/gomods/athens/pkg/download/mode"
+	"github.com/gomods/athens/pkg/errors"
+	"github.com/gomods/athens/pkg/events"
 	"github.com/gomods/athens/pkg/index"
 	"github.com/gomods/athens/pkg/index/mem"
 	"github.com/gomods/athens/pkg/index/mysql"
@@ -107,7 +111,11 @@ func addProxyRoutes(
 	if err != nil {
 		return err
 	}
-	st := stash.New(mf, s, indexer, stash.WithPool(c.GoGetWorkers), withSingleFlight)
+	withEventsHook, err := getEventHook(c)
+	if err != nil {
+		return err
+	}
+	st := stash.New(mf, s, indexer, stash.WithPool(c.GoGetWorkers), withSingleFlight, withEventsHook)
 
 	df, err := mode.NewFile(c.DownloadMode, c.DownloadURL)
 	if err != nil {
@@ -127,6 +135,23 @@ func addProxyRoutes(
 	download.RegisterHandlers(r, handlerOpts)
 
 	return nil
+}
+
+func getEventHook(c *config.Config) (stash.Wrapper, error) {
+	const op errors.Op = "actions.getEventHook"
+	if c.EventsHook == "" {
+		return func(s stash.Stasher) stash.Stasher {
+			return s
+		}, nil
+	}
+	eh := events.NewClient(c.EventsHook, nil)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+	err := eh.Ping(ctx)
+	if err != nil {
+		return nil, errors.E(op, err)
+	}
+	return stash.WithEventsHook(eh), nil
 }
 
 func getSingleFlight(c *config.Config, checker storage.Checker) (stash.Wrapper, error) {

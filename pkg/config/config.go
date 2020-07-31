@@ -44,6 +44,7 @@ type Config struct {
 	PropagateAuthHost string    `envconfig:"ATHENS_PROPAGATE_AUTH_HOST"`
 	ForceSSL          bool      `envconfig:"PROXY_FORCE_SSL"`
 	ValidatorHook     string    `envconfig:"ATHENS_PROXY_VALIDATOR"`
+	EventsHook        string    `envconfig:"ATHENS_EVENTS_HOOK"`
 	PathPrefix        string    `envconfig:"ATHENS_PATH_PREFIX"`
 	NETRCPath         string    `envconfig:"ATHENS_NETRC_PATH"`
 	GithubToken       string    `envconfig:"ATHENS_GITHUB_TOKEN"`
