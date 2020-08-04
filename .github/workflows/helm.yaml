@@ -17,7 +17,11 @@ jobs:
         steps:
             - uses: actions/checkout@v2
             - uses: docker://koalaman/shellcheck-alpine
-              run: shellcheck -x test/e2e-kind.sh
+              with:
+                entrypoint: shellcheck
+                args:
+                  - -x
+                  - test/e2e-kind.sh
     charts-e2e:
         name: Run E2E Tests on the Helm Charts
         needs: [shellcheck]
