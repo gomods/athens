@@ -43,7 +43,7 @@ jobs:
       steps:
         - uses: actions/checkout@v2
         - name: Push charts
-          uses: gomods/drone-helm
+          uses: docker://gomods/drone-helm
           env:
             CHARTS_REPO: https://athens.blob.core.windows.net
             AZURE_STORAGE_CONNECTION_STRING: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}
