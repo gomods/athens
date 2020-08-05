@@ -28,10 +28,10 @@ jobs:
           file: "chart-testing_3.0.0_linux_amd64.tar.gz"
 
       - name: Extract ct binary
-        run: tar xvfz chart-testing_3.0.0_linux_amd64.tar.gz ct
+        run: tar xvfz chart-testing_3.0.0_linux_amd64.tar.gz
 
       - name: Run chart-testing (lint)
-        run: ./ct lint --target-branch main
+        run: ./ct lint --target-branch main --chart-yaml-schema etc/chart_schema.yaml --lint-conf etc/lintconf.yaml
 
       - name: Create kind cluster
         uses: helm/kind-action@v1.0.0-alpha.3
