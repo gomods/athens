@@ -8,33 +8,35 @@ on:
         types: [opened, reopened, synchronize]
         paths:
             - "charts/*"
-            - "test/e2e-kind.sh"
 jobs:
-    shellcheck:
-        if: github.event_name == 'pull_request'
-        name: Shellcheck Helm Charts
-        runs-on: ubuntu-latest
-        steps:
-            - uses: actions/checkout@v2
-            - uses: docker://koalaman/shellcheck-alpine
-              with:
-                entrypoint: shellcheck
-                args: -x test/e2e-kind.sh
     charts-e2e:
         name: Run E2E Tests on the Helm Charts
-        needs: [shellcheck]
         runs-on: ubuntu-latest
-        env:
-            CHART_TESTING_IMAGE: quay.io/helmpack/chart-testing
-            CHART_TESTING_TAG: v2.4.1
-            K8S_VERSION: v1.18.0
-            KIND_VERSION: v0.8.1
         steps:
             - uses: actions/checkout@v2
-            - run: git fetch --prune --unshallow
+            - name: Fetch history
+              run: git fetch --prune --unshallow
+            - name: Run chart-testing (lint)
+              id: lint
+              uses: helm/chart-testing-action@v1.0.0
+              with:
+                command: lint
 
-            - name: Run linting and chart testing against kind
-              run: test/e2e-kind.sh
+          - name: Create kind cluster
+            uses: helm/kind-action@v1.0.0-alpha.3
+            # Only build a kind cluster if there are chart changes to test.
+            if: steps.lint.outputs.changed == 'true'
+
+          - name: delete default storage class
+            run: kubectl delete stroageclass standard
+
+          - name: create local-path-provisioner stroageclass
+            run: kubectl apply -f test/local-path-provisioner.yaml
+
+          - name: Run chart-testing (install)
+            uses: helm/chart-testing-action@v1.0.0
+            with:
+              command: install
 
     publish:
       if: success() && github.event_name == 'push' && github.ref == 'refs/heads/main'
