@@ -19,13 +19,19 @@ jobs:
           fetch-depth: "0"
 
       # this can't be run using the github action, it's got some weird error when running
-      # list-changes, but since we're only triggering the workflow on changes to the helm
-      # chart, this is okay.
-      - name: Run chart-testing (lint)
-        uses: docker://quay.io/helmpack/chart-testing:v3.0.0
+      # list-changes and install, but since we're only triggering the workflow on changes 
+      # to the helm chart, this is okay.
+      - uses: dsaltares/fetch-gh-release-asset@master
         with:
-          entrypoint: /usr/local/bin/ct
-          args: lint --target-branch main
+          repo: helm/chart-testing
+          version: "latest"
+          file: "chart-testing_3.0.0_linux_amd64.tar.gz"
+
+      - name: Extract ct binary
+        run: tar xvfz chart-testing_3.0.0_linux_amd64.tar.gz ct
+
+      - name: Run chart-testing (lint)
+        run: ./ct lint --target-branch main
 
       - name: Create kind cluster
         uses: helm/kind-action@v1.0.0-alpha.3
@@ -37,10 +43,7 @@ jobs:
         run: kubectl apply -f test/local-path-provisioner.yaml
 
       - name: Run chart-testing (install)
-        uses: docker://quay.io/helmpack/chart-testing:v3.0.0
-        with:
-          entrypoint: /usr/local/bin/ct
-          args: install --helm-extra-args '--timeout 800' --target-branch main
+        run: ./ct install --helm-extra-args '--timeout 800' --target-branch main
 
   publish:
     if: success() && github.event_name == 'push' && github.ref == 'refs/heads/main'
