@@ -14,8 +14,10 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v2
+
             - name: Fetch history
               run: git fetch --prune --unshallow
+
             - name: Run chart-testing (lint)
               id: lint
               uses: helm/chart-testing-action@v1.0.0

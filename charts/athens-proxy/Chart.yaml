@@ -9,7 +9,6 @@ keywords:
 - Package Management
 - Goproxy
 home: https://github.com/gomods/athens
-sources:
 maintainers:
 - name: rimusz
   email: rmocius@gmail.com
