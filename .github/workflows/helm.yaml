@@ -1,54 +1,55 @@
 name: Helm Charts
 on:
-    push:
-      branches:
-        - main
-        
-    pull_request:
-        types: [opened, reopened, synchronize]
-        paths:
-            - "charts/*"
+  push:
+    branches:
+      - main
+
+  pull_request:
+      types: [opened, reopened, synchronize]
+      paths:
+          - "charts/**"
+
 jobs:
-    charts-e2e:
-        name: Run E2E Tests on the Helm Charts
-        runs-on: ubuntu-latest
-        steps:
-          - uses: actions/checkout@v2
+  charts-e2e:
+    name: Run E2E Tests on the Helm Charts
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: "0"
 
-          - name: Fetch history
-            run: git fetch --prune --unshallow
+      # this can't be run using the github action, it's got some weird error when running
+      # list-changes, but since we're only triggering the workflow on changes to the helm
+      # chart, this is okay.
+      - name: Run chart-testing (lint)
+        uses: docker://quay.io/helmpack/chart-testing:v3.0.0
+        with:
+          entrypoint: /usr/local/bin/ct
+          args: lint --target-branch main
 
-          - name: Run chart-testing (lint)
-            id: lint
-            uses: helm/chart-testing-action@v1.0.0
-            with:
-              command: lint
+      - name: Create kind cluster
+        uses: helm/kind-action@v1.0.0-alpha.3
 
-          - name: Create kind cluster
-            uses: helm/kind-action@v1.0.0-alpha.3
-            # Only build a kind cluster if there are chart changes to test.
-            if: steps.lint.outputs.changed == 'true'
+      - name: delete default storageclass
+        run: kubectl delete storageclass standard
 
-          - name: delete default storageclass
-            run: kubectl delete stroageclass standard
+      - name: create local-path-provisioner storageclass
+        run: kubectl apply -f test/local-path-provisioner.yaml
 
-          - name: create local-path-provisioner stroageclass
-            run: kubectl apply -f test/local-path-provisioner.yaml
+      - name: Run chart-testing (install)
+        uses: docker://quay.io/helmpack/chart-testing:v3.0.0
+        with:
+          entrypoint: /usr/local/bin/ct
+          args: install --helm-extra-args '--timeout 800' --target-branch main
 
-          - name: Run chart-testing (install)
-            uses: helm/chart-testing-action@v1.0.0
-            with:
-              command: install
-
-    publish:
-      if: success() && github.event_name == 'push' && github.ref == 'refs/heads/main'
-      name: Publish Helm Charts
-      runs-on: ubuntu-latest
-      steps:
-        - uses: actions/checkout@v2
-        - name: Push charts
-          uses: docker://gomods/drone-helm
-          env:
-            CHARTS_REPO: https://athens.blob.core.windows.net
-            AZURE_STORAGE_CONNECTION_STRING: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}
-        
+  publish:
+    if: success() && github.event_name == 'push' && github.ref == 'refs/heads/main'
+    name: Publish Helm Charts
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Push charts
+        uses: docker://gomods/drone-helm
+        env:
+          CHARTS_REPO: https://athens.blob.core.windows.net
+          AZURE_STORAGE_CONNECTION_STRING: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}
