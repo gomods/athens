@@ -27,7 +27,7 @@ jobs:
               # Only build a kind cluster if there are chart changes to test.
               if: steps.lint.outputs.changed == 'true'
 
-            - name: delete default storage class
+            - name: delete default storageclass
               run: kubectl delete stroageclass standard
 
             - name: create local-path-provisioner stroageclass
