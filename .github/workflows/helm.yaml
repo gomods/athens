@@ -47,7 +47,7 @@ jobs:
         run: tar xvfz chart-testing_3.0.0_linux_amd64.tar.gz
 
       - name: Run chart-testing (install)
-        run: ./ct install --helm-extra-args '--timeout 800' --target-branch main
+        run: ./ct install --helm-extra-args '--timeout 800s' --target-branch main
 
   publish:
     if: success() && github.event_name == 'push' && github.ref == 'refs/heads/main'
