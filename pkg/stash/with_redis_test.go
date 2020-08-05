@@ -102,8 +102,8 @@ func TestWithRedisLockWithWrongPassword(t *testing.T) {
 		t.Fatal("Expected Connection Error")
 	}
 
-	if err.Error() != "NOAUTH Authentication required." {
-		t.Fatalf("Wrong error was thrown %s\n", err.Error())
+	if !strings.Contains(err.Error(), "NOAUTH Authentication required.") {
+		t.Fatalf("Wrong error was thrown %q\n", err.Error())
 	}
 }
 

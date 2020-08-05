@@ -44,7 +44,7 @@ func netrcFromToken(tok string) {
 	if err != nil {
 		log.Fatalf("netrcFromToken: could not get homedir: %v", err)
 	}
-	rcp := filepath.Join(hdir, getNetrcFileName())
+	rcp := filepath.Join(hdir, getNETRCFilename())
 	if err := ioutil.WriteFile(rcp, []byte(fileContent), 0600); err != nil {
 		log.Fatalf("netrcFromToken: could not write to file: %v", err)
 	}
@@ -52,12 +52,12 @@ func netrcFromToken(tok string) {
 
 func transformAuthFileName(authFileName string) string {
 	if root := strings.TrimLeft(authFileName, "._"); root == "netrc" {
-		return getNetrcFileName()
+		return getNETRCFilename()
 	}
 	return authFileName
 }
 
-func getNetrcFileName() string {
+func getNETRCFilename() string {
 	if runtime.GOOS == "windows" {
 		return "_netrc"
 	}

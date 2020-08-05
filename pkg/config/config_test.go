@@ -27,7 +27,8 @@ func compareConfigs(parsedConf *Config, expConf *Config, t *testing.T) {
 	opts := cmpopts.IgnoreTypes(Storage{}, SingleFlight{}, Index{})
 	eq := cmp.Equal(parsedConf, expConf, opts)
 	if !eq {
-		t.Errorf("Parsed Example configuration did not match expected values. Expected: %+v. Actual: %+v", expConf, parsedConf)
+		diff := cmp.Diff(parsedConf, expConf, opts)
+		t.Errorf("Parsed Example configuration did not match expected values. diff:\n%s", diff)
 	}
 }
 
@@ -273,26 +274,27 @@ func TestParseExampleConfig(t *testing.T) {
 		TimeoutConf: TimeoutConf{
 			Timeout: 300,
 		},
-		StorageType:      "memory",
-		GlobalEndpoint:   "http://localhost:3001",
-		Port:             ":3000",
-		EnablePprof:      false,
-		PprofPort:        ":3001",
-		BasicAuthUser:    "",
-		BasicAuthPass:    "",
-		Storage:          expStorage,
-		TraceExporterURL: "http://localhost:14268",
-		TraceExporter:    "",
-		StatsExporter:    "prometheus",
-		SingleFlightType: "memory",
-		GoBinaryEnvVars:  []string{"GOPROXY=direct"},
-		SingleFlight:     &SingleFlight{},
-		SumDBs:           []string{"https://sum.golang.org"},
-		NoSumPatterns:    []string{},
-		DownloadMode:     "sync",
-		RobotsFile:       "robots.txt",
-		IndexType:        "none",
-		Index:            &Index{},
+		StorageType:       "memory",
+		GlobalEndpoint:    "http://localhost:3001",
+		Port:              ":3000",
+		PropagateAuthHost: "",
+		EnablePprof:       false,
+		PprofPort:         ":3001",
+		BasicAuthUser:     "",
+		BasicAuthPass:     "",
+		Storage:           expStorage,
+		TraceExporterURL:  "http://localhost:14268",
+		TraceExporter:     "",
+		StatsExporter:     "prometheus",
+		SingleFlightType:  "memory",
+		GoBinaryEnvVars:   []string{"GOPROXY=direct"},
+		SingleFlight:      &SingleFlight{},
+		SumDBs:            []string{"https://sum.golang.org"},
+		NoSumPatterns:     []string{},
+		DownloadMode:      "sync",
+		RobotsFile:        "robots.txt",
+		IndexType:         "none",
+		Index:             &Index{},
 	}
 
 	absPath, err := filepath.Abs(testConfigFile(t))
@@ -485,7 +487,8 @@ func TestDefaultConfigMatchesConfigFile(t *testing.T) {
 	ignoreGoEnvOpts := cmpopts.IgnoreFields(Config{}, "GoEnv")
 	eq := cmp.Equal(defConf, parsedConf, ignoreStorageOpts, ignoreGoEnvOpts)
 	if !eq {
-		t.Errorf("Default values from the config file: %v should equal to the default values returned in case the config file isn't provided %v", parsedConf, defConf)
+		diff := cmp.Diff(defConf, parsedConf, ignoreStorageOpts, ignoreGoEnvOpts)
+		t.Errorf("Default values from the config file should equal to the default values returned in case the config file isn't provided. Diff:\n%s", diff)
 	}
 }
 
