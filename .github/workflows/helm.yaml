@@ -40,7 +40,7 @@ jobs:
       - uses: dsaltares/fetch-gh-release-asset@master
         with:
           repo: helm/chart-testing
-          version: "v3.0.0"
+          version: "28928389" # 28928389 corresponds to v3.0.0, as found via the API.
           file: "chart-testing_3.0.0_linux_amd64.tar.gz"
 
       - name: Extract ct binary
