@@ -64,3 +64,5 @@ require (
 	gopkg.in/go-playground/validator.v9 v9.20.2
 	honnef.co/go/tools v0.0.1-2020.1.3 // indirect
 )
+
+replace github.com/mattn/go-ieproxy v0.0.0-20190610004146-91bb50d98149 => github.com/mattn/go-ieproxy v0.0.1
