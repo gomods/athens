@@ -8,8 +8,7 @@ require (
 	contrib.go.opencensus.io/exporter/jaeger v0.1.0
 	contrib.go.opencensus.io/exporter/prometheus v0.1.0
 	contrib.go.opencensus.io/exporter/stackdriver v0.6.0
-	github.com/Azure/azure-storage-blob-go v0.7.0
-	github.com/Azure/go-autorest/autorest/adal v0.6.0 // indirect
+	github.com/Azure/azure-storage-blob-go v0.10.0
 	github.com/BurntSushi/toml v0.3.1
 	github.com/DataDog/datadog-go v0.0.0-20180822151419-281ae9f2d895 // indirect
 	github.com/DataDog/opencensus-go-exporter-datadog v0.0.0-20180917103902-e6c7f767dc57
@@ -33,7 +32,6 @@ require (
 	github.com/kelseyhightower/envconfig v1.3.0
 	github.com/kylelemons/godebug v1.1.0 // indirect
 	github.com/lib/pq v1.7.0
-	github.com/mattn/go-ieproxy v0.0.1 // indirect
 	github.com/minio/minio-go/v6 v6.0.43
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/philhofer/fwd v1.0.0 // indirect
