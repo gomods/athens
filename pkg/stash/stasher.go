@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/gomods/athens/pkg/auth"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/index"
 	"github.com/gomods/athens/pkg/log"
@@ -52,9 +53,12 @@ func (s *stasher) Stash(ctx context.Context, mod, ver string) (string, error) {
 
 	// create a new context that ditches whatever deadline the caller passed
 	// but keep the tracing info so that we can properly trace the whole thing.
+	tok, ok := auth.FromContext(ctx)
 	ctx, cancel := context.WithTimeout(trace.NewContext(context.Background(), span), time.Minute*10)
 	defer cancel()
-
+	if ok {
+		ctx = auth.SetAuthInContext(ctx, tok)
+	}
 	v, err := s.fetchModule(ctx, mod, ver)
 	if err != nil {
 		return "", errors.E(op, err)
@@ -74,7 +78,7 @@ func (s *stasher) Stash(ctx context.Context, mod, ver string) (string, error) {
 		return "", errors.E(op, err)
 	}
 	err = s.indexer.Index(ctx, mod, v.Semver)
-	if err != nil {
+	if err != nil && !errors.Is(err, errors.KindAlreadyExists) {
 		return "", errors.E(op, err)
 	}
 	return v.Semver, nil

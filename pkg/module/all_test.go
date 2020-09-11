@@ -13,6 +13,9 @@ const (
 	// github.com/NYTimes/gizmo is a example of a path that needs to be encoded so we can cover that case as well
 	repoURI = "github.com/NYTimes/gizmo"
 	version = "v0.1.4"
+
+	privateRepoURI     = "github.com/athens-artifacts/private"
+	privateRepoVersion = "v0.0.1"
 )
 
 type ModuleSuite struct {

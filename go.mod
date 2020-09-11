@@ -8,8 +8,7 @@ require (
 	contrib.go.opencensus.io/exporter/jaeger v0.1.0
 	contrib.go.opencensus.io/exporter/prometheus v0.1.0
 	contrib.go.opencensus.io/exporter/stackdriver v0.6.0
-	github.com/Azure/azure-storage-blob-go v0.7.0
-	github.com/Azure/go-autorest/autorest/adal v0.6.0 // indirect
+	github.com/Azure/azure-storage-blob-go v0.10.0
 	github.com/BurntSushi/toml v0.3.1
 	github.com/DataDog/datadog-go v0.0.0-20180822151419-281ae9f2d895 // indirect
 	github.com/DataDog/opencensus-go-exporter-datadog v0.0.0-20180917103902-e6c7f767dc57
@@ -25,7 +24,7 @@ require (
 	github.com/gobuffalo/httptest v1.0.4
 	github.com/golang/protobuf v1.3.3 // indirect
 	github.com/golang/snappy v0.0.1 // indirect
-	github.com/google/go-cmp v0.4.0
+	github.com/google/go-cmp v0.5.1
 	github.com/google/uuid v1.1.1
 	github.com/gorilla/mux v1.6.2
 	github.com/hashicorp/go-multierror v1.0.0

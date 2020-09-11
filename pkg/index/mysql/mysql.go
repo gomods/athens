@@ -12,6 +12,9 @@ import (
 	"github.com/gomods/athens/pkg/index"
 )
 
+// New returns a new Indexer with a MySQL implementation.
+// It attempts to connect to the DB and create the index table
+// if it doesn ot already exist.
 func New(cfg *config.MySQL) (index.Indexer, error) {
 	dataSource := getMySQLSource(cfg)
 	db, err := sql.Open("mysql", dataSource)
@@ -65,7 +68,7 @@ func (i *indexer) Index(ctx context.Context, mod, ver string) error {
 		time.Now().Format(time.RFC3339Nano),
 	)
 	if err != nil {
-		return errors.E(op, err)
+		return errors.E(op, err, getKind(err))
 	}
 	return nil
 }
@@ -102,4 +105,16 @@ func getMySQLSource(cfg *config.MySQL) string {
 	c.DBName = cfg.Database
 	c.Params = cfg.Params
 	return c.FormatDSN()
+}
+
+func getKind(err error) int {
+	mysqlErr, ok := err.(*mysql.MySQLError)
+	if !ok {
+		return errors.KindUnexpected
+	}
+	switch mysqlErr.Number {
+	case 1062:
+		return errors.KindAlreadyExists
+	}
+	return errors.KindUnexpected
 }
