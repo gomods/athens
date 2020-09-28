@@ -127,7 +127,7 @@ func addProxyRoutes(
 		handlerOpts := &download.HandlerOpts{Protocol: dp, Logger: l, DownloadFile: df}
 		download.RegisterHandlers(r, handlerOpts)
 	} else {
-		handlerOpts := download.OfflineHandlerOpts{Logger: l, Storage: s}
+		handlerOpts := &download.OfflineHandlerOpts{Logger: l, Storage: s}
 		download.RegisterOfflineHandlers(r, handlerOpts)
 	}
 

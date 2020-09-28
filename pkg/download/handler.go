@@ -29,6 +29,10 @@ type HandlerOpts struct {
 	DownloadFile *mode.DownloadFile
 }
 
+type OfflineHandlerOpts struct {
+	Storage *storage.Backend
+}
+
 // LogEntryHandler pulls a log entry from the request context. Thanks to the
 // LogEntryMiddleware, we should have a log entry stored in the context for each
 // request with request-specific fields. This will grab the entry and pass it to
@@ -43,8 +47,12 @@ func LogEntryHandler(ph ProtocolHandler, opts *HandlerOpts) http.Handler {
 }
 
 func OfflineLogEntryHandler(ph OfflineProtocolHandler, opts *OfflineHandlerOpts) http.Handler {
-	// TODO: implement this
-	return nil
+	f := func(w http.ResponseWriter, r *http.Request) {
+		ent := log.EntryFromContext(r.Context())
+		handler := ph(ent, *opts.Storage)
+		handler.ServeHTTP(w, r)
+	}
+	return http.HandlerFunc(f)
 }
 
 // RegisterHandlers is a convenience method that registers
