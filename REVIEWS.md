@@ -75,4 +75,4 @@ responded to questions, etc...) before you merge.
 This one is the easiest. When you decide to submit your review, please use `Approve` if everything
 looks good. If nobody else has any `Request Changes` or `Comment` reviews 
 (GitHub will show a red "X" near their name if they do), you can click the "Squash and Merge"
-button to merge their PR into the master branch!
+button to merge their PR into the `main` branch!

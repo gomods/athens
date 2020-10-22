@@ -13,7 +13,6 @@ spec:
   selector:
     matchLabels:
       app: {{ template "fullname" . }}-jaeger
-      chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
       release: "{{ .Release.Name }}"
   template:
     metadata:

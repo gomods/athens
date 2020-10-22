@@ -21,41 +21,45 @@ const defaultConfigFile = "athens.toml"
 // Config provides configuration values for all components
 type Config struct {
 	TimeoutConf
-	GoEnv            string    `validate:"required" envconfig:"GO_ENV"`
-	GoBinary         string    `validate:"required" envconfig:"GO_BINARY_PATH"`
-	GoProxy          string    `envconfig:"GOPROXY"`
-	GoBinaryEnvVars  EnvList   `envconfig:"ATHENS_GO_BINARY_ENV_VARS"`
-	GoGetWorkers     int       `validate:"required" envconfig:"ATHENS_GOGET_WORKERS"`
-	ProtocolWorkers  int       `validate:"required" envconfig:"ATHENS_PROTOCOL_WORKERS"`
-	LogLevel         string    `validate:"required" envconfig:"ATHENS_LOG_LEVEL"`
-	CloudRuntime     string    `validate:"required" envconfig:"ATHENS_CLOUD_RUNTIME"`
-	EnablePprof      bool      `envconfig:"ATHENS_ENABLE_PPROF"`
-	PprofPort        string    `envconfig:"ATHENS_PPROF_PORT"`
-	FilterFile       string    `envconfig:"ATHENS_FILTER_FILE"`
-	TraceExporterURL string    `envconfig:"ATHENS_TRACE_EXPORTER_URL"`
-	TraceExporter    string    `envconfig:"ATHENS_TRACE_EXPORTER"`
-	StatsExporter    string    `envconfig:"ATHENS_STATS_EXPORTER"`
-	StorageType      string    `validate:"required" envconfig:"ATHENS_STORAGE_TYPE"`
-	GlobalEndpoint   string    `envconfig:"ATHENS_GLOBAL_ENDPOINT"` // This feature is not yet implemented
-	Port             string    `envconfig:"ATHENS_PORT"`
-	BasicAuthUser    string    `envconfig:"BASIC_AUTH_USER"`
-	BasicAuthPass    string    `envconfig:"BASIC_AUTH_PASS"`
-	ForceSSL         bool      `envconfig:"PROXY_FORCE_SSL"`
-	ValidatorHook    string    `envconfig:"ATHENS_PROXY_VALIDATOR"`
-	PathPrefix       string    `envconfig:"ATHENS_PATH_PREFIX"`
-	NETRCPath        string    `envconfig:"ATHENS_NETRC_PATH"`
-	GithubToken      string    `envconfig:"ATHENS_GITHUB_TOKEN"`
-	HGRCPath         string    `envconfig:"ATHENS_HGRC_PATH"`
-	TLSCertFile      string    `envconfig:"ATHENS_TLSCERT_FILE"`
-	TLSKeyFile       string    `envconfig:"ATHENS_TLSKEY_FILE"`
-	SumDBs           []string  `envconfig:"ATHENS_SUM_DBS"`
-	NoSumPatterns    []string  `envconfig:"ATHENS_GONOSUM_PATTERNS"`
-	DownloadMode     mode.Mode `envconfig:"ATHENS_DOWNLOAD_MODE"`
-	DownloadURL      string    `envconfig:"ATHENS_DOWNLOAD_URL"`
-	SingleFlightType string    `envconfig:"ATHENS_SINGLE_FLIGHT_TYPE"`
-	RobotsFile       string    `envconfig:"ATHENS_ROBOTS_FILE"`
-	SingleFlight     *SingleFlight
-	Storage          *StorageConfig
+	GoEnv             string    `validate:"required" envconfig:"GO_ENV"`
+	GoBinary          string    `validate:"required" envconfig:"GO_BINARY_PATH"`
+	GoProxy           string    `envconfig:"GOPROXY"`
+	GoBinaryEnvVars   EnvList   `envconfig:"ATHENS_GO_BINARY_ENV_VARS"`
+	GoGetWorkers      int       `validate:"required" envconfig:"ATHENS_GOGET_WORKERS"`
+	GoGetDir          string    `envconfig:"ATHENS_GOGOET_DIR"`
+	ProtocolWorkers   int       `validate:"required" envconfig:"ATHENS_PROTOCOL_WORKERS"`
+	LogLevel          string    `validate:"required" envconfig:"ATHENS_LOG_LEVEL"`
+	CloudRuntime      string    `validate:"required" envconfig:"ATHENS_CLOUD_RUNTIME"`
+	EnablePprof       bool      `envconfig:"ATHENS_ENABLE_PPROF"`
+	PprofPort         string    `envconfig:"ATHENS_PPROF_PORT"`
+	FilterFile        string    `envconfig:"ATHENS_FILTER_FILE"`
+	TraceExporterURL  string    `envconfig:"ATHENS_TRACE_EXPORTER_URL"`
+	TraceExporter     string    `envconfig:"ATHENS_TRACE_EXPORTER"`
+	StatsExporter     string    `envconfig:"ATHENS_STATS_EXPORTER"`
+	StorageType       string    `validate:"required" envconfig:"ATHENS_STORAGE_TYPE"`
+	GlobalEndpoint    string    `envconfig:"ATHENS_GLOBAL_ENDPOINT"` // This feature is not yet implemented
+	Port              string    `envconfig:"ATHENS_PORT"`
+	BasicAuthUser     string    `envconfig:"BASIC_AUTH_USER"`
+	BasicAuthPass     string    `envconfig:"BASIC_AUTH_PASS"`
+	PropagateAuthHost string    `envconfig:"ATHENS_PROPAGATE_AUTH_HOST"`
+	ForceSSL          bool      `envconfig:"PROXY_FORCE_SSL"`
+	ValidatorHook     string    `envconfig:"ATHENS_PROXY_VALIDATOR"`
+	PathPrefix        string    `envconfig:"ATHENS_PATH_PREFIX"`
+	NETRCPath         string    `envconfig:"ATHENS_NETRC_PATH"`
+	GithubToken       string    `envconfig:"ATHENS_GITHUB_TOKEN"`
+	HGRCPath          string    `envconfig:"ATHENS_HGRC_PATH"`
+	TLSCertFile       string    `envconfig:"ATHENS_TLSCERT_FILE"`
+	TLSKeyFile        string    `envconfig:"ATHENS_TLSKEY_FILE"`
+	SumDBs            []string  `envconfig:"ATHENS_SUM_DBS"`
+	NoSumPatterns     []string  `envconfig:"ATHENS_GONOSUM_PATTERNS"`
+	DownloadMode      mode.Mode `envconfig:"ATHENS_DOWNLOAD_MODE"`
+	DownloadURL       string    `envconfig:"ATHENS_DOWNLOAD_URL"`
+	SingleFlightType  string    `envconfig:"ATHENS_SINGLE_FLIGHT_TYPE"`
+	RobotsFile        string    `envconfig:"ATHENS_ROBOTS_FILE"`
+	IndexType         string    `envconfig:"ATHENS_INDEX_TYPE"`
+	SingleFlight      *SingleFlight
+	Storage           *Storage
+	Index             *Index
 }
 
 // EnvList is a list of key-value environment
@@ -139,31 +143,63 @@ func Load(configFile string) (*Config, error) {
 
 func defaultConfig() *Config {
 	return &Config{
-		GoBinary:         "go",
-		GoBinaryEnvVars:  EnvList{"GOPROXY=direct"},
-		GoEnv:            "development",
-		GoProxy:          "direct",
-		GoGetWorkers:     10,
-		ProtocolWorkers:  30,
-		LogLevel:         "debug",
-		CloudRuntime:     "none",
-		EnablePprof:      false,
-		PprofPort:        ":3001",
-		StatsExporter:    "prometheus",
-		TimeoutConf:      TimeoutConf{Timeout: 300},
-		StorageType:      "memory",
-		Port:             ":3000",
-		SingleFlightType: "memory",
-		GlobalEndpoint:   "http://localhost:3001",
-		TraceExporterURL: "http://localhost:14268",
-		SumDBs:           []string{"https://sum.golang.org"},
-		NoSumPatterns:    []string{},
-		DownloadMode:     "sync",
-		DownloadURL:      "",
-		RobotsFile:       "robots.txt",
+		GoBinary:          "go",
+		GoBinaryEnvVars:   EnvList{"GOPROXY=direct"},
+		GoEnv:             "development",
+		GoProxy:           "direct",
+		GoGetWorkers:      10,
+		ProtocolWorkers:   30,
+		LogLevel:          "debug",
+		CloudRuntime:      "none",
+		EnablePprof:       false,
+		PprofPort:         ":3001",
+		StatsExporter:     "prometheus",
+		TimeoutConf:       TimeoutConf{Timeout: 300},
+		StorageType:       "memory",
+		Port:              ":3000",
+		PropagateAuthHost: "",
+		SingleFlightType:  "memory",
+		GlobalEndpoint:    "http://localhost:3001",
+		TraceExporterURL:  "http://localhost:14268",
+		SumDBs:            []string{"https://sum.golang.org"},
+		NoSumPatterns:     []string{},
+		DownloadMode:      "sync",
+		DownloadURL:       "",
+		RobotsFile:        "robots.txt",
+		IndexType:         "none",
 		SingleFlight: &SingleFlight{
 			Etcd:  &Etcd{"localhost:2379,localhost:22379,localhost:32379"},
-			Redis: &Redis{"127.0.0.1:6379"},
+			Redis: &Redis{"127.0.0.1:6379", ""},
+			RedisSentinel: &RedisSentinel{
+				Endpoints:        []string{"127.0.0.1:26379"},
+				MasterName:       "redis-1",
+				SentinelPassword: "sekret",
+			},
+		},
+		Index: &Index{
+			MySQL: &MySQL{
+				Protocol: "tcp",
+				Host:     "localhost",
+				Port:     3306,
+				User:     "root",
+				Password: "",
+				Database: "athens",
+				Params: map[string]string{
+					"parseTime": "true",
+					"timeout":   "30s",
+				},
+			},
+			Postgres: &Postgres{
+				Host:     "localhost",
+				Port:     5432,
+				User:     "postgres",
+				Password: "",
+				Database: "athens",
+				Params: map[string]string{
+					"connect_timeout": "30",
+					"sslmode":         "disable",
+				},
+			},
 		},
 	}
 }
@@ -262,27 +298,54 @@ func ensurePortFormat(s string) string {
 
 func validateConfig(config Config) error {
 	validate := validator.New()
-	err := validate.StructExcept(config, "Storage")
+	err := validate.StructExcept(config, "Storage", "Index")
 	if err != nil {
 		return err
 	}
-	switch config.StorageType {
+	err = validateStorage(validate, config.StorageType, config.Storage)
+	if err != nil {
+		return err
+	}
+	err = validateIndex(validate, config.IndexType, config.Index)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func validateStorage(validate *validator.Validate, storageType string, config *Storage) error {
+	switch storageType {
 	case "memory":
 		return nil
 	case "mongo":
-		return validate.Struct(config.Storage.Mongo)
+		return validate.Struct(config.Mongo)
 	case "disk":
-		return validate.Struct(config.Storage.Disk)
+		return validate.Struct(config.Disk)
 	case "minio":
-		return validate.Struct(config.Storage.Minio)
+		return validate.Struct(config.Minio)
 	case "gcp":
-		return validate.Struct(config.Storage.GCP)
+		return validate.Struct(config.GCP)
 	case "s3":
-		return validate.Struct(config.Storage.S3)
+		return validate.Struct(config.S3)
 	case "azureblob":
-		return validate.Struct(config.Storage.AzureBlob)
+		return validate.Struct(config.AzureBlob)
+	case "external":
+		return validate.Struct(config.External)
 	default:
-		return fmt.Errorf("storage type %s is unknown", config.StorageType)
+		return fmt.Errorf("storage type %q is unknown", storageType)
+	}
+}
+
+func validateIndex(validate *validator.Validate, indexType string, config *Index) error {
+	switch indexType {
+	case "", "none", "memory":
+		return nil
+	case "mysql":
+		return validate.Struct(config.MySQL)
+	case "postgres":
+		return validate.Struct(config.Postgres)
+	default:
+		return fmt.Errorf("index type %q is unknown", indexType)
 	}
 }
 

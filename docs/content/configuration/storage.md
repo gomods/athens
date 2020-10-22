@@ -27,6 +27,13 @@ The Athens proxy supports many storage types:
       - [Configuration:](#configuration-7)
 - [Azure Blob Storage](#azure-blob-storage)
       - [Configuration:](#configuration-8)
+- [External Storage](#external-storage)
+      - [Configuration:](#configuration-9)
+- [Running multiple Athens pointed at the same storage](#running-multiple-athens-pointed-at-the-same-storage)
+  - [Using etcd as the single flight mechanism](#using-etcd-as-the-single-flight-mechanism)
+  - [Using redis as the single flight mechanism](#using-redis-as-the-single-flight-mechanism)
+    - [Direct connection to redis](#direct-connection-to-redis)
+    - [Connecting to redis via redis sentinel](#connecting-to-redis-via-redis-sentinel)
 
 All of them can be configured using `config.toml` file. You need to set a valid driver in `StorageType` value or you can set it in environment variable `ATHENS_STORAGE_TYPE` on your server.
 Also for most of the drivers you need to provide additional configuration data which will be described below.
@@ -47,7 +54,7 @@ This storage doesn't need any specific configuration and it's also used by defau
 
 Disk storage allows modules to be stored on a file system. The location on disk where modules will be stored can be configured.
 
->You can pre-fill disk-based storage to enable Athens deployments that have no access to the internet. See [here](./prefill-disk-cache) for instructions on how to do that.
+>You can pre-fill disk-based storage to enable Athens deployments that have no access to the internet. See [here](/configuration/prefill-disk-cache) for instructions on how to do that.
 
 ##### Configuration:
 
@@ -335,3 +342,133 @@ It assumes that you already have the following:
             # Name of container in the blob storage
             # Env override: ATHENS_AZURE_CONTAINER_NAME
             ContainerName = "MY_AZURE_BLOB_CONTAINER_NAME"
+
+## External Storage
+
+External storage lets Athens connect to your own implementation of a storage backend. 
+All you have to do is implement the (storage.Backend)[https://github.com/gomods/athens/blob/main/pkg/storage/backend.go#L4] interface and run it behind an http server. 
+
+Once you implement the backend server, you must then configure Athens to use that storage backend as such:
+
+##### Configuration:
+    # Env override: ATHENS_STORAGE_TYPE
+    StorageType = "external"
+
+    [Storage]
+        [Storage.External]
+            # Env override: ATHENS_EXTERNAL_STORAGE_URL
+            URL = "http://localhost:9090"
+
+Athens provides a convenience wrapper that lets you implement a storage backend with ease. See the following example: 
+
+
+```golang
+package main
+
+import (
+    "github.com/gomods/athens/pkg/storage"
+    "github.com/gomods/athens/pkg/storage/external"
+)
+
+// TODO: implement storage.Backend
+type myCustomStorage struct {
+    storage.Backend
+}
+
+func main() {
+    handler := external.NewServer(&myCustomStorage{})
+    http.ListenAndServe(":9090", handler)
+}
+```
+
+## Running multiple Athens pointed at the same storage
+
+Athens has the ability to run concurrently pointed at the same storage medium, using
+a distributed locking mechanism called "single flight".
+
+By default, Athens is configured to use the `memory` single flight, which
+stores locks in local memory. This works when running a single Athens instance, given
+the process has access to it's own memory. However, when running multiple Athens instances
+pointed at the same storage, a distributed locking mechansism is required.
+
+Athens supports several distributed locking mechanisms:
+
+- `etcd`
+- `redis`
+- `redis-sentinel`
+- `gcp` (available when using the `gcp` storage type)
+- `azureblob` (available when using the `azureblob` storage type)
+
+Setting the `SingleFlightType` (or `ATHENS_SINGLE_FLIGHT TYPE` in the environment) configuration
+value will enable usage of one of the above mechanisms. The `azureblob` and `gcp` types require
+no extra configuration.
+
+### Using etcd as the single flight mechanism
+
+Using the `etcd` mechanism is very simple, just a comma separated list of etcd endpoints.
+The recommend configuration is 3 endpoints, however, more can be used.
+  
+    SingleFlightType = "etcd"
+
+    [SingleFlight]
+        [SingleFlight.Etcd]
+            # Env override: ATHENS_ETCD_ENDPOINTS
+            Endpoints = "localhost:2379,localhost:22379,localhost:32379"
+
+### Using redis as the single flight mechanism
+
+Athens supports two mechanisms of communicating with redis: direct connection, and
+connecting via redis sentinels.
+
+#### Direct connection to redis
+
+Using a direct connection to redis is simple, and only requires a single `redis-server`.
+You can also optionally specify a password to connect to the redis server with
+
+    SingleFlightType = "redis"
+
+    [SingleFlight]
+        [SingleFlight.Redis]
+            # Endpoint is the redis endpoint for the single flight mechanism
+            # Env override: ATHENS_REDIS_ENDPOINT
+            Endpoint = "127.0.0.1:6379"
+
+            # Password is the password for the redis instance
+            # Env override: ATHENS_REDIS_PASSWORD
+            Password = ""
+
+#### Connecting to redis via redis sentinel
+
+**NOTE**: redis-sentinel requires a working knowledge of redis and is not recommended for
+everyone.
+
+redis sentinel is a high-availability set up for redis, it provides automated monitoring, replication,
+failover and configuration of multiple redis servers in a leader-follower setup. It is more
+complex than running a single redis server and requires multiple disperate instances of redis
+running distributed across nodes.
+
+For more details on redis-sentinel, check out the [documentation](https://redis.io/topics/sentinel)
+
+As redis-sentinel is a more complex set up of redis, it requires more configuration than standard redis.
+
+Required configuration:
+
+- `Endpoints` is a list of redis-sentinel endpoints to connect to, typically 3, but more can be used
+- `MasterName` is the named master instance, as configured in the `redis-sentinel` [configuration](https://redis.io/topics/sentinel#configuring-sentinel)
+
+Optionally, like `redis`, you can also specify a password to connect to the `redis-sentinel` endpoints with
+
+    SingleFlightType = "redis-sentinel"
+
+    [SingleFlight]
+      [SingleFlight.RedisSentinel]
+          # Endpoints is the redis sentinel endpoints to discover a redis
+          # master for a SingleFlight lock.
+          # Env override: ATHENS_REDIS_SENTINEL_ENDPOINTS
+          Endpoints = ["127.0.0.1:26379"]
+          # MasterName is the redis sentinel master name to use to discover
+          # the master for a SingleFlight lock
+          MasterName = "redis-1"
+          # SentinelPassword is an optional password for authenticating with
+          # redis sentinel
+          SentinelPassword = "sekret"

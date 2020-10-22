@@ -15,7 +15,7 @@ import (
 
 // NewValidationMiddleware builds a middleware function that performs validation checks by calling
 // an external webhook
-func NewValidationMiddleware(validatorHook string) mux.MiddlewareFunc {
+func NewValidationMiddleware(client *http.Client, validatorHook string) mux.MiddlewareFunc {
 	const op errors.Op = "actions.NewValidationMiddleware"
 	return func(h http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -25,13 +25,14 @@ func NewValidationMiddleware(validatorHook string) mux.MiddlewareFunc {
 				h.ServeHTTP(w, r)
 				return
 			}
+			ctx := r.Context()
 			// not checking the error. Not all requests include a version
 			// i.e. list requests path is like /{module:.+}/@v/list with no version parameter
 			version, _ := paths.GetVersion(r)
 			if version != "" {
-				response, err := validate(validatorHook, mod, version)
+				response, err := validate(ctx, client, validatorHook, mod, version)
 				if err != nil {
-					entry := log.EntryFromContext(r.Context())
+					entry := log.EntryFromContext(ctx)
 					entry.SystemErr(err)
 					w.WriteHeader(http.StatusInternalServerError)
 					return
@@ -66,7 +67,7 @@ type validationResponse struct {
 	Message []byte
 }
 
-func validate(hook, mod, ver string) (validationResponse, error) {
+func validate(ctx context.Context, client *http.Client, hook, mod, ver string) (validationResponse, error) {
 	const op errors.Op = "actions.validate"
 
 	toVal := &validationParams{mod, ver}
@@ -75,7 +76,12 @@ func validate(hook, mod, ver string) (validationResponse, error) {
 		return validationResponse{Valid: false}, errors.E(op, err)
 	}
 
-	resp, err := http.Post(hook, "application/json", bytes.NewBuffer(jsonVal))
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, hook, bytes.NewReader(jsonVal))
+	if err != nil {
+		return validationResponse{}, errors.E(op, err)
+	}
+	req.Header.Set("Content-Type", "application/json")
+	resp, err := client.Do(req)
 	if err != nil {
 		return validationResponse{Valid: false}, errors.E(op, err)
 	}

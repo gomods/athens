@@ -4,7 +4,9 @@ import (
 	"context"
 	"time"
 
+	"github.com/gomods/athens/pkg/auth"
 	"github.com/gomods/athens/pkg/errors"
+	"github.com/gomods/athens/pkg/index"
 	"github.com/gomods/athens/pkg/log"
 	"github.com/gomods/athens/pkg/module"
 	"github.com/gomods/athens/pkg/observ"
@@ -13,7 +15,7 @@ import (
 )
 
 // Stasher has the job of taking a module
-// from an upstream entity and stashing it to a Storage Backend.
+// from an upstream entity and stashing it to a Storage Backend and Index.
 // It also returns a string that represents a semver version of
 // what was requested, this is helpful if what was requested
 // was a descriptive version such as a branch name or a full commit sha.
@@ -27,8 +29,8 @@ type Wrapper func(Stasher) Stasher
 // New returns a plain stasher that takes
 // a module from a download.Protocol and
 // stashes it into a backend.Storage.
-func New(f module.Fetcher, s storage.Backend, wrappers ...Wrapper) Stasher {
-	var st Stasher = &stasher{f, s}
+func New(f module.Fetcher, s storage.Backend, indexer index.Indexer, wrappers ...Wrapper) Stasher {
+	var st Stasher = &stasher{f, s, storage.WithChecker(s), indexer}
 	for _, w := range wrappers {
 		st = w(st)
 	}
@@ -39,6 +41,8 @@ func New(f module.Fetcher, s storage.Backend, wrappers ...Wrapper) Stasher {
 type stasher struct {
 	fetcher module.Fetcher
 	storage storage.Backend
+	checker storage.Checker
+	indexer index.Indexer
 }
 
 func (s *stasher) Stash(ctx context.Context, mod, ver string) (string, error) {
@@ -49,16 +53,19 @@ func (s *stasher) Stash(ctx context.Context, mod, ver string) (string, error) {
 
 	// create a new context that ditches whatever deadline the caller passed
 	// but keep the tracing info so that we can properly trace the whole thing.
+	tok, ok := auth.FromContext(ctx)
 	ctx, cancel := context.WithTimeout(trace.NewContext(context.Background(), span), time.Minute*10)
 	defer cancel()
-
+	if ok {
+		ctx = auth.SetAuthInContext(ctx, tok)
+	}
 	v, err := s.fetchModule(ctx, mod, ver)
 	if err != nil {
 		return "", errors.E(op, err)
 	}
 	defer v.Zip.Close()
 	if v.Semver != ver {
-		exists, err := s.storage.Exists(ctx, mod, v.Semver)
+		exists, err := s.checker.Exists(ctx, mod, v.Semver)
 		if err != nil {
 			return "", errors.E(op, err)
 		}
@@ -70,6 +77,10 @@ func (s *stasher) Stash(ctx context.Context, mod, ver string) (string, error) {
 	if err != nil {
 		return "", errors.E(op, err)
 	}
+	err = s.indexer.Index(ctx, mod, v.Semver)
+	if err != nil && !errors.Is(err, errors.KindAlreadyExists) {
+		return "", errors.E(op, err)
+	}
 	return v.Semver, nil
 }
 
@@ -79,6 +90,5 @@ func (s *stasher) fetchModule(ctx context.Context, mod, ver string) (*storage.Ve
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
-
 	return v, nil
 }

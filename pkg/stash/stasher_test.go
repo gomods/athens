@@ -7,6 +7,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/gomods/athens/pkg/auth"
+	"github.com/gomods/athens/pkg/index/nop"
 	"github.com/gomods/athens/pkg/storage"
 )
 
@@ -54,7 +56,7 @@ func TestStash(t *testing.T) {
 			var mf mockFetcher
 			mf.ver = testCase.modVer
 
-			s := New(&mf, &ms)
+			s := New(&mf, &ms, nop.New())
 			newVersion, err := s.Stash(context.Background(), "module", testCase.ver)
 			if err != nil {
 				t.Fatal(err)
@@ -73,6 +75,24 @@ func TestStash(t *testing.T) {
 				t.Fatalf("expected save not to be called")
 			}
 		})
+	}
+}
+
+func TestStashWithAuthContext(t *testing.T) {
+	var mf mockFetcher
+	var ms mockStorage
+	s := New(&mf, &ms, nop.New())
+	want := auth.BasicAuth{
+		User:     "gomods",
+		Password: "athens",
+	}
+	ctx := auth.SetAuthInContext(context.Background(), want)
+	_, err := s.Stash(ctx, "mod", "ver")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if mf.auth != want {
+		t.Fatalf("expected %+v but got %+v", want, mf.auth)
 	}
 }
 
@@ -96,10 +116,13 @@ func (ms *mockStorage) Exists(ctx context.Context, mod, ver string) (bool, error
 }
 
 type mockFetcher struct {
-	ver string
+	ver  string
+	auth auth.BasicAuth
 }
 
 func (mf *mockFetcher) Fetch(ctx context.Context, mod, ver string) (*storage.Version, error) {
+	a, _ := auth.FromContext(ctx)
+	mf.auth = a
 	return &storage.Version{
 		Info:   []byte("info"),
 		Mod:    []byte("gomod"),

@@ -4,7 +4,7 @@ description: Information about Athens' Docker images
 weight: 1
 ---
 
-Whether setting Athens up using [Kubernetes](./install-on-kubernetes) or using the [Walkthrough](/Walkthrough), you'll most likely be using one of the images that the Athens project produces. This document details what images are available, and has a recap from the Walkthrough of how to use them on their own.
+Whether setting Athens up using [Kubernetes](install/install-on-kubernetes/) or using the [Walkthrough](/Walkthrough), you'll most likely be using one of the images that the Athens project produces. This document details what images are available, and has a recap from the Walkthrough of how to use them on their own.
 
 ---
 
@@ -12,8 +12,8 @@ Whether setting Athens up using [Kubernetes](./install-on-kubernetes) or using t
 
 The Athens project produces two docker images, available via [Docker Hub](https://hub.docker.com/) 
 
-1. A release version as [`gomods/athens`](https://hub.docker.com/gomods/athens), each tag corresponds with an Athens [release](https://github.com/gomods/athens/releases), e.g. `v0.7.1`. Additionally, a `canary` tag is available and tracks each commit to `master`
-2. A tip version, as [`gomods/athens-dev`](https://hub.docker.com/r/gomods/athens-dev), tagged with every commit to `master`, e.g. `1573339`
+1. A release version as [`gomods/athens`](https://hub.docker.com/gomods/athens), each tag corresponds with an Athens [release](https://github.com/gomods/athens/releases), e.g. `v0.7.1`. Additionally, a `canary` tag is available and tracks each commit to `main`
+2. A tip version, as [`gomods/athens-dev`](https://hub.docker.com/r/gomods/athens-dev), tagged with every commit to `main`, e.g. `1573339`
 
 For a detailed tags list, check each image's Docker Hub
 
