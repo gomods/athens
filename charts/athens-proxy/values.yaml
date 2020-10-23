@@ -147,7 +147,7 @@ sshGitServers: {}
 goGetWorkers: 3
 
 serviceAccount:
-   annotations: {}
+  annotations: {}
 
 nodeSelector: {}
 
