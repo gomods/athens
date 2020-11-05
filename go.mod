@@ -15,6 +15,7 @@ require (
 	github.com/aws/aws-sdk-go v1.32.7
 	github.com/bsm/redislock v0.4.2
 	github.com/codegangsta/negroni v1.0.0 // indirect
+	github.com/coreos/go-semver v0.2.0
 	github.com/fatih/color v1.7.0
 	github.com/go-playground/locales v0.12.1 // indirect
 	github.com/go-playground/universal-translator v0.16.0 // indirect
@@ -50,7 +51,7 @@ require (
 	go.opencensus.io v0.22.3
 	golang.org/x/exp v0.0.0-20200224162631-6cc2880d07d6 // indirect
 	golang.org/x/lint v0.0.0-20200130185559-910be7a94367 // indirect
-	golang.org/x/mod v0.2.0
+	golang.org/x/mod v0.3.0
 	golang.org/x/net v0.0.0-20200222125558-5a598a2470a0 // indirect
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
 	golang.org/x/sync v0.0.0-20200317015054-43a5402ce75a
