@@ -153,6 +153,13 @@ tolerations: []
 affinity: {}
 
 resources: {}
+
+serviceAccount:
+  create: true
+  name: ""
+  ## Annotations for the Service Account
+  annotations: {}
+
 #  limits:
 #    cpu: 100m
 #    memory: 64Mi

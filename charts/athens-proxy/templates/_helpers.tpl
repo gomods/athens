@@ -17,3 +17,10 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 {{- define "readinessPath" -}}
 {{- if contains "v0.2.0" .Values.image.tag -}}/{{- else -}}/readyz{{- end -}}
 {{- end -}}
+{{- define "serviceaccountname" -}}
+{{- if eq .Values.serviceAccount.name  "" -}}
+{{ include "fullname" . }}
+{{- else -}}
+{{ .Values.serviceAccount.name }}
+{{- end -}}
+{{- end -}}
