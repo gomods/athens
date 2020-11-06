@@ -32,3 +32,6 @@ tmp
 
 # prod config file
 config.toml
+
+# goreleaser output directory
+dist/
