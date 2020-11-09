@@ -11,5 +11,6 @@ type S3Config struct {
 	ForcePathStyle                     bool   `envconfig:"AWS_FORCE_PATH_STYLE"`
 	CredentialsEndpoint                string `envconfig:"AWS_CREDENTIALS_ENDPOINT"`
 	AwsContainerCredentialsRelativeURI string `envconfig:"AWS_CONTAINER_CREDENTIALS_RELATIVE_URI"`
-	Endpoint                           string `envconfig:"AWS_ENDPOINT"`
+	Endpoint                           string `evnconfig:"AWS_ENDPOINT"`
+	UseIAMProxy                        bool   `envconfig:"AWS_USE_IAM_PROXY"`
 }
