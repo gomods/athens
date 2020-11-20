@@ -34,6 +34,7 @@ spec:
 {{ toYaml .Values.annotations | indent 8 }}
         {{- end }}
     spec:
+      serviceAccount: {{ template "fullname" . }}
       {{- if .Values.sshGitServers }}
       initContainers:
         - name: copy-key-files
