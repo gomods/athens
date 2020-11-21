@@ -1,15 +1,13 @@
+---
 name: "CodeQL Security Scanning"
 
 on:
   push:
-    branches:
-      [main]
+    branches: [main]
   pull_request:
-    branches:
-      [main]
+    branches: [main]
   schedule:
-    - cron: '0 15 * * 0'
-
+    - cron: "0 15 * * 0"
 
 jobs:
   analyze:
@@ -30,7 +28,6 @@ jobs:
 
       - name: Autobuild
         uses: github/codeql-action/autobuild@v1
-
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v1
