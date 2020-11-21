@@ -1,8 +1,14 @@
-name: "CodeQL Scanning"
+name: "CodeQL Security Scanning"
 
 on:
   push:
+    branches:
+      [main]
   pull_request:
+    branches:
+      [main]
+  schedule:
+    - cron: '0 15 * * 0'
 
 
 jobs:
