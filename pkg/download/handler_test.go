@@ -2,7 +2,6 @@ package download
 
 import (
 	"context"
-	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -10,6 +9,7 @@ import (
 	"github.com/gomods/athens/pkg/download/mode"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/log"
+	"github.com/gomods/athens/pkg/storage"
 	"github.com/gorilla/mux"
 )
 
@@ -58,7 +58,7 @@ func (mp *mockProtocol) GoMod(ctx context.Context, mod, ver string) ([]byte, err
 	return nil, errors.E(op, "not found", errors.KindRedirect)
 }
 
-func (mp *mockProtocol) Zip(ctx context.Context, mod, ver string) (io.ReadCloser, error) {
+func (mp *mockProtocol) Zip(ctx context.Context, mod, ver string) (storage.SizeReadCloser, error) {
 	const op errors.Op = "mockProtocol.Zip"
 	return nil, errors.E(op, "not found", errors.KindRedirect)
 }

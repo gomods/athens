@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"mime/multipart"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/gomods/athens/pkg/errors"
@@ -31,7 +32,7 @@ func NewClient(url string, c *http.Client) storage.Backend {
 
 func (s *service) List(ctx context.Context, mod string) ([]string, error) {
 	const op errors.Op = "external.List"
-	body, err := s.getRequest(ctx, mod, "list", "")
+	body, _, err := s.getRequest(ctx, mod, "list", "")
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
@@ -48,7 +49,7 @@ func (s *service) List(ctx context.Context, mod string) ([]string, error) {
 
 func (s *service) Info(ctx context.Context, mod, ver string) ([]byte, error) {
 	const op errors.Op = "external.Info"
-	body, err := s.getRequest(ctx, mod, ver, "info")
+	body, _, err := s.getRequest(ctx, mod, ver, "info")
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
@@ -61,7 +62,7 @@ func (s *service) Info(ctx context.Context, mod, ver string) ([]byte, error) {
 
 func (s *service) GoMod(ctx context.Context, mod, ver string) ([]byte, error) {
 	const op errors.Op = "external.GoMod"
-	body, err := s.getRequest(ctx, mod, ver, "mod")
+	body, _, err := s.getRequest(ctx, mod, ver, "mod")
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
@@ -72,13 +73,13 @@ func (s *service) GoMod(ctx context.Context, mod, ver string) ([]byte, error) {
 	return modFile, nil
 }
 
-func (s *service) Zip(ctx context.Context, mod, ver string) (io.ReadCloser, error) {
+func (s *service) Zip(ctx context.Context, mod, ver string) (storage.SizeReadCloser, error) {
 	const op errors.Op = "external.Zip"
-	body, err := s.getRequest(ctx, mod, ver, "zip")
+	body, size, err := s.getRequest(ctx, mod, ver, "zip")
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
-	return body, nil
+	return storage.NewSizer(body, size), nil
 }
 
 func (s *service) Save(ctx context.Context, mod, ver string, modFile []byte, zip io.Reader, info []byte) error {
@@ -114,7 +115,7 @@ func (s *service) Save(ctx context.Context, mod, ver string, modFile []byte, zip
 
 func (s *service) Delete(ctx context.Context, mod, ver string) error {
 	const op errors.Op = "external.Delete"
-	body, err := s.doRequest(ctx, "DELETE", mod, ver, "delete")
+	body, _, err := s.doRequest(ctx, "DELETE", mod, ver, "delete")
 	if err != nil {
 		return errors.E(op, err)
 	}
@@ -151,16 +152,16 @@ func upload(mw *multipart.Writer, mod, info []byte, zip io.Reader) error {
 	return nil
 }
 
-func (s *service) getRequest(ctx context.Context, mod, ver, ext string) (io.ReadCloser, error) {
+func (s *service) getRequest(ctx context.Context, mod, ver, ext string) (io.ReadCloser, int64, error) {
 	return s.doRequest(ctx, "GET", mod, ver, ext)
 }
 
-func (s *service) doRequest(ctx context.Context, method, mod, ver, ext string) (io.ReadCloser, error) {
+func (s *service) doRequest(ctx context.Context, method, mod, ver, ext string) (io.ReadCloser, int64, error) {
 	const op errors.Op = "external.doRequest"
 	var err error
 	mod, err = module.EscapePath(mod)
 	if err != nil {
-		return nil, errors.E(op, err)
+		return nil, 0, errors.E(op, err)
 	}
 	url := s.url + "/" + mod + "/@v/" + ver
 	if ext != "" {
@@ -168,16 +169,23 @@ func (s *service) doRequest(ctx context.Context, method, mod, ver, ext string) (
 	}
 	req, err := http.NewRequestWithContext(ctx, method, url, nil)
 	if err != nil {
-		return nil, errors.E(op, err)
+		return nil, 0, errors.E(op, err)
 	}
 	resp, err := s.c.Do(req)
 	if err != nil {
-		return nil, errors.E(op, err)
+		return nil, 0, errors.E(op, err)
 	}
 	if resp.StatusCode != 200 {
 		body, _ := ioutil.ReadAll(resp.Body)
 		resp.Body.Close()
-		return nil, errors.E(op, fmt.Errorf("none 200 status code: %v - body: %s", resp.StatusCode, body), resp.StatusCode)
+		return nil, 0, errors.E(op, fmt.Errorf("none 200 status code: %v - body: %s", resp.StatusCode, body), resp.StatusCode)
 	}
-	return resp.Body, nil
+	var size int64
+	if cl := resp.Header.Get("Content-Length"); cl != "" {
+		size, err = strconv.ParseInt(cl, 10, 64)
+		if err != nil {
+			return nil, 0, errors.E(op, fmt.Errorf("could not parse content-length(%q): %w", cl, err))
+		}
+	}
+	return resp.Body, size, nil
 }

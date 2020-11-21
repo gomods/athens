@@ -12,6 +12,7 @@ import (
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/observ"
+	"github.com/gomods/athens/pkg/storage"
 )
 
 type client interface {
@@ -88,14 +89,16 @@ func (c *azureBlobStoreClient) BlobExists(ctx context.Context, path string) (boo
 }
 
 // ReadBlob returns an io.ReadCloser for the contents of a blob
-func (c *azureBlobStoreClient) ReadBlob(ctx context.Context, path string) (io.ReadCloser, error) {
+func (c *azureBlobStoreClient) ReadBlob(ctx context.Context, path string) (storage.SizeReadCloser, error) {
 	const op errors.Op = "azureblob.ReadBlob"
 	blobURL := c.containerURL.NewBlockBlobURL(path)
 	downloadResponse, err := blobURL.Download(ctx, 0, 0, azblob.BlobAccessConditions{}, false)
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
-	return downloadResponse.Body(azblob.RetryReaderOptions{}), nil
+	rc := downloadResponse.Body(azblob.RetryReaderOptions{})
+	size := downloadResponse.ContentLength()
+	return storage.NewSizer(rc, size), nil
 }
 
 // ListBlobs will list all blobs which has the given prefix

@@ -5,6 +5,7 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/gomods/athens/pkg/download"
@@ -67,6 +68,7 @@ func NewServer(strg storage.Backend) http.Handler {
 			return
 		}
 		defer zip.Close()
+		w.Header().Set("Content-Length", strconv.FormatInt(zip.Size(), 10))
 		io.Copy(w, zip)
 	}).Methods(http.MethodGet)
 	r.HandleFunc("/{module:.+}/@v/{version}.save", func(w http.ResponseWriter, r *http.Request) {

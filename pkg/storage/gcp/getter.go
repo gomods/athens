@@ -3,13 +3,13 @@ package gcp
 import (
 	"context"
 	"fmt"
-	"io"
 	"io/ioutil"
 
 	"cloud.google.com/go/storage"
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/observ"
+	pkgstorage "github.com/gomods/athens/pkg/storage"
 )
 
 // Info implements Getter
@@ -48,7 +48,7 @@ func (s *Storage) GoMod(ctx context.Context, module, version string) ([]byte, er
 }
 
 // Zip implements Getter
-func (s *Storage) Zip(ctx context.Context, module, version string) (io.ReadCloser, error) {
+func (s *Storage) Zip(ctx context.Context, module, version string) (pkgstorage.SizeReadCloser, error) {
 	const op errors.Op = "gcp.Zip"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
@@ -56,8 +56,7 @@ func (s *Storage) Zip(ctx context.Context, module, version string) (io.ReadClose
 	if err != nil {
 		return nil, errors.E(op, err, getErrorKind(err), errors.M(module), errors.V(version))
 	}
-
-	return zipReader, nil
+	return pkgstorage.NewSizer(zipReader, zipReader.Size()), nil
 }
 
 func getErrorKind(err error) int {
