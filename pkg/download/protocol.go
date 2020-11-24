@@ -2,8 +2,10 @@ package download
 
 import (
 	"context"
+	"encoding/json"
 	"io"
 	"regexp"
+	"sort"
 	"strings"
 	"sync"
 
@@ -13,6 +15,7 @@ import (
 	"github.com/gomods/athens/pkg/observ"
 	"github.com/gomods/athens/pkg/stash"
 	"github.com/gomods/athens/pkg/storage"
+	"golang.org/x/mod/semver"
 )
 
 // Protocol is the download protocol which mirrors
@@ -74,19 +77,27 @@ func (p *protocol) List(ctx context.Context, mod string) ([]string, error) {
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 
+	// If the download mode is None, we won't be downloading anything from
+	// the internet anyway, so we should only examine local storage.
+	localOnly := p.df.Match(mod) == mode.None
+
 	var strList, goList []string
 	var sErr, goErr error
 	var wg sync.WaitGroup
-	wg.Add(2)
+	wg.Add(1)
+
+	if !localOnly {
+		wg.Add(1)
+
+		go func() {
+			defer wg.Done()
+			_, goList, goErr = p.lister.List(ctx, mod)
+		}()
+	}
 
 	go func() {
 		defer wg.Done()
 		strList, sErr = p.storage.List(ctx, mod)
-	}()
-
-	go func() {
-		defer wg.Done()
-		_, goList, goErr = p.lister.List(ctx, mod)
 	}()
 
 	wg.Wait()
@@ -145,12 +156,38 @@ func (p *protocol) Latest(ctx context.Context, mod string) (*storage.RevInfo, er
 	const op errors.Op = "protocol.Latest"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
-	lr, _, err := p.lister.List(ctx, mod)
-	if err != nil {
-		return nil, errors.E(op, err)
+
+	localOnly := p.df.Match(mod) == mode.None
+	if localOnly {
+		sList, err := p.storage.List(ctx, mod)
+		if err != nil {
+			return nil, err
+		}
+		if len(sList) == 0 {
+			return nil, errors.E(op, errors.KindNotFound)
+		}
+		var sorted []string
+		for _, v := range sList {
+			sorted = append(sorted, semver.Canonical(v))
+		}
+		sort.Slice(sorted, func(i, j int) bool {
+			return semver.Compare(sorted[i], sorted[j]) == -1
+		})
+		latest := sorted[len(sorted)-1]
+		bytes, err := p.storage.Info(ctx, mod, latest)
+		if err != nil {
+			return nil, err
+		}
+		var revInfo storage.RevInfo
+		err = json.Unmarshal(bytes, &revInfo)
+		if err != nil {
+			return nil, err
+		}
+		return &revInfo, err
 	}
 
-	return lr, nil
+	revInfo, _, err := p.lister.List(ctx, mod)
+	return revInfo, err
 }
 
 func (p *protocol) Info(ctx context.Context, mod, ver string) ([]byte, error) {
