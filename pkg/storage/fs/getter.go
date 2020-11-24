@@ -2,12 +2,12 @@ package fs
 
 import (
 	"context"
-	"io"
 	"os"
 	"path/filepath"
 
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/observ"
+	"github.com/gomods/athens/pkg/storage"
 	"github.com/spf13/afero"
 )
 
@@ -37,7 +37,7 @@ func (v *storageImpl) GoMod(ctx context.Context, module, version string) ([]byte
 	return mod, nil
 }
 
-func (v *storageImpl) Zip(ctx context.Context, module, version string) (io.ReadCloser, error) {
+func (v *storageImpl) Zip(ctx context.Context, module, version string) (storage.SizeReadCloser, error) {
 	const op errors.Op = "fs.Zip"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
@@ -47,6 +47,21 @@ func (v *storageImpl) Zip(ctx context.Context, module, version string) (io.ReadC
 	if err != nil {
 		return nil, errors.E(op, errors.M(module), errors.V(version), errors.KindNotFound)
 	}
+	fi, err := src.Stat()
+	if err != nil {
+		return nil, errors.E(op, err)
+	}
+	return storage.NewSizer(src, fi.Size()), nil
+}
 
-	return src, nil
+func (v *storageImpl) ZipSize(ctx context.Context, module, version string) (int64, error) {
+	const op errors.Op = "fs.ZipFileSize"
+	ctx, span := observ.StartSpan(ctx, op.String())
+	defer span.End()
+	versionedPath := v.versionLocation(module, version)
+	fi, err := v.filesystem.Stat(filepath.Join(versionedPath))
+	if err != nil {
+		return 0, errors.E(op, err, errors.M(module), errors.V(version), errors.KindNotFound)
+	}
+	return fi.Size(), nil
 }

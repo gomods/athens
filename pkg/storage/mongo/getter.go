@@ -2,7 +2,6 @@ package mongo
 
 import (
 	"context"
-	"io"
 
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/observ"
@@ -11,6 +10,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/gridfs"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/x/bsonx"
 )
 
 // Info implements storage.Getter
@@ -44,7 +44,7 @@ func (s *ModuleStore) GoMod(ctx context.Context, module, vsn string) ([]byte, er
 }
 
 // Zip implements storage.Getter
-func (s *ModuleStore) Zip(ctx context.Context, module, vsn string) (io.ReadCloser, error) {
+func (s *ModuleStore) Zip(ctx context.Context, module, vsn string) (storage.SizeReadCloser, error) {
 	const op errors.Op = "mongo.Zip"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
@@ -64,8 +64,19 @@ func (s *ModuleStore) Zip(ctx context.Context, module, vsn string) (io.ReadClose
 		}
 		return nil, errors.E(op, err, kind, errors.M(module), errors.V(vsn))
 	}
-
-	return dStream, nil
+	res := s.client.Database(s.db).Collection("fs.files").FindOne(ctx, bson.M{
+		"filename": zipName,
+	})
+	if res.Err() != nil {
+		return nil, errors.E(op, res.Err())
+	}
+	var m bsonx.Doc
+	err = res.Decode(&m)
+	if err != nil {
+		return nil, errors.E(op, err)
+	}
+	size, _ := m.Lookup("length").Int64OK()
+	return storage.NewSizer(dStream, size), nil
 }
 
 // Query connects to and queries storage module
