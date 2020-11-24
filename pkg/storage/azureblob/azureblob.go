@@ -88,7 +88,7 @@ func (c *azureBlobStoreClient) BlobExists(ctx context.Context, path string) (boo
 
 }
 
-// ReadBlob returns an io.ReadCloser for the contents of a blob
+// ReadBlob returns a storage.SizeReadCloser for the contents of a blob
 func (c *azureBlobStoreClient) ReadBlob(ctx context.Context, path string) (storage.SizeReadCloser, error) {
 	const op errors.Op = "azureblob.ReadBlob"
 	blobURL := c.containerURL.NewBlockBlobURL(path)
