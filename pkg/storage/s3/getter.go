@@ -3,7 +3,6 @@ package s3
 import (
 	"context"
 	"fmt"
-	"io"
 	"io/ioutil"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -11,6 +10,7 @@ import (
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/observ"
+	"github.com/gomods/athens/pkg/storage"
 )
 
 // Info implements the (./pkg/storage).Getter interface
@@ -67,7 +67,7 @@ func (s *Storage) GoMod(ctx context.Context, module, version string) ([]byte, er
 }
 
 // Zip implements the (./pkg/storage).Getter interface
-func (s *Storage) Zip(ctx context.Context, module, version string) (io.ReadCloser, error) {
+func (s *Storage) Zip(ctx context.Context, module, version string) (storage.SizeReadCloser, error) {
 	const op errors.Op = "s3.Zip"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
@@ -87,7 +87,7 @@ func (s *Storage) Zip(ctx context.Context, module, version string) (io.ReadClose
 	return zipReader, nil
 }
 
-func (s *Storage) open(ctx context.Context, path string) (io.ReadCloser, error) {
+func (s *Storage) open(ctx context.Context, path string) (storage.SizeReadCloser, error) {
 	const op errors.Op = "s3.open"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
@@ -100,6 +100,9 @@ func (s *Storage) open(ctx context.Context, path string) (io.ReadCloser, error) 
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
-
-	return goo.Body, nil
+	var size int64
+	if goo.ContentLength != nil {
+		size = *goo.ContentLength
+	}
+	return storage.NewSizer(goo.Body, size), nil
 }
