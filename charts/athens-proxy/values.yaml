@@ -38,11 +38,15 @@ service:
 ingress:
   enabled: false
   # Provide key/value annotations
-  annotations:
+  annotations: {}
   # Provide an array of values for the ingress host mapping
-  hosts:
+  hosts: []
   # Provide a base64 encoded cert for TLS use
-  tls:
+  tls: ""
+  extraPaths: []
+#    - service: ssl-redirect
+#      port: use-annotation
+#      path: /*
 
 storage:
   type: disk
