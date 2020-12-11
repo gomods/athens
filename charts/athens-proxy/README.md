@@ -59,14 +59,11 @@ ingress:
   enabled: true
   annotations:
     alb.ingress.kubernetes.io/actions.ssl-redirect: '{"Type": "redirect", "RedirectConfig": { "Protocol": "HTTPS", "Port": "443", "StatusCode": "HTTP_301"}}'
-    # legalone.io wildcard
     alb.ingress.kubernetes.io/certificate-arn: ACM ARN
     alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS":443}]'
     alb.ingress.kubernetes.io/scheme: internet-facing
-    alb.ingress.kubernetes.io/tags: Service=athens-proxy,Environment=k-production
     alb.ingress.kubernetes.io/target-type: instance
     kubernetes.io/ingress.class: alb
-  # Provide an array of values for the ingress host mapping
   hosts:
     - athens-proxy.host
   extraPaths:
