@@ -1,3 +1,4 @@
+---
 replicaCount: 1
 image:
   registry: docker.io
@@ -43,6 +44,9 @@ ingress:
   hosts: []
   # Provide a base64 encoded cert for TLS use
   tls: ""
+  # To customize default path
+  # This is useful for ALB users.
+  customPath: ""
   extraPaths: []
 #    - service: ssl-redirect
 #      port: use-annotation
