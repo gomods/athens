@@ -30,7 +30,9 @@ type HandlerOpts struct {
 }
 
 type OfflineHandlerOpts struct {
-	Storage *storage.Backend
+	Storage storage.Backend
+	Logger  *log.Logger
+	// DownloadFile *mode.DownloadFile
 }
 
 // LogEntryHandler pulls a log entry from the request context. Thanks to the
@@ -49,7 +51,7 @@ func LogEntryHandler(ph ProtocolHandler, opts *HandlerOpts) http.Handler {
 func OfflineLogEntryHandler(ph OfflineProtocolHandler, opts *OfflineHandlerOpts) http.Handler {
 	f := func(w http.ResponseWriter, r *http.Request) {
 		ent := log.EntryFromContext(r.Context())
-		handler := ph(ent, *opts.Storage)
+		handler := ph(ent, opts.Storage)
 		handler.ServeHTTP(w, r)
 	}
 	return http.HandlerFunc(f)
@@ -82,12 +84,6 @@ func getRedirectURL(base, downloadPath string) (string, error) {
 	}
 	url.Path = path.Join(url.Path, downloadPath)
 	return url.String(), nil
-}
-
-type OfflineHandlerOpts struct {
-	Storage storage.Backend
-	Logger  *log.Logger
-	// DownloadFile *mode.DownloadFile
 }
 
 func RegisterOfflineHandlers(r *mux.Router, opts *OfflineHandlerOpts) {
