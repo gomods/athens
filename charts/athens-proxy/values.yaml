@@ -146,6 +146,9 @@ sshGitServers: {}
 
 goGetWorkers: 3
 
+serviceAccount:
+  annotations: {}
+
 nodeSelector: {}
 
 tolerations: []

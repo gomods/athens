@@ -2,7 +2,6 @@ package download
 
 import (
 	"context"
-	"io"
 	"regexp"
 	"strings"
 	"sync"
@@ -31,7 +30,7 @@ type Protocol interface {
 	GoMod(ctx context.Context, mod, ver string) ([]byte, error)
 
 	// Zip implements GET /{module}/@v/{version}.zip
-	Zip(ctx context.Context, mod, ver string) (io.ReadCloser, error)
+	Zip(ctx context.Context, mod, ver string) (storage.SizeReadCloser, error)
 }
 
 // Wrapper helps extend the main protocol's functionality with addons.
@@ -188,7 +187,7 @@ func (p *protocol) GoMod(ctx context.Context, mod, ver string) ([]byte, error) {
 	return goMod, nil
 }
 
-func (p *protocol) Zip(ctx context.Context, mod, ver string) (io.ReadCloser, error) {
+func (p *protocol) Zip(ctx context.Context, mod, ver string) (storage.SizeReadCloser, error) {
 	const op errors.Op = "protocol.Zip"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
