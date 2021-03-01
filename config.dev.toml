@@ -199,6 +199,15 @@ ForceSSL = false
 # Env override: ATHENS_PROXY_VALIDATOR
 ValidatorHook = ""
 
+# EventsHook specifies a URL that will receive POST request events
+# throughout an Athens request lifecycle.
+# 
+# To see what type of events you will get and what the payload looks like
+# check the pkg/event in this repository.
+# 
+# Env override: ATHENS_EVENTS_HOOK
+EventsHook = ""
+
 # PathPrefix specifies whether the Proxy
 # should have a basepath. Certain proxies and services
 # are distinguished based on subdomain, while others are based
