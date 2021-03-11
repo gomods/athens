@@ -7,12 +7,10 @@ import (
 	"net/http/httptest"
 	"os"
 	"runtime"
-	"testing"
 
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/spf13/afero"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 )
 
 var ctx = context.Background()
@@ -56,20 +54,6 @@ func (s *ModuleSuite) TestGoGetFetcherFetch() {
 
 	// close the version's zip file (which also cleans up the underlying GOPATH) and expect it to fail again
 	r.NoError(ver.Zip.Close())
-}
-
-// checkErr fails on whether we were expecting an error and did not get one,
-// or whether we were not expecting an error and did get one.
-// It returns a boolean to say whether the caller should return early
-func checkErr(t *testing.T, wantErr bool, err error) bool {
-	if wantErr {
-		if err == nil {
-			t.Fatal("expected an error but got nil")
-		}
-		return true
-	}
-	require.NoError(t, err)
-	return false
 }
 
 func (s *ModuleSuite) TestNotFoundFetches() {
