@@ -74,7 +74,7 @@ func checkErr(t *testing.T, wantErr bool, err error) bool {
 
 func (s *ModuleSuite) TestNotFoundFetches() {
 	r := s.Require()
-	fetcher, err := NewGoGetFetcher(s.goBinaryName, "", s.env, afero.NewOsFs()) //, "")
+	fetcher, err := NewGoGetFetcher(s.goBinaryName, "", s.env, afero.NewOsFs())
 	r.NoError(err)
 	// when someone buys laks47dfjoijskdvjxuyyd.com, and implements
 	// a git server on top of it, this test will fail :)
@@ -102,13 +102,13 @@ func (s *ModuleSuite) TestGoGetFetcherSumDB() {
 	proxyAddr, close := s.getProxy(mp)
 	defer close()
 
-	fetcher, err := NewGoGetFetcher(s.goBinaryName, "", []string{"GOPROXY=" + proxyAddr}, afero.NewOsFs()) //, "")
+	fetcher, err := NewGoGetFetcher(s.goBinaryName, "", []string{"GOPROXY=" + proxyAddr}, afero.NewOsFs())
 	r.NoError(err)
 	_, err = fetcher.Fetch(ctx, "mockmod.xyz", "v1.2.3")
 	if err == nil {
 		s.T().Fatal("expected a gosum error but got nil")
 	}
-	fetcher, err = NewGoGetFetcher(s.goBinaryName, "", []string{"GONOSUMDB=mockmod.xyz", "GOPROXY=" + proxyAddr}, afero.NewOsFs()) //, "")
+	fetcher, err = NewGoGetFetcher(s.goBinaryName, "", []string{"GONOSUMDB=mockmod.xyz", "GOPROXY=" + proxyAddr}, afero.NewOsFs())
 	r.NoError(err)
 	_, err = fetcher.Fetch(ctx, "mockmod.xyz", "v1.2.3")
 	r.NoError(err, "expected the go sum to not be consulted but got an error")
