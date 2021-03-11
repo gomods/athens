@@ -10,7 +10,7 @@ import (
 // prepareEnv will return all the appropriate
 // environment variables for a Go Command to run
 // successfully (such as GOPATH, GOCACHE, PATH etc)
-func prepareEnv(gopath, homedir string, envVars []string) []string {
+func prepareEnv(gopath string, envVars []string) []string {
 	gopathEnv := fmt.Sprintf("GOPATH=%s", gopath)
 	cacheEnv := fmt.Sprintf("GOCACHE=%s", filepath.Join(gopath, "cache"))
 	disableCgo := "CGO_ENABLED=0"
@@ -21,9 +21,9 @@ func prepareEnv(gopath, homedir string, envVars []string) []string {
 		disableCgo,
 		enableGoModules,
 	}
-	cmdEnv = append(cmdEnv, withHomeDir(homedir)...)
 	keys := []string{
 		"PATH",
+		"HOME",
 		"GIT_SSH",
 		"GIT_SSH_COMMAND",
 		"HTTP_PROXY",
@@ -36,6 +36,7 @@ func prepareEnv(gopath, homedir string, envVars []string) []string {
 	}
 	if runtime.GOOS == "windows" {
 		windowsSpecificKeys := []string{
+			"USERPROFILE",
 			"SystemRoot",
 			"ALLUSERSPROFILE",
 			"HOMEDRIVE",
@@ -60,19 +61,4 @@ func prepareEnv(gopath, homedir string, envVars []string) []string {
 		}
 	}
 	return cmdEnv
-}
-
-func withHomeDir(dir string) []string {
-	key := "HOME"
-	if runtime.GOOS == "windows" {
-		key = "USERPROFILE"
-	}
-	if dir != "" {
-		return []string{key + "=" + dir}
-	}
-	val, ok := os.LookupEnv(key)
-	if ok {
-		return []string{key + "=" + val}
-	}
-	return []string{}
 }

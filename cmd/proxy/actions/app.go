@@ -51,17 +51,14 @@ func App(conf *config.Config) (http.Handler, error) {
 	lggr := log.New(conf.CloudRuntime, logLvl)
 
 	r := mux.NewRouter()
-	r.Use(
-		mw.WithRequestID,
-		mw.LogEntryMiddleware(lggr),
-		mw.RequestLogger,
-		secure.New(secure.Options{
-			SSLRedirect:     conf.ForceSSL,
-			SSLProxyHeaders: map[string]string{"X-Forwarded-Proto": "https"},
-		}).Handler,
-		mw.ContentType,
-		mw.WithAuth,
-	)
+	r.Use(mw.WithRequestID)
+	r.Use(mw.LogEntryMiddleware(lggr))
+	r.Use(mw.RequestLogger)
+	r.Use(secure.New(secure.Options{
+		SSLRedirect:     conf.ForceSSL,
+		SSLProxyHeaders: map[string]string{"X-Forwarded-Proto": "https"},
+	}).Handler)
+	r.Use(mw.ContentType)
 
 	var subRouter *mux.Router
 	if prefix := conf.PathPrefix; prefix != "" {
