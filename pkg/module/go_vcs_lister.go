@@ -37,10 +37,6 @@ func NewVCSLister(goBinPath string, env []string, fs afero.Fs) UpstreamLister {
 	}
 }
 
-// func (l *vcsLister) shouldPropAuth() bool {
-// 	return len(l.propagateAuthHost) > 0
-// }
-
 func (l *vcsLister) List(ctx context.Context, module string) (*storage.RevInfo, []string, error) {
 	const op errors.Op = "vcsLister.List"
 	ctx, span := observ.StartSpan(ctx, op.String())
