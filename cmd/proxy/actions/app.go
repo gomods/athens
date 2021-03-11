@@ -60,7 +60,6 @@ func App(conf *config.Config) (http.Handler, error) {
 			SSLProxyHeaders: map[string]string{"X-Forwarded-Proto": "https"},
 		}).Handler,
 		mw.ContentType,
-		mw.WithAuth,
 	)
 
 	var subRouter *mux.Router
