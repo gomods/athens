@@ -5,14 +5,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"os"
 	"os/exec"
 	"time"
 
-	"github.com/gomods/athens/pkg/auth"
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/errors"
-	"github.com/gomods/athens/pkg/log"
 	"github.com/gomods/athens/pkg/observ"
 	"github.com/gomods/athens/pkg/storage"
 	"github.com/spf13/afero"
@@ -26,43 +23,24 @@ type listResp struct {
 }
 
 type vcsLister struct {
-	goBinPath         string
-	env               []string
-	fs                afero.Fs
-	propagateAuthHost string
+	goBinPath string
+	env       []string
+	fs        afero.Fs
 }
 
 // NewVCSLister creates an UpstreamLister which uses VCS to fetch a list of available versions
-func NewVCSLister(goBinPath string, env []string, fs afero.Fs, propagateAuthHost string) UpstreamLister {
+func NewVCSLister(goBinPath string, env []string, fs afero.Fs) UpstreamLister {
 	return &vcsLister{
-		goBinPath:         goBinPath,
-		env:               env,
-		fs:                fs,
-		propagateAuthHost: propagateAuthHost,
+		goBinPath: goBinPath,
+		env:       env,
+		fs:        fs,
 	}
-}
-
-func (l *vcsLister) shouldPropAuth() bool {
-	return len(l.propagateAuthHost) > 0
 }
 
 func (l *vcsLister) List(ctx context.Context, module string) (*storage.RevInfo, []string, error) {
 	const op errors.Op = "vcsLister.List"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
-	var (
-		netrcDir string
-		err      error
-	)
-	creds, ok := auth.FromContext(ctx)
-	if ok && l.shouldPropAuth() {
-		log.EntryFromContext(ctx).Debugf("propagating authentication")
-		netrcDir, err = auth.WriteTemporaryNETRC(l.propagateAuthHost, creds.User, creds.Password)
-		if err != nil {
-			return nil, nil, errors.E(op, err)
-		}
-		defer os.RemoveAll(netrcDir)
-	}
 	tmpDir, err := afero.TempDir(l.fs, "", "go-list")
 	if err != nil {
 		return nil, nil, errors.E(op, err)
@@ -85,7 +63,7 @@ func (l *vcsLister) List(ctx context.Context, module string) (*storage.RevInfo, 
 		return nil, nil, errors.E(op, err)
 	}
 	defer clearFiles(l.fs, gopath)
-	cmd.Env = prepareEnv(gopath, netrcDir, l.env)
+	cmd.Env = prepareEnv(gopath, l.env)
 
 	err = cmd.Run()
 	if err != nil {
