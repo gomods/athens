@@ -15,4 +15,4 @@ jobs:
           paths: "**/*.md"
           markdown: true
           retry: true
-          linksToSkip: "http://localhost:1313/, ^(?!http).*"
+          linksToSkip: "http://localhost:1313/, ^((?!http).)*$"
