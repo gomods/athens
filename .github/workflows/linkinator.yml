@@ -16,3 +16,4 @@ jobs:
           markdown: true
           retry: true
           linksToSkip: "http://localhost:1313/, ^((?!http).)*$"
+          verbosity: INFO
