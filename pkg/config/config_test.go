@@ -11,6 +11,8 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
+	"github.com/kelseyhightower/envconfig"
+	"github.com/stretchr/testify/require"
 )
 
 func testConfigFile(t *testing.T) (testConfigFile string) {
@@ -22,14 +24,15 @@ func testConfigFile(t *testing.T) (testConfigFile string) {
 }
 
 func compareConfigs(parsedConf *Config, expConf *Config, t *testing.T) {
-	opts := cmpopts.IgnoreTypes(StorageConfig{}, SingleFlight{})
+	opts := cmpopts.IgnoreTypes(Storage{}, SingleFlight{}, Index{})
 	eq := cmp.Equal(parsedConf, expConf, opts)
 	if !eq {
-		t.Errorf("Parsed Example configuration did not match expected values. Expected: %+v. Actual: %+v", expConf, parsedConf)
+		diff := cmp.Diff(parsedConf, expConf, opts)
+		t.Errorf("Parsed Example configuration did not match expected values. diff:\n%s", diff)
 	}
 }
 
-func compareStorageConfigs(parsedStorage *StorageConfig, expStorage *StorageConfig, t *testing.T) {
+func compareStorageConfigs(parsedStorage *Storage, expStorage *Storage, t *testing.T) {
 	eq := cmp.Equal(parsedStorage.Mongo, expStorage.Mongo)
 	if !eq {
 		t.Errorf("Parsed Example Storage configuration did not match expected values. Expected: %+v. Actual: %+v", expStorage.Mongo, parsedStorage.Mongo)
@@ -89,10 +92,11 @@ func TestEnvOverrides(t *testing.T) {
 		PathPrefix:      "prefix",
 		NETRCPath:       "/test/path/.netrc",
 		HGRCPath:        "/test/path/.hgrc",
-		Storage:         &StorageConfig{},
+		Storage:         &Storage{},
 		GoBinaryEnvVars: []string{"GOPROXY=direct"},
 		SingleFlight:    &SingleFlight{},
 		RobotsFile:      "robots.txt",
+		Index:           &Index{},
 	}
 
 	envVars := getEnvMap(expConf)
@@ -155,7 +159,7 @@ func TestEnsurePortFormat(t *testing.T) {
 }
 
 func TestStorageEnvOverrides(t *testing.T) {
-	expStorage := &StorageConfig{
+	expStorage := &Storage{
 		Disk: &DiskConfig{
 			RootPath: "/my/root/path",
 		},
@@ -207,7 +211,7 @@ func TestParseExampleConfig(t *testing.T) {
 
 	// initialize all struct pointers so we get all applicable env variables
 	emptyConf := &Config{
-		Storage: &StorageConfig{
+		Storage: &Storage{
 			Disk: &DiskConfig{},
 			GCP:  &GCPConfig{},
 			Minio: &MinioConfig{
@@ -217,6 +221,7 @@ func TestParseExampleConfig(t *testing.T) {
 			S3:    &S3Config{},
 		},
 		SingleFlight: &SingleFlight{},
+		Index:        &Index{},
 	}
 	// unset all environment variables
 	envVars := getEnvMap(emptyConf)
@@ -227,7 +232,7 @@ func TestParseExampleConfig(t *testing.T) {
 		os.Unsetenv(k)
 	}
 
-	expStorage := &StorageConfig{
+	expStorage := &Storage{
 		Disk: &DiskConfig{
 			RootPath: "/path/on/disk",
 		},
@@ -287,6 +292,8 @@ func TestParseExampleConfig(t *testing.T) {
 		NoSumPatterns:    []string{},
 		DownloadMode:     "sync",
 		RobotsFile:       "robots.txt",
+		IndexType:        "none",
+		Index:            &Index{},
 	}
 
 	absPath, err := filepath.Abs(testConfigFile(t))
@@ -360,6 +367,7 @@ func getEnvMap(config *Config) map[string]string {
 			envVars["AWS_ACCESS_KEY_ID"] = storage.S3.Key
 			envVars["AWS_SECRET_ACCESS_KEY"] = storage.S3.Secret
 			envVars["AWS_SESSION_TOKEN"] = storage.S3.Token
+			envVars["AWS_FORCE_PATH_STYLE"] = strconv.FormatBool(storage.S3.ForcePathStyle)
 			envVars["ATHENS_S3_BUCKET_NAME"] = storage.S3.Bucket
 		}
 	}
@@ -474,11 +482,12 @@ func TestDefaultConfigMatchesConfigFile(t *testing.T) {
 
 	defConf := defaultConfig()
 
-	ignoreStorageOpts := cmpopts.IgnoreTypes(&StorageConfig{})
+	ignoreStorageOpts := cmpopts.IgnoreTypes(&Storage{}, &Index{})
 	ignoreGoEnvOpts := cmpopts.IgnoreFields(Config{}, "GoEnv")
 	eq := cmp.Equal(defConf, parsedConf, ignoreStorageOpts, ignoreGoEnvOpts)
 	if !eq {
-		t.Errorf("Default values from the config file: %v should equal to the default values returned in case the config file isn't provided %v", parsedConf, defConf)
+		diff := cmp.Diff(defConf, parsedConf, ignoreStorageOpts, ignoreGoEnvOpts)
+		t.Errorf("Default values from the config file should equal to the default values returned in case the config file isn't provided. Diff:\n%s", diff)
 	}
 }
 
@@ -511,4 +520,121 @@ func TestEnvList(t *testing.T) {
 	if err := el.Validate(); err != nil {
 		t.Fatalf("expected err to be nil but got %v", err)
 	}
+}
+
+type decodeTestCase struct {
+	name     string
+	pre      EnvList
+	given    string
+	valid    bool
+	expected EnvList
+}
+
+var envListDecodeTests = []decodeTestCase{
+	{
+		name:     "empty",
+		pre:      EnvList{},
+		given:    "",
+		valid:    true,
+		expected: EnvList{},
+	},
+	{
+		name:     "unchanged",
+		pre:      EnvList{"GOPROXY=direct"},
+		given:    "",
+		valid:    true,
+		expected: EnvList{"GOPROXY=direct"},
+	},
+	{
+		name:     "must not merge",
+		pre:      EnvList{"GOPROXY=direct"},
+		given:    "GOPRIVATE=github.com/gomods/*",
+		valid:    true,
+		expected: EnvList{"GOPRIVATE=github.com/gomods/*"},
+	},
+	{
+		name:     "must override",
+		pre:      EnvList{"GOPROXY=direct"},
+		given:    "GOPROXY=https://proxy.golang.org",
+		valid:    true,
+		expected: EnvList{"GOPROXY=https://proxy.golang.org"},
+	},
+	{
+		name:  "semi colon separator",
+		pre:   EnvList{"GOPROXY=direct", "GOPRIVATE="},
+		given: "GOPROXY=off; GOPRIVATE=marwan.io/*;GONUTS=lol;GODEBUG=dns=true",
+		valid: true,
+		expected: EnvList{
+			"GOPROXY=off",
+			"GOPRIVATE=marwan.io/*",
+			"GONUTS=lol",
+			"GODEBUG=dns=true",
+		},
+	},
+	{
+		name:  "with commas",
+		pre:   EnvList{"GOPROXY=direct", "GOPRIVATE="},
+		given: "GOPROXY=proxy.golang.org,direct;GOPRIVATE=marwan.io/*;GONUTS=lol;GODEBUG=dns=true",
+		valid: true,
+		expected: EnvList{
+			"GOPROXY=proxy.golang.org,direct",
+			"GOPRIVATE=marwan.io/*",
+			"GONUTS=lol",
+			"GODEBUG=dns=true",
+		},
+	},
+	{
+		name:  "invalid",
+		pre:   EnvList{},
+		given: "GOPROXY=direct; INVALID",
+		valid: false,
+	},
+	{
+		name:     "accept empty value",
+		pre:      EnvList{"GOPROXY=direct"},
+		given:    "GOPROXY=; GOPRIVATE=github.com/*",
+		valid:    true,
+		expected: EnvList{"GOPROXY=", "GOPRIVATE=github.com/*"},
+	},
+}
+
+func TestEnvListDecode(t *testing.T) {
+	for _, tc := range envListDecodeTests {
+		t.Run(tc.name, func(t *testing.T) {
+			testDecode(t, tc)
+		})
+	}
+	cfg := &Config{
+		GoBinaryEnvVars: EnvList{"GOPROXY=direct"},
+	}
+	err := cfg.GoBinaryEnvVars.Decode("GOPROXY=https://proxy.golang.org; GOPRIVATE=github.com/gomods/*")
+	if err != nil {
+		t.Fatal(err)
+	}
+	cfg.GoBinaryEnvVars.Validate()
+}
+
+func testDecode(t *testing.T, tc decodeTestCase) {
+	const envKey = "ATHENS_LIST_TEST"
+
+	os.Setenv(envKey, tc.given)
+	defer func() {
+		require.NoError(t, os.Unsetenv(envKey))
+	}()
+
+	var config struct {
+		GoBinaryEnvVars EnvList `envconfig:"ATHENS_LIST_TEST"`
+	}
+	config.GoBinaryEnvVars = tc.pre
+	err := envconfig.Process("", &config)
+	if tc.valid && err != nil {
+		t.Fatal(err)
+	}
+	if !tc.valid {
+		if err == nil {
+			t.Fatal("expected an error but got nil")
+		}
+		return
+	}
+	require.Equal(t, tc.expected, config.GoBinaryEnvVars)
 }

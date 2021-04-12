@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"io"
 	"reflect"
 	"sync"
 	"testing"
@@ -98,7 +97,7 @@ type mockDP struct {
 	info     []byte
 	latest   *storage.RevInfo
 	gomod    []byte
-	zip      io.ReadCloser
+	zip      storage.SizeReadCloser
 	inputMod string
 	inputVer string
 	catalog  []paths.AllPathParams
@@ -143,7 +142,7 @@ func (m *mockDP) GoMod(ctx context.Context, mod, ver string) ([]byte, error) {
 }
 
 // Zip implements GET /{module}/@v/{version}.zip
-func (m *mockDP) Zip(ctx context.Context, mod, ver string) (io.ReadCloser, error) {
+func (m *mockDP) Zip(ctx context.Context, mod, ver string) (storage.SizeReadCloser, error) {
 	if m.inputMod != mod {
 		return nil, fmt.Errorf("expected mod input %v but got %v", m.inputMod, mod)
 	}

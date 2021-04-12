@@ -26,6 +26,7 @@ type Config struct {
 	GoProxy          string    `envconfig:"GOPROXY"`
 	GoBinaryEnvVars  EnvList   `envconfig:"ATHENS_GO_BINARY_ENV_VARS"`
 	GoGetWorkers     int       `validate:"required" envconfig:"ATHENS_GOGET_WORKERS"`
+	GoGetDir         string    `envconfig:"ATHENS_GOGOET_DIR"`
 	ProtocolWorkers  int       `validate:"required" envconfig:"ATHENS_PROTOCOL_WORKERS"`
 	LogLevel         string    `validate:"required" envconfig:"ATHENS_LOG_LEVEL"`
 	CloudRuntime     string    `validate:"required" envconfig:"ATHENS_CLOUD_RUNTIME"`
@@ -54,8 +55,10 @@ type Config struct {
 	DownloadURL      string    `envconfig:"ATHENS_DOWNLOAD_URL"`
 	SingleFlightType string    `envconfig:"ATHENS_SINGLE_FLIGHT_TYPE"`
 	RobotsFile       string    `envconfig:"ATHENS_ROBOTS_FILE"`
+	IndexType        string    `envconfig:"ATHENS_INDEX_TYPE"`
 	SingleFlight     *SingleFlight
-	Storage          *StorageConfig
+	Storage          *Storage
+	Index            *Index
 }
 
 // EnvList is a list of key-value environment
@@ -78,6 +81,31 @@ func (el EnvList) HasKey(key string) bool {
 // list
 func (el *EnvList) Add(key, value string) {
 	*el = append(*el, key+"="+value)
+}
+
+// Decode implements envconfig.Decoder. Please see the below link for more information on
+// that interface:
+//
+// https://github.com/kelseyhightower/envconfig#custom-decoders
+//
+// We are doing this to allow for very long lists of assignments to be set inside of
+// a single environment variable. For example:
+//
+//	ATHENS_GO_BINARY_ENV_VARS="GOPRIVATE=*.corp.example.com,rsc.io/private; GOPROXY=direct"
+//
+// See the below link for more information:
+// https://github.com/gomods/athens/issues/1404
+func (el *EnvList) Decode(value string) error {
+	const op errors.Op = "envList.Decode"
+	if value == "" {
+		return nil
+	}
+	*el = EnvList{} // env vars must override config file
+	assignments := strings.Split(value, ";")
+	for _, assignment := range assignments {
+		*el = append(*el, strings.TrimSpace(assignment))
+	}
+	return el.Validate()
 }
 
 // Validate validates that all strings inside the
@@ -136,9 +164,40 @@ func defaultConfig() *Config {
 		DownloadMode:     "sync",
 		DownloadURL:      "",
 		RobotsFile:       "robots.txt",
+		IndexType:        "none",
 		SingleFlight: &SingleFlight{
 			Etcd:  &Etcd{"localhost:2379,localhost:22379,localhost:32379"},
-			Redis: &Redis{"127.0.0.1:6379"},
+			Redis: &Redis{"127.0.0.1:6379", ""},
+			RedisSentinel: &RedisSentinel{
+				Endpoints:        []string{"127.0.0.1:26379"},
+				MasterName:       "redis-1",
+				SentinelPassword: "sekret",
+			},
+		},
+		Index: &Index{
+			MySQL: &MySQL{
+				Protocol: "tcp",
+				Host:     "localhost",
+				Port:     3306,
+				User:     "root",
+				Password: "",
+				Database: "athens",
+				Params: map[string]string{
+					"parseTime": "true",
+					"timeout":   "30s",
+				},
+			},
+			Postgres: &Postgres{
+				Host:     "localhost",
+				Port:     5432,
+				User:     "postgres",
+				Password: "",
+				Database: "athens",
+				Params: map[string]string{
+					"connect_timeout": "30",
+					"sslmode":         "disable",
+				},
+			},
 		},
 	}
 }
@@ -237,27 +296,54 @@ func ensurePortFormat(s string) string {
 
 func validateConfig(config Config) error {
 	validate := validator.New()
-	err := validate.StructExcept(config, "Storage")
+	err := validate.StructExcept(config, "Storage", "Index")
 	if err != nil {
 		return err
 	}
-	switch config.StorageType {
+	err = validateStorage(validate, config.StorageType, config.Storage)
+	if err != nil {
+		return err
+	}
+	err = validateIndex(validate, config.IndexType, config.Index)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func validateStorage(validate *validator.Validate, storageType string, config *Storage) error {
+	switch storageType {
 	case "memory":
 		return nil
 	case "mongo":
-		return validate.Struct(config.Storage.Mongo)
+		return validate.Struct(config.Mongo)
 	case "disk":
-		return validate.Struct(config.Storage.Disk)
+		return validate.Struct(config.Disk)
 	case "minio":
-		return validate.Struct(config.Storage.Minio)
+		return validate.Struct(config.Minio)
 	case "gcp":
-		return validate.Struct(config.Storage.GCP)
+		return validate.Struct(config.GCP)
 	case "s3":
-		return validate.Struct(config.Storage.S3)
+		return validate.Struct(config.S3)
 	case "azureblob":
-		return validate.Struct(config.Storage.AzureBlob)
+		return validate.Struct(config.AzureBlob)
+	case "external":
+		return validate.Struct(config.External)
 	default:
-		return fmt.Errorf("storage type %s is unknown", config.StorageType)
+		return fmt.Errorf("storage type %q is unknown", storageType)
+	}
+}
+
+func validateIndex(validate *validator.Validate, indexType string, config *Index) error {
+	switch indexType {
+	case "", "none", "memory":
+		return nil
+	case "mysql":
+		return validate.Struct(config.MySQL)
+	case "postgres":
+		return validate.Struct(config.Postgres)
+	default:
+		return fmt.Errorf("index type %q is unknown", indexType)
 	}
 }
 

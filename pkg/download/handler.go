@@ -3,6 +3,7 @@ package download
 import (
 	"net/http"
 	"net/url"
+	"path"
 
 	"github.com/gomods/athens/pkg/download/mode"
 	"github.com/gomods/athens/pkg/log"
@@ -52,14 +53,14 @@ func RegisterHandlers(r *mux.Router, opts *HandlerOpts) {
 
 	r.Handle(PathVersionInfo, LogEntryHandler(InfoHandler, opts)).Methods(http.MethodGet)
 	r.Handle(PathVersionModule, LogEntryHandler(ModuleHandler, opts)).Methods(http.MethodGet)
-	r.Handle(PathVersionZip, LogEntryHandler(ZipHandler, opts)).Methods(http.MethodGet)
+	r.Handle(PathVersionZip, LogEntryHandler(ZipHandler, opts)).Methods(http.MethodGet, http.MethodHead)
 }
 
-func getRedirectURL(base, path string) (string, error) {
+func getRedirectURL(base, downloadPath string) (string, error) {
 	url, err := url.Parse(base)
 	if err != nil {
 		return "", err
 	}
-	url.Path = path
+	url.Path = path.Join(url.Path, downloadPath)
 	return url.String(), nil
 }

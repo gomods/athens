@@ -45,7 +45,7 @@ Book.
   commit them to the log we mentioned. You have a few options for writing a
   message that will be stored with the commit in the log, more on that later.</dd>
   <dt>Branch</dt>
-  <dd>When you are in the repository the default is usually called master,
+  <dd>When you are in the repository the default out of the box is usually called `master`. This is the main branch of the repository (NOTE: if you are creating a new repository of your own, please change the default branch to `main`. `master` is an inappropriate and offensive),
   the main branch of the repository. Typically you will want to do your work
   on a new branch for each feature or bug. This allows you to see and work on
   different versions of the same code in one repository.</dd>
@@ -53,9 +53,7 @@ Book.
   <dd>To check out a branch, is to switch to view that branches version of the
   files in the repository.</dd>
   <dt>Merge</dt>
-  <dd>When you want to incorporate another branch, master or someone else's
-  feature for example, into your current branch you will merge the changes. This will apply
-  the other changes on top of yours.
+  <dd>When you want to incorporate another branch, `main` or someone else's   feature for example, into your current branch you will merge the changes. This will apply the other changes on top of yours.
   <dt>Remote</dt>
   <dd>This is just a repository, that is accessible remotely. You can use the
   git command to push and pull changes to.</dd>

@@ -121,7 +121,7 @@ For more information, see [Managing Compute Resources for Containers](https://ku
 ### Give Athens access to private repositories via Github Token (Optional)
 
 1. Create a token at https://github.com/settings/tokens
-2. Provide the token to the Athens proxy either through the [config.toml](https://github.com/gomods/athens/blob/master/config.dev.toml) file (the `GithubToken` field) or by setting the `ATHENS_GITHUB_TOKEN` environment variable.
+2. Provide the token to the Athens proxy either through the [config.toml](https://github.com/gomods/athens/blob/main/config.dev.toml) file (the `GithubToken` field) or by setting the `ATHENS_GITHUB_TOKEN` environment variable.
 
 ### Storage Providers
 
@@ -176,6 +176,18 @@ Last athens need authentication credentials for your minio in `storage.minio.acc
 ```
 helm install gomods/athens-proxy -n athens --namespace athens --set storage.type=minio --set storage.minio.endpoint=<your-minio-endpoint> --set storage.minio.bucket=<your-bucket> --set storage.minio.accessKey=<your-minio-access-key> --set storage.minio.secretKey=<your-minio-secret-key>
 ```
+
+#### Google Cloud Storage
+
+ To use Google Cloud Storage storage with Athens, set `storage.type` to `gcp`. You need to set `storage.gcp.projectID` and `storage.gcp.bucket` to the
+ desired GCP project and bucket name, respectively.
+
+ Depending on your deployment environment you will also need to set `storage.gcp.serviceAccount` to a key which has read/write access to
+ the GCS bucket. If you are running Athens inside GCP, you will most likely not need this as GCP figures out internal authentication between products for you.
+
+ ```
+ helm install gomods/athens-proxy -n athens --namespace athens --set storage.type=gcp --set storage.gcp.projectID=<your-gcp-project> --set storage.gcp.bucket=<your-bucket>
+ ```
 
 ### Kubernetes Service
 

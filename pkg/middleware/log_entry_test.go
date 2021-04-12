@@ -34,6 +34,6 @@ func TestLogContext(t *testing.T) {
 	req, _ := http.NewRequest("GET", "/test", nil)
 	r.ServeHTTP(w, req)
 
-	expected := `{"http-method":"GET","http-path":"/test","http-url":"/test","level":"info","msg":"test"}`
+	expected := `{"http-method":"GET","http-path":"/test","level":"info","msg":"test","request-id":""}`
 	assert.True(t, strings.Contains(buf.String(), expected), fmt.Sprintf("%s should contain: %s", buf.String(), expected))
 }

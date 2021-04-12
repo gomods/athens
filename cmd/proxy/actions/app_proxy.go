@@ -11,6 +11,11 @@ import (
 	"github.com/gomods/athens/pkg/download"
 	"github.com/gomods/athens/pkg/download/addons"
 	"github.com/gomods/athens/pkg/download/mode"
+	"github.com/gomods/athens/pkg/index"
+	"github.com/gomods/athens/pkg/index/mem"
+	"github.com/gomods/athens/pkg/index/mysql"
+	"github.com/gomods/athens/pkg/index/nop"
+	"github.com/gomods/athens/pkg/index/postgres"
 	"github.com/gomods/athens/pkg/log"
 	"github.com/gomods/athens/pkg/module"
 	"github.com/gomods/athens/pkg/stash"
@@ -32,6 +37,12 @@ func addProxyRoutes(
 	r.HandleFunc("/catalog", catalogHandler(s))
 	r.HandleFunc("/robots.txt", robotsHandler(c))
 
+	indexer, err := getIndex(c)
+	if err != nil {
+		return err
+	}
+	r.HandleFunc("/index", indexHandler(indexer))
+
 	for _, sumdb := range c.SumDBs {
 		sumdbURL, err := url.Parse(sumdb)
 		if err != nil {
@@ -44,10 +55,10 @@ func addProxyRoutes(
 		r.HandleFunc(supportPath, func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(200)
 		})
-		sumHandler := sumdbPoxy(sumdbURL, c.NoSumPatterns)
+		sumHandler := sumdbProxy(sumdbURL, c.NoSumPatterns)
 		pathPrefix := "/sumdb/" + sumdbURL.Host
 		r.PathPrefix(pathPrefix + "/").Handler(
-			http.StripPrefix(pathPrefix, sumHandler),
+			http.StripPrefix(strings.TrimSuffix(c.PathPrefix, "/")+pathPrefix, sumHandler),
 		)
 	}
 
@@ -85,18 +96,18 @@ func addProxyRoutes(
 	if err := c.GoBinaryEnvVars.Validate(); err != nil {
 		return err
 	}
-	mf, err := module.NewGoGetFetcher(c.GoBinary, c.GoBinaryEnvVars, fs)
+	mf, err := module.NewGoGetFetcher(c.GoBinary, c.GoGetDir, c.GoBinaryEnvVars, fs)
 	if err != nil {
 		return err
 	}
 
 	lister := module.NewVCSLister(c.GoBinary, c.GoBinaryEnvVars, fs)
-
-	withSingleFlight, err := getSingleFlight(c, s)
+	checker := storage.WithChecker(s)
+	withSingleFlight, err := getSingleFlight(c, checker)
 	if err != nil {
 		return err
 	}
-	st := stash.New(mf, s, stash.WithPool(c.GoGetWorkers), withSingleFlight)
+	st := stash.New(mf, s, indexer, stash.WithPool(c.GoGetWorkers), withSingleFlight)
 
 	df, err := mode.NewFile(c.DownloadMode, c.DownloadURL)
 	if err != nil {
@@ -132,7 +143,17 @@ func getSingleFlight(c *config.Config, checker storage.Checker) (stash.Wrapper, 
 		if c.SingleFlight == nil || c.SingleFlight.Redis == nil {
 			return nil, fmt.Errorf("Redis config must be present")
 		}
-		return stash.WithRedisLock(c.SingleFlight.Redis.Endpoint, checker)
+		return stash.WithRedisLock(c.SingleFlight.Redis.Endpoint, c.SingleFlight.Redis.Password, checker)
+	case "redis-sentinel":
+		if c.SingleFlight == nil || c.SingleFlight.RedisSentinel == nil {
+			return nil, fmt.Errorf("Redis config must be present")
+		}
+		return stash.WithRedisSentinelLock(
+			c.SingleFlight.RedisSentinel.Endpoints,
+			c.SingleFlight.RedisSentinel.MasterName,
+			c.SingleFlight.RedisSentinel.SentinelPassword,
+			checker,
+		)
 	case "gcp":
 		if c.StorageType != "gcp" {
 			return nil, fmt.Errorf("gcp SingleFlight only works with a gcp storage type and not: %v", c.StorageType)
@@ -146,4 +167,18 @@ func getSingleFlight(c *config.Config, checker storage.Checker) (stash.Wrapper, 
 	default:
 		return nil, fmt.Errorf("unrecognized single flight type: %v", c.SingleFlightType)
 	}
+}
+
+func getIndex(c *config.Config) (index.Indexer, error) {
+	switch c.IndexType {
+	case "", "none":
+		return nop.New(), nil
+	case "memory":
+		return mem.New(), nil
+	case "mysql":
+		return mysql.New(c.Index.MySQL)
+	case "postgres":
+		return postgres.New(c.Index.Postgres)
+	}
+	return nil, fmt.Errorf("unknown index type: %q", c.IndexType)
 }

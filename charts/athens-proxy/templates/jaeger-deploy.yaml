@@ -1,5 +1,5 @@
 {{- if .Values.jaeger.enabled -}}
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ template "fullname" . }}-jaeger
@@ -13,7 +13,6 @@ spec:
   selector:
     matchLabels:
       app: {{ template "fullname" . }}-jaeger
-      chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
       release: "{{ .Release.Name }}"
   template:
     metadata:

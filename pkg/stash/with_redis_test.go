@@ -19,6 +19,7 @@ import (
 // and therefore all 5 responses should have no error.
 func TestWithRedisLock(t *testing.T) {
 	endpoint := os.Getenv("REDIS_TEST_ENDPOINT")
+	password := os.Getenv("ATHENS_REDIS_PASSWORD")
 	if len(endpoint) == 0 {
 		t.SkipNow()
 	}
@@ -27,7 +28,7 @@ func TestWithRedisLock(t *testing.T) {
 		t.Fatal(err)
 	}
 	ms := &mockRedisStasher{strg: strg}
-	wrapper, err := WithRedisLock(endpoint, strg)
+	wrapper, err := WithRedisLock(endpoint, password, storage.WithChecker(strg))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -46,6 +47,63 @@ func TestWithRedisLock(t *testing.T) {
 	err = eg.Wait()
 	if err != nil {
 		t.Fatal(err)
+	}
+}
+
+// Verify with WithRedisLock working with password protected redis
+// Same logic as the TestWithRedisLock test.
+func TestWithRedisLockWithPassword(t *testing.T) {
+	endpoint := os.Getenv("PROTECTED_REDIS_TEST_ENDPOINT")
+	password := os.Getenv("ATHENS_PROTECTED_REDIS_PASSWORD")
+	if len(endpoint) == 0 {
+		t.SkipNow()
+	}
+	strg, err := mem.NewStorage()
+	if err != nil {
+		t.Fatal(err)
+	}
+	ms := &mockRedisStasher{strg: strg}
+	wrapper, err := WithRedisLock(endpoint, password, storage.WithChecker(strg))
+	if err != nil {
+		t.Fatal(err)
+	}
+	s := wrapper(ms)
+
+	var eg errgroup.Group
+	for i := 0; i < 5; i++ {
+		eg.Go(func() error {
+			ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+			defer cancel()
+			_, err := s.Stash(ctx, "mod", "ver")
+			return err
+		})
+	}
+
+	err = eg.Wait()
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+// Verify the WithRedisLock fails with the correct error when trying
+// to connect with the wrong password.
+func TestWithRedisLockWithWrongPassword(t *testing.T) {
+	endpoint := os.Getenv("PROTECTED_REDIS_TEST_ENDPOINT")
+	password := ""
+	if len(endpoint) == 0 {
+		t.SkipNow()
+	}
+	strg, err := mem.NewStorage()
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, err = WithRedisLock(endpoint, password, storage.WithChecker(strg))
+	if err == nil {
+		t.Fatal("Expected Connection Error")
+	}
+
+	if !strings.Contains(err.Error(), "NOAUTH Authentication required.") {
+		t.Fatalf("Wrong error was thrown %q\n", err.Error())
 	}
 }
 

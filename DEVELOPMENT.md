@@ -27,15 +27,16 @@ GO_BINARY_PATH=go1.11.X
 
 # Run the Proxy
 
-We provide three ways to run the proxy on your local machine:
+We provide four ways to run the proxy on your local machine:
 
 1. Using [Docker](https://www.docker.com/) and [Docker Compose](https://docs.docker.com/compose/) (_we suggest this one if you're getting started_)
-2. Natively on your host
-3. Using [Sail](https://sail.dev)
+2. Natively on your host as a service (only SystemD is currently supported)
+3. Natively on your host as a simple binary
+4. Using [Sail](https://sail.dev)
 
 See below for instructions for each option!
 
-## Using Docker
+## Run Using Docker
 
 As we said above, we suggest that you use this approach because it simulates a more realistic Athens deployment. This technique does the following, completely inside containers:
 
@@ -79,7 +80,42 @@ When you're ready to stop Athens and all its dependencies, run this command:
 $ make run-docker-teardown
 ```
 
-## Natively on Your Host
+## Run Natively on Your Host as a Service
+
+There are many service execution environments. On Linux, two important ones are SystemD and SysV, but at the moment only SystemD is supported; others may follow soon. For other systems, please see the next section. 
+
+### SystemD on Linux
+
+If you're inside GOPATH, make sure `GO111MODULE=on`, if you're outside GOPATH, then Go Modules are on by default.
+
+The Makefile builds the necessary `athens` binary. Then a script sets up the service for you.
+
+```console
+$ make athens
+$ sudo ./scripts/systemd.sh install
+```
+
+After the server starts, you can manage it as usual via `systemctl`, e.g.:
+
+```console
+sudo systemctl status athens
+```
+which is the same as
+
+```console
+$ sudo ./scripts/systemd.sh status
+```
+
+The `systemd.sh` script also has a `remove` option to uninstall the service.
+
+SystemD allows logs to be collected and inspected; more information is in 
+[this tutorial by Digital Ocean](https://www.digitalocean.com/community/tutorials/how-to-use-journalctl-to-view-and-manipulate-systemd-logs), amongst others. So tailing the logs can be done like this:
+
+```console
+$ sudo journalctl -u athens --since today --follow
+```
+
+## Run Natively on Your Host
 
 If you're inside GOPATH, make sure `GO111MODULE=on`, if you're outside GOPATH, then Go Modules are on by default.
 
@@ -97,7 +133,7 @@ After the server starts, you'll see some console output like:
 Starting application at 127.0.0.1:3000
 ```
 
-## Using Sail
+## Run Using Sail
 
 Follow instructions at [sail.dev](https://sail.dev) to setup the sail CLI. Then simply run:
 
@@ -203,3 +239,89 @@ In our CI/CD pass, we use golint, so feel free to install and run it locally bef
 ```
 go get golang.org/x/lint/golint
 ```
+
+# For People Doing a Release
+
+This section is written primarily for maintainers, so we don't forget how to initiate and complete a release. If you're not a maintainer and you're curious how we release new versions of Athens, read on!
+
+Take a look at our [releases page](https://github.com/gomods/athens/releases). This is how we release official new builds of Athens. Almost all of the release process is automatic.
+
+## Notes about the release number
+
+Before we continue, please be sure you're familiar with our release numbering scheme.
+
+We follow the [semver](https://semver.org) convention for our release numbers. At the moment, we're not at `v1`, so release versions are `v0.x.y`. `x` is the `MINOR` number, and `y` is the `PATCH` number. You'll need to decide which one to update.
+
+If there are significant new features in this release, choose to update `x` and set `y` to 0. If there are just bugfixes, just increment the `y` version number.
+
+## Code freeze
+
+The first step to a release is a code freeze. This is 1-2 weeks (depending on the features and bugfixes we intend to release) during which we don't merge anything but critical bugfixes to the `main` branch. The code in `main` is essentially a release candidate (we don't cut a new branch for RC's at the moment) to test.
+
+>If you are doing a patch release, you do not need to do a code freeze.
+
+## Release branch
+
+You'll be creating a new branch that represents the code that will be released. It always looks like `release-v0.x.y`. The `v0.x.y` represents the semver version number.
+
+>Reminder, the `x` and `y` make up the semver number. `x` is the `MINOR` and `y` is the `PATCH`
+
+You'll need to have permissions to create a new branch in origin, whether through the GitHub site or running `push origin release-v0.x.x`.
+
+### Minor releases
+
+If you're doing a minor release, you'll be incrementing `x` and setting `y` to 0 in the branch name. For example, if the previous release was `v0.1.2`, the previous release branch will be `release-v0.1.2`. Your new version will be `v0.2.0` and new release branch will be `release-v0.2.0`.
+
+Cut minor release branches from the `main` branch.
+
+### Patch releases
+
+If you're doing a patch release, you'll be incrementing only the `y` version number. In this case, the new version will be `v0.2.1` and new branch will be `release-v0.2.1`.
+
+Cut patch release branches from the most recent release branch. Since these branches will only fix bugs, you'll need to find the commits from `main` that have the fixes in them and cherry pick them into the new patch release branch. For example:
+
+```console
+$ git checkout -b release-v0.2.1 upstream/release-v0.2.0
+$ git cherry-pick <commit from main>
+....
+```
+
+### Updating the helm chart
+
+Regardless of which branch you created, you'll need to update the helm chart number. After you've cut the branch, make sure to change the versions in the [`Chart.yaml`](./charts/athens-proxy/Chart.yaml) file:
+
+- If this is a new release of Athens, make sure to update the Docker image version [value](./charts/athens-proxy/values.yaml#L5)
+- Increment the patch number in the [`version` field](./charts/athens-proxy/Chart.yaml#L2)
+- Set the [`appVersion` field](./charts/athens-proxy/Chart.yaml#L2) to the semver of the new branch. Do not include the `v` prefix
+
+## Creating the new release in GitHub
+
+Go to the [create new release page](https://github.com/gomods/athens/releases/new) and draft a new release. See below for what data to put into the fields you see:
+
+- **Tag version** - This should be the same `v0.x.y` number you put into the release branch. Make sure this tag starts with `v` and that the tag target is the proper release branch.
+- **Release Title** - Make sure the title is prefixed by the release number including the `v`. If you want to write something creative in the rest of the title, go for it!
+- **Describe this release** - Make sure to write what features this release includes, and any notable bugfixes. Also, thank all the folks who contributed to the release. You can find that information in a link that looks like this: `https://github.com/gomods/athens/compare/$PREVIOUS_TAG...release-$CURRENT_TAG`. Substitute `$PREVIOUS_TAG` for the last semver and `$CURRENT_TAG` to the version in the new release branch
+
+When you're done, press the "Publish Release" button. After you do, our [Drone](https://cloud.drone.io) job will do almost everything.
+
+Make sure the Drone CI/CD job finished, and check in Docker Hub to make sure the new release showed up in the [tags](https://hub.docker.com/r/gomods/athens/tags) section.
+
+## Finishing up
+
+The Drone job will do everything except:
+
+- Tweet out about the new release
+- Update the helm chart in the `main` branch
+
+If you are a core maintainer and don't have access to the `@gomods` account, ask one of the maintainers to give you access. [Here](https://twitter.com/gomodsio/status/1240016379962691585) is an example showing the general format of these tweets. Obviously you should use your creativity here though!
+
+Finally, you'll need to update the helm version number in the `main` branch. Create a new branch called `update-helm-$CURRENT_TAG` and update the following files:
+
+- [charts/athens-proxy/values.yaml](./charts/athens-proxy/values.yaml) - update the `image.tag` field to the latest version number you created, including the `v`. This field should be near the top of the file
+- [charts/athens-proxy/Chart.yaml](./charts/athens-proxy/Chart.yaml) - update the `version` field and the `appVersion` field
+  - Increment the patch number in the `version` field
+  - Change the `appVersion` field to the tag name of the GitHub version you created, including the `v`
+
+[Here](https://github.com/gomods/athens/pull/1574) is an example of how to do this.
+
+Finally, create a pull request from your new branch into the `main` branch. It will be reviewed and merged as soon as possible.

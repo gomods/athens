@@ -3,12 +3,12 @@ package azureblob
 import (
 	"context"
 	"fmt"
-	"io"
 	"io/ioutil"
 
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/observ"
+	"github.com/gomods/athens/pkg/storage"
 )
 
 // Info implements the (./pkg/storage).Getter interface
@@ -76,7 +76,7 @@ func (s *Storage) GoMod(ctx context.Context, module string, version string) ([]b
 }
 
 // Zip implements the (./pkg/storage).Getter interface
-func (s *Storage) Zip(ctx context.Context, module string, version string) (io.ReadCloser, error) {
+func (s *Storage) Zip(ctx context.Context, module string, version string) (storage.SizeReadCloser, error) {
 	const op errors.Op = "azureblob.Zip"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
@@ -87,11 +87,9 @@ func (s *Storage) Zip(ctx context.Context, module string, version string) (io.Re
 	if !exists {
 		return nil, errors.E(op, errors.M(module), errors.V(version), errors.KindNotFound)
 	}
-
 	zipReader, err := s.client.ReadBlob(ctx, config.PackageVersionedName(module, version, "zip"))
 	if err != nil {
 		return nil, errors.E(op, err, errors.M(module), errors.V(version))
 	}
-
 	return zipReader, nil
 }

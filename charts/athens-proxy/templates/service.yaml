@@ -23,5 +23,4 @@ spec:
     {{- end }}
   selector:
     app: {{ template "fullname" . }}
-    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
     release: "{{ .Release.Name }}"

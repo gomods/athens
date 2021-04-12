@@ -3,12 +3,14 @@ package actions
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"time"
 
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/storage"
 	"github.com/gomods/athens/pkg/storage/azureblob"
+	"github.com/gomods/athens/pkg/storage/external"
 	"github.com/gomods/athens/pkg/storage/fs"
 	"github.com/gomods/athens/pkg/storage/gcp"
 	"github.com/gomods/athens/pkg/storage/mem"
@@ -19,7 +21,7 @@ import (
 )
 
 // GetStorage returns storage backend based on env configuration
-func GetStorage(storageType string, storageConfig *config.StorageConfig, timeout time.Duration) (storage.Backend, error) {
+func GetStorage(storageType string, storageConfig *config.Storage, timeout time.Duration, client *http.Client) (storage.Backend, error) {
 	const op errors.Op = "actions.GetStorage"
 	switch storageType {
 	case "memory":
@@ -60,6 +62,11 @@ func GetStorage(storageType string, storageConfig *config.StorageConfig, timeout
 			return nil, errors.E(op, "Invalid AzureBlob Storage Configuration")
 		}
 		return azureblob.New(storageConfig.AzureBlob, timeout)
+	case "external":
+		if storageConfig.External == nil {
+			return nil, errors.E(op, "Invalid External Storage Configuration")
+		}
+		return external.NewClient(storageConfig.External.URL, client), nil
 	default:
 		return nil, fmt.Errorf("storage type %s is unknown", storageType)
 	}
