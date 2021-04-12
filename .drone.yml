@@ -61,7 +61,7 @@ steps:
       from_secret: ATHENS_AZURE_ACCOUNT_KEY
   when:
     branch:
-      - master
+      - main
     event:
       - push
       - pull_request
@@ -84,7 +84,7 @@ steps:
       - VERSION=${DRONE_COMMIT}
   when:
     branch:
-      - master
+      - main
     event:
       - push
 
@@ -103,7 +103,7 @@ steps:
       - VERSION=${DRONE_COMMIT}
   when:
     branch:
-      - master
+      - main
     event:
       - push
 
@@ -135,7 +135,7 @@ steps:
       from_secret: AZURE_STORAGE_CONNECTION_STRING
   when:
     branch:
-      - master
+      - main
     event:
      - push
 

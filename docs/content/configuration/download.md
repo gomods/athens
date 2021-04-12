@@ -18,7 +18,7 @@ This document will outline how to use this file - called the download mode file 
 First, once you've created your download mode file, you tell Athens to use it by setting the `DownloadMode` configuration parameter in the `config.toml` file, or setting the `ATHENS_DOWNLOAD_MODE` environment variable. You can set this configuration value to one of two values to tell Athens to use your file:
 
 1. Set its value to `file:$FILE_PATH`, where `$FILE_PATH` is the path to the HCL file
-2. Set its value to `custom$BASE_64` where `$BASE_64` is the base64 encoded HCL file
+2. Set its value to `custom:$BASE_64` where `$BASE_64` is the base64 encoded HCL file
 
 >Instead of one of the above two values, you can set this configuration to `sync`, `async`, `none`, `redirect`, or `async_redirect`. If you do, the download mode will be set globally rather than for specific sub-groups of modules. See below for what each of these values mean.
 
@@ -90,7 +90,7 @@ download "bad/module/repo/*" {
 
 ### Preventing storage overflow
 
-If you are running Athens using a [storage backend](./storage) that has limited space, you may want to prevent Athens from storing certain groups of modules that take up a lot of space. To avoid exhausting Athens storage, while still ensuring that the users of your Athens server still get access to the modules you can't store, you would use a `redirect` directive, as shown below:
+If you are running Athens using a [storage backend](/configuration/storage) that has limited space, you may want to prevent Athens from storing certain groups of modules that take up a lot of space. To avoid exhausting Athens storage, while still ensuring that the users of your Athens server still get access to the modules you can't store, you would use a `redirect` directive, as shown below:
 
 ```hcl
 download "very/large/*" {

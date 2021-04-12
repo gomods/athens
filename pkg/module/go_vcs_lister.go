@@ -28,11 +28,19 @@ type vcsLister struct {
 	fs        afero.Fs
 }
 
-func (l *vcsLister) List(ctx context.Context, mod string) (*storage.RevInfo, []string, error) {
+// NewVCSLister creates an UpstreamLister which uses VCS to fetch a list of available versions
+func NewVCSLister(goBinPath string, env []string, fs afero.Fs) UpstreamLister {
+	return &vcsLister{
+		goBinPath: goBinPath,
+		env:       env,
+		fs:        fs,
+	}
+}
+
+func (l *vcsLister) List(ctx context.Context, module string) (*storage.RevInfo, []string, error) {
 	const op errors.Op = "vcsLister.List"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
-
 	tmpDir, err := afero.TempDir(l.fs, "", "go-list")
 	if err != nil {
 		return nil, nil, errors.E(op, err)
@@ -42,7 +50,7 @@ func (l *vcsLister) List(ctx context.Context, mod string) (*storage.RevInfo, []s
 	cmd := exec.Command(
 		l.goBinPath,
 		"list", "-m", "-versions", "-json",
-		config.FmtModVer(mod, "latest"),
+		config.FmtModVer(module, "latest"),
 	)
 	cmd.Dir = tmpDir
 	stdout := &bytes.Buffer{}
@@ -80,9 +88,4 @@ func (l *vcsLister) List(ctx context.Context, mod string) (*storage.RevInfo, []s
 		Version: lr.Version,
 	}
 	return &rev, lr.Versions, nil
-}
-
-// NewVCSLister creates an UpstreamLister which uses VCS to fetch a list of available versions
-func NewVCSLister(goBinPath string, env []string, fs afero.Fs) UpstreamLister {
-	return &vcsLister{goBinPath: goBinPath, env: env, fs: fs}
 }

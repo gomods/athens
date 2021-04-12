@@ -3,12 +3,12 @@ package minio
 import (
 	"context"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"net/http"
 
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/observ"
+	"github.com/gomods/athens/pkg/storage"
 	minio "github.com/minio/minio-go/v6"
 )
 
@@ -45,7 +45,7 @@ func (v *storageImpl) GoMod(ctx context.Context, module, vsn string) ([]byte, er
 
 	return mod, nil
 }
-func (v *storageImpl) Zip(ctx context.Context, module, vsn string) (io.ReadCloser, error) {
+func (v *storageImpl) Zip(ctx context.Context, module, vsn string) (storage.SizeReadCloser, error) {
 	const op errors.Op = "minio.Zip"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
@@ -60,8 +60,11 @@ func (v *storageImpl) Zip(ctx context.Context, module, vsn string) (io.ReadClose
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
-
-	return zipReader, nil
+	oi, err := zipReader.Stat()
+	if err != nil {
+		return nil, errors.E(op, err)
+	}
+	return storage.NewSizer(zipReader, oi.Size), nil
 }
 
 func transformNotFoundErr(op errors.Op, module, version string, err error) error {

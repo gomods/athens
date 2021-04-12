@@ -20,6 +20,7 @@ type goGetFetcher struct {
 	fs           afero.Fs
 	goBinaryName string
 	envVars      []string
+	gogetDir     string
 }
 
 type goModule struct {
@@ -35,7 +36,7 @@ type goModule struct {
 }
 
 // NewGoGetFetcher creates fetcher which uses go get tool to fetch modules
-func NewGoGetFetcher(goBinaryName string, envVars []string, fs afero.Fs) (Fetcher, error) {
+func NewGoGetFetcher(goBinaryName, gogetDir string, envVars []string, fs afero.Fs) (Fetcher, error) {
 	const op errors.Op = "module.NewGoGetFetcher"
 	if err := validGoBinary(goBinaryName); err != nil {
 		return nil, errors.E(op, err)
@@ -44,6 +45,7 @@ func NewGoGetFetcher(goBinaryName string, envVars []string, fs afero.Fs) (Fetche
 		fs:           fs,
 		goBinaryName: goBinaryName,
 		envVars:      envVars,
+		gogetDir:     gogetDir,
 	}, nil
 }
 
@@ -55,7 +57,7 @@ func (g *goGetFetcher) Fetch(ctx context.Context, mod, ver string) (*storage.Ver
 	defer span.End()
 
 	// setup the GOPATH
-	goPathRoot, err := afero.TempDir(g.fs, "", "athens")
+	goPathRoot, err := afero.TempDir(g.fs, g.gogetDir, "athens")
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
@@ -66,7 +68,16 @@ func (g *goGetFetcher) Fetch(ctx context.Context, mod, ver string) (*storage.Ver
 		return nil, errors.E(op, err)
 	}
 
-	m, err := downloadModule(g.goBinaryName, g.envVars, g.fs, goPathRoot, modPath, mod, ver)
+	m, err := downloadModule(
+		ctx,
+		g.goBinaryName,
+		g.envVars,
+		g.fs,
+		goPathRoot,
+		modPath,
+		mod,
+		ver,
+	)
 	if err != nil {
 		clearFiles(g.fs, goPathRoot)
 		return nil, errors.E(op, err)
@@ -101,18 +112,29 @@ func (g *goGetFetcher) Fetch(ctx context.Context, mod, ver string) (*storage.Ver
 
 // given a filesystem, gopath, repository root, module and version, runs 'go mod download -json'
 // on module@version from the repoRoot with GOPATH=gopath, and returns a non-nil error if anything went wrong.
-func downloadModule(goBinaryName string, envVars []string, fs afero.Fs, gopath, repoRoot, module, version string) (goModule, error) {
+func downloadModule(
+	ctx context.Context,
+	goBinaryName string,
+	envVars []string,
+	fs afero.Fs,
+	gopath,
+	repoRoot,
+	module,
+	version string,
+) (goModule, error) {
 	const op errors.Op = "module.downloadModule"
+
 	uri := strings.TrimSuffix(module, "/")
 	fullURI := fmt.Sprintf("%s@%s", uri, version)
 
-	cmd := exec.Command(goBinaryName, "mod", "download", "-json", fullURI)
+	cmd := exec.CommandContext(ctx, goBinaryName, "mod", "download", "-json", fullURI)
 	cmd.Env = prepareEnv(gopath, envVars)
 	cmd.Dir = repoRoot
 	stdout := &bytes.Buffer{}
 	stderr := &bytes.Buffer{}
 	cmd.Stdout = stdout
 	cmd.Stderr = stderr
+
 	err := cmd.Run()
 	if err != nil {
 		err = fmt.Errorf("%v: %s", err, stderr)

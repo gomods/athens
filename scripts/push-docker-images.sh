@@ -14,8 +14,8 @@ if [[ "${MUTABLE_TAG:-}" == "" ]]; then
     # tagged builds
     if [[ "$VERSION" =~ ^v[0-9]+\.[0-9]+\.[0-9]+ ]]; then
         MUTABLE_TAG="latest"
-    # master build
-    elif [[ "$BRANCH" == "master" ]]; then
+    # main branch build
+    elif [[ "$BRANCH" == "main" ]]; then
         MUTABLE_TAG="canary"
     # branch build
     else

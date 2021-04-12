@@ -2,7 +2,7 @@ replicaCount: 1
 image:
   registry: docker.io
   repository: gomods/athens
-  tag: v0.8.1
+  tag: v0.11.0
 
   ## Specify a imagePullPolicy
   ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
@@ -145,6 +145,10 @@ sshGitServers: {}
   #  port: 22
 
 goGetWorkers: 3
+
+serviceAccount:
+  create: true
+  annotations: {}
 
 nodeSelector: {}
 

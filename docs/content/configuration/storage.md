@@ -29,6 +29,11 @@ The Athens proxy supports many storage types:
       - [Configuration:](#configuration-8)
 - [External Storage](#external-storage)
       - [Configuration:](#configuration-9)
+- [Running multiple Athens pointed at the same storage](#running-multiple-athens-pointed-at-the-same-storage)
+  - [Using etcd as the single flight mechanism](#using-etcd-as-the-single-flight-mechanism)
+  - [Using redis as the single flight mechanism](#using-redis-as-the-single-flight-mechanism)
+    - [Direct connection to redis](#direct-connection-to-redis)
+    - [Connecting to redis via redis sentinel](#connecting-to-redis-via-redis-sentinel)
 
 All of them can be configured using `config.toml` file. You need to set a valid driver in `StorageType` value or you can set it in environment variable `ATHENS_STORAGE_TYPE` on your server.
 Also for most of the drivers you need to provide additional configuration data which will be described below.
@@ -49,7 +54,7 @@ This storage doesn't need any specific configuration and it's also used by defau
 
 Disk storage allows modules to be stored on a file system. The location on disk where modules will be stored can be configured.
 
->You can pre-fill disk-based storage to enable Athens deployments that have no access to the internet. See [here](./prefill-disk-cache) for instructions on how to do that.
+>You can pre-fill disk-based storage to enable Athens deployments that have no access to the internet. See [here](/configuration/prefill-disk-cache) for instructions on how to do that.
 
 ##### Configuration:
 
@@ -341,7 +346,7 @@ It assumes that you already have the following:
 ## External Storage
 
 External storage lets Athens connect to your own implementation of a storage backend. 
-All you have to do is implement the (storage.Backend)[https://github.com/gomods/athens/blob/master/pkg/storage/backend.go#L4] interface and run it behind an http server. 
+All you have to do is implement the (storage.Backend)[https://github.com/gomods/athens/blob/main/pkg/storage/backend.go#L4] interface and run it behind an http server. 
 
 Once you implement the backend server, you must then configure Athens to use that storage backend as such:
 

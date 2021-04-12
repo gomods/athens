@@ -7,7 +7,7 @@ weight: 2
 
 This document lays out generally how we want to work with each other. It's hard to make a rule or set a guideline for each and every situation that might come up in our community. That's basically predicting the future!
 
-We do of course set some boundaries like the [code of conduct](https://github.com/gomods/athens/blob/master/CODE_OF_CONDUCT.md), but we want to fall back to this document for guidance when we encounter a new situation or question that we need to address.
+We do of course set some boundaries like the [code of conduct](https://github.com/gomods/athens/blob/main/CODE_OF_CONDUCT.md), but we want to fall back to this document for guidance when we encounter a new situation or question that we need to address.
 
 # Guiding Principles
 
