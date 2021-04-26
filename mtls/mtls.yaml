@@ -21,3 +21,4 @@ services:
     - ./mtls/certs:/etc/nginx/mtls_certs
     ports:
       - "443:443"
+      - "80:80"
