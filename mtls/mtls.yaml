@@ -5,6 +5,14 @@ version: '3'
 
 services:
 
+  dev:
+    environment:
+      ATHENS_TLSCERT_FILE: /etc/athens/backend/web.cert.pem    
+      ATHENS_TLSKEY_FILE: /etc/athens/backend/web.key.pem    
+      ATHENS_TLSCACERT_FILE: /etc/athens/backend/ca-chain.cert.pem
+    volumes:
+    - ./mtls/certs:/etc/athens
+
   nginx:
     image: nginx:latest
     depends_on: [dev]
