@@ -49,7 +49,7 @@ Available options:
 - [gitconfig support](https://docs.gomods.io/install/install-on-kubernetes/#gitconfig-support)
 
 ### [AWS Load Balancer Controller](https://kubernetes-sigs.github.io/aws-load-balancer-controller/latest/) ssl redirect using annotation
-Using `.Values.ingress.extraPaths` you can difine extra paths to the each hosts. So now we can define
+Using `.Values.ingress.extraPaths` you can define extra paths to the each hosts. So now we can define
 extraPaths to `use-annotation` like it mentioned [here](https://kubernetes-sigs.github.io/aws-load-balancer-controller/latest/guide/tasks/ssl_redirect/)
 
 The example below shows how to setup ssl-redirect for AWS LoadBalancer Controller.
