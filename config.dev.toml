@@ -353,10 +353,10 @@ IndexType = "none"
 
         # JSONKey is a base64 encoded service account 
         # key that allows Athens to be run outside of GCP
-        # but still be able to access GCS. If you are
-        # running Athens inside GCP, you will most
-        # likely not need this as GCP figures out
-        # internal authentication between products for you.
+        # but still be able to access GCS. This is not needed
+        # when relying on default GCP authentication with 
+        # GOOGLE_APPLICATION_CREDENTIALS variable set up. 
+        # See https://cloud.google.com/docs/authentication/getting-started.
         #
         # Env override: ATHENS_STORAGE_GCP_JSON_KEY
         JSONKey = ""
