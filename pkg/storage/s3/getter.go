@@ -100,7 +100,7 @@ func (s *Storage) open(ctx context.Context, path string) (storage.SizeReadCloser
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
-	var size int64 = -1
+	var size int64
 	if goo.ContentLength != nil {
 		size = *goo.ContentLength
 	}

@@ -45,7 +45,7 @@ func ZipHandler(dp Protocol, lggr log.Entry, df *mode.DownloadFile) http.Handler
 
 		w.Header().Set("Content-Type", "application/zip")
 		size := zip.Size()
-		if size >= 0 {
+		if size > 0 {
 			w.Header().Set("Content-Length", strconv.FormatInt(size, 10))
 		}
 		if r.Method == http.MethodHead {
