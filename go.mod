@@ -12,7 +12,7 @@ require (
 	github.com/BurntSushi/toml v0.3.1
 	github.com/DataDog/datadog-go v0.0.0-20180822151419-281ae9f2d895 // indirect
 	github.com/DataDog/opencensus-go-exporter-datadog v0.0.0-20180917103902-e6c7f767dc57
-	github.com/aws/aws-sdk-go v1.32.7
+	github.com/aws/aws-sdk-go v1.34.28
 	github.com/bsm/redislock v0.4.2
 	github.com/codegangsta/negroni v1.0.0 // indirect
 	github.com/fatih/color v1.7.0
@@ -20,11 +20,10 @@ require (
 	github.com/go-playground/universal-translator v0.16.0 // indirect
 	github.com/go-redis/redis/v7 v7.2.0
 	github.com/go-sql-driver/mysql v1.5.0
-	github.com/gobuffalo/envy v1.6.7
+	github.com/gobuffalo/envy v1.7.0
 	github.com/gobuffalo/httptest v1.0.4
 	github.com/golang/protobuf v1.3.3 // indirect
-	github.com/golang/snappy v0.0.1 // indirect
-	github.com/google/go-cmp v0.5.1
+	github.com/google/go-cmp v0.5.2
 	github.com/google/uuid v1.1.1
 	github.com/gorilla/mux v1.6.2
 	github.com/hashicorp/go-multierror v1.0.0
@@ -37,16 +36,12 @@ require (
 	github.com/philhofer/fwd v1.0.0 // indirect
 	github.com/sirupsen/logrus v1.4.2
 	github.com/spf13/afero v1.1.2
-	github.com/spf13/pflag v1.0.3 // indirect
-	github.com/stretchr/testify v1.5.1
+	github.com/stretchr/testify v1.6.1
 	github.com/technosophos/moniker v0.0.0-20180509230615-a5dbd03a2245
-	github.com/tidwall/pretty v0.0.0-20180105212114-65a9db5fad51 // indirect
 	github.com/tinylib/msgp v1.0.2 // indirect
 	github.com/unrolled/secure v0.0.0-20181221173256-0d6b5bb13069
-	github.com/xdg/scram v0.0.0-20180814205039-7eeb5667e42c // indirect
-	github.com/xdg/stringprep v1.0.0 // indirect
 	go.etcd.io/etcd v0.0.0-20190215181705-784daa04988c
-	go.mongodb.org/mongo-driver v1.0.0
+	go.mongodb.org/mongo-driver v1.5.1
 	go.opencensus.io v0.22.3
 	golang.org/x/exp v0.0.0-20200224162631-6cc2880d07d6 // indirect
 	golang.org/x/lint v0.0.0-20200130185559-910be7a94367 // indirect
