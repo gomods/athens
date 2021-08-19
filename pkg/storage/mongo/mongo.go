@@ -11,6 +11,7 @@ import (
 
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/errors"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -55,9 +56,7 @@ func NewStorage(conf *config.MongoConfig, timeout time.Duration) (*ModuleStore, 
 func (m *ModuleStore) connect(conf *config.MongoConfig) (*mongo.Collection, error) {
 	const op errors.Op = "mongo.connect"
 
-	var err error
-	err = m.client.Connect(context.Background())
-
+	err := m.client.Connect(context.Background())
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
@@ -76,11 +75,12 @@ func (m *ModuleStore) initDatabase() *mongo.Collection {
 
 	c := m.client.Database(m.db).Collection(m.coll)
 	indexView := c.Indexes()
-	keys := make(map[string]int)
-	keys["base_url"] = 1
-	keys["module"] = 1
-	keys["version"] = 1
-	indexOptions := options.Index().SetBackground(true).SetSparse(true).SetUnique(true)
+	keys := bson.D{
+		{Key: "base_url", Value: 1},
+		{Key: "module", Value: 1},
+		{Key: "version", Value: 1},
+	}
+	indexOptions := options.Index().SetSparse(true).SetUnique(true)
 	indexView.CreateOne(context.Background(), mongo.IndexModel{Keys: keys, Options: indexOptions}, options.CreateIndexes())
 
 	return c
