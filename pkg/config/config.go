@@ -53,6 +53,7 @@ type Config struct {
 	NoSumPatterns    []string  `envconfig:"ATHENS_GONOSUM_PATTERNS"`
 	DownloadMode     mode.Mode `envconfig:"ATHENS_DOWNLOAD_MODE"`
 	DownloadURL      string    `envconfig:"ATHENS_DOWNLOAD_URL"`
+	NetworkMode      string    `validate:"oneof=strict offline fallback" envconfig:"ATHENS_NETWORK_MODE"`
 	SingleFlightType string    `envconfig:"ATHENS_SINGLE_FLIGHT_TYPE"`
 	RobotsFile       string    `envconfig:"ATHENS_ROBOTS_FILE"`
 	IndexType        string    `envconfig:"ATHENS_INDEX_TYPE"`
@@ -173,6 +174,7 @@ func defaultConfig() *Config {
 		NoSumPatterns:    []string{},
 		DownloadMode:     "sync",
 		DownloadURL:      "",
+		NetworkMode:      "strict",
 		RobotsFile:       "robots.txt",
 		IndexType:        "none",
 		SingleFlight: &SingleFlight{

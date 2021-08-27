@@ -143,6 +143,7 @@ func addProxyRoutes(
 		Stasher:      st,
 		Lister:       lister,
 		DownloadFile: df,
+		NetworkMode:  c.NetworkMode,
 	}
 
 	dp := download.New(dpOpts, addons.WithPool(c.ProtocolWorkers))
