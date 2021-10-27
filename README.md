@@ -14,6 +14,8 @@ Welcome to the Athens project! We are a proxy server for the [Go Modules downloa
 
 See our documentation site [https://docs.gomods.io](https://docs.gomods.io) for more details on the project.
 
+>We are looking for people who would like to become core maintainers of this project. Please see [issue #1734](https://github.com/gomods/athens/issues/1734) for more details.
+
 # Project Status
 
 Development teams at several companies are using Athens in their everyday development workflows.
