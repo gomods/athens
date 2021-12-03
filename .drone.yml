@@ -7,9 +7,9 @@ steps:
   image: golang:1.14
   commands:
     # wait for services to be ready.
-    - cd scripts/liveness_probe
-    - go run .
-    - cd ../..
+    # - cd scripts/liveness_probe
+    # - go run .
+    # - cd ../..
     - go mod download
     - go mod vendor # this is for when the Dockerfile gets built
   environment:
