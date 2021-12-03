@@ -49,7 +49,7 @@ GoProxy = "direct"
 # GoBinaryEnvVars = ["GOPROXY=direct"]
 # And you pass the following env var: 
 # ATHENS_GO_BINARY_ENV_VARS='GODEBUG=true'
-# Then the final value that the Go binary will receive is [GOBINARY=true] and NOT ["GOPROXY=direct", "GOBINARY=true"]
+# Then the final value that the Go binary will receive is ["GODEBUG=true"] and NOT ["GOPROXY=direct", "GODEBUG=true"]
 # Therefore, whether you use the config file or the env var, make sure you have all the values you need there.
 GoBinaryEnvVars = ["GOPROXY=direct"]
 
@@ -69,7 +69,7 @@ GoGetWorkers = 10
 # a directory that has larger disk resources. If the value is
 # empty, Athens will use the default OS temporary directory.
 # 
-# Env override: ATHENS_GOGOET_DIR
+# Env override: ATHENS_GOGET_DIR
 GoGetDir = ""
 
 # ProtocolWorkers specifies how many concurrent
