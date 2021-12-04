@@ -6,7 +6,7 @@
 # See project Makefile if using make.
 # See docker --build-arg if building directly.
 ARG GOLANG_VERSION=1.17
-ARG ALPINE_VERSION=3.14.2
+ARG ALPINE_VERSION=3.15
 
 FROM golang:${GOLANG_VERSION}-alpine AS builder
 
@@ -29,7 +29,7 @@ COPY --from=builder /usr/local/go/bin/go /bin/go
 RUN chmod 644 /config/config.toml
 
 # Add tini, see https://github.com/gomods/athens/issues/1155 for details.
-RUN apk add --update bzr git git-lfs mercurial openssh-client subversion procps fossil tini && \
+RUN apk add --update git git-lfs mercurial openssh-client subversion procps fossil tini && \
 	mkdir -p /usr/local/go
 
 EXPOSE 3000
