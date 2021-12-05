@@ -55,6 +55,8 @@ weight: 2
 
 ## Bazaar(bzr) private repositories
 
+* Bazaar is not supported with the Dockerfile provided by Athens. but the instructions are valid for custom Athens build with bazaar.*
+
 1. Bazaaar config files are located in
 
 - Unix

@@ -26,7 +26,7 @@ type Config struct {
 	GoProxy          string    `envconfig:"GOPROXY"`
 	GoBinaryEnvVars  EnvList   `envconfig:"ATHENS_GO_BINARY_ENV_VARS"`
 	GoGetWorkers     int       `validate:"required" envconfig:"ATHENS_GOGET_WORKERS"`
-	GoGetDir         string    `envconfig:"ATHENS_GOGOET_DIR"`
+	GoGetDir         string    `envconfig:"ATHENS_GOGET_DIR"`
 	ProtocolWorkers  int       `validate:"required" envconfig:"ATHENS_PROTOCOL_WORKERS"`
 	LogLevel         string    `validate:"required" envconfig:"ATHENS_LOG_LEVEL"`
 	CloudRuntime     string    `validate:"required" envconfig:"ATHENS_CLOUD_RUNTIME"`
@@ -53,6 +53,7 @@ type Config struct {
 	NoSumPatterns    []string  `envconfig:"ATHENS_GONOSUM_PATTERNS"`
 	DownloadMode     mode.Mode `envconfig:"ATHENS_DOWNLOAD_MODE"`
 	DownloadURL      string    `envconfig:"ATHENS_DOWNLOAD_URL"`
+	NetworkMode      string    `validate:"oneof=strict offline fallback" envconfig:"ATHENS_NETWORK_MODE"`
 	SingleFlightType string    `envconfig:"ATHENS_SINGLE_FLIGHT_TYPE"`
 	RobotsFile       string    `envconfig:"ATHENS_ROBOTS_FILE"`
 	IndexType        string    `envconfig:"ATHENS_INDEX_TYPE"`
@@ -163,6 +164,7 @@ func defaultConfig() *Config {
 		NoSumPatterns:    []string{},
 		DownloadMode:     "sync",
 		DownloadURL:      "",
+		NetworkMode:      "strict",
 		RobotsFile:       "robots.txt",
 		IndexType:        "none",
 		SingleFlight: &SingleFlight{

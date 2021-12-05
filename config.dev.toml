@@ -49,7 +49,7 @@ GoProxy = "direct"
 # GoBinaryEnvVars = ["GOPROXY=direct"]
 # And you pass the following env var: 
 # ATHENS_GO_BINARY_ENV_VARS='GODEBUG=true'
-# Then the final value that the Go binary will receive is [GOBINARY=true] and NOT ["GOPROXY=direct", "GOBINARY=true"]
+# Then the final value that the Go binary will receive is ["GODEBUG=true"] and NOT ["GOPROXY=direct", "GODEBUG=true"]
 # Therefore, whether you use the config file or the env var, make sure you have all the values you need there.
 GoBinaryEnvVars = ["GOPROXY=direct"]
 
@@ -69,7 +69,7 @@ GoGetWorkers = 10
 # a directory that has larger disk resources. If the value is
 # empty, Athens will use the default OS temporary directory.
 # 
-# Env override: ATHENS_GOGOET_DIR
+# Env override: ATHENS_GOGET_DIR
 GoGetDir = ""
 
 # ProtocolWorkers specifies how many concurrent
@@ -260,6 +260,21 @@ NoSumPatterns = []
 # Env override: ATHENS_DOWNLOAD_MODE
 DownloadMode = "sync"
 
+# NetworkMode configures how Athens will return the results
+# of the /list endpoint as it can be assembled from both its own
+# storage and the upstream VCS.
+# 
+# Note, that for better error messaging, this would also affect how other
+# endpoints behave.
+# 
+# Modes:
+# 1. strict: merge VCS versions with storage versions, but fail if either of them fails.
+# 2. offline: only get storage versions, never reach out to VCS.
+# 3. fallback: only return storage versions, if VCS fails. Note this means that you may
+# see inconsistent results since fallback mode does a best effort of giving you what's
+# available at the time of requesting versions.
+NetworkMode = "strict"
+
 # DownloadURL is the URL that will be used if
 # DownloadMode is set to "redirect"
 # Env override: ATHENS_DOWNLOAD_URL
@@ -353,10 +368,10 @@ IndexType = "none"
 
         # JSONKey is a base64 encoded service account 
         # key that allows Athens to be run outside of GCP
-        # but still be able to access GCS. If you are
-        # running Athens inside GCP, you will most
-        # likely not need this as GCP figures out
-        # internal authentication between products for you.
+        # but still be able to access GCS. This is not needed
+        # when relying on default GCP authentication with 
+        # GOOGLE_APPLICATION_CREDENTIALS variable set up. 
+        # See https://cloud.google.com/docs/authentication/getting-started.
         #
         # Env override: ATHENS_STORAGE_GCP_JSON_KEY
         JSONKey = ""

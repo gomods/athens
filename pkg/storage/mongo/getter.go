@@ -94,7 +94,11 @@ func query(ctx context.Context, s *ModuleStore, module, vsn string) (*storage.Mo
 
 	queryResult := c.FindOne(tctx, bson.M{"module": module, "version": vsn})
 	if queryErr := queryResult.Err(); queryErr != nil {
-		return nil, errors.E(op, queryErr, errors.M(module), errors.V(vsn))
+		kind := errors.KindUnexpected
+		if queryErr == mongo.ErrNoDocuments {
+			kind = errors.KindNotFound
+		}
+		return nil, errors.E(op, queryErr, kind, errors.M(module), errors.V(vsn))
 	}
 
 	if err := queryResult.Decode(result); err != nil {
