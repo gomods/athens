@@ -29,10 +29,13 @@ func WithEtcd(endpoints []string, checker storage.Checker) (Wrapper, error) {
 	}
 	var eg errgroup.Group
 	for _, ep := range endpoints {
-		eg.Go(func() error {
-			_, err := c.Status(ctx, ep)
-			return err
-		})
+		epStat := func(ep string) func() error {
+			return func() error {
+				_, err := c.Status(ctx, ep)
+				return err
+			}
+		}(ep)
+		eg.Go(epStat)
 	}
 	err = eg.Wait()
 	if err != nil {
