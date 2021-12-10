@@ -47,7 +47,7 @@ setup-dev-env:
 .PHONY: verify
 verify: ## verify athens codebase
 	./scripts/check_gofmt.sh
-	./scripts/check_golint.sh
+	./scripts/check_govet.sh
 	./scripts/check_deps.sh
 	./scripts/check_conflicts.sh
 
