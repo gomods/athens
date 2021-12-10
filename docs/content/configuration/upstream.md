@@ -4,7 +4,7 @@ description: How to Configure Athens to Fetch Missing Modules From an Upstream M
 weight: 7
 ---
 
->Note: the filter file that this page documents is deprecated. Please instead see ["Filtering with the download mode file"](./download) for updated instructions on how to set upstream repositories in Athens.
+>Note: the filter file that this page documents is deprecated. Please instead see ["Filtering with the download mode file"](/configuration/download) for updated instructions on how to set upstream repositories in Athens.
 
 By default, Athens fetches module code from an upstream version control system (VCS) like github.com, but this can be configured to use a Go modules repository like GoCenter or another Athens Server.
 

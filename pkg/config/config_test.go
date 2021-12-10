@@ -24,14 +24,16 @@ func testConfigFile(t *testing.T) (testConfigFile string) {
 }
 
 func compareConfigs(parsedConf *Config, expConf *Config, t *testing.T) {
-	opts := cmpopts.IgnoreTypes(StorageConfig{}, SingleFlight{})
+	t.Helper()
+	opts := cmpopts.IgnoreTypes(Storage{}, SingleFlight{}, Index{})
 	eq := cmp.Equal(parsedConf, expConf, opts)
 	if !eq {
-		t.Errorf("Parsed Example configuration did not match expected values. Expected: %+v. Actual: %+v", expConf, parsedConf)
+		diff := cmp.Diff(parsedConf, expConf, opts)
+		t.Errorf("Parsed Example configuration did not match expected values. diff:\n%s", diff)
 	}
 }
 
-func compareStorageConfigs(parsedStorage *StorageConfig, expStorage *StorageConfig, t *testing.T) {
+func compareStorageConfigs(parsedStorage *Storage, expStorage *Storage, t *testing.T) {
 	eq := cmp.Equal(parsedStorage.Mongo, expStorage.Mongo)
 	if !eq {
 		t.Errorf("Parsed Example Storage configuration did not match expected values. Expected: %+v. Actual: %+v", expStorage.Mongo, parsedStorage.Mongo)
@@ -91,10 +93,11 @@ func TestEnvOverrides(t *testing.T) {
 		PathPrefix:      "prefix",
 		NETRCPath:       "/test/path/.netrc",
 		HGRCPath:        "/test/path/.hgrc",
-		Storage:         &StorageConfig{},
+		Storage:         &Storage{},
 		GoBinaryEnvVars: []string{"GOPROXY=direct"},
 		SingleFlight:    &SingleFlight{},
 		RobotsFile:      "robots.txt",
+		Index:           &Index{},
 	}
 
 	envVars := getEnvMap(expConf)
@@ -157,7 +160,7 @@ func TestEnsurePortFormat(t *testing.T) {
 }
 
 func TestStorageEnvOverrides(t *testing.T) {
-	expStorage := &StorageConfig{
+	expStorage := &Storage{
 		Disk: &DiskConfig{
 			RootPath: "/my/root/path",
 		},
@@ -209,7 +212,7 @@ func TestParseExampleConfig(t *testing.T) {
 
 	// initialize all struct pointers so we get all applicable env variables
 	emptyConf := &Config{
-		Storage: &StorageConfig{
+		Storage: &Storage{
 			Disk: &DiskConfig{},
 			GCP:  &GCPConfig{},
 			Minio: &MinioConfig{
@@ -219,6 +222,7 @@ func TestParseExampleConfig(t *testing.T) {
 			S3:    &S3Config{},
 		},
 		SingleFlight: &SingleFlight{},
+		Index:        &Index{},
 	}
 	// unset all environment variables
 	envVars := getEnvMap(emptyConf)
@@ -229,7 +233,7 @@ func TestParseExampleConfig(t *testing.T) {
 		os.Unsetenv(k)
 	}
 
-	expStorage := &StorageConfig{
+	expStorage := &Storage{
 		Disk: &DiskConfig{
 			RootPath: "/path/on/disk",
 		},
@@ -272,6 +276,7 @@ func TestParseExampleConfig(t *testing.T) {
 			Timeout: 300,
 		},
 		StorageType:      "memory",
+		NetworkMode:      "strict",
 		GlobalEndpoint:   "http://localhost:3001",
 		Port:             ":3000",
 		EnablePprof:      false,
@@ -289,6 +294,8 @@ func TestParseExampleConfig(t *testing.T) {
 		NoSumPatterns:    []string{},
 		DownloadMode:     "sync",
 		RobotsFile:       "robots.txt",
+		IndexType:        "none",
+		Index:            &Index{},
 	}
 
 	absPath, err := filepath.Abs(testConfigFile(t))
@@ -477,11 +484,12 @@ func TestDefaultConfigMatchesConfigFile(t *testing.T) {
 
 	defConf := defaultConfig()
 
-	ignoreStorageOpts := cmpopts.IgnoreTypes(&StorageConfig{})
+	ignoreStorageOpts := cmpopts.IgnoreTypes(&Storage{}, &Index{})
 	ignoreGoEnvOpts := cmpopts.IgnoreFields(Config{}, "GoEnv")
 	eq := cmp.Equal(defConf, parsedConf, ignoreStorageOpts, ignoreGoEnvOpts)
 	if !eq {
-		t.Errorf("Default values from the config file: %v should equal to the default values returned in case the config file isn't provided %v", parsedConf, defConf)
+		diff := cmp.Diff(defConf, parsedConf, ignoreStorageOpts, ignoreGoEnvOpts)
+		t.Errorf("Default values from the config file should equal to the default values returned in case the config file isn't provided. Diff:\n%s", diff)
 	}
 }
 
@@ -606,6 +614,27 @@ func TestEnvListDecode(t *testing.T) {
 		t.Fatal(err)
 	}
 	cfg.GoBinaryEnvVars.Validate()
+}
+
+func TestNetworkMode(t *testing.T) {
+	cfg := defaultConfig()
+	cfg.NetworkMode = "invalid"
+	err := validateConfig(*cfg)
+	if err == nil {
+		t.Fatal("expected network mode to cause validation to fail")
+	}
+	cfg.NetworkMode = ""
+	err = validateConfig(*cfg)
+	if err == nil {
+		t.Fatal("expected network mode to disallow empty strings")
+	}
+	for _, allowed := range [...]string{"strict", "offline", "fallback"} {
+		cfg.NetworkMode = allowed
+		err = validateConfig(*cfg)
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
 }
 
 func testDecode(t *testing.T, tc decodeTestCase) {

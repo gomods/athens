@@ -34,6 +34,9 @@ func (s *ModuleStore) Delete(ctx context.Context, module, version string) error 
 	filter := bsonx.Doc{}
 	filter = filter.Set("filename", bsonx.String(s.gridFileName(module, version)))
 	cursor, err := bucket.Find(filter)
+	if err != nil {
+		return errors.E(op, errors.M(module), errors.V(version), err)
+	}
 
 	var x bsonx.Doc
 	for cursor.Next(ctx) {

@@ -2,7 +2,6 @@ package addons
 
 import (
 	"context"
-	"io"
 
 	"github.com/gomods/athens/pkg/download"
 	"github.com/gomods/athens/pkg/errors"
@@ -112,9 +111,9 @@ func (p *withpool) GoMod(ctx context.Context, mod, ver string) ([]byte, error) {
 	return goMod, nil
 }
 
-func (p *withpool) Zip(ctx context.Context, mod, ver string) (io.ReadCloser, error) {
+func (p *withpool) Zip(ctx context.Context, mod, ver string) (storage.SizeReadCloser, error) {
 	const op errors.Op = "pool.Zip"
-	var zip io.ReadCloser
+	var zip storage.SizeReadCloser
 	var err error
 	done := make(chan struct{}, 1)
 	p.jobCh <- func() {

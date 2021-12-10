@@ -28,7 +28,7 @@ func TestWithRedisLock(t *testing.T) {
 		t.Fatal(err)
 	}
 	ms := &mockRedisStasher{strg: strg}
-	wrapper, err := WithRedisLock(endpoint, password, strg)
+	wrapper, err := WithRedisLock(endpoint, password, storage.WithChecker(strg))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -63,7 +63,7 @@ func TestWithRedisLockWithPassword(t *testing.T) {
 		t.Fatal(err)
 	}
 	ms := &mockRedisStasher{strg: strg}
-	wrapper, err := WithRedisLock(endpoint, password, strg)
+	wrapper, err := WithRedisLock(endpoint, password, storage.WithChecker(strg))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -97,13 +97,13 @@ func TestWithRedisLockWithWrongPassword(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	_, err = WithRedisLock(endpoint, password, strg)
+	_, err = WithRedisLock(endpoint, password, storage.WithChecker(strg))
 	if err == nil {
 		t.Fatal("Expected Connection Error")
 	}
 
-	if err.Error() != "NOAUTH Authentication required." {
-		t.Fatalf("Wrong error was thrown %s\n", err.Error())
+	if !strings.Contains(err.Error(), "NOAUTH Authentication required.") {
+		t.Fatalf("Wrong error was thrown %q\n", err.Error())
 	}
 }
 

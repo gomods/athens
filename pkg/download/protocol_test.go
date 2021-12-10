@@ -15,6 +15,7 @@ import (
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/download/mode"
 	"github.com/gomods/athens/pkg/errors"
+	"github.com/gomods/athens/pkg/index/nop"
 	"github.com/gomods/athens/pkg/module"
 	"github.com/gomods/athens/pkg/stash"
 	"github.com/gomods/athens/pkg/storage"
@@ -36,7 +37,7 @@ func getDP(t *testing.T) Protocol {
 	}
 	goBin := conf.GoBinary
 	fs := afero.NewOsFs()
-	mf, err := module.NewGoGetFetcher(goBin, conf.GoBinaryEnvVars, fs)
+	mf, err := module.NewGoGetFetcher(goBin, conf.GoGetDir, conf.GoBinaryEnvVars, fs)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -44,8 +45,13 @@ func getDP(t *testing.T) Protocol {
 	if err != nil {
 		t.Fatal(err)
 	}
-	st := stash.New(mf, s)
-	return New(&Opts{s, st, module.NewVCSLister(goBin, conf.GoBinaryEnvVars, fs), nil})
+	st := stash.New(mf, s, nop.New())
+	return New(&Opts{
+		Storage:     s,
+		Stasher:     st,
+		Lister:      module.NewVCSLister(goBin, conf.GoBinaryEnvVars, fs),
+		NetworkMode: Strict,
+	})
 }
 
 type listTest struct {
@@ -76,6 +82,100 @@ func TestList(t *testing.T) {
 			versions, err := dp.List(ctx, tc.path)
 			require.NoError(t, err)
 			require.EqualValues(t, tc.tags, versions)
+		})
+	}
+}
+
+type listModeTest struct {
+	name         string
+	path         string
+	storageTags  []string
+	upstreamList []string
+	upstreamErr  error
+	networkmode  string
+	wantTags     []string
+	wantErr      bool
+}
+
+var listModeTests = []listModeTest{
+	{
+		name:        "strict no tags",
+		networkmode: Offline,
+		path:        "github.com/athens-artifacts/happy-path",
+		wantTags:    []string{},
+	},
+	{
+		name:         "strict tags",
+		networkmode:  Strict,
+		path:         "github.com/athens-artifacts/happy-path",
+		storageTags:  []string{"v0.0.4"},
+		upstreamList: []string{"v0.0.1", "v0.0.2", "v0.0.3"},
+		wantTags:     []string{"v0.0.1", "v0.0.2", "v0.0.3", "v0.0.4"},
+	},
+	{
+		name:        "offline",
+		networkmode: Offline,
+		path:        "github.com/athens-artifacts/happy-path",
+		storageTags: []string{"v0.0.4"},
+		wantTags:    []string{"v0.0.4"},
+	},
+	{
+		name:         "fallback with err",
+		networkmode:  Fallback,
+		path:         "github.com/athens-artifacts/happy-path",
+		storageTags:  []string{"v0.0.4"},
+		upstreamList: []string{},
+		upstreamErr:  errors.E("test", "unexpected error"),
+		wantTags:     []string{"v0.0.4"},
+	},
+	{
+		name:         "fallback upstream not found",
+		networkmode:  Fallback,
+		path:         "github.com/athens-artifacts/happy-path",
+		storageTags:  []string{"v0.0.4"},
+		upstreamList: []string{},
+		upstreamErr:  errors.E("test", "remote: Repository not found", errors.KindNotFound),
+		wantTags:     []string{"v0.0.4"},
+	},
+	{
+		name:         "fallback error with no storage",
+		networkmode:  Fallback,
+		path:         "github.com/athens-artifacts/happy-path",
+		storageTags:  []string{},
+		upstreamList: []string{},
+		upstreamErr:  errors.E("test", "remote: Repository not found", errors.KindNotFound),
+		wantTags:     nil,
+		wantErr:      true,
+	},
+}
+
+func TestListMode(t *testing.T) {
+	ctx := context.Background()
+	for _, tc := range listModeTests {
+		strg, err := mem.NewStorage()
+		require.NoError(t, err)
+		ml := &mockLister{
+			list: tc.upstreamList,
+			err:  tc.upstreamErr,
+		}
+		dp := &protocol{
+			storage:     strg,
+			lister:      ml,
+			networkMode: tc.networkmode,
+		}
+		for _, tag := range tc.storageTags {
+			err := strg.Save(ctx, tc.path, tag, []byte("mod"), bytes.NewReader([]byte("zip")), []byte("info"))
+			require.NoError(t, err)
+		}
+		t.Run(tc.name, func(t *testing.T) {
+			versions, err := dp.List(ctx, tc.path)
+			if err != nil && !tc.wantErr {
+				t.Fatal(err)
+			}
+			require.EqualValues(t, tc.wantTags, versions)
+			if tc.networkmode == Offline && ml.called {
+				t.Fatal("upstream lister must not be called in offline mode")
+			}
 		})
 	}
 }
@@ -280,8 +380,8 @@ func TestDownloadProtocol(t *testing.T) {
 		t.Fatal(err)
 	}
 	mp := &mockFetcher{}
-	st := stash.New(mp, s)
-	dp := New(&Opts{s, st, nil, nil})
+	st := stash.New(mp, s, nop.New())
+	dp := New(&Opts{s, st, nil, nil, Strict})
 	ctx := context.Background()
 
 	var eg errgroup.Group
@@ -332,8 +432,8 @@ func TestDownloadProtocolWhenFetchFails(t *testing.T) {
 		t.Fatal(err)
 	}
 	mp := &notFoundFetcher{}
-	st := stash.New(mp, s)
-	dp := New(&Opts{s, st, nil, nil})
+	st := stash.New(mp, s, nop.New())
+	dp := New(&Opts{s, st, nil, nil, Strict})
 	ctx := context.Background()
 	_, err = dp.GoMod(ctx, fakeMod.mod, fakeMod.ver)
 	if err != nil {
@@ -380,4 +480,15 @@ type notFoundFetcher struct{}
 func (m *notFoundFetcher) Fetch(ctx context.Context, mod, ver string) (*storage.Version, error) {
 	const op errors.Op = "goGetFetcher.Fetch"
 	return nil, errors.E(op, "Fetcher error")
+}
+
+type mockLister struct {
+	called bool
+	list   []string
+	err    error
+}
+
+func (ml *mockLister) List(ctx context.Context, mod string) (*storage.RevInfo, []string, error) {
+	ml.called = true
+	return nil, ml.list, ml.err
 }

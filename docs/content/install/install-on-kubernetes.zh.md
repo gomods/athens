@@ -120,7 +120,7 @@ helm install gomods/athens-proxy -n athens --namespace athens \
 ### 通过Github令牌(Token)授予athens访问私有存储库的权限（可选）
 
 1. 在 https://github.com/settings/tokens 上创建一个令牌(Token)
-2. 通过 [config.toml](https://github.com/gomods/athens/blob/master/config.dev.toml) 文件 ( `GithubToken` 字段) 或 通过设置`ATHENS_GITHUB_TOKEN` 环境变量，将令牌提供给Athens代理.
+2. 通过 [config.toml](https://github.com/gomods/athens/blob/main/config.dev.toml) 文件 ( `GithubToken` 字段) 或 通过设置`ATHENS_GITHUB_TOKEN` 环境变量，将令牌提供给Athens代理.
 
 ### 存储提供程序（storage provider）
 

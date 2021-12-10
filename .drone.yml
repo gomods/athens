@@ -7,14 +7,15 @@ steps:
   image: golang:1.14
   commands:
     # wait for services to be ready.
-    - cd scripts/liveness_probe
-    - go run .
-    - cd ../..
+    # - cd scripts/liveness_probe
+    # - go run .
+    # - cd ../..
     - go mod download
     - go mod vendor # this is for when the Dockerfile gets built
   environment:
     GO111MODULE: on
-    GOPROXY: http://athens-proxy:3000
+    # temporarily disabled until we move to Actions
+    # GOPROXY: http://athens-proxy:3000
   volumes:
   - name: cache
     path: /go
@@ -61,7 +62,7 @@ steps:
       from_secret: ATHENS_AZURE_ACCOUNT_KEY
   when:
     branch:
-      - master
+      - main
     event:
       - push
       - pull_request
@@ -84,7 +85,7 @@ steps:
       - VERSION=${DRONE_COMMIT}
   when:
     branch:
-      - master
+      - main
     event:
       - push
 
@@ -103,7 +104,7 @@ steps:
       - VERSION=${DRONE_COMMIT}
   when:
     branch:
-      - master
+      - main
     event:
       - push
 
@@ -135,7 +136,7 @@ steps:
       from_secret: AZURE_STORAGE_CONNECTION_STRING
   when:
     branch:
-      - master
+      - main
     event:
      - push
 

@@ -41,9 +41,8 @@ func New(s3Conf *config.S3Config, timeout time.Duration, options ...func(*aws.Co
 		o(awsConfig)
 	}
 
-	credProviders := defaults.CredProviders(awsConfig, defaults.Handlers())
-
 	if !s3Conf.UseDefaultConfiguration {
+		credProviders := defaults.CredProviders(awsConfig, defaults.Handlers())
 		endpointcreds := []credentials.Provider{
 			endpointcreds.NewProviderClient(*awsConfig, defaults.Handlers(), endpointFrom(s3Conf.CredentialsEndpoint, s3Conf.AwsContainerCredentialsRelativeURI)),
 			&credentials.StaticProvider{
@@ -56,10 +55,10 @@ func New(s3Conf *config.S3Config, timeout time.Duration, options ...func(*aws.Co
 		}
 
 		credProviders = append(endpointcreds, credProviders...)
+		awsConfig.Credentials = credentials.NewChainCredentials(credProviders)
 	}
 
 	awsConfig.S3ForcePathStyle = aws.Bool(s3Conf.ForcePathStyle)
-	awsConfig.Credentials = credentials.NewChainCredentials(credProviders)
 	awsConfig.CredentialsChainVerboseErrors = aws.Bool(true)
 	if s3Conf.Endpoint != "" {
 		awsConfig.Endpoint = aws.String(s3Conf.Endpoint)

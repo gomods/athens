@@ -2,7 +2,6 @@ package download
 
 import (
 	"context"
-	"io"
 	"regexp"
 	"strings"
 	"sync"
@@ -31,7 +30,7 @@ type Protocol interface {
 	GoMod(ctx context.Context, mod, ver string) ([]byte, error)
 
 	// Zip implements GET /{module}/@v/{version}.zip
-	Zip(ctx context.Context, mod, ver string) (io.ReadCloser, error)
+	Zip(ctx context.Context, mod, ver string) (storage.SizeReadCloser, error)
 }
 
 // Wrapper helps extend the main protocol's functionality with addons.
@@ -43,7 +42,15 @@ type Opts struct {
 	Stasher      stash.Stasher
 	Lister       module.UpstreamLister
 	DownloadFile *mode.DownloadFile
+	NetworkMode  string
 }
+
+// NetworkMode constants
+const (
+	Strict   = "strict"
+	Offline  = "offline"
+	Fallback = "fallback"
+)
 
 // New returns a full implementation of the download.Protocol
 // that the proxy needs. New also takes a variadic list of wrappers
@@ -54,7 +61,7 @@ func New(opts *Opts, wrappers ...Wrapper) Protocol {
 	if opts.DownloadFile == nil {
 		opts.DownloadFile = &mode.DownloadFile{Mode: mode.Sync}
 	}
-	var p Protocol = &protocol{opts.DownloadFile, opts.Storage, opts.Stasher, opts.Lister}
+	var p Protocol = &protocol{opts.DownloadFile, opts.Storage, opts.Stasher, opts.Lister, opts.NetworkMode}
 	for _, w := range wrappers {
 		p = w(p)
 	}
@@ -63,10 +70,11 @@ func New(opts *Opts, wrappers ...Wrapper) Protocol {
 }
 
 type protocol struct {
-	df      *mode.DownloadFile
-	storage storage.Backend
-	stasher stash.Stasher
-	lister  module.UpstreamLister
+	df          *mode.DownloadFile
+	storage     storage.Backend
+	stasher     stash.Stasher
+	lister      module.UpstreamLister
+	networkMode string
 }
 
 func (p *protocol) List(ctx context.Context, mod string) ([]string, error) {
@@ -77,17 +85,31 @@ func (p *protocol) List(ctx context.Context, mod string) ([]string, error) {
 	var strList, goList []string
 	var sErr, goErr error
 	var wg sync.WaitGroup
-	wg.Add(2)
 
+	/*
+		TODO: potential refactor:
+
+		Storage Lister: just return stuff from storage, or error otherwise.
+
+		FallbackVCS lister: list from VCS, return empty list if error.
+
+		StrictVCS Lister: list from VCS, error if it doesn't succeed.
+
+		UnionLister(listers ...Lister): combines any number of listers.
+	*/
+	wg.Add(1)
 	go func() {
 		defer wg.Done()
 		strList, sErr = p.storage.List(ctx, mod)
 	}()
 
-	go func() {
-		defer wg.Done()
-		_, goList, goErr = p.lister.List(ctx, mod)
-	}()
+	if p.networkMode != Offline {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			_, goList, goErr = p.lister.List(ctx, mod)
+		}()
+	}
 
 	wg.Wait()
 
@@ -97,15 +119,28 @@ func (p *protocol) List(ctx context.Context, mod string) ([]string, error) {
 		return nil, errors.E(op, sErr)
 	}
 
+	// if we're in offline mode, just return what came from storage.
+	if p.networkMode == Offline {
+		return strList, nil
+	}
+
 	// if i.e. github is unavailable we should fail as well so that the behavior of the proxy is stable.
 	// otherwise we will get different results the next time because i.e. GH is up again
 	isUnexpGoErr := goErr != nil && !errors.IsRepoNotFoundErr(goErr)
-	if isUnexpGoErr {
+	if isUnexpGoErr && p.networkMode == Strict {
 		return nil, errors.E(op, goErr)
+	}
+
+	// if we're in fallback mode, and VCS is down, just return what we have in storage,
+	// don't remove any pseudo versions.
+	if isUnexpGoErr && p.networkMode == Fallback {
+		return strList, nil
 	}
 
 	isRepoNotFoundErr := goErr != nil && errors.IsRepoNotFoundErr(goErr)
 	storageEmpty := len(strList) == 0
+	// if storage has no versions, and the repo was deleted/not-found, we know for sure
+	// there are no versions that Athens can serve, so just return an error.
 	if isRepoNotFoundErr && storageEmpty {
 		return nil, errors.E(op, errors.M(mod), errors.KindNotFound, goErr)
 	}
@@ -145,6 +180,11 @@ func (p *protocol) Latest(ctx context.Context, mod string) (*storage.RevInfo, er
 	const op errors.Op = "protocol.Latest"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
+	if p.networkMode == Offline {
+		// Go never pings the /@latest endpoint _first_. It always tries /list and if that
+		// endpoint returns an empty list then it fallsback to calling /@latest.
+		return nil, errors.E(op, "Athens is in offline mode, use /list endpoint", errors.KindNotFound)
+	}
 	lr, _, err := p.lister.List(ctx, mod)
 	if err != nil {
 		return nil, errors.E(op, err)
@@ -188,7 +228,7 @@ func (p *protocol) GoMod(ctx context.Context, mod, ver string) ([]byte, error) {
 	return goMod, nil
 }
 
-func (p *protocol) Zip(ctx context.Context, mod, ver string) (io.ReadCloser, error) {
+func (p *protocol) Zip(ctx context.Context, mod, ver string) (storage.SizeReadCloser, error) {
 	const op errors.Op = "protocol.Zip"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
