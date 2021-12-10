@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# check_golint.sh
+# check_govet.sh
 # Run the linter on everything except generated code
 set -euo pipefail
 
