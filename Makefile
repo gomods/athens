@@ -41,7 +41,6 @@ docs: ## build the docs docker image
 
 .PHONY: setup-dev-env
 setup-dev-env:
-	./scripts/get_dev_tools.sh
 	$(MAKE) dev
 
 .PHONY: verify

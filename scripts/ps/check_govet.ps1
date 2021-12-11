@@ -1,7 +1,7 @@
-# check_golint.ps1
+# check_govet.ps1
 # Run the linter on everything
 
-$out = & golint -set_exit_status $(& go list ./...)
+$out = & go vet ./...
 if ($LastExitCode -ne 0) {
     Write-Error $out
 }
