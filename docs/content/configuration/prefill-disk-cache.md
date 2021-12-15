@@ -18,7 +18,9 @@ You'll need to produce the following assets from module source code:
 
 The `source.zip` file has a specific directory structure and the `$VERSION.info` has a JSON structure, both of which you'll need to get right in order for Athens to serve up the right dependency formats that the Go toolchain will accept.
 
->We don't recommend that you create these assets yourself. Instead, use [pacmod](https://github.com/plexsystems/pacmod)
+>We don't recommend that you create these assets yourself. Instead, use [pacmod](https://github.com/plexsystems/pacmod) or [gopack](https://github.com/alex-user-go/gopack)
+
+## Using pacmod 
 
 To install the `pacmod` tool, run `go get` like this:
 
@@ -28,7 +30,7 @@ $ go get github.com/plexsystems/pacmod
 
 This command will install the `pacmod` binary to your `$GOPATH/bin/pacmod` directory, so make sure that is in your `$PATH`.
 
-# Next, run `pacmod` to create assets
+### Next, run `pacmod` to create assets
 
 After you have `pacmod`, you'll need the module source code that you want to package. Before you run the command, set the `VERSION` variable in your environment to the version of the module you want to generate assets for.
 
@@ -51,6 +53,28 @@ Once this command is done, you'll notice three new files in the same same direct
 - `go.mod`
 - `$VERSION.info`
 - `$VERSION.zip`
+
+## Using gopack 
+
+>To use this method you need docker-compose installed.
+
+Fork gopack project and clone it to your local machine (or just download files to your computer)
+
+Edit <code>goget.sh</code> with a list of go modules you want to download:
+
+```bash
+#!/bin/bash
+go get github.com/my/module1;
+go get github.com/my/module2;
+```
+
+Run
+
+```bash
+docker-compose up --abort-on-container-exit
+```
+
+Once this command is done, you'll notice in the  ATHENS_STORAGE folder all modules ready to be moved to your Athens disk storage.
 
 # Next, move assets into Athens storage directory
 
