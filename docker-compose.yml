@@ -90,6 +90,8 @@ services:
       - REDIS_SENTINEL_QUORUM=1
     ports:
       - 26379:26379
+    depends_on:
+      - "redis"
   protectedredis:
     image: redis
     ports:
