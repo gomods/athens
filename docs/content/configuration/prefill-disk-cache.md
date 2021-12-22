@@ -30,7 +30,7 @@ $ go get github.com/plexsystems/pacmod
 
 This command will install the `pacmod` binary to your `$GOPATH/bin/pacmod` directory, so make sure that is in your `$PATH`.
 
-### Next, run `pacmod` to create assets
+**Next, run `pacmod` to create assets**
 
 After you have `pacmod`, you'll need the module source code that you want to package. Before you run the command, set the `VERSION` variable in your environment to the version of the module you want to generate assets for.
 
