@@ -69,6 +69,9 @@ steps:
   volumes:
   - name: cache
     path: /go
+  depends_on:
+    - redis
+    - redis-sentinel
 
 - name: docker-latest
   image: plugins/docker
@@ -169,6 +172,8 @@ services:
     REDIS_SENTINEL_QUORUM: "1"
   ports:
     - 26379
+  depends_on:
+    - redis
 - name: protectedredis
   image: redis
   ports:
