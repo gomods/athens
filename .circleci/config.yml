@@ -10,7 +10,8 @@ jobs:
             shellcheck -x test/e2e-kind.sh
           
   lint-install-charts:
-    machine: true
+    machine:
+      image: ubuntu-2004:202201-02
     environment:
       CHART_TESTING_IMAGE: quay.io/helmpack/chart-testing
       CHART_TESTING_TAG: v2.3.3
