@@ -27,19 +27,9 @@ func TestWithRedisSentinelLock(t *testing.T) {
 	}
 	ms := &mockRedisStasher{strg: strg}
 
-	// retries because of flaky test on drone.
-	var wrapper Wrapper
-	for i := 1; i <= 3; i++ {
-		wrapper, err = WithRedisSentinelLock([]string{endpoint}, masterName, password, storage.WithChecker(strg))
-		if err != nil {
-			t.Logf("Retried %d time because we got error: %s", i, err.Error())
-		}
-		time.Sleep(1 * time.Second)
-	}
-
+	wrapper, err := WithRedisSentinelLock([]string{endpoint}, masterName, password, storage.WithChecker(strg))
 	if err != nil {
-		t.Fatalf("Please file an issue at https://github.com/gomods/athens/issues as the "+
-			"test flake is not fixed.  The error that occured was: %s", err)
+		t.Fatal(err)
 	}
 	s := wrapper(ms)
 
