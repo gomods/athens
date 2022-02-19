@@ -96,5 +96,5 @@ func (l *vcsLister) List(ctx context.Context, module string) (*storage.RevInfo, 
 }
 
 func gitAuthFailed(errCmd error) bool {
-	return strings.Contains(errCmd.Error(), "fatal: could not read Username for 'https://github.com'")
+	return strings.Contains(strings.ToLower(errCmd.Error()), "could not read username")
 }
