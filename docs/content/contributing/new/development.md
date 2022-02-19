@@ -85,8 +85,8 @@ Then open [http://localhost:1313](http://localhost:1313/).
 
 # Linting
 
-In our CI/CD pass, we use golint, so feel free to install and run it locally beforehand:
+In our CI/CD pass, we use govet, so feel free to run it locally beforehand:
 
 ```
-go get golang.org/x/lint/golint
+go vet ./...
 ```

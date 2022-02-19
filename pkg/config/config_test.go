@@ -24,6 +24,7 @@ func testConfigFile(t *testing.T) (testConfigFile string) {
 }
 
 func compareConfigs(parsedConf *Config, expConf *Config, t *testing.T) {
+	t.Helper()
 	opts := cmpopts.IgnoreTypes(Storage{}, SingleFlight{}, Index{})
 	eq := cmp.Equal(parsedConf, expConf, opts)
 	if !eq {
@@ -75,7 +76,6 @@ func TestEnvOverrides(t *testing.T) {
 		ProtocolWorkers: 10,
 		LogLevel:        "info",
 		GoBinary:        "go11",
-		GoProxy:         "direct",
 		CloudRuntime:    "gcp",
 		TimeoutConf: TimeoutConf{
 			Timeout: 30,
@@ -267,7 +267,6 @@ func TestParseExampleConfig(t *testing.T) {
 		GoEnv:           "development",
 		LogLevel:        "debug",
 		GoBinary:        "go",
-		GoProxy:         "direct",
 		GoGetWorkers:    10,
 		ProtocolWorkers: 30,
 		CloudRuntime:    "none",
@@ -275,6 +274,7 @@ func TestParseExampleConfig(t *testing.T) {
 			Timeout: 300,
 		},
 		StorageType:      "memory",
+		NetworkMode:      "strict",
 		GlobalEndpoint:   "http://localhost:3001",
 		Port:             ":3000",
 		EnablePprof:      false,
@@ -314,7 +314,6 @@ func getEnvMap(config *Config) map[string]string {
 	envVars := map[string]string{
 		"GO_ENV":                  config.GoEnv,
 		"GO_BINARY_PATH":          config.GoBinary,
-		"GOPROXY":                 config.GoProxy,
 		"ATHENS_GOGET_WORKERS":    strconv.Itoa(config.GoGetWorkers),
 		"ATHENS_PROTOCOL_WORKERS": strconv.Itoa(config.ProtocolWorkers),
 		"ATHENS_LOG_LEVEL":        config.LogLevel,
@@ -612,6 +611,27 @@ func TestEnvListDecode(t *testing.T) {
 		t.Fatal(err)
 	}
 	cfg.GoBinaryEnvVars.Validate()
+}
+
+func TestNetworkMode(t *testing.T) {
+	cfg := defaultConfig()
+	cfg.NetworkMode = "invalid"
+	err := validateConfig(*cfg)
+	if err == nil {
+		t.Fatal("expected network mode to cause validation to fail")
+	}
+	cfg.NetworkMode = ""
+	err = validateConfig(*cfg)
+	if err == nil {
+		t.Fatal("expected network mode to disallow empty strings")
+	}
+	for _, allowed := range [...]string{"strict", "offline", "fallback"} {
+		cfg.NetworkMode = allowed
+		err = validateConfig(*cfg)
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
 }
 
 func testDecode(t *testing.T, tc decodeTestCase) {
