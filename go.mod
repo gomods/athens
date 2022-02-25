@@ -4,7 +4,7 @@ go 1.17
 
 require (
 	cloud.google.com/go/storage v1.20.0
-	contrib.go.opencensus.io/exporter/jaeger v0.1.0
+	contrib.go.opencensus.io/exporter/jaeger v0.2.1
 	contrib.go.opencensus.io/exporter/prometheus v0.1.0
 	contrib.go.opencensus.io/exporter/stackdriver v0.6.0
 	github.com/Azure/azure-storage-blob-go v0.10.0
@@ -63,7 +63,6 @@ require (
 	github.com/Azure/azure-pipeline-go v0.2.2 // indirect
 	github.com/agext/levenshtein v1.2.1 // indirect
 	github.com/ajg/form v0.0.0-20160822230020-523a5da1a92f // indirect
-	github.com/apache/thrift v0.12.0 // indirect
 	github.com/apparentlymart/go-textseg v1.0.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cespare/xxhash/v2 v2.1.1 // indirect
@@ -94,6 +93,7 @@ require (
 	github.com/prometheus/common v0.26.0 // indirect
 	github.com/prometheus/procfs v0.6.0 // indirect
 	github.com/rogpeppe/go-internal v1.3.0 // indirect
+	github.com/uber/jaeger-client-go v2.25.0+incompatible // indirect
 	github.com/xdg-go/pbkdf2 v1.0.0 // indirect
 	github.com/xdg-go/scram v1.0.2 // indirect
 	github.com/xdg-go/stringprep v1.0.2 // indirect
