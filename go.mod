@@ -35,7 +35,7 @@ require (
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/philhofer/fwd v1.0.0 // indirect
 	github.com/sirupsen/logrus v1.6.0
-	github.com/spf13/afero v1.1.2
+	github.com/spf13/afero v1.8.1
 	github.com/stretchr/testify v1.7.0
 	github.com/technosophos/moniker v0.0.0-20180509230615-a5dbd03a2245
 	github.com/tinylib/msgp v1.0.2 // indirect
@@ -104,7 +104,7 @@ require (
 	go.uber.org/atomic v1.9.0 // indirect
 	go.uber.org/multierr v1.7.0 // indirect
 	go.uber.org/zap v1.21.0 // indirect
-	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9 // indirect
+	golang.org/x/crypto v0.0.0-20211108221036-ceb1ce70b4fa // indirect
 	golang.org/x/text v0.3.7 // indirect
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
