@@ -6,6 +6,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/download/mode"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/module"
@@ -256,12 +257,12 @@ func (p *protocol) processDownload(ctx context.Context, mod, ver string, f func(
 		}
 		return f(newVer)
 	case mode.Async:
-		go p.stasher.Stash(ctx, mod, ver)
+		go p.stasher.Stash(config.ContextWithoutCancel(ctx), mod, ver)
 		return errors.E(op, "async: module not found", errors.KindNotFound)
 	case mode.Redirect:
 		return errors.E(op, "redirect", errors.KindRedirect)
 	case mode.AsyncRedirect:
-		go p.stasher.Stash(ctx, mod, ver)
+		go p.stasher.Stash(config.ContextWithoutCancel(ctx), mod, ver)
 		return errors.E(op, "async_redirect: module not found", errors.KindRedirect)
 	case mode.None:
 		return errors.E(op, "none", errors.KindNotFound)
