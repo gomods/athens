@@ -26,6 +26,7 @@ func TestWithRedisSentinelLock(t *testing.T) {
 		t.Fatal(err)
 	}
 	ms := &mockRedisStasher{strg: strg}
+
 	wrapper, err := WithRedisSentinelLock([]string{endpoint}, masterName, password, storage.WithChecker(strg))
 	if err != nil {
 		t.Fatal(err)

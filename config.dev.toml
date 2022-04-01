@@ -15,14 +15,6 @@ GoBinary = "go"
 # Env override: GO_ENV
 GoEnv = "development"
 
-# GoProxy IS DEPRECATED and will be removed in v0.7.0: PLEASE USE GoBinaryEnvVars
-# GoProxy specifies GOPROXY env for go list or mod download inside athens
-# which can be configured totally same with GOPROXY of Go Command.
-# Notes that the comma-separated GOPROXY (e.g. <proxy1>,<proxy2>,direct) is only available in Go 1.13 or higher,
-# otherwise only single proxy URL can be set.
-# Env override: GOPROXY
-GoProxy = "direct"
-
 # GoBinaryEnvVars are environment variables that you'd like
 # to pass directly to the Go command that Athens runs under the
 # hood. Athens primarily runs two Go commands:
@@ -49,7 +41,7 @@ GoProxy = "direct"
 # GoBinaryEnvVars = ["GOPROXY=direct"]
 # And you pass the following env var: 
 # ATHENS_GO_BINARY_ENV_VARS='GODEBUG=true'
-# Then the final value that the Go binary will receive is [GOBINARY=true] and NOT ["GOPROXY=direct", "GOBINARY=true"]
+# Then the final value that the Go binary will receive is ["GODEBUG=true"] and NOT ["GOPROXY=direct", "GODEBUG=true"]
 # Therefore, whether you use the config file or the env var, make sure you have all the values you need there.
 GoBinaryEnvVars = ["GOPROXY=direct"]
 
@@ -69,7 +61,7 @@ GoGetWorkers = 10
 # a directory that has larger disk resources. If the value is
 # empty, Athens will use the default OS temporary directory.
 # 
-# Env override: ATHENS_GOGOET_DIR
+# Env override: ATHENS_GOGET_DIR
 GoGetDir = ""
 
 # ProtocolWorkers specifies how many concurrent
@@ -166,30 +158,6 @@ BasicAuthUser = ""
 # Env override: BASIC_AUTH_PASS
 BasicAuthPass = ""
 
-# PropagateAuthHost, when set to a hostname such as "github.com", will pass the Basic Authentication
-# Headers to the "go mod download" operations. This will allow a user
-# to pass their credentials for a private repository and have Athens be
-# able to download and store it. Note that, once a private repository is stored,
-# Athens will naively serve it to anyone who requests it.
-# 
-# Therefore, it is **important** that you
-# make sure you have a ValidatorHook or put Athens behind an auth proxy that always 
-# ensures access to modules are securely authorized.
-# 
-# Note that "go mod download" uses "git clone" which will look for these credentials 
-# in the $HOME directory of the process. Therefore, turning this feature on means that each
-# "go mod download" will have its own $HOME direcotry with only the .netrc file. If
-# your "go mod download" relies on your global $HOME directory (such as .gitconfig), then
-# you must turn this feature off. If you'd like to specify files to be copied from the global
-# $HOME directory to the temporary one, please open an issue at https://github.com/gomods/athens
-# to gauge demand for such a feature before implementing.
-#
-# You must also specify the import path host using PropagateAuthHost so that the .netrc file knows
-# when to forward the credentials and when not to.
-# 
-# Env override: ATHENS_PROPAGATE_AUTH_HOST
-PropagateAuthHost = ""
-
 # Set to true to force an SSL redirect
 # Env override: PROXY_FORCE_SSL
 ForceSSL = false
@@ -284,6 +252,21 @@ NoSumPatterns = []
 # Env override: ATHENS_DOWNLOAD_MODE
 DownloadMode = "sync"
 
+# NetworkMode configures how Athens will return the results
+# of the /list endpoint as it can be assembled from both its own
+# storage and the upstream VCS.
+# 
+# Note, that for better error messaging, this would also affect how other
+# endpoints behave.
+# 
+# Modes:
+# 1. strict: merge VCS versions with storage versions, but fail if either of them fails.
+# 2. offline: only get storage versions, never reach out to VCS.
+# 3. fallback: only return storage versions, if VCS fails. Note this means that you may
+# see inconsistent results since fallback mode does a best effort of giving you what's
+# available at the time of requesting versions.
+NetworkMode = "strict"
+
 # DownloadURL is the URL that will be used if
 # DownloadMode is set to "redirect"
 # Env override: ATHENS_DOWNLOAD_URL
@@ -377,10 +360,10 @@ IndexType = "none"
 
         # JSONKey is a base64 encoded service account 
         # key that allows Athens to be run outside of GCP
-        # but still be able to access GCS. If you are
-        # running Athens inside GCP, you will most
-        # likely not need this as GCP figures out
-        # internal authentication between products for you.
+        # but still be able to access GCS. This is not needed
+        # when relying on default GCP authentication with 
+        # GOOGLE_APPLICATION_CREDENTIALS variable set up. 
+        # See https://cloud.google.com/docs/authentication/getting-started.
         #
         # Env override: ATHENS_STORAGE_GCP_JSON_KEY
         JSONKey = ""

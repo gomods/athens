@@ -38,24 +38,26 @@ Change the values of these environment variables to be appropriate for your appl
 $ export GOOGLE_CLOUD_PROJECT=your-project
 $ export ATHENS_REGION=asia-northeast1
 $ export GCS_BUCKET=your-bucket-name
+$ gcloud auth login
+$ gcloud auth configure-docker
 ```
 
 You will then need to push a copy of the Athens docker image to your google cloud container registry.
 
-Below is an example using v0.7.2, for the latest version, check out the [latest Athens release](https://github.com/gomods/athens/releases)
+Below is an example using v0.11.0, for the latest version, check out the [latest Athens release](https://github.com/gomods/athens/releases)
 ```console
-$ docker pull gomods/athens:v0.7.2
+$ docker pull gomods/athens:v0.11.0
 
-$ docker tag gomods/athens:v0.7.2 gcr.io/$GOOGLE_CLOUD_PROJECT/athens:v0.7.2
+$ docker tag gomods/athens:v0.11.0 gcr.io/$GOOGLE_CLOUD_PROJECT/athens:v0.11.0
 
-$ gcloud builds submit --tag gcr.io/$GOOGLE_CLOUD_PROJECT/athens:v0.7.2
+$ docker push gcr.io/$GOOGLE_CLOUD_PROJECT/athens:v0.11.0
 ```
 
 Once you have the container image in your registry you can use `gcloud` to provision your Athens instance.
 
 ```console
 $ gcloud beta run deploy \
-    --image gcr.io/$GOOGLE_CLOUD_PROJECT/athens:v0.7.2 \
+    --image gcr.io/$GOOGLE_CLOUD_PROJECT/athens:v0.11.0 \
     --platform managed \
     --region $ATHENS_REGION \
     --allow-unauthenticated \

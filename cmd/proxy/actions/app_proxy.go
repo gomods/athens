@@ -86,22 +86,18 @@ func addProxyRoutes(
 	// 4. The plain stash.New just takes a request from upstream and saves it into storage.
 	fs := afero.NewOsFs()
 
-	// TODO: remove before we release v0.7.0
-	if c.GoProxy != "direct" && c.GoProxy != "" {
-		l.Error("GoProxy is deprecated, please use GoBinaryEnvVars")
-	}
 	if !c.GoBinaryEnvVars.HasKey("GONOSUMDB") {
 		c.GoBinaryEnvVars.Add("GONOSUMDB", strings.Join(c.NoSumPatterns, ","))
 	}
 	if err := c.GoBinaryEnvVars.Validate(); err != nil {
 		return err
 	}
-	mf, err := module.NewGoGetFetcher(c.GoBinary, c.GoGetDir, c.GoBinaryEnvVars, fs, c.PropagateAuthHost)
+	mf, err := module.NewGoGetFetcher(c.GoBinary, c.GoGetDir, c.GoBinaryEnvVars, fs)
 	if err != nil {
 		return err
 	}
 
-	lister := module.NewVCSLister(c.GoBinary, c.GoBinaryEnvVars, fs, c.PropagateAuthHost)
+	lister := module.NewVCSLister(c.GoBinary, c.GoBinaryEnvVars, fs)
 	checker := storage.WithChecker(s)
 	withSingleFlight, err := getSingleFlight(c, checker)
 	if err != nil {
@@ -119,6 +115,7 @@ func addProxyRoutes(
 		Stasher:      st,
 		Lister:       lister,
 		DownloadFile: df,
+		NetworkMode:  c.NetworkMode,
 	}
 
 	dp := download.New(dpOpts, addons.WithPool(c.ProtocolWorkers))

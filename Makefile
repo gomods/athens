@@ -2,7 +2,7 @@ VERSION = "unset"
 DATE=$(shell date -u +%Y-%m-%d-%H:%M:%S-%Z)
 
 ifndef GOLANG_VERSION
-override GOLANG_VERSION = 1.14
+override GOLANG_VERSION = 1.18
 endif
 
 .PHONY: build
@@ -41,13 +41,12 @@ docs: ## build the docs docker image
 
 .PHONY: setup-dev-env
 setup-dev-env:
-	./scripts/get_dev_tools.sh
 	$(MAKE) dev
 
 .PHONY: verify
 verify: ## verify athens codebase
 	./scripts/check_gofmt.sh
-	./scripts/check_golint.sh
+	./scripts/check_govet.sh
 	./scripts/check_deps.sh
 	./scripts/check_conflicts.sh
 
