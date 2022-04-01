@@ -23,10 +23,9 @@ type Config struct {
 	TimeoutConf
 	GoEnv            string    `validate:"required" envconfig:"GO_ENV"`
 	GoBinary         string    `validate:"required" envconfig:"GO_BINARY_PATH"`
-	GoProxy          string    `envconfig:"GOPROXY"`
 	GoBinaryEnvVars  EnvList   `envconfig:"ATHENS_GO_BINARY_ENV_VARS"`
 	GoGetWorkers     int       `validate:"required" envconfig:"ATHENS_GOGET_WORKERS"`
-	GoGetDir         string    `envconfig:"ATHENS_GOGOET_DIR"`
+	GoGetDir         string    `envconfig:"ATHENS_GOGET_DIR"`
 	ProtocolWorkers  int       `validate:"required" envconfig:"ATHENS_PROTOCOL_WORKERS"`
 	LogLevel         string    `validate:"required" envconfig:"ATHENS_LOG_LEVEL"`
 	CloudRuntime     string    `validate:"required" envconfig:"ATHENS_CLOUD_RUNTIME"`
@@ -156,7 +155,6 @@ func defaultConfig() *Config {
 		GoBinary:         "go",
 		GoBinaryEnvVars:  EnvList{"GOPROXY=direct"},
 		GoEnv:            "development",
-		GoProxy:          "direct",
 		GoGetWorkers:     10,
 		ProtocolWorkers:  30,
 		LogLevel:         "debug",

@@ -4,23 +4,24 @@ name: default
 
 steps:
 - name: download-dependencies
-  image: golang:1.14
+  image: golang:1.18
   commands:
     # wait for services to be ready.
-    - cd scripts/liveness_probe
-    - go run .
-    - cd ../..
+    # - cd scripts/liveness_probe
+    # - go run .
+    # - cd ../..
     - go mod download
     - go mod vendor # this is for when the Dockerfile gets built
   environment:
     GO111MODULE: on
-    GOPROXY: http://athens-proxy:3000
+    # temporarily disabled until we move to Actions
+    # GOPROXY: http://athens-proxy:3000
   volumes:
   - name: cache
     path: /go
 
 - name: build
-  image: golang:1.14
+  image: golang:1.18
   commands:
 
   # build
@@ -53,11 +54,11 @@ steps:
     ATHENS_PROTECTED_REDIS_PASSWORD: AthensPass1
     GCS_SERVICE_ACCOUNT:
       from_secret: GCS_SERVICE_ACCOUNT
-    GCS_PROJECT_ID: 
+    GCS_PROJECT_ID:
       from_secret: GOOGLE_CLOUD_PROJECT
     ATHENS_AZURE_ACCOUNT_NAME:
       from_secret: ATHENS_AZURE_ACCOUNT_NAME
-    ATHENS_AZURE_ACCOUNT_KEY: 
+    ATHENS_AZURE_ACCOUNT_KEY:
       from_secret: ATHENS_AZURE_ACCOUNT_KEY
   when:
     branch:
@@ -68,6 +69,9 @@ steps:
   volumes:
   - name: cache
     path: /go
+  depends_on:
+    - redis
+    - redis-sentinel
 
 - name: docker-latest
   image: plugins/docker
@@ -168,6 +172,8 @@ services:
     REDIS_SENTINEL_QUORUM: "1"
   ports:
     - 26379
+  depends_on:
+    - redis
 - name: protectedredis
   image: redis
   ports:
