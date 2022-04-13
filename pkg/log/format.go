@@ -44,7 +44,7 @@ func (devFormatter) Format(e *logrus.Entry) ([]byte, error) {
 	}
 	lvl := strings.ToUpper(e.Level.String())
 	buf.WriteString(sprintf(lvl))
-	buf.WriteString("[" + e.Time.Format(time.Kitchen) + "]")
+	buf.WriteString("[" + e.Time.Format(time.Now().Format(time.RFC3339)) + "]")
 	buf.WriteString(": ")
 	buf.WriteString(e.Message)
 	buf.WriteByte('\t')
