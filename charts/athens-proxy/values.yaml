@@ -39,8 +39,13 @@ ingress:
   enabled: false
   # Provide key/value annotations
   annotations:
+  className: ""
   # Provide an array of values for the ingress host mapping
   hosts:
+    # - host: athens-proxy.local
+    # paths:
+    #   - path: /
+    #     pathType: ImplementationSpecific
   # Provide a base64 encoded cert for TLS use
   tls:
 
