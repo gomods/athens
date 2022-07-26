@@ -21,6 +21,7 @@ func (v *storageImpl) Info(ctx context.Context, module, vsn string) ([]byte, err
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
+	defer infoReader.Close()
 	info, err := ioutil.ReadAll(infoReader)
 	if err != nil {
 		return nil, transformNotFoundErr(op, module, vsn, err)
@@ -38,6 +39,7 @@ func (v *storageImpl) GoMod(ctx context.Context, module, vsn string) ([]byte, er
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
+	defer modReader.Close()
 	mod, err := ioutil.ReadAll(modReader)
 	if err != nil {
 		return nil, transformNotFoundErr(op, module, vsn, err)
@@ -45,6 +47,7 @@ func (v *storageImpl) GoMod(ctx context.Context, module, vsn string) ([]byte, er
 
 	return mod, nil
 }
+
 func (v *storageImpl) Zip(ctx context.Context, module, vsn string) (storage.SizeReadCloser, error) {
 	const op errors.Op = "minio.Zip"
 	ctx, span := observ.StartSpan(ctx, op.String())
@@ -62,6 +65,7 @@ func (v *storageImpl) Zip(ctx context.Context, module, vsn string) (storage.Size
 	}
 	oi, err := zipReader.Stat()
 	if err != nil {
+		zipReader.Close()
 		return nil, errors.E(op, err)
 	}
 	return storage.NewSizer(zipReader, oi.Size), nil
