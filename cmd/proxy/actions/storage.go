@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/storage"
@@ -56,7 +57,9 @@ func GetStorage(storageType string, storageConfig *config.Storage, timeout time.
 		if storageConfig.S3 == nil {
 			return nil, errors.E(op, "Invalid S3 Storage Configuration")
 		}
-		return s3.New(storageConfig.S3, timeout)
+		return s3.New(storageConfig.S3, timeout, func(config *aws.Config) {
+			config.HTTPClient = client
+		})
 	case "azureblob":
 		if storageConfig.AzureBlob == nil {
 			return nil, errors.E(op, "Invalid AzureBlob Storage Configuration")
