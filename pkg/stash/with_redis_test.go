@@ -9,6 +9,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/storage"
 	"github.com/gomods/athens/pkg/storage/mem"
 	"golang.org/x/sync/errgroup"
@@ -28,7 +29,7 @@ func TestWithRedisLock(t *testing.T) {
 		t.Fatal(err)
 	}
 	ms := &mockRedisStasher{strg: strg}
-	wrapper, err := WithRedisLock(endpoint, password, storage.WithChecker(strg))
+	wrapper, err := WithRedisLock(endpoint, password, storage.WithChecker(strg), config.DefaultRedisLockConfig())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -63,7 +64,7 @@ func TestWithRedisLockWithPassword(t *testing.T) {
 		t.Fatal(err)
 	}
 	ms := &mockRedisStasher{strg: strg}
-	wrapper, err := WithRedisLock(endpoint, password, storage.WithChecker(strg))
+	wrapper, err := WithRedisLock(endpoint, password, storage.WithChecker(strg), config.DefaultRedisLockConfig())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -97,7 +98,7 @@ func TestWithRedisLockWithWrongPassword(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	_, err = WithRedisLock(endpoint, password, storage.WithChecker(strg))
+	_, err = WithRedisLock(endpoint, password, storage.WithChecker(strg), config.DefaultRedisLockConfig())
 	if err == nil {
 		t.Fatal("Expected Connection Error")
 	}
