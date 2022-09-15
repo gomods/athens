@@ -5,11 +5,14 @@ import (
 	"regexp"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/gomods/athens/pkg/download/mode"
 	"github.com/gomods/athens/pkg/errors"
+	"github.com/gomods/athens/pkg/log"
 	"github.com/gomods/athens/pkg/module"
 	"github.com/gomods/athens/pkg/observ"
+	"github.com/gomods/athens/pkg/requestid"
 	"github.com/gomods/athens/pkg/stash"
 	"github.com/gomods/athens/pkg/storage"
 )
@@ -248,6 +251,10 @@ func (p *protocol) Zip(ctx context.Context, mod, ver string) (storage.SizeReadCl
 
 func (p *protocol) processDownload(ctx context.Context, mod, ver string, f func(newVer string) error) error {
 	const op errors.Op = "protocol.processDownload"
+	// Create a new context with custom deadline and ditch whatever deadline was passed by the caller.
+	// This is needed so that the async go routines can continue even after the HTTP request is complete (which leads to context cancellation).
+	ctx, cancel := copyContextWithCustomTimeout(ctx, time.Minute*15)
+	defer cancel()
 	switch p.df.Match(mod) {
 	case mode.Sync:
 		newVer, err := p.stasher.Stash(ctx, mod, ver)
@@ -287,4 +294,11 @@ func union(list1, list2 []string) []string {
 		}
 	}
 	return unique
+}
+
+func copyContextWithCustomTimeout(ctx context.Context, timeout time.Duration) (context.Context, context.CancelFunc) {
+	ctxCopy, cancel := context.WithTimeout(context.Background(), timeout)
+	requestid.SetInContext(ctxCopy, requestid.FromContext(ctx))
+	log.SetEntryInContext(ctxCopy, log.EntryFromContext(ctx))
+	return ctxCopy, cancel
 }
