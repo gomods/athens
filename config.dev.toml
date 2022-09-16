@@ -322,7 +322,7 @@ IndexType = "none"
         Password = ""
 
         [SingleFlight.Redis.LockConfig]
-            # TTL for the lock in second. Defaults to 300 seconds (5 minutes).
+            # TTL for the lock in seconds. Defaults to 300 seconds (5 minutes).
             TTL = 300
             # Timeout for acquiring the lock in seconds. Defaults to 300 seconds (5 minutes).
             Timeout = 300
@@ -342,7 +342,7 @@ IndexType = "none"
         SentinelPassword = "sekret"
 
         [SingleFlight.RedisSentinel.LockConfig]
-            # TTL for the lock in second. Defaults to 300 seconds (5 minutes).
+            # TTL for the lock in seconds. Defaults to 300 seconds (5 minutes).
             TTL = 300
             # Timeout for acquiring the lock in seconds. Defaults to 300 seconds (5 minutes).
             Timeout = 300
