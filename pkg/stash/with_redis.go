@@ -2,6 +2,7 @@ package stash
 
 import (
 	"context"
+	goerrors "errors"
 	"time"
 
 	"github.com/bsm/redislock"
@@ -10,12 +11,6 @@ import (
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/observ"
 	"github.com/gomods/athens/pkg/storage"
-)
-
-const (
-	defaultRedisTTL        = 300 * time.Second
-	defaultRedisTimeout    = 300 * time.Second
-	defaultRedisMaxRetries = 300
 )
 
 // WithRedisLock returns a distributed singleflight
@@ -32,31 +27,25 @@ func WithRedisLock(endpoint string, password string, checker storage.Checker, lo
 		return nil, errors.E(op, err)
 	}
 
+	lockOptions, err := lockOptionsFromConfig(lockConfig)
+	if err != nil {
+		return nil, errors.E(op, err)
+	}
+
 	return func(s Stasher) Stasher {
-		return &redisLock{client, s, checker, lockOptionsFromConfig(lockConfig)}
+		return &redisLock{client, s, checker, lockOptions}
 	}, nil
 }
 
-func lockOptionsFromConfig(lockConfig *config.RedisLockConfig) redisLockOptions {
-	lockOptions := defaultRedisLockOptions()
-	if lockConfig.TTL > 0 {
-		lockOptions.ttl = time.Duration(lockConfig.TTL) * time.Second
+func lockOptionsFromConfig(lockConfig *config.RedisLockConfig) (redisLockOptions, error) {
+	if lockConfig.TTL <= 0 || lockConfig.Timeout <= 0 || lockConfig.MaxRetries <= 0 {
+		return redisLockOptions{}, goerrors.New("invalid lock options")
 	}
-	if lockConfig.Timeout > 0 {
-		lockOptions.timeout = time.Duration(lockConfig.Timeout) * time.Second
-	}
-	if lockConfig.MaxRetries > 0 {
-		lockOptions.maxRetries = lockConfig.MaxRetries
-	}
-	return lockOptions
-}
-
-func defaultRedisLockOptions() redisLockOptions {
 	return redisLockOptions{
-		ttl:        defaultRedisTTL,
-		timeout:    defaultRedisTimeout,
-		maxRetries: defaultRedisMaxRetries,
-	}
+		ttl:        time.Duration(lockConfig.TTL) * time.Second,
+		timeout:    time.Duration(lockConfig.Timeout) * time.Second,
+		maxRetries: lockConfig.MaxRetries,
+	}, nil
 }
 
 type redisLockOptions struct {
