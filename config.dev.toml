@@ -323,10 +323,13 @@ IndexType = "none"
 
         [SingleFlight.Redis.LockConfig]
             # TTL for the lock in seconds. Defaults to 300 seconds (5 minutes).
+            # Env override: ATHENS_REDIS_LOCK_TTL
             TTL = 300
             # Timeout for acquiring the lock in seconds. Defaults to 300 seconds (5 minutes).
+            # Env override: ATHENS_REDIS_LOCK_TIMEOUT
             Timeout = 300
             # Max retries while acquiring the lock. Defaults to 300.
+            # Env override: ATHENS_REDIS_LOCK_MAX_RETRIES
             MaxRetries = 300
 
     [SingleFlight.RedisSentinel]
@@ -336,17 +339,22 @@ IndexType = "none"
         Endpoints = ["127.0.0.1:26379"]
         # MasterName is the redis sentinel master name to use to discover
         # the master for a SingleFlight lock
+        # Env override: ATHENS_REDIS_SENTINEL_MASTER_NAME
         MasterName = "redis-1"
         # SentinelPassword is an optional password for authenticating with
         # redis sentinel
+        # Env override: ATHENS_REDIS_SENTINEL_PASSWORD
         SentinelPassword = "sekret"
 
         [SingleFlight.RedisSentinel.LockConfig]
             # TTL for the lock in seconds. Defaults to 300 seconds (5 minutes).
+            # Env override: ATHENS_REDIS_LOCK_TTL
             TTL = 300
             # Timeout for acquiring the lock in seconds. Defaults to 300 seconds (5 minutes).
+            # Env override: ATHENS_REDIS_LOCK_TIMEOUT
             Timeout = 300
             # Max retries while acquiring the lock. Defaults to 300.
+            # Env override: ATHENS_REDIS_LOCK_MAX_RETRIES
             MaxRetries = 300
 [Storage]
     # Only storage backends that are specified in Proxy.StorageType are required here
