@@ -23,9 +23,9 @@ func testConfigFile(t *testing.T) (testConfigFile string) {
 	return testConfigFile
 }
 
-func compareConfigs(parsedConf *Config, expConf *Config, t *testing.T) {
+func compareConfigs(parsedConf *Config, expConf *Config, t *testing.T, ignoreTypes ...interface{}) {
 	t.Helper()
-	opts := cmpopts.IgnoreTypes(Index{})
+	opts := cmpopts.IgnoreTypes(append([]interface{}{Index{}}, ignoreTypes...)...)
 	eq := cmp.Equal(parsedConf, expConf, opts)
 	if !eq {
 		diff := cmp.Diff(parsedConf, expConf, opts)
@@ -108,7 +108,7 @@ func TestEnvOverrides(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Env override failed: %v", err)
 	}
-	compareConfigs(conf, expConf, t)
+	compareConfigs(conf, expConf, t, Storage{}, SingleFlight{})
 }
 
 func TestEnvOverridesPreservingPort(t *testing.T) {
@@ -411,8 +411,7 @@ func getEnvMap(config *Config) map[string]string {
 				envVars["ATHENS_REDIS_LOCK_TIMEOUT"] = strconv.Itoa(singleFlight.Redis.LockConfig.Timeout)
 				envVars["ATHENS_REDIS_LOCK_MAX_RETRIES"] = strconv.Itoa(singleFlight.Redis.LockConfig.MaxRetries)
 			}
-		}
-		if singleFlight.RedisSentinel != nil {
+		} else if singleFlight.RedisSentinel != nil {
 			envVars["ATHENS_SINGLE_FLIGHT_TYPE"] = "redis-sentinel"
 			envVars["ATHENS_REDIS_SENTINEL_ENDPOINTS"] = strings.Join(singleFlight.RedisSentinel.Endpoints, ",")
 			envVars["ATHENS_REDIS_SENTINEL_MASTER_NAME"] = singleFlight.RedisSentinel.MasterName
@@ -422,8 +421,7 @@ func getEnvMap(config *Config) map[string]string {
 				envVars["ATHENS_REDIS_LOCK_TIMEOUT"] = strconv.Itoa(singleFlight.RedisSentinel.LockConfig.Timeout)
 				envVars["ATHENS_REDIS_LOCK_MAX_RETRIES"] = strconv.Itoa(singleFlight.RedisSentinel.LockConfig.MaxRetries)
 			}
-		}
-		if singleFlight.Etcd != nil {
+		} else if singleFlight.Etcd != nil {
 			envVars["ATHENS_SINGLE_FLIGHT_TYPE"] = "etcd"
 			envVars["ATHENS_ETCD_ENDPOINTS"] = singleFlight.Etcd.Endpoints
 		}
