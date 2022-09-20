@@ -43,6 +43,6 @@ func DefaultRedisLockConfig() *RedisLockConfig {
 	return &RedisLockConfig{
 		TTL:        300,
 		Timeout:    300,
-		MaxRetries: 300,
+		MaxRetries: 10,
 	}
 }

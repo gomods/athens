@@ -271,23 +271,15 @@ func TestParseExampleConfig(t *testing.T) {
 
 	expSingleFlight := &SingleFlight{
 		Redis: &Redis{
-			Endpoint: "127.0.0.1:6379",
-			Password: "",
-			LockConfig: &RedisLockConfig{
-				Timeout:    300,
-				TTL:        300,
-				MaxRetries: 300,
-			},
+			Endpoint:   "127.0.0.1:6379",
+			Password:   "",
+			LockConfig: DefaultRedisLockConfig(),
 		},
 		RedisSentinel: &RedisSentinel{
 			Endpoints:        []string{"127.0.0.1:26379"},
 			MasterName:       "redis-1",
 			SentinelPassword: "sekret",
-			LockConfig: &RedisLockConfig{
-				Timeout:    300,
-				TTL:        300,
-				MaxRetries: 300,
-			},
+			LockConfig:       DefaultRedisLockConfig(),
 		},
 		Etcd: &Etcd{Endpoints: "localhost:2379,localhost:22379,localhost:32379"},
 	}

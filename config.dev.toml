@@ -328,9 +328,9 @@ IndexType = "none"
             # Timeout for acquiring the lock in seconds. Defaults to 300 seconds (5 minutes).
             # Env override: ATHENS_REDIS_LOCK_TIMEOUT
             Timeout = 300
-            # Max retries while acquiring the lock. Defaults to 300.
+            # Max retries while acquiring the lock. Defaults to 10.
             # Env override: ATHENS_REDIS_LOCK_MAX_RETRIES
-            MaxRetries = 300
+            MaxRetries = 10
 
     [SingleFlight.RedisSentinel]
         # Endpoints is the redis sentinel endpoints to discover a redis 
@@ -353,9 +353,9 @@ IndexType = "none"
             # Timeout for acquiring the lock in seconds. Defaults to 300 seconds (5 minutes).
             # Env override: ATHENS_REDIS_LOCK_TIMEOUT
             Timeout = 300
-            # Max retries while acquiring the lock. Defaults to 300.
+            # Max retries while acquiring the lock. Defaults to 10.
             # Env override: ATHENS_REDIS_LOCK_MAX_RETRIES
-            MaxRetries = 300
+            MaxRetries = 10
 [Storage]
     # Only storage backends that are specified in Proxy.StorageType are required here
     [Storage.CDN]

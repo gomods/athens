@@ -451,7 +451,7 @@ If you would like to customize the distributed lock options then you can optiona
             Timeout = 300
             # Max retries while acquiring the lock. Defaults to 300.
             # Env override: ATHENS_REDIS_LOCK_MAX_RETRIES
-            MaxRetries = 300
+            MaxRetries = 10
 
 Customizations may be required in some cases for eg, you can set a higher TTL if it usually takes longer than 5 mins to fetch the modules in your case.
 
