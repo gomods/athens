@@ -437,6 +437,24 @@ You can also optionally specify a password to connect to the redis server with
             # Env override: ATHENS_REDIS_PASSWORD
             Password = ""
 
+##### Customizing lock configurations:
+If you would like to customize the distributed lock options then you can optionally override the default lock config to better suit your use-case:
+
+    [SingleFlight.Redis]
+        ...
+        [SingleFlight.Redis.LockConfig]
+            # TTL for the lock in seconds. Defaults to 300 seconds (5 minutes).
+            # Env override: ATHENS_REDIS_LOCK_TTL
+            TTL = 300
+            # Timeout for acquiring the lock in seconds. Defaults to 300 seconds (5 minutes).
+            # Env override: ATHENS_REDIS_LOCK_TIMEOUT
+            Timeout = 300
+            # Max retries while acquiring the lock. Defaults to 300.
+            # Env override: ATHENS_REDIS_LOCK_MAX_RETRIES
+            MaxRetries = 300
+
+Customizations may be required in some cases for eg, you can set a higher TTL if it usually takes longer than 5 mins to fetch the modules in your case.
+
 #### Connecting to redis via redis sentinel
 
 **NOTE**: redis-sentinel requires a working knowledge of redis and is not recommended for
@@ -472,3 +490,5 @@ Optionally, like `redis`, you can also specify a password to connect to the `red
           # SentinelPassword is an optional password for authenticating with
           # redis sentinel
           SentinelPassword = "sekret"
+
+Distributed lock options can be customised for redis sentinal as well, in a similar manner as described above for redis.
