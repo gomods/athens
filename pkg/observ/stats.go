@@ -97,6 +97,8 @@ func registerViews() error {
 		ochttp.ServerResponseBytesView,
 		ochttp.ServerLatencyView,
 		ochttp.ServerResponseCountByStatusCode,
+		ochttp.ServerRequestBytesView,
+		ochttp.ServerRequestCountByMethod,
 		ochttp.ClientReceivedBytesDistribution,
 		ochttp.ClientRoundtripLatencyDistribution,
 		ochttp.ClientCompletedCount,
