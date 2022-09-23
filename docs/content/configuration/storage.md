@@ -446,10 +446,10 @@ If you would like to customize the distributed lock options then you can optiona
             # TTL for the lock in seconds. Defaults to 300 seconds (5 minutes).
             # Env override: ATHENS_REDIS_LOCK_TTL
             TTL = 300
-            # Timeout for acquiring the lock in seconds. Defaults to 300 seconds (5 minutes).
+            # Timeout for acquiring the lock in seconds. Defaults to 15 seconds.
             # Env override: ATHENS_REDIS_LOCK_TIMEOUT
-            Timeout = 300
-            # Max retries while acquiring the lock. Defaults to 300.
+            Timeout = 15
+            # Max retries while acquiring the lock. Defaults to 10.
             # Env override: ATHENS_REDIS_LOCK_MAX_RETRIES
             MaxRetries = 10
 

@@ -42,7 +42,7 @@ type RedisLockConfig struct {
 func DefaultRedisLockConfig() *RedisLockConfig {
 	return &RedisLockConfig{
 		TTL:        300,
-		Timeout:    300,
+		Timeout:    15,
 		MaxRetries: 10,
 	}
 }
