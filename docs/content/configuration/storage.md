@@ -443,9 +443,9 @@ If you would like to customize the distributed lock options then you can optiona
     [SingleFlight.Redis]
         ...
         [SingleFlight.Redis.LockConfig]
-            # TTL for the lock in seconds. Defaults to 300 seconds (5 minutes).
+            # TTL for the lock in seconds. Defaults to 900 seconds (15 minutes).
             # Env override: ATHENS_REDIS_LOCK_TTL
-            TTL = 300
+            TTL = 900
             # Timeout for acquiring the lock in seconds. Defaults to 15 seconds.
             # Env override: ATHENS_REDIS_LOCK_TIMEOUT
             Timeout = 15
