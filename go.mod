@@ -34,7 +34,7 @@ require (
 	go.etcd.io/etcd/client/v3 v3.5.2
 	go.mongodb.org/mongo-driver v1.7.1
 	go.opencensus.io v0.23.0
-	golang.org/x/mod v0.4.2
+	golang.org/x/mod v0.5.1
 	golang.org/x/oauth2 v0.0.0-20211104180415-d3ed0bb246c8
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 	google.golang.org/api v0.67.0
