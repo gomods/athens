@@ -73,63 +73,6 @@ steps:
     - redis
     - redis-sentinel
 
-- name: docker-latest
-  image: plugins/docker
-  settings:
-    username:
-      from_secret: DOCKER_USER
-    password:
-      from_secret: DOCKER_PASSWORD
-    repo: gomods/athens
-    tags:
-      - canary
-    dockerfile: cmd/proxy/Dockerfile
-    build_args:
-      - VERSION=${DRONE_COMMIT}
-  when:
-    branch:
-      - main
-    event:
-      - push
-
-- name: docker-latest-commit-sha
-  image: plugins/docker
-  settings:
-    username:
-      from_secret: DOCKER_USER
-    password:
-      from_secret: DOCKER_PASSWORD
-    repo: gomods/athens-dev
-    tags:
-      - ${DRONE_COMMIT:0:7}
-    dockerfile: cmd/proxy/Dockerfile
-    build_args:
-      - VERSION=${DRONE_COMMIT}
-  when:
-    branch:
-      - main
-    event:
-      - push
-
-- name: docker-release
-  image: plugins/docker
-  settings:
-    username:
-      from_secret: DOCKER_USER
-    password:
-      from_secret: DOCKER_PASSWORD
-    repo: gomods/athens
-    tags:
-      - ${DRONE_TAG}
-      - latest
-    dockerfile: cmd/proxy/Dockerfile
-    build_args:
-      - VERSION=${DRONE_TAG}
-
-  when:
-    event:
-      - tag
-
 - name: publish-helm
   image: gomods/drone-helm
   settings:
@@ -196,6 +139,162 @@ services:
 volumes:
   - name: cache
     temp: {}
+
+
+---
+kind: pipeline
+name: docker-amd64
+platform:
+  arch: amd64
+depends_on:
+- default
+
+steps:
+- name: docker-commit
+  image: plugins/docker
+  settings:
+    username:
+      from_secret: DOCKER_USER
+    password:
+      from_secret: DOCKER_PASSWORD
+    repo: gomods/athens
+    tags:
+      - canary
+      - ${DRONE_COMMIT:0:7}-linux-amd64
+    dockerfile: cmd/proxy/Dockerfile
+    build_args:
+      - VERSION=${DRONE_COMMIT}
+  when:
+    branch:
+      - main
+    event:
+      - push
+
+- name: docker-release
+  image: plugins/docker
+  settings:
+    username:
+      from_secret: DOCKER_USER
+    password:
+      from_secret: DOCKER_PASSWORD
+    repo: gomods/athens
+    tags:
+      - ${DRONE_TAG}-linux-amd64
+      - latest-linux-amd64
+    dockerfile: cmd/proxy/Dockerfile
+    build_args:
+      - VERSION=${DRONE_TAG}
+
+  when:
+    event:
+      - tag
+
+---
+kind: pipeline
+name: docker-arm64
+platform:
+  arch: arm64
+depends_on:
+- default
+
+steps:
+- name: docker-commit
+  image: plugins/docker
+  settings:
+    username:
+      from_secret: DOCKER_USER
+    password:
+      from_secret: DOCKER_PASSWORD
+    repo: gomods/athens
+    tags:
+      - ${DRONE_COMMIT:0:7}-linux-arm64
+    dockerfile: cmd/proxy/Dockerfile
+    build_args:
+      - VERSION=${DRONE_COMMIT}
+  when:
+    branch:
+      - main
+    event:
+      - push
+
+- name: docker-release
+  image: plugins/docker
+  settings:
+    username:
+      from_secret: DOCKER_USER
+    password:
+      from_secret: DOCKER_PASSWORD
+    repo: gomods/athens
+    tags:
+      - ${DRONE_TAG}-linux-arm64
+      - latest-linux-arm64
+    dockerfile: cmd/proxy/Dockerfile
+    build_args:
+      - VERSION=${DRONE_TAG}
+
+  when:
+    event:
+      - tag
+
+---
+kind: pipeline
+name: docker-multiarch
+depends_on:
+- docker-amd64
+- docker-arm64
+
+steps:
+
+- name: manifest-commit
+  image: plugins/manifest
+  settings:
+    username:
+      from_secret: DOCKER_USER
+    password:
+      from_secret: DOCKER_PASSWORD
+    target: gomods/athens:${DRONE_COMMIT:0:7}
+    template: gomods/athens:${DRONE_COMMIT:0:7}-OS-ARCH
+    platforms:
+      - linux/amd64
+      - linux/arm64
+  when:
+    branch:
+      - main
+    event:
+      - push
+
+- name: manifest-release-tag
+  image: plugins/manifest
+  settings:
+    username:
+      from_secret: DOCKER_USER
+    password:
+      from_secret: DOCKER_PASSWORD
+    target: gomods/athens:${DRONE_TAG}
+    template: gomods/athens:${DRONE_TAG}-OS-ARCH
+    platforms:
+      - linux/amd64
+      - linux/arm64
+  when:
+    event:
+      - tag
+
+- name: manifest-release-latest
+  image: plugins/manifest
+  settings:
+    username:
+      from_secret: DOCKER_USER
+    password:
+      from_secret: DOCKER_PASSWORD
+    target: gomods/athens:latest
+    template: gomods/athens:latest-OS-ARCH
+    platforms:
+      - linux/amd64
+      - linux/arm64
+  when:
+    event:
+      - tag
+
 ---
 kind: signature
 hmac: 8ee2a04fedfd1a0c1ab3da19a3441485bf447de3e04fe057f626c83454a042b6
