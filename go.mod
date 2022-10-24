@@ -34,7 +34,7 @@ require (
 	go.etcd.io/etcd/client/v3 v3.5.2
 	go.mongodb.org/mongo-driver v1.7.1
 	go.opencensus.io v0.23.0
-	golang.org/x/mod v0.4.2
+	golang.org/x/mod v0.6.0
 	golang.org/x/oauth2 v0.0.0-20211104180415-d3ed0bb246c8
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 	google.golang.org/api v0.67.0
@@ -106,10 +106,10 @@ require (
 	go.uber.org/atomic v1.9.0 // indirect
 	go.uber.org/multierr v1.7.0 // indirect
 	go.uber.org/zap v1.21.0 // indirect
-	golang.org/x/crypto v0.0.0-20211108221036-ceb1ce70b4fa // indirect
-	golang.org/x/net v0.0.0-20220425223048-2871e0cb64e4 // indirect
-	golang.org/x/sys v0.0.0-20220422013727-9388b58f7150 // indirect
-	golang.org/x/text v0.3.7 // indirect
+	golang.org/x/crypto v0.1.0 // indirect
+	golang.org/x/net v0.1.0 // indirect
+	golang.org/x/sys v0.1.0 // indirect
+	golang.org/x/text v0.4.0 // indirect
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/genproto v0.0.0-20220211171837-173942840c17 // indirect
