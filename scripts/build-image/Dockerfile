@@ -1,4 +1,4 @@
-FROM golang:1.18-stretch
+FROM golang:1.19-stretch
 
 WORKDIR /tmp
 
@@ -11,6 +11,6 @@ RUN curl -sLO https://kubernetes-helm.storage.googleapis.com/helm-v${HELM_VERSIO
 # Install a tiny azure client
 ENV AZCLI_VERSION=v0.3.1
 RUN curl -sLo /usr/local/bin/az https://github.com/carolynvs/az-cli/releases/download/$AZCLI_VERSION/az-linux-amd64 && \
-chmod +x /usr/local/bin/az
+    chmod +x /usr/local/bin/az
 
 WORKDIR /go/src/github.com/gomods/athens
