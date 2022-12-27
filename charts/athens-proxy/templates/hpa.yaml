@@ -1,0 +1,53 @@
+{{- if .Values.autoscaling.enabled }}
+{{- if .Values.autoscaling.apiVersionOverride -}}
+apiVersion: {{ .Values.autoscaling.apiVersionOverride }}
+{{- else if .Capabilities.APIVersions.Has "autoscaling/v2beta1" -}}
+apiVersion: autoscaling/v2beta1
+{{- else -}}
+apiVersion: autoscaling/v2
+{{- end }}
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ template "fullname" . }}
+  labels:
+    app: {{ template "fullname" . }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ template "fullname" . }}
+  minReplicas: {{ .Values.autoscaling.minReplicas }}
+  maxReplicas: {{ .Values.autoscaling.maxReplicas }}
+  metrics:
+  {{- with .Values.autoscaling.targetCPUUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: cpu
+        {{- if $.Capabilities.APIVersions.Has "autoscaling/v2beta1" }}
+        targetAverageUtilization: {{ . }}
+        {{- else }}
+        target:
+          averageUtilization: {{ . }}
+          type: Utilization
+        {{- end }}
+  {{- end }}
+  {{- with .Values.autoscaling.targetMemoryUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: memory
+        {{- if $.Capabilities.APIVersions.Has "autoscaling/v2beta1" }}
+        targetAverageUtilization: {{ . }}
+        {{- else }}
+        target:
+          averageUtilization: {{ . }}
+          type: Utilization
+        {{- end }}
+  {{- end }}
+  {{- with .Values.autoscaling.behavior }}
+  behavior:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+{{- end }}

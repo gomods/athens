@@ -168,3 +168,25 @@ resources: {}
 #  requests:
 #    cpu: 100m
 #    memory: 64Mi
+autoscaling:
+  # enable Horizontal Pod Autoscaling
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 80%
+  targetMemoryUtilizationPercentage: 80%
+  apiVersionOverride: ""
+  # This is only available on HPA apiVersion `autoscaling/v2beta2` and newer
+  behavior: {}
+    # scaleDown:
+    #  stabilizationWindowSeconds: 300
+    #  policies:
+    #   - type: Pods
+    #     value: 1
+    #     periodSeconds: 180
+    # scaleUp:
+    #   stabilizationWindowSeconds: 300
+    #   policies:
+    #   - type: Pods
+    #     value: 2
+    #     periodSeconds: 60
