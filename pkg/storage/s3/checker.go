@@ -26,22 +26,29 @@ func (s *Storage) Exists(ctx context.Context, module, version string) (bool, err
 		Bucket: aws.String(s.bucket),
 		Prefix: aws.String(fmt.Sprintf("%s/@v", module)),
 	}
+	var count int
+	err := s.s3API.ListObjectsPagesWithContext(ctx, lsParams, func(loo *s3.ListObjectsOutput, lastpage bool) bool {
+		for _, o := range loo.Contents {
+			// sane assumption: no duplicate keys.
+			switch *o.Key {
+			case config.PackageVersionedName(module, version, "info"):
+				count++
+			case config.PackageVersionedName(module, version, "mod"):
+				count++
+			case config.PackageVersionedName(module, version, "zip"):
+				count++
+			}
+		}
+		// stop paging if already found all files or this is the last page
+		if count == 3 || lastpage {
+			return false
+		}
+		return true
+	})
 
-	loo, err := s.s3API.ListObjectsWithContext(ctx, lsParams)
 	if err != nil {
 		return false, errors.E(op, err, errors.M(module), errors.V(version))
 	}
-	var count int
-	for _, o := range loo.Contents {
-		// sane assumption: no duplicate keys.
-		switch *o.Key {
-		case config.PackageVersionedName(module, version, "info"):
-			count++
-		case config.PackageVersionedName(module, version, "mod"):
-			count++
-		case config.PackageVersionedName(module, version, "zip"):
-			count++
-		}
-	}
+
 	return count == 3, nil
 }
