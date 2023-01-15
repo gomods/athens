@@ -294,6 +294,7 @@ func TestInfo(t *testing.T) {
 
 			var info storage.RevInfo
 			dec := json.NewDecoder(bytes.NewReader(bts))
+			dec.DisallowUnknownFields()
 			err = dec.Decode(&info)
 			require.NoError(t, err)
 
