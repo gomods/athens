@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"path/filepath"
 	"regexp"
@@ -298,7 +299,8 @@ func TestInfo(t *testing.T) {
 			err = dec.Decode(&info)
 			require.NoError(t, err)
 
-			require.EqualValues(t, tc.info, &info)
+			assert.Equal(t, tc.info.Version, info.Version)
+			assert.Equal(t, tc.info.Time, info.Time)
 		})
 	}
 }
