@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/storage"
 	"github.com/gomods/athens/pkg/storage/mem"
 	"golang.org/x/sync/errgroup"
@@ -27,7 +28,7 @@ func TestWithRedisSentinelLock(t *testing.T) {
 	}
 	ms := &mockRedisStasher{strg: strg}
 
-	wrapper, err := WithRedisSentinelLock([]string{endpoint}, masterName, password, storage.WithChecker(strg))
+	wrapper, err := WithRedisSentinelLock([]string{endpoint}, masterName, password, storage.WithChecker(strg), config.DefaultRedisLockConfig())
 	if err != nil {
 		t.Fatal(err)
 	}

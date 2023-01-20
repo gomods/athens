@@ -36,6 +36,9 @@ func New(s3Conf *config.S3Config, timeout time.Duration, options ...func(*aws.Co
 	const op errors.Op = "s3.New"
 
 	awsConfig := defaults.Config()
+	// remove anonymous credentials from the default config so that
+	// session.NewSession can auto-resolve credentials from role, profile, env etc.
+	awsConfig.Credentials = nil
 	awsConfig.Region = aws.String(s3Conf.Region)
 	for _, o := range options {
 		o(awsConfig)

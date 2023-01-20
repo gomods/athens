@@ -1,14 +1,16 @@
 package stash
 
 import (
-	"github.com/go-redis/redis/v7"
+	"context"
+	"github.com/go-redis/redis/v8"
+	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/storage"
 )
 
 // WithRedisSentinelLock returns a distributed singleflight
 // with a redis cluster that utilizes sentinel for quorum and failover
-func WithRedisSentinelLock(endpoints []string, master, password string, checker storage.Checker) (Wrapper, error) {
+func WithRedisSentinelLock(endpoints []string, master, password string, checker storage.Checker, lockConfig *config.RedisLockConfig) (Wrapper, error) {
 	const op errors.Op = "stash.WithRedisSentinelLock"
 	// The redis client constructor does not return an error when no endpoints
 	// are provided, so we check for ourselves.
@@ -20,11 +22,17 @@ func WithRedisSentinelLock(endpoints []string, master, password string, checker 
 		SentinelAddrs:    endpoints,
 		SentinelPassword: password,
 	})
-	_, err := client.Ping().Result()
+	_, err := client.Ping(context.Background()).Result()
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
+
+	lockOptions, err := lockOptionsFromConfig(lockConfig)
+	if err != nil {
+		return nil, errors.E(op, err)
+	}
+
 	return func(s Stasher) Stasher {
-		return &redisLock{client, s, checker}
+		return &redisLock{client, s, checker, lockOptions}
 	}, nil
 }

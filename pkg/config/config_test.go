@@ -23,9 +23,9 @@ func testConfigFile(t *testing.T) (testConfigFile string) {
 	return testConfigFile
 }
 
-func compareConfigs(parsedConf *Config, expConf *Config, t *testing.T) {
+func compareConfigs(parsedConf *Config, expConf *Config, t *testing.T, ignoreTypes ...interface{}) {
 	t.Helper()
-	opts := cmpopts.IgnoreTypes(Storage{}, SingleFlight{}, Index{})
+	opts := cmpopts.IgnoreTypes(append([]interface{}{Index{}}, ignoreTypes...)...)
 	eq := cmp.Equal(parsedConf, expConf, opts)
 	if !eq {
 		diff := cmp.Diff(parsedConf, expConf, opts)
@@ -108,7 +108,7 @@ func TestEnvOverrides(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Env override failed: %v", err)
 	}
-	compareConfigs(conf, expConf, t)
+	compareConfigs(conf, expConf, t, Storage{}, SingleFlight{})
 }
 
 func TestEnvOverridesPreservingPort(t *testing.T) {
@@ -261,6 +261,27 @@ func TestParseExampleConfig(t *testing.T) {
 			Token:  "",
 			Bucket: "MY_S3_BUCKET_NAME",
 		},
+		AzureBlob: &AzureBlobConfig{
+			AccountName:   "MY_AZURE_BLOB_ACCOUNT_NAME",
+			AccountKey:    "MY_AZURE_BLOB_ACCOUNT_KEY",
+			ContainerName: "MY_AZURE_BLOB_CONTAINER_NAME",
+		},
+		External: &External{URL: ""},
+	}
+
+	expSingleFlight := &SingleFlight{
+		Redis: &Redis{
+			Endpoint:   "127.0.0.1:6379",
+			Password:   "",
+			LockConfig: DefaultRedisLockConfig(),
+		},
+		RedisSentinel: &RedisSentinel{
+			Endpoints:        []string{"127.0.0.1:26379"},
+			MasterName:       "redis-1",
+			SentinelPassword: "sekret",
+			LockConfig:       DefaultRedisLockConfig(),
+		},
+		Etcd: &Etcd{Endpoints: "localhost:2379,localhost:22379,localhost:32379"},
 	}
 
 	expConf := &Config{
@@ -287,7 +308,7 @@ func TestParseExampleConfig(t *testing.T) {
 		StatsExporter:    "prometheus",
 		SingleFlightType: "memory",
 		GoBinaryEnvVars:  []string{"GOPROXY=direct"},
-		SingleFlight:     &SingleFlight{},
+		SingleFlight:     expSingleFlight,
 		SumDBs:           []string{"https://sum.golang.org"},
 		NoSumPatterns:    []string{},
 		DownloadMode:     "sync",
@@ -368,6 +389,33 @@ func getEnvMap(config *Config) map[string]string {
 			envVars["AWS_SESSION_TOKEN"] = storage.S3.Token
 			envVars["AWS_FORCE_PATH_STYLE"] = strconv.FormatBool(storage.S3.ForcePathStyle)
 			envVars["ATHENS_S3_BUCKET_NAME"] = storage.S3.Bucket
+		}
+	}
+
+	singleFlight := config.SingleFlight
+	if singleFlight != nil {
+		if singleFlight.Redis != nil {
+			envVars["ATHENS_SINGLE_FLIGHT_TYPE"] = "redis"
+			envVars["ATHENS_REDIS_ENDPOINT"] = singleFlight.Redis.Endpoint
+			envVars["ATHENS_REDIS_PASSWORD"] = singleFlight.Redis.Endpoint
+			if singleFlight.Redis.LockConfig != nil {
+				envVars["ATHENS_REDIS_LOCK_TTL"] = strconv.Itoa(singleFlight.Redis.LockConfig.TTL)
+				envVars["ATHENS_REDIS_LOCK_TIMEOUT"] = strconv.Itoa(singleFlight.Redis.LockConfig.Timeout)
+				envVars["ATHENS_REDIS_LOCK_MAX_RETRIES"] = strconv.Itoa(singleFlight.Redis.LockConfig.MaxRetries)
+			}
+		} else if singleFlight.RedisSentinel != nil {
+			envVars["ATHENS_SINGLE_FLIGHT_TYPE"] = "redis-sentinel"
+			envVars["ATHENS_REDIS_SENTINEL_ENDPOINTS"] = strings.Join(singleFlight.RedisSentinel.Endpoints, ",")
+			envVars["ATHENS_REDIS_SENTINEL_MASTER_NAME"] = singleFlight.RedisSentinel.MasterName
+			envVars["ATHENS_REDIS_SENTINEL_PASSWORD"] = singleFlight.RedisSentinel.SentinelPassword
+			if singleFlight.RedisSentinel.LockConfig != nil {
+				envVars["ATHENS_REDIS_LOCK_TTL"] = strconv.Itoa(singleFlight.RedisSentinel.LockConfig.TTL)
+				envVars["ATHENS_REDIS_LOCK_TIMEOUT"] = strconv.Itoa(singleFlight.RedisSentinel.LockConfig.Timeout)
+				envVars["ATHENS_REDIS_LOCK_MAX_RETRIES"] = strconv.Itoa(singleFlight.RedisSentinel.LockConfig.MaxRetries)
+			}
+		} else if singleFlight.Etcd != nil {
+			envVars["ATHENS_SINGLE_FLIGHT_TYPE"] = "etcd"
+			envVars["ATHENS_ETCD_ENDPOINTS"] = singleFlight.Etcd.Endpoints
 		}
 	}
 	return envVars

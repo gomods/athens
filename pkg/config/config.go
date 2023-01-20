@@ -167,11 +167,12 @@ func defaultConfig() *Config {
 		IndexType:        "none",
 		SingleFlight: &SingleFlight{
 			Etcd:  &Etcd{"localhost:2379,localhost:22379,localhost:32379"},
-			Redis: &Redis{"127.0.0.1:6379", ""},
+			Redis: &Redis{"127.0.0.1:6379", "", DefaultRedisLockConfig()},
 			RedisSentinel: &RedisSentinel{
 				Endpoints:        []string{"127.0.0.1:26379"},
 				MasterName:       "redis-1",
 				SentinelPassword: "sekret",
+				LockConfig:       DefaultRedisLockConfig(),
 			},
 		},
 		Index: &Index{

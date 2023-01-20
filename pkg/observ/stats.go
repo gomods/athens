@@ -5,11 +5,11 @@ import (
 	"net/http"
 	"time"
 
+	"contrib.go.opencensus.io/exporter/prometheus"
 	"contrib.go.opencensus.io/exporter/stackdriver"
 	datadog "github.com/DataDog/opencensus-go-exporter-datadog"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gorilla/mux"
-	"contrib.go.opencensus.io/exporter/prometheus"
 	"go.opencensus.io/plugin/ochttp"
 	"go.opencensus.io/stats/view"
 )
@@ -92,7 +92,17 @@ func registerStatsStackDriverExporter(projectID string) (func(), error) {
 // registerViews register stats which should be collected in Athens
 func registerViews() error {
 	const op errors.Op = "observ.registerViews"
-	if err := view.Register(ochttp.DefaultServerViews...); err != nil {
+	if err := view.Register(
+		ochttp.ServerRequestCountView,
+		ochttp.ServerResponseBytesView,
+		ochttp.ServerLatencyView,
+		ochttp.ServerResponseCountByStatusCode,
+		ochttp.ServerRequestBytesView,
+		ochttp.ServerRequestCountByMethod,
+		ochttp.ClientReceivedBytesDistribution,
+		ochttp.ClientRoundtripLatencyDistribution,
+		ochttp.ClientCompletedCount,
+	); err != nil {
 		return errors.E(op, err)
 	}
 
