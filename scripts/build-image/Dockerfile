@@ -1,4 +1,4 @@
-FROM golang:1.19-stretch
+FROM golang:1.19-bullseye
 
 WORKDIR /tmp
 
