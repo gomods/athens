@@ -314,6 +314,7 @@ func TestParseExampleConfig(t *testing.T) {
 		DownloadMode:     "sync",
 		RobotsFile:       "robots.txt",
 		IndexType:        "none",
+		ShutdownTimeout:  60,
 		Index:            &Index{},
 	}
 

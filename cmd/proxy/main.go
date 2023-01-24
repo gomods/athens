@@ -55,7 +55,7 @@ func main() {
 		<-sigint
 
 		// We received an interrupt signal, shut down.
-		ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(conf.ShutdownTimeout))
 		defer cancel()
 		if err := srv.Shutdown(ctx); err != nil {
 			log.Fatal(err)
