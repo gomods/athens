@@ -1,7 +1,6 @@
 package module
 
 import (
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
@@ -208,27 +207,27 @@ func (t *FilterTests) Test_initFromConfig() {
 	defer os.Remove(filterFile)
 
 	goodInput := []byte("+ github.com/a/b\n\n# some comment\n- github.com/c/d\n\nD github.com/x")
-	ioutil.WriteFile(filterFile, goodInput, 0644)
+	os.WriteFile(filterFile, goodInput, 0644)
 
 	f, err := initFromConfig(filterFile)
 	r.NotNil(f)
 	r.NoError(err)
 
 	badInput := []byte("+ github.com/a/b\n\n# some comment\n\n- github.com/c/d\n\nD github.com/x\nsome_random_line")
-	ioutil.WriteFile(filterFile, badInput, 0644)
+	os.WriteFile(filterFile, badInput, 0644)
 	f, err = initFromConfig(filterFile)
 	r.Nil(f)
 	r.Error(err)
 
 	versionInput := []byte("+ github.com/a/b\n\n# some comment\n\n- github.com/c/d v1,v2.3.4,v3.2.*\n\nD github.com/x\n")
-	ioutil.WriteFile(filterFile, versionInput, 0644)
+	os.WriteFile(filterFile, versionInput, 0644)
 	f, err = initFromConfig(filterFile)
 	r.NotNil(f)
 	r.NoError(err)
 }
 
 func tempFilterFile(t *testing.T) (path string) {
-	filter, err := ioutil.TempFile(os.TempDir(), "filter-")
+	filter, err := os.CreateTemp(os.TempDir(), "filter-")
 	if err != nil {
 		t.FailNow()
 	}

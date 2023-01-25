@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"net/http"
 
 	"github.com/gomods/athens/pkg/errors"
@@ -99,6 +99,6 @@ func validate(ctx context.Context, client *http.Client, hook, mod, ver string) (
 func validationResponseFromRequest(resp *http.Response) validationResponse {
 	defer resp.Body.Close()
 
-	body, _ := ioutil.ReadAll(resp.Body)
+	body, _ := io.ReadAll(resp.Body)
 	return validationResponse{Valid: resp.StatusCode == http.StatusOK, Message: body}
 }
