@@ -37,7 +37,7 @@ services:
       dockerfile: Dockerfile.test
       args:
         GOLANG_VERSION: 1.19
-    command: ["./scripts/test_e2e.sh"]
+    command: "/bin/sh -c 'cd e2etests && go test --tags e2etests'"
   azurite:
     image: arafato/azurite:2.6.5
     ports:
