@@ -305,6 +305,12 @@ SingleFlightType = "memory"
 # Env override: ATHENS_INDEX_TYPE
 IndexType = "none"
 
+# ShutdownTimeout sets the timeout (in seconds) for open connections when shutting down
+# (via SIGINT or SIGTERM). Connections still open after the timeout will be dropped.
+# Defaults to 60
+# Env override: ATHENS_SHUTDOWN_TIMEOUT
+ShutdownTimeout = 60
+
 [SingleFlight]
     [SingleFlight.Etcd]
         # Endpoints are comma separated URLs that determine all distributed etcd servers.

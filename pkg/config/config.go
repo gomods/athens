@@ -56,6 +56,7 @@ type Config struct {
 	SingleFlightType string    `envconfig:"ATHENS_SINGLE_FLIGHT_TYPE"`
 	RobotsFile       string    `envconfig:"ATHENS_ROBOTS_FILE"`
 	IndexType        string    `envconfig:"ATHENS_INDEX_TYPE"`
+	ShutdownTimeout  int       `validate:"min=0" envconfig:"ATHENS_SHUTDOWN_TIMEOUT"`
 	SingleFlight     *SingleFlight
 	Storage          *Storage
 	Index            *Index
@@ -165,6 +166,7 @@ func defaultConfig() *Config {
 		NetworkMode:      "strict",
 		RobotsFile:       "robots.txt",
 		IndexType:        "none",
+		ShutdownTimeout:  60,
 		SingleFlight: &SingleFlight{
 			Etcd:  &Etcd{"localhost:2379,localhost:22379,localhost:32379"},
 			Redis: &Redis{"127.0.0.1:6379", "", DefaultRedisLockConfig()},
