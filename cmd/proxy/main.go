@@ -13,6 +13,7 @@ import (
 	_ "net/http/pprof"
 
 	"github.com/gomods/athens/cmd/proxy/actions"
+	"github.com/gomods/athens/internal/shutdown"
 	"github.com/gomods/athens/pkg/build"
 	"github.com/gomods/athens/pkg/config"
 )
@@ -51,8 +52,9 @@ func main() {
 
 	go func() {
 		sigint := make(chan os.Signal, 1)
-		signal.Notify(sigint, os.Interrupt)
-		<-sigint
+		signal.Notify(sigint, shutdown.GetSignals()...)
+		s := <-sigint
+		log.Printf("Recived signal (%s): Shutting down server", s)
 
 		// We received an interrupt signal, shut down.
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(conf.ShutdownTimeout))
