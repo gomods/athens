@@ -3,7 +3,7 @@ package mode
 import (
 	"encoding/base64"
 	"fmt"
-	"io/ioutil"
+	"os"
 	"strings"
 
 	"github.com/gomods/athens/pkg/errors"
@@ -59,7 +59,7 @@ func NewFile(m Mode, downloadURL string) (*DownloadFile, error) {
 
 	if strings.HasPrefix(string(m), "file:") {
 		filePath := string(m[5:])
-		bts, err := ioutil.ReadFile(filePath)
+		bts, err := os.ReadFile(filePath)
 		if err != nil {
 			return nil, err
 		}

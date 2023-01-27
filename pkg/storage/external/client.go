@@ -5,7 +5,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"mime/multipart"
 	"net/http"
 	"strconv"
@@ -53,7 +52,7 @@ func (s *service) Info(ctx context.Context, mod, ver string) ([]byte, error) {
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
-	info, err := ioutil.ReadAll(body)
+	info, err := io.ReadAll(body)
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
@@ -66,7 +65,7 @@ func (s *service) GoMod(ctx context.Context, mod, ver string) ([]byte, error) {
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
-	modFile, err := ioutil.ReadAll(body)
+	modFile, err := io.ReadAll(body)
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
@@ -107,7 +106,7 @@ func (s *service) Save(ctx context.Context, mod, ver string, modFile []byte, zip
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != 200 {
-		bts, _ := ioutil.ReadAll(resp.Body)
+		bts, _ := io.ReadAll(resp.Body)
 		return errors.E(op, fmt.Errorf("unexpected status code: %v - body: %s", resp.StatusCode, bts), resp.StatusCode)
 	}
 	return nil
@@ -176,7 +175,7 @@ func (s *service) doRequest(ctx context.Context, method, mod, ver, ext string) (
 		return nil, 0, errors.E(op, err)
 	}
 	if resp.StatusCode != 200 {
-		body, _ := ioutil.ReadAll(resp.Body)
+		body, _ := io.ReadAll(resp.Body)
 		resp.Body.Close()
 		return nil, 0, errors.E(op, fmt.Errorf("none 200 status code: %v - body: %s", resp.StatusCode, body), resp.StatusCode)
 	}

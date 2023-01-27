@@ -3,7 +3,7 @@ package stash
 import (
 	"bytes"
 	"context"
-	"io/ioutil"
+	"io"
 	"os"
 	"strings"
 	"testing"
@@ -67,7 +67,7 @@ func TestWithGCS(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer zip.Close()
-	zipContent, err := ioutil.ReadAll(zip)
+	zipContent, err := io.ReadAll(zip)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -3,7 +3,6 @@ package external
 import (
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"strconv"
 	"strings"
@@ -88,7 +87,7 @@ func NewServer(strg storage.Backend) http.Handler {
 			return
 		}
 		defer infoFile.Close()
-		info, err := ioutil.ReadAll(infoFile)
+		info, err := io.ReadAll(infoFile)
 		if err != nil {
 			http.Error(w, err.Error(), 400)
 			return
@@ -99,7 +98,7 @@ func NewServer(strg storage.Backend) http.Handler {
 			return
 		}
 		defer modReader.Close()
-		modFile, err := ioutil.ReadAll(modReader)
+		modFile, err := io.ReadAll(modReader)
 		if err != nil {
 			http.Error(w, err.Error(), 400)
 			return

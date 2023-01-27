@@ -3,7 +3,7 @@ package gcp
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
+	"io"
 
 	"cloud.google.com/go/storage"
 	"github.com/gomods/athens/pkg/config"
@@ -21,7 +21,7 @@ func (s *Storage) Info(ctx context.Context, module, version string) ([]byte, err
 	if err != nil {
 		return nil, errors.E(op, err, getErrorKind(err), errors.M(module), errors.V(version))
 	}
-	infoBytes, err := ioutil.ReadAll(infoReader)
+	infoBytes, err := io.ReadAll(infoReader)
 	infoReader.Close()
 	if err != nil {
 		return nil, errors.E(op, err, errors.M(module), errors.V(version))
@@ -38,7 +38,7 @@ func (s *Storage) GoMod(ctx context.Context, module, version string) ([]byte, er
 	if err != nil {
 		return nil, errors.E(op, err, getErrorKind(err), errors.M(module), errors.V(version))
 	}
-	modBytes, err := ioutil.ReadAll(modReader)
+	modBytes, err := io.ReadAll(modReader)
 	modReader.Close()
 	if err != nil {
 		return nil, errors.E(op, fmt.Errorf("could not get new reader for mod file: %s", err), errors.M(module), errors.V(version))

@@ -1,7 +1,6 @@
 package config
 
 import (
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -433,7 +432,7 @@ func restoreEnv(envVars map[string]string) {
 }
 
 func tempFile(perm os.FileMode) (name string, err error) {
-	f, err := ioutil.TempFile(os.TempDir(), "prefix-")
+	f, err := os.CreateTemp(os.TempDir(), "prefix-")
 	if err != nil {
 		return "", err
 	}

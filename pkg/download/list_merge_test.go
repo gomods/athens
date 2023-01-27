@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
-	"io/ioutil"
+	"io"
 	"testing"
 
 	athenserr "github.com/gomods/athens/pkg/errors"
@@ -125,7 +125,7 @@ func TestListMerge(t *testing.T) {
 				t.Fatal(err)
 			}
 			for _, v := range tc.strVersions {
-				s.Save(ctx, testModName, v, bts, ioutil.NopCloser(bytes.NewReader(bts)), bts)
+				s.Save(ctx, testModName, v, bts, io.NopCloser(bytes.NewReader(bts)), bts)
 			}
 			defer clearStorage(s, testModName, tc.strVersions)
 			dp := New(&Opts{s, nil, &listerMock{versions: tc.goVersions, err: tc.goErr}, nil, Strict})

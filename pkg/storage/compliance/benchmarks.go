@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"testing"
 
 	"github.com/gomods/athens/pkg/storage"
@@ -49,7 +49,7 @@ func benchSave(b *testing.B, s storage.Backend, clear func() error) {
 
 	module, version := "benchSaveModule", "1.0.1"
 	mock := getMockModule()
-	zipBts, err := ioutil.ReadAll(mock.Zip)
+	zipBts, err := io.ReadAll(mock.Zip)
 	require.NoError(b, err)
 
 	mi := 0
@@ -76,7 +76,7 @@ func benchDelete(b *testing.B, s storage.Backend, clear func() error) {
 
 	module, version := "benchDeleteModule", "1.0.1"
 	mock := getMockModule()
-	zipBts, err := ioutil.ReadAll(mock.Zip)
+	zipBts, err := io.ReadAll(mock.Zip)
 	require.NoError(b, err)
 	ctx := context.Background()
 
