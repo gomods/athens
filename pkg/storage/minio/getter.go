@@ -3,7 +3,7 @@ package minio
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 
 	"github.com/gomods/athens/pkg/errors"
@@ -22,7 +22,7 @@ func (v *storageImpl) Info(ctx context.Context, module, vsn string) ([]byte, err
 		return nil, errors.E(op, err)
 	}
 	defer infoReader.Close()
-	info, err := ioutil.ReadAll(infoReader)
+	info, err := io.ReadAll(infoReader)
 	if err != nil {
 		return nil, transformNotFoundErr(op, module, vsn, err)
 	}
@@ -40,7 +40,7 @@ func (v *storageImpl) GoMod(ctx context.Context, module, vsn string) ([]byte, er
 		return nil, errors.E(op, err)
 	}
 	defer modReader.Close()
-	mod, err := ioutil.ReadAll(modReader)
+	mod, err := io.ReadAll(modReader)
 	if err != nil {
 		return nil, transformNotFoundErr(op, module, vsn, err)
 	}

@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"github.com/stretchr/testify/assert"
-	"io/ioutil"
+	"io"
+	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -22,6 +22,7 @@ import (
 	"github.com/gomods/athens/pkg/storage"
 	"github.com/gomods/athens/pkg/storage/mem"
 	"github.com/spf13/afero"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"golang.org/x/sync/errgroup"
 )
@@ -358,7 +359,7 @@ func TestGoMod(t *testing.T) {
 func getGoldenFile(t *testing.T, name string) []byte {
 	t.Helper()
 	file := filepath.Join("test_data", strings.Replace(name, " ", "_", -1)+".golden")
-	bts, err := ioutil.ReadFile(file)
+	bts, err := os.ReadFile(file)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -418,7 +419,7 @@ func (m *mockFetcher) Fetch(ctx context.Context, mod, ver string) (*storage.Vers
 	return &storage.Version{
 		Mod:  bts,
 		Info: bts,
-		Zip:  ioutil.NopCloser(bytes.NewReader(bts)),
+		Zip:  io.NopCloser(bytes.NewReader(bts)),
 	}, nil
 }
 
@@ -429,7 +430,7 @@ func TestDownloadProtocolWhenFetchFails(t *testing.T) {
 	}
 	fakeMod := testMod{"github.com/athens-artifacts/samplelib", "v1.0.0"}
 	bts := []byte(fakeMod.mod + "@" + fakeMod.ver)
-	err = s.Save(context.Background(), fakeMod.mod, fakeMod.ver, bts, ioutil.NopCloser(bytes.NewReader(bts)), bts)
+	err = s.Save(context.Background(), fakeMod.mod, fakeMod.ver, bts, io.NopCloser(bytes.NewReader(bts)), bts)
 	if err != nil {
 		t.Fatal(err)
 	}

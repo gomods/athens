@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"encoding/json"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -58,7 +57,7 @@ func newTestFilter(filterFile string) (*module.Filter, error) {
 func Test_FilterMiddleware(t *testing.T) {
 	r := require.New(t)
 
-	filter, err := ioutil.TempFile(os.TempDir(), "filter-")
+	filter, err := os.CreateTemp(os.TempDir(), "filter-")
 	if err != nil {
 		t.FailNow()
 	}

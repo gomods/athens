@@ -2,7 +2,7 @@ package module
 
 import (
 	"context"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -48,7 +48,7 @@ func (s *ModuleSuite) TestGoGetFetcherFetch() {
 
 	r.True(len(ver.Mod) > 0)
 
-	zipBytes, err := ioutil.ReadAll(ver.Zip)
+	zipBytes, err := io.ReadAll(ver.Zip)
 	r.NoError(err)
 	r.True(len(zipBytes) > 0)
 
@@ -76,7 +76,7 @@ func (s *ModuleSuite) TestGoGetFetcherSumDB() {
 		return
 	}
 	r := s.Require()
-	zipBytes, err := ioutil.ReadFile("test_data/mockmod.xyz@v1.2.3.zip")
+	zipBytes, err := os.ReadFile("test_data/mockmod.xyz@v1.2.3.zip")
 	r.NoError(err)
 	mp := &mockProxy{paths: map[string][]byte{
 		"/mockmod.xyz/@v/v1.2.3.info": []byte(`{"Version":"v1.2.3"}`),
@@ -101,7 +101,7 @@ func (s *ModuleSuite) TestGoGetFetcherSumDB() {
 func (s *ModuleSuite) TestGoGetDir() {
 	r := s.Require()
 	t := s.T()
-	dir, err := ioutil.TempDir("", "nested")
+	dir, err := os.MkdirTemp("", "nested")
 	r.NoError(err)
 	t.Cleanup(func() {
 		os.RemoveAll(dir)
@@ -113,7 +113,7 @@ func (s *ModuleSuite) TestGoGetDir() {
 	r.NoError(err)
 	defer ver.Zip.Close()
 
-	dirInfo, err := ioutil.ReadDir(dir)
+	dirInfo, err := os.ReadDir(dir)
 	r.NoError(err)
 
 	if len(dirInfo) <= 0 {

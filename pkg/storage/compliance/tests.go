@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"math/rand"
 	"sort"
 	"testing"
@@ -136,7 +136,7 @@ func testGet(t *testing.T, b storage.Backend) {
 	modname := "github.com/gomods/athens"
 	ver := "v1.2.3"
 	mock := getMockModule()
-	zipBts, _ := ioutil.ReadAll(mock.Zip)
+	zipBts, _ := io.ReadAll(mock.Zip)
 	b.Save(ctx, modname, ver, mock.Mod, bytes.NewReader(zipBts), mock.Info)
 	defer b.Delete(ctx, modname, ver)
 
@@ -150,7 +150,7 @@ func testGet(t *testing.T, b storage.Backend) {
 
 	zip, err := b.Zip(ctx, modname, ver)
 	require.NoError(t, err)
-	givenZipBts, err := ioutil.ReadAll(zip)
+	givenZipBts, err := io.ReadAll(zip)
 	require.NoError(t, err)
 	require.Equal(t, zipBts, givenZipBts)
 	require.Equal(t, int64(len(zipBts)), zip.Size())
@@ -161,7 +161,7 @@ func testExists(t *testing.T, b storage.Backend) {
 	modname := "github.com/gomods/athens"
 	ver := "v1.2.3"
 	mock := getMockModule()
-	zipBts, _ := ioutil.ReadAll(mock.Zip)
+	zipBts, _ := io.ReadAll(mock.Zip)
 	b.Save(ctx, modname, ver, mock.Mod, bytes.NewReader(zipBts), mock.Info)
 	defer b.Delete(ctx, modname, ver)
 	checker := storage.WithChecker(b)
@@ -175,7 +175,7 @@ func testShouldNotExist(t *testing.T, b storage.Backend) {
 	mod := "github.com/gomods/shouldNotExist"
 	ver := "v1.2.3-pre.1"
 	mock := getMockModule()
-	zipBts, _ := ioutil.ReadAll(mock.Zip)
+	zipBts, _ := io.ReadAll(mock.Zip)
 	err := b.Save(ctx, mod, ver, mock.Mod, bytes.NewReader(zipBts), mock.Info)
 	require.NoError(t, err, "should successfully safe a mock module")
 	defer b.Delete(ctx, mod, ver)
@@ -217,7 +217,7 @@ func testCatalog(t *testing.T, b storage.Backend) {
 	ctx := context.Background()
 
 	mock := getMockModule()
-	zipBts, _ := ioutil.ReadAll(mock.Zip)
+	zipBts, _ := io.ReadAll(mock.Zip)
 	modname := "github.com/gomods/testCatalogModule"
 	for i := 0; i < 6; i++ {
 		ver := fmt.Sprintf("v1.2.%04d", i)
@@ -256,6 +256,6 @@ func getMockModule() *storage.Version {
 	return &storage.Version{
 		Info: []byte("123"),
 		Mod:  []byte("456"),
-		Zip:  ioutil.NopCloser(bytes.NewReader([]byte("789"))),
+		Zip:  io.NopCloser(bytes.NewReader([]byte("789"))),
 	}
 }
