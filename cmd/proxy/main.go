@@ -2,9 +2,10 @@ package main
 
 import (
 	"context"
+	"errors"
 	"flag"
 	"fmt"
-	"log"
+	stdlog "log"
 	"net/http"
 	"os"
 	"os/signal"
@@ -16,6 +17,8 @@ import (
 	"github.com/gomods/athens/internal/shutdown"
 	"github.com/gomods/athens/pkg/build"
 	"github.com/gomods/athens/pkg/config"
+	athenslog "github.com/gomods/athens/pkg/log"
+	"github.com/sirupsen/logrus"
 )
 
 var (
@@ -31,17 +34,24 @@ func main() {
 	}
 	conf, err := config.Load(*configFile)
 	if err != nil {
-		log.Fatalf("could not load config file: %v", err)
+		stdlog.Fatalf("could not load config file: %v", err)
 	}
 
-	handler, err := actions.App(conf)
+	logLvl, err := logrus.ParseLevel(conf.LogLevel)
 	if err != nil {
-		log.Fatal(err)
+		stdlog.Fatalf("failed logrus.ParseLevel(%q): %v", conf.LogLevel, err)
+	}
+
+	logger := athenslog.New(conf.CloudRuntime, logLvl)
+
+	handler, err := actions.App(logger, conf)
+	if err != nil {
+		logger.WithError(err).Fatal("failed to create App")
 	}
 
 	cert, key, err := conf.TLSCertFiles()
 	if err != nil {
-		log.Fatal(err)
+		logger.WithError(err).Fatal("failed conf.TLSCertFiles")
 	}
 
 	srv := &http.Server{
@@ -54,35 +64,36 @@ func main() {
 		sigint := make(chan os.Signal, 1)
 		signal.Notify(sigint, shutdown.GetSignals()...)
 		s := <-sigint
-		log.Printf("Recived signal (%s): Shutting down server", s)
+		logger.WithField("signal", s).Infof("received signal, shutting down server")
 
 		// We received an interrupt signal, shut down.
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(conf.ShutdownTimeout))
 		defer cancel()
 		if err := srv.Shutdown(ctx); err != nil {
-			log.Fatal(err)
+			logger.WithError(err).Fatal("failed srv.Shutdown")
 		}
 		close(idleConnsClosed)
 	}()
 
 	if conf.EnablePprof {
 		go func() {
-			// pprof to be exposed on a different port than the application for security matters, not to expose profiling data and avoid DoS attacks (profiling slows down the service)
+			// pprof to be exposed on a different port than the application for security matters,
+			// not to expose profiling data and avoid DoS attacks (profiling slows down the service)
 			// https://www.farsightsecurity.com/txt-record/2016/10/28/cmikk-go-remote-profiling/
-			log.Printf("Starting `pprof` at port %v", conf.PprofPort)
-			log.Fatal(http.ListenAndServe(conf.PprofPort, nil))
+			logger.WithField("port", conf.PprofPort).Infof("starting pprof")
+			logger.Fatal(http.ListenAndServe(conf.PprofPort, nil))
 		}()
 	}
 
-	log.Printf("Starting application at port %v", conf.Port)
+	logger.WithField("port", conf.Port).Infof("starting application")
 	if cert != "" && key != "" {
 		err = srv.ListenAndServeTLS(conf.TLSCertFile, conf.TLSKeyFile)
 	} else {
 		err = srv.ListenAndServe()
 	}
 
-	if err != http.ErrServerClosed {
-		log.Fatal(err)
+	if !errors.Is(err, http.ErrServerClosed) {
+		logger.WithError(err).Fatal("application error")
 	}
 
 	<-idleConnsClosed

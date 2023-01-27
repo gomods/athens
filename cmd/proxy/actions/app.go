@@ -3,7 +3,6 @@ package actions
 import (
 	"fmt"
 	"net/http"
-	"os"
 
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/log"
@@ -11,7 +10,6 @@ import (
 	"github.com/gomods/athens/pkg/module"
 	"github.com/gomods/athens/pkg/observ"
 	"github.com/gorilla/mux"
-	"github.com/sirupsen/logrus"
 	"github.com/unrolled/secure"
 	"go.opencensus.io/plugin/ochttp"
 )
@@ -22,38 +20,33 @@ const Service = "proxy"
 // App is where all routes and middleware for the proxy
 // should be defined. This is the nerve center of your
 // application.
-func App(conf *config.Config) (http.Handler, error) {
-	// ENV is used to help switch settings based on where the
-	// application is being run. Default is "development".
-	ENV := conf.GoEnv
-
+func App(logger *log.Logger, conf *config.Config) (http.Handler, error) {
 	if conf.GithubToken != "" {
 		if conf.NETRCPath != "" {
-			fmt.Println("Cannot provide both GithubToken and NETRCPath. Only provide one.")
-			os.Exit(1)
+			return nil, fmt.Errorf("cannot provide both GithubToken and NETRCPath")
 		}
 
-		netrcFromToken(conf.GithubToken)
+		if err := netrcFromToken(conf.GithubToken); err != nil {
+			return nil, fmt.Errorf("netrcFromToken error: %w", err)
+		}
 	}
 
 	// mount .netrc to home dir
 	// to have access to private repos.
-	initializeAuthFile(conf.NETRCPath)
+	if err := initializeAuthFile(conf.NETRCPath); err != nil {
+		return nil, fmt.Errorf("initializeAuthFile(netrc) error: %w", err)
+	}
 
 	// mount .hgrc to home dir
 	// to have access to private repos.
-	initializeAuthFile(conf.HGRCPath)
-
-	logLvl, err := logrus.ParseLevel(conf.LogLevel)
-	if err != nil {
-		return nil, err
+	if err := initializeAuthFile(conf.HGRCPath); err != nil {
+		return nil, fmt.Errorf("initializeAuthFile(hgrc) error: %w", err)
 	}
-	lggr := log.New(conf.CloudRuntime, logLvl)
 
 	r := mux.NewRouter()
 	r.Use(
 		mw.WithRequestID,
-		mw.LogEntryMiddleware(lggr),
+		mw.LogEntryMiddleware(logger),
 		mw.RequestLogger,
 		secure.New(secure.Options{
 			SSLRedirect:     conf.ForceSSL,
@@ -82,10 +75,10 @@ func App(conf *config.Config) (http.Handler, error) {
 		conf.TraceExporter,
 		conf.TraceExporterURL,
 		Service,
-		ENV,
+		conf.GoEnv,
 	)
 	if err != nil {
-		lggr.Infof("%s", err)
+		logger.Info(err)
 	} else {
 		defer flushTraces()
 	}
@@ -95,7 +88,7 @@ func App(conf *config.Config) (http.Handler, error) {
 	// was specified by the user.
 	flushStats, err := observ.RegisterStatsExporter(r, conf.StatsExporter, Service)
 	if err != nil {
-		lggr.Infof("%s", err)
+		logger.Info(err)
 	} else {
 		defer flushStats()
 	}
@@ -108,7 +101,7 @@ func App(conf *config.Config) (http.Handler, error) {
 	if !conf.FilterOff() {
 		mf, err := module.NewFilter(conf.FilterFile)
 		if err != nil {
-			lggr.Fatal(err)
+			return nil, fmt.Errorf("error from module.NewFilter: %w", err)
 		}
 		r.Use(mw.NewFilterMiddleware(mf, conf.GlobalEndpoint))
 	}
@@ -126,22 +119,15 @@ func App(conf *config.Config) (http.Handler, error) {
 
 	store, err := GetStorage(conf.StorageType, conf.Storage, conf.TimeoutDuration(), client)
 	if err != nil {
-		err = fmt.Errorf("error getting storage configuration (%s)", err)
-		return nil, err
+		return nil, fmt.Errorf("error getting storage configuration: %w", err)
 	}
 
 	proxyRouter := r
 	if subRouter != nil {
 		proxyRouter = subRouter
 	}
-	if err := addProxyRoutes(
-		proxyRouter,
-		store,
-		lggr,
-		conf,
-	); err != nil {
-		err = fmt.Errorf("error adding proxy routes (%s)", err)
-		return nil, err
+	if err := addProxyRoutes(proxyRouter, store, logger, conf); err != nil {
+		return nil, fmt.Errorf("error adding proxy routes: %w", err)
 	}
 
 	h := &ochttp.Handler{
