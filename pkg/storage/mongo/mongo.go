@@ -5,7 +5,7 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
-	"io/ioutil"
+	"os"
 	"strings"
 	"time"
 
@@ -109,7 +109,7 @@ func (m *ModuleStore) newClient() (*mongo.Client, error) {
 			roots = x509.NewCertPool()
 		}
 
-		cert, err := ioutil.ReadFile(m.certPath)
+		cert, err := os.ReadFile(m.certPath)
 		if err != nil {
 			return nil, errors.E(op, err)
 		}

@@ -3,7 +3,7 @@ package azureblob
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
+	"io"
 
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/errors"
@@ -30,7 +30,7 @@ func (s *Storage) Info(ctx context.Context, module string, version string) ([]by
 		return nil, errors.E(op, err, errors.M(module), errors.V(version))
 	}
 
-	infoBytes, err := ioutil.ReadAll(infoReader)
+	infoBytes, err := io.ReadAll(infoReader)
 	if err != nil {
 		return nil, errors.E(op, err, errors.M(module), errors.V(version))
 	}
@@ -62,7 +62,7 @@ func (s *Storage) GoMod(ctx context.Context, module string, version string) ([]b
 		return nil, errors.E(op, err, errors.M(module), errors.V(version))
 	}
 
-	modBytes, err := ioutil.ReadAll(modReader)
+	modBytes, err := io.ReadAll(modReader)
 	if err != nil {
 		return nil, errors.E(op, fmt.Errorf("could not get new reader for mod file: %s", err), errors.M(module), errors.V(version))
 	}

@@ -15,6 +15,15 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
+// testingRedisLogger implements pkg/stash.RedisLogger.
+type testingRedisLogger struct {
+	t *testing.T
+}
+
+func (l *testingRedisLogger) Printf(ctx context.Context, format string, v ...interface{}) {
+	l.t.Logf(format, v...)
+}
+
 // WithRedisLock will ensure that 5 concurrent requests will all get the first request's
 // response. We can ensure that because only the first response does not return an error
 // and therefore all 5 responses should have no error.
@@ -29,7 +38,8 @@ func TestWithRedisLock(t *testing.T) {
 		t.Fatal(err)
 	}
 	ms := &mockRedisStasher{strg: strg}
-	wrapper, err := WithRedisLock(endpoint, password, storage.WithChecker(strg), config.DefaultRedisLockConfig())
+	l := &testingRedisLogger{t: t}
+	wrapper, err := WithRedisLock(l, endpoint, password, storage.WithChecker(strg), config.DefaultRedisLockConfig())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -64,7 +74,8 @@ func TestWithRedisLockWithPassword(t *testing.T) {
 		t.Fatal(err)
 	}
 	ms := &mockRedisStasher{strg: strg}
-	wrapper, err := WithRedisLock(endpoint, password, storage.WithChecker(strg), config.DefaultRedisLockConfig())
+	l := &testingRedisLogger{t: t}
+	wrapper, err := WithRedisLock(l, endpoint, password, storage.WithChecker(strg), config.DefaultRedisLockConfig())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -98,7 +109,8 @@ func TestWithRedisLockWithWrongPassword(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	_, err = WithRedisLock(endpoint, password, storage.WithChecker(strg), config.DefaultRedisLockConfig())
+	l := &testingRedisLogger{t: t}
+	_, err = WithRedisLock(l, endpoint, password, storage.WithChecker(strg), config.DefaultRedisLockConfig())
 	if err == nil {
 		t.Fatal("Expected Connection Error")
 	}

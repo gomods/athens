@@ -2,6 +2,7 @@ package stash
 
 import (
 	"context"
+
 	"github.com/go-redis/redis/v8"
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/errors"
@@ -10,7 +11,9 @@ import (
 
 // WithRedisSentinelLock returns a distributed singleflight
 // with a redis cluster that utilizes sentinel for quorum and failover
-func WithRedisSentinelLock(endpoints []string, master, password string, checker storage.Checker, lockConfig *config.RedisLockConfig) (Wrapper, error) {
+func WithRedisSentinelLock(l RedisLogger, endpoints []string, master, password string, checker storage.Checker, lockConfig *config.RedisLockConfig) (Wrapper, error) {
+	redis.SetLogger(l)
+
 	const op errors.Op = "stash.WithRedisSentinelLock"
 	// The redis client constructor does not return an error when no endpoints
 	// are provided, so we check for ourselves.
