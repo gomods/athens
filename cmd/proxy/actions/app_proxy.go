@@ -1,6 +1,7 @@
 package actions
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -99,7 +100,7 @@ func addProxyRoutes(
 
 	lister := module.NewVCSLister(c.GoBinary, c.GoBinaryEnvVars, fs)
 	checker := storage.WithChecker(s)
-	withSingleFlight, err := getSingleFlight(c, checker)
+	withSingleFlight, err := getSingleFlight(l, c, checker)
 	if err != nil {
 		return err
 	}
@@ -126,7 +127,16 @@ func addProxyRoutes(
 	return nil
 }
 
-func getSingleFlight(c *config.Config, checker storage.Checker) (stash.Wrapper, error) {
+// athensLoggerForRedis implements pkg/stash.RedisLogger.
+type athensLoggerForRedis struct {
+	logger *log.Logger
+}
+
+func (l *athensLoggerForRedis) Printf(ctx context.Context, format string, v ...interface{}) {
+	l.logger.WithContext(ctx).Printf(format, v...)
+}
+
+func getSingleFlight(l *log.Logger, c *config.Config, checker storage.Checker) (stash.Wrapper, error) {
 	switch c.SingleFlightType {
 	case "", "memory":
 		return stash.WithSingleflight, nil
@@ -140,12 +150,18 @@ func getSingleFlight(c *config.Config, checker storage.Checker) (stash.Wrapper, 
 		if c.SingleFlight == nil || c.SingleFlight.Redis == nil {
 			return nil, fmt.Errorf("Redis config must be present")
 		}
-		return stash.WithRedisLock(c.SingleFlight.Redis.Endpoint, c.SingleFlight.Redis.Password, checker, c.SingleFlight.Redis.LockConfig)
+		return stash.WithRedisLock(
+			&athensLoggerForRedis{logger: l},
+			c.SingleFlight.Redis.Endpoint,
+			c.SingleFlight.Redis.Password,
+			checker,
+			c.SingleFlight.Redis.LockConfig)
 	case "redis-sentinel":
 		if c.SingleFlight == nil || c.SingleFlight.RedisSentinel == nil {
 			return nil, fmt.Errorf("Redis config must be present")
 		}
 		return stash.WithRedisSentinelLock(
+			&athensLoggerForRedis{logger: l},
 			c.SingleFlight.RedisSentinel.Endpoints,
 			c.SingleFlight.RedisSentinel.MasterName,
 			c.SingleFlight.RedisSentinel.SentinelPassword,
