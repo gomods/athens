@@ -20,15 +20,17 @@ Athens provides a repository for [Go Modules](https://github.com/golang/go/wiki/
 
 The fastest way to install Athens using Helm is to deploy it from our public Helm chart repository. First, add the repository with this command:
 
+Hint: To make the chart available again, the chart is temporarily hosted at sickhub.github.io until we've found a new solution.
+
 ```console
-$ helm repo add gomods https://athens.blob.core.windows.net/charts
+$ helm repo add athens https://sickhub.github.io/athens-proxy
 $ helm repo update
 ```
 
 Next, install the chart with default values to `athens` namespace:  
 
 ```
-$ helm install gomods/athens-proxy -n athens --namespace athens
+$ helm install athens/athens-proxy -n athens --namespace athens
 ```
 
 This will deploy a single Athens instance in the `athens` namespace with `disk` storage enabled. Additionally, a `ClusterIP` service will be created.
