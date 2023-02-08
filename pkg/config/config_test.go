@@ -100,7 +100,7 @@ func TestEnvOverrides(t *testing.T) {
 
 	envVars := getEnvMap(expConf)
 	for k, v := range envVars {
-		os.Setenv(k, v)
+		t.Setenv(k, v)
 	}
 	conf := &Config{}
 	err := envOverride(conf)
@@ -125,9 +125,7 @@ func TestEnvOverridesPreservingPort(t *testing.T) {
 
 func TestEnvOverridesPORT(t *testing.T) {
 	conf := &Config{Port: ""}
-	oldVal := os.Getenv("PORT")
-	defer os.Setenv("PORT", oldVal)
-	os.Setenv("PORT", "5000")
+	t.Setenv("PORT", "5000")
 	err := envOverride(conf)
 	if err != nil {
 		t.Fatalf("Env override failed: %v", err)
@@ -189,11 +187,8 @@ func TestStorageEnvOverrides(t *testing.T) {
 		},
 	}
 	envVars := getEnvMap(&Config{Storage: expStorage})
-	envVarBackup := map[string]string{}
 	for k, v := range envVars {
-		oldVal := os.Getenv(k)
-		envVarBackup[k] = oldVal
-		os.Setenv(k, v)
+		t.Setenv(k, v)
 	}
 	conf := &Config{}
 	err := envOverride(conf)
@@ -201,35 +196,12 @@ func TestStorageEnvOverrides(t *testing.T) {
 		t.Fatalf("Env override failed: %v", err)
 	}
 	compareStorageConfigs(conf.Storage, expStorage, t)
-	restoreEnv(envVarBackup)
 }
 
 // TestParseExampleConfig validates that all the properties in the example configuration file
 // can be parsed and validated without any environment variables
 func TestParseExampleConfig(t *testing.T) {
-
-	// initialize all struct pointers so we get all applicable env variables
-	emptyConf := &Config{
-		Storage: &Storage{
-			Disk: &DiskConfig{},
-			GCP:  &GCPConfig{},
-			Minio: &MinioConfig{
-				EnableSSL: false,
-			},
-			Mongo: &MongoConfig{},
-			S3:    &S3Config{},
-		},
-		SingleFlight: &SingleFlight{},
-		Index:        &Index{},
-	}
-	// unset all environment variables
-	envVars := getEnvMap(emptyConf)
-	envVarBackup := map[string]string{}
-	for k := range envVars {
-		oldVal := os.Getenv(k)
-		envVarBackup[k] = oldVal
-		os.Unsetenv(k)
-	}
+	os.Clearenv()
 
 	expStorage := &Storage{
 		Disk: &DiskConfig{
@@ -327,7 +299,6 @@ func TestParseExampleConfig(t *testing.T) {
 	}
 
 	compareConfigs(parsedConf, expConf, t)
-	restoreEnv(envVarBackup)
 }
 
 func getEnvMap(config *Config) map[string]string {
@@ -419,16 +390,6 @@ func getEnvMap(config *Config) map[string]string {
 		}
 	}
 	return envVars
-}
-
-func restoreEnv(envVars map[string]string) {
-	for k, v := range envVars {
-		if v != "" {
-			os.Setenv(k, v)
-		} else {
-			os.Unsetenv(k)
-		}
-	}
 }
 
 func tempFile(perm os.FileMode) (name string, err error) {
@@ -683,12 +644,7 @@ func TestNetworkMode(t *testing.T) {
 }
 
 func testDecode(t *testing.T, tc decodeTestCase) {
-	const envKey = "ATHENS_LIST_TEST"
-
-	os.Setenv(envKey, tc.given)
-	defer func() {
-		require.NoError(t, os.Unsetenv(envKey))
-	}()
+	t.Setenv("ATHENS_LIST_TEST", tc.given)
 
 	var config struct {
 		GoBinaryEnvVars EnvList `envconfig:"ATHENS_LIST_TEST"`
