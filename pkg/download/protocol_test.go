@@ -164,6 +164,7 @@ func TestListMode(t *testing.T) {
 			storage:     strg,
 			lister:      ml,
 			networkMode: tc.networkmode,
+			df:          &mode.DownloadFile{},
 		}
 		for _, tag := range tc.storageTags {
 			err := strg.Save(ctx, tc.path, tag, []byte("mod"), bytes.NewReader([]byte("zip")), []byte("info"))

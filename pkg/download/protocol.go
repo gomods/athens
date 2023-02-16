@@ -89,6 +89,12 @@ func (p *protocol) List(ctx context.Context, mod string) ([]string, error) {
 	var sErr, goErr error
 	var wg sync.WaitGroup
 
+	// if download mode is none for the specific mod, just return an error.
+	downloadMode := p.df.Match(mod)
+	if downloadMode == mode.None {
+		return nil, errors.E(op, errors.M(mod), errors.KindNotFound)
+	}
+
 	/*
 		TODO: potential refactor:
 
@@ -183,9 +189,16 @@ func (p *protocol) Latest(ctx context.Context, mod string) (*storage.RevInfo, er
 	const op errors.Op = "protocol.Latest"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
+
+	// if download mode is none for the specific mod, just return an error.
+	downloadMode := p.df.Match(mod)
+	if downloadMode == mode.None {
+		return nil, errors.E(op, errors.M(mod), errors.KindNotFound)
+	}
+
 	if p.networkMode == Offline {
 		// Go never pings the /@latest endpoint _first_. It always tries /list and if that
-		// endpoint returns an empty list then it fallsback to calling /@latest.
+		// endpoint returns an empty list then it fallbacks to calling /@latest.
 		return nil, errors.E(op, "Athens is in offline mode, use /list endpoint", errors.KindNotFound)
 	}
 	lr, _, err := p.lister.List(ctx, mod)
