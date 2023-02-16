@@ -28,7 +28,8 @@ import (
 )
 
 var (
-	testConfigPath = filepath.Join("..", "..", "config.dev.toml")
+	testConfigPath           = filepath.Join("..", "..", "config.dev.toml")
+	testDownloadModeFilePath = filepath.Join("..", "..", "download.example.hcl")
 )
 
 func getDP(t *testing.T) Protocol {
@@ -37,6 +38,12 @@ func getDP(t *testing.T) Protocol {
 	if err != nil {
 		t.Fatalf("Unable to parse config file: %s", err.Error())
 	}
+
+	df, err := mode.NewFile(mode.Mode("file:"+testDownloadModeFilePath), conf.DownloadURL)
+	if err != nil {
+		t.Fatalf("Unable to parse download mode file: %s", err.Error())
+	}
+
 	goBin := conf.GoBinary
 	fs := afero.NewOsFs()
 	mf, err := module.NewGoGetFetcher(goBin, conf.GoGetDir, conf.GoBinaryEnvVars, fs)
@@ -49,10 +56,11 @@ func getDP(t *testing.T) Protocol {
 	}
 	st := stash.New(mf, s, nop.New())
 	return New(&Opts{
-		Storage:     s,
-		Stasher:     st,
-		Lister:      module.NewVCSLister(goBin, conf.GoBinaryEnvVars, fs),
-		NetworkMode: Strict,
+		Storage:      s,
+		Stasher:      st,
+		Lister:       module.NewVCSLister(goBin, conf.GoBinaryEnvVars, fs),
+		NetworkMode:  Strict,
+		DownloadFile: df,
 	})
 }
 
@@ -149,10 +157,33 @@ var listModeTests = []listModeTest{
 		wantTags:     nil,
 		wantErr:      true,
 	},
+	{
+		name:         "download mode is none for module",
+		networkmode:  Strict,
+		path:         "golang.org/x/crypto",
+		storageTags:  []string{"v0.1.0"},
+		upstreamList: []string{"v0.1.0", "v0.2.0", "v0.3.0", "v0.4.0", "v0.5.0", "v0.6.0"},
+		wantTags:     nil,
+		wantErr:      true,
+	},
+	{
+		name:         "download mode is async_redirect for module",
+		networkmode:  Strict,
+		path:         "github.com/gomods/athens",
+		storageTags:  []string{"v0.1.0"},
+		upstreamList: []string{"v0.1.0", "v0.2.0", "v0.3.0"},
+		wantTags:     []string{"v0.1.0", "v0.2.0", "v0.3.0"},
+		wantErr:      true,
+	},
 }
 
 func TestListMode(t *testing.T) {
 	ctx := context.Background()
+	df, err := mode.NewFile(mode.Mode("file:"+testDownloadModeFilePath), "")
+	if err != nil {
+		t.Fatalf("Unable to parse download mode file: %s", err.Error())
+	}
+
 	for _, tc := range listModeTests {
 		strg, err := mem.NewStorage()
 		require.NoError(t, err)
@@ -164,7 +195,7 @@ func TestListMode(t *testing.T) {
 			storage:     strg,
 			lister:      ml,
 			networkMode: tc.networkmode,
-			df:          &mode.DownloadFile{},
+			df:          df,
 		}
 		for _, tag := range tc.storageTags {
 			err := strg.Save(ctx, tc.path, tag, []byte("mod"), bytes.NewReader([]byte("zip")), []byte("info"))
@@ -237,6 +268,12 @@ var latestTests = []latestTest{
 			Version: "v0.0.3",
 			Time:    time.Date(2018, 8, 3, 17, 16, 00, 0, time.UTC),
 		},
+	},
+	{
+		name: "download mode is none",
+		path: "golang.org/x/crypto",
+		info: nil,
+		err:  true,
 	},
 }
 
@@ -329,6 +366,12 @@ var modTests = []modTest{
 		name:    "incorrect github repo",
 		path:    "github.com/athens-artifacts/not-exists",
 		version: "v1.0.0",
+		err:     true,
+	},
+	{
+		name:    "download mode is none",
+		path:    "golang.org/x/crypto",
+		version: "v0.6.0",
 		err:     true,
 	},
 }

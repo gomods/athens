@@ -1,9 +1,9 @@
 downloadURL = "https://proxy.golang.org"
 
-mode = "async_redirect"
+mode = "sync"
 
 download "github.com/gomods/*" {
-    mode = "sync"
+    mode = "async_redirect"
 }
 
 download "golang.org/x/*" {
