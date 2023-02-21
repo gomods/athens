@@ -5,7 +5,6 @@ on:
 jobs:
   build:
     env:
-      GO111MODULE: on
       ATHENS_MONGO_STORAGE_URL: mongodb://localhost:27017
       ATHENS_MINIO_ENDPOINT: localhost:9000
       REDIS_TEST_ENDPOINT: localhost:6379
@@ -60,11 +59,12 @@ jobs:
           go mod vendor
       - name: Build
         run: go build cmd/proxy/*.go
-      - name: Test
-        run: |
-          ./scripts/check_gofmt.sh
-          go vet ./...
-          go test -v ./...
+      - name: Check go formatting
+        run: ./scripts/check_gofmt.sh
+      - name: Run Linter
+        run: go vet ./...
+      - name: Unit test
+        run: go test -v -race ./...
       - name: End to end test
         if: success() || failure()
         run: |
