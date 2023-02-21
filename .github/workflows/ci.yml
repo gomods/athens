@@ -21,10 +21,7 @@ jobs:
         ports:
           - 27017:27017
       minio:
-        image: minio/minio:latest
-          command:
-            - server
-            - /data
+        image: minio/minio:edge-cicd
           ports:
             - 9000:9000
           env:
