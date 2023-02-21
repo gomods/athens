@@ -1,0 +1,120 @@
+---
+name: Test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  GO_VERSION: 1.19
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    env:
+      GOPROXY: http://localhost:3001
+      ATHENS_MONGO_STORAGE_URL: mongodb://localhost:27017
+      ATHENS_MINIO_ENDPOINT: localhost:9000
+      REDIS_TEST_ENDPOINT: localhost:6379
+      REDIS_SENTINEL_TEST_ENDPOINT: localhost:26379
+      REDIS_SENTINEL_TEST_MASTER_NAME: redis-1
+      REDIS_SENTINEL_TEST_PASSWORD: sekret
+      PROTECTED_REDIS_TEST_ENDPOINT: localhost:6380
+      ATHENS_PROTECTED_REDIS_PASSWORD: AthensPass1
+      GCS_SERVICE_ACCOUNT: ${{ secrets.GCS_SERVICE_ACCOUNT }}
+      GCS_PROJECT_ID: ${{ secrets.GOOGLE_CLOUD_PROJECT }}
+      ATHENS_AZURE_ACCOUNT_NAME: ${{ secrets.ATHENS_AZURE_ACCOUNT_NAME }}
+      ATHENS_AZURE_ACCOUNT_KEY: ${{ secrets.ATHENS_AZURE_ACCOUNT_KEY }}
+
+    strategy:
+      fail-fast: false
+
+    steps:
+      - name: Install Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Cache Go modules
+        uses: actions/cache@v3
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
+      - name: Run unit tests
+        run: go test -cover -race ./...
+
+      - name: Run e2e tests
+        run: |
+          go build cmd/proxy/*.go
+          # Run the just-built athens server
+          ./main &
+          # Wait for it to spin up
+          sleep 3
+          curl localhost:3000
+          mkdir -p ~/happy
+          # Ensure the gopath has no modules cached.
+          mkdir -p ~/emptygopath
+          cd ~/happy
+          git clone https://github.com/athens-artifacts/happy-path.git
+          cd happy-path
+          GOPATH=~/emptygopath GOPROXY=http://localhost:3000 go build
+
+    services:
+      mongo:
+        image: mongo
+        ports:
+          - 27017
+
+      minio:
+        image: minio/minio:latest
+        command:
+          - server
+          - /data
+        ports:
+          - 9000
+        env:
+          MINIO_ACCESS_KEY: minio
+          MINIO_SECRET_KEY: minio123
+
+      redis:
+        image: redis
+        ports:
+          - 6379
+
+      redis-sentinel:
+        image: bitnami/redis-sentinel
+        env:
+          REDIS_MASTER_HOST: redis
+          REDIS_MASTER_SET: redis-1
+          REDIS_SENTINEL_PASSWORD: sekret
+          REDIS_SENTINEL_QUORUM: "1"
+        ports:
+          - 26379
+
+      redis-protected:
+        image: redis
+        ports:
+          - 6380
+        volumes:
+          - "./test/redis.conf:/usr/local/etc/redis/redis.conf"
+
+      athens-proxy:
+        image: gomods/athens:canary
+        ports:
+          - 3001
+        env:
+          ATHENS_GOGET_WORKERS: 5
+          ATHENS_PROTOCOL_WORKERS: 10
+          ATHENS_SINGLE_FLIGHT_TYPE: gcp
+          ATHENS_STORAGE_TYPE: gcp
+          ATHENS_STORAGE_GCP_BUCKET: "athens_ci_build"
+          ATHENS_STORAGE_GCP_JSON_KEY: ${{ secrets.GCS_SERVICE_ACCOUNT }}
