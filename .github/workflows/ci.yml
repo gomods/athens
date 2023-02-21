@@ -41,7 +41,7 @@ jobs:
         ports:
           - 26379:26379
       protectedredis:
-        image: redis
+        image: bitnami/redis
         ports:
           - 6380:6380
         env:
