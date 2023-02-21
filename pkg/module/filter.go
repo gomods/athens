@@ -24,12 +24,15 @@ type Filter struct {
 // WARNING: this is not concurrently safe
 // Configuration consists of two operations: + for include and - for exclude
 // e.g.
-//    - github.com/a
-//    + github.com/a/b
+//   - github.com/a
+//   - github.com/a/b
+//
 // will communicate all modules except github.com/a and its children, but github.com/a/b will be communicated
 // example 2:
-//   -
-//   + github.com/a
+//
+//	-
+//	+ github.com/a
+//
 // will exclude all items from communication except github.com/a
 func NewFilter(filterFilePath string) (*Filter, error) {
 	// Do not return an error if the file path is empty
