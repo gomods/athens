@@ -6,13 +6,13 @@ jobs:
   build:
     env:
       GO111MODULE: on
-      ATHENS_MONGO_STORAGE_URL: mongodb://mongo:27017
-      ATHENS_MINIO_ENDPOINT: minio:9000
-      REDIS_TEST_ENDPOINT: redis:6379
-      REDIS_SENTINEL_TEST_ENDPOINT: redis-sentinel:26379
+      ATHENS_MONGO_STORAGE_URL: mongodb://localhost:27017
+      ATHENS_MINIO_ENDPOINT: localhost:9000
+      REDIS_TEST_ENDPOINT: localhost:6379
+      REDIS_SENTINEL_TEST_ENDPOINT: localhost:26379
       REDIS_SENTINEL_TEST_MASTER_NAME: redis-1
       REDIS_SENTINEL_TEST_PASSWORD: sekret
-      PROTECTED_REDIS_TEST_ENDPOINT: protectedredis:6380
+      PROTECTED_REDIS_TEST_ENDPOINT: localhost:6380
       ATHENS_PROTECTED_REDIS_PASSWORD: AthensPass1
     runs-on: ubuntu-latest
     services:
@@ -40,6 +40,13 @@ jobs:
           REDIS_SENTINEL_QUORUM: "1"
         ports:
           - 26379:26379
+      protectedredis:
+        image: redis
+        ports:
+          - 6380:6380
+        env:
+          REDIS_PORT_NUMBER: 6380
+          REDIS_PASSWORD: AthensPass1
     steps:
       - uses: actions/checkout@v3
       - name: Set up Go
@@ -59,6 +66,7 @@ jobs:
           go vet ./...
           go test -v ./...
       - name: End to end test
+        if: success() || failure()
         run: |
           ./main & # run the just-built athens server
           sleep 3 # wait for it to spin up
@@ -69,6 +77,3 @@ jobs:
           git clone https://github.com/athens-artifacts/happy-path.git
           cd happy-path
           GOPATH=~/emptygopath GOPROXY=http://localhost:3000 go build
-
-          
-      
