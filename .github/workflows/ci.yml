@@ -40,8 +40,6 @@ jobs:
           REDIS_SENTINEL_QUORUM: "1"
         ports:
           - 26379:26379
-        needs:
-          - redis
     steps:
       - uses: actions/checkout@v3
       - name: Set up Go
@@ -71,8 +69,6 @@ jobs:
           git clone https://github.com/athens-artifacts/happy-path.git
           cd happy-path
           GOPATH=~/emptygopath GOPROXY=http://localhost:3000 go build
-        needs:
-          - redis
-          - redis-sentinel
+
           
       
