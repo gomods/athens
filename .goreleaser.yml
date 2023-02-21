@@ -12,7 +12,6 @@ builds:
     - darwin
   goarch:
     - amd64
-    - x86_64
   main: cmd/proxy/main.go
   binary: athens
   ldflags:
