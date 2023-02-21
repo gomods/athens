@@ -5,4 +5,6 @@
 set -euo pipefail
 
 GO_FILES=$(find . -iname '*.go' -type f)   # All the .go files
-test -z $(gofmt -s -d "$GO_FILES" | tee /dev/stderr)
+for f in $GO_FILES; do
+  test -z "$(gofmt -s -d "$f" | tee /dev/stderr)"
+done
