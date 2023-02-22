@@ -5,6 +5,10 @@ ifndef GOLANG_VERSION
 override GOLANG_VERSION = 1.19
 endif
 
+.PHONY: lint
+lint:
+	@golangci-lint run ./...
+
 .PHONY: build
 build: ## build the athens proxy
 	go build -o ./cmd/proxy/proxy ./cmd/proxy
