@@ -53,16 +53,12 @@ jobs:
         with:
           go-version-file: 'go.mod'
           cache: true
-      - name: Module download & vendor
-        run: |
-          go mod download
-          go mod vendor
-      - name: Build
-        run: go build cmd/proxy/*.go
       - name: Check go formatting
         run: ./scripts/check_gofmt.sh
       - name: Run Linter
         run: go vet ./...
+      - name: Build
+        run: go build cmd/proxy/*.go
       - name: Unit test
         run: go test -v -race ./...
       - name: End to end test
