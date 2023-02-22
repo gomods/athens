@@ -19,8 +19,9 @@ func DecodePath(encoding string) (path string, err error) {
 	return path, nil
 }
 
-// Ripped from cmd/go
+// Ripped from cmd/go.
 func decodeString(encoding string) (string, bool) {
+	//nolint:prealloc
 	var buf []byte
 
 	bang := false

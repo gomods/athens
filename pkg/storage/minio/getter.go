@@ -12,16 +12,16 @@ import (
 	minio "github.com/minio/minio-go/v6"
 )
 
-func (v *storageImpl) Info(ctx context.Context, module, vsn string) ([]byte, error) {
+func (s *storageImpl) Info(ctx context.Context, module, vsn string) ([]byte, error) {
 	const op errors.Op = "minio.Info"
-	ctx, span := observ.StartSpan(ctx, op.String())
+	_, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
-	infoPath := fmt.Sprintf("%s/%s.info", v.versionLocation(module, vsn), vsn)
-	infoReader, err := v.minioClient.GetObject(v.bucketName, infoPath, minio.GetObjectOptions{})
+	infoPath := fmt.Sprintf("%s/%s.info", s.versionLocation(module, vsn), vsn)
+	infoReader, err := s.minioClient.GetObject(s.bucketName, infoPath, minio.GetObjectOptions{})
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
-	defer infoReader.Close()
+	defer func() { _ = infoReader.Close() }()
 	info, err := io.ReadAll(infoReader)
 	if err != nil {
 		return nil, transformNotFoundErr(op, module, vsn, err)
@@ -30,16 +30,16 @@ func (v *storageImpl) Info(ctx context.Context, module, vsn string) ([]byte, err
 	return info, nil
 }
 
-func (v *storageImpl) GoMod(ctx context.Context, module, vsn string) ([]byte, error) {
+func (s *storageImpl) GoMod(ctx context.Context, module, vsn string) ([]byte, error) {
 	const op errors.Op = "minio.GoMod"
-	ctx, span := observ.StartSpan(ctx, op.String())
+	_, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
-	modPath := fmt.Sprintf("%s/go.mod", v.versionLocation(module, vsn))
-	modReader, err := v.minioClient.GetObject(v.bucketName, modPath, minio.GetObjectOptions{})
+	modPath := fmt.Sprintf("%s/go.mod", s.versionLocation(module, vsn))
+	modReader, err := s.minioClient.GetObject(s.bucketName, modPath, minio.GetObjectOptions{})
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
-	defer modReader.Close()
+	defer func() { _ = modReader.Close() }()
 	mod, err := io.ReadAll(modReader)
 	if err != nil {
 		return nil, transformNotFoundErr(op, module, vsn, err)
@@ -48,31 +48,32 @@ func (v *storageImpl) GoMod(ctx context.Context, module, vsn string) ([]byte, er
 	return mod, nil
 }
 
-func (v *storageImpl) Zip(ctx context.Context, module, vsn string) (storage.SizeReadCloser, error) {
+func (s *storageImpl) Zip(ctx context.Context, module, vsn string) (storage.SizeReadCloser, error) {
 	const op errors.Op = "minio.Zip"
-	ctx, span := observ.StartSpan(ctx, op.String())
+	_, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 
-	zipPath := fmt.Sprintf("%s/source.zip", v.versionLocation(module, vsn))
-	_, err := v.minioClient.StatObject(v.bucketName, zipPath, minio.StatObjectOptions{})
+	zipPath := fmt.Sprintf("%s/source.zip", s.versionLocation(module, vsn))
+	_, err := s.minioClient.StatObject(s.bucketName, zipPath, minio.StatObjectOptions{})
 	if err != nil {
 		return nil, errors.E(op, err, errors.KindNotFound, errors.M(module), errors.V(vsn))
 	}
 
-	zipReader, err := v.minioClient.GetObject(v.bucketName, zipPath, minio.GetObjectOptions{})
+	zipReader, err := s.minioClient.GetObject(s.bucketName, zipPath, minio.GetObjectOptions{})
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
 	oi, err := zipReader.Stat()
 	if err != nil {
-		zipReader.Close()
+		_ = zipReader.Close()
 		return nil, errors.E(op, err)
 	}
 	return storage.NewSizer(zipReader, oi.Size), nil
 }
 
 func transformNotFoundErr(op errors.Op, module, version string, err error) error {
-	if eresp, ok := err.(minio.ErrorResponse); ok {
+	var eresp minio.ErrorResponse
+	if errors.AsErr(err, &eresp) {
 		if eresp.StatusCode == http.StatusNotFound {
 			return errors.E(op, errors.M(module), errors.V(version), errors.KindNotFound)
 		}

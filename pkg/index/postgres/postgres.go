@@ -7,17 +7,15 @@ import (
 	"strings"
 	"time"
 
-	// register the driver with database/sql
-	"github.com/lib/pq"
-
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/index"
+	"github.com/lib/pq"
 )
 
 // New returns a new Indexer with a PostgreSQL implementation.
 // It attempts to connect to the DB and create the index table
-// if it doesn ot already exist.
+// if it does not already exist.
 func New(cfg *config.Postgres) (index.Indexer, error) {
 	dataSource := getPostgresSource(cfg)
 	db, err := sql.Open("postgres", dataSource)
@@ -42,7 +40,7 @@ var schema = [...]string{
 			id SERIAL PRIMARY KEY,
 			path VARCHAR(255) NOT NULL,
 			version VARCHAR(255) NOT NULL,
-			timestamp timestamp NOT NULL
+			timestamp TIMESTAMP NOT NULL
 		)
 	`,
 	`
@@ -82,8 +80,8 @@ func (i *indexer) Lines(ctx context.Context, since time.Time, limit int) ([]*ind
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
-	defer rows.Close()
-	lines := []*index.Line{}
+	defer func() { _ = rows.Close() }()
+	var lines []*index.Line
 	for rows.Next() {
 		var line index.Line
 		err = rows.Scan(&line.Path, &line.Version, &line.Timestamp)
@@ -96,7 +94,7 @@ func (i *indexer) Lines(ctx context.Context, since time.Time, limit int) ([]*ind
 }
 
 func getPostgresSource(cfg *config.Postgres) string {
-	args := []string{}
+	args := make([]string, 0, 5+len(cfg.Params))
 	args = append(args, "host="+cfg.Host)
 	args = append(args, "port=", strconv.Itoa(cfg.Port))
 	args = append(args, "user=", cfg.User)
@@ -109,13 +107,14 @@ func getPostgresSource(cfg *config.Postgres) string {
 }
 
 func getKind(err error) int {
-	pqerr, ok := err.(*pq.Error)
-	if !ok {
+	pqerr := &pq.Error{}
+	if !errors.AsErr(err, &pqerr) {
 		return errors.KindUnexpected
 	}
 	switch pqerr.Code {
 	case "23505":
 		return errors.KindAlreadyExists
+	default:
+		return errors.KindUnexpected
 	}
-	return errors.KindUnexpected
 }

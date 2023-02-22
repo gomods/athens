@@ -8,21 +8,17 @@ import (
 	"github.com/gomods/athens/pkg/observ"
 )
 
-const (
-	minioErrorCodeNoSuchKey = "NoSuchKey"
-)
-
-func (v *storageImpl) Exists(ctx context.Context, module, version string) (bool, error) {
+func (s *storageImpl) Exists(ctx context.Context, module, version string) (bool, error) {
 	const op errors.Op = "minio.Exists"
-	ctx, span := observ.StartSpan(ctx, op.String())
+	_, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
-	versionedPath := v.versionLocation(module, version)
+	versionedPath := s.versionLocation(module, version)
 	modPath := fmt.Sprintf("%s/go.mod", versionedPath)
 	infoPath := fmt.Sprintf("%s/%s.info", versionedPath, version)
 	zipPath := fmt.Sprintf("%s/source.zip", versionedPath)
 
 	var count int
-	objectCh, err := v.minioCore.ListObjectsV2(v.bucketName, versionedPath, "", false, "", 0, "")
+	objectCh, err := s.minioCore.ListObjectsV2(s.bucketName, versionedPath, "", false, "", 0, "")
 	if err != nil {
 		return false, errors.E(op, err, errors.M(module), errors.V(version))
 	}

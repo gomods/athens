@@ -6,14 +6,14 @@ import (
 	"github.com/gomods/athens/pkg/errors"
 )
 
-// Checker is the interface that checks if the version of the module exists
+// Checker is the interface that checks if the version of the module exists.
 type Checker interface {
 	// Exists checks whether or not module in specified version is present
-	// in the backing storage
+	// in the backing storage.
 	Exists(ctx context.Context, module, version string) (bool, error)
 }
 
-// WithChecker wraps the backend with a Checker implementaiton
+// WithChecker wraps the backend with a Checker implementation.
 func WithChecker(strg Backend) Checker {
 	if checker, ok := strg.(Checker); ok {
 		return checker

@@ -9,14 +9,13 @@ import (
 	"github.com/spf13/afero"
 )
 
-func (v *storageImpl) Exists(ctx context.Context, module, version string) (bool, error) {
+func (s *storageImpl) Exists(ctx context.Context, module, version string) (bool, error) {
 	const op errors.Op = "fs.Exists"
-	ctx, span := observ.StartSpan(ctx, op.String())
+	_, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
-	versionedPath := v.versionLocation(module, version)
+	versionedPath := s.versionLocation(module, version)
 
-	files, err := afero.ReadDir(v.filesystem, versionedPath)
-
+	files, err := afero.ReadDir(s.filesystem, versionedPath)
 	if err != nil {
 		if os.IsNotExist(err) {
 			return false, nil

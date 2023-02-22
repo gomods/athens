@@ -15,10 +15,10 @@ import (
 )
 
 // RegisterStatsExporter determines the type of StatsExporter service for exporting stats from Opencensus
-// Currently it supports: prometheus
+// Currently it supports: prometheus.
 func RegisterStatsExporter(r *mux.Router, statsExporter, service string) (func(), error) {
 	const op errors.Op = "observ.RegisterStatsExporter"
-	var stop = func() {}
+	stop := func() {}
 	var err error
 	switch statsExporter {
 	case "prometheus":
@@ -38,7 +38,7 @@ func RegisterStatsExporter(r *mux.Router, statsExporter, service string) (func()
 	default:
 		return nil, errors.E(op, fmt.Sprintf("StatsExporter %s not supported. Please open PR or an issue at github.com/gomods/athens", statsExporter))
 	}
-	if err := registerViews(); err != nil {
+	if err = registerViews(); err != nil {
 		return nil, errors.E(op, err)
 	}
 
@@ -89,7 +89,7 @@ func registerStatsStackDriverExporter(projectID string) (func(), error) {
 	return sd.Flush, nil
 }
 
-// registerViews register stats which should be collected in Athens
+// registerViews register stats which should be collected in Athens.
 func registerViews() error {
 	const op errors.Op = "observ.registerViews"
 	if err := view.Register(

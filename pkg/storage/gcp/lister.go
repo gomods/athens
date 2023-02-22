@@ -10,8 +10,8 @@ import (
 	"google.golang.org/api/iterator"
 )
 
-// List implements the (./pkg/storage).Lister interface
-// It returns a list of versions, if any, for a given module
+// List implements the (./pkg/storage).Lister interface.
+// It returns a list of versions, if any, for a given module.
 func (s *Storage) List(ctx context.Context, module string) ([]string, error) {
 	const op errors.Op = "gcp.List"
 	ctx, span := observ.StartSpan(ctx, op.String())
@@ -22,7 +22,7 @@ func (s *Storage) List(ctx context.Context, module string) ([]string, error) {
 	paths := []string{}
 	for {
 		attrs, err := it.Next()
-		if err == iterator.Done {
+		if errors.IsErr(err, iterator.Done) {
 			break
 		}
 		if err != nil {

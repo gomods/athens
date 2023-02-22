@@ -15,8 +15,7 @@ import (
 // a ready-to-go http handler that serves up cmd/go's download protocol.
 type ProtocolHandler func(dp Protocol, lggr log.Entry, df *mode.DownloadFile) http.Handler
 
-// HandlerOpts are the generic options
-// for a ProtocolHandler
+// HandlerOpts are the generic options for a ProtocolHandler.
 type HandlerOpts struct {
 	Protocol     Protocol
 	Logger       *log.Logger
@@ -26,7 +25,7 @@ type HandlerOpts struct {
 // LogEntryHandler pulls a log entry from the request context. Thanks to the
 // LogEntryMiddleware, we should have a log entry stored in the context for each
 // request with request-specific fields. This will grab the entry and pass it to
-// the protocol handlers
+// the protocol handlers.
 func LogEntryHandler(ph ProtocolHandler, opts *HandlerOpts) http.Handler {
 	f := func(w http.ResponseWriter, r *http.Request) {
 		ent := log.EntryFromContext(r.Context())

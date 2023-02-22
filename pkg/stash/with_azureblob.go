@@ -132,8 +132,8 @@ func (s *azblobLock) acquireLease(ctx context.Context, blobURL azblob.BlockBlobU
 	_, err := blobURL.Upload(tctx, bytes.NewReader([]byte{1}), azblob.BlobHTTPHeaders{}, nil, azblob.BlobAccessConditions{})
 	if err != nil {
 		// if the blob is already leased we will get http.StatusPreconditionFailed while writing to that blob
-		stgErr, ok := err.(azblob.StorageError)
-		if !ok || stgErr.Response().StatusCode != http.StatusPreconditionFailed {
+		var stgErr azblob.StorageError
+		if !errors.AsErr(err, &stgErr) || stgErr.Response().StatusCode != http.StatusPreconditionFailed {
 			return "", errors.E(op, err)
 		}
 	}
@@ -147,7 +147,8 @@ func (s *azblobLock) acquireLease(ctx context.Context, blobURL azblob.BlockBlobU
 		res, err := blobURL.AcquireLease(tctx, leaseID.String(), 15, azblob.ModifiedAccessConditions{})
 		if err != nil {
 			// if the blob is already leased we will get http.StatusConflict - wait and try again
-			if stgErr, ok := err.(azblob.StorageError); ok && stgErr.Response().StatusCode == http.StatusConflict {
+			var stgErr azblob.StorageError
+			if ok := errors.AsErr(err, &stgErr); ok && stgErr.Response().StatusCode == http.StatusConflict {
 				select {
 				case <-time.After(1 * time.Second):
 					continue

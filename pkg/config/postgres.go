@@ -1,6 +1,6 @@
 package config
 
-// Postgres config
+// Postgres config.
 type Postgres struct {
 	Host     string            `validate:"required" envconfig:"ATHENS_INDEX_POSTGRES_HOST"`
 	Port     int               `validate:"required" envconfig:"ATHENS_INDEX_POSTGRES_PORT"`

@@ -16,7 +16,7 @@ import (
 	"go.opencensus.io/plugin/ochttp"
 )
 
-// Service is the name of the service that we want to tag our processes with
+// Service is the name of the service that we want to tag our processes with.
 const Service = "proxy"
 
 // App is where all routes and middleware for the proxy
@@ -126,7 +126,7 @@ func App(conf *config.Config) (http.Handler, error) {
 
 	store, err := GetStorage(conf.StorageType, conf.Storage, conf.TimeoutDuration(), client)
 	if err != nil {
-		err = fmt.Errorf("error getting storage configuration (%s)", err)
+		err = fmt.Errorf("error getting storage configuration: %w", err)
 		return nil, err
 	}
 
@@ -140,7 +140,7 @@ func App(conf *config.Config) (http.Handler, error) {
 		lggr,
 		conf,
 	); err != nil {
-		err = fmt.Errorf("error adding proxy routes (%s)", err)
+		err = fmt.Errorf("error adding proxy routes: %w", err)
 		return nil, err
 	}
 
