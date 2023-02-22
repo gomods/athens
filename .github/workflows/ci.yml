@@ -53,23 +53,10 @@ jobs:
         with:
           go-version-file: 'go.mod'
           cache: true
-      - name: Check go formatting
-        run: ./scripts/check_gofmt.sh
-      - name: Run Linter
-        run: go vet ./...
-      - name: Build
-        run: go build cmd/proxy/*.go
-      - name: Unit test
+      - name: Run linter
+        run: make verify
+      - name: Unit tests
         run: go test -v -race ./...
-      - name: End to end test
+      - name: End to end tests
         if: success() || failure()
-        run: |
-          ./main & # run the just-built athens server
-          sleep 3 # wait for it to spin up
-          curl localhost:3000
-          mkdir -p ~/happy
-          mkdir -p ~/emptygopath # ensure the gopath has no modules cached.
-          cd ~/happy
-          git clone https://github.com/athens-artifacts/happy-path.git
-          cd happy-path
-          GOPATH=~/emptygopath GOPROXY=http://localhost:3000 go build
+        run: make test-e2e
