@@ -28,6 +28,8 @@ services:
       - ATHENS_MONGO_STORAGE_URL=mongodb://mongo:27017
       - TIMEOUT=20 # in case the mongo dependency takes longer to start up
       - ATHENS_STORAGE_TYPE=mongo
+    volumes:
+      - ${GO_MODCACHE}:/go/pkg/mod
     depends_on:
       - mongo
       - minio
@@ -38,6 +40,8 @@ services:
       args:
         GOLANG_VERSION: 1.19
     command: "/bin/sh -c 'cd e2etests && go test --tags e2etests'"
+    volumes:
+      - ${GO_MODCACHE}:/go/pkg/mod
   azurite:
     image: arafato/azurite:2.6.5
     ports:

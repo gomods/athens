@@ -1,9 +1,13 @@
 VERSION = "unset"
 DATE=$(shell date -u +%Y-%m-%d-%H:%M:%S-%Z)
 
+GO_MODCACHE?=$(shell go env GOMODCACHE)
+
 ifndef GOLANG_VERSION
 override GOLANG_VERSION = 1.19
 endif
+
+export GO_MODCACHE
 
 .PHONY: build
 build: ## build the athens proxy
