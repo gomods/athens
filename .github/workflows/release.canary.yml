@@ -2,7 +2,7 @@ name: Release canary and commit tags
 on:
   push:
     branches:
-      - main
+      - "**"
 jobs:
   docker-push-main:
     runs-on: ubuntu-latest
@@ -20,7 +20,7 @@ jobs:
         with:
           file: cmd/proxy/Dockerfile
           build-args: VERSION=${{github.sha}}
-          tags: gomods/athens:canary
+          tags: gomods/athens:canary-test
           push: true
       - name: Set Short SHA
         id: vars
