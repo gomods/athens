@@ -5,10 +5,6 @@ ifndef GOLANG_VERSION
 override GOLANG_VERSION = 1.19
 endif
 
-.PHONY: lint
-lint:
-	@golangci-lint run ./...
-
 .PHONY: build
 build: ## build the athens proxy
 	go build -o ./cmd/proxy/proxy ./cmd/proxy
@@ -47,10 +43,12 @@ docs: ## build the docs docker image
 setup-dev-env:
 	$(MAKE) dev
 
+.PHONY: lint
+lint:
+	@golangci-lint run ./...
+
 .PHONY: verify
 verify: ## verify athens codebase
-	./scripts/check_gofmt.sh
-	./scripts/check_govet.sh
 	./scripts/check_deps.sh
 	./scripts/check_conflicts.sh
 

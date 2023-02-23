@@ -53,7 +53,7 @@ jobs:
         with:
           go-version-file: 'go.mod'
           cache: true
-      - name: Run linter
+      - name: Verify changes
         run: make verify
       - name: Unit tests
         run: go test -v -race ./...
