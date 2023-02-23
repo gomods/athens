@@ -2,9 +2,10 @@
 Package s3 provides a storage driver to upload module files to
 amazon s3 storage bucket.
 
-Configuration
+# Configuration
 
 Environment variables:
+
 	AWS_REGION				// region for this storage, e.g 'us-west-2'
 	AWS_ACCESS_KEY_ID
 	AWS_SECRET_ACCESS_KEY
@@ -20,6 +21,5 @@ Example:
 		export AWS_REGION="us-west-2"
 	Fish:
 		set -x AWS_REGION us-west-2
-
 */
 package s3

@@ -1,0 +1,62 @@
+name: continuous-integration
+on:
+  - push
+  - pull_request
+jobs:
+  build:
+    env:
+      ATHENS_MONGO_STORAGE_URL: mongodb://localhost:27017
+      ATHENS_MINIO_ENDPOINT: localhost:9000
+      REDIS_TEST_ENDPOINT: localhost:6379
+      REDIS_SENTINEL_TEST_ENDPOINT: localhost:26379
+      REDIS_SENTINEL_TEST_MASTER_NAME: redis-1
+      REDIS_SENTINEL_TEST_PASSWORD: sekret
+      PROTECTED_REDIS_TEST_ENDPOINT: localhost:6380
+      ATHENS_PROTECTED_REDIS_PASSWORD: AthensPass1
+    runs-on: ubuntu-latest
+    services:
+      mongo:
+        image: mongo
+        ports:
+          - 27017:27017
+      minio:
+        image: minio/minio:edge-cicd
+        ports:
+          - 9000:9000
+        env:
+          MINIO_ACCESS_KEY: minio
+          MINIO_SECRET_KEY: minio123
+      redis:
+        image: redis
+        ports:
+          - 6379:6379
+      redis-sentinel:
+        image: bitnami/redis-sentinel
+        env:
+          REDIS_MASTER_HOST: redis
+          REDIS_MASTER_SET: redis-1
+          REDIS_SENTINEL_PASSWORD: sekret
+          REDIS_SENTINEL_QUORUM: "1"
+        ports:
+          - 26379:26379
+      protectedredis:
+        image: bitnami/redis
+        ports:
+          - 6380:6380
+        env:
+          REDIS_PORT_NUMBER: 6380
+          REDIS_PASSWORD: AthensPass1
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version-file: 'go.mod'
+          cache: true
+      - name: Run linter
+        run: make verify
+      - name: Unit tests
+        run: go test -v -race ./...
+      - name: End to end tests
+        if: success() || failure()
+        run: make test-e2e
