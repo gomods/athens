@@ -21,3 +21,4 @@ jobs:
           file: cmd/proxy/Dockerfile
           build-args: VERSION=${{github.sha}}
           tags: gomods/athens:latest
+          push: true
