@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
-//OpTests composes a testsuite to run all the Ops related tests in one group
+// OpTests composes a testsuite to run all the Ops related tests in one group
 type OpTests struct {
 	suite.Suite
 }
