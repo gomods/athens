@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 
+	"contrib.go.opencensus.io/exporter/jaeger"
 	"contrib.go.opencensus.io/exporter/stackdriver"
 	datadog "github.com/DataDog/opencensus-go-exporter-datadog"
 	"github.com/gomods/athens/pkg/errors"
-	"contrib.go.opencensus.io/exporter/jaeger"
 	"go.opencensus.io/trace"
 )
 
