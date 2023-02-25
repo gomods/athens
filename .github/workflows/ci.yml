@@ -3,6 +3,18 @@ on:
   - push
   - pull_request
 jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version-file: 'go.mod'
+          cache: true
+      - name: Lint code
+        run: make lint-docker
+
   build:
     env:
       ATHENS_MONGO_STORAGE_URL: mongodb://localhost:27017
@@ -55,8 +67,6 @@ jobs:
           cache: true
       - name: Verify changes
         run: make verify
-      - name: Lint code
-        run: make lint-docker
       - name: Unit tests
         run: go test -v -race ./...
       - name: End to end tests
