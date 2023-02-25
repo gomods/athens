@@ -53,15 +53,15 @@ func (s *Storage) upload(ctx context.Context, path string, stream io.Reader) err
 	// Once we support private storage buckets this may need refactoring
 	// unless there is a way to set the default perms in the project.
 	if _, err := io.Copy(wc, stream); err != nil {
-		wc.Close()
+		_ = wc.Close()
 		return err
 	}
 
 	err := wc.Close()
 	if err != nil {
 		kind := errors.KindBadRequest
-		apiErr, ok := err.(*googleapi.Error)
-		if ok && apiErr.Code == 412 {
+		apiErr := &googleapi.Error{}
+		if errors.AsErr(err, &apiErr) && apiErr.Code == 412 {
 			kind = errors.KindAlreadyExists
 		}
 		return errors.E(op, err, kind)

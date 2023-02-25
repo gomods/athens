@@ -5,18 +5,16 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/gomods/athens/pkg/config"
-
-	"github.com/gomods/athens/pkg/paths"
-
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/observ"
+	"github.com/gomods/athens/pkg/paths"
 )
 
-// Catalog implements the (./pkg/storage).Cataloger interface
-// It returns a list of modules and versions contained in the storage
+// Catalog implements the (./pkg/storage).Cataloger interface.
+// It returns a list of modules and versions contained in the storage.
 func (s *Storage) Catalog(ctx context.Context, token string, pageSize int) ([]paths.AllPathParams, string, error) {
 	const op errors.Op = "s3.Catalog"
 	ctx, span := observ.StartSpan(ctx, op.String())

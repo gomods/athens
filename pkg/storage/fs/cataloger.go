@@ -15,11 +15,11 @@ import (
 
 const tokenSeparator = "|"
 
-// Catalog implements the (./pkg/storage).Cataloger interface
-// It returns a list of modules and versions contained in the storage
+// Catalog implements the (./pkg/storage).Cataloger interface.
+// It returns a list of modules and versions contained in the storage.
 func (s *storageImpl) Catalog(ctx context.Context, token string, pageSize int) ([]paths.AllPathParams, string, error) {
 	const op errors.Op = "fs.Catalog"
-	ctx, span := observ.StartSpan(ctx, op.String())
+	_, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 
 	fromModule, fromVersion, err := modVerFromToken(token)
@@ -41,7 +41,7 @@ func (s *storageImpl) Catalog(ctx context.Context, token string, pageSize int) (
 
 			m, version := filepath.Split(modVer)
 			module := filepath.Clean(m)
-			module = strings.Replace(module, string(os.PathSeparator), "/", -1)
+			module = strings.ReplaceAll(module, string(os.PathSeparator), "/")
 
 			if fromModule != "" && module < fromModule { // it is ok to land on the same module
 				return nil
@@ -60,7 +60,7 @@ func (s *storageImpl) Catalog(ctx context.Context, token string, pageSize int) (
 		}
 		return nil
 	})
-	if err != nil && err != io.EOF {
+	if err != nil && !errors.IsErr(err, io.EOF) {
 		return nil, "", errors.E(op, err, errors.KindUnexpected)
 	}
 

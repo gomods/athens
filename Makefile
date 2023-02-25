@@ -1,6 +1,8 @@
 VERSION = "unset"
 DATE=$(shell date -u +%Y-%m-%d-%H:%M:%S-%Z)
 
+GOLANGCI_LINT_VERSION=v1.51.2
+
 ifndef GOLANG_VERSION
 override GOLANG_VERSION = 1.19
 endif
@@ -43,10 +45,16 @@ docs: ## build the docs docker image
 setup-dev-env:
 	$(MAKE) dev
 
+.PHONY: lint
+lint:
+	@golangci-lint run ./...
+
+.PHONY: lint-docker
+lint-docker:
+	@docker run -t --rm -v $(CURDIR):/app -w /app golangci/golangci-lint:$(GOLANGCI_LINT_VERSION) golangci-lint run ./...
+
 .PHONY: verify
 verify: ## verify athens codebase
-	./scripts/check_gofmt.sh
-	./scripts/check_govet.sh
 	./scripts/check_deps.sh
 	./scripts/check_conflicts.sh
 

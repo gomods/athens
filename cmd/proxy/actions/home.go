@@ -5,5 +5,5 @@ import (
 )
 
 func proxyHomeHandler(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte(`"Welcome to The Athens Proxy"`))
+	_, _ = w.Write([]byte(`"Welcome to The Athens Proxy"`))
 }

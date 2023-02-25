@@ -8,5 +8,5 @@ import (
 )
 
 func versionHandler(w http.ResponseWriter, r *http.Request) {
-	json.NewEncoder(w).Encode(build.Data())
+	_ = json.NewEncoder(w).Encode(build.Data())
 }

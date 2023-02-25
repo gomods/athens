@@ -21,7 +21,7 @@ func RunTests(t *testing.T, indexer index.Indexer, clearIndex func() error) {
 		t.Fatal(err)
 	}
 
-	var tests = []struct {
+	tests := []struct {
 		name    string
 		desc    string
 		limit   int

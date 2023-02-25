@@ -7,7 +7,7 @@ import (
 	"github.com/gomods/athens/pkg/paths"
 )
 
-func getModuleParams(r *http.Request, op errors.Op) (mod string, ver string, err error) {
+func getModuleParams(r *http.Request, op errors.Op) (mod, ver string, err error) {
 	params, err := paths.GetAllParams(r)
 	if err != nil {
 		return "", "", errors.E(op, err, errors.KindBadRequest)
