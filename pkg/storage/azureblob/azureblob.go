@@ -15,14 +15,6 @@ import (
 	"github.com/gomods/athens/pkg/storage"
 )
 
-type client interface {
-	UploadWithContext(ctx context.Context, path, contentType string, content io.Reader) error
-	BlobExists(ctx context.Context, path string) (bool, error)
-	ReadBlob(ctx context.Context, path string) (io.ReadCloser, error)
-	ListBlobs(ctx context.Context, prefix string) ([]string, error)
-	DeleteBlob(ctx context.Context, path string) error
-}
-
 type azureBlobStoreClient struct {
 	containerURL *azblob.ContainerURL
 }
@@ -45,13 +37,13 @@ func newBlobStoreClient(accountURL *url.URL, accountName, accountKey, containerN
 }
 
 // Storage implements (github.com/gomods/athens/pkg/storage).Saver and
-// also provides a function to fetch the location of a module
+// also provides a function to fetch the location of a module.
 type Storage struct {
 	client  *azureBlobStoreClient
 	timeout time.Duration
 }
 
-// New creates a new azure blobs storage
+// New creates a new azure blobs storage.
 func New(conf *config.AzureBlobConfig, timeout time.Duration) (*Storage, error) {
 	const op errors.Op = "azureblob.New"
 	u, err := url.Parse(fmt.Sprintf("https://%s.blob.core.windows.net", conf.AccountName))
@@ -65,7 +57,7 @@ func New(conf *config.AzureBlobConfig, timeout time.Duration) (*Storage, error) 
 	return &Storage{client: cl, timeout: timeout}, nil
 }
 
-// BlobExists checks if a particular blob exists in the container
+// BlobExists checks if a particular blob exists in the container.
 func (c *azureBlobStoreClient) BlobExists(ctx context.Context, path string) (bool, error) {
 	const op errors.Op = "azureblob.BlobExists"
 	// TODO: Any better way of doing this ?
@@ -73,10 +65,8 @@ func (c *azureBlobStoreClient) BlobExists(ctx context.Context, path string) (boo
 	_, err := blobURL.GetProperties(ctx, azblob.BlobAccessConditions{})
 	if err != nil {
 		var serr azblob.StorageError
-		var ok bool
-
-		if serr, ok = err.(azblob.StorageError); !ok {
-			return false, errors.E(op, fmt.Errorf("Error in casting to azure error type %v", err))
+		if !errors.AsErr(err, &serr) {
+			return false, errors.E(op, fmt.Errorf("error in casting to azure error type %w", err))
 		}
 		if serr.Response().StatusCode == http.StatusNotFound {
 			return false, nil
@@ -85,10 +75,9 @@ func (c *azureBlobStoreClient) BlobExists(ctx context.Context, path string) (boo
 		return false, errors.E(op, err)
 	}
 	return true, nil
-
 }
 
-// ReadBlob returns a storage.SizeReadCloser for the contents of a blob
+// ReadBlob returns a storage.SizeReadCloser for the contents of a blob.
 func (c *azureBlobStoreClient) ReadBlob(ctx context.Context, path string) (storage.SizeReadCloser, error) {
 	const op errors.Op = "azureblob.ReadBlob"
 	blobURL := c.containerURL.NewBlockBlobURL(path)
@@ -101,7 +90,7 @@ func (c *azureBlobStoreClient) ReadBlob(ctx context.Context, path string) (stora
 	return storage.NewSizer(rc, size), nil
 }
 
-// ListBlobs will list all blobs which has the given prefix
+// ListBlobs will list all blobs which has the given prefix.
 func (c *azureBlobStoreClient) ListBlobs(ctx context.Context, prefix string) ([]string, error) {
 	const op errors.Op = "azureblob.ListBlobs"
 	var blobs []string
@@ -122,7 +111,7 @@ func (c *azureBlobStoreClient) ListBlobs(ctx context.Context, prefix string) ([]
 	return blobs, nil
 }
 
-// DeleteBlob deletes the blob with the given path
+// DeleteBlob deletes the blob with the given path.
 func (c *azureBlobStoreClient) DeleteBlob(ctx context.Context, path string) error {
 	const op errors.Op = "azureblob.DeleteBlob"
 	blobURL := c.containerURL.NewBlockBlobURL(path)
@@ -133,7 +122,7 @@ func (c *azureBlobStoreClient) DeleteBlob(ctx context.Context, path string) erro
 	return nil
 }
 
-// UploadWithContext uploads a blob to the container
+// UploadWithContext uploads a blob to the container.
 func (c *azureBlobStoreClient) UploadWithContext(ctx context.Context, path, contentType string, content io.Reader) error {
 	const op errors.Op = "azureblob.UploadWithContext"
 	ctx, span := observ.StartSpan(ctx, op.String())

@@ -25,7 +25,7 @@ type Redis struct {
 }
 
 // RedisSentinel is the configuration for using redis with sentinel
-// for SingleFlight
+// for SingleFlight.
 type RedisSentinel struct {
 	Endpoints        []string `envconfig:"ATHENS_REDIS_SENTINEL_ENDPOINTS"`
 	MasterName       string   `envconfig:"ATHENS_REDIS_SENTINEL_MASTER_NAME"`
@@ -33,12 +33,14 @@ type RedisSentinel struct {
 	LockConfig       *RedisLockConfig
 }
 
+// RedisLockConfig is the configuration for redis locking.
 type RedisLockConfig struct {
 	Timeout    int `envconfig:"ATHENS_REDIS_LOCK_TIMEOUT"`
 	TTL        int `envconfig:"ATHENS_REDIS_LOCK_TTL"`
 	MaxRetries int `envconfig:"ATHENS_REDIS_LOCK_MAX_RETRIES"`
 }
 
+// DefaultRedisLockConfig returns the default redis locking configuration.
 func DefaultRedisLockConfig() *RedisLockConfig {
 	return &RedisLockConfig{
 		TTL:        900,

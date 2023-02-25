@@ -13,7 +13,7 @@ import (
 	"github.com/gomods/athens/pkg/storage"
 )
 
-// Info implements the (./pkg/storage).Getter interface
+// Info implements the (./pkg/storage).Getter interface.
 func (s *Storage) Info(ctx context.Context, module, version string) ([]byte, error) {
 	const op errors.Op = "s3.Info"
 	ctx, span := observ.StartSpan(ctx, op.String())
@@ -30,7 +30,7 @@ func (s *Storage) Info(ctx context.Context, module, version string) ([]byte, err
 	if err != nil {
 		return nil, errors.E(op, err, errors.M(module), errors.V(version))
 	}
-	defer infoReader.Close()
+	defer func() { _ = infoReader.Close() }()
 
 	infoBytes, err := io.ReadAll(infoReader)
 	if err != nil {
@@ -39,7 +39,7 @@ func (s *Storage) Info(ctx context.Context, module, version string) ([]byte, err
 	return infoBytes, nil
 }
 
-// GoMod implements the (./pkg/storage).Getter interface
+// GoMod implements the (./pkg/storage).Getter interface.
 func (s *Storage) GoMod(ctx context.Context, module, version string) ([]byte, error) {
 	const op errors.Op = "s3.GoMod"
 	ctx, span := observ.StartSpan(ctx, op.String())
@@ -56,17 +56,17 @@ func (s *Storage) GoMod(ctx context.Context, module, version string) ([]byte, er
 	if err != nil {
 		return nil, errors.E(op, err, errors.M(module), errors.V(version))
 	}
-	defer modReader.Close()
+	defer func() { _ = modReader.Close() }()
 
 	modBytes, err := io.ReadAll(modReader)
 	if err != nil {
-		return nil, errors.E(op, fmt.Errorf("could not get new reader for mod file: %s", err), errors.M(module), errors.V(version))
+		return nil, errors.E(op, fmt.Errorf("could not get new reader for mod file: %w", err), errors.M(module), errors.V(version))
 	}
 
 	return modBytes, nil
 }
 
-// Zip implements the (./pkg/storage).Getter interface
+// Zip implements the (./pkg/storage).Getter interface.
 func (s *Storage) Zip(ctx context.Context, module, version string) (storage.SizeReadCloser, error) {
 	const op errors.Op = "s3.Zip"
 	ctx, span := observ.StartSpan(ctx, op.String())

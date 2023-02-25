@@ -11,11 +11,11 @@ import (
 	"github.com/minio/minio-go/v6"
 )
 
-// Catalog implements the (./pkg/storage).Cataloger interface
-// It returns a list of modules and versions contained in the storage
+// Catalog implements the (./pkg/storage).Cataloger interface.
+// It returns a list of modules and versions contained in the storage.
 func (s *storageImpl) Catalog(ctx context.Context, token string, pageSize int) ([]paths.AllPathParams, string, error) {
 	const op errors.Op = "minio.Catalog"
-	ctx, span := observ.StartSpan(ctx, op.String())
+	_, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 	res := make([]paths.AllPathParams, 0)
 	count := pageSize
@@ -50,7 +50,7 @@ func fetchModsAndVersions(objects []minio.ObjectInfo, elementsNum int) ([]paths.
 			continue
 		}
 
-		p, err := parseMinioKey(&o)
+		p, err := parseMinioKey(o)
 		if err != nil {
 			continue
 		}
@@ -66,7 +66,7 @@ func fetchModsAndVersions(objects []minio.ObjectInfo, elementsNum int) ([]paths.
 	return res, lastKey
 }
 
-func parseMinioKey(o *minio.ObjectInfo) (paths.AllPathParams, error) {
+func parseMinioKey(o minio.ObjectInfo) (paths.AllPathParams, error) {
 	const op errors.Op = "minio.parseMinioKey"
 
 	_, m, v := extractKey(o.Key)

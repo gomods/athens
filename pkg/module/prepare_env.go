@@ -9,7 +9,7 @@ import (
 
 // prepareEnv will return all the appropriate
 // environment variables for a Go Command to run
-// successfully (such as GOPATH, GOCACHE, PATH etc)
+// successfully (such as GOPATH, GOCACHE, PATH etc).
 func prepareEnv(gopath string, envVars []string) []string {
 	gopathEnv := fmt.Sprintf("GOPATH=%s", gopath)
 	cacheEnv := fmt.Sprintf("GOCACHE=%s", filepath.Join(gopath, "cache"))

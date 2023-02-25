@@ -83,8 +83,8 @@ func (i *indexer) Lines(ctx context.Context, since time.Time, limit int) ([]*ind
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
-	defer rows.Close()
-	lines := []*index.Line{}
+	defer func() { _ = rows.Close() }()
+	var lines []*index.Line
 	for rows.Next() {
 		var line index.Line
 		err = rows.Scan(&line.Path, &line.Version, &line.Timestamp)
@@ -108,13 +108,14 @@ func getMySQLSource(cfg *config.MySQL) string {
 }
 
 func getKind(err error) int {
-	mysqlErr, ok := err.(*mysql.MySQLError)
-	if !ok {
+	mysqlErr := &mysql.MySQLError{}
+	if !errors.AsErr(err, &mysqlErr) {
 		return errors.KindUnexpected
 	}
 	switch mysqlErr.Number {
 	case 1062:
 		return errors.KindAlreadyExists
+	default:
+		return errors.KindUnexpected
 	}
-	return errors.KindUnexpected
 }

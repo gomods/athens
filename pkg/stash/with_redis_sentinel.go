@@ -10,7 +10,7 @@ import (
 )
 
 // WithRedisSentinelLock returns a distributed singleflight
-// with a redis cluster that utilizes sentinel for quorum and failover
+// with a redis cluster that utilizes sentinel for quorum and failover.
 func WithRedisSentinelLock(l RedisLogger, endpoints []string, master, password string, checker storage.Checker, lockConfig *config.RedisLockConfig) (Wrapper, error) {
 	redis.SetLogger(l)
 

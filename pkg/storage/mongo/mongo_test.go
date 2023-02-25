@@ -20,8 +20,8 @@ func TestBackend(t *testing.T) {
 	compliance.RunTests(t, backend, backend.clear)
 }
 
-func (m *ModuleStore) clear() error {
-	m.client.Database(m.db).Drop(context.Background())
+func (s *ModuleStore) clear() error {
+	s.client.Database(s.db).Drop(context.Background())
 	return nil
 }
 

@@ -13,7 +13,7 @@ type Line struct {
 }
 
 // Indexer is an interface that can process new module@versions
-// and also retrieve 'limit' module@versions that were indexed after 'since'
+// and also retrieve 'limit' module@versions that were indexed after 'since'.
 type Indexer interface {
 	// Index stores the module@version into the index backend.
 	// Implementer must create the Timestamp at the time and set it
