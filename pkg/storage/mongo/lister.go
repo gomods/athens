@@ -12,7 +12,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-// List lists all versions of a module
+// List lists all versions of a module.
 func (s *ModuleStore) List(ctx context.Context, moduleName string) ([]string, error) {
 	const op errors.Op = "mongo.List"
 	ctx, span := observ.StartSpan(ctx, op.String())
@@ -31,9 +31,9 @@ func (s *ModuleStore) List(ctx context.Context, moduleName string) ([]string, er
 	var errs error
 	for cursor.Next(ctx) {
 		var module storage.Module
-		if err := cursor.Decode(&module); err != nil {
+		if err = cursor.Decode(&module); err != nil {
 			kind := errors.KindUnexpected
-			if err == mongo.ErrNoDocuments {
+			if errors.IsErr(err, mongo.ErrNoDocuments) {
 				kind = errors.KindNotFound
 			}
 			errs = multierror.Append(errs, errors.E(op, err, kind))

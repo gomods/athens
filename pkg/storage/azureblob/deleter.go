@@ -11,7 +11,7 @@ import (
 // Delete implements the (./pkg/storage).Deleter interface and
 // removes a version of a module from storage. Returning ErrNotFound
 // if the version does not exist.
-func (s *Storage) Delete(ctx context.Context, module string, version string) error {
+func (s *Storage) Delete(ctx context.Context, module, version string) error {
 	const op errors.Op = "azureblob.Delete"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()

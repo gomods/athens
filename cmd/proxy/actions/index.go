@@ -13,7 +13,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// indexHandler implements GET baseURL/index
+// indexHandler implements GET baseURL/index.
 func indexHandler(index index.Indexer) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()

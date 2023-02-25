@@ -8,7 +8,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-// Exists checks for a specific version of a module
+// Exists checks for a specific version of a module.
 func (s *ModuleStore) Exists(ctx context.Context, module, vsn string) (bool, error) {
 	var op errors.Op = "mongo.Exists"
 	ctx, span := observ.StartSpan(ctx, op.String())

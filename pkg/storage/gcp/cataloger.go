@@ -14,7 +14,7 @@ import (
 )
 
 // Catalog implements the (./pkg/storage).Catalog interface
-// It returns a list of versions, if any, for a given module
+// It returns a list of versions, if any, for a given module.
 func (s *Storage) Catalog(ctx context.Context, token string, pageSize int) ([]paths.AllPathParams, string, error) {
 	const op errors.Op = "gcp.Catalog"
 	ctx, span := observ.StartSpan(ctx, op.String())

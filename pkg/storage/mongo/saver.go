@@ -37,10 +37,9 @@ func (s *ModuleStore) Save(ctx context.Context, module, version string, mod []by
 	if err != nil {
 		return errors.E(op, err, errors.M(module), errors.V(version))
 	}
-	defer uStream.Close()
+	defer func() { _ = uStream.Close() }()
 
 	numBytesWritten, err := io.Copy(uStream, zip)
-
 	if err != nil {
 		return errors.E(op, err, errors.M(module), errors.V(version))
 	}

@@ -3,6 +3,7 @@ package module
 import (
 	"bufio"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 
@@ -14,15 +15,15 @@ var (
 	versionSeparator = "."
 )
 
-// Filter is a filter of modules
+// Filter is a filter of modules.
 type Filter struct {
 	root     ruleNode
 	filePath string
 }
 
-// NewFilter creates new filter based on rules defined in a configuration file
-// WARNING: this is not concurrently safe
-// Configuration consists of two operations: + for include and - for exclude
+// NewFilter creates new filter based on rules defined in a configuration file.
+// WARNING: this is not concurrently safe.
+// Configuration consists of two operations: + for include and - for exclude:
 // e.g.
 //   - github.com/a
 //   - github.com/a/b
@@ -33,7 +34,7 @@ type Filter struct {
 //	-
 //	+ github.com/a
 //
-// will exclude all items from communication except github.com/a
+// will exclude all items from communication except github.com/a.
 func NewFilter(filterFilePath string) (*Filter, error) {
 	// Do not return an error if the file path is empty
 	// Do not attempt to parse it as well.
@@ -42,10 +43,9 @@ func NewFilter(filterFilePath string) (*Filter, error) {
 	}
 
 	return initFromConfig(filterFilePath)
-
 }
 
-// AddRule adds rule for specified path
+// AddRule adds rule for specified path.
 func (f *Filter) AddRule(path string, qualifiers []string, rule FilterRule) {
 	f.ensurePath(path)
 
@@ -70,7 +70,7 @@ func (f *Filter) AddRule(path string, qualifiers []string, rule FilterRule) {
 	latest.next[last] = rn
 }
 
-// Rule returns the filter rule to be applied to the given path
+// Rule returns the filter rule to be applied to the given path.
 func (f *Filter) Rule(path, version string) FilterRule {
 	segs := getPathSegments(path)
 	rule := f.getAssociatedRule(version, segs...)
@@ -145,7 +145,6 @@ func initFromConfig(filePath string) (*Filter, error) {
 	f.root = rn
 
 	for idx, line := range lines {
-
 		// Ignore newline
 		if len(line) == 0 {
 			continue
@@ -160,7 +159,7 @@ func initFromConfig(filePath string) (*Filter, error) {
 		}
 
 		ruleSign := strings.TrimSpace(split[0])
-		rule := Default
+		var rule FilterRule
 		switch ruleSign {
 		case "+":
 			rule = Include
@@ -195,11 +194,11 @@ func initFromConfig(filePath string) (*Filter, error) {
 
 // matches checks if the given version matches the given qualifier.
 // Qualifiers can be:
-// - plain versions
-// - v1.2.3 enables v1.2.3
-// - ~1.2.3: enables 1.2.x  which are at least 1.2.3
-// - ^1.2.3: enables 1.x.x which are at least 1.2.3
-// - <1.2.3: enables everything lower than 1.2.3 includes 1.2.2 and 0.58.9 as well
+// - plain versions.
+// - v1.2.3 enables v1.2.3.
+// - ~1.2.3: enables 1.2.x  which are at least 1.2.3.
+// - ^1.2.3: enables 1.x.x which are at least 1.2.3.
+// - <1.2.3: enables everything lower than 1.2.3 includes 1.2.2 and 0.58.9 as well.
 func matches(version, qualifier string) bool {
 	if len(qualifier) < 2 || len(version) < 1 {
 		return false
@@ -297,7 +296,7 @@ func newRule(r FilterRule) ruleNode {
 func getConfigLines(filterFile string) ([]string, error) {
 	const op errors.Op = "module.getConfigLines"
 
-	f, err := os.Open(filterFile)
+	f, err := os.Open(filepath.Clean(filterFile))
 	if err != nil {
 		return nil, errors.E(op, err)
 	}

@@ -2,7 +2,7 @@ package storage
 
 import "time"
 
-// From https://pkg.go.dev/cmd/go/internal/modfetch/codehost#Origin
+// Origin is taken from https://pkg.go.dev/cmd/go/internal/modfetch/codehost#Origin.
 type Origin struct {
 	VCS    string `json:",omitempty"` // "git" etc
 	URL    string `json:",omitempty"` // URL of repository
@@ -36,7 +36,7 @@ type Origin struct {
 
 // RevInfo is json-encodable into the response body for
 // GET baseURL/module/@v/version.info
-// From https://pkg.go.dev/cmd/go/internal/modfetch/codehost#RevInfo
+// from https://pkg.go.dev/cmd/go/internal/modfetch/codehost#RevInfo.
 type RevInfo struct {
 	Origin  *Origin
 	Name    string    // complete ID in underlying repository

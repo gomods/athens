@@ -10,7 +10,7 @@ import (
 )
 
 // LogEntryMiddleware builds a log.Entry, setting the request fields
-// and storing it in the context to be used throughout the stack
+// and storing it in the context to be used throughout the stack.
 func LogEntryMiddleware(lggr *log.Logger) mux.MiddlewareFunc {
 	return func(h http.Handler) http.Handler {
 		f := func(w http.ResponseWriter, r *http.Request) {

@@ -18,7 +18,7 @@ type catalogRes struct {
 	NextPageToken   string                `json:"next,omitempty"`
 }
 
-// catalogHandler implements GET baseURL/catalog
+// catalogHandler implements GET baseURL/catalog.
 func catalogHandler(s storage.Backend) http.HandlerFunc {
 	const op errors.Op = "actions.CatalogHandler"
 	cs, isCataloger := s.(storage.Cataloger)
@@ -54,7 +54,7 @@ func catalogHandler(s storage.Backend) http.HandlerFunc {
 }
 
 // getLimitFromParam converts a URL query parameter into an int
-// otherwise converts defaultPageSize constant
+// otherwise converts defaultPageSize constant.
 func getLimitFromParam(param string) (int, error) {
 	if param == "" {
 		return defaultPageSize, nil
