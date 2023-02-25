@@ -19,6 +19,6 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           file: cmd/proxy/Dockerfile
-          build-args: VERSION=${{github.sha}}
-          tags: gomods/athens:latest
+          build-args: VERSION=${{ github.ref_name }}
+          tags: gomods/athens:latest,gomods/athens:${{ github.ref_name }}
           push: true
