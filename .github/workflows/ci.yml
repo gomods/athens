@@ -55,6 +55,8 @@ jobs:
           cache: true
       - name: Verify changes
         run: make verify
+      - name: Lint code
+        run: make lint-docker
       - name: Unit tests
         run: go test -v -race ./...
       - name: End to end tests
