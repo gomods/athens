@@ -21,17 +21,16 @@ func (s *storageImpl) moduleLocation(module string) string {
 
 func (s *storageImpl) versionLocation(module, version string) string {
 	return filepath.Join(s.moduleLocation(module), version)
-
 }
 
 // NewStorage returns a new ListerSaver implementation that stores
-// everything under rootDir
-// If the root directory does not exist an error is returned
+// everything under rootDir.
+// If the root directory does not exist an error is returned.
 func NewStorage(rootDir string, filesystem afero.Fs) (storage.Backend, error) {
 	const op errors.Op = "fs.NewStorage"
 	exists, err := afero.Exists(filesystem, rootDir)
 	if err != nil {
-		return nil, errors.E(op, fmt.Errorf("could not check if root directory `%s` exists: %s", rootDir, err))
+		return nil, errors.E(op, fmt.Errorf("could not check if root directory `%s` exists: %w", rootDir, err))
 	}
 	if !exists {
 		return nil, errors.E(op, fmt.Errorf("root directory `%s` does not exist", rootDir))

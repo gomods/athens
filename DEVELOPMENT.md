@@ -234,10 +234,10 @@ Then open [http://localhost:1313](http://localhost:1313/).
 
 # Linting
 
-In our CI/CD pass, we use govet, so feel free to run it locally beforehand:
+In our CI/CD pass, we use golangci-lint, so feel free to run it locally beforehand:
 
 ```
-go vet ./...
+make lint
 ```
 
 # For People Doing a Release

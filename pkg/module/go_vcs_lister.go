@@ -28,7 +28,7 @@ type vcsLister struct {
 	fs        afero.Fs
 }
 
-// NewVCSLister creates an UpstreamLister which uses VCS to fetch a list of available versions
+// NewVCSLister creates an UpstreamLister which uses VCS to fetch a list of available versions.
 func NewVCSLister(goBinPath string, env []string, fs afero.Fs) UpstreamLister {
 	return &vcsLister{
 		goBinPath: goBinPath,
@@ -39,13 +39,13 @@ func NewVCSLister(goBinPath string, env []string, fs afero.Fs) UpstreamLister {
 
 func (l *vcsLister) List(ctx context.Context, module string) (*storage.RevInfo, []string, error) {
 	const op errors.Op = "vcsLister.List"
-	ctx, span := observ.StartSpan(ctx, op.String())
+	_, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 	tmpDir, err := afero.TempDir(l.fs, "", "go-list")
 	if err != nil {
 		return nil, nil, errors.E(op, err)
 	}
-	defer l.fs.RemoveAll(tmpDir)
+	defer func() { _ = l.fs.RemoveAll(tmpDir) }()
 
 	cmd := exec.Command(
 		l.goBinPath,
@@ -62,12 +62,12 @@ func (l *vcsLister) List(ctx context.Context, module string) (*storage.RevInfo, 
 	if err != nil {
 		return nil, nil, errors.E(op, err)
 	}
-	defer clearFiles(l.fs, gopath)
+	defer func() { _ = clearFiles(l.fs, gopath) }()
 	cmd.Env = prepareEnv(gopath, l.env)
 
 	err = cmd.Run()
 	if err != nil {
-		err = fmt.Errorf("%v: %s", err, stderr)
+		err = fmt.Errorf("%w: %s", err, stderr)
 		// as of now, we can't recognize between a true NotFound
 		// and an unexpected error, so we choose the more
 		// hopeful path of NotFound. This way the Go command

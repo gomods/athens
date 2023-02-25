@@ -10,8 +10,8 @@ import (
 	"github.com/gomods/athens/pkg/observ"
 )
 
-// List implements the (./pkg/storage).Lister interface
-// It returns a list of versions, if any, for a given module
+// List implements the (./pkg/storage).Lister interface.
+// It returns a list of versions, if any, for a given module.
 func (s *Storage) List(ctx context.Context, module string) ([]string, error) {
 	const op errors.Op = "s3.List"
 	ctx, span := observ.StartSpan(ctx, op.String())
