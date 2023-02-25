@@ -13,7 +13,7 @@ import (
 // PathVersionZip URL.
 const PathVersionZip = "/{module:.+}/@v/{version}.zip"
 
-// ZipHandler implements GET baseURL/module/@v/version.zip
+// ZipHandler implements GET baseURL/module/@v/version.zip.
 func ZipHandler(dp Protocol, lggr log.Entry, df *mode.DownloadFile) http.Handler {
 	const op errors.Op = "download.ZipHandler"
 	f := func(w http.ResponseWriter, r *http.Request) {
@@ -41,7 +41,7 @@ func ZipHandler(dp Protocol, lggr log.Entry, df *mode.DownloadFile) http.Handler
 			w.WriteHeader(errors.Kind(err))
 			return
 		}
-		defer zip.Close()
+		defer func() { _ = zip.Close() }()
 
 		w.Header().Set("Content-Type", "application/zip")
 		size := zip.Size()

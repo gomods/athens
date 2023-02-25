@@ -2,15 +2,15 @@ package main
 
 import (
 	"context"
+	"errors"
 	"flag"
 	"fmt"
 	"log"
 	"net/http"
+	_ "net/http/pprof"
 	"os"
 	"os/signal"
 	"time"
-
-	_ "net/http/pprof"
 
 	"github.com/gomods/athens/cmd/proxy/actions"
 	"github.com/gomods/athens/internal/shutdown"
@@ -45,8 +45,9 @@ func main() {
 	}
 
 	srv := &http.Server{
-		Addr:    conf.Port,
-		Handler: handler,
+		Addr:              conf.Port,
+		Handler:           handler,
+		ReadHeaderTimeout: 2 * time.Second,
 	}
 	idleConnsClosed := make(chan struct{})
 
@@ -54,7 +55,7 @@ func main() {
 		sigint := make(chan os.Signal, 1)
 		signal.Notify(sigint, shutdown.GetSignals()...)
 		s := <-sigint
-		log.Printf("Recived signal (%s): Shutting down server", s)
+		log.Printf("Received signal (%s): Shutting down server", s)
 
 		// We received an interrupt signal, shut down.
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(conf.ShutdownTimeout))
@@ -70,7 +71,7 @@ func main() {
 			// pprof to be exposed on a different port than the application for security matters, not to expose profiling data and avoid DoS attacks (profiling slows down the service)
 			// https://www.farsightsecurity.com/txt-record/2016/10/28/cmikk-go-remote-profiling/
 			log.Printf("Starting `pprof` at port %v", conf.PprofPort)
-			log.Fatal(http.ListenAndServe(conf.PprofPort, nil))
+			log.Fatal(http.ListenAndServe(conf.PprofPort, nil)) //nolint:gosec // This should not be exposed to the world.
 		}()
 	}
 
@@ -81,7 +82,7 @@ func main() {
 		err = srv.ListenAndServe()
 	}
 
-	if err != http.ErrServerClosed {
+	if !errors.Is(err, http.ErrServerClosed) {
 		log.Fatal(err)
 	}
 

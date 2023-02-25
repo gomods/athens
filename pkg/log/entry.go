@@ -35,8 +35,8 @@ func (e *entry) WithFields(fields map[string]interface{}) Entry {
 }
 
 func (e *entry) SystemErr(err error) {
-	athensErr, ok := err.(errors.Error)
-	if !ok {
+	var athensErr errors.Error
+	if !errors.IsErr(err, athensErr) {
 		e.Error(err)
 		return
 	}

@@ -11,7 +11,7 @@ import (
 	"go.mongodb.org/mongo-driver/x/bsonx"
 )
 
-// Delete removes a specific version of a module
+// Delete removes a specific version of a module.
 func (s *ModuleStore) Delete(ctx context.Context, module, version string) error {
 	const op errors.Op = "mongo.Delete"
 	ctx, span := observ.StartSpan(ctx, op.String())
@@ -40,11 +40,11 @@ func (s *ModuleStore) Delete(ctx context.Context, module, version string) error 
 
 	var x bsonx.Doc
 	for cursor.Next(ctx) {
-		cursor.Decode(&x)
+		_ = cursor.Decode(&x)
 	}
 	if err = bucket.Delete(x.Lookup("_id").ObjectID()); err != nil {
 		kind := errors.KindUnexpected
-		if err == gridfs.ErrFileNotFound {
+		if errors.IsErr(err, gridfs.ErrFileNotFound) {
 			kind = errors.KindNotFound
 		}
 		return errors.E(op, err, kind, errors.M(module), errors.V(version))

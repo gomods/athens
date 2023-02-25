@@ -11,12 +11,12 @@ import (
 	"golang.org/x/mod/semver"
 )
 
-func (l *storageImpl) List(ctx context.Context, module string) ([]string, error) {
+func (s *storageImpl) List(ctx context.Context, module string) ([]string, error) {
 	const op errors.Op = "fs.List"
-	ctx, span := observ.StartSpan(ctx, op.String())
+	_, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
-	loc := l.moduleLocation(module)
-	fileInfos, err := afero.ReadDir(l.filesystem, loc)
+	loc := s.moduleLocation(module)
+	fileInfos, err := afero.ReadDir(s.filesystem, loc)
 	if err != nil {
 		if os.IsNotExist(err) {
 			return []string{}, nil

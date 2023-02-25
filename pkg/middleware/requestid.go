@@ -9,7 +9,7 @@ import (
 
 // WithRequestID ensures a request id is in the
 // request context by either the incoming header
-// or creating a new one
+// or creating a new one.
 func WithRequestID(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		requestID := r.Header.Get(requestid.HeaderKey)

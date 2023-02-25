@@ -14,7 +14,7 @@ import (
 )
 
 // NewValidationMiddleware builds a middleware function that performs validation checks by calling
-// an external webhook
+// an external webhook.
 func NewValidationMiddleware(client *http.Client, validatorHook string) mux.MiddlewareFunc {
 	const op errors.Op = "actions.NewValidationMiddleware"
 	return func(h http.Handler) http.Handler {
@@ -50,7 +50,7 @@ func NewValidationMiddleware(client *http.Client, validatorHook string) mux.Midd
 	}
 }
 
-func maybeLogValidationReason(context context.Context, message string, mod string, version string) {
+func maybeLogValidationReason(context context.Context, message, mod, version string) {
 	if len(message) > 0 {
 		entry := log.EntryFromContext(context)
 		entry.Warnf("error validating %s@%s %s", mod, version, message)
@@ -85,6 +85,10 @@ func validate(ctx context.Context, client *http.Client, hook, mod, ver string) (
 	if err != nil {
 		return validationResponse{Valid: false}, errors.E(op, err)
 	}
+	defer func() {
+		_, _ = io.Copy(io.Discard, resp.Body)
+		_ = resp.Body.Close()
+	}()
 
 	switch resp.StatusCode {
 	case http.StatusOK:
@@ -97,8 +101,6 @@ func validate(ctx context.Context, client *http.Client, hook, mod, ver string) (
 }
 
 func validationResponseFromRequest(resp *http.Response) validationResponse {
-	defer resp.Body.Close()
-
 	body, _ := io.ReadAll(resp.Body)
 	return validationResponse{Valid: resp.StatusCode == http.StatusOK, Message: body}
 }

@@ -1,0 +1,80 @@
+run:
+  tests: false
+  timeout: 5m
+
+linters-settings:
+  cyclop:
+    max-complexity: 12
+    skip-tests: true
+  gofumpt:
+    extra-rules: true
+
+linters:
+  enable-all: true
+  disable:
+    - interfacer # deprecated
+    - scopelint # deprecated
+    - maligned # deprecated
+    - golint # deprecated
+    - structcheck # deprecated
+    - deadcode # deprecated
+    - varcheck # deprecated
+    - nosnakecase # deprecated
+    - ifshort # deprecated
+    - errchkjson
+    - exhaustive
+    - exhaustivestruct
+    - exhaustruct
+    - forcetypeassert
+    - funlen
+    - gochecknoglobals
+    - gochecknoinits
+    - goconst
+    - godox
+    - goerr113
+    - gomnd
+    - ireturn
+    - lll
+    - musttag
+    - nilnil
+    - nlreturn
+    - nonamedreturns
+    - tagliatelle
+    - varnamelen
+    - wrapcheck
+    - wsl
+    - cyclop # TODO: turn this back on later
+    - gocognit # TODO: turn this back on later
+    - forbidigo # TODO: turn this back on later
+
+issues:
+  exclude-use-default: false
+  exclude:
+    - 'package-comments: should have a package comment'
+    - 'ST1000: at least one file in a package should have a package comment'
+    - 'G204: Subprocess launched with a potential tainted input or cmd arguments'
+    - 'G204: Subprocess launched with variable'
+    - 'G402: TLS MinVersion too low.'
+    - 'const `op` is unused'
+  exclude-rules:
+    - path: cmd/proxy/main.go
+      text: 'G108: Profiling endpoint is automatically exposed on /debug/pprof'
+    - path: pkg/stash/stasher.go
+      linters:
+        - contextcheck
+    - path: pkg/stash/with_azureblob.go # False positive
+      linters:
+        - bodyclose
+    - path: pkg/storage/azureblob/azureblob.go # False positive
+      linters:
+        - bodyclose
+    - path: pkg/storage/compliance/*
+      linters:
+        - thelper
+        - gosec
+        - errcheck
+    - path: pkg/index/compliance/*
+      linters:
+        - thelper
+        - gosec
+        - errcheck
