@@ -79,8 +79,6 @@ if ($docs.IsPresent) {
 }
 
 if ($verify.IsPresent) {
-	execScript "check_gofmt.ps1"
-	execScript "check_govet.ps1"
 	execScript "check_deps.ps1"
 }
 

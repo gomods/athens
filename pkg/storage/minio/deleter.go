@@ -8,11 +8,11 @@ import (
 	"github.com/gomods/athens/pkg/observ"
 )
 
-func (v *storageImpl) Delete(ctx context.Context, module, version string) error {
+func (s *storageImpl) Delete(ctx context.Context, module, version string) error {
 	const op errors.Op = "minio.Delete"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
-	exists, err := v.Exists(ctx, module, version)
+	exists, err := s.Exists(ctx, module, version)
 	if err != nil {
 		return errors.E(op, err, errors.M(module), errors.V(version))
 	}
@@ -21,20 +21,20 @@ func (v *storageImpl) Delete(ctx context.Context, module, version string) error 
 		return errors.E(op, errors.M(module), errors.V(version), errors.KindNotFound)
 	}
 
-	versionedPath := v.versionLocation(module, version)
+	versionedPath := s.versionLocation(module, version)
 
 	modPath := fmt.Sprintf("%s/go.mod", versionedPath)
-	if err := v.minioClient.RemoveObject(v.bucketName, modPath); err != nil {
+	if err := s.minioClient.RemoveObject(s.bucketName, modPath); err != nil {
 		return errors.E(op, err, errors.M(module), errors.V(version))
 	}
 
 	zipPath := fmt.Sprintf("%s/source.zip", versionedPath)
-	if err := v.minioClient.RemoveObject(v.bucketName, zipPath); err != nil {
+	if err := s.minioClient.RemoveObject(s.bucketName, zipPath); err != nil {
 		return errors.E(op, err, errors.M(module), errors.V(version))
 	}
 
 	infoPath := fmt.Sprintf("%s/%s.info", versionedPath, version)
-	err = v.minioClient.RemoveObject(v.bucketName, infoPath)
+	err = s.minioClient.RemoveObject(s.bucketName, infoPath)
 	if err != nil {
 		return errors.E(op, err, errors.M(module), errors.V(version))
 	}

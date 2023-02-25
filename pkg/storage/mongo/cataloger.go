@@ -2,6 +2,7 @@ package mongo
 
 import (
 	"context"
+
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/paths"
 	"github.com/gomods/athens/pkg/storage"
@@ -11,8 +12,8 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-// Catalog implements the (./pkg/storage).Cataloger interface
-// It returns a list of modules and versions contained in the storage
+// Catalog implements the (./pkg/storage).Cataloger interface.
+// It returns a list of modules and versions contained in the storage.
 func (s *ModuleStore) Catalog(ctx context.Context, token string, pageSize int) ([]paths.AllPathParams, string, error) {
 	const op errors.Op = "mongo.Catalog"
 	q := bson.M{}
@@ -33,7 +34,6 @@ func (s *ModuleStore) Catalog(ctx context.Context, token string, pageSize int) (
 	modules := make([]storage.Module, 0)
 	findOptions := options.Find().SetProjection(projection).SetSort(sort).SetLimit(int64(pageSize))
 	cursor, err := c.Find(tctx, q, findOptions)
-
 	if err != nil {
 		return nil, "", errors.E(op, err)
 	}
@@ -53,13 +53,13 @@ func (s *ModuleStore) Catalog(ctx context.Context, token string, pageSize int) (
 		return nil, "", nil
 	}
 
-	var versions = make([]paths.AllPathParams, len(modules))
+	versions := make([]paths.AllPathParams, len(modules))
 	for i := range modules {
 		versions[i].Module = modules[i].Module
 		versions[i].Version = modules[i].Version
 	}
 
-	var next = modules[len(modules)-1].ID.Hex()
+	next := modules[len(modules)-1].ID.Hex()
 	if len(modules) < pageSize {
 		return versions, "", nil
 	}

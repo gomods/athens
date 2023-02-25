@@ -4,7 +4,7 @@ import (
 	"net/http"
 )
 
-// ContentType writes writes an application/json
+// ContentType writes an application/json
 // Content-Type header.
 func ContentType(h http.Handler) http.Handler {
 	f := func(w http.ResponseWriter, r *http.Request) {

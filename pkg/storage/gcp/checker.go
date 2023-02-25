@@ -11,7 +11,7 @@ import (
 )
 
 // Exists implements the (./pkg/storage).Checker interface
-// returning true if the module at version exists in storage
+// returning true if the module at version exists in storage.
 func (s *Storage) Exists(ctx context.Context, module, version string) (bool, error) {
 	const op errors.Op = "gcp.Exists"
 	ctx, span := observ.StartSpan(ctx, op.String())
@@ -21,7 +21,7 @@ func (s *Storage) Exists(ctx context.Context, module, version string) (bool, err
 	var count int
 	for {
 		attrs, err := it.Next()
-		if err == iterator.Done {
+		if errors.IsErr(err, iterator.Done) {
 			break
 		}
 		if err != nil {

@@ -48,7 +48,7 @@ type Opts struct {
 	NetworkMode  string
 }
 
-// NetworkMode constants
+// NetworkMode constants.
 const (
 	Strict   = "strict"
 	Offline  = "offline"
@@ -263,12 +263,12 @@ func (p *protocol) processDownload(ctx context.Context, mod, ver string, f func(
 		}
 		return f(newVer)
 	case mode.Async:
-		go p.stasher.Stash(ctx, mod, ver)
+		go func() { _, _ = p.stasher.Stash(ctx, mod, ver) }()
 		return errors.E(op, "async: module not found", errors.KindNotFound)
 	case mode.Redirect:
 		return errors.E(op, "redirect", errors.KindRedirect)
 	case mode.AsyncRedirect:
-		go p.stasher.Stash(ctx, mod, ver)
+		go func() { _, _ = p.stasher.Stash(ctx, mod, ver) }()
 		return errors.E(op, "async_redirect: module not found", errors.KindRedirect)
 	case mode.None:
 		return errors.E(op, "none", errors.KindNotFound)
@@ -276,7 +276,7 @@ func (p *protocol) processDownload(ctx context.Context, mod, ver string, f func(
 	return nil
 }
 
-// union concatenates two version lists and removes duplicates
+// union concatenates two version lists and removes duplicates.
 func union(list1, list2 []string) []string {
 	if list1 == nil {
 		list1 = []string{}
@@ -284,10 +284,10 @@ func union(list1, list2 []string) []string {
 	if list2 == nil {
 		list2 = []string{}
 	}
-	list := append(list1, list2...)
+	list1 = append(list1, list2...)
 	unique := []string{}
 	m := make(map[string]struct{})
-	for _, v := range list {
+	for _, v := range list1 {
 		if _, ok := m[v]; !ok {
 			unique = append(unique, v)
 			m[v] = struct{}{}
