@@ -25,6 +25,7 @@ jobs:
       REDIS_SENTINEL_TEST_PASSWORD: sekret
       PROTECTED_REDIS_TEST_ENDPOINT: localhost:6380
       ATHENS_PROTECTED_REDIS_PASSWORD: AthensPass1
+      GA_PULL_REQUEST: ${{github.event.number}}
     runs-on: ubuntu-latest
     services:
       mongo:

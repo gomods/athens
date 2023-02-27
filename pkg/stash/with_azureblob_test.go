@@ -20,7 +20,7 @@ import (
 // and it will ensure that saving to modules at the same time
 // is done synchronously so that only the first module gets saved.
 func TestWithAzureBlob(t *testing.T) {
-	containerName := randomContainerName(os.Getenv("DRONE_PULL_REQUEST"))
+	containerName := randomContainerName(os.Getenv("GA_PULL_REQUEST"))
 	cfg := getAzureTestConfig(containerName)
 	if cfg == nil {
 		t.SkipNow()

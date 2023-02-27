@@ -302,13 +302,13 @@ Go to the [create new release page](https://github.com/gomods/athens/releases/ne
 - **Release Title** - Make sure the title is prefixed by the release number including the `v`. If you want to write something creative in the rest of the title, go for it!
 - **Describe this release** - Make sure to write what features this release includes, and any notable bugfixes. Also, thank all the folks who contributed to the release. You can find that information in a link that looks like this: `https://github.com/gomods/athens/compare/$PREVIOUS_TAG...release-$CURRENT_TAG`. Substitute `$PREVIOUS_TAG` for the last semver and `$CURRENT_TAG` to the version in the new release branch
 
-When you're done, press the "Publish Release" button. After you do, our [Drone](https://cloud.drone.io) job will do almost everything.
+When you're done, press the "Publish Release" button. After you do, our Github Actions job will do almost everything.
 
-Make sure the Drone CI/CD job finished, and check in Docker Hub to make sure the new release showed up in the [tags](https://hub.docker.com/r/gomods/athens/tags) section.
+Make sure the Github Actions CI/CD job finished, and check in Docker Hub to make sure the new release showed up in the [tags](https://hub.docker.com/r/gomods/athens/tags) section.
 
 ## Finishing up
 
-The Drone job will do everything except:
+The Github Actions job will do everything except:
 
 - Tweet out about the new release
 - Update the helm chart in the `main` branch
