@@ -88,7 +88,7 @@ type V string
 // an error or a string to describe what exactly went wrong.
 // You can optionally pass a Logrus severity to indicate
 // the log level of an error based on the context it was constructed in.
-func E(op Op, args ...interface{}) error {
+func E(op Op, args ...any) error {
 	e := Error{Op: op}
 	if len(args) == 0 {
 		msg := "errors.E called with 0 args"

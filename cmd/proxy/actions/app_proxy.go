@@ -133,7 +133,7 @@ type athensLoggerForRedis struct {
 	logger *log.Logger
 }
 
-func (l *athensLoggerForRedis) Printf(ctx context.Context, format string, v ...interface{}) {
+func (l *athensLoggerForRedis) Printf(ctx context.Context, format string, v ...any) {
 	l.logger.WithContext(ctx).Printf(format, v...)
 }
 

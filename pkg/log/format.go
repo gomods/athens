@@ -31,7 +31,7 @@ const lightGrey = 0xffccc
 
 func (devFormatter) Format(e *logrus.Entry) ([]byte, error) {
 	var buf bytes.Buffer
-	var sprintf func(format string, a ...interface{}) string
+	var sprintf func(format string, a ...any) string
 	switch e.Level {
 	case logrus.DebugLevel:
 		sprintf = color.New(lightGrey).Sprintf
