@@ -2,7 +2,6 @@ package s3
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
@@ -21,7 +20,7 @@ func (s *Storage) Exists(ctx context.Context, module, version string) (bool, err
 
 	lsParams := &s3.ListObjectsInput{
 		Bucket: aws.String(s.bucket),
-		Prefix: aws.String(fmt.Sprintf("%s/@v", module)),
+		Prefix: aws.String(config.PackageVersionedName(module, version, "")),
 	}
 	found := make(map[string]struct{}, 3)
 	err := s.s3API.ListObjectsPagesWithContext(ctx, lsParams, func(loo *s3.ListObjectsOutput, lastPage bool) bool {
