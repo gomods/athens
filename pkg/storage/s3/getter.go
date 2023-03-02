@@ -2,11 +2,12 @@ package s3
 
 import (
 	"context"
+	errs "errors"
 	"fmt"
-	"github.com/aws/aws-sdk-go/aws/awserr"
 	"io"
 
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/errors"
@@ -22,7 +23,8 @@ func (s *Storage) Info(ctx context.Context, module, version string) ([]byte, err
 
 	infoReader, err := s.open(ctx, config.PackageVersionedName(module, version, "info"))
 	if err != nil {
-		if aerr, ok := err.(awserr.Error); ok && aerr.Code() == s3.ErrCodeNoSuchKey {
+		var aerr awserr.Error
+		if errs.As(err, &aerr) && aerr.Code() == s3.ErrCodeNoSuchKey {
 			return nil, errors.E(op, errors.M(module), errors.V(version), errors.KindNotFound)
 		}
 		return nil, errors.E(op, err, errors.M(module), errors.V(version))
@@ -44,7 +46,8 @@ func (s *Storage) GoMod(ctx context.Context, module, version string) ([]byte, er
 
 	modReader, err := s.open(ctx, config.PackageVersionedName(module, version, "mod"))
 	if err != nil {
-		if aerr, ok := err.(awserr.Error); ok && aerr.Code() == s3.ErrCodeNoSuchKey {
+		var aerr awserr.Error
+		if errs.As(err, &aerr) && aerr.Code() == s3.ErrCodeNoSuchKey {
 			return nil, errors.E(op, errors.M(module), errors.V(version), errors.KindNotFound)
 		}
 		return nil, errors.E(op, err, errors.M(module), errors.V(version))
@@ -67,7 +70,8 @@ func (s *Storage) Zip(ctx context.Context, module, version string) (storage.Size
 
 	zipReader, err := s.open(ctx, config.PackageVersionedName(module, version, "zip"))
 	if err != nil {
-		if aerr, ok := err.(awserr.Error); ok && aerr.Code() == s3.ErrCodeNoSuchKey {
+		var aerr awserr.Error
+		if errs.As(err, &aerr) && aerr.Code() == s3.ErrCodeNoSuchKey {
 			return nil, errors.E(op, errors.M(module), errors.V(version), errors.KindNotFound)
 		}
 		return nil, errors.E(op, err, errors.M(module), errors.V(version))
