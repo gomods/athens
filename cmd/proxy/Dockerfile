@@ -32,6 +32,9 @@ RUN chmod 644 /config/config.toml
 RUN apk add --update git git-lfs mercurial openssh-client subversion procps fossil tini && \
 	mkdir -p /usr/local/go
 
+ARG USER=athens
+RUN adduser -D -h /home/$USER $USER
+
 EXPOSE 3000
 
 ENTRYPOINT [ "/sbin/tini", "--" ]
