@@ -91,7 +91,8 @@ func (s *Storage) open(ctx context.Context, path string) (storage.SizeReadCloser
 
 	goo, err := s.s3API.GetObjectWithContext(ctx, getParams)
 	if err != nil {
-		if aerr, ok := err.(awserr.Error); ok && aerr.Code() == s3.ErrCodeNoSuchKey {
+		var aerr awserr.Error
+		if errs.As(err, &aerr) && aerr.Code() == s3.ErrCodeNoSuchKey {
 			return nil, errors.E(op, errors.KindNotFound)
 		}
 		return nil, errors.E(op, err)
