@@ -53,6 +53,23 @@ docker run -d -v "$($env:ATHENS_STORAGE):/var/lib/athens" `
    gomods/athens:latest
 ```
 
+## Non-Root User
+
+The Athens docker images comes with a non-root user `authens` with `uid: 1000`, `gid: 1000` and home directory `/home/athens`.
+In situations where running as root is not permitted, this user can be used instead. In all other instuctions
+replace `/root/` with `/home/athens/` and set the user and group ids in the run environment to `1000`.
+
+```shell
+docker run -d -v $ATHENS_STORAGE:/var/lib/athens \
+   -e ATHENS_DISK_STORAGE_ROOT=/var/lib/athens \
+   -e ATHENS_STORAGE_TYPE=disk \
+   -v "$PWD/gitconfig/.gitconfig:/home/athens/.gitconfig" \
+   --name athens-proxy \
+   --restart always \
+   -p 3000:3000 \
+   -u 1000:1000 \
+   gomods/athens:latest
+```
 
 ## Troubleshooting Athens in Docker
 
