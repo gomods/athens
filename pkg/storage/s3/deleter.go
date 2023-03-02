@@ -17,13 +17,6 @@ func (s *Storage) Delete(ctx context.Context, module, version string) error {
 	const op errors.Op = "s3.Delete"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
-	exists, err := s.Exists(ctx, module, version)
-	if err != nil {
-		return errors.E(op, err, errors.M(module), errors.V(version))
-	}
-	if !exists {
-		return errors.E(op, errors.M(module), errors.V(version), errors.KindNotFound)
-	}
 
 	return modupl.Delete(ctx, module, version, s.remove, s.timeout)
 }
