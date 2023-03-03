@@ -48,9 +48,9 @@ func (s *Storage) Exists(ctx context.Context, module, version string) (bool, err
 		if errs.As(err, &aerr) && aerr.Code() == "NotFound" {
 			exists = false
 		}
-		cancel()
 		break
 	}
+	cancel()
 	wg.Wait()
 	return exists, err
 }
