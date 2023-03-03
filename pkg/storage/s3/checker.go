@@ -28,6 +28,7 @@ func (s *Storage) Exists(ctx context.Context, module, version string) (bool, err
 	for _, file := range files {
 		wg.Add(1)
 		go func(file string) {
+			defer wg.Done()
 			_, err := s.s3API.HeadObjectWithContext(
 				cancelingCtx,
 				&s3.HeadObjectInput{
