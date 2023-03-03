@@ -2,9 +2,10 @@ package s3
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go/aws/awserr"
+	errs "errors"
 
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/errors"
