@@ -2,12 +2,13 @@ package s3
 
 import (
 	"context"
+	goerr "errors"
 
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/errors"
-	"github.com/gomods/athens/pkg/log"
 	"github.com/gomods/athens/pkg/observ"
 )
 
@@ -18,27 +19,25 @@ func (s *Storage) Exists(ctx context.Context, module, version string) (bool, err
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 
-	lsParams := &s3.ListObjectsInput{
-		Bucket: aws.String(s.bucket),
-		Prefix: aws.String(config.PackageVersionedName(module, version, "")),
+	fileKeys := []string{
+		config.PackageVersionedName(module, version, "info"),
+		config.PackageVersionedName(module, version, "mod"),
+		config.PackageVersionedName(module, version, "zip"),
 	}
-	found := make(map[string]struct{}, 3)
-	err := s.s3API.ListObjectsPagesWithContext(ctx, lsParams, func(loo *s3.ListObjectsOutput, lastPage bool) bool {
-		for _, o := range loo.Contents {
-			if _, exists := found[*o.Key]; exists {
-				log.EntryFromContext(ctx).Warnf("duplicate key in prefix %q: %q", *lsParams.Prefix, *o.Key)
-				continue
-			}
-			if *o.Key == config.PackageVersionedName(module, version, "info") ||
-				*o.Key == config.PackageVersionedName(module, version, "mod") ||
-				*o.Key == config.PackageVersionedName(module, version, "zip") {
-				found[*o.Key] = struct{}{}
-			}
+
+	for _, key := range fileKeys {
+		params := &s3.HeadObjectInput{
+			Bucket: aws.String(s.bucket),
+			Key:    aws.String(key),
 		}
-		return len(found) < 3
-	})
-	if err != nil {
-		return false, errors.E(op, err, errors.M(module), errors.V(version))
+
+		if _, err := s.s3API.HeadObjectWithContext(ctx, params); err != nil {
+			var s3Err awserr.Error
+			if goerr.As(err, &s3Err) && s3Err.Code() == "NotFound" {
+				return false, nil
+			}
+			return false, errors.E(op, err, errors.M(module), errors.V(version))
+		}
 	}
-	return len(found) == 3, nil
+	return true, nil
 }
