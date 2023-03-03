@@ -35,11 +35,11 @@ func (s *Storage) Exists(ctx context.Context, module, version string) (bool, err
 			errChan <- err
 		}(file)
 	}
-	for _ = range files {
+	for range files {
 		err := <-errChan
 		if err != nil {
 			var aerr awserr.Error
-			if errs.As(err, &aerr) && aerr.Code() == s3.ErrCodeNoSuchKey {
+			if errs.As(err, &aerr) && aerr.Code() == "NotFound" {
 				return false, nil
 			}
 			return false, err
