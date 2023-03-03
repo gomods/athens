@@ -89,14 +89,6 @@ proxy-docker:
 docker-push:
 	./scripts/push-docker-images.sh
 
-.PHONY: charts-push
-charts-push: build-image
-	docker run --rm -it \
-	-v `pwd`:/go/src/github.com/gomods/athens \
-	-e AZURE_STORAGE_CONNECTION_STRING \
-	-e CHARTS_REPO \
-	athens-build ./scripts/push-helm-charts.sh
-
 bench:
 	./scripts/benchmark.sh
 
