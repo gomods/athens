@@ -39,11 +39,14 @@ func (s *Storage) Exists(ctx context.Context, module, version string) (bool, err
 		}(file)
 	}
 	exists := true
-	var err error
+	var firstErr error
 	for range files {
-		err = <-errChan
+		err := <-errChan
 		if err == nil {
 			continue
+		}
+		if firstErr == nil {
+			firstErr = err
 		}
 		var aerr awserr.Error
 		if errs.As(err, &aerr) && aerr.Code() == "NotFound" {
@@ -53,5 +56,5 @@ func (s *Storage) Exists(ctx context.Context, module, version string) (bool, err
 	}
 	cancel()
 	wg.Wait()
-	return exists, err
+	return exists, firstErr
 }
