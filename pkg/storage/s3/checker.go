@@ -47,6 +47,7 @@ func (s *Storage) Exists(ctx context.Context, module, version string) (bool, err
 		}
 		var aerr awserr.Error
 		if errs.As(err, &aerr) && aerr.Code() == "NotFound" {
+			err = nil
 			exists = false
 		}
 		break
