@@ -20,10 +20,10 @@ func (s *Storage) Exists(ctx context.Context, module, version string) (bool, err
 	defer span.End()
 
 	files := []string{"info", "mod", "zip"}
-	cancelingCtx, cancel := context.WithCancel(ctx)
-	defer cancel()
 	errChan := make(chan error, len(files))
 	defer close(errChan)
+	cancelingCtx, cancel := context.WithCancel(ctx)
+	defer cancel()
 	for _, file := range files {
 		go func(file string) {
 			_, err := s.s3API.HeadObjectWithContext(
