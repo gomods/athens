@@ -3,6 +3,7 @@ package s3
 import (
 	"context"
 	errs "errors"
+	"sync"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
@@ -23,8 +24,9 @@ func (s *Storage) Exists(ctx context.Context, module, version string) (bool, err
 	errChan := make(chan error, len(files))
 	defer close(errChan)
 	cancelingCtx, cancel := context.WithCancel(ctx)
-	defer cancel()
+	var wg sync.WaitGroup
 	for _, file := range files {
+		wg.Add(1)
 		go func(file string) {
 			_, err := s.s3API.HeadObjectWithContext(
 				cancelingCtx,
@@ -35,15 +37,20 @@ func (s *Storage) Exists(ctx context.Context, module, version string) (bool, err
 			errChan <- err
 		}(file)
 	}
+	exists := true
+	var err error
 	for range files {
-		err := <-errChan
-		if err != nil {
-			var aerr awserr.Error
-			if errs.As(err, &aerr) && aerr.Code() == "NotFound" {
-				return false, nil
-			}
-			return false, err
+		err = <-errChan
+		if err == nil {
+			continue
 		}
+		var aerr awserr.Error
+		if errs.As(err, &aerr) && aerr.Code() == "NotFound" {
+			exists = false
+		}
+		cancel()
+		break
 	}
-	return true, nil
+	wg.Wait()
+	return exists, err
 }
