@@ -6,7 +6,7 @@
 # See project Makefile if using make.
 # See docker --build-arg if building directly.
 ARG GOLANG_VERSION=1.20
-ARG ALPINE_VERSION=3.15
+ARG ALPINE_VERSION=3.17
 
 FROM golang:${GOLANG_VERSION}-alpine AS builder
 
@@ -16,7 +16,7 @@ COPY . .
 
 ARG VERSION="unset"
 
-RUN DATE="$(date -u +%Y-%m-%d-%H:%M:%S-%Z)" && GO111MODULE=on CGO_ENABLED=0 GOPROXY="https://proxy.golang.org" go build -ldflags "-X github.com/gomods/athens/pkg/build.version=$VERSION -X github.com/gomods/athens/pkg/build.buildDate=$DATE" -o /bin/athens-proxy ./cmd/proxy
+RUN DATE="$(date -u +%Y-%m-%d-%H:%M:%S-%Z)" && GO111MODULE=on CGO_ENABLED=0 GOPROXY="https://proxy.golang.org" go build -ldflags "-X github.com/gomods/athens/pkg/build.version=$VERSION -X github.com/gomods/athens/pkg/build.buildDate=$DATE -s -w" -o /bin/athens-proxy ./cmd/proxy
 
 FROM alpine:${ALPINE_VERSION}
 
