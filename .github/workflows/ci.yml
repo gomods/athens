@@ -1,7 +1,9 @@
 name: continuous-integration
 on:
-  - push
   - pull_request
+  - push:
+      branches: [main]
+
 jobs:
   lint:
     runs-on: ubuntu-latest
