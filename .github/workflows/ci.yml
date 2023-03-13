@@ -5,6 +5,9 @@ on:
 jobs:
   lint:
     runs-on: ubuntu-latest
+    env:
+      GOLANGCI_LINT_VERSION: v1.51.2
+
     steps:
       - uses: actions/checkout@v3
       - name: Set up Go
@@ -13,7 +16,11 @@ jobs:
           go-version-file: 'go.mod'
           cache: true
       - name: Lint code
-        run: make lint-docker
+        uses: golangci/golangci-lint-action@v3
+        with:
+          version: ${{ env.GOLANGCI_LINT_VERSION }}
+          skip-pkg-cache: true
+          skip-build-cache: true
 
   build:
     env:
