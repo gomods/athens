@@ -9,11 +9,11 @@ endif
 
 .PHONY: build
 build: ## build the athens proxy
-	go build -o ./cmd/proxy/proxy ./cmd/proxy
+	go build -ldflags="-w -s" -o ./cmd/proxy/proxy ./cmd/proxy
 
 .PHONY: build-ver
 build-ver: ## build the athens proxy with version number
-	GO111MODULE=on CGO_ENABLED=0 GOPROXY="https://proxy.golang.org" go build -ldflags "-X github.com/gomods/athens/pkg/build.version=$(VERSION) -X github.com/gomods/athens/pkg/build.buildDate=$(DATE)" -o athens ./cmd/proxy
+	GO111MODULE=on CGO_ENABLED=0 GOPROXY="https://proxy.golang.org" go build -ldflags "-s -w -X github.com/gomods/athens/pkg/build.version=$(VERSION) -X github.com/gomods/athens/pkg/build.buildDate=$(DATE)" -o athens ./cmd/proxy
 
 athens:
 	$(MAKE) build-ver
