@@ -1,8 +1,6 @@
 name: continuous-integration
 on:
   - pull_request
-  - push:
-      branches: [main]
 
 jobs:
   lint:
