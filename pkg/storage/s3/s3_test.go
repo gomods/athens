@@ -89,7 +89,6 @@ func getStorage(t testing.TB) *Storage {
 		config.GetTimeoutDuration(300),
 		options,
 	)
-
 	if err != nil {
 		t.Fatal(err)
 	}
