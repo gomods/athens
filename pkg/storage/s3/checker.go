@@ -2,7 +2,6 @@ package s3
 
 import (
 	"context"
-	errs "errors"
 	"sync"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -46,7 +45,7 @@ func (s *Storage) Exists(ctx context.Context, module, version string) (bool, err
 			continue
 		}
 		var aerr awserr.Error
-		if errs.As(err, &aerr) && aerr.Code() == "NotFound" {
+		if errors.AsErr(err, &aerr) && aerr.Code() == "NotFound" {
 			err = nil
 			exists = false
 		}
