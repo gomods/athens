@@ -67,7 +67,7 @@ jobs:
         image: mongo
         ports:
           - 27017:27017
-          -
+
       minio:
         image: minio/minio:edge-cicd
         ports:
