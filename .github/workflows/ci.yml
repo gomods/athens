@@ -28,6 +28,9 @@ jobs:
           skip-build-cache: true
 
   build:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
     env:
       ATHENS_MONGO_STORAGE_URL: mongodb://localhost:27017
       ATHENS_MINIO_ENDPOINT: localhost:9000
@@ -38,7 +41,7 @@ jobs:
       PROTECTED_REDIS_TEST_ENDPOINT: localhost:6380
       ATHENS_PROTECTED_REDIS_PASSWORD: AthensPass1
       GA_PULL_REQUEST: ${{github.event.number}}
-    runs-on: ubuntu-latest
+    runs-on:  ${{ matrix.os }}
     services:
       mongo:
         image: mongo
