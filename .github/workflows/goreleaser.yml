@@ -12,7 +12,7 @@ jobs:
       - name: unshallow
         run: git fetch --prune --unshallow
       - name: setup-go
-        uses: actions/setup-go@v3
+        uses: actions/setup-go@v4
         with:
           go-version: "1.20"
       - name: capture current date
