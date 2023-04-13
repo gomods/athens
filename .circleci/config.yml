@@ -4,7 +4,8 @@ jobs:
   do-nothing:
     docker:
       - image: koalaman/shellcheck-alpine
-    steps: []
+    steps:
+      - checkout
 
 workflows:
   version: 2
