@@ -1,0 +1,14 @@
+version: 2.1
+
+jobs:
+  do-nothing:
+    docker:
+      - image: koalaman/shellcheck-alpine
+    steps:
+      - checkout
+
+workflows:
+  version: 2
+  lint_and_install:
+    jobs:
+      - do-nothing
