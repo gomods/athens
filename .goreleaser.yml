@@ -12,11 +12,14 @@ builds:
     - darwin
   goarch:
     - amd64
+    - arm64
   main: cmd/proxy/main.go
   binary: athens
   ldflags:
     - -X "github.com/gomods/athens/pkg/build.version={{ .Tag }}"
     - -X "github.com/gomods/athens/pkg/build.buildDate={{ .Env.DATE }}"
+universal_binaries:
+- replace: true
 checksum:
   name_template: 'checksums.txt'
 snapshot:
