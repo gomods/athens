@@ -14,7 +14,7 @@ jobs:
         run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
 
       - name: Build and push canary image
-        uses: ./.github/workflows/build-push-image.yaml
+        uses: ./.github/workflows/build-push-image.yml
         with:
           tags: gomods/athens:canary,gomods/athens-dev:${{ steps.vars.outputs.sha_short }}
           version: ${{ github.sha }}

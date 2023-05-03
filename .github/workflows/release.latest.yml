@@ -20,7 +20,7 @@ jobs:
             type=raw,value=latest
 
       - name: Build and push latest tag
-        uses: ./.github/workflows/build-push-image.yaml
+        uses: ./.github/workflows/build-push-image.yml
         with:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
