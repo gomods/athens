@@ -22,6 +22,6 @@ jobs:
       - name: Build and push latest tag
         uses: ./.github/workflows/build-push-image.yaml
         with:
-          tags: {{ steps.meta.outputs.tags }}
-          labels: {{ steps.meta.outputs.labels }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
           version: ${{ github.ref_name }}
