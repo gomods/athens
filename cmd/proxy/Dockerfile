@@ -8,15 +8,24 @@
 ARG GOLANG_VERSION=1.20
 ARG ALPINE_VERSION=3.17
 
-FROM golang:${GOLANG_VERSION}-alpine AS builder
+FROM --platform=$BUILDPLATFORM golang:${GOLANG_VERSION}-alpine AS builder
+
+ARG VERSION="unset" \
+    TARGETARCH
+
+ENV GOARCH=${TARGETARCH} \
+    GO111MODULE=on \
+    CGO_ENABLED=0 \
+    GOPROXY="https://proxy.golang.org"
 
 WORKDIR $GOPATH/src/github.com/gomods/athens
 
 COPY . .
 
-ARG VERSION="unset"
-
-RUN DATE="$(date -u +%Y-%m-%d-%H:%M:%S-%Z)" && GO111MODULE=on CGO_ENABLED=0 GOPROXY="https://proxy.golang.org" go build -ldflags "-X github.com/gomods/athens/pkg/build.version=$VERSION -X github.com/gomods/athens/pkg/build.buildDate=$DATE -s -w" -o /bin/athens-proxy ./cmd/proxy
+RUN DATE="$(date -u +%Y-%m-%d-%H:%M:%S-%Z)" && \
+    go build \
+    -ldflags "-X github.com/gomods/athens/pkg/build.version=$VERSION -X github.com/gomods/athens/pkg/build.buildDate=$DATE -s -w" \
+    -o /bin/athens-proxy ./cmd/proxy
 
 FROM alpine:${ALPINE_VERSION}
 
@@ -30,7 +39,7 @@ RUN chmod 644 /config/config.toml
 
 # Add tini, see https://github.com/gomods/athens/issues/1155 for details.
 RUN apk add --update git git-lfs mercurial openssh-client subversion procps fossil tini && \
-	mkdir -p /usr/local/go
+    mkdir -p /usr/local/go
 
 ARG USER=athens
 RUN adduser -D -h /home/$USER $USER
