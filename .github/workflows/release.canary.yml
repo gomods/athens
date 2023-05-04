@@ -33,6 +33,5 @@ jobs:
           file: cmd/proxy/Dockerfile
           build-args: VERSION=${{ github.sha }}
           tags: gomods/athens:canary,gomods/athens-dev:${{ steps.vars.outputs.sha_short }}
-          labels: ${{ inputs.labels }}
           push: true
           platforms: linux/amd64,linux/arm64
