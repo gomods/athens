@@ -1,3 +1,5 @@
+//go:generate mockery --inpackage=false --exported --name=minioCore
+
 package minio
 
 import (
@@ -10,9 +12,13 @@ import (
 	minio "github.com/minio/minio-go/v6"
 )
 
+type minioCore interface {
+	ListObjectsV2(bucketName, objectPrefix, continuationToken string, fetchOwner bool, delimiter string, maxkeys int, startAfter string) (minio.ListBucketV2Result, error)
+}
+
 type storageImpl struct {
 	minioClient *minio.Client
-	minioCore   *minio.Core
+	minioCore   minioCore
 	bucketName  string
 }
 
