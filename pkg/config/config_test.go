@@ -409,7 +409,7 @@ func Test_checkFilePerms(t *testing.T) {
 		t.Skipf("Chmod is not supported in windows, so not possible to test. Ref: https://github.com/golang/go/blob/master/src/os/os_test.go#L1031\n")
 	}
 
-	incorrectPerms := []os.FileMode{0777, 0610, 0660}
+	incorrectPerms := []os.FileMode{0o777, 0o610, 0o660}
 	var incorrectFiles = make([]string, len(incorrectPerms))
 
 	for i := range incorrectPerms {
@@ -421,7 +421,7 @@ func Test_checkFilePerms(t *testing.T) {
 		defer os.Remove(f)
 	}
 
-	correctPerms := []os.FileMode{0600, 0400}
+	correctPerms := []os.FileMode{0o600, 0o400, 0o644}
 	var correctFiles = make([]string, len(correctPerms))
 
 	for i := range correctPerms {
@@ -441,8 +441,8 @@ func Test_checkFilePerms(t *testing.T) {
 
 	tests := []test{
 		{
-			"should not have an error on 0600, 0400, 0640",
-			[]string{correctFiles[0], correctFiles[1]},
+			"should not have an error on 0600, 0400, 0644",
+			[]string{correctFiles[0], correctFiles[1], correctFiles[2]},
 			false,
 		},
 		{

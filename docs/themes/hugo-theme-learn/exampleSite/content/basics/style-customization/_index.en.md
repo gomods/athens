@@ -33,7 +33,7 @@ The size of the logo will adapt automatically
 
 ## Change the favicon
 
-If your favicon is a png, just drop off your image in your local `static/images/` folder and names it `favicon.png`
+If your favicon is a png, just drop off your image in your local `static/images/` folder and name it `favicon.png`
 
 If you need to change this default behavior, create a new file in `layouts/partials/` named `favicon.html`. Then write something like this:
 
@@ -53,7 +53,7 @@ If you need to change this default behavior, create a new file in `layouts/parti
   themeVariant = "red"
 ```
 
-![Red variant](/basics/style-customization/images/red-variant.png?width=60pc)
+![Red variant](/en/basics/style-customization/images/red-variant.png?width=60pc)
 
 ### Blue variant
 
@@ -63,7 +63,7 @@ If you need to change this default behavior, create a new file in `layouts/parti
   themeVariant = "blue"
 ```
 
-![Blue variant](/basics/style-customization/images/blue-variant.png?width=60pc)
+![Blue variant](/en/basics/style-customization/images/blue-variant.png?width=60pc)
 
 ### Green variant
 
@@ -73,7 +73,7 @@ If you need to change this default behavior, create a new file in `layouts/parti
   themeVariant = "green"
 ```
 
-![Green variant](/basics/style-customization/images/green-variant.png?width=60pc)
+![Green variant](/en/basics/style-customization/images/green-variant.png?width=60pc)
 
 ### 'Yours‘ variant
 

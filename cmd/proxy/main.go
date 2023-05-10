@@ -6,6 +6,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"net"
 	"net/http"
 	_ "net/http/pprof"
 	"os"
@@ -45,7 +46,6 @@ func main() {
 	}
 
 	srv := &http.Server{
-		Addr:              conf.Port,
 		Handler:           handler,
 		ReadHeaderTimeout: 2 * time.Second,
 	}
@@ -75,11 +75,29 @@ func main() {
 		}()
 	}
 
-	log.Printf("Starting application at port %v", conf.Port)
-	if cert != "" && key != "" {
-		err = srv.ListenAndServeTLS(conf.TLSCertFile, conf.TLSKeyFile)
+	// Unix socket configuration, if available, takes precedence over TCP port configuration.
+	var ln net.Listener
+
+	if conf.UnixSocket != "" {
+		log.Printf("Starting application at Unix domain socket %v", conf.UnixSocket)
+
+		ln, err = net.Listen("unix", conf.UnixSocket)
+		if err != nil {
+			log.Fatalf("error listening on Unix domain socket %v: %v", conf.UnixSocket, err)
+		}
 	} else {
-		err = srv.ListenAndServe()
+		log.Printf("Starting application at port %v", conf.Port)
+
+		ln, err = net.Listen("tcp", conf.Port)
+		if err != nil {
+			log.Fatalf("error listening on TCP port %v: %v", conf.Port, err)
+		}
+	}
+
+	if cert != "" && key != "" {
+		err = srv.ServeTLS(ln, conf.TLSCertFile, conf.TLSKeyFile)
+	} else {
+		err = srv.Serve(ln)
 	}
 
 	if !errors.Is(err, http.ErrServerClosed) {

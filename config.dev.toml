@@ -131,6 +131,12 @@ StorageType = "memory"
 # The PORT must be a number or a number prefixed by ":"
 Port = ":3000"
 
+# UnixSocket sets a Unix domain socket path that the proxy listens on.
+# This option, when specified, takes precedence over TCP port configuration.
+# Defaults to empty (i.e. listen on a TCP port only)
+# Env override: ATHENS_UNIX_SOCKET
+UnixSocket = ""
+
 # The endpoint for a package registry in case of a proxy cache miss
 # NOTE: Currently no registries have been implemented
 # Env override: ATHENS_GLOBAL_ENDPOINT

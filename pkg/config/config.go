@@ -38,6 +38,7 @@ type Config struct {
 	StorageType      string    `validate:"required" envconfig:"ATHENS_STORAGE_TYPE"`
 	GlobalEndpoint   string    `envconfig:"ATHENS_GLOBAL_ENDPOINT"` // This feature is not yet implemented
 	Port             string    `envconfig:"ATHENS_PORT"`
+	UnixSocket       string    `envconfig:"ATHENS_UNIX_SOCKET"`
 	BasicAuthUser    string    `envconfig:"BASIC_AUTH_USER"`
 	BasicAuthPass    string    `envconfig:"BASIC_AUTH_PASS"`
 	ForceSSL         bool      `envconfig:"PROXY_FORCE_SSL"`
@@ -383,7 +384,7 @@ func checkFilePerms(files ...string) error {
 		// Assume unix based system (MacOS and Linux)
 		// the bit mask is calculated using the umask command which tells which permissions
 		// should not be allowed for a particular user, group or world
-		if fInfo.Mode()&0o077 != 0 && runtime.GOOS != "windows" {
+		if fInfo.Mode()&0o033 != 0 && runtime.GOOS != "windows" {
 			return errors.E(op, f+" should have at most rwx,-, - (bit mask 077) as permission")
 		}
 	}
