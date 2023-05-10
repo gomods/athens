@@ -6,9 +6,9 @@ weight: 1
 
 When you follow the instructions in the [Walkthrough](/walkthrough), you end up with an Athens Proxy that uses in-memory storage. This is only suitable for trying out the Athens proxy for a short period of time, as you will quickly run out of memory and Athens won't persist modules between restarts. In order to run a more production-like proxy, you may want to run Athens on a [Kubernetes](https://kubernetes.io/) cluster. To aid in deployment of the Athens proxy on Kubernetes, a [Helm](https://www.helm.sh/) chart has been provided. This guide will walk you through installing Athens on a Kubernetes cluster using Helm.
 
-* [Prerequisites](#prerequisites)
-* [Configure Helm](#configure-helm)
-* [Deploy Athens](#deploy-athens)
+-   [Prerequisites](#prerequisites)
+-   [Configure Helm](#configure-helm)
+-   [Deploy Athens](#deploy-athens)
 
 ---
 
@@ -16,35 +16,16 @@ When you follow the instructions in the [Walkthrough](/walkthrough), you end up 
 
 In order to install Athens on your Kubernetes cluster, there are a few prerequisites that you must satisfy. If you already have completed the following steps, please continue to [configuring helm](#configure-helm). This guide assumes you have already created a Kubernetes cluster.
 
-* Install the [Kubernetes CLI](#install-the-kubernetes-cli).
-* Install the [Helm CLI](#install-the-helm-cli).
+-   Install the [Kubernetes CLI](#install-the-kubernetes-cli).
+-   Install the [Helm CLI](#install-the-helm-cli).
 
 ### Install the Kubernetes CLI
 
-In order to interact with your Kubernetes Cluster, you will need to [install kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/).
+To work with your Kubernetes Cluster, it's necessary to have the Kubernetes CLI, also known as `kubectl`, installed on your computer. You can download and install it by following the instructions provided in the [official Kubernetes documentation](https://kubernetes.io/docs/tasks/tools/install-kubectl/).
 
-### Install The Helm CLI
+### Install the Helm CLI
 
-[Helm](https://github.com/kubernetes/helm) is a tool for installing pre-configured applications on Kubernetes.
-Install `helm` by running the following command:
-
-#### MacOS
-
-```console
-brew install kubernetes-helm
-```
-
-#### Windows
-
-1. Download the latest [Helm release](https://storage.googleapis.com/kubernetes-helm/helm-v2.7.2-windows-amd64.tar.gz).
-1. Decompress the tar file.
-1. Copy **helm.exe** to a directory on your PATH.
-
-#### Linux
-
-```console
-curl https://raw.githubusercontent.com/kubernetes/helm/master/scripts/get | bash
-```
+[Helm](https://github.com/helm/helm) is a tool for installing pre-configured applications on Kubernetes. You can download and install `helm` by following the instructions available on the [official Helm documentation](https://helm.sh/docs/intro/install/).
 
 ## Configure Helm
 
@@ -88,7 +69,7 @@ $ helm repo update
 
 Next, install the chart with default values to `athens` namespace:
 
-```
+```console
 $ helm install gomods/athens-proxy -n athens --namespace athens
 ```
 
@@ -133,10 +114,10 @@ When using the `disk` storage provider, you can configure a number of options re
 
 ```yaml
 persistence:
-  enabled: false
-  accessMode: ReadWriteOnce
-  size: 4Gi
-  storageClass:
+    enabled: false
+    accessMode: ReadWriteOnce
+    size: 4Gi
+    storageClass:
 ```
 
 Add it to `override-values.yaml` file and run:
@@ -151,7 +132,7 @@ helm install gomods/athens-proxy -n athens --namespace athens -f override-values
 
 To use the Mongo DB storage provider, you will first need a MongoDB instance. Once you have deployed MongoDB, you can configure Athens using the connection string via `storage.mongo.url`. You will also need to set `storage.type` to "mongo".
 
-```
+```console
 helm install gomods/athens-proxy -n athens --namespace athens --set storage.type=mongo --set storage.mongo.url=<some-mongodb-connection-string>
 ```
 
@@ -162,7 +143,7 @@ S3 bucket name, respectively. By default, Athens will attempt to load AWS creden
 variables, shared credentials files, and EC2 instance credentials. To manually specify AWS credentials, set `storage.s3.access_key_id`,
 `storage.s3.secret_access_key`, and change `storage.s3.useDefaultConfiguration` to `false`.
 
-```
+```console
 helm install gomods/athens-proxy -n athens --namespace athens --set storage.type=s3 --set storage.s3.region=<your-aws-region> --set storage.s3.bucket=<your-bucket>
 ```
 
@@ -173,21 +154,21 @@ This URL can also be an kubernetes-internal one (e.g. something like `minio-serv
 You need to create a bucket inside your minio-installation or use an existing one. The bucket needs to be referenced in `storage.minio.bucket`.
 Last athens need authentication credentials for your minio in `storage.minio.accessKey` and `storage.minio.secretKey`.
 
-```
+```console
 helm install gomods/athens-proxy -n athens --namespace athens --set storage.type=minio --set storage.minio.endpoint=<your-minio-endpoint> --set storage.minio.bucket=<your-bucket> --set storage.minio.accessKey=<your-minio-access-key> --set storage.minio.secretKey=<your-minio-secret-key>
 ```
 
 #### Google Cloud Storage
 
- To use Google Cloud Storage storage with Athens, set `storage.type` to `gcp`. You need to set `storage.gcp.projectID` and `storage.gcp.bucket` to the
- desired GCP project and bucket name, respectively.
+To use Google Cloud Storage storage with Athens, set `storage.type` to `gcp`. You need to set `storage.gcp.projectID` and `storage.gcp.bucket` to the
+desired GCP project and bucket name, respectively.
 
- Depending on your deployment environment you will also need to set `storage.gcp.serviceAccount` to a key which has read/write access to
- the GCS bucket. If you are running Athens inside GCP, you will most likely not need this as GCP figures out internal authentication between products for you.
+Depending on your deployment environment you will also need to set `storage.gcp.serviceAccount` to a key which has read/write access to
+the GCS bucket. If you are running Athens inside GCP, you will most likely not need this as GCP figures out internal authentication between products for you.
 
- ```
- helm install gomods/athens-proxy -n athens --namespace athens --set storage.type=gcp --set storage.gcp.projectID=<your-gcp-project> --set storage.gcp.bucket=<your-bucket>
- ```
+```console
+helm install gomods/athens-proxy -n athens --namespace athens --set storage.type=gcp --set storage.gcp.projectID=<your-gcp-project> --set storage.gcp.bucket=<your-bucket>
+```
 
 ### Kubernetes Service
 
@@ -237,16 +218,16 @@ You can set the `URL` for the [upstream module repository](https://docs.gomods.i
 
 You have a few good options for what you can set as an upstream:
 
--  `https://gocenter.io` to use JFrog's GoCenter
--  `https://proxy.golang.org` to use the Go Module Mirror
--  The URL to any other Athens server
+-   `https://gocenter.io` to use JFrog's GoCenter
+-   `https://proxy.golang.org` to use the Go Module Mirror
+-   The URL to any other Athens server
 
 The example below shows you how to set GoCenter up as upstream module repository:
 
 ```yaml
 upstreamProxy:
-  enabled: true
-  url: "https://gocenter.io"
+    enabled: true
+    url: "https://gocenter.io"
 ```
 
 Add it to `override-values.yaml` file and run:
