@@ -17,3 +17,9 @@ There are 3 modes available for the NetworkMode configuration. To configure the 
 2. `offline`: This mode only retrieves versions from Athens' storage and never reaches out to the VCS.
 
 3. `fallback`: This mode retrieves versions from Athens' storage only if the VCS fails. Note that using this mode may result in inconsistent results since fallback mode does its best to provide the available versions at the time of the request.
+
+## Use cases
+
+### Fetching modules for offline environments
+
+When working in offline environments with private networks lacking direct internet access, Athens' offline mode can be useful. For example, you can [pre-download](/configuration/prefill-disk-cache/) modules using Athens from a machine with internet access. Subsequently, the pre-downloaded modules are accessible within the offline network through Athens, facilitating development and build without requiring an active internet connection.
