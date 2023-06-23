@@ -41,6 +41,10 @@ run-docker-teardown:
 docs: ## build the docs docker image
 	docker build -t gomods/hugo -f docs/Dockerfile .
 
+.PHONY: docs-docker
+docs-docker: ## run the docs docker image
+	docker run -it --rm --name hugo-server -p 1313:1313 -v ${PWD}/docs:/src:cached gomods/hugo
+
 .PHONY: setup-dev-env
 setup-dev-env:
 	$(MAKE) dev
