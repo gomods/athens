@@ -9,7 +9,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-// GetModule gets the module from the path of a ?go-get=1 request
+// GetModule gets the module from the path of a ?go-get=1 request.
 func GetModule(r *http.Request) (string, error) {
 	const op errors.Op = "paths.GetModule"
 	module := mux.Vars(r)["module"]
@@ -19,7 +19,7 @@ func GetModule(r *http.Request) (string, error) {
 	return DecodePath(module)
 }
 
-// GetVersion gets the version from the path of a ?go-get=1 request
+// GetVersion gets the version from the path of a ?go-get=1 request.
 func GetVersion(r *http.Request) (string, error) {
 	const op errors.Op = "paths.GetVersion"
 
@@ -31,13 +31,13 @@ func GetVersion(r *http.Request) (string, error) {
 }
 
 // AllPathParams holds the module and version in the path of a ?go-get=1
-// request
+// request.
 type AllPathParams struct {
 	Module  string `json:"module"`
 	Version string `json:"version"`
 }
 
-// GetAllParams fetches the path params from r and returns them
+// GetAllParams fetches the path params from r and returns them.
 func GetAllParams(r *http.Request) (*AllPathParams, error) {
 	const op errors.Op = "paths.GetAllParams"
 	mod, err := GetModule(r)
@@ -54,7 +54,7 @@ func GetAllParams(r *http.Request) (*AllPathParams, error) {
 }
 
 // MatchesPattern reports whether the path prefix of target matches
-// pattern (as defined by path.Match)
+// pattern (as defined by path.Match).
 //
 // This tries to keep the same behavior as GOPRIVATE/GONOPROXY/GONOSUMDB,
 // and is adopted from:

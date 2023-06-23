@@ -3,7 +3,7 @@ package mongo
 import (
 	"bytes"
 	"context"
-	"io/ioutil"
+	"io"
 	"os"
 	"testing"
 
@@ -20,8 +20,8 @@ func TestBackend(t *testing.T) {
 	compliance.RunTests(t, backend, backend.clear)
 }
 
-func (m *ModuleStore) clear() error {
-	m.client.Database(m.db).Drop(context.Background())
+func (s *ModuleStore) clear() error {
+	s.client.Database(s.db).Drop(context.Background())
 	return nil
 }
 
@@ -48,13 +48,13 @@ func TestQueryModuleVersionExists(t *testing.T) {
 	mock := &storage.Version{
 		Info: []byte("123"),
 		Mod:  []byte("456"),
-		Zip:  ioutil.NopCloser(bytes.NewReader([]byte("789"))),
+		Zip:  io.NopCloser(bytes.NewReader([]byte("789"))),
 	}
 
 	ctx := context.Background()
 	backend := getStorage(t)
 
-	zipBts, _ := ioutil.ReadAll(mock.Zip)
+	zipBts, _ := io.ReadAll(mock.Zip)
 	backend.Save(ctx, modname, ver, mock.Mod, bytes.NewReader(zipBts), mock.Info)
 	defer backend.Delete(ctx, modname, ver)
 
@@ -69,13 +69,13 @@ func TestQueryKindNotFoundErrorCases(t *testing.T) {
 	mock := &storage.Version{
 		Info: []byte("123"),
 		Mod:  []byte("456"),
-		Zip:  ioutil.NopCloser(bytes.NewReader([]byte("789"))),
+		Zip:  io.NopCloser(bytes.NewReader([]byte("789"))),
 	}
 
 	ctx := context.Background()
 	backend := getStorage(t)
 
-	zipBts, _ := ioutil.ReadAll(mock.Zip)
+	zipBts, _ := io.ReadAll(mock.Zip)
 	backend.Save(ctx, modname, ver, mock.Mod, bytes.NewReader(zipBts), mock.Info)
 	defer backend.Delete(ctx, modname, ver)
 
@@ -111,12 +111,12 @@ func TestNewStorageWithDefaultOverrides(t *testing.T) {
 		collName    string
 		expCollName string
 	}{
-		{"Test Default 'Athens' DB Name", "athens", "athens", "modules", "modules"},          //Tests the default database name
-		{"Test Custom DB Name", "testAthens", "testAthens", "modules", "modules"},            //Tests a non-default database name
-		{"Test Blank DB Name", "", "athens", "modules", "modules"},                           //Tests the blank database name edge-case
-		{"Test Default 'Modules' Collection Name", "athens", "athens", "modules", "modules"}, //Tests the default collection name
-		{"Test Custom Collection Name", "athens", "athens", "testModules", "testModules"},    //Tests the non-default collection name
-		{"Test Blank Collection Name", "athens", "athens", "", "modules"},                    //Tests the blank collection name edge-case
+		{"Test Default 'Athens' DB Name", "athens", "athens", "modules", "modules"},          // Tests the default database name
+		{"Test Custom DB Name", "testAthens", "testAthens", "modules", "modules"},            // Tests a non-default database name
+		{"Test Blank DB Name", "", "athens", "modules", "modules"},                           // Tests the blank database name edge-case
+		{"Test Default 'Modules' Collection Name", "athens", "athens", "modules", "modules"}, // Tests the default collection name
+		{"Test Custom Collection Name", "athens", "athens", "testModules", "testModules"},    // Tests the non-default collection name
+		{"Test Blank Collection Name", "athens", "athens", "", "modules"},                    // Tests the blank collection name edge-case
 
 	}
 

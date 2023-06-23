@@ -80,16 +80,15 @@ func getStorage(t testing.TB) *Storage {
 	}
 	backend, err := New(
 		&config.S3Config{
-			Key:    "minio",
-			Secret: "minio123",
-			Bucket: "gomodsaws",
-			Region: "us-west-1",
+			Key:            "minio",
+			Secret:         "minio123",
+			Bucket:         "gomodsaws",
+			Region:         "us-west-1",
 			ForcePathStyle: true,
 		},
 		config.GetTimeoutDuration(300),
 		options,
 	)
-
 	if err != nil {
 		t.Fatal(err)
 	}

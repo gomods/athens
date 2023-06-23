@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-func extractKey(objectKey string) (key string, module string, version string) {
+func extractKey(objectKey string) (key, module, version string) {
 	var err error
 	key, err = url.PathUnescape(objectKey)
 	if err != nil {
@@ -14,8 +14,8 @@ func extractKey(objectKey string) (key string, module string, version string) {
 
 	parts := strings.Split(key, "/")
 	version = parts[len(parts)-2]
-	module = strings.Replace(key, version, "", -2)
-	module = strings.Replace(module, "//.info", "", -1)
+	module = strings.ReplaceAll(key, version, "")
+	module = strings.ReplaceAll(module, "//.info", "")
 
 	return key, module, version
 }

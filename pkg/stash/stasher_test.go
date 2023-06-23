@@ -3,7 +3,6 @@ package stash
 import (
 	"context"
 	"io"
-	"io/ioutil"
 	"strings"
 	"testing"
 
@@ -104,7 +103,7 @@ func (mf *mockFetcher) Fetch(ctx context.Context, mod, ver string) (*storage.Ver
 	return &storage.Version{
 		Info:   []byte("info"),
 		Mod:    []byte("gomod"),
-		Zip:    ioutil.NopCloser(strings.NewReader("zipfile")),
+		Zip:    io.NopCloser(strings.NewReader("zipfile")),
 		Semver: mf.ver,
 	}, nil
 }

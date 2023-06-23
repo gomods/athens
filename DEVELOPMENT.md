@@ -234,10 +234,10 @@ Then open [http://localhost:1313](http://localhost:1313/).
 
 # Linting
 
-In our CI/CD pass, we use govet, so feel free to run it locally beforehand:
+In our CI/CD pass, we use golangci-lint, so feel free to run it locally beforehand:
 
 ```
-go vet ./...
+make lint
 ```
 
 # For People Doing a Release
@@ -287,12 +287,7 @@ $ git cherry-pick <commit from main>
 ```
 
 ### Updating the helm chart
-
-Regardless of which branch you created, you'll need to update the helm chart number. After you've cut the branch, make sure to change the versions in the [`Chart.yaml`](./charts/athens-proxy/Chart.yaml) file:
-
-- If this is a new release of Athens, make sure to update the Docker image version [value](./charts/athens-proxy/values.yaml#L5)
-- Increment the patch number in the [`version` field](./charts/athens-proxy/Chart.yaml#L2)
-- Set the [`appVersion` field](./charts/athens-proxy/Chart.yaml#L2) to the semver of the new branch. Do not include the `v` prefix
+see https://github.com/gomods/athens-charts
 
 ## Creating the new release in GitHub
 
@@ -302,26 +297,17 @@ Go to the [create new release page](https://github.com/gomods/athens/releases/ne
 - **Release Title** - Make sure the title is prefixed by the release number including the `v`. If you want to write something creative in the rest of the title, go for it!
 - **Describe this release** - Make sure to write what features this release includes, and any notable bugfixes. Also, thank all the folks who contributed to the release. You can find that information in a link that looks like this: `https://github.com/gomods/athens/compare/$PREVIOUS_TAG...release-$CURRENT_TAG`. Substitute `$PREVIOUS_TAG` for the last semver and `$CURRENT_TAG` to the version in the new release branch
 
-When you're done, press the "Publish Release" button. After you do, our [Drone](https://cloud.drone.io) job will do almost everything.
+When you're done, press the "Publish Release" button. After you do, our Github Actions job will do almost everything.
 
-Make sure the Drone CI/CD job finished, and check in Docker Hub to make sure the new release showed up in the [tags](https://hub.docker.com/r/gomods/athens/tags) section.
+Make sure the Github Actions CI/CD job finished, and check in Docker Hub to make sure the new release showed up in the [tags](https://hub.docker.com/r/gomods/athens/tags) section.
 
 ## Finishing up
 
-The Drone job will do everything except:
+The Github Actions job will do everything except:
 
 - Tweet out about the new release
-- Update the helm chart in the `main` branch
+- Update the helm chart
 
 If you are a core maintainer and don't have access to the `@gomods` account, ask one of the maintainers to give you access. [Here](https://twitter.com/gomodsio/status/1240016379962691585) is an example showing the general format of these tweets. Obviously you should use your creativity here though!
-
-Finally, you'll need to update the helm version number in the `main` branch. Create a new branch called `update-helm-$CURRENT_TAG` and update the following files:
-
-- [charts/athens-proxy/values.yaml](./charts/athens-proxy/values.yaml) - update the `image.tag` field to the latest version number you created, including the `v`. This field should be near the top of the file
-- [charts/athens-proxy/Chart.yaml](./charts/athens-proxy/Chart.yaml) - update the `version` field and the `appVersion` field
-  - Increment the patch number in the `version` field
-  - Change the `appVersion` field to the tag name of the GitHub version you created, including the `v`
-
-[Here](https://github.com/gomods/athens/pull/1574) is an example of how to do this.
 
 Finally, create a pull request from your new branch into the `main` branch. It will be reviewed and merged as soon as possible.

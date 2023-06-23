@@ -17,12 +17,12 @@ func sumdbProxy(url *url.URL, nosumPatterns []string) http.Handler {
 		req.URL.Host = url.Host
 	}
 	if len(nosumPatterns) > 0 {
-		return noSumWrapper(rp, url.Host, nosumPatterns)
+		return noSumWrapper(rp, nosumPatterns)
 	}
 	return rp
 }
 
-func noSumWrapper(h http.Handler, host string, patterns []string) http.Handler {
+func noSumWrapper(h http.Handler, patterns []string) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if strings.HasPrefix(r.URL.Path, "/lookup/") {
 			for _, p := range patterns {

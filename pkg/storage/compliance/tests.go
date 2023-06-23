@@ -4,9 +4,8 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"math/rand"
-	"sort"
 	"testing"
 
 	"github.com/gomods/athens/pkg/errors"
@@ -26,7 +25,6 @@ func RunTests(t *testing.T, b storage.Backend, clearBackend func() error) {
 	testGet(t, b)
 	testExists(t, b)
 	testShouldNotExist(t, b)
-	// testCatalog(t, b)
 }
 
 // testNotFound ensures that a storage Backend
@@ -136,7 +134,7 @@ func testGet(t *testing.T, b storage.Backend) {
 	modname := "github.com/gomods/athens"
 	ver := "v1.2.3"
 	mock := getMockModule()
-	zipBts, _ := ioutil.ReadAll(mock.Zip)
+	zipBts, _ := io.ReadAll(mock.Zip)
 	b.Save(ctx, modname, ver, mock.Mod, bytes.NewReader(zipBts), mock.Info)
 	defer b.Delete(ctx, modname, ver)
 
@@ -150,7 +148,7 @@ func testGet(t *testing.T, b storage.Backend) {
 
 	zip, err := b.Zip(ctx, modname, ver)
 	require.NoError(t, err)
-	givenZipBts, err := ioutil.ReadAll(zip)
+	givenZipBts, err := io.ReadAll(zip)
 	require.NoError(t, err)
 	require.Equal(t, zipBts, givenZipBts)
 	require.Equal(t, int64(len(zipBts)), zip.Size())
@@ -161,7 +159,7 @@ func testExists(t *testing.T, b storage.Backend) {
 	modname := "github.com/gomods/athens"
 	ver := "v1.2.3"
 	mock := getMockModule()
-	zipBts, _ := ioutil.ReadAll(mock.Zip)
+	zipBts, _ := io.ReadAll(mock.Zip)
 	b.Save(ctx, modname, ver, mock.Mod, bytes.NewReader(zipBts), mock.Info)
 	defer b.Delete(ctx, modname, ver)
 	checker := storage.WithChecker(b)
@@ -175,7 +173,7 @@ func testShouldNotExist(t *testing.T, b storage.Backend) {
 	mod := "github.com/gomods/shouldNotExist"
 	ver := "v1.2.3-pre.1"
 	mock := getMockModule()
-	zipBts, _ := ioutil.ReadAll(mock.Zip)
+	zipBts, _ := io.ReadAll(mock.Zip)
 	err := b.Save(ctx, mod, ver, mock.Mod, bytes.NewReader(zipBts), mock.Info)
 	require.NoError(t, err, "should successfully safe a mock module")
 	defer b.Delete(ctx, mod, ver)
@@ -209,53 +207,10 @@ func testDelete(t *testing.T, b storage.Backend) {
 	require.Equal(t, false, exists)
 }
 
-func testCatalog(t *testing.T, b storage.Backend) {
-	cs, ok := b.(storage.Cataloger)
-	if !ok {
-		t.Skip()
-	}
-	ctx := context.Background()
-
-	mock := getMockModule()
-	zipBts, _ := ioutil.ReadAll(mock.Zip)
-	modname := "github.com/gomods/testCatalogModule"
-	for i := 0; i < 6; i++ {
-		ver := fmt.Sprintf("v1.2.%04d", i)
-		b.Save(ctx, modname, ver, mock.Mod, bytes.NewReader(zipBts), mock.Info)
-
-		defer b.Delete(ctx, modname, ver)
-	}
-
-	allres, next, err := cs.Catalog(ctx, "", 5)
-
-	require.NoError(t, err)
-	require.Equal(t, 5, len(allres))
-
-	res, next, err := cs.Catalog(ctx, next, 50)
-	allres = append(allres, res...)
-	require.NoError(t, err)
-	require.Equal(t, 1, len(res))
-	require.Equal(t, "", next)
-
-	sort.Slice(allres, func(i, j int) bool {
-		if allres[i].Module == allres[j].Module {
-			return allres[i].Version < allres[j].Version
-		}
-		return allres[i].Module < allres[j].Module
-	})
-	require.Equal(t, modname, allres[0].Module)
-	require.Equal(t, "v1.2.0000", allres[0].Version)
-	require.Equal(t, "v1.2.0004", allres[4].Version)
-
-	for i := 1; i < len(allres); i++ {
-		require.NotEqual(t, allres[i].Version, allres[i-1].Version)
-	}
-}
-
 func getMockModule() *storage.Version {
 	return &storage.Version{
 		Info: []byte("123"),
 		Mod:  []byte("456"),
-		Zip:  ioutil.NopCloser(bytes.NewReader([]byte("789"))),
+		Zip:  io.NopCloser(bytes.NewReader([]byte("789"))),
 	}
 }

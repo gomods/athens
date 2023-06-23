@@ -1,3 +1,4 @@
+//go:build e2etests
 // +build e2etests
 
 package e2etests
@@ -6,7 +7,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"os/exec"
@@ -35,12 +35,12 @@ type catalogRes struct {
 
 func (m *E2eSuite) SetupSuite() {
 	var err error
-	m.goPath, err = ioutil.TempDir("/tmp", "gopath")
+	m.goPath, err = os.MkdirTemp("/tmp", "gopath")
 	if err != nil {
 		m.Fail("Failed to make temp dir", err)
 	}
 
-	m.sampleRepoPath, err = ioutil.TempDir("/tmp", "repopath")
+	m.sampleRepoPath, err = os.MkdirTemp("/tmp", "repopath")
 	if err != nil {
 		m.Fail("Failed to make temp dir for sample repo", err)
 	}

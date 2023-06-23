@@ -5,7 +5,7 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
-	"io/ioutil"
+	"os"
 	"strings"
 	"time"
 
@@ -44,7 +44,7 @@ func NewStorage(conf *config.MongoConfig, timeout time.Duration) (*ModuleStore, 
 		return nil, errors.E(op, err)
 	}
 
-	_, err = ms.connect(conf)
+	_, err = ms.connect()
 
 	if err != nil {
 		return nil, errors.E(op, err)
@@ -53,27 +53,27 @@ func NewStorage(conf *config.MongoConfig, timeout time.Duration) (*ModuleStore, 
 	return ms, nil
 }
 
-func (m *ModuleStore) connect(conf *config.MongoConfig) (*mongo.Collection, error) {
+func (s *ModuleStore) connect() (*mongo.Collection, error) {
 	const op errors.Op = "mongo.connect"
 
-	err := m.client.Connect(context.Background())
+	err := s.client.Connect(context.Background())
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
 
-	return m.initDatabase(), nil
+	return s.initDatabase(), nil
 }
 
-func (m *ModuleStore) initDatabase() *mongo.Collection {
-	if m.db == "" {
-		m.db = "athens"
+func (s *ModuleStore) initDatabase() *mongo.Collection {
+	if s.db == "" {
+		s.db = "athens"
 	}
 
-	if m.coll == "" {
-		m.coll = "modules"
+	if s.coll == "" {
+		s.coll = "modules"
 	}
 
-	c := m.client.Database(m.db).Collection(m.coll)
+	c := s.client.Database(s.db).Collection(s.coll)
 	indexView := c.Indexes()
 	keys := bson.D{
 		{Key: "base_url", Value: 1},
@@ -81,26 +81,26 @@ func (m *ModuleStore) initDatabase() *mongo.Collection {
 		{Key: "version", Value: 1},
 	}
 	indexOptions := options.Index().SetSparse(true).SetUnique(true)
-	indexView.CreateOne(context.Background(), mongo.IndexModel{Keys: keys, Options: indexOptions}, options.CreateIndexes())
+	_, _ = indexView.CreateOne(context.Background(), mongo.IndexModel{Keys: keys, Options: indexOptions}, options.CreateIndexes())
 
 	return c
 }
 
-func (m *ModuleStore) newClient() (*mongo.Client, error) {
+func (s *ModuleStore) newClient() (*mongo.Client, error) {
 	const op errors.Op = "mongo.newClient"
 
 	tlsConfig := &tls.Config{}
 	clientOptions := options.Client()
-	clientOptions = clientOptions.ApplyURI(m.url)
+	clientOptions = clientOptions.ApplyURI(s.url)
 
 	err := clientOptions.Validate()
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
 
-	if m.certPath != "" {
+	if s.certPath != "" {
 		// Sets only when the env var is setup in config.dev.toml
-		tlsConfig.InsecureSkipVerify = m.insecure
+		tlsConfig.InsecureSkipVerify = s.insecure
 		var roots *x509.CertPool
 		// See if there is a system cert pool
 		roots, err := x509.SystemCertPool()
@@ -109,19 +109,19 @@ func (m *ModuleStore) newClient() (*mongo.Client, error) {
 			roots = x509.NewCertPool()
 		}
 
-		cert, err := ioutil.ReadFile(m.certPath)
+		cert, err := os.ReadFile(s.certPath)
 		if err != nil {
 			return nil, errors.E(op, err)
 		}
 
 		if ok := roots.AppendCertsFromPEM(cert); !ok {
-			return nil, fmt.Errorf("failed to parse certificate from: %s", m.certPath)
+			return nil, fmt.Errorf("failed to parse certificate from: %s", s.certPath)
 		}
 
 		tlsConfig.ClientCAs = roots
 		clientOptions = clientOptions.SetTLSConfig(tlsConfig)
 	}
-	clientOptions = clientOptions.SetConnectTimeout(m.timeout)
+	clientOptions = clientOptions.SetConnectTimeout(s.timeout)
 	client, err := mongo.NewClient(clientOptions)
 	if err != nil {
 		return nil, errors.E(op, err)
@@ -130,6 +130,6 @@ func (m *ModuleStore) newClient() (*mongo.Client, error) {
 	return client, nil
 }
 
-func (m *ModuleStore) gridFileName(mod, ver string) string {
-	return strings.Replace(mod, "/", "_", -1) + "_" + ver + ".zip"
+func (s *ModuleStore) gridFileName(mod, ver string) string {
+	return strings.ReplaceAll(mod, "/", "_") + "_" + ver + ".zip"
 }

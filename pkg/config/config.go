@@ -18,7 +18,7 @@ import (
 
 const defaultConfigFile = "athens.toml"
 
-// Config provides configuration values for all components
+// Config provides configuration values for all components.
 type Config struct {
 	TimeoutConf
 	GoEnv            string    `validate:"required" envconfig:"GO_ENV"`
@@ -38,6 +38,7 @@ type Config struct {
 	StorageType      string    `validate:"required" envconfig:"ATHENS_STORAGE_TYPE"`
 	GlobalEndpoint   string    `envconfig:"ATHENS_GLOBAL_ENDPOINT"` // This feature is not yet implemented
 	Port             string    `envconfig:"ATHENS_PORT"`
+	UnixSocket       string    `envconfig:"ATHENS_UNIX_SOCKET"`
 	BasicAuthUser    string    `envconfig:"BASIC_AUTH_USER"`
 	BasicAuthPass    string    `envconfig:"BASIC_AUTH_PASS"`
 	ForceSSL         bool      `envconfig:"PROXY_FORCE_SSL"`
@@ -56,18 +57,19 @@ type Config struct {
 	SingleFlightType string    `envconfig:"ATHENS_SINGLE_FLIGHT_TYPE"`
 	RobotsFile       string    `envconfig:"ATHENS_ROBOTS_FILE"`
 	IndexType        string    `envconfig:"ATHENS_INDEX_TYPE"`
+	ShutdownTimeout  int       `validate:"min=0" envconfig:"ATHENS_SHUTDOWN_TIMEOUT"`
 	SingleFlight     *SingleFlight
 	Storage          *Storage
 	Index            *Index
 }
 
 // EnvList is a list of key-value environment
-// variables that are passed to the Go command
+// variables that are passed to the Go command.
 type EnvList []string
 
 // HasKey returns whether a key-value entry
 // is present by only checking the left of
-// key=value
+// key=value.
 func (el EnvList) HasKey(key string) bool {
 	for _, env := range el {
 		if strings.HasPrefix(env, key+"=") {
@@ -78,7 +80,7 @@ func (el EnvList) HasKey(key string) bool {
 }
 
 // Add adds a key=value entry to the environment
-// list
+// list.
 func (el *EnvList) Add(key, value string) {
 	*el = append(*el, key+"="+value)
 }
@@ -109,7 +111,7 @@ func (el *EnvList) Decode(value string) error {
 }
 
 // Validate validates that all strings inside the
-// list are of the key=value format
+// list are of the key=value format.
 func (el EnvList) Validate() error {
 	const op errors.Op = "EnvList.Validate"
 	for _, env := range el {
@@ -122,7 +124,7 @@ func (el EnvList) Validate() error {
 }
 
 // Load loads the config from a file.
-// If file is not present returns default config
+// If file is not present returns default config.
 func Load(configFile string) (*Config, error) {
 	// User explicitly specified a config file
 	if configFile != "" {
@@ -165,6 +167,7 @@ func defaultConfig() *Config {
 		NetworkMode:      "strict",
 		RobotsFile:       "robots.txt",
 		IndexType:        "none",
+		ShutdownTimeout:  60,
 		SingleFlight: &SingleFlight{
 			Etcd:  &Etcd{"localhost:2379,localhost:22379,localhost:32379"},
 			Redis: &Redis{"127.0.0.1:6379", "", DefaultRedisLockConfig()},
@@ -204,7 +207,7 @@ func defaultConfig() *Config {
 }
 
 // BasicAuth returns BasicAuthUser and BasicAuthPassword
-// and ok if neither of them are empty
+// and ok if neither of them are empty.
 func (c *Config) BasicAuth() (user, pass string, ok bool) {
 	user = c.BasicAuthUser
 	pass = c.BasicAuthPass
@@ -213,7 +216,7 @@ func (c *Config) BasicAuth() (user, pass string, ok bool) {
 }
 
 // TLSCertFiles returns certificate and key files and an error if
-// both files doesn't exist and have approperiate file permissions
+// both files doesn't exist and have approperiate file permissions.
 func (c *Config) TLSCertFiles() (cert, key string, err error) {
 	if c.TLSCertFile == "" && c.TLSKeyFile == "" {
 		return "", "", nil
@@ -221,29 +224,28 @@ func (c *Config) TLSCertFiles() (cert, key string, err error) {
 
 	certFile, err := os.Stat(c.TLSCertFile)
 	if err != nil {
-		return "", "", fmt.Errorf("Could not access TLSCertFile: %v", err)
+		return "", "", fmt.Errorf("could not access TLSCertFile: %w", err)
 	}
 
 	keyFile, err := os.Stat(c.TLSKeyFile)
 	if err != nil {
-		return "", "", fmt.Errorf("Could not access TLSKeyFile: %v", err)
+		return "", "", fmt.Errorf("could not access TLSKeyFile: %w", err)
 	}
 
-	if keyFile.Mode()&077 != 0 && runtime.GOOS != "windows" {
+	if keyFile.Mode()&0o077 != 0 && runtime.GOOS != "windows" {
 		return "", "", fmt.Errorf("TLSKeyFile should not be accessible by others")
 	}
 
 	return certFile.Name(), keyFile.Name(), nil
 }
 
-// FilterOff returns true if the FilterFile is empty
+// FilterOff returns true if the FilterFile is empty.
 func (c *Config) FilterOff() bool {
 	return c.FilterFile == ""
 }
 
-// ParseConfigFile parses the given file into an athens config struct
+// ParseConfigFile parses the given file into an athens config struct.
 func ParseConfigFile(configFile string) (*Config, error) {
-
 	var config Config
 	// attempt to read the given config file
 	if _, err := toml.DecodeFile(configFile, &config); err != nil {
@@ -269,7 +271,7 @@ func ParseConfigFile(configFile string) (*Config, error) {
 	return &config, nil
 }
 
-// envOverride uses Environment variables to override unspecified properties
+// envOverride uses Environment variables to override unspecified properties.
 func envOverride(config *Config) error {
 	const defaultPort = ":3000"
 	err := envconfig.Process("athens", config)
@@ -353,16 +355,16 @@ func validateIndex(validate *validator.Validate, indexType string, config *Index
 func GetConf(path string) (*Config, error) {
 	absPath, err := filepath.Abs(path)
 	if err != nil {
-		return nil, fmt.Errorf("Unable to construct absolute path to test config file")
+		return nil, fmt.Errorf("unable to construct absolute path to test config file")
 	}
 	conf, err := ParseConfigFile(absPath)
 	if err != nil {
-		return nil, fmt.Errorf("Unable to parse test config file: %s", err.Error())
+		return nil, fmt.Errorf("unable to parse test config file: %w", err)
 	}
 	return conf, nil
 }
 
-// checkFilePerms given a list of files
+// checkFilePerms given a list of files.
 func checkFilePerms(files ...string) error {
 	const op = "config.checkFilePerms"
 
@@ -382,10 +384,9 @@ func checkFilePerms(files ...string) error {
 		// Assume unix based system (MacOS and Linux)
 		// the bit mask is calculated using the umask command which tells which permissions
 		// should not be allowed for a particular user, group or world
-		if fInfo.Mode()&0077 != 0 && runtime.GOOS != "windows" {
+		if fInfo.Mode()&0o033 != 0 && runtime.GOOS != "windows" {
 			return errors.E(op, f+" should have at most rwx,-, - (bit mask 077) as permission")
 		}
-
 	}
 
 	return nil

@@ -21,7 +21,7 @@ import (
 	"github.com/spf13/afero"
 )
 
-// GetStorage returns storage backend based on env configuration
+// GetStorage returns storage backend based on env configuration.
 func GetStorage(storageType string, storageConfig *config.Storage, timeout time.Duration, client *http.Client) (storage.Backend, error) {
 	const op errors.Op = "actions.GetStorage"
 	switch storageType {

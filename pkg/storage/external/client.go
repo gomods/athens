@@ -5,7 +5,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"mime/multipart"
 	"net/http"
 	"strconv"
@@ -21,7 +20,7 @@ type service struct {
 	c   *http.Client
 }
 
-// NewClient returns an external storage client
+// NewClient returns an external storage client.
 func NewClient(url string, c *http.Client) storage.Backend {
 	if c == nil {
 		c = &http.Client{}
@@ -53,7 +52,7 @@ func (s *service) Info(ctx context.Context, mod, ver string) ([]byte, error) {
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
-	info, err := ioutil.ReadAll(body)
+	info, err := io.ReadAll(body)
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
@@ -66,7 +65,7 @@ func (s *service) GoMod(ctx context.Context, mod, ver string) ([]byte, error) {
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
-	modFile, err := ioutil.ReadAll(body)
+	modFile, err := io.ReadAll(body)
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
@@ -94,7 +93,7 @@ func (s *service) Save(ctx context.Context, mod, ver string, modFile []byte, zip
 	mw := multipart.NewWriter(pw)
 	go func() {
 		err := upload(mw, modFile, info, zip)
-		pw.CloseWithError(err)
+		_ = pw.CloseWithError(err)
 	}()
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, pr)
 	if err != nil {
@@ -105,9 +104,9 @@ func (s *service) Save(ctx context.Context, mod, ver string, modFile []byte, zip
 	if err != nil {
 		return errors.E(op, err)
 	}
-	defer resp.Body.Close()
-	if resp.StatusCode != 200 {
-		bts, _ := ioutil.ReadAll(resp.Body)
+	defer func() { _ = resp.Body.Close() }()
+	if resp.StatusCode != http.StatusOK {
+		bts, _ := io.ReadAll(resp.Body)
 		return errors.E(op, fmt.Errorf("unexpected status code: %v - body: %s", resp.StatusCode, bts), resp.StatusCode)
 	}
 	return nil
@@ -119,35 +118,35 @@ func (s *service) Delete(ctx context.Context, mod, ver string) error {
 	if err != nil {
 		return errors.E(op, err)
 	}
-	defer body.Close()
+	defer func() { _ = body.Close() }()
 	return nil
 }
 
 func upload(mw *multipart.Writer, mod, info []byte, zip io.Reader) error {
-	defer mw.Close()
+	defer func() { _ = mw.Close() }()
 	infoW, err := mw.CreateFormFile("mod.info", "mod.info")
 	if err != nil {
-		return fmt.Errorf("error creating info file: %v", err)
+		return fmt.Errorf("error creating info file: %w", err)
 	}
 	_, err = infoW.Write(info)
 	if err != nil {
-		return fmt.Errorf("error writing info file: %v", err)
+		return fmt.Errorf("error writing info file: %w", err)
 	}
 	modW, err := mw.CreateFormFile("mod.mod", "mod.mod")
 	if err != nil {
-		return fmt.Errorf("error creating mod file: %v", err)
+		return fmt.Errorf("error creating mod file: %w", err)
 	}
 	_, err = modW.Write(mod)
 	if err != nil {
-		return fmt.Errorf("error writing mod file: %v", err)
+		return fmt.Errorf("error writing mod file: %w", err)
 	}
 	zipW, err := mw.CreateFormFile("mod.zip", "mod.zip")
 	if err != nil {
-		return fmt.Errorf("error creating zip file: %v", err)
+		return fmt.Errorf("error creating zip file: %w", err)
 	}
 	_, err = io.Copy(zipW, zip)
 	if err != nil {
-		return fmt.Errorf("error writing zip file: %v", err)
+		return fmt.Errorf("error writing zip file: %w", err)
 	}
 	return nil
 }
@@ -175,9 +174,9 @@ func (s *service) doRequest(ctx context.Context, method, mod, ver, ext string) (
 	if err != nil {
 		return nil, 0, errors.E(op, err)
 	}
-	if resp.StatusCode != 200 {
-		body, _ := ioutil.ReadAll(resp.Body)
-		resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(resp.Body)
+		_ = resp.Body.Close()
 		return nil, 0, errors.E(op, fmt.Errorf("none 200 status code: %v - body: %s", resp.StatusCode, body), resp.StatusCode)
 	}
 	var size int64

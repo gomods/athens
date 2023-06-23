@@ -2,8 +2,8 @@ package actions
 
 import (
 	"fmt"
-	"io/ioutil"
 	"log"
+	"os"
 	"path/filepath"
 	"runtime"
 	"strings"
@@ -19,7 +19,7 @@ func initializeAuthFile(path string) {
 		return
 	}
 
-	fileBts, err := ioutil.ReadFile(path)
+	fileBts, err := os.ReadFile(filepath.Clean(path))
 	if err != nil {
 		log.Fatalf("could not read %s: %v", path, err)
 	}
@@ -31,7 +31,7 @@ func initializeAuthFile(path string) {
 
 	fileName := transformAuthFileName(filepath.Base(path))
 	rcp := filepath.Join(hdir, fileName)
-	if err := ioutil.WriteFile(rcp, fileBts, 0600); err != nil {
+	if err := os.WriteFile(rcp, fileBts, 0o600); err != nil {
 		log.Fatalf("could not write to file: %v", err)
 	}
 }
@@ -45,7 +45,7 @@ func netrcFromToken(tok string) {
 		log.Fatalf("netrcFromToken: could not get homedir: %v", err)
 	}
 	rcp := filepath.Join(hdir, getNETRCFilename())
-	if err := ioutil.WriteFile(rcp, []byte(fileContent), 0600); err != nil {
+	if err := os.WriteFile(rcp, []byte(fileContent), 0o600); err != nil {
 		log.Fatalf("netrcFromToken: could not write to file: %v", err)
 	}
 }

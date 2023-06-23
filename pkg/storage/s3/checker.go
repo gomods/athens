@@ -2,9 +2,10 @@ package s3
 
 import (
 	"context"
-	"fmt"
+	"sync"
 
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/errors"
@@ -12,35 +13,45 @@ import (
 )
 
 // Exists implements the (./pkg/storage).Checker interface
-// returning true if the module at version exists in storage
+// returning true if the module at version exists in storage.
 func (s *Storage) Exists(ctx context.Context, module, version string) (bool, error) {
 	const op errors.Op = "s3.Exists"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 
-	lsParams := &s3.ListObjectsInput{
-		Bucket: aws.String(s.bucket),
-		Prefix: aws.String(fmt.Sprintf("%s/@v", module)),
+	files := []string{"info", "mod", "zip"}
+	errChan := make(chan error, len(files))
+	defer close(errChan)
+	cancelingCtx, cancel := context.WithCancel(ctx)
+	var wg sync.WaitGroup
+	for _, file := range files {
+		wg.Add(1)
+		go func(file string) {
+			defer wg.Done()
+			_, err := s.s3API.HeadObjectWithContext(
+				cancelingCtx,
+				&s3.HeadObjectInput{
+					Bucket: aws.String(s.bucket),
+					Key:    aws.String(config.PackageVersionedName(module, version, file)),
+				})
+			errChan <- err
+		}(file)
 	}
-	var count int
-	err := s.s3API.ListObjectsPagesWithContext(ctx, lsParams, func(loo *s3.ListObjectsOutput, lastPage bool) bool {
-		for _, o := range loo.Contents {
-			// sane assumption: no duplicate keys.
-			switch *o.Key {
-			case config.PackageVersionedName(module, version, "info"):
-				count++
-			case config.PackageVersionedName(module, version, "mod"):
-				count++
-			case config.PackageVersionedName(module, version, "zip"):
-				count++
-			}
+	exists := true
+	var err error
+	for range files {
+		err = <-errChan
+		if err == nil {
+			continue
 		}
-		return count != 3
-	})
-
-	if err != nil {
-		return false, errors.E(op, err, errors.M(module), errors.V(version))
+		var aerr awserr.Error
+		if errors.AsErr(err, &aerr) && aerr.Code() == "NotFound" {
+			err = nil
+			exists = false
+		}
+		break
 	}
-
-	return count == 3, nil
+	cancel()
+	wg.Wait()
+	return exists, err
 }

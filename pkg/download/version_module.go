@@ -11,7 +11,7 @@ import (
 // PathVersionModule URL.
 const PathVersionModule = "/{module:.+}/@v/{version}.mod"
 
-// ModuleHandler implements GET baseURL/module/@v/version.mod
+// ModuleHandler implements GET baseURL/module/@v/version.mod.
 func ModuleHandler(dp Protocol, lggr log.Entry, df *mode.DownloadFile) http.Handler {
 	const op errors.Op = "download.VersionModuleHandler"
 	f := func(w http.ResponseWriter, r *http.Request) {
@@ -42,7 +42,7 @@ func ModuleHandler(dp Protocol, lggr log.Entry, df *mode.DownloadFile) http.Hand
 			return
 		}
 
-		w.Write(modBts)
+		_, _ = w.Write(modBts)
 	}
 	return http.HandlerFunc(f)
 }

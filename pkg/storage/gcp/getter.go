@@ -3,7 +3,7 @@ package gcp
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
+	"io"
 
 	"cloud.google.com/go/storage"
 	"github.com/gomods/athens/pkg/config"
@@ -12,7 +12,7 @@ import (
 	pkgstorage "github.com/gomods/athens/pkg/storage"
 )
 
-// Info implements Getter
+// Info implements Getter.
 func (s *Storage) Info(ctx context.Context, module, version string) ([]byte, error) {
 	const op errors.Op = "gcp.Info"
 	ctx, span := observ.StartSpan(ctx, op.String())
@@ -21,15 +21,15 @@ func (s *Storage) Info(ctx context.Context, module, version string) ([]byte, err
 	if err != nil {
 		return nil, errors.E(op, err, getErrorKind(err), errors.M(module), errors.V(version))
 	}
-	infoBytes, err := ioutil.ReadAll(infoReader)
-	infoReader.Close()
+	infoBytes, err := io.ReadAll(infoReader)
+	_ = infoReader.Close()
 	if err != nil {
 		return nil, errors.E(op, err, errors.M(module), errors.V(version))
 	}
 	return infoBytes, nil
 }
 
-// GoMod implements Getter
+// GoMod implements Getter.
 func (s *Storage) GoMod(ctx context.Context, module, version string) ([]byte, error) {
 	const op errors.Op = "gcp.GoMod"
 	ctx, span := observ.StartSpan(ctx, op.String())
@@ -38,16 +38,16 @@ func (s *Storage) GoMod(ctx context.Context, module, version string) ([]byte, er
 	if err != nil {
 		return nil, errors.E(op, err, getErrorKind(err), errors.M(module), errors.V(version))
 	}
-	modBytes, err := ioutil.ReadAll(modReader)
-	modReader.Close()
+	modBytes, err := io.ReadAll(modReader)
+	_ = modReader.Close()
 	if err != nil {
-		return nil, errors.E(op, fmt.Errorf("could not get new reader for mod file: %s", err), errors.M(module), errors.V(version))
+		return nil, errors.E(op, fmt.Errorf("could not get new reader for mod file: %w", err), errors.M(module), errors.V(version))
 	}
 
 	return modBytes, nil
 }
 
-// Zip implements Getter
+// Zip implements Getter.
 func (s *Storage) Zip(ctx context.Context, module, version string) (pkgstorage.SizeReadCloser, error) {
 	const op errors.Op = "gcp.Zip"
 	ctx, span := observ.StartSpan(ctx, op.String())
@@ -56,11 +56,11 @@ func (s *Storage) Zip(ctx context.Context, module, version string) (pkgstorage.S
 	if err != nil {
 		return nil, errors.E(op, err, getErrorKind(err), errors.M(module), errors.V(version))
 	}
-	return pkgstorage.NewSizer(zipReader, zipReader.Size()), nil
+	return pkgstorage.NewSizer(zipReader, zipReader.Attrs.Size), nil
 }
 
 func getErrorKind(err error) int {
-	if err == storage.ErrObjectNotExist {
+	if errors.IsErr(err, storage.ErrObjectNotExist) {
 		return errors.KindNotFound
 	}
 	return errors.KindUnexpected

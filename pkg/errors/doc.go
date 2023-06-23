@@ -11,7 +11,7 @@
 // the logger's SystemError method, although it accepts any type of error,
 // it knows how to deal with errors constructed from this package in a debuggable way.
 // To construct an Athens error, call the errors.E function. The E function takes
-// an Op and a variadic interface{}, but the values of the Error struct are what you can
+// an Op and a variadic of any, but the values of the Error struct are what you can
 // pass to it. Values such as the error Kind, Module, Version, Error Message,
 // and Seveirty (seriousness of an error) are all optional. The only truly required value is
 // the errors.Op so you can construct a traceable stack that leads to where

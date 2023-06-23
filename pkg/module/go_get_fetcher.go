@@ -35,7 +35,7 @@ type goModule struct {
 	GoModSum string `json:"goModSum"` // checksum for go.mod (as in go.sum)
 }
 
-// NewGoGetFetcher creates fetcher which uses go get tool to fetch modules
+// NewGoGetFetcher creates fetcher which uses go get tool to fetch modules.
 func NewGoGetFetcher(goBinaryName, gogetDir string, envVars []string, fs afero.Fs) (Fetcher, error) {
 	const op errors.Op = "module.NewGoGetFetcher"
 	if err := validGoBinary(goBinaryName); err != nil {
@@ -64,7 +64,7 @@ func (g *goGetFetcher) Fetch(ctx context.Context, mod, ver string) (*storage.Ver
 	sourcePath := filepath.Join(goPathRoot, "src")
 	modPath := filepath.Join(sourcePath, getRepoDirName(mod, ver))
 	if err := g.fs.MkdirAll(modPath, os.ModeDir|os.ModePerm); err != nil {
-		clearFiles(g.fs, goPathRoot)
+		_ = clearFiles(g.fs, goPathRoot)
 		return nil, errors.E(op, err)
 	}
 
@@ -72,14 +72,13 @@ func (g *goGetFetcher) Fetch(ctx context.Context, mod, ver string) (*storage.Ver
 		ctx,
 		g.goBinaryName,
 		g.envVars,
-		g.fs,
 		goPathRoot,
 		modPath,
 		mod,
 		ver,
 	)
 	if err != nil {
-		clearFiles(g.fs, goPathRoot)
+		_ = clearFiles(g.fs, goPathRoot)
 		return nil, errors.E(op, err)
 	}
 
@@ -116,7 +115,6 @@ func downloadModule(
 	ctx context.Context,
 	goBinaryName string,
 	envVars []string,
-	fs afero.Fs,
 	gopath,
 	repoRoot,
 	module,
@@ -137,7 +135,7 @@ func downloadModule(
 
 	err := cmd.Run()
 	if err != nil {
-		err = fmt.Errorf("%v: %s", err, stderr)
+		err = fmt.Errorf("%w: %s", err, stderr)
 		var m goModule
 		if jsonErr := json.NewDecoder(stdout).Decode(&m); jsonErr != nil {
 			return goModule{}, errors.E(op, err)
@@ -165,17 +163,17 @@ func isLimitHit(o string) bool {
 }
 
 // getRepoDirName takes a raw repository URI and a version and creates a directory name that the
-// repository contents can be put into
+// repository contents can be put into.
 func getRepoDirName(repoURI, version string) string {
-	escapedURI := strings.Replace(repoURI, "/", "-", -1)
+	escapedURI := strings.ReplaceAll(repoURI, "/", "-")
 	return fmt.Sprintf("%s-%s", escapedURI, version)
 }
 
 func validGoBinary(name string) error {
 	const op errors.Op = "module.validGoBinary"
 	err := exec.Command(name).Run()
-	_, ok := err.(*exec.ExitError)
-	if err != nil && !ok {
+	eErr := &exec.ExitError{}
+	if err != nil && !errors.AsErr(err, &eErr) {
 		return errors.E(op, err)
 	}
 	return nil

@@ -3,9 +3,10 @@ package s3
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
+	"io"
 
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/errors"
@@ -13,74 +14,65 @@ import (
 	"github.com/gomods/athens/pkg/storage"
 )
 
-// Info implements the (./pkg/storage).Getter interface
+// Info implements the (./pkg/storage).Getter interface.
 func (s *Storage) Info(ctx context.Context, module, version string) ([]byte, error) {
 	const op errors.Op = "s3.Info"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
-	exists, err := s.Exists(ctx, module, version)
-	if err != nil {
-		return nil, errors.E(op, err, errors.M(module), errors.V(version))
-	}
-	if !exists {
-		return nil, errors.E(op, errors.M(module), errors.V(version), errors.KindNotFound)
-	}
 
 	infoReader, err := s.open(ctx, config.PackageVersionedName(module, version, "info"))
 	if err != nil {
+		var aerr awserr.Error
+		if errors.AsErr(err, &aerr) && aerr.Code() == s3.ErrCodeNoSuchKey {
+			return nil, errors.E(op, errors.M(module), errors.V(version), errors.KindNotFound)
+		}
 		return nil, errors.E(op, err, errors.M(module), errors.V(version))
 	}
-	defer infoReader.Close()
+	defer func() { _ = infoReader.Close() }()
 
-	infoBytes, err := ioutil.ReadAll(infoReader)
+	infoBytes, err := io.ReadAll(infoReader)
 	if err != nil {
 		return nil, errors.E(op, err, errors.M(module), errors.V(version))
 	}
 	return infoBytes, nil
 }
 
-// GoMod implements the (./pkg/storage).Getter interface
+// GoMod implements the (./pkg/storage).Getter interface.
 func (s *Storage) GoMod(ctx context.Context, module, version string) ([]byte, error) {
 	const op errors.Op = "s3.GoMod"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
-	exists, err := s.Exists(ctx, module, version)
-	if err != nil {
-		return nil, errors.E(op, err, errors.M(module), errors.V(version))
-	}
-	if !exists {
-		return nil, errors.E(op, errors.M(module), errors.V(version), errors.KindNotFound)
-	}
 
 	modReader, err := s.open(ctx, config.PackageVersionedName(module, version, "mod"))
 	if err != nil {
+		var aerr awserr.Error
+		if errors.AsErr(err, &aerr) && aerr.Code() == s3.ErrCodeNoSuchKey {
+			return nil, errors.E(op, errors.M(module), errors.V(version), errors.KindNotFound)
+		}
 		return nil, errors.E(op, err, errors.M(module), errors.V(version))
 	}
-	defer modReader.Close()
+	defer func() { _ = modReader.Close() }()
 
-	modBytes, err := ioutil.ReadAll(modReader)
+	modBytes, err := io.ReadAll(modReader)
 	if err != nil {
-		return nil, errors.E(op, fmt.Errorf("could not get new reader for mod file: %s", err), errors.M(module), errors.V(version))
+		return nil, errors.E(op, fmt.Errorf("could not get new reader for mod file: %w", err), errors.M(module), errors.V(version))
 	}
 
 	return modBytes, nil
 }
 
-// Zip implements the (./pkg/storage).Getter interface
+// Zip implements the (./pkg/storage).Getter interface.
 func (s *Storage) Zip(ctx context.Context, module, version string) (storage.SizeReadCloser, error) {
 	const op errors.Op = "s3.Zip"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
-	exists, err := s.Exists(ctx, module, version)
-	if err != nil {
-		return nil, errors.E(op, err, errors.M(module), errors.V(version))
-	}
-	if !exists {
-		return nil, errors.E(op, errors.M(module), errors.V(version), errors.KindNotFound)
-	}
 
 	zipReader, err := s.open(ctx, config.PackageVersionedName(module, version, "zip"))
 	if err != nil {
+		var aerr awserr.Error
+		if errors.AsErr(err, &aerr) && aerr.Code() == s3.ErrCodeNoSuchKey {
+			return nil, errors.E(op, errors.M(module), errors.V(version), errors.KindNotFound)
+		}
 		return nil, errors.E(op, err, errors.M(module), errors.V(version))
 	}
 
@@ -98,6 +90,10 @@ func (s *Storage) open(ctx context.Context, path string) (storage.SizeReadCloser
 
 	goo, err := s.s3API.GetObjectWithContext(ctx, getParams)
 	if err != nil {
+		var aerr awserr.Error
+		if errors.AsErr(err, &aerr) && aerr.Code() == s3.ErrCodeNoSuchKey {
+			return nil, errors.E(op, errors.KindNotFound)
+		}
 		return nil, errors.E(op, err)
 	}
 	var size int64

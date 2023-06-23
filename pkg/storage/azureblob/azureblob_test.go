@@ -50,7 +50,7 @@ func (s *Storage) clear() error {
 
 func getStorage(t testing.TB) *Storage {
 	t.Helper()
-	containerName := randomContainerName(os.Getenv("DRONE_PULL_REQUEST"))
+	containerName := randomContainerName(os.Getenv("GA_PULL_REQUEST"))
 	cfg := getTestConfig(containerName)
 	if cfg == nil {
 		t.SkipNow()

@@ -1,17 +1,19 @@
 VERSION = "unset"
 DATE=$(shell date -u +%Y-%m-%d-%H:%M:%S-%Z)
 
+GOLANGCI_LINT_VERSION=v1.51.2
+
 ifndef GOLANG_VERSION
-override GOLANG_VERSION = 1.19
+override GOLANG_VERSION = 1.20
 endif
 
 .PHONY: build
 build: ## build the athens proxy
-	go build -o ./cmd/proxy/proxy ./cmd/proxy
+	go build -ldflags="-w -s" -o ./cmd/proxy/proxy ./cmd/proxy
 
 .PHONY: build-ver
 build-ver: ## build the athens proxy with version number
-	GO111MODULE=on CGO_ENABLED=0 GOPROXY="https://proxy.golang.org" go build -ldflags "-X github.com/gomods/athens/pkg/build.version=$(VERSION) -X github.com/gomods/athens/pkg/build.buildDate=$(DATE)" -o athens ./cmd/proxy
+	GO111MODULE=on CGO_ENABLED=0 GOPROXY="https://proxy.golang.org" go build -ldflags "-s -w -X github.com/gomods/athens/pkg/build.version=$(VERSION) -X github.com/gomods/athens/pkg/build.buildDate=$(DATE)" -o athens ./cmd/proxy
 
 athens:
 	$(MAKE) build-ver
@@ -39,14 +41,24 @@ run-docker-teardown:
 docs: ## build the docs docker image
 	docker build -t gomods/hugo -f docs/Dockerfile .
 
+.PHONY: docs-docker
+docs-docker: ## run the docs docker image
+	docker run -it --rm --name hugo-server -p 1313:1313 -v ${PWD}/docs:/src:cached gomods/hugo
+
 .PHONY: setup-dev-env
 setup-dev-env:
 	$(MAKE) dev
 
+.PHONY: lint
+lint:
+	@golangci-lint run ./...
+
+.PHONY: lint-docker
+lint-docker:
+	@docker run -t --rm -v $(CURDIR):/app -w /app golangci/golangci-lint:$(GOLANGCI_LINT_VERSION) golangci-lint run ./...
+
 .PHONY: verify
 verify: ## verify athens codebase
-	./scripts/check_gofmt.sh
-	./scripts/check_govet.sh
 	./scripts/check_deps.sh
 	./scripts/check_conflicts.sh
 
@@ -80,14 +92,6 @@ proxy-docker:
 .PHONY: docker-push
 docker-push:
 	./scripts/push-docker-images.sh
-
-.PHONY: charts-push
-charts-push: build-image
-	docker run --rm -it \
-	-v `pwd`:/go/src/github.com/gomods/athens \
-	-e AZURE_STORAGE_CONNECTION_STRING \
-	-e CHARTS_REPO \
-	athens-build ./scripts/push-helm-charts.sh
 
 bench:
 	./scripts/benchmark.sh

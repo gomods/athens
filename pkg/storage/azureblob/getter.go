@@ -3,7 +3,7 @@ package azureblob
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
+	"io"
 
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/errors"
@@ -11,8 +11,8 @@ import (
 	"github.com/gomods/athens/pkg/storage"
 )
 
-// Info implements the (./pkg/storage).Getter interface
-func (s *Storage) Info(ctx context.Context, module string, version string) ([]byte, error) {
+// Info implements the (./pkg/storage).Getter interface.
+func (s *Storage) Info(ctx context.Context, module, version string) ([]byte, error) {
 	const op errors.Op = "azureblob.Info"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
@@ -30,7 +30,7 @@ func (s *Storage) Info(ctx context.Context, module string, version string) ([]by
 		return nil, errors.E(op, err, errors.M(module), errors.V(version))
 	}
 
-	infoBytes, err := ioutil.ReadAll(infoReader)
+	infoBytes, err := io.ReadAll(infoReader)
 	if err != nil {
 		return nil, errors.E(op, err, errors.M(module), errors.V(version))
 	}
@@ -43,8 +43,8 @@ func (s *Storage) Info(ctx context.Context, module string, version string) ([]by
 	return infoBytes, nil
 }
 
-// GoMod implements the (./pkg/storage).Getter interface
-func (s *Storage) GoMod(ctx context.Context, module string, version string) ([]byte, error) {
+// GoMod implements the (./pkg/storage).Getter interface.
+func (s *Storage) GoMod(ctx context.Context, module, version string) ([]byte, error) {
 	const op errors.Op = "azureblob.GoMod"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
@@ -62,9 +62,9 @@ func (s *Storage) GoMod(ctx context.Context, module string, version string) ([]b
 		return nil, errors.E(op, err, errors.M(module), errors.V(version))
 	}
 
-	modBytes, err := ioutil.ReadAll(modReader)
+	modBytes, err := io.ReadAll(modReader)
 	if err != nil {
-		return nil, errors.E(op, fmt.Errorf("could not get new reader for mod file: %s", err), errors.M(module), errors.V(version))
+		return nil, errors.E(op, fmt.Errorf("could not get new reader for mod file: %w", err), errors.M(module), errors.V(version))
 	}
 
 	err = modReader.Close()
@@ -75,8 +75,8 @@ func (s *Storage) GoMod(ctx context.Context, module string, version string) ([]b
 	return modBytes, nil
 }
 
-// Zip implements the (./pkg/storage).Getter interface
-func (s *Storage) Zip(ctx context.Context, module string, version string) (storage.SizeReadCloser, error) {
+// Zip implements the (./pkg/storage).Getter interface.
+func (s *Storage) Zip(ctx context.Context, module, version string) (storage.SizeReadCloser, error) {
 	const op errors.Op = "azureblob.Zip"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()

@@ -1,7 +1,6 @@
 package config
 
 import (
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -23,9 +22,9 @@ func testConfigFile(t *testing.T) (testConfigFile string) {
 	return testConfigFile
 }
 
-func compareConfigs(parsedConf *Config, expConf *Config, t *testing.T, ignoreTypes ...interface{}) {
+func compareConfigs(parsedConf *Config, expConf *Config, t *testing.T, ignoreTypes ...any) {
 	t.Helper()
-	opts := cmpopts.IgnoreTypes(append([]interface{}{Index{}}, ignoreTypes...)...)
+	opts := cmpopts.IgnoreTypes(append([]any{Index{}}, ignoreTypes...)...)
 	eq := cmp.Equal(parsedConf, expConf, opts)
 	if !eq {
 		diff := cmp.Diff(parsedConf, expConf, opts)
@@ -101,7 +100,7 @@ func TestEnvOverrides(t *testing.T) {
 
 	envVars := getEnvMap(expConf)
 	for k, v := range envVars {
-		os.Setenv(k, v)
+		t.Setenv(k, v)
 	}
 	conf := &Config{}
 	err := envOverride(conf)
@@ -126,9 +125,7 @@ func TestEnvOverridesPreservingPort(t *testing.T) {
 
 func TestEnvOverridesPORT(t *testing.T) {
 	conf := &Config{Port: ""}
-	oldVal := os.Getenv("PORT")
-	defer os.Setenv("PORT", oldVal)
-	os.Setenv("PORT", "5000")
+	t.Setenv("PORT", "5000")
 	err := envOverride(conf)
 	if err != nil {
 		t.Fatalf("Env override failed: %v", err)
@@ -190,11 +187,8 @@ func TestStorageEnvOverrides(t *testing.T) {
 		},
 	}
 	envVars := getEnvMap(&Config{Storage: expStorage})
-	envVarBackup := map[string]string{}
 	for k, v := range envVars {
-		oldVal := os.Getenv(k)
-		envVarBackup[k] = oldVal
-		os.Setenv(k, v)
+		t.Setenv(k, v)
 	}
 	conf := &Config{}
 	err := envOverride(conf)
@@ -202,35 +196,12 @@ func TestStorageEnvOverrides(t *testing.T) {
 		t.Fatalf("Env override failed: %v", err)
 	}
 	compareStorageConfigs(conf.Storage, expStorage, t)
-	restoreEnv(envVarBackup)
 }
 
 // TestParseExampleConfig validates that all the properties in the example configuration file
 // can be parsed and validated without any environment variables
 func TestParseExampleConfig(t *testing.T) {
-
-	// initialize all struct pointers so we get all applicable env variables
-	emptyConf := &Config{
-		Storage: &Storage{
-			Disk: &DiskConfig{},
-			GCP:  &GCPConfig{},
-			Minio: &MinioConfig{
-				EnableSSL: false,
-			},
-			Mongo: &MongoConfig{},
-			S3:    &S3Config{},
-		},
-		SingleFlight: &SingleFlight{},
-		Index:        &Index{},
-	}
-	// unset all environment variables
-	envVars := getEnvMap(emptyConf)
-	envVarBackup := map[string]string{}
-	for k := range envVars {
-		oldVal := os.Getenv(k)
-		envVarBackup[k] = oldVal
-		os.Unsetenv(k)
-	}
+	os.Clearenv()
 
 	expStorage := &Storage{
 		Disk: &DiskConfig{
@@ -314,6 +285,7 @@ func TestParseExampleConfig(t *testing.T) {
 		DownloadMode:     "sync",
 		RobotsFile:       "robots.txt",
 		IndexType:        "none",
+		ShutdownTimeout:  60,
 		Index:            &Index{},
 	}
 
@@ -327,7 +299,6 @@ func TestParseExampleConfig(t *testing.T) {
 	}
 
 	compareConfigs(parsedConf, expConf, t)
-	restoreEnv(envVarBackup)
 }
 
 func getEnvMap(config *Config) map[string]string {
@@ -421,18 +392,8 @@ func getEnvMap(config *Config) map[string]string {
 	return envVars
 }
 
-func restoreEnv(envVars map[string]string) {
-	for k, v := range envVars {
-		if v != "" {
-			os.Setenv(k, v)
-		} else {
-			os.Unsetenv(k)
-		}
-	}
-}
-
 func tempFile(perm os.FileMode) (name string, err error) {
-	f, err := ioutil.TempFile(os.TempDir(), "prefix-")
+	f, err := os.CreateTemp(os.TempDir(), "prefix-")
 	if err != nil {
 		return "", err
 	}
@@ -448,7 +409,7 @@ func Test_checkFilePerms(t *testing.T) {
 		t.Skipf("Chmod is not supported in windows, so not possible to test. Ref: https://github.com/golang/go/blob/master/src/os/os_test.go#L1031\n")
 	}
 
-	incorrectPerms := []os.FileMode{0777, 0610, 0660}
+	incorrectPerms := []os.FileMode{0o777, 0o610, 0o660}
 	var incorrectFiles = make([]string, len(incorrectPerms))
 
 	for i := range incorrectPerms {
@@ -460,7 +421,7 @@ func Test_checkFilePerms(t *testing.T) {
 		defer os.Remove(f)
 	}
 
-	correctPerms := []os.FileMode{0600, 0400}
+	correctPerms := []os.FileMode{0o600, 0o400, 0o644}
 	var correctFiles = make([]string, len(correctPerms))
 
 	for i := range correctPerms {
@@ -480,8 +441,8 @@ func Test_checkFilePerms(t *testing.T) {
 
 	tests := []test{
 		{
-			"should not have an error on 0600, 0400, 0640",
-			[]string{correctFiles[0], correctFiles[1]},
+			"should not have an error on 0600, 0400, 0644",
+			[]string{correctFiles[0], correctFiles[1], correctFiles[2]},
 			false,
 		},
 		{
@@ -683,12 +644,7 @@ func TestNetworkMode(t *testing.T) {
 }
 
 func testDecode(t *testing.T, tc decodeTestCase) {
-	const envKey = "ATHENS_LIST_TEST"
-
-	os.Setenv(envKey, tc.given)
-	defer func() {
-		require.NoError(t, os.Unsetenv(envKey))
-	}()
+	t.Setenv("ATHENS_LIST_TEST", tc.given)
 
 	var config struct {
 		GoBinaryEnvVars EnvList `envconfig:"ATHENS_LIST_TEST"`

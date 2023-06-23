@@ -48,7 +48,7 @@ func (s *Storage) clear() error {
 
 func getStorage(t testing.TB) *Storage {
 	t.Helper()
-	bucketName := randomBucketName(os.Getenv("DRONE_PULL_REQUEST"))
+	bucketName := randomBucketName(os.Getenv("GA_PULL_REQUEST"))
 	cfg := getTestConfig(bucketName)
 	if cfg == nil {
 		// Don't fail if there's no test config, so that these tests don't

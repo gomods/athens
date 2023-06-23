@@ -82,7 +82,7 @@ tiller-deploy-5456568744-76c6s          1/1       Running   0          5s
 使用Helm安装Athens的最快方法是从我们的公共Helm Chart库中进行部署。 首先，使用以下命令添加库
 
 ```console
-$ helm repo add gomods https://athens.blob.core.windows.net/charts
+$ helm repo add gomods https://gomods.github.io/athens-charts
 $ helm repo update
 ```
 接下来，将含有默认值的chart安装到`athens`命名空间：

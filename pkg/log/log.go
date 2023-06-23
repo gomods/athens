@@ -35,13 +35,13 @@ func (l *Logger) SystemErr(err error) {
 }
 
 // WithFields Entry implementation.
-func (l *Logger) WithFields(fields map[string]interface{}) Entry {
+func (l *Logger) WithFields(fields map[string]any) Entry {
 	e := l.Logger.WithFields(fields)
 
 	return &entry{e}
 }
 
-// NoOpLogger provides a Logger that does nothing
+// NoOpLogger provides a Logger that does nothing.
 func NoOpLogger() *Logger {
 	return &Logger{
 		Logger: &logrus.Logger{},

@@ -8,10 +8,8 @@ import (
 	"github.com/gorilla/mux"
 )
 
-var (
-	// basicAuthExcludedPaths is a regular expression that matches paths that should not be protected by HTTP basic authentication.
-	basicAuthExcludedPaths = regexp.MustCompile("^/(health|ready)z$")
-)
+// basicAuthExcludedPaths is a regular expression that matches paths that should not be protected by HTTP basic authentication.
+var basicAuthExcludedPaths = regexp.MustCompile("^/(health|ready)z$")
 
 func basicAuth(user, pass string) mux.MiddlewareFunc {
 	return func(h http.Handler) http.Handler {
@@ -40,9 +38,5 @@ func checkAuth(r *http.Request, user, pass string) bool {
 	}
 
 	isPass := subtle.ConstantTimeCompare([]byte(pass), []byte(givenPass))
-	if isPass != 1 {
-		return false
-	}
-
-	return true
+	return isPass == 1
 }

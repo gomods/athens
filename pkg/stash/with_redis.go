@@ -13,9 +13,16 @@ import (
 	"github.com/gomods/athens/pkg/storage"
 )
 
+// RedisLogger mirrors github.com/go-redis/redis/v8/internal.Logging.
+type RedisLogger interface {
+	Printf(ctx context.Context, format string, v ...any)
+}
+
 // WithRedisLock returns a distributed singleflight
 // using a redis cluster. If it cannot connect, it will return an error.
-func WithRedisLock(endpoint string, password string, checker storage.Checker, lockConfig *config.RedisLockConfig) (Wrapper, error) {
+func WithRedisLock(l RedisLogger, endpoint, password string, checker storage.Checker, lockConfig *config.RedisLockConfig) (Wrapper, error) {
+	redis.SetLogger(l)
+
 	const op errors.Op = "stash.WithRedisLock"
 	client := redis.NewClient(&redis.Options{
 		Network:  "tcp",
