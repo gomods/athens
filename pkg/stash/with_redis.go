@@ -15,7 +15,7 @@ import (
 
 // RedisLogger mirrors github.com/go-redis/redis/v8/internal.Logging.
 type RedisLogger interface {
-	Printf(ctx context.Context, format string, v ...interface{})
+	Printf(ctx context.Context, format string, v ...any)
 }
 
 // WithRedisLock returns a distributed singleflight
