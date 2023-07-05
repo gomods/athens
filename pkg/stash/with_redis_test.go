@@ -20,7 +20,7 @@ type testingRedisLogger struct {
 	t *testing.T
 }
 
-func (l *testingRedisLogger) Printf(ctx context.Context, format string, v ...interface{}) {
+func (l *testingRedisLogger) Printf(ctx context.Context, format string, v ...any) {
 	l.t.Logf(format, v...)
 }
 

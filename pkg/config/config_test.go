@@ -22,9 +22,9 @@ func testConfigFile(t *testing.T) (testConfigFile string) {
 	return testConfigFile
 }
 
-func compareConfigs(parsedConf *Config, expConf *Config, t *testing.T, ignoreTypes ...interface{}) {
+func compareConfigs(parsedConf *Config, expConf *Config, t *testing.T, ignoreTypes ...any) {
 	t.Helper()
-	opts := cmpopts.IgnoreTypes(append([]interface{}{Index{}}, ignoreTypes...)...)
+	opts := cmpopts.IgnoreTypes(append([]any{Index{}}, ignoreTypes...)...)
 	eq := cmp.Equal(parsedConf, expConf, opts)
 	if !eq {
 		diff := cmp.Diff(parsedConf, expConf, opts)
