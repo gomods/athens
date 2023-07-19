@@ -173,7 +173,11 @@ func getSingleFlight(l *log.Logger, c *config.Config, checker storage.Checker) (
 		if c.StorageType != "gcp" {
 			return nil, fmt.Errorf("gcp SingleFlight only works with a gcp storage type and not: %v", c.StorageType)
 		}
-		return stash.WithGCSLock, nil
+		return func(s stash.Stasher) stash.Stasher {
+			// add WithSingleflight to ensure vcs calls are singleflighted since WithGCSLock
+			// only handles the storage part
+			return stash.WithSingleflight(stash.WithGCSLock(s))
+		}, nil
 	case "azureblob":
 		if c.StorageType != "azureblob" {
 			return nil, fmt.Errorf("azureblob SingleFlight only works with a azureblob storage type and not: %v", c.StorageType)
