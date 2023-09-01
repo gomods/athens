@@ -40,11 +40,6 @@ func main() {
 		log.Fatal(err)
 	}
 
-	cert, key, err := conf.TLSCertFiles()
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	srv := &http.Server{
 		Handler:           handler,
 		ReadHeaderTimeout: 2 * time.Second,
@@ -94,7 +89,7 @@ func main() {
 		}
 	}
 
-	if cert != "" && key != "" {
+	if conf.TLSCertFile != "" && conf.TLSKeyFile != "" {
 		err = srv.ServeTLS(ln, conf.TLSCertFile, conf.TLSKeyFile)
 	} else {
 		err = srv.Serve(ln)
