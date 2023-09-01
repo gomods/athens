@@ -215,30 +215,6 @@ func (c *Config) BasicAuth() (user, pass string, ok bool) {
 	return user, pass, ok
 }
 
-// TLSCertFiles returns certificate and key files and an error if
-// both files doesn't exist and have approperiate file permissions.
-func (c *Config) TLSCertFiles() (cert, key string, err error) {
-	if c.TLSCertFile == "" && c.TLSKeyFile == "" {
-		return "", "", nil
-	}
-
-	certFile, err := os.Stat(c.TLSCertFile)
-	if err != nil {
-		return "", "", fmt.Errorf("could not access TLSCertFile: %w", err)
-	}
-
-	keyFile, err := os.Stat(c.TLSKeyFile)
-	if err != nil {
-		return "", "", fmt.Errorf("could not access TLSKeyFile: %w", err)
-	}
-
-	if keyFile.Mode()&0o077 != 0 && runtime.GOOS != "windows" {
-		return "", "", fmt.Errorf("TLSKeyFile should not be accessible by others")
-	}
-
-	return certFile.Name(), keyFile.Name(), nil
-}
-
 // FilterOff returns true if the FilterFile is empty.
 func (c *Config) FilterOff() bool {
 	return c.FilterFile == ""
