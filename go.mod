@@ -94,6 +94,7 @@ require (
 	github.com/prometheus/common v0.26.0 // indirect
 	github.com/prometheus/procfs v0.6.0 // indirect
 	github.com/rogpeppe/go-internal v1.3.0 // indirect
+	github.com/stretchr/objx v0.1.1 // indirect
 	github.com/tinylib/msgp v1.0.2 // indirect
 	github.com/uber/jaeger-client-go v2.25.0+incompatible // indirect
 	github.com/xdg-go/pbkdf2 v1.0.0 // indirect
