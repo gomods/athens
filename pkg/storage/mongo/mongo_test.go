@@ -3,6 +3,8 @@ package mongo
 import (
 	"bytes"
 	"context"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"io"
 	"os"
 	"testing"
@@ -95,6 +97,49 @@ func TestQueryKindNotFoundErrorCases(t *testing.T) {
 		_, err := query(ctx, backend, test.modname, test.ver)
 		require.Error(t, err)
 		require.Equal(t, errors.KindNotFound, errors.Kind(err))
+	}
+}
+
+func TestQueryKindUnexpectedErrorCases(t *testing.T) {
+	// Prepare error documents
+	// If there is any error in preparation phase, skip this test
+	ctx := context.Background()
+	mongoStorage := getStorage(t)
+	uri := os.Getenv("ATHENS_MONGO_STORAGE_URL")
+	client, err := mongo.Connect(ctx, options.Client().ApplyURI(uri))
+	if err != nil {
+		t.SkipNow()
+	}
+	defer client.Disconnect(ctx)
+	coll := client.Database("athens").Collection("modules")
+	errDocs := []struct {
+		Module  string      `bson:"module"`
+		Version string      `bson:"version"`
+		Mod     interface{} `bson:"mod"`
+		Info    interface{} `bson:"info"`
+	}{
+		{"model1", "v1.1.1", 12345678, "error document with integer mod"},
+		{"model2", "v2.0.0", true, "error document with boolean mod"},
+	}
+	// clear collection before insert
+	coll.Drop(ctx)
+	for _, errDoc := range errDocs {
+		_, err = coll.InsertOne(ctx, errDoc, options.InsertOne().SetBypassDocumentValidation(true))
+		if err != nil {
+			t.SkipNow()
+		}
+	}
+	testCases := []struct {
+		modName string
+		version string
+	}{
+		{"model1", "v1.1.1"}, // test case: decode integer to []byte
+		{"model2", "v2.0.0"}, // test case: decode boolean to []byte
+	}
+	for _, test := range testCases {
+		_, err := query(ctx, mongoStorage, test.modName, test.version)
+		require.Error(t, err)
+		require.Equal(t, errors.KindUnexpected, errors.Kind(err))
 	}
 }
 func TestNewStorageWithDefaultOverrides(t *testing.T) {
