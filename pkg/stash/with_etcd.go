@@ -10,39 +10,21 @@ import (
 	"github.com/gomods/athens/pkg/storage"
 	clientv3 "go.etcd.io/etcd/client/v3"
 	"go.etcd.io/etcd/client/v3/concurrency"
-	"golang.org/x/sync/errgroup"
 )
 
 // WithEtcd returns a distributed singleflight
 // using an etcd cluster. If it cannot connect,
 // to any of the endpoints, it will return an error.
 func WithEtcd(endpoints []string, checker storage.Checker) (Wrapper, error) {
-	const op errors.Op = "stash.WithEtcd"
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-	defer cancel()
 	c, err := clientv3.New(clientv3.Config{
 		Endpoints:   endpoints,
-		DialTimeout: time.Second * 5,
+		DialTimeout: 5 * time.Second,
 	})
 	if err != nil {
-		return nil, errors.E(op, err)
-	}
-	var eg errgroup.Group
-	for _, ep := range endpoints {
-		epStat := func(ep string) func() error {
-			return func() error {
-				_, err := c.Status(ctx, ep)
-				return err
-			}
-		}(ep)
-		eg.Go(epStat)
-	}
-	err = eg.Wait()
-	if err != nil {
-		return nil, errors.E(op, err)
+		return nil, errors.E("stash.WithEtcd", err)
 	}
 	return func(s Stasher) Stasher {
-		return &etcd{c, s, checker}
+		return &etcd{client: c, stasher: s, checker: checker}
 	}, nil
 }
 
