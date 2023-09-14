@@ -17,6 +17,9 @@ import (
 	"github.com/gomods/athens/internal/shutdown"
 	"github.com/gomods/athens/pkg/build"
 	"github.com/gomods/athens/pkg/config"
+	octrace "go.opencensus.io/trace"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/bridge/opencensus"
 )
 
 var (
@@ -30,10 +33,13 @@ func main() {
 		fmt.Println(build.String())
 		os.Exit(0)
 	}
+
 	conf, err := config.Load(*configFile)
 	if err != nil {
 		log.Fatalf("could not load config file: %v", err)
 	}
+
+	octrace.DefaultTracer = opencensus.NewTracer(otel.GetTracerProvider().Tracer(actions.Service))
 
 	handler, err := actions.App(conf)
 	if err != nil {
