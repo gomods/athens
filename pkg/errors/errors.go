@@ -47,6 +47,8 @@ func (e Error) Error() string {
 	return e.Err.Error()
 }
 
+func (e Error) Unwrap() error { return e.Err }
+
 // Is is a shorthand for checking an error against a kind.
 func Is(err error, kind int) bool {
 	if err == nil {
