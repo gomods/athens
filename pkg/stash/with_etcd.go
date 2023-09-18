@@ -38,33 +38,31 @@ func (s *etcd) Stash(ctx context.Context, mod, ver string) (newVer string, err e
 	const op errors.Op = "etcd.Stash"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
-	sesh, err := concurrency.NewSession(s.client)
+
+	sess, err := concurrency.NewSession(s.client)
 	if err != nil {
-		return ver, errors.E(op, err)
+		return "", errors.E(op, err)
 	}
-	mv := config.FmtModVer(mod, ver)
-	mu := concurrency.NewMutex(sesh, mv)
-	err = mu.Lock(ctx)
-	if err != nil {
-		return ver, errors.E(op, err)
+	defer sess.Close()
+
+	m := concurrency.NewMutex(sess, config.FmtModVer(mod, ver))
+	if err := m.Lock(ctx); err != nil {
+		return "", errors.E(op, err)
 	}
-	defer func() {
-		const op errors.Op = "etcd.Unlock"
-		lockErr := mu.Unlock(ctx)
-		if err == nil && lockErr != nil {
-			err = errors.E(op, lockErr)
-		}
-	}()
+	defer m.Unlock(ctx)
+
 	ok, err := s.checker.Exists(ctx, mod, ver)
 	if err != nil {
-		return ver, errors.E(op, err)
+		return "", errors.E(op, err)
 	}
+
 	if ok {
 		return ver, nil
 	}
+
 	newVer, err = s.stasher.Stash(ctx, mod, ver)
 	if err != nil {
-		return ver, errors.E(op, err)
+		return "", errors.E(op, err)
 	}
 	return newVer, nil
 }

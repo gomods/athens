@@ -2,82 +2,218 @@ package stash
 
 import (
 	"context"
-	"fmt"
-	"os"
-	"strings"
-	"sync"
+	"net/url"
 	"testing"
 	"time"
 
-	"github.com/gomods/athens/pkg/storage"
-	"github.com/gomods/athens/pkg/storage/mem"
-	"golang.org/x/sync/errgroup"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"go.etcd.io/etcd/api/v3/etcdserverpb"
+	etcdembed "go.etcd.io/etcd/server/v3/embed"
 )
 
-// TestEtcdSingleFlight will ensure that 5 concurrent requests will all get the first request's
-// response. We can ensure that because only the first response does not return an error
-// and therefore all 5 responses should have no error.
-func TestEtcdSingleFlight(t *testing.T) {
-	endpointsStr := os.Getenv("ETCD_TEST_ENDPOINTS")
-	if len(endpointsStr) == 0 {
-		t.SkipNow()
-	}
-	strg, err := mem.NewStorage()
-	if err != nil {
-		t.Fatal(err)
-	}
-	ms := &mockEtcdStasher{strg: strg}
-	endpoints := strings.Split(endpointsStr, ",")
-	wrapper, err := WithEtcd(endpoints, storage.WithChecker(strg))
-	if err != nil {
-		t.Fatal(err)
-	}
-	s := wrapper(ms)
+type testContextKey struct{}
 
-	var eg errgroup.Group
-	for i := 0; i < 5; i++ {
-		eg.Go(func() error {
-			ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
-			defer cancel()
-			_, err := s.Stash(ctx, "mod", "ver")
-			return err
-		})
-	}
+type testError string
 
-	err = eg.Wait()
-	if err != nil {
-		t.Fatal(err)
-	}
+func (e testError) Error() string { return string(e) }
+
+type mockChecker struct {
+	t                       *testing.T
+	e                       *etcdembed.Etcd
+	wantModule, wantVersion string
+
+	exists bool
+	err    error
 }
 
-// mockEtcdStasher is like mockStasher
-// but leverages in memory storage
-// so that etcd can determine
-// whether to call the underlying stasher or not.
-type mockEtcdStasher struct {
-	strg storage.Backend
-	mu   sync.Mutex
-	num  int
+func (c *mockChecker) Exists(ctx context.Context, module, version string) (bool, error) {
+	assert.NotNil(c.t, ctx.Value(testContextKey{}))
+	assert.Equal(c.t, c.wantModule, module)
+	assert.Equal(c.t, c.wantVersion, version)
+
+	res, err := c.e.Server.LeaseLeases(ctx, &etcdserverpb.LeaseLeasesRequest{})
+	require.NoError(c.t, err)
+
+	assert.Len(c.t, res.Leases, 1)
+
+	return c.exists, c.err
 }
 
-func (ms *mockEtcdStasher) Stash(ctx context.Context, mod, ver string) (string, error) {
-	time.Sleep(time.Millisecond * 100) // allow for second requests to come in.
-	ms.mu.Lock()
-	defer ms.mu.Unlock()
-	if ms.num == 0 {
-		err := ms.strg.Save(
-			ctx,
-			mod,
-			ver,
-			[]byte("mod file"),
-			strings.NewReader("zip file"),
-			[]byte("info file"),
+type mockStasher struct {
+	t                       *testing.T
+	wantModule, wantVersion string
+
+	newVersion string
+	err        error
+}
+
+func (s *mockStasher) Stash(ctx context.Context, module, version string) (string, error) {
+	assert.NotNil(s.t, ctx.Value(testContextKey{}))
+	assert.Equal(s.t, s.wantModule, module)
+	assert.Equal(s.t, s.wantVersion, version)
+	return s.newVersion, s.err
+}
+
+func startEtcdServer(t *testing.T) (endpoint string, e *etcdembed.Etcd) {
+	c := etcdembed.NewConfig()
+	c.Dir = t.TempDir()
+	c.ListenPeerUrls = []url.URL{{Host: "localhost:0"}}
+	c.ListenClientUrls = []url.URL{{Host: "localhost:0"}}
+
+	e, err := etcdembed.StartEtcd(c)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { e.Close() })
+
+	deadline, ok := t.Deadline()
+	if !ok {
+		deadline = time.Now().Add(5 * time.Second)
+	}
+
+	select {
+	case <-e.Server.ReadyNotify():
+	case <-time.After(time.Until(deadline)):
+		t.Fatal("etcd server startup duration exceeded deadline")
+	}
+	return e.Clients[0].Addr().String(), e
+}
+
+func TestWithEtcd(t *testing.T) {
+	endpoint, _ := startEtcdServer(t)
+
+	var someChecker mockChecker
+	w, err := WithEtcd([]string{endpoint}, &someChecker)
+	require.NoError(t, err)
+
+	var someStasher mockStasher
+	etcdSingleflight, ok := w(&someStasher).(*etcd)
+	require.True(t, ok)
+
+	assert.Equal(t, etcdSingleflight.checker, &someChecker)
+	assert.Equal(t, etcdSingleflight.stasher, &someStasher)
+}
+
+func TestEtcdStash(t *testing.T) {
+	t.Run("module exists", func(t *testing.T) {
+		endpoint, e := startEtcdServer(t)
+
+		const (
+			someModule  = "some module"
+			someVersion = "some version"
 		)
-		if err != nil {
-			return "", err
-		}
-		ms.num++
-		return "", nil
-	}
-	return "", fmt.Errorf("second time error")
+
+		ctx := context.WithValue(context.Background(), testContextKey{}, struct{}{})
+
+		w, err := WithEtcd([]string{endpoint}, &mockChecker{
+			t:           t,
+			e:           e,
+			wantModule:  someModule,
+			wantVersion: someVersion,
+			exists:      true,
+		})
+		require.NoError(t, err)
+
+		newVersion, err := w(&mockStasher{
+			t:           t,
+			wantModule:  someModule,
+			wantVersion: someVersion,
+		}).Stash(ctx, someModule, someVersion)
+		require.NoError(t, err)
+
+		assert.Equal(t, someVersion, newVersion)
+
+		res, err := e.Server.LeaseLeases(ctx, &etcdserverpb.LeaseLeasesRequest{})
+		require.NoError(t, err)
+
+		assert.Empty(t, res.Leases)
+	})
+
+	t.Run("module does not exist", func(t *testing.T) {
+		endpoint, e := startEtcdServer(t)
+
+		const (
+			someModule  = "some module"
+			someVersion = "some version"
+
+			someNewVersion = "some new version"
+		)
+
+		ctx := context.WithValue(context.Background(), testContextKey{}, struct{}{})
+
+		w, err := WithEtcd([]string{endpoint}, &mockChecker{
+			t:           t,
+			e:           e,
+			wantModule:  someModule,
+			wantVersion: someVersion,
+		})
+		require.NoError(t, err)
+
+		newVersion, err := w(&mockStasher{
+			t:           t,
+			wantModule:  someModule,
+			wantVersion: someVersion,
+			newVersion:  someNewVersion,
+		}).Stash(ctx, someModule, someVersion)
+		require.NoError(t, err)
+
+		assert.Equal(t, someNewVersion, newVersion)
+	})
+
+	t.Run("checker error", func(t *testing.T) {
+		endpoint, e := startEtcdServer(t)
+
+		const (
+			someModule  = "some module"
+			someVersion = "some version"
+
+			someError testError = "some error"
+		)
+
+		ctx := context.WithValue(context.Background(), testContextKey{}, struct{}{})
+
+		w, err := WithEtcd([]string{endpoint}, &mockChecker{
+			t:           t,
+			e:           e,
+			wantModule:  someModule,
+			wantVersion: someVersion,
+			err:         someError,
+		})
+		require.NoError(t, err)
+
+		newVersion, err := w(&mockStasher{}).Stash(ctx, someModule, someVersion)
+		assert.ErrorIs(t, err, someError)
+		assert.Empty(t, newVersion)
+	})
+
+	t.Run("stasher error", func(t *testing.T) {
+		endpoint, e := startEtcdServer(t)
+
+		const (
+			someModule  = "some module"
+			someVersion = "some version"
+
+			someError testError = "some error"
+		)
+
+		ctx := context.WithValue(context.Background(), testContextKey{}, struct{}{})
+
+		w, err := WithEtcd([]string{endpoint}, &mockChecker{
+			t:           t,
+			e:           e,
+			wantModule:  someModule,
+			wantVersion: someVersion,
+		})
+		require.NoError(t, err)
+
+		newVersion, err := w(&mockStasher{
+			t:           t,
+			wantModule:  someModule,
+			wantVersion: someVersion,
+			err:         someError,
+		}).Stash(ctx, someModule, someVersion)
+		assert.ErrorIs(t, err, someError)
+		assert.Empty(t, newVersion)
+	})
 }
