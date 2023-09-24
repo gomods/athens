@@ -3,6 +3,7 @@ package mongo
 import (
 	"bytes"
 	"context"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"io"
@@ -121,10 +122,12 @@ func TestQueryKindUnexpectedErrorCases(t *testing.T) {
 		{"model1", "v1.1.1", 12345678, "error document with integer mod"},
 		{"model2", "v2.0.0", true, "error document with boolean mod"},
 	}
-	// clear collection before insert
-	coll.Drop(ctx)
+	// In case some docs were inserted into the collection before, using upsert instead.
 	for _, errDoc := range errDocs {
-		_, err = coll.InsertOne(ctx, errDoc, options.InsertOne().SetBypassDocumentValidation(true))
+		filter := bson.D{{"module", errDoc.Module}, {"version", errDoc.Version}}
+		update := bson.D{{"$set", bson.D{{"mod", errDoc.Mod}, {"info", errDoc.Info}}}}
+		opts := options.Update().SetUpsert(true).SetBypassDocumentValidation(true)
+		_, err = coll.UpdateOne(ctx, filter, update, opts)
 		if err != nil {
 			t.SkipNow()
 		}
