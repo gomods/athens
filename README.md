@@ -28,8 +28,6 @@ We encourage you to [try it out](https://docs.gomods.io/install/), consider usin
 
 The proxy implements the [Go modules download protocol](https://docs.gomods.io/intro/protocol/).
 
-There is currently an **experimental** public proxy (at https://athens.azurefd.net) that you can use to try out Athens, without installing anything locally. We also have a community of folks using Athens in production inside their organizations as an internal proxy. In either deployment, developers set their `GOPROXY` environment variable to point to the Athens proxy of their choice. At that point, `go get`, `go build`, and more commands will use the proxy to download dependencies as necessary.
-
 Athens proxies are highly configurable, so they can work for lots of different deployments. For example, proxies support a wide variety of storage drivers including:
 
 - Cloud blob storage services
