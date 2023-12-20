@@ -36,7 +36,7 @@ func NewVCSLister(goBinPath string, env []string, fs afero.Fs) UpstreamLister {
 		goBinPath: goBinPath,
 		env:       env,
 		fs:        fs,
-		sfg:       new(singleflight.Group),
+		sfg:       &singleflight.Group{},
 	}
 }
 

@@ -48,7 +48,7 @@ func NewGoGetFetcher(goBinaryName, gogetDir string, envVars []string, fs afero.F
 		goBinaryName: goBinaryName,
 		envVars:      envVars,
 		gogetDir:     gogetDir,
-		sfg:          new(singleflight.Group),
+		sfg:          &singleflight.Group{},
 	}, nil
 }
 
