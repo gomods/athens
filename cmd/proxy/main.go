@@ -5,7 +5,6 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"log"
 	stdlog "log"
 	"net"
 	"net/http"
@@ -47,7 +46,7 @@ func main() {
 
 	handler, err := actions.App(logger, conf)
 	if err != nil {
-		logger.WithError(err).Fatal("failed to create App")
+		logger.WithError(err).Fatal("Could not create App")
 	}
 
 	srv := &http.Server{
@@ -60,13 +59,13 @@ func main() {
 		sigint := make(chan os.Signal, 1)
 		signal.Notify(sigint, shutdown.GetSignals()...)
 		s := <-sigint
-		logger.WithField("signal", s).Infof("received signal, shutting down server")
+		logger.WithField("signal", s).Infof("Received signal, shutting down server")
 
 		// We received an interrupt signal, shut down.
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(conf.ShutdownTimeout))
 		defer cancel()
 		if err := srv.Shutdown(ctx); err != nil {
-			logger.WithError(err).Fatal("failed srv.Shutdown")
+			logger.WithError(err).Fatal("Could not shut down server")
 		}
 		close(idleConnsClosed)
 	}()
@@ -85,19 +84,20 @@ func main() {
 	var ln net.Listener
 
 	if conf.UnixSocket != "" {
-		logger := logger.WithField("socket", conf.UnixSocket)
-		logger.Info("starting application")
+		logger := logger.WithField("unixSocket", conf.UnixSocket)
+		logger.Info("Starting application")
 
 		ln, err = net.Listen("unix", conf.UnixSocket)
 		if err != nil {
-			logger.WithError(err).Fatal("error listening on Unix domain socket")
+			logger.WithError(err).Fatal("Could not listen on Unix domain socket")
 		}
 	} else {
-		log.Printf("Starting application at port %v", conf.Port)
+		logger := logger.WithField("tcpPort", conf.Port)
+		logger.Info("Starting application")
 
 		ln, err = net.Listen("tcp", conf.Port)
 		if err != nil {
-			log.Fatalf("error listening on TCP port %v: %v", conf.Port, err)
+			logger.WithError(err).Fatal("Could not listen on TCP port")
 		}
 	}
 
@@ -108,7 +108,7 @@ func main() {
 	}
 
 	if !errors.Is(err, http.ErrServerClosed) {
-		logger.WithError(err).Fatal("error from server startup")
+		logger.WithError(err).Fatal("Could not start server")
 	}
 
 	<-idleConnsClosed

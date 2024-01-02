@@ -20,18 +20,18 @@ func initializeAuthFile(path string) error {
 
 	fileBts, err := os.ReadFile(filepath.Clean(path))
 	if err != nil {
-		return fmt.Errorf("could not read %s: %w", path, err)
+		return fmt.Errorf("reading %s: %w", path, err)
 	}
 
 	hdir, err := homedir.Dir()
 	if err != nil {
-		return fmt.Errorf("could not get homedir: %w", err)
+		return fmt.Errorf("getting home dir: %w", err)
 	}
 
 	fileName := transformAuthFileName(filepath.Base(path))
 	rcp := filepath.Join(hdir, fileName)
 	if err := os.WriteFile(rcp, fileBts, 0o600); err != nil {
-		return fmt.Errorf("could not write to file: %w", err)
+		return fmt.Errorf("writing to auth file: %w", err)
 	}
 
 	return nil
@@ -43,11 +43,11 @@ func netrcFromToken(tok string) error {
 	fileContent := fmt.Sprintf("machine github.com login %s\n", tok)
 	hdir, err := homedir.Dir()
 	if err != nil {
-		return fmt.Errorf("could not get homedir: %w", err)
+		return fmt.Errorf("getting homedir: %w", err)
 	}
 	rcp := filepath.Join(hdir, getNETRCFilename())
 	if err := os.WriteFile(rcp, []byte(fileContent), 0o600); err != nil {
-		return fmt.Errorf("could not write to file: %w", err)
+		return fmt.Errorf("writing to netrc file: %w", err)
 	}
 	return nil
 }

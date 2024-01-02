@@ -27,20 +27,20 @@ func App(logger *log.Logger, conf *config.Config) (http.Handler, error) {
 		}
 
 		if err := netrcFromToken(conf.GithubToken); err != nil {
-			return nil, fmt.Errorf("netrcFromToken error: %w", err)
+			return nil, fmt.Errorf("creating netrc from token: %w", err)
 		}
 	}
 
 	// mount .netrc to home dir
 	// to have access to private repos.
 	if err := initializeAuthFile(conf.NETRCPath); err != nil {
-		return nil, fmt.Errorf("initializeAuthFile(netrc) error: %w", err)
+		return nil, fmt.Errorf("initializing auth file from netrc: %w", err)
 	}
 
 	// mount .hgrc to home dir
 	// to have access to private repos.
 	if err := initializeAuthFile(conf.HGRCPath); err != nil {
-		return nil, fmt.Errorf("initializeAuthFile(hgrc) error: %w", err)
+		return nil, fmt.Errorf("initializing auth file from hgrc: %w", err)
 	}
 
 	r := mux.NewRouter()
@@ -101,7 +101,7 @@ func App(logger *log.Logger, conf *config.Config) (http.Handler, error) {
 	if !conf.FilterOff() {
 		mf, err := module.NewFilter(conf.FilterFile)
 		if err != nil {
-			return nil, fmt.Errorf("error from module.NewFilter: %w", err)
+			return nil, fmt.Errorf("creating new filter: %w", err)
 		}
 		r.Use(mw.NewFilterMiddleware(mf, conf.GlobalEndpoint))
 	}
@@ -119,7 +119,7 @@ func App(logger *log.Logger, conf *config.Config) (http.Handler, error) {
 
 	store, err := GetStorage(conf.StorageType, conf.Storage, conf.TimeoutDuration(), client)
 	if err != nil {
-		return nil, fmt.Errorf("error getting storage configuration: %w", err)
+		return nil, fmt.Errorf("getting storage configuration: %w", err)
 	}
 
 	proxyRouter := r
@@ -127,7 +127,7 @@ func App(logger *log.Logger, conf *config.Config) (http.Handler, error) {
 		proxyRouter = subRouter
 	}
 	if err := addProxyRoutes(proxyRouter, store, logger, conf); err != nil {
-		return nil, fmt.Errorf("error adding proxy routes: %w", err)
+		return nil, fmt.Errorf("adding proxy routes: %w", err)
 	}
 
 	h := &ochttp.Handler{
