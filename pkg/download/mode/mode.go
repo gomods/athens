@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/gomods/athens/pkg/errors"
@@ -16,7 +17,7 @@ import (
 // when a module is not found in storage.
 type Mode string
 
-// DownloadMode constants. For more information see config.dev.toml
+// DownloadMode constants. For more information see config.dev.toml.
 const (
 	Sync            Mode = "sync"
 	Async           Mode = "async"
@@ -59,7 +60,7 @@ func NewFile(m Mode, downloadURL string) (*DownloadFile, error) {
 
 	if strings.HasPrefix(string(m), "file:") {
 		filePath := string(m[5:])
-		bts, err := os.ReadFile(filePath)
+		bts, err := os.ReadFile(filepath.Clean(filePath))
 		if err != nil {
 			return nil, err
 		}

@@ -5,13 +5,14 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"log"
 	stdlog "log"
+	"net"
 	"net/http"
+	_ "net/http/pprof"
 	"os"
 	"os/signal"
 	"time"
-
-	_ "net/http/pprof"
 
 	"github.com/gomods/athens/cmd/proxy/actions"
 	"github.com/gomods/athens/internal/shutdown"
@@ -49,14 +50,9 @@ func main() {
 		logger.WithError(err).Fatal("failed to create App")
 	}
 
-	cert, key, err := conf.TLSCertFiles()
-	if err != nil {
-		logger.WithError(err).Fatal("failed conf.TLSCertFiles")
-	}
-
 	srv := &http.Server{
-		Addr:    conf.Port,
-		Handler: handler,
+		Handler:           handler,
+		ReadHeaderTimeout: 2 * time.Second,
 	}
 	idleConnsClosed := make(chan struct{})
 
@@ -81,19 +77,38 @@ func main() {
 			// not to expose profiling data and avoid DoS attacks (profiling slows down the service)
 			// https://www.farsightsecurity.com/txt-record/2016/10/28/cmikk-go-remote-profiling/
 			logger.WithField("port", conf.PprofPort).Infof("starting pprof")
-			logger.Fatal(http.ListenAndServe(conf.PprofPort, nil))
+			logger.Fatal(http.ListenAndServe(conf.PprofPort, nil)) //nolint:gosec // This should not be exposed to the world.
 		}()
 	}
 
-	logger.WithField("port", conf.Port).Infof("starting application")
-	if cert != "" && key != "" {
-		err = srv.ListenAndServeTLS(conf.TLSCertFile, conf.TLSKeyFile)
+	// Unix socket configuration, if available, takes precedence over TCP port configuration.
+	var ln net.Listener
+
+	if conf.UnixSocket != "" {
+		logger := logger.WithField("socket", conf.UnixSocket)
+		logger.Info("starting application")
+
+		ln, err = net.Listen("unix", conf.UnixSocket)
+		if err != nil {
+			logger.WithError(err).Fatal("error listening on Unix domain socket")
+		}
 	} else {
-		err = srv.ListenAndServe()
+		log.Printf("Starting application at port %v", conf.Port)
+
+		ln, err = net.Listen("tcp", conf.Port)
+		if err != nil {
+			log.Fatalf("error listening on TCP port %v: %v", conf.Port, err)
+		}
+	}
+
+	if conf.TLSCertFile != "" && conf.TLSKeyFile != "" {
+		err = srv.ServeTLS(ln, conf.TLSCertFile, conf.TLSKeyFile)
+	} else {
+		err = srv.Serve(ln)
 	}
 
 	if !errors.Is(err, http.ErrServerClosed) {
-		logger.WithError(err).Fatal("application error")
+		logger.WithError(err).Fatal("error from server startup")
 	}
 
 	<-idleConnsClosed

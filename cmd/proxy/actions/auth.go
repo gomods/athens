@@ -18,7 +18,7 @@ func initializeAuthFile(path string) error {
 		return nil
 	}
 
-	fileBts, err := os.ReadFile(path)
+	fileBts, err := os.ReadFile(filepath.Clean(path))
 	if err != nil {
 		return fmt.Errorf("could not read %s: %w", path, err)
 	}
@@ -30,7 +30,7 @@ func initializeAuthFile(path string) error {
 
 	fileName := transformAuthFileName(filepath.Base(path))
 	rcp := filepath.Join(hdir, fileName)
-	if err := os.WriteFile(rcp, fileBts, 0600); err != nil {
+	if err := os.WriteFile(rcp, fileBts, 0o600); err != nil {
 		return fmt.Errorf("could not write to file: %w", err)
 	}
 
@@ -46,7 +46,7 @@ func netrcFromToken(tok string) error {
 		return fmt.Errorf("could not get homedir: %w", err)
 	}
 	rcp := filepath.Join(hdir, getNETRCFilename())
-	if err := os.WriteFile(rcp, []byte(fileContent), 0600); err != nil {
+	if err := os.WriteFile(rcp, []byte(fileContent), 0o600); err != nil {
 		return fmt.Errorf("could not write to file: %w", err)
 	}
 	return nil

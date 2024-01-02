@@ -1,8 +1,32 @@
+---
 name: continuous-integration
+
 on:
-  - push
-  - pull_request
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
 jobs:
+  lint:
+    runs-on: ubuntu-latest
+    env:
+      GOLANGCI_LINT_VERSION: v1.51.2
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: 'go.mod'
+          cache: true
+      - name: Lint code
+        uses: golangci/golangci-lint-action@v3
+        with:
+          version: ${{ env.GOLANGCI_LINT_VERSION }}
+          skip-pkg-cache: true
+          skip-build-cache: true
+
   build:
     env:
       ATHENS_MONGO_STORAGE_URL: mongodb://localhost:27017
@@ -13,6 +37,7 @@ jobs:
       REDIS_SENTINEL_TEST_PASSWORD: sekret
       PROTECTED_REDIS_TEST_ENDPOINT: localhost:6380
       ATHENS_PROTECTED_REDIS_PASSWORD: AthensPass1
+      GA_PULL_REQUEST: ${{github.event.number}}
     runs-on: ubuntu-latest
     services:
       mongo:
@@ -47,13 +72,13 @@ jobs:
           REDIS_PORT_NUMBER: 6380
           REDIS_PASSWORD: AthensPass1
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Set up Go
-        uses: actions/setup-go@v3
+        uses: actions/setup-go@v5
         with:
           go-version-file: 'go.mod'
           cache: true
-      - name: Run linter
+      - name: Verify changes
         run: make verify
       - name: Unit tests
         run: go test -v -race ./...

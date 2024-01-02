@@ -97,7 +97,7 @@ func TestNoSumPatterns(t *testing.T) {
 	for _, tc := range noSumTestCases {
 		t.Run(tc.name, func(t *testing.T) {
 			w := httptest.NewRecorder()
-			skipHandler := noSumWrapper(http.HandlerFunc(emptyHandler), "sum.golang.org", tc.patterns)
+			skipHandler := noSumWrapper(http.HandlerFunc(emptyHandler), tc.patterns)
 			req := httptest.NewRequest("GET", "/lookup/"+tc.given, nil)
 			skipHandler.ServeHTTP(w, req)
 			if tc.status != w.Code {

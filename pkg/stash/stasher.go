@@ -19,7 +19,7 @@ import (
 // what was requested, this is helpful if what was requested
 // was a descriptive version such as a branch name or a full commit sha.
 type Stasher interface {
-	Stash(ctx context.Context, mod string, ver string) (string, error)
+	Stash(ctx context.Context, mod, ver string) (string, error)
 }
 
 // Wrapper helps extend the main stasher's functionality with addons.
@@ -46,7 +46,7 @@ type stasher struct {
 
 func (s *stasher) Stash(ctx context.Context, mod, ver string) (string, error) {
 	const op errors.Op = "stasher.Stash"
-	_, span := observ.StartSpan(ctx, op.String())
+	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 	log.EntryFromContext(ctx).Debugf("saving %s@%s to storage...", mod, ver)
 
@@ -58,7 +58,7 @@ func (s *stasher) Stash(ctx context.Context, mod, ver string) (string, error) {
 	if err != nil {
 		return "", errors.E(op, err)
 	}
-	defer v.Zip.Close()
+	defer func() { _ = v.Zip.Close() }()
 	if v.Semver != ver {
 		exists, err := s.checker.Exists(ctx, mod, v.Semver)
 		if err != nil {

@@ -14,7 +14,7 @@ import (
 // PathList URL.
 const PathList = "/{module:.+}/@v/list"
 
-// ListHandler implements GET baseURL/module/@v/list
+// ListHandler implements GET baseURL/module/@v/list.
 func ListHandler(dp Protocol, lggr log.Entry, df *mode.DownloadFile) http.Handler {
 	const op errors.Op = "download.ListHandler"
 	f := func(w http.ResponseWriter, r *http.Request) {

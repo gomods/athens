@@ -9,7 +9,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// Kind enums
+// Kind enums.
 const (
 	KindNotFound       = http.StatusNotFound
 	KindBadRequest     = http.StatusBadRequest
@@ -47,12 +47,24 @@ func (e Error) Error() string {
 	return e.Err.Error()
 }
 
+func (e Error) Unwrap() error { return e.Err }
+
 // Is is a shorthand for checking an error against a kind.
 func Is(err error, kind int) bool {
 	if err == nil {
 		return false
 	}
 	return Kind(err) == kind
+}
+
+// IsErr is a convenience wrapper around the std library errors.Is.
+func IsErr(err, target error) bool {
+	return errors.Is(err, target)
+}
+
+// AsErr is a convenience wrapper around the std library errors.As.
+func AsErr(err error, target any) bool {
+	return errors.As(err, target)
 }
 
 // Op describes any independent function or
@@ -69,7 +81,7 @@ func (o Op) String() string {
 // a module from a regular error string or version.
 type M string
 
-// V represents a module version in an error
+// V represents a module version in an error.
 type V string
 
 // E is a helper function to construct an Error type
@@ -78,7 +90,7 @@ type V string
 // an error or a string to describe what exactly went wrong.
 // You can optionally pass a Logrus severity to indicate
 // the log level of an error based on the context it was constructed in.
-func E(op Op, args ...interface{}) error {
+func E(op Op, args ...any) error {
 	e := Error{Op: op}
 	if len(args) == 0 {
 		msg := "errors.E called with 0 args"
@@ -114,8 +126,8 @@ func E(op Op, args ...interface{}) error {
 // if none exists, then the level is Error because
 // it is an unexpected.
 func Severity(err error) logrus.Level {
-	e, ok := err.(Error)
-	if !ok {
+	var e Error
+	if !errors.As(err, &e) {
 		return logrus.ErrorLevel
 	}
 
@@ -145,8 +157,8 @@ func Expect(err error, kinds ...int) logrus.Level {
 // Kind recursively searches for the
 // first error kind it finds.
 func Kind(err error) int {
-	e, ok := err.(Error)
-	if !ok {
+	var e Error
+	if !errors.As(err, &e) {
 		return KindUnexpected
 	}
 
@@ -173,6 +185,7 @@ func KindText(err error) string {
 func Ops(err Error) []Op {
 	ops := []Op{err.Op}
 	for {
+		//nolint:errorlint // We iterate the errors anyway.
 		embeddedErr, ok := err.Err.(Error)
 		if !ok {
 			break

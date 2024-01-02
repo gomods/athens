@@ -2,6 +2,7 @@ package actions
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -54,7 +55,7 @@ func addProxyRoutes(
 		}
 		supportPath := path.Join("/sumdb", sumdbURL.Host, "/supported")
 		r.HandleFunc(supportPath, func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(200)
+			w.WriteHeader(http.StatusOK)
 		})
 		sumHandler := sumdbProxy(sumdbURL, c.NoSumPatterns)
 		pathPrefix := "/sumdb/" + sumdbURL.Host
@@ -63,7 +64,7 @@ func addProxyRoutes(
 		)
 	}
 
-	// Download Protocol
+	// Download Protocol:
 	// the download.Protocol and the stash.Stasher interfaces are composable
 	// in a middleware fashion. Therefore you can separate concerns
 	// by the functionality: a download.Protocol that just takes care
@@ -132,7 +133,7 @@ type athensLoggerForRedis struct {
 	logger *log.Logger
 }
 
-func (l *athensLoggerForRedis) Printf(ctx context.Context, format string, v ...interface{}) {
+func (l *athensLoggerForRedis) Printf(ctx context.Context, format string, v ...any) {
 	l.logger.WithContext(ctx).Printf(format, v...)
 }
 
@@ -142,13 +143,13 @@ func getSingleFlight(l *log.Logger, c *config.Config, checker storage.Checker) (
 		return stash.WithSingleflight, nil
 	case "etcd":
 		if c.SingleFlight == nil || c.SingleFlight.Etcd == nil {
-			return nil, fmt.Errorf("Etcd config must be present")
+			return nil, errors.New("etcd config must be present")
 		}
 		endpoints := strings.Split(c.SingleFlight.Etcd.Endpoints, ",")
 		return stash.WithEtcd(endpoints, checker)
 	case "redis":
 		if c.SingleFlight == nil || c.SingleFlight.Redis == nil {
-			return nil, fmt.Errorf("Redis config must be present")
+			return nil, errors.New("redis config must be present")
 		}
 		return stash.WithRedisLock(
 			&athensLoggerForRedis{logger: l},
@@ -158,7 +159,7 @@ func getSingleFlight(l *log.Logger, c *config.Config, checker storage.Checker) (
 			c.SingleFlight.Redis.LockConfig)
 	case "redis-sentinel":
 		if c.SingleFlight == nil || c.SingleFlight.RedisSentinel == nil {
-			return nil, fmt.Errorf("Redis config must be present")
+			return nil, errors.New("redis config must be present")
 		}
 		return stash.WithRedisSentinelLock(
 			&athensLoggerForRedis{logger: l},

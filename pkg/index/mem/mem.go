@@ -10,7 +10,7 @@ import (
 	"github.com/gomods/athens/pkg/index"
 )
 
-// New returns a new in-memory indexer
+// New returns a new in-memory indexer.
 func New() index.Indexer {
 	return &indexer{}
 }

@@ -1,3 +1,4 @@
+---
 version: 2
 updates:
   - package-ecosystem: gomod
@@ -6,6 +7,15 @@ updates:
       interval: weekly
     commit-message:
       prefix: update-go-pkg
+      include: scope
+    open-pull-requests-limit: 2
+    target-branch: main
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: update-github-action
       include: scope
     open-pull-requests-limit: 2
     target-branch: main

@@ -6,31 +6,18 @@
 .progress ul {
   list-style: none;
   margin: 0;
-  padding: 0 5px;
+  padding: 0 15px;
 }
 
 #TableOfContents {
     font-size: 13px !important;
     max-height: 85vh;
     overflow: auto;
-    padding: 15px !important;
+    padding: 15px 5px !important;
 }
 
-
-#TableOfContents > ul > li > ul > li > ul li {
-  margin-right: 8px;
-}
-
-#TableOfContents > ul > li > a   {
-  font-weight: bold; padding: 0 18px; margin: 0 2px;
-}
-
-#TableOfContents > ul > li > ul > li > a {
+#TableOfContents > ul > li > a {
   font-weight: bold;
-}
-
-#TableOfContents > ul > li > ul > li > ul > li > ul > li > ul > li  {
-    display: none;
 }
 
 body {

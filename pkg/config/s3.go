@@ -1,6 +1,6 @@
 package config
 
-// S3Config specifies the properties required to use S3 as the storage backend
+// S3Config specifies the properties required to use S3 as the storage backend.
 type S3Config struct {
 	Region                             string `validate:"required" envconfig:"AWS_REGION"`
 	Key                                string `envconfig:"AWS_ACCESS_KEY_ID"`

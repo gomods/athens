@@ -10,11 +10,20 @@
         {{ partial "search.html" . }}
     {{end}}
   </div>
+  {{if not .Site.Params.disableLandingPageButton }}
+    <section id="homelinks">
+      <ul>
+        <li>
+            <a class="padding" href='{{ (cond (and (ne .Site.Params.landingPageURL nil) (.Site.IsMultiLingual)) .Site.Params.landingPageURL "/") }}'>{{ safeHTML (cond (ne .Site.Params.landingPageName nil) .Site.Params.landingPageName "<i class='fas fa-home'></i> Home") }}</a>
+        </li>
+      </ul>
+    </section>
+  {{end}}
 
     <div class="highlightable">
     <ul class="topics">
 
-        {{if eq .Site.Params.ordersectionsby "title"}}  
+        {{if eq .Site.Params.ordersectionsby "title"}}
           {{range .Site.Home.Sections.ByTitle}}
           {{ template "section-tree-nav" dict "sect" . "currentnode" $currentNode "showvisitedlinks" $showvisitedlinks}}
           {{end}}
@@ -22,7 +31,7 @@
           {{range .Site.Home.Sections.ByWeight}}
           {{ template "section-tree-nav" dict "sect" . "currentnode" $currentNode "showvisitedlinks" $showvisitedlinks}}
           {{end}}
-        {{end}} 
+        {{end}}
     </ul>
 
     {{ $disableShortcutsTitle := .Site.Params.DisableShortcutsTitle}}
@@ -31,8 +40,8 @@
         <h3>{{ if not $disableShortcutsTitle}}{{ T "Shortcuts-Title"}}{{ end }}</h3>
         <ul>
           {{ range sort . "Weight"}}
-              <li> 
-                  {{.Pre}}<a class="padding" href="{{.URL}}">{{safeHTML .Name}}</a>{{.Post}}
+              <li>
+                  {{.Pre}}<a class="padding" href="{{.URL | absLangURL }}">{{safeHTML .Name}}</a>{{.Post}}
               </li>
           {{end}}
         </ul>
@@ -46,7 +55,7 @@
       {{ if and .Site.IsMultiLingual (not .Site.Params.DisableLanguageSwitchingButton)}}
         <li>
           <a class="padding">
-            <i class="fa fa-fw fa-language"></i>
+            <i class="fas fa-language fa-fw"></i>
           <div class="select-style">
             <select id="select-language" onchange="location = this.value;">
           {{ $siteLanguages := .Site.Languages}}
@@ -57,9 +66,9 @@
                   {{ if eq $translation.Lang .Lang }}
                     {{ $selected := false }}
                     {{ if eq $pageLang .Lang}}
-                      <option id="{{ $translation.Language }}" value="{{ $translation.URL }}" selected>{{ .LanguageName }}</option>
+                      <option id="{{ $translation.Language }}" value="{{ $translation.Permalink }}" selected>{{ .LanguageName }}</option>
                     {{ else }}
-                      <option id="{{ $translation.Language }}" value="{{ $translation.URL }}">{{ .LanguageName }}</option>
+                      <option id="{{ $translation.Language }}" value="{{ $translation.Permalink }}">{{ .LanguageName }}</option>
                     {{ end }}
                   {{ end }}
               {{ end }}
@@ -76,10 +85,10 @@
         </div>
         </a>
         </li>
-      {{end}} 
-      
+      {{end}}
+
       {{ if $showvisitedlinks}}
-        <li><a class="padding" href="#" data-clear-history-toggle=""><i class="fa fa-fw fa-history"></i> {{T "Clear-History"}}</a></li>         
+        <li><a class="padding" href="#" data-clear-history-toggle=""><i class="fas fa-history fa-fw"></i> {{T "Clear-History"}}</a></li>
       {{ end }}
       </ul>
     </section>
@@ -94,21 +103,23 @@
 {{ define "section-tree-nav" }}
 {{ $showvisitedlinks := .showvisitedlinks }}
 {{ $currentNode := .currentnode }}
+{{ $currentFileUniqueID := "" }}
+{{ with $currentNode.File }}{{ $currentFileUniqueID = .UniqueID }}{{ end }}
  {{with .sect}}
-  {{if .IsSection}}
+  {{if and .IsSection (or (not .Params.hidden) $.showhidden)}}
     {{safeHTML .Params.head}}
-    <li data-nav-id="{{.URL}}" title="{{.Title}}" class="dd-item 
+    <li data-nav-id="{{.RelPermalink}}" title="{{.Title}}" class="dd-item
         {{if .IsAncestor $currentNode }}parent{{end}}
-        {{if eq .UniqueID $currentNode.UniqueID}}active{{end}}
+        {{if eq .File.UniqueID $currentFileUniqueID}}active{{end}}
         {{if .Params.alwaysopen}}parent{{end}}
         ">
       <a href="{{.RelPermalink}}">
           {{safeHTML .Params.Pre}}{{or .Params.menuTitle .LinkTitle .Title}}{{safeHTML .Params.Post}}
           {{ if $showvisitedlinks}}
-            <i class="fa fa-check read-icon"></i>
+            <i class="fas fa-check read-icon"></i>
           {{ end }}
       </a>
-      {{ $numberOfPages := (add (len .Pages) (len .Sections)) }}
+      {{ $numberOfPages := (add (len ( where .Pages "Params.hidden" "ne" true )) (len ( where .Sections "Params.hidden" "ne" true ))) }}
       {{ if ne $numberOfPages 0 }}
         <ul>
           {{ $currentNode.Scratch.Set "pages" .Pages }}
@@ -116,35 +127,34 @@
             {{ $currentNode.Scratch.Set "pages" (.Pages | union .Sections) }}
           {{end}}
           {{ $pages := ($currentNode.Scratch.Get "pages") }}
-          
-        {{if eq .Site.Params.ordersectionsby "title"}}  
+
+        {{if eq .Site.Params.ordersectionsby "title"}}
           {{ range $pages.ByTitle }}
-            {{ if and .Params.hidden (not $.showhidden) }} 
+            {{ if and .Params.hidden (not $.showhidden) }}
             {{else}}
             {{ template "section-tree-nav" dict "sect" . "currentnode" $currentNode "showvisitedlinks" $showvisitedlinks }}
             {{end}}
           {{ end }}
         {{else}}
           {{ range $pages.ByWeight }}
-            {{ if and .Params.hidden (not $.showhidden) }} 
+            {{ if and .Params.hidden (not $.showhidden) }}
             {{else}}
             {{ template "section-tree-nav" dict "sect" . "currentnode" $currentNode "showvisitedlinks" $showvisitedlinks }}
             {{end}}
           {{ end }}
         {{end}}
         </ul>
-      {{ end }}        
+      {{ end }}
     </li>
   {{else}}
     {{ if not .Params.Hidden }}
-      <li data-nav-id="{{.URL}}" title="{{.Title}}" class="dd-item {{if eq .UniqueID $currentNode.UniqueID}}active{{end}}">
+      <li data-nav-id="{{.RelPermalink}}" title="{{.Title}}" class="dd-item {{if eq .File.UniqueID $currentFileUniqueID}}active{{end}}">
         <a href="{{ .RelPermalink}}">
         {{safeHTML .Params.Pre}}{{or .Params.menuTitle .LinkTitle .Title}}{{safeHTML .Params.Post}}
-        {{ if $showvisitedlinks}}<i class="fa fa-check read-icon"></i>{{end}}
+        {{ if $showvisitedlinks}}<i class="fas fa-check read-icon"></i>{{end}}
         </a>
     </li>
      {{ end }}
   {{end}}
  {{ end }}
 {{ end }}
-

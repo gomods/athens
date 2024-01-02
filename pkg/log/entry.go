@@ -12,13 +12,13 @@ import (
 // Fields are being overwritten.
 type Entry interface {
 	// Basic Logging Operation
-	Debugf(format string, args ...interface{})
-	Infof(format string, args ...interface{})
-	Warnf(format string, args ...interface{})
-	Errorf(format string, args ...interface{})
+	Debugf(format string, args ...any)
+	Infof(format string, args ...any)
+	Warnf(format string, args ...any)
+	Errorf(format string, args ...any)
 
 	// Attach contextual information to the logging entry
-	WithFields(fields map[string]interface{}) Entry
+	WithFields(fields map[string]any) Entry
 
 	// SystemErr is a method that disects the error
 	// and logs the appropriate level and fields for it.
@@ -29,14 +29,14 @@ type entry struct {
 	*logrus.Entry
 }
 
-func (e *entry) WithFields(fields map[string]interface{}) Entry {
+func (e *entry) WithFields(fields map[string]any) Entry {
 	ent := e.Entry.WithFields(fields)
 	return &entry{ent}
 }
 
 func (e *entry) SystemErr(err error) {
-	athensErr, ok := err.(errors.Error)
-	if !ok {
+	var athensErr errors.Error
+	if !errors.IsErr(err, athensErr) {
 		e.Error(err)
 		return
 	}

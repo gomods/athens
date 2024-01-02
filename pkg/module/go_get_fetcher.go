@@ -14,6 +14,7 @@ import (
 	"github.com/gomods/athens/pkg/observ"
 	"github.com/gomods/athens/pkg/storage"
 	"github.com/spf13/afero"
+	"golang.org/x/sync/singleflight"
 )
 
 type goGetFetcher struct {
@@ -21,6 +22,7 @@ type goGetFetcher struct {
 	goBinaryName string
 	envVars      []string
 	gogetDir     string
+	sfg          *singleflight.Group
 }
 
 type goModule struct {
@@ -35,7 +37,7 @@ type goModule struct {
 	GoModSum string `json:"goModSum"` // checksum for go.mod (as in go.sum)
 }
 
-// NewGoGetFetcher creates fetcher which uses go get tool to fetch modules
+// NewGoGetFetcher creates fetcher which uses go get tool to fetch modules.
 func NewGoGetFetcher(goBinaryName, gogetDir string, envVars []string, fs afero.Fs) (Fetcher, error) {
 	const op errors.Op = "module.NewGoGetFetcher"
 	if err := validGoBinary(goBinaryName); err != nil {
@@ -46,6 +48,7 @@ func NewGoGetFetcher(goBinaryName, gogetDir string, envVars []string, fs afero.F
 		goBinaryName: goBinaryName,
 		envVars:      envVars,
 		gogetDir:     gogetDir,
+		sfg:          &singleflight.Group{},
 	}, nil
 }
 
@@ -56,58 +59,63 @@ func (g *goGetFetcher) Fetch(ctx context.Context, mod, ver string) (*storage.Ver
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 
-	// setup the GOPATH
-	goPathRoot, err := afero.TempDir(g.fs, g.gogetDir, "athens")
-	if err != nil {
-		return nil, errors.E(op, err)
-	}
-	sourcePath := filepath.Join(goPathRoot, "src")
-	modPath := filepath.Join(sourcePath, getRepoDirName(mod, ver))
-	if err := g.fs.MkdirAll(modPath, os.ModeDir|os.ModePerm); err != nil {
-		clearFiles(g.fs, goPathRoot)
-		return nil, errors.E(op, err)
-	}
+	resp, err, _ := g.sfg.Do(mod+"###"+ver, func() (any, error) {
+		// setup the GOPATH
+		goPathRoot, err := afero.TempDir(g.fs, g.gogetDir, "athens")
+		if err != nil {
+			return nil, errors.E(op, err)
+		}
+		sourcePath := filepath.Join(goPathRoot, "src")
+		modPath := filepath.Join(sourcePath, getRepoDirName(mod, ver))
+		if err := g.fs.MkdirAll(modPath, os.ModeDir|os.ModePerm); err != nil {
+			_ = clearFiles(g.fs, goPathRoot)
+			return nil, errors.E(op, err)
+		}
 
-	m, err := downloadModule(
-		ctx,
-		g.goBinaryName,
-		g.envVars,
-		g.fs,
-		goPathRoot,
-		modPath,
-		mod,
-		ver,
-	)
-	if err != nil {
-		clearFiles(g.fs, goPathRoot)
-		return nil, errors.E(op, err)
-	}
+		m, err := downloadModule(
+			ctx,
+			g.goBinaryName,
+			g.envVars,
+			goPathRoot,
+			modPath,
+			mod,
+			ver,
+		)
+		if err != nil {
+			_ = clearFiles(g.fs, goPathRoot)
+			return nil, errors.E(op, err)
+		}
 
-	var storageVer storage.Version
-	storageVer.Semver = m.Version
-	info, err := afero.ReadFile(g.fs, m.Info)
-	if err != nil {
-		return nil, errors.E(op, err)
-	}
-	storageVer.Info = info
+		var storageVer storage.Version
+		storageVer.Semver = m.Version
+		info, err := afero.ReadFile(g.fs, m.Info)
+		if err != nil {
+			return nil, errors.E(op, err)
+		}
+		storageVer.Info = info
 
-	gomod, err := afero.ReadFile(g.fs, m.GoMod)
-	if err != nil {
-		return nil, errors.E(op, err)
-	}
-	storageVer.Mod = gomod
+		gomod, err := afero.ReadFile(g.fs, m.GoMod)
+		if err != nil {
+			return nil, errors.E(op, err)
+		}
+		storageVer.Mod = gomod
 
-	zip, err := g.fs.Open(m.Zip)
-	if err != nil {
-		return nil, errors.E(op, err)
-	}
-	// note: don't close zip here so that the caller can read directly from disk.
-	//
-	// if we close, then the caller will panic, and the alternative to make this work is
-	// that we read into memory and return an io.ReadCloser that reads out of memory
-	storageVer.Zip = &zipReadCloser{zip, g.fs, goPathRoot}
+		zip, err := g.fs.Open(m.Zip)
+		if err != nil {
+			return nil, errors.E(op, err)
+		}
+		// note: don't close zip here so that the caller can read directly from disk.
+		//
+		// if we close, then the caller will panic, and the alternative to make this work is
+		// that we read into memory and return an io.ReadCloser that reads out of memory
+		storageVer.Zip = &zipReadCloser{zip, g.fs, goPathRoot}
 
-	return &storageVer, nil
+		return &storageVer, nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	return resp.(*storage.Version), nil
 }
 
 // given a filesystem, gopath, repository root, module and version, runs 'go mod download -json'
@@ -116,7 +124,6 @@ func downloadModule(
 	ctx context.Context,
 	goBinaryName string,
 	envVars []string,
-	fs afero.Fs,
 	gopath,
 	repoRoot,
 	module,
@@ -137,7 +144,7 @@ func downloadModule(
 
 	err := cmd.Run()
 	if err != nil {
-		err = fmt.Errorf("%v: %s", err, stderr)
+		err = fmt.Errorf("%w: %s", err, stderr)
 		var m goModule
 		if jsonErr := json.NewDecoder(stdout).Decode(&m); jsonErr != nil {
 			return goModule{}, errors.E(op, err)
@@ -165,17 +172,17 @@ func isLimitHit(o string) bool {
 }
 
 // getRepoDirName takes a raw repository URI and a version and creates a directory name that the
-// repository contents can be put into
+// repository contents can be put into.
 func getRepoDirName(repoURI, version string) string {
-	escapedURI := strings.Replace(repoURI, "/", "-", -1)
+	escapedURI := strings.ReplaceAll(repoURI, "/", "-")
 	return fmt.Sprintf("%s-%s", escapedURI, version)
 }
 
 func validGoBinary(name string) error {
 	const op errors.Op = "module.validGoBinary"
 	err := exec.Command(name).Run()
-	_, ok := err.(*exec.ExitError)
-	if err != nil && !ok {
+	eErr := &exec.ExitError{}
+	if err != nil && !errors.AsErr(err, &eErr) {
 		return errors.E(op, err)
 	}
 	return nil

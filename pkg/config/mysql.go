@@ -1,6 +1,6 @@
 package config
 
-// MySQL config
+// MySQL config.
 type MySQL struct {
 	Protocol string            `validate:"required" envconfig:"ATHENS_INDEX_MYSQL_PROTOCOL"`
 	Host     string            `validate:"required" envconfig:"ATHENS_INDEX_MYSQL_HOST"`

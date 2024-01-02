@@ -14,7 +14,7 @@ import (
 	"go.opencensus.io/plugin/ochttp"
 )
 
-// Service is the name of the service that we want to tag our processes with
+// Service is the name of the service that we want to tag our processes with.
 const Service = "proxy"
 
 // App is where all routes and middleware for the proxy

@@ -1,6 +1,6 @@
 package config
 
-// Storage provides configs for various storage backends
+// Storage provides configs for various storage backends.
 type Storage struct {
 	Disk      *DiskConfig
 	GCP       *GCPConfig

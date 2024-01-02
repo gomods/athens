@@ -11,7 +11,7 @@ import (
 // PathVersionInfo URL.
 const PathVersionInfo = "/{module:.+}/@v/{version}.info"
 
-// InfoHandler implements GET baseURL/module/@v/version.info
+// InfoHandler implements GET baseURL/module/@v/version.info.
 func InfoHandler(dp Protocol, lggr log.Entry, df *mode.DownloadFile) http.Handler {
 	const op errors.Op = "download.InfoHandler"
 	f := func(w http.ResponseWriter, r *http.Request) {
@@ -38,7 +38,7 @@ func InfoHandler(dp Protocol, lggr log.Entry, df *mode.DownloadFile) http.Handle
 			w.WriteHeader(errors.Kind(err))
 		}
 
-		w.Write(info)
+		_, _ = w.Write(info)
 	}
 	return http.HandlerFunc(f)
 }
