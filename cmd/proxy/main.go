@@ -34,12 +34,12 @@ func main() {
 	}
 	conf, err := config.Load(*configFile)
 	if err != nil {
-		stdlog.Fatalf("could not load config file: %v", err)
+		stdlog.Fatalf("Could not load config file: %v", err)
 	}
 
 	logLvl, err := logrus.ParseLevel(conf.LogLevel)
 	if err != nil {
-		stdlog.Fatalf("failed logrus.ParseLevel(%q): %v", conf.LogLevel, err)
+		stdlog.Fatalf("Could not parse log level %q: %v", conf.LogLevel, err)
 	}
 
 	logger := athenslog.New(conf.CloudRuntime, logLvl)
