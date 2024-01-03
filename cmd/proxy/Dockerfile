@@ -8,7 +8,7 @@
 ARG GOLANG_VERSION=1.20
 ARG ALPINE_VERSION=3.17
 
-FROM --platform=$BUILDPLATFORM golang:${GOLANG_VERSION}-alpine AS builder
+FROM golang:${GOLANG_VERSION}-alpine AS builder
 
 ARG VERSION="unset" \
     TARGETARCH
