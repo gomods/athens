@@ -49,7 +49,11 @@ func main() {
 	// we can do it once in main and have the global log.Logger use it.
 	{
 		logrusWriter := logger.Writer()
-		defer logrusWriter.Close()
+		defer func() {
+			if err := logrusWriter.Close(); err != nil {
+				logger.WithError(err).Warn("Could not close logrus writer pipe")
+			}
+		}()
 		stdlog.SetOutput(logrusWriter)
 		stdlog.SetFlags(stdlog.Flags() &^ (stdlog.Ldate | stdlog.Ltime))
 	}
