@@ -44,6 +44,16 @@ func main() {
 
 	logger := athenslog.New(conf.CloudRuntime, logLvl)
 
+	// logrus.Writer() spawns a go routine, so instead of doing that each time
+	// we need to make logrus look like a (standard) log.Logger (and then Close()ing it),
+	// we can do it once in main and have the global log.Logger use it.
+	{
+		logrusWriter := logger.Writer()
+		defer logrusWriter.Close()
+		stdlog.SetOutput(logrusWriter)
+		stdlog.SetFlags(stdlog.Flags() &^ (stdlog.Ldate | stdlog.Ltime))
+	}
+
 	handler, err := actions.App(logger, conf)
 	if err != nil {
 		logger.WithError(err).Fatal("Could not create App")
