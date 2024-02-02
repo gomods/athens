@@ -48,7 +48,7 @@ func main() {
 	// we need to make logrus look like a (standard) log.Logger (and then Close()ing it),
 	// we can do it once in main and have the global log.Logger use it.
 	{
-		logrusWriter := logger.Writer()
+		logrusWriter := logger.WriterLevel(logrus.ErrorLevel)
 		defer func() {
 			if err := logrusWriter.Close(); err != nil {
 				logger.WithError(err).Warn("Could not close logrus writer pipe")
