@@ -44,19 +44,15 @@ func main() {
 
 	logger := athenslog.New(conf.CloudRuntime, logLvl)
 
-	// logrus.Writer() spawns a go routine, so instead of doing that each time
-	// we need to make logrus look like a (standard) log.Logger (and then Close()ing it),
-	// we can do it once in main and have the global log.Logger use it.
-	{
-		logrusWriter := logger.WriterLevel(logrus.ErrorLevel)
-		defer func() {
-			if err := logrusWriter.Close(); err != nil {
-				logger.WithError(err).Warn("Could not close logrus writer pipe")
-			}
-		}()
-		stdlog.SetOutput(logrusWriter)
-		stdlog.SetFlags(stdlog.Flags() &^ (stdlog.Ldate | stdlog.Ltime))
-	}
+	// Turn standard logger output into logrus Errors.
+	logrusErrorWriter := logger.WriterLevel(logrus.ErrorLevel)
+	defer func() {
+		if err := logrusErrorWriter.Close(); err != nil {
+			logger.WithError(err).Warn("Could not close logrus writer pipe")
+		}
+	}()
+	stdlog.SetOutput(logrusErrorWriter)
+	stdlog.SetFlags(stdlog.Flags() &^ (stdlog.Ldate | stdlog.Ltime))
 
 	handler, err := actions.App(logger, conf)
 	if err != nil {
