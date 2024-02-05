@@ -44,6 +44,16 @@ func main() {
 
 	logger := athenslog.New(conf.CloudRuntime, logLvl)
 
+	// Turn standard logger output into logrus Errors.
+	logrusErrorWriter := logger.WriterLevel(logrus.ErrorLevel)
+	defer func() {
+		if err := logrusErrorWriter.Close(); err != nil {
+			logger.WithError(err).Warn("Could not close logrus writer pipe")
+		}
+	}()
+	stdlog.SetOutput(logrusErrorWriter)
+	stdlog.SetFlags(stdlog.Flags() &^ (stdlog.Ldate | stdlog.Ltime))
+
 	handler, err := actions.App(logger, conf)
 	if err != nil {
 		logger.WithError(err).Fatal("Could not create App")
