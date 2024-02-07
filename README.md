@@ -44,7 +44,7 @@ Speaking of contributing, read on!
 
 # Contributing
 
-If you use Athens for your development workflow, we hope that you'll consider contributing back to the project. Athens is widely used and has plenty of interesting work to do, from technical challenges to technical documentation to release management. We have a wonderful community that we would love you to be a part of. [Absolutely everyone is welcome](https://arschles.com/blog/absolutely-everybody-is-welcome/).
+If you use Athens for your development workflow, we hope that you'll consider contributing back to the project. Athens is widely used and has plenty of interesting work to do, from technical challenges to technical documentation to release management. We have a wonderful community that we would love you to be a part of. [Absolutely everyone is welcome](https://arschles.com/blog/absolutely-everybody/).
 
 The quickest way to get involved is by [filing issues](https://github.com/gomods/athens/issues/new/choose) if you find bugs or find that you need Athens to do something it doesn't.
 
