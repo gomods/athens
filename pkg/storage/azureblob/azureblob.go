@@ -62,7 +62,7 @@ func (c *azureBlobStoreClient) BlobExists(ctx context.Context, path string) (boo
 	const op errors.Op = "azureblob.BlobExists"
 	// TODO: Any better way of doing this ?
 	blobURL := c.containerURL.NewBlockBlobURL(path)
-	_, err := blobURL.GetProperties(ctx, azblob.BlobAccessConditions{})
+	_, err := blobURL.GetProperties(ctx, azblob.BlobAccessConditions{}, azblob.ClientProvidedKeyOptions{})
 	if err != nil {
 		var serr azblob.StorageError
 		if !errors.AsErr(err, &serr) {
@@ -81,7 +81,7 @@ func (c *azureBlobStoreClient) BlobExists(ctx context.Context, path string) (boo
 func (c *azureBlobStoreClient) ReadBlob(ctx context.Context, path string) (storage.SizeReadCloser, error) {
 	const op errors.Op = "azureblob.ReadBlob"
 	blobURL := c.containerURL.NewBlockBlobURL(path)
-	downloadResponse, err := blobURL.Download(ctx, 0, 0, azblob.BlobAccessConditions{}, false)
+	downloadResponse, err := blobURL.Download(ctx, 0, 0, azblob.BlobAccessConditions{}, false, azblob.ClientProvidedKeyOptions{})
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
