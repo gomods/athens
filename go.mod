@@ -19,7 +19,7 @@ require (
 	github.com/gobuffalo/httptest v1.0.4
 	github.com/google/go-cmp v0.5.9
 	github.com/google/uuid v1.3.0
-	github.com/gorilla/mux v1.6.2
+	github.com/gorilla/mux v1.8.1
 	github.com/hashicorp/go-multierror v1.0.0
 	github.com/hashicorp/hcl2 v0.0.0-20190503213020-640445e16309
 	github.com/kelseyhightower/envconfig v1.3.0
@@ -75,7 +75,6 @@ require (
 	github.com/google/btree v1.0.1 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.2.3 // indirect
 	github.com/googleapis/gax-go/v2 v2.7.1 // indirect
-	github.com/gorilla/context v1.1.1 // indirect
 	github.com/gorilla/websocket v1.4.2 // indirect
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0 // indirect
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0 // indirect
