@@ -28,7 +28,7 @@ require (
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/sirupsen/logrus v1.7.0
 	github.com/spf13/afero v1.8.2
-	github.com/stretchr/testify v1.8.1
+	github.com/stretchr/testify v1.8.4
 	github.com/technosophos/moniker v0.0.0-20180509230615-a5dbd03a2245
 	github.com/unrolled/secure v0.0.0-20181221173256-0d6b5bb13069
 	go.etcd.io/etcd/api/v3 v3.5.9
