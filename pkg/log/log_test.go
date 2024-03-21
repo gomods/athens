@@ -14,6 +14,7 @@ import (
 type input struct {
 	name          string
 	cloudProvider string
+	format        string
 	level         logrus.Level
 	fields        logrus.Fields
 	logFunc       func(e Entry) time.Time
@@ -82,10 +83,10 @@ var testCases = []input{
 		output: `{"message":"warn message","severity":"warning","timestamp":"%v"}` + "\n",
 	},
 	{
-		name:          "default",
-		cloudProvider: "default",
-		level:         logrus.DebugLevel,
-		fields:        logrus.Fields{"xyz": "abc", "abc": "xyz"},
+		name:   "default json",
+		format: "json",
+		level:  logrus.DebugLevel,
+		fields: logrus.Fields{"xyz": "abc", "abc": "xyz"},
 		logFunc: func(e Entry) time.Time {
 			t := time.Now()
 			e.Warnf("warn message")
@@ -98,7 +99,7 @@ var testCases = []input{
 func TestCloudLogger(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			lggr := New(tc.cloudProvider, tc.level)
+			lggr := New(tc.cloudProvider, tc.level, "")
 			var buf bytes.Buffer
 			lggr.Out = &buf
 			e := lggr.WithFields(tc.fields)

@@ -78,6 +78,11 @@ ProtocolWorkers = 30
 # Env override: ATHENS_LOG_LEVEL
 LogLevel = "debug"
 
+# LogFormat determines the format that logs are output in. Defaults to json.
+# It is only used when CloudRuntime is set to none. Values can be "plain" or "json".
+# Env override: ATHENS_LOG_FORMAT
+LogFormat = "json"
+
 # CloudRuntime is the Cloud Provider on which the Proxy/Registry is running.
 # Currently available options are "GCP", or "none". Defaults to "none"
 # Env override: ATHENS_CLOUD_RUNTIME

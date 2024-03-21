@@ -258,6 +258,7 @@ func TestParseExampleConfig(t *testing.T) {
 	expConf := &Config{
 		GoEnv:           "development",
 		LogLevel:        "debug",
+		LogFormat:       "json",
 		GoBinary:        "go",
 		GoGetWorkers:    10,
 		ProtocolWorkers: 30,

@@ -42,7 +42,7 @@ func main() {
 		stdlog.Fatalf("Could not parse log level %q: %v", conf.LogLevel, err)
 	}
 
-	logger := athenslog.New(conf.CloudRuntime, logLvl)
+	logger := athenslog.New(conf.CloudRuntime, logLvl, conf.LogFormat)
 
 	// Turn standard logger output into logrus Errors.
 	logrusErrorWriter := logger.WriterLevel(logrus.ErrorLevel)
