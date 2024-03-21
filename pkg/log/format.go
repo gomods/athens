@@ -64,6 +64,10 @@ func sortFields(data logrus.Fields) []string {
 	return keys
 }
 
-func getDefaultFormatter() logrus.Formatter {
+func parseFormat(format string) logrus.Formatter {
+	if format == "plain" {
+		return &logrus.TextFormatter{}
+	}
+
 	return &logrus.JSONFormatter{}
 }

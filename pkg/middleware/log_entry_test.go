@@ -24,7 +24,7 @@ func TestLogContext(t *testing.T) {
 	r.HandleFunc("/test", h)
 
 	var buf bytes.Buffer
-	lggr := log.New("", logrus.DebugLevel)
+	lggr := log.New("", logrus.DebugLevel, "")
 	lggr.Formatter = &logrus.JSONFormatter{DisableTimestamp: true}
 	lggr.Out = &buf
 

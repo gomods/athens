@@ -10,10 +10,10 @@ import (
 	"strings"
 
 	"github.com/BurntSushi/toml"
+	"github.com/go-playground/validator/v10"
 	"github.com/gomods/athens/pkg/download/mode"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/kelseyhightower/envconfig"
-	"gopkg.in/go-playground/validator.v9"
 )
 
 const defaultConfigFile = "athens.toml"
@@ -28,7 +28,8 @@ type Config struct {
 	GoGetDir         string    `envconfig:"ATHENS_GOGET_DIR"`
 	ProtocolWorkers  int       `validate:"required" envconfig:"ATHENS_PROTOCOL_WORKERS"`
 	LogLevel         string    `validate:"required" envconfig:"ATHENS_LOG_LEVEL"`
-	CloudRuntime     string    `validate:"required" envconfig:"ATHENS_CLOUD_RUNTIME"`
+	LogFormat        string    `validate:"oneof='' 'json' 'plain'" envconfig:"ATHENS_LOG_FORMAT"`
+	CloudRuntime     string    `validate:"required_without=LogFormat" envconfig:"ATHENS_CLOUD_RUNTIME"`
 	EnablePprof      bool      `envconfig:"ATHENS_ENABLE_PPROF"`
 	PprofPort        string    `envconfig:"ATHENS_PPROF_PORT"`
 	FilterFile       string    `envconfig:"ATHENS_FILTER_FILE"`
