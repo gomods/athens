@@ -83,10 +83,24 @@ var testCases = []input{
 		output: `{"message":"warn message","severity":"warning","timestamp":"%v"}` + "\n",
 	},
 	{
-		name:   "default json",
-		format: "json",
-		level:  logrus.DebugLevel,
-		fields: logrus.Fields{"xyz": "abc", "abc": "xyz"},
+		name:          "default plain",
+		format:        "plain",
+		cloudProvider: "none",
+		level:         logrus.DebugLevel,
+		fields:        logrus.Fields{"xyz": "abc", "abc": "xyz"},
+		logFunc: func(e Entry) time.Time {
+			t := time.Now()
+			e.Warnf("warn message")
+			return t
+		},
+		output: `WARNING[%v]: warn message` + "\t" + `abc=xyz xyz=abc` + " \n",
+	},
+	{
+		name:          "default",
+		format:        "json",
+		cloudProvider: "none",
+		level:         logrus.DebugLevel,
+		fields:        logrus.Fields{"xyz": "abc", "abc": "xyz"},
 		logFunc: func(e Entry) time.Time {
 			t := time.Now()
 			e.Warnf("warn message")
@@ -99,7 +113,7 @@ var testCases = []input{
 func TestCloudLogger(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			lggr := New(tc.cloudProvider, tc.level, "")
+			lggr := New(tc.cloudProvider, tc.level, tc.format)
 			var buf bytes.Buffer
 			lggr.Out = &buf
 			e := lggr.WithFields(tc.fields)
@@ -107,7 +121,11 @@ func TestCloudLogger(t *testing.T) {
 			out := buf.String()
 			expected := tc.output
 			if strings.Contains(expected, "%v") {
-				expected = fmt.Sprintf(expected, entryTime.Format(time.RFC3339))
+				if tc.format == "plain" {
+					expected = fmt.Sprintf(expected, entryTime.Format(time.Kitchen))
+				} else {
+					expected = fmt.Sprintf(expected, entryTime.Format(time.RFC3339))
+				}
 			}
 
 			require.Equal(t, expected, out, "expected the logged entry to match the testCase output")
