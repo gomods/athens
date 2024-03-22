@@ -36,32 +36,17 @@ func NewStorage(conf *config.MongoConfig, timeout time.Duration) (*ModuleStore, 
 	}
 	ms := &ModuleStore{url: conf.URL, certPath: conf.CertPath, timeout: timeout, insecure: conf.InsecureConn}
 	client, err := ms.newClient()
+	if err != nil {
+		return nil, errors.E(op, err)
+	}
+
 	ms.client = client
 	ms.db = conf.DefaultDBName
 	ms.coll = conf.DefaultCollectionName
 
-	if err != nil {
-		return nil, errors.E(op, err)
-	}
-
-	_, err = ms.connect()
-
-	if err != nil {
-		return nil, errors.E(op, err)
-	}
+	_ = ms.initDatabase()
 
 	return ms, nil
-}
-
-func (s *ModuleStore) connect() (*mongo.Collection, error) {
-	const op errors.Op = "mongo.connect"
-
-	err := s.client.Connect(context.Background())
-	if err != nil {
-		return nil, errors.E(op, err)
-	}
-
-	return s.initDatabase(), nil
 }
 
 func (s *ModuleStore) initDatabase() *mongo.Collection {
@@ -122,7 +107,7 @@ func (s *ModuleStore) newClient() (*mongo.Client, error) {
 		clientOptions = clientOptions.SetTLSConfig(tlsConfig)
 	}
 	clientOptions = clientOptions.SetConnectTimeout(s.timeout)
-	client, err := mongo.NewClient(clientOptions)
+	client, err := mongo.Connect(context.Background(), clientOptions)
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
