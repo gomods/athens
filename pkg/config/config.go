@@ -151,7 +151,7 @@ func defaultConfig() *Config {
 		GoGetWorkers:     10,
 		ProtocolWorkers:  30,
 		LogLevel:         "debug",
-		LogFormat:        "json",
+		LogFormat:        "plain",
 		CloudRuntime:     "none",
 		EnablePprof:      false,
 		PprofPort:        ":3001",

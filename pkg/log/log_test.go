@@ -97,6 +97,18 @@ var testCases = []input{
 	},
 	{
 		name:          "default",
+		cloudProvider: "none",
+		level:         logrus.DebugLevel,
+		fields:        logrus.Fields{"xyz": "abc", "abc": "xyz"},
+		logFunc: func(e Entry) time.Time {
+			t := time.Now()
+			e.Warnf("warn message")
+			return t
+		},
+		output: `WARNING[%v]: warn message` + "\t" + `abc=xyz xyz=abc` + " \n",
+	},
+	{
+		name:          "default json",
 		format:        "json",
 		cloudProvider: "none",
 		level:         logrus.DebugLevel,
@@ -121,7 +133,7 @@ func TestCloudLogger(t *testing.T) {
 			out := buf.String()
 			expected := tc.output
 			if strings.Contains(expected, "%v") {
-				if tc.format == "plain" {
+				if tc.format == "plain" || (tc.format == "" && (tc.cloudProvider == "none" || tc.cloudProvider == "")) {
 					expected = fmt.Sprintf(expected, entryTime.Format(time.Kitchen))
 				} else {
 					expected = fmt.Sprintf(expected, entryTime.Format(time.RFC3339))
