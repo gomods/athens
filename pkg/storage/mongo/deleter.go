@@ -8,7 +8,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo/gridfs"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"go.mongodb.org/mongo-driver/x/bsonx"
 )
 
 // Delete removes a specific version of a module.
@@ -31,18 +30,23 @@ func (s *ModuleStore) Delete(ctx context.Context, module, version string) error 
 		return errors.E(op, errors.M(module), errors.V(version), errors.KindNotFound)
 	}
 
-	filter := bsonx.Doc{}
-	filter = filter.Set("filename", bsonx.String(s.gridFileName(module, version)))
+	filter := bson.D{bson.E{Key: "filename", Value: s.gridFileName(module, version)}}
+
 	cursor, err := bucket.Find(filter)
 	if err != nil {
 		return errors.E(op, errors.M(module), errors.V(version), err)
 	}
 
-	var x bsonx.Doc
+	var x bson.D
 	for cursor.Next(ctx) {
 		_ = cursor.Decode(&x)
 	}
-	if err = bucket.Delete(x.Lookup("_id").ObjectID()); err != nil {
+	b, err := bson.Marshal(x)
+	if err != nil {
+		return errors.E(op, errors.M(module), errors.V(version), err)
+	}
+
+	if err = bucket.Delete(bson.Raw(b).Lookup("_id").ObjectID()); err != nil {
 		kind := errors.KindUnexpected
 		if errors.IsErr(err, gridfs.ErrFileNotFound) {
 			kind = errors.KindNotFound
