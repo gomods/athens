@@ -41,12 +41,6 @@ function doInstallConfig
   fi
   sudo mkdir -p /etc/athens
   sudo install -v -o root -g root -m 644 config.toml /etc/athens
-
-  # if storage is on disk, this is where the database goes (see scripts/service/athens.service)
-  ATHENS_DISK_STORAGE_ROOT=/var/run/athens
-  sudo mkdir -p $ATHENS_DISK_STORAGE_ROOT
-  sudo chown www-data $ATHENS_DISK_STORAGE_ROOT
-  sudo chgrp www-data $ATHENS_DISK_STORAGE_ROOT
 }
 
 # doInstallBinary copies the Athens binary to /usr/local/bin with the necessary settings.
@@ -69,6 +63,9 @@ function doInstallBinary
 # doInstallSystemd sets up the SystemD service unit.
 function doInstallSystemd
 {
+  local rootPath=$(sed -nr 's/(RootPath) = (".*")/\2/p' /etc/athens/config.toml | xargs)
+  sed -i "/ReadWritePaths/ s|=.*|=$rootPath|" scripts/service/athens.service
+
   sudo install -v -o root -g root -m 644 scripts/service/athens.service /etc/systemd/system
   sudo systemctl daemon-reload
   sudo systemctl enable athens
