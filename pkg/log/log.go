@@ -19,8 +19,6 @@ func New(cloudProvider string, level logrus.Level, format string) *Logger {
 	switch cloudProvider {
 	case "GCP":
 		l.Formatter = getGCPFormatter()
-	case "none":
-		l.Formatter = getDevFormatter()
 	default:
 		l.Formatter = parseFormat(format)
 	}

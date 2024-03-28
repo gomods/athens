@@ -65,9 +65,9 @@ func sortFields(data logrus.Fields) []string {
 }
 
 func parseFormat(format string) logrus.Formatter {
-	if format == "plain" {
-		return &logrus.TextFormatter{}
+	if format == "json" {
+		return &logrus.JSONFormatter{}
 	}
 
-	return &logrus.JSONFormatter{}
+	return getDevFormatter()
 }
