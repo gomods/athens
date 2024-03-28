@@ -4,7 +4,7 @@ description: Information about Athens' Docker images
 weight: 1
 ---
 
-Whether setting Athens up using [Kubernetes](install/install-on-kubernetes/) or using the [Walkthrough](/Walkthrough), you'll most likely be using one of the images that the Athens project produces. This document details what images are available, and has a recap from the Walkthrough of how to use them on their own.
+Whether setting Athens up using [Kubernetes](/install/install-on-kubernetes/) or using the [Walkthrough](/Walkthrough), you'll most likely be using one of the images that the Athens project produces. This document details what images are available, and has a recap from the Walkthrough of how to use them on their own.
 
 ---
 

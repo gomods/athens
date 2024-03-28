@@ -59,7 +59,7 @@ download "github.com/pkg/*" {
 
 The first two lines describe the _default_ behavior for all modules. This behavior is overridden for select module groups below. In this case, the default behavior is:
 
-- Immediatley redirect all requests to `https://proxy.golang.org`
+- Immediately redirect all requests to `https://proxy.golang.org`
 - In the background, download the module from the version control system (VCS) and store it
 
 The rest of the file contains `download` blocks. These override the default behavior for specific groups of modules.
