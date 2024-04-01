@@ -52,7 +52,7 @@ If you'd like to help us tackle some of the technical / code challenges and you'
 
 >If you're not familiar with the standard GitHub contribution process, which Athens mostly follows, please see [this section of our documentation](https://docs.gomods.io/contributing/new/) to learn how to contribute. You can also take advantage of [@bketelsen](https://github.com/bketelsen)'s [great video](https://www.youtube.com/watch?v=bgSDcTyysRc) on how to contribute code. The information in these documents and videos will help you not only with this project, but can also help you contribute to many other projects on GitHub.
 
-If you decide to to contribute but aren't sure what to work on, we have a well maintained [list of good first issues](https://github.com/gomods/athens/contribute) that you should look at. If you find one that you would like to work on, please post a comment saying "I want to work on this", and then it's all yours to begin working on.
+If you decide to contribute but aren't sure what to work on, we have a well maintained [list of good first issues](https://github.com/gomods/athens/contribute) that you should look at. If you find one that you would like to work on, please post a comment saying "I want to work on this", and then it's all yours to begin working on.
 
 >We do recommend that you choose one of the issues on the above list, but you may also consider a different one from our [entire list](https://github.com/gomods/athens/issues). Many of the issues on that list are more complex and challenging.
 
