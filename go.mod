@@ -27,7 +27,7 @@ require (
 	github.com/lib/pq v1.10.9
 	github.com/minio/minio-go/v6 v6.0.57
 	github.com/mitchellh/go-homedir v1.1.0
-	github.com/sirupsen/logrus v1.7.0
+	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/afero v1.8.2
 	github.com/stretchr/testify v1.9.0
 	github.com/technosophos/moniker v0.0.0-20180509230615-a5dbd03a2245
