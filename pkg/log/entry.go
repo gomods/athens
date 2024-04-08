@@ -36,7 +36,7 @@ func (e *entry) WithFields(fields map[string]any) Entry {
 
 func (e *entry) SystemErr(err error) {
 	var athensErr errors.Error
-	if !errors.IsErr(err, athensErr) {
+	if !errors.AsErr(err, &athensErr) {
 		e.Error(err)
 		return
 	}
