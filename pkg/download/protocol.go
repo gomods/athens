@@ -298,7 +298,7 @@ func union(list1, list2 []string) []string {
 
 func copyContextWithCustomTimeout(ctx context.Context, timeout time.Duration) (context.Context, context.CancelFunc) {
 	ctxCopy, cancel := context.WithTimeout(context.Background(), timeout)
-	requestid.SetInContext(ctxCopy, requestid.FromContext(ctx))
-	log.SetEntryInContext(ctxCopy, log.EntryFromContext(ctx))
+	ctxCopy = requestid.SetInContext(ctxCopy, requestid.FromContext(ctx))
+	ctxCopy = log.SetEntryInContext(ctxCopy, log.EntryFromContext(ctx))
 	return ctxCopy, cancel
 }

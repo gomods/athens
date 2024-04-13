@@ -10,7 +10,6 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/gridfs"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"go.mongodb.org/mongo-driver/x/bsonx"
 )
 
 // Info implements storage.Getter.
@@ -68,12 +67,16 @@ func (s *ModuleStore) Zip(ctx context.Context, module, vsn string) (storage.Size
 	if res.Err() != nil {
 		return nil, errors.E(op, res.Err())
 	}
-	var m bsonx.Doc
+	var m bson.M
 	err = res.Decode(&m)
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
-	size, _ := m.Lookup("length").Int64OK()
+	b, err := bson.Marshal(m)
+	if err != nil {
+		return nil, errors.E(op, err)
+	}
+	size, _ := bson.Raw(b).Lookup("length").Int64OK()
 	return storage.NewSizer(dStream, size), nil
 }
 

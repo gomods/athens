@@ -346,7 +346,7 @@ It assumes that you already have the following:
 ## External Storage
 
 External storage lets Athens connect to your own implementation of a storage backend. 
-All you have to do is implement the (storage.Backend)[https://github.com/gomods/athens/blob/main/pkg/storage/backend.go#L4] interface and run it behind an http server. 
+All you have to do is implement the [storage.Backend](https://github.com/gomods/athens/blob/main/pkg/storage/backend.go#L4) interface and run it behind an http server. 
 
 Once you implement the backend server, you must then configure Athens to use that storage backend as such:
 
