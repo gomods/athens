@@ -2,10 +2,11 @@ package s3
 
 import (
 	"context"
+	"github.com/aws/aws-sdk-go-v2/service/s3/types"
 	"strings"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/observ"
 )
@@ -23,7 +24,7 @@ func (s *Storage) List(ctx context.Context, module string) ([]string, error) {
 		Prefix: aws.String(modulePrefix),
 	}
 
-	loo, err := s.s3API.ListObjectsWithContext(ctx, lsParams)
+	loo, err := s.s3API.ListObjects(ctx, lsParams)
 	if err != nil {
 		return nil, errors.E(op, err, errors.M(module))
 	}
@@ -31,7 +32,7 @@ func (s *Storage) List(ctx context.Context, module string) ([]string, error) {
 	return extractVersions(loo.Contents), nil
 }
 
-func extractVersions(objects []*s3.Object) []string {
+func extractVersions(objects []types.Object) []string {
 	var versions []string
 
 	for _, o := range objects {

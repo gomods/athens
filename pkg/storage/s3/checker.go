@@ -2,11 +2,11 @@ package s3
 
 import (
 	"context"
+	"github.com/aws/aws-sdk-go/aws/awserr"
 	"sync"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/awserr"
-	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/observ"
@@ -28,7 +28,7 @@ func (s *Storage) Exists(ctx context.Context, module, version string) (bool, err
 		wg.Add(1)
 		go func(file string) {
 			defer wg.Done()
-			_, err := s.s3API.HeadObjectWithContext(
+			_, err := s.s3API.HeadObject(
 				cancelingCtx,
 				&s3.HeadObjectInput{
 					Bucket: aws.String(s.bucket),
