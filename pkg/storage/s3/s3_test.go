@@ -55,11 +55,6 @@ func (s *Storage) createBucket() error {
 	if _, err := s.s3API.CreateBucket(ctx, &s3.CreateBucketInput{Bucket: aws.String(s.bucket)}); err != nil {
 		var aerr smithy.APIError
 
-		// aerr, ok := err.(awserr.Error)
-		// if !ok {
-		// 	return err
-		// }
-
 		if errors.AsErr(err, &aerr) {
 			switch aerr.(type) {
 			case *types.BucketAlreadyOwnedByYou:
@@ -87,7 +82,6 @@ func getStorage(t testing.TB) *Storage {
 
 	options := func(conf *aws.Config) {
 		conf.BaseEndpoint = aws.String(url)
-		// conf.DisableSSL = aws.Bool(true)
 	}
 
 	backend, err := New(

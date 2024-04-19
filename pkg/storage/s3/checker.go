@@ -2,7 +2,7 @@ package s3
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go/aws/awserr"
+	"github.com/aws/smithy-go"
 	"sync"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -44,8 +44,8 @@ func (s *Storage) Exists(ctx context.Context, module, version string) (bool, err
 		if err == nil {
 			continue
 		}
-		var aerr awserr.Error
-		if errors.AsErr(err, &aerr) && aerr.Code() == "NotFound" {
+		var aerr smithy.APIError
+		if errors.AsErr(err, &aerr) && aerr.ErrorCode() == "NotFound" {
 			err = nil
 			exists = false
 		}
