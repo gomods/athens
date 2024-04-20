@@ -13,8 +13,10 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-const testOp athenserr.Op = "vcsLister.List"
-const testModName = "happy tags"
+const (
+	testOp      athenserr.Op = "vcsLister.List"
+	testModName              = "happy tags"
+)
 
 type listMergeTest struct {
 	name        string

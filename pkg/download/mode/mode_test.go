@@ -84,7 +84,8 @@ var testCases = []struct {
 				{
 					Pattern:     "github.com/gomods/*",
 					Mode:        AsyncRedirect,
-					DownloadURL: "gomods.io"},
+					DownloadURL: "gomods.io",
+				},
 			},
 		},
 		input:        "github.com/gomods/athens",

@@ -3,8 +3,9 @@ package s3
 import (
 	"bytes"
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"io"
+
+	"github.com/aws/aws-sdk-go-v2/service/s3"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/gomods/athens/pkg/errors"

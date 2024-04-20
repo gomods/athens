@@ -3,6 +3,8 @@ package s3
 import (
 	"context"
 	"fmt"
+	"time"
+
 	"github.com/aws/aws-sdk-go-v2/aws"
 	awscfg "github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/credentials"
@@ -11,7 +13,6 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/errors"
-	"time"
 )
 
 // Storage implements (./pkg/storage).Backend and
@@ -36,7 +37,6 @@ func New(s3Conf *config.S3Config, timeout time.Duration, options ...func(*aws.Co
 	const op errors.Op = "s3.New"
 
 	awsConfig, err := awscfg.LoadDefaultConfig(context.TODO(), awscfg.WithRegion(s3Conf.Region))
-
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
@@ -50,13 +50,13 @@ func New(s3Conf *config.S3Config, timeout time.Duration, options ...func(*aws.Co
 	}
 
 	if !s3Conf.UseDefaultConfiguration {
-		//credProviders := defaults.CredProviders(awsConfig, defaults.Handlers())
+		// credProviders := defaults.CredProviders(awsConfig, defaults.Handlers())
 		endpointCreds := []aws.CredentialsProvider{
 			endpointcreds.New(endpointFrom(s3Conf.CredentialsEndpoint, s3Conf.AwsContainerCredentialsRelativeURI)),
 			credentials.NewStaticCredentialsProvider(s3Conf.Key, s3Conf.Secret, s3Conf.Token),
 		}
 
-		//credProviders = append(endpointCreds, credProviders...)
+		// credProviders = append(endpointCreds, credProviders...)
 		awsConfig.Credentials = newChainCredentials(endpointCreds...)
 	}
 
@@ -82,7 +82,7 @@ func endpointFrom(credentialsEndpoint, relativeURI string) string {
 	return credentialsEndpoint + relativeURI
 }
 
-// Based on old credentials.NewChainCredentials in v1
+// newChainCredentials is based on old credentials.NewChainCredentials in v1.
 func newChainCredentials(providers ...aws.CredentialsProvider) aws.CredentialsProvider {
 	return aws.NewCredentialsCache(
 		aws.CredentialsProviderFunc(func(ctx context.Context) (aws.Credentials, error) {

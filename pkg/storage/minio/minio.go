@@ -55,7 +55,7 @@ func NewStorage(conf *config.MinioConfig, timeout time.Duration) (storage.Backen
 	return &storageImpl{minioClient, minioCore, bucketName}, nil
 }
 
-// TrimHTTP trims "http://" or "https://" prefix from input string
+// TrimHTTP trims "http://" or "https://" prefix from input string.
 func TrimHTTP(s string) string {
 	s = strings.TrimPrefix(s, "http://")
 	s = strings.TrimPrefix(s, "https://")

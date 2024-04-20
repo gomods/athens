@@ -48,7 +48,7 @@ func TestProxyRoutes(t *testing.T) {
 			tmp, err := template.New("home").Parse(homepage)
 			assert.NoError(t, err)
 
-			var templateData = make(map[string]string)
+			templateData := make(map[string]string)
 
 			templateData["Host"] = req.Host
 
@@ -109,5 +109,4 @@ func TestProxyRoutes(t *testing.T) {
 			tc.test(t, req, w.Result())
 		})
 	}
-
 }

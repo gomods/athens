@@ -3,12 +3,13 @@ package mongo
 import (
 	"bytes"
 	"context"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 	"io"
 	"os"
 	"testing"
+
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/errors"
@@ -145,6 +146,7 @@ func TestQueryKindUnexpectedErrorCases(t *testing.T) {
 		require.Equal(t, errors.KindUnexpected, errors.Kind(err))
 	}
 }
+
 func TestNewStorageWithDefaultOverrides(t *testing.T) {
 	url := os.Getenv("ATHENS_MONGO_STORAGE_URL")
 

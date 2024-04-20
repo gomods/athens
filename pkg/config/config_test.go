@@ -16,7 +16,7 @@ import (
 
 func testConfigFile(t *testing.T) (testConfigFile string) {
 	testConfigFile = filepath.Join("..", "..", "config.dev.toml")
-	if err := os.Chmod(testConfigFile, 0700); err != nil {
+	if err := os.Chmod(testConfigFile, 0o700); err != nil {
 		t.Fatalf("%s\n", err)
 	}
 	return testConfigFile
@@ -305,7 +305,6 @@ func TestParseExampleConfig(t *testing.T) {
 }
 
 func getEnvMap(config *Config) map[string]string {
-
 	envVars := map[string]string{
 		"GO_ENV":                  config.GoEnv,
 		"GO_BINARY_PATH":          config.GoBinary,
@@ -414,7 +413,7 @@ func Test_checkFilePerms(t *testing.T) {
 	}
 
 	incorrectPerms := []os.FileMode{0o777, 0o610, 0o660}
-	var incorrectFiles = make([]string, len(incorrectPerms))
+	incorrectFiles := make([]string, len(incorrectPerms))
 
 	for i := range incorrectPerms {
 		f, err := tempFile(incorrectPerms[i])
@@ -426,7 +425,7 @@ func Test_checkFilePerms(t *testing.T) {
 	}
 
 	correctPerms := []os.FileMode{0o600, 0o400, 0o644}
-	var correctFiles = make([]string, len(correctPerms))
+	correctFiles := make([]string, len(correctPerms))
 
 	for i := range correctPerms {
 		f, err := tempFile(correctPerms[i])
