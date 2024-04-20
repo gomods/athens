@@ -2,10 +2,12 @@ package actions
 
 import (
 	"encoding/json"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"text/template"
 
 	"github.com/gomods/athens/pkg/build"
 	"github.com/gomods/athens/pkg/config"
@@ -20,7 +22,7 @@ type routeTest struct {
 	method string
 	path   string
 	body   string
-	test   func(t *testing.T, resp *http.Response)
+	test   func(t *testing.T, req *http.Request, resp *http.Response)
 }
 
 func TestProxyRoutes(t *testing.T) {
@@ -39,19 +41,43 @@ func TestProxyRoutes(t *testing.T) {
 	baseURL := "https://athens.azurefd.net" + c.PathPrefix
 
 	testCases := []routeTest{
-		{"GET", "/", "", func(t *testing.T, resp *http.Response) {
+		{"GET", "/", "", func(t *testing.T, req *http.Request, resp *http.Response) {
 			assert.Equal(t, http.StatusOK, resp.StatusCode)
+			body, err := io.ReadAll(resp.Body)
+			require.NoError(t, err)
+			tmp, err := template.New("home").Parse(homepage)
+			assert.NoError(t, err)
+
+			var templateData = make(map[string]string)
+
+			templateData["Host"] = req.Host
+
+			if !strings.HasPrefix(templateData["Host"], "http://") && !strings.HasPrefix(templateData["Host"], "https://") {
+				if req.TLS != nil {
+					templateData["Host"] = "https://" + templateData["Host"]
+				} else {
+					templateData["Host"] = "http://" + templateData["Host"]
+				}
+			}
+
+			templateData["NoSumPatterns"] = strings.Join(c.NoSumPatterns, ",")
+
+			var expected strings.Builder
+			err = tmp.ExecuteTemplate(&expected, "home", templateData)
+			require.NoError(t, err)
+
+			assert.Equal(t, expected.String(), string(body))
 		}},
-		{"GET", "/badz", "", func(t *testing.T, resp *http.Response) {
+		{"GET", "/badz", "", func(t *testing.T, req *http.Request, resp *http.Response) {
 			assert.Equal(t, http.StatusNotFound, resp.StatusCode)
 		}},
-		{"GET", "/healthz", "", func(t *testing.T, resp *http.Response) {
+		{"GET", "/healthz", "", func(t *testing.T, req *http.Request, resp *http.Response) {
 			assert.Equal(t, http.StatusOK, resp.StatusCode)
 		}},
-		{"GET", "/readyz", "", func(t *testing.T, resp *http.Response) {
+		{"GET", "/readyz", "", func(t *testing.T, req *http.Request, resp *http.Response) {
 			assert.Equal(t, http.StatusOK, resp.StatusCode)
 		}},
-		{"GET", "/version", "", func(t *testing.T, resp *http.Response) {
+		{"GET", "/version", "", func(t *testing.T, req *http.Request, resp *http.Response) {
 			assert.Equal(t, http.StatusOK, resp.StatusCode)
 			details := build.Details{}
 			err := json.NewDecoder(resp.Body).Decode(&details)
@@ -60,13 +86,13 @@ func TestProxyRoutes(t *testing.T) {
 		}},
 
 		// Default sumdb is sum.golang.org
-		{"GET", "/sumdb/sum.golang.org/supported", "", func(t *testing.T, resp *http.Response) {
+		{"GET", "/sumdb/sum.golang.org/supported", "", func(t *testing.T, req *http.Request, resp *http.Response) {
 			assert.Equal(t, http.StatusOK, resp.StatusCode)
 		}},
-		{"GET", "/sumdb/sum.rust-lang.org/supported", "", func(t *testing.T, resp *http.Response) {
+		{"GET", "/sumdb/sum.rust-lang.org/supported", "", func(t *testing.T, req *http.Request, resp *http.Response) {
 			assert.Equal(t, http.StatusNotFound, resp.StatusCode)
 		}},
-		{"GET", "/sumdb/sum.golang.org/lookup/github.com/gomods/athens", "", func(t *testing.T, resp *http.Response) {
+		{"GET", "/sumdb/sum.golang.org/lookup/github.com/gomods/athens", "", func(t *testing.T, req *http.Request, resp *http.Response) {
 			assert.Equal(t, http.StatusForbidden, resp.StatusCode)
 		}},
 	}
@@ -80,7 +106,7 @@ func TestProxyRoutes(t *testing.T) {
 		t.Run(req.RequestURI, func(t *testing.T) {
 			w := httptest.NewRecorder()
 			r.ServeHTTP(w, req)
-			tc.test(t, w.Result())
+			tc.test(t, req, w.Result())
 		})
 	}
 
