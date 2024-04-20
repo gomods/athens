@@ -1,8 +1,10 @@
 package actions
 
 import (
+	"errors"
 	"html/template"
 	"net/http"
+	"os"
 	"strings"
 
 	"github.com/gomods/athens/pkg/config"
@@ -85,55 +87,57 @@ const homepage = `<!DOCTYPE html>
 `
 
 func proxyHomeHandler(c *config.Config) http.HandlerFunc {
-	if c.ShowInstructions {
-		return func(w http.ResponseWriter, r *http.Request) {
-			lggr := log.EntryFromContext(r.Context())
-
-			templateData := make(map[string]string)
-
-			// determine the host. If the proxy host is set, use that. Otherwise, use the request host, lastly use localhost + port
-			if c.ProxyHost != "" {
-				templateData["Host"] = c.ProxyHost
-			} else if r.Host != "" {
-				templateData["Host"] = r.Host
-			} else {
-				templateData["Host"] = "localhost" + ":" + c.Port
-			}
-
-			// if the host does not have a scheme, add one based on the request
-			if !strings.HasPrefix(templateData["Host"], "http://") && !strings.HasPrefix(templateData["Host"], "https://") {
-				if r.TLS != nil {
-					templateData["Host"] = "https://" + templateData["Host"]
-				} else {
-					templateData["Host"] = "http://" + templateData["Host"]
-				}
-			}
-
-			templateData["NoSumPatterns"] = ""
-
-			// collapse the NoSumPatterns into a comma separated list
-			for i, pattern := range c.NoSumPatterns {
-				if i == len(c.NoSumPatterns)-1 {
-					templateData["NoSumPatterns"] += pattern
-					continue
-				}
-
-				templateData["NoSumPatterns"] += pattern + ","
-			}
-
-			tmp, err := template.New("home").Parse(homepage)
-			if err != nil {
-				lggr.SystemErr(err)
-				w.WriteHeader(http.StatusInternalServerError)
-			}
-
-			w.Header().Add("Content-Type", "text/html")
-			w.WriteHeader(http.StatusOK)
-			tmp.ExecuteTemplate(w, "home", templateData)
-		}
-	}
-
 	return func(w http.ResponseWriter, r *http.Request) {
-		_, _ = w.Write([]byte(`"Welcome to The Athens Proxy"`))
+		var templateContents string
+
+		lggr := log.EntryFromContext(r.Context())
+
+		templateData := make(map[string]string)
+
+		// load the template from the file system if it exists, otherwise revert to default
+		rawTemplateFileContents, err := os.ReadFile(c.HomeTemplatePath)
+		if errors.Is(err, os.ErrNotExist) {
+			templateContents = homepage
+		} else if err != nil {
+			// this is some other error, log it and revert to default
+			lggr.SystemErr(err)
+			templateContents = homepage
+		} else {
+			templateContents = string(rawTemplateFileContents)
+		}
+
+		// This should be correct in most cases. If it is not, users can supply their own template
+		templateData["Host"] = r.Host
+
+		// if the host does not have a scheme, add one based on the request
+		if !strings.HasPrefix(templateData["Host"], "http://") && !strings.HasPrefix(templateData["Host"], "https://") {
+			if r.TLS != nil {
+				templateData["Host"] = "https://" + templateData["Host"]
+			} else {
+				templateData["Host"] = "http://" + templateData["Host"]
+			}
+		}
+
+		templateData["NoSumPatterns"] = ""
+
+		// collapse the NoSumPatterns into a comma separated list
+		for i, pattern := range c.NoSumPatterns {
+			if i == len(c.NoSumPatterns)-1 {
+				templateData["NoSumPatterns"] += pattern
+				continue
+			}
+
+			templateData["NoSumPatterns"] += pattern + ","
+		}
+
+		tmp, err := template.New("home").Parse(templateContents)
+		if err != nil {
+			lggr.SystemErr(err)
+			w.WriteHeader(http.StatusInternalServerError)
+		}
+
+		w.Header().Add("Content-Type", "text/html")
+		w.WriteHeader(http.StatusOK)
+		tmp.ExecuteTemplate(w, "home", templateData)
 	}
 }

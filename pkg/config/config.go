@@ -42,8 +42,7 @@ type Config struct {
 	UnixSocket       string    `envconfig:"ATHENS_UNIX_SOCKET"`
 	BasicAuthUser    string    `envconfig:"BASIC_AUTH_USER"`
 	BasicAuthPass    string    `envconfig:"BASIC_AUTH_PASS"`
-	ShowInstructions bool      `envconfig:"ATHENS_SHOW_INSTRUCTIONS"`
-	ProxyHost        string    `envconfig:"ATHENS_PROXY_HOST"`
+	HomeTemplatePath string    `envconfig:"ATHENS_HOME_TEMPLATE_PATH"`
 	ForceSSL         bool      `envconfig:"PROXY_FORCE_SSL"`
 	ValidatorHook    string    `envconfig:"ATHENS_PROXY_VALIDATOR"`
 	PathPrefix       string    `envconfig:"ATHENS_PATH_PREFIX"`
@@ -159,10 +158,9 @@ func defaultConfig() *Config {
 		PprofPort:        ":3001",
 		StatsExporter:    "prometheus",
 		TimeoutConf:      TimeoutConf{Timeout: 300},
+		HomeTemplatePath: "/var/lib/athens/home.html",
 		StorageType:      "memory",
 		Port:             ":3000",
-		ShowInstructions: false,
-		ProxyHost:        "",
 		SingleFlightType: "memory",
 		GlobalEndpoint:   "http://localhost:3001",
 		TraceExporterURL: "http://localhost:14268",

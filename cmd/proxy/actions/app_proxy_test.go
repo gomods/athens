@@ -44,7 +44,7 @@ func TestProxyRoutes(t *testing.T) {
 			assert.Equal(t, http.StatusOK, resp.StatusCode)
 			body, err := io.ReadAll(resp.Body)
 			require.NoError(t, err)
-			assert.Equal(t, `"Welcome to The Athens Proxy"`, string(body))
+			assert.Equal(t, homepage, string(body))
 		}},
 		{"GET", "/badz", "", func(t *testing.T, resp *http.Response) {
 			assert.Equal(t, http.StatusNotFound, resp.StatusCode)
