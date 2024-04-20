@@ -108,6 +108,7 @@ func TestEnvOverrides(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Env override failed: %v", err)
 	}
+
 	compareConfigs(conf, expConf, t, Storage{}, SingleFlight{})
 }
 
