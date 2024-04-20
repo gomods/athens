@@ -1,17 +1,31 @@
-package actions
+---
+title: Home template configuration
+description: How to customize the home template
+weight: 8
+---
 
-import (
-	"errors"
-	"html/template"
-	"net/http"
-	"os"
-	"strings"
+As of v0.14.0 Athens ships with a default, minimal HTML home page that advises users on how to connect to the proxy. It factors in whether `GoNoSumPatterns` is configured, and attempts
+to build configuration for `GO_PROXY`. It relies on the users request Host header (on HTTP 1.1) or the Authority header (on HTTP 2) as well as whether the request was over TLS to advise 
+on configuring `GO_PROXY`. Lastly, the homepage provides a quick guide on how users can leverage the Athens API.
 
-	"github.com/gomods/athens/pkg/config"
-	"github.com/gomods/athens/pkg/log"
-)
+Of course, not all instructions will be this simple. Some installations may be reachable at different addresses in CI than for desktop users. In this case, and others where the default
+home page does not make sense it is possible to override the template.
 
-const homepage = `<!DOCTYPE html>
+Do so by configuring `HomeTemplatePath` via the config or `ATHENS_HOME_TEMPLATE_PATH` to a location on disk with a Go HTML template or placing a template file at `/var/lib/athens/home.html`.
+
+Athens automatically injects the following variables in templates:
+
+| Setting         | Source |
+| :------         | :----- |
+| `Host`          | Built from the request Host (HTTP1) or Authority (HTTP2) header and presence of TLS. Includes ports. |
+| `NoSumPatterns` | Comes directly from the configuration. |
+
+Using these values is done by wrapping them in bracers with a dot prepended. Example: `{{ .Host }}`
+
+For more advanced formatting read more about [Go HTML templates](https://pkg.go.dev/html/template).
+
+```html
+<!DOCTYPE html>
 <html>
 <head>
 	<title>Athens</title>
@@ -84,54 +98,4 @@ const homepage = `<!DOCTYPE html>
 
 </body>
 </html>
-`
-
-func proxyHomeHandler(c *config.Config) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		lggr := log.EntryFromContext(r.Context())
-
-		templateData := make(map[string]string)
-
-		templateContents := homepage
-
-		// load the template from the file system if it exists, otherwise revert to default
-		rawTemplateFileContents, err := os.ReadFile(c.HomeTemplatePath)
-		if err != nil {
-			if !errors.Is(err, os.ErrNotExist) {
-				// this is some other error, log it and revert to default
-				lggr.SystemErr(err)
-			}
-		} else {
-			templateContents = string(rawTemplateFileContents)
-		}
-
-		// This should be correct in most cases. If it is not, users can supply their own template
-		templateData["Host"] = r.Host
-
-		// if the host does not have a scheme, add one based on the request
-		if !strings.HasPrefix(templateData["Host"], "http://") && !strings.HasPrefix(templateData["Host"], "https://") {
-			if r.TLS != nil {
-				templateData["Host"] = "https://" + templateData["Host"]
-			} else {
-				templateData["Host"] = "http://" + templateData["Host"]
-			}
-		}
-
-		templateData["NoSumPatterns"] = strings.Join(c.NoSumPatterns, ",")
-
-		tmp, err := template.New("home").Parse(templateContents)
-		if err != nil {
-			lggr.SystemErr(err)
-			w.WriteHeader(http.StatusInternalServerError)
-		}
-
-		w.Header().Add("Content-Type", "text/html")
-		w.WriteHeader(http.StatusOK)
-
-		err = tmp.ExecuteTemplate(w, "home", templateData)
-		if err != nil {
-			lggr.SystemErr(err)
-			w.WriteHeader(http.StatusInternalServerError)
-		}
-	}
-}
+```

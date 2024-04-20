@@ -14,8 +14,6 @@ Nice=5
 User=www-data
 Group=www-data
 
-Environment=ATHENS_DISK_STORAGE_ROOT=/var/run/athens
-
 ; The full path and the arguments of the command to be executed to start the process.
 ExecStart=/usr/local/bin/athens -config_file=/etc/athens/config.toml
 
