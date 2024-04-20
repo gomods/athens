@@ -118,17 +118,7 @@ func proxyHomeHandler(c *config.Config) http.HandlerFunc {
 			}
 		}
 
-		templateData["NoSumPatterns"] = ""
-
-		// collapse the NoSumPatterns into a comma separated list
-		for i, pattern := range c.NoSumPatterns {
-			if i == len(c.NoSumPatterns)-1 {
-				templateData["NoSumPatterns"] += pattern
-				continue
-			}
-
-			templateData["NoSumPatterns"] += pattern + ","
-		}
+		templateData["NoSumPatterns"] = strings.Join(c.NoSumPatterns, ",")
 
 		tmp, err := template.New("home").Parse(templateContents)
 		if err != nil {
@@ -138,6 +128,11 @@ func proxyHomeHandler(c *config.Config) http.HandlerFunc {
 
 		w.Header().Add("Content-Type", "text/html")
 		w.WriteHeader(http.StatusOK)
-		tmp.ExecuteTemplate(w, "home", templateData)
+
+		err = tmp.ExecuteTemplate(w, "home", templateData)
+		if err != nil {
+			lggr.SystemErr(err)
+			w.WriteHeader(http.StatusInternalServerError)
+		}
 	}
 }
