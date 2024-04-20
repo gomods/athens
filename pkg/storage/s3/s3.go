@@ -24,7 +24,6 @@ import (
 // - AWS_SESSION_TOKEN		- [optional]
 // - AWS_FORCE_PATH_STYLE	- [optional]
 // For information how to get your keyId and access key turn to official aws docs: https://docs.aws.amazon.com/sdk-for-go/v1/developer-guide/setting-up.html.
-
 type Storage struct {
 	bucket   string
 	uploader *manager.Uploader
