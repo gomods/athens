@@ -24,7 +24,7 @@ services:
     command: ["./scripts/test_unit.sh"]
     environment:
       - GO_ENV=test
-      - ATHENS_MINIO_ENDPOINT=minio:9000
+      - ATHENS_MINIO_ENDPOINT=http://minio:9000
       - ATHENS_MONGO_STORAGE_URL=mongodb://mongo:27017
       - TIMEOUT=20 # in case the mongo dependency takes longer to start up
       - ATHENS_STORAGE_TYPE=mongo

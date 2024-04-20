@@ -30,7 +30,7 @@ jobs:
   build:
     env:
       ATHENS_MONGO_STORAGE_URL: mongodb://localhost:27017
-      ATHENS_MINIO_ENDPOINT: localhost:9000
+      ATHENS_MINIO_ENDPOINT: http://localhost:9000
       REDIS_TEST_ENDPOINT: localhost:6379
       REDIS_SENTINEL_TEST_ENDPOINT: localhost:26379
       REDIS_SENTINEL_TEST_MASTER_NAME: redis-1
