@@ -2,10 +2,10 @@ package config
 
 // Postgres config.
 type Postgres struct {
-	Host     string            `validate:"required" envconfig:"ATHENS_INDEX_POSTGRES_HOST"`
-	Port     int               `validate:"required" envconfig:"ATHENS_INDEX_POSTGRES_PORT"`
-	User     string            `validate:"required" envconfig:"ATHENS_INDEX_POSTGRES_USER"`
-	Password string            `validate:"" envconfig:"ATHENS_INDEX_POSTGRES_PASSWORD"`
-	Database string            `validate:"required" envconfig:"ATHENS_INDEX_POSTGRES_DATABASE"`
-	Params   map[string]string `validate:"required" envconfig:"ATHENS_INDEX_POSTGRES_PARAMS"`
+	Host     string            `envconfig:"ATHENS_INDEX_POSTGRES_HOST"     validate:"required"`
+	Port     int               `envconfig:"ATHENS_INDEX_POSTGRES_PORT"     validate:"required"`
+	User     string            `envconfig:"ATHENS_INDEX_POSTGRES_USER"     validate:"required"`
+	Password string            `envconfig:"ATHENS_INDEX_POSTGRES_PASSWORD" validate:""`
+	Database string            `envconfig:"ATHENS_INDEX_POSTGRES_DATABASE" validate:"required"`
+	Params   map[string]string `envconfig:"ATHENS_INDEX_POSTGRES_PARAMS"   validate:"required"`
 }
