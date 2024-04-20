@@ -96,13 +96,15 @@ func proxyHomeHandler(c *config.Config) http.HandlerFunc {
 
 		// load the template from the file system if it exists, otherwise revert to default
 		rawTemplateFileContents, err := os.ReadFile(c.HomeTemplatePath)
-		if errors.Is(err, os.ErrNotExist) {
+
+		switch {
+		case errors.Is(err, os.ErrNotExist):
 			templateContents = homepage
-		} else if err != nil {
+		case err != nil:
 			// this is some other error, log it and revert to default
 			lggr.SystemErr(err)
 			templateContents = homepage
-		} else {
+		default:
 			templateContents = string(rawTemplateFileContents)
 		}
 

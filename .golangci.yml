@@ -39,10 +39,13 @@ linters:
     - gomnd
     - ireturn
     - lll
+    - depguard
     - musttag
     - nilnil
     - nlreturn
     - nonamedreturns
+    - revive
+    - perfsprint
     - tagliatelle
     - varnamelen
     - wrapcheck
