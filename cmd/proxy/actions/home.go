@@ -88,23 +88,20 @@ const homepage = `<!DOCTYPE html>
 
 func proxyHomeHandler(c *config.Config) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var templateContents string
-
 		lggr := log.EntryFromContext(r.Context())
 
 		templateData := make(map[string]string)
 
+		templateContents := homepage
+
 		// load the template from the file system if it exists, otherwise revert to default
 		rawTemplateFileContents, err := os.ReadFile(c.HomeTemplatePath)
-
-		switch {
-		case errors.Is(err, os.ErrNotExist):
-			templateContents = homepage
-		case err != nil:
-			// this is some other error, log it and revert to default
-			lggr.SystemErr(err)
-			templateContents = homepage
-		default:
+		if err != nil {
+			if !errors.Is(err, os.ErrNotExist) {
+				// this is some other error, log it and revert to default
+				lggr.SystemErr(err)
+			}
+		} else {
 			templateContents = string(rawTemplateFileContents)
 		}
 
