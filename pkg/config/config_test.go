@@ -79,23 +79,24 @@ func TestEnvOverrides(t *testing.T) {
 		TimeoutConf: TimeoutConf{
 			Timeout: 30,
 		},
-		StorageType:     "minio",
-		GlobalEndpoint:  "mytikas.gomods.io",
-		Port:            ":7000",
-		EnablePprof:     false,
-		PprofPort:       ":3001",
-		BasicAuthUser:   "testuser",
-		BasicAuthPass:   "testpass",
-		ForceSSL:        true,
-		ValidatorHook:   "testhook.io",
-		PathPrefix:      "prefix",
-		NETRCPath:       "/test/path/.netrc",
-		HGRCPath:        "/test/path/.hgrc",
-		Storage:         &Storage{},
-		GoBinaryEnvVars: []string{"GOPROXY=direct"},
-		SingleFlight:    &SingleFlight{},
-		RobotsFile:      "robots.txt",
-		Index:           &Index{},
+		StorageType:      "minio",
+		GlobalEndpoint:   "mytikas.gomods.io",
+		HomeTemplatePath: "/tmp/athens/home.html",
+		Port:             ":7000",
+		EnablePprof:      false,
+		PprofPort:        ":3001",
+		BasicAuthUser:    "testuser",
+		BasicAuthPass:    "testpass",
+		ForceSSL:         true,
+		ValidatorHook:    "testhook.io",
+		PathPrefix:       "prefix",
+		NETRCPath:        "/test/path/.netrc",
+		HGRCPath:         "/test/path/.hgrc",
+		Storage:          &Storage{},
+		GoBinaryEnvVars:  []string{"GOPROXY=direct"},
+		SingleFlight:     &SingleFlight{},
+		RobotsFile:       "robots.txt",
+		Index:            &Index{},
 	}
 
 	envVars := getEnvMap(expConf)
@@ -269,6 +270,7 @@ func TestParseExampleConfig(t *testing.T) {
 		StorageType:      "memory",
 		NetworkMode:      "strict",
 		GlobalEndpoint:   "http://localhost:3001",
+		HomeTemplatePath: "/var/lib/athens/home.html",
 		Port:             ":3000",
 		EnablePprof:      false,
 		PprofPort:        ":3001",
@@ -322,6 +324,7 @@ func getEnvMap(config *Config) map[string]string {
 	envVars["BASIC_AUTH_USER"] = config.BasicAuthUser
 	envVars["BASIC_AUTH_PASS"] = config.BasicAuthPass
 	envVars["PROXY_FORCE_SSL"] = strconv.FormatBool(config.ForceSSL)
+	envVars["ATHENS_HOME_TEMPLATE_PATH"] = config.HomeTemplatePath
 	envVars["ATHENS_PROXY_VALIDATOR"] = config.ValidatorHook
 	envVars["ATHENS_PATH_PREFIX"] = config.PathPrefix
 	envVars["ATHENS_NETRC_PATH"] = config.NETRCPath
