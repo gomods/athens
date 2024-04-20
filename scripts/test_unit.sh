@@ -7,7 +7,7 @@ if [ -z ${GO_ENV} ]; then
 fi
 
 if [ -z ${ATHENS_MINIO_ENDPOINT} ]; then
-    export ATHENS_MINIO_ENDPOINT="127.0.0.1:9001"
+    export ATHENS_MINIO_ENDPOINT="http://127.0.0.1:9001"
 fi
 
 if [ -z ${ATHENS_MONGO_STORAGE_URL} ]; then
