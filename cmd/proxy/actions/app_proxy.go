@@ -32,7 +32,7 @@ func addProxyRoutes(
 	l *log.Logger,
 	c *config.Config,
 ) error {
-	r.HandleFunc("/", proxyHomeHandler)
+	r.HandleFunc("/", proxyHomeHandler(c))
 	r.HandleFunc("/healthz", healthHandler)
 	r.HandleFunc("/readyz", getReadinessHandler(s))
 	r.HandleFunc("/version", versionHandler)

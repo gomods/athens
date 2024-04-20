@@ -169,6 +169,10 @@ BasicAuthUser = ""
 # Env override: BASIC_AUTH_PASS
 BasicAuthPass = ""
 
+# A path on disk to a Go HTML template to be used on the homepage
+# Env override: ATHENS_HOME_TEMPLATE_PATH
+HomeTemplatePath = "/var/lib/athens/home.html"
+
 # Set to true to force an SSL redirect
 # Env override: PROXY_FORCE_SSL
 ForceSSL = false
