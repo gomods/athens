@@ -2,7 +2,6 @@ package minio
 
 import (
 	"os"
-	"strings"
 	"testing"
 
 	"github.com/gomods/athens/pkg/config"
@@ -109,11 +108,4 @@ func getStorage(t testing.TB) *storageImpl {
 	}
 
 	return backend.(*storageImpl)
-}
-
-// TrimHTTP trims "http://" or "https://" prefix from input string
-func TrimHTTP(s string) string {
-	s = strings.TrimPrefix(s, "http://")
-	s = strings.TrimPrefix(s, "https://")
-	return s
 }
