@@ -2,6 +2,7 @@ package minio
 
 import (
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/gomods/athens/pkg/config"
@@ -15,7 +16,7 @@ func TestBackend(t *testing.T) {
 
 // TestNewStorageExists tests the logic around MakeBucket and BucketExists
 func TestNewStorageExists(t *testing.T) {
-	url := os.Getenv("ATHENS_MINIO_ENDPOINT")
+	url := TrimHTTP(os.Getenv("ATHENS_MINIO_ENDPOINT"))
 	if url == "" {
 		t.SkipNow()
 	}
@@ -51,7 +52,7 @@ func TestNewStorageExists(t *testing.T) {
 // To ensure both paths are tested, there is a strict path error using the
 // "_" and a non strict error using less than 3 characters
 func TestNewStorageError(t *testing.T) {
-	url := os.Getenv("ATHENS_MINIO_ENDPOINT")
+	url := TrimHTTP(os.Getenv("ATHENS_MINIO_ENDPOINT"))
 	if url == "" {
 		t.SkipNow()
 	}
@@ -92,7 +93,7 @@ func (s *storageImpl) clear() error {
 }
 
 func getStorage(t testing.TB) *storageImpl {
-	url := os.Getenv("ATHENS_MINIO_ENDPOINT")
+	url := TrimHTTP(os.Getenv("ATHENS_MINIO_ENDPOINT"))
 	if url == "" {
 		t.SkipNow()
 	}
@@ -108,4 +109,11 @@ func getStorage(t testing.TB) *storageImpl {
 	}
 
 	return backend.(*storageImpl)
+}
+
+// TrimHTTP trims "http://" or "https://" prefix from input string
+func TrimHTTP(s string) string {
+	s = strings.TrimPrefix(s, "http://")
+	s = strings.TrimPrefix(s, "https://")
+	return s
 }
