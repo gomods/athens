@@ -43,7 +43,6 @@ linters:
     - nilnil
     - nlreturn
     - nonamedreturns
-    - perfsprint
     - tagliatelle
     - varnamelen
     - wrapcheck
