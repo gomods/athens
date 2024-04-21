@@ -10,7 +10,7 @@
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com)
 [![Open Source Helpers](https://www.codetriage.com/gomods/athens/badges/users.svg)](https://www.codetriage.com/gomods/athens)
 
-Welcome to the Athens project! We are a proxy server for the [Go Modules download API](https://docs.gomods.io/intro/protocol/).
+Welcome to the Athens project! Athens is an open source, enterprise ready implementation of the [Go Module proxy](https://go.dev/ref/mod#module-proxy) for the [Go Modules download API](https://docs.gomods.io/intro/protocol/).
 
 See our documentation site [https://docs.gomods.io](https://docs.gomods.io) for more details on the project.
 
@@ -74,8 +74,7 @@ If you're not ready to contribute code yet, there are plenty of other great ways
 
 # Built on the Shoulders of Giants
 
-The Athens project would not be possible without the amazing projects it builds on. Please see
-[SHOULDERS.md](./SHOULDERS.md) to see a list of them.
+The Athens project would not be possible without the amazing projects it builds on. Please see [SHOULDERS.md](./SHOULDERS.md) to see a list of them.
 
 # Coding Guidelines
 
@@ -92,4 +91,5 @@ If you have concerns, notice a code of conduct violation, or otherwise would lik
 related to this code of conduct, please reach out `@arschles` on the [Gophers Slack](https://gophers.slack.com/).
 
 ---
+
 Athens banner attributed to Golda Manuel
