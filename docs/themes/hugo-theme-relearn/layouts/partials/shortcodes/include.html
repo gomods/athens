@@ -1,0 +1,36 @@
+{{- $page := .page }}
+{{- if and (not $page) .context }}
+  {{- $page = .context }}
+  {{- warnf "%q: DEPRECATED parameter 'context' for shortcode 'include' found, use 'page' instead; see https://mcshelby.github.io/hugo-theme-relearn/basics/migration#5180" $page.File.Filename }}
+{{- end }}
+{{- $file := .file }}
+{{- $content := "" }}
+{{- with or
+  ($page.Resources.Get $file)
+  (resources.Get $file)
+}}
+  {{- $content = .Content }}
+{{- else }}
+  {{- if (fileExists $file) }}
+    {{- $content = $file | readFile }}
+  {{- else }}
+    {{- if eq $page.Site.Params.include.errorlevel "warning" }}
+      {{- warnf "%q: file '%s' is not a resource nor accessible via file system" $page.File.Filename $file }}
+    {{- else if eq $page.Site.Params.include.errorlevel "error" }}
+      {{- errorf "%q: image '%s' is not a resource nor accessible via file system" $page.File.Filename $file }}
+    {{- end }}
+  {{- end }}
+{{- end }}
+{{- $hideFirstHeading := .hidefirstheading | default false }}
+{{- if eq (printf "%T" $hideFirstHeading) "string" }}
+	{{- $hideFirstHeading = (eq $hideFirstHeading "true") }}
+{{- end }}
+{{- if $content }}
+	{{- if $hideFirstHeading }}<div class="include hide-first-heading">
+
+{{ end }}
+	{{- with $page }}
+{{- $content | safeHTML }}
+	{{- end }}
+	{{- if $hideFirstHeading }}</div>{{ end }}
+{{- end }}

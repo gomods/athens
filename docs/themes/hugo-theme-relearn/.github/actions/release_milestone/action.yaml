@@ -1,0 +1,172 @@
+name: Release milestone
+description: Creates a release and tag out of a given milestone
+inputs:
+  milestone:
+    description: Milestone for this release
+    required: true
+  github_token:
+    description: Secret GitHub token
+    required: true
+runs:
+  using: composite
+  steps:
+    - name: Setup node
+      uses: actions/setup-node@v4
+      with:
+        node-version: '16'
+
+    - name: Setup git
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ inputs.github_token }}
+      run: |
+        git config user.name "GitHub Actions Bot"
+        git config user.email "<>"
+
+    - name: Get current date
+      id: date
+      uses: Kaven-Universe/github-action-current-date-time@v1
+      with:
+        format: 'YYYY-MM-DD'
+
+    - name: Get current main version number
+      id: mainvers
+      uses: ashley-taylor/regex-property-action@v1
+      env:
+        MILESTONE: ${{ inputs.milestone }}
+      with:
+        value: ${{ env.MILESTONE }}
+        regex: (\d+\.\d+)\.\d+
+        replacement: "$1"
+
+    - name: Get current main version number for anchoring
+      id: mainanchor
+      uses: ashley-taylor/regex-property-action@v1
+      env:
+        MILESTONE: ${{ inputs.milestone }}
+      with:
+        value: ${{ env.MILESTONE }}
+        regex: (\d+)\.(\d+)\.\d+
+        replacement: "$1$2"
+
+    - name: Get current major version number
+      id: majorvers
+      uses: ashley-taylor/regex-property-action@v1
+      env:
+        MILESTONE: ${{ inputs.milestone }}
+      with:
+        value: ${{ env.MILESTONE }}
+        regex: (\d+)\.\d+\.\d+
+        replacement: "$1"
+
+    - name: Get next version number
+      id: nextvers
+      uses: WyriHaximus/github-action-next-semvers@v1
+      env:
+        MILESTONE: ${{ inputs.milestone }}
+      with:
+        version: ${{ env.MILESTONE }}
+
+    - name: Close milestone
+      uses: Akkjon/close-milestone@v2.1.0
+      continue-on-error: true
+      env:
+        MILESTONE: ${{ inputs.milestone }}
+        GITHUB_TOKEN: ${{ inputs.github_token }}
+      with:
+        milestone_name: ${{ env.MILESTONE }}
+
+    - name: Create temporary tag
+      shell: bash
+      env:
+        MILESTONE: ${{ inputs.milestone }}
+        GITHUB_TOKEN: ${{ inputs.github_token }}
+      run: |
+        git tag --message "" "$MILESTONE" || true
+        git push origin "$MILESTONE"      || true
+        git tag  --force --message "" "$MILESTONE"
+        git push --force origin "$MILESTONE"
+
+    - name: Update migration docs
+      uses: mingjun97/file-regex-replace@v1
+      with:
+        regex: '(.)[\n\r\s]*<!--GH-ACTION-RELEASE-MILESTONE-->[\n\r\s]*-*\s*[\n\r\s]*?[\n\r]+##\s*.*?[\n\r][\n\r\s]*(.)'
+        replacement: "$1\n\n<!--GH-ACTION-RELEASE-MILESTONE-->\n\n---\n\n## ${{ steps.mainvers.outputs.value }}.0 (${{ steps.date.outputs.time }}) {#${{ steps.mainanchor.outputs.value }}0}\n\n$2"
+        include: exampleSite/content/basics/migration/_index.en.md
+
+    - name: Update generator version
+      shell: bash
+      env:
+        MILESTONE: ${{ inputs.milestone }}
+      run: |
+        echo -n "$MILESTONE" > layouts/partials/version.txt
+
+    - name: Update changelog
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ inputs.github_token }}
+        GREN_GITHUB_TOKEN: ${{ inputs.github_token }}
+      run: |
+        npx github-release-notes@0.17.1 changelog --generate --override --tags=all
+
+    - name: Commit updates
+      shell: bash
+      env:
+        MILESTONE: ${{ inputs.milestone }}
+        GITHUB_TOKEN: ${{ inputs.github_token }}
+        GREN_GITHUB_TOKEN: ${{ inputs.github_token }}
+      run: |
+        git add *
+        git commit --message "Ship tag $MILESTONE"
+        git push origin main
+
+    - name: Create final tag
+      shell: bash
+      env:
+        MILESTONE: ${{ inputs.milestone }}
+        MILESTONE_MINOR: ${{ steps.mainvers.outputs.value }}
+        MILESTONE_MAJOR: ${{ steps.majorvers.outputs.value }}
+        GITHUB_TOKEN: ${{ inputs.github_token }}
+      run: |
+        git tag  --force --message "" "$MILESTONE"
+        git push --force origin "$MILESTONE"
+        git tag --message "" "$MILESTONE_MINOR.x" || true
+        git push origin "$MILESTONE_MINOR.x"      || true
+        git tag  --force --message "" "$MILESTONE_MINOR.x"
+        git push --force origin "$MILESTONE_MINOR.x"
+        git tag --message "" "$MILESTONE_MAJOR.x" || true
+        git push origin "$MILESTONE_MAJOR.x"      || true
+        git tag  --force --message "" "$MILESTONE_MAJOR.x"
+        git push --force origin "$MILESTONE_MAJOR.x"
+        git tag --message "" "x" || true
+        git push origin "x"      || true
+        git tag  --force --message "" "x"
+        git push --force origin "x"
+
+    - name: Publish release
+      shell: bash
+      env:
+        MILESTONE: ${{ inputs.milestone }}
+        GREN_GITHUB_TOKEN: ${{ inputs.github_token }}
+      run: |
+        npx github-release-notes@0.17.1 release --tags "$MILESTONE"
+
+    - name: Update version number to mark non-release version
+      shell: bash
+      env:
+        MILESTONE: ${{ inputs.milestone }}
+        GITHUB_TOKEN: ${{ inputs.github_token }}
+      run: |
+        echo -n "$MILESTONE+tip" > layouts/partials/version.txt
+        git add *
+        git commit --message "Mark non-release version"
+        git push origin main
+
+    - name: Create next patch milestone
+      uses: WyriHaximus/github-action-create-milestone@v1
+      continue-on-error: true
+      env:
+        MILESTONE: ${{ inputs.milestone }}
+        GITHUB_TOKEN: ${{ inputs.github_token }}
+      with:
+        title: ${{ steps.nextvers.outputs.patch }}

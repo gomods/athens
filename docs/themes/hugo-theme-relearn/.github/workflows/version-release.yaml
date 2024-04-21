@@ -1,0 +1,42 @@
+name: version-release
+
+on:
+  workflow_dispatch:
+    inputs:
+      milestone:
+        description: 'Milestone for this release'
+        required: true
+
+jobs:
+  release:
+    name: Run release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          submodules: true  # Fetch Hugo themes (true OR recursive)
+          # fetch-depth: 0   # Fetch all history for .GitInfo and .Lastmod - not necessary for this repo
+
+      - name: Check milestone
+        id: check
+        uses: ./.github/actions/check_milestone
+        with:
+          milestone: ${{ github.event.inputs.milestone }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create release
+        if: ${{ steps.check.outputs.outcome == 'success' }}
+        uses: ./.github/actions/release_milestone
+        with:
+          milestone: ${{ github.event.inputs.milestone }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      # We need to deploy the site again to show the updated changelog
+      - name: Build site
+        uses: ./.github/actions/build_site
+
+      - name: Deploy site
+        uses: ./.github/actions/deploy_site
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
