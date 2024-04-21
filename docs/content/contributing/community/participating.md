@@ -75,35 +75,8 @@ please reach out to one or more of the contributors or maintainers.
 # Maintainers
 
 After you become a contributor, you'll have the opportunity to become a
-maintainer.
-Here's what being a maintainer means and how to become one.
-
-_Note: We sometimes refer to maintainers as "core maintainers," but they're
-the same thing._
-
-## What Being a Maintainer Means
-
-As a maintainer, you'll be doing the same things as a contributor with a few
-extras:
-
-- Help organize our development meetings (i.e. help organize the agenda)
-- Promote the project and build community (e.g. present on it where possible,
-write about it, ...) when possible<sup>2</sup>
-- Triage issues (e.g. adding labels, promoting discussions, finalizing
-decisions)
-- Organize and promote PR reviews (e.g. prompting community members,
-contributors, and other maintainers to review)
-- Help foster a safe and welcoming environment for all project participants.
-This will include enforcing our code of conduct. We adhere to the [Contributor
-Covenant](https://www.contributor-covenant.org), if you haven't read it yet you can do so [here](https://www.contributor-covenant.org/version/1/4/code-of-conduct) (english version).
-
-## How to Become a Maintainer
-
-To become a maintainer, we would like you to see you be an effective
-contributor, and show that you can do some of the things maintainers do.
-Maintainers will do their best to regularly discuss promoting contributors.
-But don't be shy, if you feel that this is you, please reach out to one or
-more of the maintainers.
+maintainer. If you're happy with your contributions but want more of a role in
+steering the project then read more on [being a maintainer](./contributing/maintainers).
 
 # The End
 
