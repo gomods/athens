@@ -5,7 +5,7 @@
     base = "docs/"
     publish = "docs/public/"
     command = "hugo -v"
-    environment = { HUGO_VERSION = "0.72.0" }
+    environment = { HUGO_VERSION = "0.125.1" }
 
 [[redirects]]
   from = "https://gomods.io/*"
