@@ -1,0 +1,105 @@
+name: Check milestone
+description: Checks if the given milestone and its according tag are valid to be released
+inputs:
+  milestone:
+    description: Milestone for this release
+    required: true
+  github_token:
+    description: Secret GitHub token
+    required: true
+outputs:
+  outcome:
+    description: Result of the check, success or failure
+    value: ${{ steps.outcome.outputs.outcome }}
+runs:
+  using: composite
+  steps:
+    - name: Get closed issues for milestone
+      id: closed_issues
+      uses: octokit/graphql-action@v2.x
+      env:
+        MILESTONE: ${{ inputs.milestone }}
+        GITHUB_TOKEN: ${{ inputs.github_token }}
+      with:
+        query: |
+          query {
+            search(first: 1, type: ISSUE, query: "user:${{ github.repository_owner }} repo:${{ github.event.repository.name }} milestone:${{ env.MILESTONE }} state:closed") {
+              issueCount
+            }
+          }
+
+    - name: Get open issues for milestone
+      id: open_issues
+      uses: octokit/graphql-action@v2.x
+      env:
+        MILESTONE: ${{ inputs.milestone }}
+        GITHUB_TOKEN: ${{ inputs.github_token }}
+      with:
+        query: |
+          query {
+            search(first: 1, type: ISSUE, query: "user:${{ github.repository_owner }} repo:${{ github.event.repository.name }} milestone:${{ env.MILESTONE }} state:open") {
+              issueCount
+            }
+          }
+
+    - name: Get old version number
+      id: oldvers
+      uses: andstor/file-reader-action@v1
+      with:
+        path: layouts/partials/version.txt
+
+    - name: Get old main version number
+      id: oldmainvers
+      uses: ashley-taylor/regex-property-action@v1
+      with:
+        value: ${{ steps.oldvers.outputs.contents }}
+        regex: (\d+)\.(\d+)\.\d+.*
+        replacement: '$1\.$2'
+
+    - name: Get current patch version number
+      id: patchvers
+      uses: ashley-taylor/regex-property-action@v1
+      env:
+        MILESTONE: ${{ inputs.milestone }}
+      with:
+        value: ${{ env.MILESTONE }}
+        regex: \d+\.\d+\.(\d+)
+        replacement: "$1"
+
+    - name: Get migration notes
+      id: migrationnotes
+      uses: andstor/file-reader-action@v1
+      with:
+        path: exampleSite/content/basics/migration/_index.en.md
+
+    - name: Check for old migration notes
+      id: hasoldnotes
+      uses: ashley-taylor/regex-property-action@v1
+      with:
+        value: ${{ steps.migrationnotes.outputs.contents }}
+        regex: '.*?[\n\r\s]*<!--GH-ACTION-RELEASE-MILESTONE-->[\n\r\s]*-*\s*[\n\r\s]*?[\n\r]+##\s+${{ steps.oldmainvers.outputs.value }}\.0\s+.*?[\n\r][\n\r\s]*.*'
+        flags: gs
+        replacement: '1'
+
+    - name: Set outcome
+      id: outcome
+      shell: bash
+      run: |
+        if [ "${{ fromJSON(steps.closed_issues.outputs.data).search.issueCount > 0 && fromJSON(steps.open_issues.outputs.data).search.issueCount == 0 && ( (steps.patchvers.outputs.value!='0'&&steps.hasoldnotes.outputs.value=='1') || (steps.patchvers.outputs.value=='0'&&steps.hasoldnotes.outputs.value!='1') ) }}" = "true" ]; then
+          echo "outcome=success" >> $GITHUB_OUTPUT
+        else
+          echo "outcome=failure" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Log results and exit
+      shell: bash
+      run: |
+        echo outcome            : ${{ steps.outcome.outputs.outcome }}
+        echo has closed issues  : ${{ fromJSON(steps.closed_issues.outputs.data).search.issueCount > 0 }}
+        echo has open issues    : ${{ fromJSON(steps.open_issues.outputs.data).search.issueCount > 0 }}
+        echo is patch version   : ${{ steps.patchvers.outputs.value != '0' }}
+        echo has old main notes : ${{ steps.hasoldnotes.outputs.value == '1' }}
+        echo are notes okay     : ${{ (steps.patchvers.outputs.value!='0'&&steps.hasoldnotes.outputs.value=='1') || (steps.patchvers.outputs.value=='0'&&steps.hasoldnotes.outputs.value!='1') }}
+        if [ "${{ steps.outcome.outputs.outcome }}" = "failure" ]; then
+          exit 1
+        fi
