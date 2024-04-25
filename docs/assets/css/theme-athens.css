@@ -1,0 +1,42 @@
+/* my-custom-variant */
+:root {
+  --PRIMARY-color: rgb( 9, 7, 112 ); /* brand primary color */
+  --SECONDARY-color: rgb( 9, 7, 112 ); /* brand secondary color */
+  --ACCENT-color: rgb( 64, 62, 150 ); /* brand accent color, used for search highlights */
+  --MAIN-LINK-color: rgb( 68, 66, 165 ); /* link color of content */
+  --MAIN-LINK-HOVER-color: rgb( 68, 66, 165 ); /* hoverd link color of content */
+  --MAIN-BG-color: rgba( 255, 255, 255, 1 ); /* background color of content */
+  --MAIN-TEXT-color: rgba( 50, 50, 50, 1 ); /* text color of content and h1 titles */
+  --MAIN-TITLES-TEXT-color: rgba( 94, 94, 94, 1 ); /* text color of h2-h6 titles and transparent box titles */
+  --MAIN-TITLES-H1-color: rgba( 34, 34, 34, 1 ); /* text color of h1 titles */
+  --CODE-theme: learn; /* name of the chroma stylesheet file */
+  --CODE-BLOCK-color: rgba( 226, 228, 229, 1 ); /* fallback text color of block code; should be adjusted to your selected chroma style */
+  --CODE-BLOCK-BG-color: rgba( 40, 42, 54, 1 ); /* fallback background color of block code; should be adjusted to your selected chroma style */
+  --CODE-BLOCK-BORDER-color: rgba( 40, 42, 54, 1 ); /* border color of block code */
+  --CODE-INLINE-color: rgba( 94, 94, 94, 1 ); /* text color of inline code */
+  --CODE-INLINE-BG-color: rgba( 255, 247, 221, 1 ); /* background color of inline code */
+  --CODE-INLINE-BORDER-color: rgba( 251, 240, 203, 1 ); /* border color of inline code */
+  --MENU-HEADER-BG-color: rgb( 9, 7, 112 ); /* background color of menu header */
+  --MENU-HEADER-BORDER-color: rgb( 64, 62, 150 ); /* border color between menu header and menu */
+  --MENU-HOME-LINK-color: rgba( 224, 224, 224, 1 ); /* home button color if configured */
+  --MENU-HOME-LINK-HOVER-color: rgba( 240, 240, 240, 1 ); /* hoverd home button color if configured */
+  --MENU-SEARCH-color: rgba( 255, 255, 255, 1 ); /* text and icon color of search box */
+  --MENU-SEARCH-BG-color: rgb( 64, 62, 150 ); /* background color of search box */
+  --MENU-SEARCH-BORDER-color: rgb( 64, 62, 150 ); /* border color of search box */
+  --MENU-SECTIONS-BG-color: rgba( 43, 42, 56, 1 ); /* background of the menu; this is NOT just a color value but can be a complete CSS background definition including gradients, etc. */
+  --MENU-SECTIONS-ACTIVE-BG-color: rgba( 32, 31, 41, 1 ); /* background color of the active menu section */
+  --MENU-SECTIONS-LINK-color: rgba( 204, 204, 204, 1 ); /* link color of menu topics */
+  --MENU-SECTIONS-LINK-HOVER-color: rgba( 230, 230, 230, 1 ); /* hoverd link color of menu topics */
+  --MENU-SECTION-ACTIVE-CATEGORY-color: rgba( 119, 119, 119, 1 ); /* text color of the displayed menu topic */
+  --MENU-SECTION-ACTIVE-CATEGORY-BG-color: rgba( 255, 255, 255, 1 ); /* background color of the displayed menu topic */
+  --MENU-SECTION-SEPARATOR-color: rgba( 42, 35, 47, 1 ); /* separator color between menu sections and menu footer */
+  --MENU-VISITED-color: rgba( 0, 189, 243, 1 ); /* icon color of visited menu topics if configured */
+  --BOX-CAPTION-color: rgba( 255, 255, 255, 1 ); /* text color of colored box titles */
+  --BOX-BG-color: rgba( 255, 255, 255, .833 ); /* background color of colored boxes */
+  --BOX-TEXT-color: rgba( 16, 16, 16, 1 ); /* text color of colored box content */
+  --BOX-BLUE-color: rgb( 201, 238, 255 ); /* background color of blue boxes */
+  --BOX-GREEN-color: rgb( 179, 229, 190 ); /* background color of green boxes */
+  --BOX-GREY-color: rgb( 170, 119, 255 ); /* background color of grey boxes */
+  --BOX-ORANGE-color: rgb( 255, 184, 76 ); /* background color of orange boxes */
+  --BOX-RED-color: rgb( 241, 103, 103 ); /* background color of red boxes */
+}

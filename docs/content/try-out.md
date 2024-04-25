@@ -1,7 +1,6 @@
 ---
 title: Try it out!
 description: How to see Athens in action 
-menu: shortcuts
 ---
 
 ## Try out Athens

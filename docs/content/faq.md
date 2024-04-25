@@ -1,7 +1,6 @@
 ---
 title: FAQ
 description: Frequently Asked Questions
-menu: shortcuts
 ---
 
 ### Is Athens Just a Proxy? A Registry?

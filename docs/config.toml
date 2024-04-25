@@ -1,5 +1,5 @@
 baseURL = "https://docs.gomods.io"
-theme = "hugo-theme-learn"
+theme = "hugo-theme-relearn"
 languageCode = "en-us"
 title = "Athens"
 
@@ -18,8 +18,65 @@ title = "Athens"
 
 
 [params]
-disableShortcutsTitle = true
-disableInlineCopyToClipBoard = true
+  disableShortcutsTitle = true
+  disableInlineCopyToClipBoard = true
+  # Extension to the image effects only for the docs.
+  imageEffects.bg-white = true
+  editURL = 'https://github.com/gomods/athens/edit/main/docs/content/${FilePath}'
+  titleSeparator = '-'
+  additionalContentLanguage = ['en', 'zh', 'es']
+  themeVariant = [{ identifier = "athens" },]
 
 [outputs]
-home = [ "HTML", "RSS", "JSON"]
+  # add `json` to the home to support Lunr search; This is a mandatory setting
+  # for the search functionality
+  # add `print` to home, section and page to activate the feature to print whole
+  # chapters
+  home = ["html", "rss", "print", "search", "searchpage"]
+  section = ["html", "rss", "print"]
+  page = ["html", "rss", "print"]
+
+[markup]
+  [markup.highlight]
+    # line numbers in a table layout will shift if code is wrapping, so better
+    # not use it; visually both layouts have the same look and behavior
+    lineNumbersInTable = false
+
+    # the shipped variants come with their own modified chroma syntax highlighting
+    # stylesheets which are linked in your generated HTML pages; you can use Hugo to generate
+    # own stylesheets to your liking and use them in your variant;
+    # if you want to use Hugo's internal styles instead of the shipped stylesheets:
+    # - remove `noClasses` or set `noClasses = true`
+    # - set `style` to a predefined style name
+    # note: with using the internal styles, the `--CODE-theme` setting in your variant
+    # stylesheet will be ignored and the internal style is used for all variants and
+    # even print
+    noClasses = false
+    # style = "tango"
+
+  [markup.goldmark]
+    # this is required for the themes exampleSite to make the piratify shortcode work
+    duplicateResourceFiles = true
+
+    # activated for this showcase to use HTML and JavaScript; decide on your own needs;
+    # if in doubt, remove this line
+    renderer.unsafe = true
+
+  [markup.goldmark.extensions]
+
+    [markup.goldmark.extensions.passthrough]
+      enable = true
+
+      [markup.goldmark.extensions.passthrough.delimiters]
+        # the settings chosen here match the default initialization
+        # of the MathJax library chosen by the theme;
+        # if you want to adjust to different values you also need
+        # to set them in `[params] mathJaxInitialize`
+        inline = [['\(', '\)'], ['$',  '$']]
+        block  = [['\[', '\]'], ['$$', '$$']]
+
+[[menu.shortcuts]]
+    name = "<i class='fa-fw fab fa-github'></i> GitHub repo"
+    identifier = "ds"
+    url = "https://github.com/gomods/athens"
+    weight = 10
