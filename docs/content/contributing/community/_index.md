@@ -6,8 +6,6 @@ weight: 1
 
 ---
 
-# The Athens Community
-
 Welcome, Athenian! We've put together this section to help you get involved with the Athens community.
 
 Before we go further, we want you to know two things:

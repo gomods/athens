@@ -1,6 +1,6 @@
 FROM alpine:3.8 as builder
 
-ARG HUGO_VERSION=0.72.0
+ARG HUGO_VERSION=0.125.1
 ENV HUGO_BINARY=hugo_${HUGO_VERSION}_Linux-64bit.tar.gz
 
 ADD https://github.com/gohugoio/hugo/releases/download/v${HUGO_VERSION}/${HUGO_BINARY} /tmp
