@@ -56,6 +56,8 @@ func NewStorage(conf *config.MinioConfig, timeout time.Duration) (storage.Backen
 }
 
 // TrimHTTP trims "http://" or "https://" prefix from input string.
+// Minio doesn't need to specify protocol in the URL so it should be trimmed. 
+// Related issue: https://github.com/gomods/athens/issues/1938#issuecomment-2067590653
 func TrimHTTP(s string) string {
 	s = strings.TrimPrefix(s, "http://")
 	s = strings.TrimPrefix(s, "https://")
