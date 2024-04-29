@@ -28,9 +28,7 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
-var (
-	testConfigPath = filepath.Join("..", "..", "config.dev.toml")
-)
+var testConfigPath = filepath.Join("..", "..", "config.dev.toml")
 
 func getDP(t *testing.T) Protocol {
 	t.Helper()
@@ -235,7 +233,7 @@ var latestTests = []latestTest{
 		path: "github.com/athens-artifacts/happy-path",
 		info: &storage.RevInfo{
 			Version: "v0.0.3",
-			Time:    time.Date(2018, 8, 3, 17, 16, 00, 0, time.UTC),
+			Time:    time.Date(2018, 8, 3, 17, 16, 0o0, 0, time.UTC),
 		},
 	},
 }

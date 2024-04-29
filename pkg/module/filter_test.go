@@ -10,7 +10,7 @@ import (
 
 func testConfigFile(t *testing.T) (testConfigFile string) {
 	testConfigFile = filepath.Join("..", "..", "config.dev.toml")
-	if err := os.Chmod(testConfigFile, 0700); err != nil {
+	if err := os.Chmod(testConfigFile, 0o700); err != nil {
 		t.Fatalf("%s\n", err)
 	}
 	return testConfigFile
@@ -40,7 +40,6 @@ func (t *FilterTests) Test_NewFilter() {
 	mf, err = NewFilter(filter)
 	r.Equal(filter, mf.filePath)
 	r.NoError(err)
-
 }
 
 func (t *FilterTests) Test_IgnoreSimple() {
@@ -198,7 +197,6 @@ func (t *FilterTests) Test_versionFilterRobust() {
 
 	r.Equal(Exclude, f.Rule("github.com/a/b", "a"))
 	r.Equal(Exclude, f.Rule("github.com/c/d", "fg"))
-
 }
 
 func (t *FilterTests) Test_initFromConfig() {
@@ -207,20 +205,20 @@ func (t *FilterTests) Test_initFromConfig() {
 	defer os.Remove(filterFile)
 
 	goodInput := []byte("+ github.com/a/b\n\n# some comment\n- github.com/c/d\n\nD github.com/x")
-	os.WriteFile(filterFile, goodInput, 0644)
+	os.WriteFile(filterFile, goodInput, 0o644)
 
 	f, err := initFromConfig(filterFile)
 	r.NotNil(f)
 	r.NoError(err)
 
 	badInput := []byte("+ github.com/a/b\n\n# some comment\n\n- github.com/c/d\n\nD github.com/x\nsome_random_line")
-	os.WriteFile(filterFile, badInput, 0644)
+	os.WriteFile(filterFile, badInput, 0o644)
 	f, err = initFromConfig(filterFile)
 	r.Nil(f)
 	r.Error(err)
 
 	versionInput := []byte("+ github.com/a/b\n\n# some comment\n\n- github.com/c/d v1,v2.3.4,v3.2.*\n\nD github.com/x\n")
-	os.WriteFile(filterFile, versionInput, 0644)
+	os.WriteFile(filterFile, versionInput, 0o644)
 	f, err = initFromConfig(filterFile)
 	r.NotNil(f)
 	r.NoError(err)

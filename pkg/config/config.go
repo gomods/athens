@@ -21,22 +21,22 @@ const defaultConfigFile = "athens.toml"
 // Config provides configuration values for all components.
 type Config struct {
 	TimeoutConf
-	GoEnv            string    `validate:"required" envconfig:"GO_ENV"`
-	GoBinary         string    `validate:"required" envconfig:"GO_BINARY_PATH"`
+	GoEnv            string    `envconfig:"GO_ENV"                    validate:"required"`
+	GoBinary         string    `envconfig:"GO_BINARY_PATH"            validate:"required"`
 	GoBinaryEnvVars  EnvList   `envconfig:"ATHENS_GO_BINARY_ENV_VARS"`
-	GoGetWorkers     int       `validate:"required" envconfig:"ATHENS_GOGET_WORKERS"`
+	GoGetWorkers     int       `envconfig:"ATHENS_GOGET_WORKERS"      validate:"required"`
 	GoGetDir         string    `envconfig:"ATHENS_GOGET_DIR"`
-	ProtocolWorkers  int       `validate:"required" envconfig:"ATHENS_PROTOCOL_WORKERS"`
-	LogLevel         string    `validate:"required" envconfig:"ATHENS_LOG_LEVEL"`
-	LogFormat        string    `validate:"oneof='' 'json' 'plain'" envconfig:"ATHENS_LOG_FORMAT"`
-	CloudRuntime     string    `validate:"required_without=LogFormat" envconfig:"ATHENS_CLOUD_RUNTIME"`
+	ProtocolWorkers  int       `envconfig:"ATHENS_PROTOCOL_WORKERS"   validate:"required"`
+	LogLevel         string    `envconfig:"ATHENS_LOG_LEVEL"          validate:"required"`
+	LogFormat        string    `envconfig:"ATHENS_LOG_FORMAT"         validate:"oneof='' 'json' 'plain'"`
+	CloudRuntime     string    `envconfig:"ATHENS_CLOUD_RUNTIME"      validate:"required_without=LogFormat"`
 	EnablePprof      bool      `envconfig:"ATHENS_ENABLE_PPROF"`
 	PprofPort        string    `envconfig:"ATHENS_PPROF_PORT"`
 	FilterFile       string    `envconfig:"ATHENS_FILTER_FILE"`
 	TraceExporterURL string    `envconfig:"ATHENS_TRACE_EXPORTER_URL"`
 	TraceExporter    string    `envconfig:"ATHENS_TRACE_EXPORTER"`
 	StatsExporter    string    `envconfig:"ATHENS_STATS_EXPORTER"`
-	StorageType      string    `validate:"required" envconfig:"ATHENS_STORAGE_TYPE"`
+	StorageType      string    `envconfig:"ATHENS_STORAGE_TYPE"       validate:"required"`
 	GlobalEndpoint   string    `envconfig:"ATHENS_GLOBAL_ENDPOINT"` // This feature is not yet implemented
 	Port             string    `envconfig:"ATHENS_PORT"`
 	UnixSocket       string    `envconfig:"ATHENS_UNIX_SOCKET"`
@@ -55,11 +55,11 @@ type Config struct {
 	NoSumPatterns    []string  `envconfig:"ATHENS_GONOSUM_PATTERNS"`
 	DownloadMode     mode.Mode `envconfig:"ATHENS_DOWNLOAD_MODE"`
 	DownloadURL      string    `envconfig:"ATHENS_DOWNLOAD_URL"`
-	NetworkMode      string    `validate:"oneof=strict offline fallback" envconfig:"ATHENS_NETWORK_MODE"`
+	NetworkMode      string    `envconfig:"ATHENS_NETWORK_MODE"       validate:"oneof=strict offline fallback"`
 	SingleFlightType string    `envconfig:"ATHENS_SINGLE_FLIGHT_TYPE"`
 	RobotsFile       string    `envconfig:"ATHENS_ROBOTS_FILE"`
 	IndexType        string    `envconfig:"ATHENS_INDEX_TYPE"`
-	ShutdownTimeout  int       `validate:"min=0" envconfig:"ATHENS_SHUTDOWN_TIMEOUT"`
+	ShutdownTimeout  int       `envconfig:"ATHENS_SHUTDOWN_TIMEOUT"   validate:"min=0"`
 	SingleFlight     *SingleFlight
 	Storage          *Storage
 	Index            *Index

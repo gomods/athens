@@ -4,10 +4,14 @@ import (
 	"context"
 	"os"
 	"testing"
+	"time"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/awserr"
-	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/aws/aws-sdk-go-v2/service/s3/types"
+	"github.com/aws/smithy-go"
+	"github.com/gomods/athens/pkg/errors"
+
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/storage/compliance"
 )
@@ -26,7 +30,7 @@ func (s *Storage) clear() error {
 	ctx, cancel := context.WithTimeout(context.Background(), s.timeout)
 	defer cancel()
 
-	objects, err := s.s3API.ListObjectsWithContext(ctx, &s3.ListObjectsInput{Bucket: aws.String(s.bucket)})
+	objects, err := s.s3API.ListObjects(ctx, &s3.ListObjectsInput{Bucket: aws.String(s.bucket)})
 	if err != nil {
 		return err
 	}
@@ -37,7 +41,7 @@ func (s *Storage) clear() error {
 			Key:    o.Key,
 		}
 
-		_, err := s.s3API.DeleteObjectWithContext(ctx, delParams)
+		_, err := s.s3API.DeleteObject(ctx, delParams)
 		if err != nil {
 			return err
 		}
@@ -49,23 +53,26 @@ func (s *Storage) createBucket() error {
 	ctx, cancel := context.WithTimeout(context.Background(), s.timeout)
 	defer cancel()
 
-	if _, err := s.s3API.CreateBucketWithContext(ctx, &s3.CreateBucketInput{Bucket: aws.String(s.bucket)}); err != nil {
-		aerr, ok := err.(awserr.Error)
-		if !ok {
-			return err
+	if _, err := s.s3API.CreateBucket(ctx, &s3.CreateBucketInput{Bucket: aws.String(s.bucket)}); err != nil {
+		var aerr smithy.APIError
+
+		if errors.AsErr(err, &aerr) {
+			switch aerr.(type) {
+			case *types.BucketAlreadyOwnedByYou:
+				return nil
+			case *types.BucketAlreadyExists:
+				return nil
+			default:
+				return aerr
+			}
 		}
 
-		switch aerr.Code() {
-		case s3.ErrCodeBucketAlreadyOwnedByYou:
-			return nil
-		case s3.ErrCodeBucketAlreadyExists:
-			return nil
-		default:
-			return aerr
-		}
+		return err
 	}
 
-	return s.s3API.WaitUntilBucketExistsWithContext(ctx, &s3.HeadBucketInput{Bucket: aws.String(s.bucket)})
+	waiter := s3.NewBucketExistsWaiter(s.s3API)
+
+	return waiter.Wait(ctx, &s3.HeadBucketInput{Bucket: aws.String(s.bucket)}, 10*time.Minute)
 }
 
 func getStorage(t testing.TB) *Storage {
@@ -75,9 +82,9 @@ func getStorage(t testing.TB) *Storage {
 	}
 
 	options := func(conf *aws.Config) {
-		conf.Endpoint = aws.String(url)
-		conf.DisableSSL = aws.Bool(true)
+		conf.BaseEndpoint = aws.String(url)
 	}
+
 	backend, err := New(
 		&config.S3Config{
 			Key:            "minio",

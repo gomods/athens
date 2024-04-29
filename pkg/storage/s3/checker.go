@@ -4,9 +4,9 @@ import (
 	"context"
 	"sync"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/awserr"
-	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/aws/smithy-go"
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/observ"
@@ -28,7 +28,7 @@ func (s *Storage) Exists(ctx context.Context, module, version string) (bool, err
 		wg.Add(1)
 		go func(file string) {
 			defer wg.Done()
-			_, err := s.s3API.HeadObjectWithContext(
+			_, err := s.s3API.HeadObject(
 				cancelingCtx,
 				&s3.HeadObjectInput{
 					Bucket: aws.String(s.bucket),
@@ -44,8 +44,8 @@ func (s *Storage) Exists(ctx context.Context, module, version string) (bool, err
 		if err == nil {
 			continue
 		}
-		var aerr awserr.Error
-		if errors.AsErr(err, &aerr) && aerr.Code() == "NotFound" {
+		var aerr smithy.APIError
+		if errors.AsErr(err, &aerr) && aerr.ErrorCode() == "NotFound" {
 			err = nil
 			exists = false
 		}

@@ -107,7 +107,6 @@ func TestIndexHandler(t *testing.T) {
 			if w.Code != tc.code {
 				t.Fatalf("expected response code to be %d but got %d", tc.code, w.Code)
 			}
-
 		})
 	}
 }

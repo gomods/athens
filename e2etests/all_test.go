@@ -62,9 +62,9 @@ func (m *E2eSuite) SetupSuite() {
 
 func (m *E2eSuite) TearDownSuite() {
 	m.stopAthens()
-	chmodR(m.goPath, 0777)
+	chmodR(m.goPath, 0o777)
 	os.RemoveAll(m.goPath)
-	chmodR(m.sampleRepoPath, 0777)
+	chmodR(m.sampleRepoPath, 0o777)
 	os.RemoveAll(m.sampleRepoPath)
 }
 
@@ -73,7 +73,7 @@ func TestE2E(t *testing.T) {
 }
 
 func (m *E2eSuite) SetupTest() {
-	chmodR(m.goPath, 0777)
+	chmodR(m.goPath, 0o777)
 	err := cleanGoCache(m.getEnv())
 	if err != nil {
 		m.Fail("Failed to clear go cache", err)

@@ -5,8 +5,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/aws/aws-sdk-go-v2/service/s3/types"
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/observ"
@@ -28,7 +29,7 @@ func (s *Storage) Catalog(ctx context.Context, token string, pageSize int) ([]pa
 			Marker: &queryToken,
 		}
 
-		loo, err := s.s3API.ListObjectsWithContext(ctx, lsParams)
+		loo, err := s.s3API.ListObjects(ctx, lsParams)
 		if err != nil {
 			return nil, "", errors.E(op, err)
 		}
@@ -49,7 +50,7 @@ func (s *Storage) Catalog(ctx context.Context, token string, pageSize int) ([]pa
 	return res, queryToken, nil
 }
 
-func fetchModsAndVersions(objects []*s3.Object, elementsNum int) ([]paths.AllPathParams, string) {
+func fetchModsAndVersions(objects []types.Object, elementsNum int) ([]paths.AllPathParams, string) {
 	res := make([]paths.AllPathParams, 0)
 	lastKey := ""
 	for _, o := range objects {
@@ -72,7 +73,7 @@ func fetchModsAndVersions(objects []*s3.Object, elementsNum int) ([]paths.AllPat
 	return res, lastKey
 }
 
-func parseS3Key(o *s3.Object) (paths.AllPathParams, error) {
+func parseS3Key(o types.Object) (paths.AllPathParams, error) {
 	const op errors.Op = "s3.parseS3Key"
 	m, v := config.ModuleVersionFromPath(*o.Key)
 

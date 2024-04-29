@@ -2,6 +2,7 @@ package minio
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/gomods/athens/pkg/config"
@@ -24,7 +25,7 @@ func (s *storageImpl) versionLocation(module, version string) string {
 // that implements storage.Backend.
 func NewStorage(conf *config.MinioConfig, timeout time.Duration) (storage.Backend, error) {
 	const op errors.Op = "minio.NewStorage"
-	endpoint := conf.Endpoint
+	endpoint := TrimHTTP(conf.Endpoint)
 	accessKeyID := conf.Key
 	secretAccessKey := conf.Secret
 	bucketName := conf.Bucket
@@ -52,4 +53,13 @@ func NewStorage(conf *config.MinioConfig, timeout time.Duration) (storage.Backen
 		}
 	}
 	return &storageImpl{minioClient, minioCore, bucketName}, nil
+}
+
+// TrimHTTP trims "http://" or "https://" prefix from input string.
+// Minio doesn't need to specify protocol in the URL so it should be trimmed.
+// Related issue: https://github.com/gomods/athens/issues/1938#issuecomment-2067590653
+func TrimHTTP(s string) string {
+	s = strings.TrimPrefix(s, "http://")
+	s = strings.TrimPrefix(s, "https://")
+	return s
 }
