@@ -36,7 +36,7 @@ require (
 	github.com/spf13/afero v1.8.2
 	github.com/stretchr/testify v1.9.0
 	github.com/technosophos/moniker v0.0.0-20180509230615-a5dbd03a2245
-	github.com/unrolled/secure v0.0.0-20181221173256-0d6b5bb13069
+	github.com/unrolled/secure v1.14.0
 	go.etcd.io/etcd/api/v3 v3.5.12
 	go.etcd.io/etcd/client/v3 v3.5.12
 	go.etcd.io/etcd/server/v3 v3.5.12
@@ -77,7 +77,6 @@ require (
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cenkalti/backoff/v4 v4.2.1 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
-	github.com/codegangsta/negroni v1.0.0 // indirect
 	github.com/coreos/go-semver v0.3.1 // indirect
 	github.com/coreos/go-systemd/v22 v22.5.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
