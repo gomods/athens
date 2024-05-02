@@ -3,6 +3,7 @@ package stash
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"io"
 	"os"
 	"strings"
@@ -16,6 +17,12 @@ import (
 	"github.com/google/uuid"
 	"golang.org/x/sync/errgroup"
 )
+
+type failReader int
+
+func (f *failReader) Read([]byte) (int, error) {
+	return 0, fmt.Errorf("failure")
+}
 
 // TestWithGCS requires a real GCP backend implementation
 // and it will ensure that saving to modules at the same time
@@ -54,6 +61,68 @@ func TestWithGCS(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	info, err := strg.Info(ctx, mod, ver)
+	if err != nil {
+		t.Fatal(err)
+	}
+	modContent, err := strg.GoMod(ctx, mod, ver)
+	if err != nil {
+		t.Fatal(err)
+	}
+	zip, err := strg.Zip(ctx, mod, ver)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer zip.Close()
+	zipContent, err := io.ReadAll(zip)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !bytes.Equal(info, modContent) {
+		t.Fatalf("expected info and go.mod to be equal but info was {%v} and content was {%v}", string(info), string(modContent))
+	}
+	if !bytes.Equal(info, zipContent) {
+		t.Fatalf("expected info and zip to be equal but info was {%v} and content was {%v}", string(info), string(zipContent))
+	}
+}
+
+// TestWithGCSPartialFailure equires a real GCP backend implementation
+// and ensures that if one of the non-singleflight-lock files fails to
+// upload, that the cache does not remain poisoned.
+func TestWithGCSPartialFailure(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Minute*5)
+	defer cancel()
+	const (
+		mod = "stashmod"
+		ver = "v1.0.0"
+	)
+	strg := getStorage(t)
+	strg.Delete(ctx, mod, ver)
+	defer strg.Delete(ctx, mod, ver)
+
+	// sanity check
+	_, err := strg.GoMod(ctx, mod, ver)
+	if !errors.Is(err, errors.KindNotFound) {
+		t.Fatalf("expected the stash bucket to return a NotFound error but got: %v", err)
+	}
+
+	content := uuid.New().String()
+	ms := &mockGCPStasher{strg, content}
+	fr := new(failReader)
+	// We simulate a failure by manually passing an io.Reader that will fail.
+	err = ms.strg.Save(ctx, "stashmod", "v1.0.0", []byte(ms.content), fr, []byte(ms.content))
+	if err == nil {
+		// We *want* to fail.
+		t.Fatal(err)
+	}
+
+	// Now try a Stash. This should upload the missing files.
+	s := WithGCSLock(ms)
+	_, err = s.Stash(ctx, "stashmod", "v1.0.0")
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	info, err := strg.Info(ctx, mod, ver)
 	if err != nil {
 		t.Fatal(err)
