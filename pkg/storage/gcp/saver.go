@@ -133,9 +133,12 @@ func (s *Storage) upload(ctx context.Context, path string, stream io.Reader, fir
 	const op errors.Op = "gcp.upload"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
+	cancelCtx, cancel := context.WithCancel(ctx)
+	defer cancel()
+
 	wc := s.bucket.Object(path).If(storage.Conditions{
 		DoesNotExist: true,
-	}).NewWriter(ctx)
+	}).NewWriter(cancelCtx)
 
 	// We set this metadata only for the first of the three files uploaded,
 	// for use as a singleflight lock.
@@ -148,7 +151,7 @@ func (s *Storage) upload(ctx context.Context, path string, stream io.Reader, fir
 	// Once we support private storage buckets this may need refactoring
 	// unless there is a way to set the default perms in the project.
 	if _, err := io.Copy(wc, stream); err != nil {
-		_ = wc.Close()
+		// Purposely do not close it to avoid creating a partial file.
 		return err
 	}
 
