@@ -181,6 +181,7 @@ func defaultConfig() *Config {
 				SentinelPassword: "sekret",
 				LockConfig:       DefaultRedisLockConfig(),
 			},
+			GCP: DefaultGCPConfig(),
 		},
 		Index: &Index{
 			MySQL: &MySQL{

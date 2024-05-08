@@ -2,15 +2,32 @@ package stash
 
 import (
 	"context"
+	"fmt"
+	"time"
 
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/observ"
+	"github.com/gomods/athens/pkg/storage"
+	"github.com/gomods/athens/pkg/storage/gcp"
 )
 
 // WithGCSLock returns a distributed singleflight
 // using a GCS backend. See the config.toml documentation for details.
-func WithGCSLock(s Stasher) Stasher {
-	return &gcsLock{s}
+func WithGCSLock(staleThreshold int, s storage.Backend) (Wrapper, error) {
+	if staleThreshold <= 0 {
+		return nil, errors.E("stash.WithGCSLock", fmt.Errorf("invalid stale threshold"))
+	}
+	// Since we *must* be using a GCP stoagfe backend, we can abuse this
+	// fact to mutate it, so that we can get our threshold into Save().
+	// Your instincts are correct, this is kind of gross.
+	gs, ok := s.(*gcp.Storage)
+	if !ok {
+		return nil, errors.E("stash.WithGCSLock", fmt.Errorf("GCP singleflight can only be used with GCP storage"))
+	}
+	gs.SetStaleThreshold(time.Duration(staleThreshold) * time.Second)
+	return func(s Stasher) Stasher {
+		return &gcsLock{s}
+	}, nil
 }
 
 type gcsLock struct {

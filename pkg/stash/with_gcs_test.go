@@ -48,7 +48,11 @@ func TestWithGCS(t *testing.T) {
 	for i := 0; i < 5; i++ {
 		content := uuid.New().String()
 		ms := &mockGCPStasher{strg, content}
-		s := WithGCSLock(ms)
+		gs, err := WithGCSLock(120, strg)
+		if err != nil {
+			t.Fatal(err)
+		}
+		s := gs(ms)
 		eg.Go(func() error {
 			ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 			defer cancel()
@@ -109,6 +113,11 @@ func TestWithGCSPartialFailure(t *testing.T) {
 	content := uuid.New().String()
 	ms := &mockGCPStasher{strg, content}
 	fr := new(failReader)
+	gs, err := WithGCSLock(120, strg)
+	if err != nil {
+		t.Fatal(err)
+	}
+	s := gs(ms)
 	// We simulate a failure by manually passing an io.Reader that will fail.
 	err = ms.strg.Save(ctx, "stashmod", "v1.0.0", []byte(ms.content), fr, []byte(ms.content))
 	if err == nil {
@@ -117,7 +126,6 @@ func TestWithGCSPartialFailure(t *testing.T) {
 	}
 
 	// Now try a Stash. This should upload the missing files.
-	s := WithGCSLock(ms)
 	_, err = s.Stash(ctx, "stashmod", "v1.0.0")
 	if err != nil {
 		t.Fatal(err)

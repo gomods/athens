@@ -255,6 +255,7 @@ func TestParseExampleConfig(t *testing.T) {
 			LockConfig:       DefaultRedisLockConfig(),
 		},
 		Etcd: &Etcd{Endpoints: "localhost:2379,localhost:22379,localhost:32379"},
+		GCP:  DefaultGCPConfig(),
 	}
 
 	expConf := &Config{
@@ -391,6 +392,8 @@ func getEnvMap(config *Config) map[string]string {
 		} else if singleFlight.Etcd != nil {
 			envVars["ATHENS_SINGLE_FLIGHT_TYPE"] = "etcd"
 			envVars["ATHENS_ETCD_ENDPOINTS"] = singleFlight.Etcd.Endpoints
+		} else if singleFlight.GCP != nil {
+			envVars["ATHENS_GCP_STALE_THRESHOLD"] = strconv.Itoa(singleFlight.GCP.StaleThreshold)
 		}
 	}
 	return envVars

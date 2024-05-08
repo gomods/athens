@@ -13,9 +13,9 @@ import (
 	googleapi "google.golang.org/api/googleapi"
 )
 
-// After how long we consider an "in_progress" metadata key stale,
+// Fallback for how long we consider an "in_progress" metadata key stale,
 // due to failure to remove it.
-const inProgressStaleThreshold = 2 * time.Minute
+const fallbackInProgressStaleThreshold = 2 * time.Minute
 
 // Save uploads the module's .mod, .zip and .info files for a given version
 // It expects a context, which can be provided using context.Background
@@ -46,6 +46,12 @@ func (s *Storage) Save(ctx context.Context, module, version string, mod []byte, 
 		}
 	}
 	return innerErr
+}
+
+// SetStaleThreshold sets the threshold of how long we consider
+// a lock metadata stale after.
+func (s *Storage) SetStaleThreshold(threshold time.Duration) {
+	s.staleThreshold = threshold
 }
 
 func (s *Storage) save(ctx context.Context, module, version string, mod []byte, zip io.Reader, info []byte) error {
@@ -115,12 +121,19 @@ func (s *Storage) checkUploadInProgress(ctx context.Context, gomodPath string) (
 	if err != nil {
 		return false, errors.E(op, err)
 	}
+	// If we have a config-set lock threshold, i.e. we are using the GCP
+	// slightflight backend, use it. Otherwise, use the fallback, which
+	// is arguably irrelevant when not using GCP for singleflighting.
+	threshold := fallbackInProgressStaleThreshold
+	if s.staleThreshold > 0 {
+		threshold = s.staleThreshold
+	}
 	if attrs.Metadata != nil {
 		_, ok := attrs.Metadata["in_progress"]
 		if ok {
 			// In case the final call to remove the metadata fails for some reason,
 			// we have a threshold after which we consider this to be stale.
-			if time.Since(attrs.Created) > inProgressStaleThreshold {
+			if time.Since(attrs.Created) > threshold {
 				return false, nil
 			}
 			return true, nil
