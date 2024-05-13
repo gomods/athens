@@ -21,7 +21,7 @@ jobs:
           go-version-file: 'go.mod'
           cache: true
       - name: Lint code
-        uses: golangci/golangci-lint-action@v5
+        uses: golangci/golangci-lint-action@v6
         with:
           version: ${{ env.GOLANGCI_LINT_VERSION }}
           skip-pkg-cache: true
