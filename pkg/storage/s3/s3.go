@@ -40,10 +40,6 @@ func New(s3Conf *config.S3Config, timeout time.Duration, options ...func(*aws.Co
 		return nil, errors.E(op, err)
 	}
 
-	// Remove anonymous credentials from the default config so that
-	// session.NewSession can auto-resolve credentials from role, profile, env etc.
-	awsConfig.Credentials = nil
-
 	for _, o := range options {
 		o(&awsConfig)
 	}
