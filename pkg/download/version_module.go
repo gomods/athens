@@ -15,6 +15,7 @@ const PathVersionModule = "/{module:.+}/@v/{version}.mod"
 func ModuleHandler(dp Protocol, lggr log.Entry, df *mode.DownloadFile) http.Handler {
 	const op errors.Op = "download.VersionModuleHandler"
 	f := func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 		mod, ver, err := getModuleParams(r, op)
 		if err != nil {
 			err = errors.E(op, errors.M(mod), errors.V(ver), err)

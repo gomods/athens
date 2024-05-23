@@ -52,7 +52,6 @@ func App(logger *log.Logger, conf *config.Config) (http.Handler, error) {
 			SSLRedirect:     conf.ForceSSL,
 			SSLProxyHeaders: map[string]string{"X-Forwarded-Proto": "https"},
 		}).Handler,
-		mw.ContentType,
 	)
 
 	var subRouter *mux.Router
