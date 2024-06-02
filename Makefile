@@ -74,7 +74,7 @@ test-unit-docker: ## run unit tests with docker
 
 .PHONY: test-e2e
 test-e2e:
-	cd e2etests && go test --tags e2etests
+	./scripts/test_e2e.sh
 
 .PHONY: test-e2e-docker
 test-e2e-docker:
