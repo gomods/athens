@@ -125,7 +125,7 @@ func proxyHomeHandler(c *config.Config) http.HandlerFunc {
 			w.WriteHeader(http.StatusInternalServerError)
 		}
 
-		w.Header().Add("Content-Type", "text/html")
+		w.Header().Set("Content-Type", "text/html")
 		w.WriteHeader(http.StatusOK)
 
 		err = tmp.ExecuteTemplate(w, "home", templateData)

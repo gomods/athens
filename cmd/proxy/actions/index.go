@@ -23,6 +23,8 @@ func indexHandler(index index.Indexer) http.HandlerFunc {
 			http.Error(w, err.Error(), errors.Kind(err))
 			return
 		}
+
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		enc := json.NewEncoder(w)
 		for _, meta := range list {
 			if err = enc.Encode(meta); err != nil {

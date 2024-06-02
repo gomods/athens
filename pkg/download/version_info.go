@@ -15,6 +15,7 @@ const PathVersionInfo = "/{module:.+}/@v/{version}.info"
 func InfoHandler(dp Protocol, lggr log.Entry, df *mode.DownloadFile) http.Handler {
 	const op errors.Op = "download.InfoHandler"
 	f := func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		mod, ver, err := getModuleParams(r, op)
 		if err != nil {
 			lggr.SystemErr(err)

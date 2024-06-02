@@ -18,6 +18,7 @@ const PathList = "/{module:.+}/@v/list"
 func ListHandler(dp Protocol, lggr log.Entry, df *mode.DownloadFile) http.Handler {
 	const op errors.Op = "download.ListHandler"
 	f := func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		mod, err := paths.GetModule(r)
 		if err != nil {
 			lggr.SystemErr(errors.E(op, err))

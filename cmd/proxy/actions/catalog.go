@@ -23,6 +23,7 @@ func catalogHandler(s storage.Backend) http.HandlerFunc {
 	const op errors.Op = "actions.CatalogHandler"
 	cs, isCataloger := s.(storage.Cataloger)
 	f := func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		if !isCataloger {
 			w.WriteHeader(errors.KindNotImplemented)
 			return
