@@ -492,3 +492,14 @@ Optionally, like `redis`, you can also specify a password to connect to the `red
           SentinelPassword = "sekret"
 
 Distributed lock options can be customised for redis sentinal as well, in a similar manner as described above for redis.
+
+
+### Using GCP as a singleflight mechanism
+
+The GCP singleflight mechanism does not required configuration, and works out of the box. It has a
+single option with which it can be customized:
+
+    [SingleFlight.GCP]
+        # Threshold for how long to wait in seconds for an in-progress GCP upload to
+        # be considered to have failed to unlock.
+        StaleThreshold = 120

@@ -377,6 +377,10 @@ ShutdownTimeout = 60
             # Max retries while acquiring the lock. Defaults to 10.
             # Env override: ATHENS_REDIS_LOCK_MAX_RETRIES
             MaxRetries = 10
+    [SingleFlight.GCP]
+        # Threshold for how long to wait in seconds for an in-progress GCP upload to
+        # be considered to have failed to unlock.
+        StaleThreshold = 120
 [Storage]
     # Only storage backends that are specified in Proxy.StorageType are required here
     [Storage.CDN]
