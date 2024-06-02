@@ -101,7 +101,7 @@ func addProxyRoutes(
 
 	lister := module.NewVCSLister(c.GoBinary, c.GoBinaryEnvVars, fs)
 	checker := storage.WithChecker(s)
-	withSingleFlight, err := getSingleFlight(l, c, checker)
+	withSingleFlight, err := getSingleFlight(l, c, s, checker)
 	if err != nil {
 		return err
 	}
@@ -137,7 +137,7 @@ func (l *athensLoggerForRedis) Printf(ctx context.Context, format string, v ...a
 	l.logger.WithContext(ctx).Printf(format, v...)
 }
 
-func getSingleFlight(l *log.Logger, c *config.Config, checker storage.Checker) (stash.Wrapper, error) {
+func getSingleFlight(l *log.Logger, c *config.Config, s storage.Backend, checker storage.Checker) (stash.Wrapper, error) {
 	switch c.SingleFlightType {
 	case "", "memory":
 		return stash.WithSingleflight, nil
@@ -173,7 +173,7 @@ func getSingleFlight(l *log.Logger, c *config.Config, checker storage.Checker) (
 		if c.StorageType != "gcp" {
 			return nil, fmt.Errorf("gcp SingleFlight only works with a gcp storage type and not: %v", c.StorageType)
 		}
-		return stash.WithGCSLock, nil
+		return stash.WithGCSLock(c.SingleFlight.GCP.StaleThreshold, s)
 	case "azureblob":
 		if c.StorageType != "azureblob" {
 			return nil, fmt.Errorf("azureblob SingleFlight only works with a azureblob storage type and not: %v", c.StorageType)

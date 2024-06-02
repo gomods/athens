@@ -15,8 +15,9 @@ import (
 
 // Storage implements the (./pkg/storage).Backend interface.
 type Storage struct {
-	bucket  *storage.BucketHandle
-	timeout time.Duration
+	bucket         *storage.BucketHandle
+	timeout        time.Duration
+	staleThreshold time.Duration
 }
 
 // New returns a new Storage instance backed by a Google Cloud Storage bucket.
