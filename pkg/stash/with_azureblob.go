@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/Azure/azure-storage-blob-go/azblob"
+	"github.com/Azure/go-autorest/autorest/adal"
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/observ"
@@ -25,9 +26,23 @@ func WithAzureBlobLock(conf *config.AzureBlobConfig, timeout time.Duration, chec
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
-	cred, err := azblob.NewSharedKeyCredential(conf.AccountName, conf.AccountKey)
-	if err != nil {
-		return nil, errors.E(op, err)
+	var cred azblob.Credential
+	if conf.AccountKey != "" {
+		cred, err = azblob.NewSharedKeyCredential(conf.AccountName, conf.AccountKey)
+		if err != nil {
+			return nil, errors.E(op, err)
+		}
+	}
+	if conf.ManagedIdentityResourceID != "" {
+		spStorageToken, err := adal.NewServicePrincipalTokenFromManagedIdentity(conf.ResourceProvider, &adal.ManagedIdentityOptions{IdentityResourceID: conf.ManagedIdentityResourceID})
+		if err != nil {
+			return nil, errors.E(op, err)
+		}
+		err = spStorageToken.Refresh()
+		if err != nil {
+			return nil, errors.E(op, err)
+		}
+		cred = azblob.NewTokenCredential(spStorageToken.OAuthToken(), nil)
 	}
 	pipe := azblob.NewPipeline(cred, azblob.PipelineOptions{})
 	serviceURL := azblob.NewServiceURL(*accountURL, pipe)
