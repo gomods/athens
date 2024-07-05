@@ -345,7 +345,7 @@ It assumes that you already have the following:
 
             # Resource Provider to use with the storage account
             # Env override: ATHENS_AZURE_RESOURCE_PROVIDER
-            ResourceProvider = "MY_AZURE_RESOURCE_PROVIDER"
+            StorageResource = "MY_AZURE_STORAGE_RESOURCE"
 
             # Name of container in the blob storage
             # Env override: ATHENS_AZURE_CONTAINER_NAME

@@ -34,7 +34,7 @@ func WithAzureBlobLock(conf *config.AzureBlobConfig, timeout time.Duration, chec
 		}
 	}
 	if conf.ManagedIdentityResourceID != "" {
-		spStorageToken, err := adal.NewServicePrincipalTokenFromManagedIdentity(conf.ResourceProvider, &adal.ManagedIdentityOptions{IdentityResourceID: conf.ManagedIdentityResourceID})
+		spStorageToken, err := adal.NewServicePrincipalTokenFromManagedIdentity(conf.StorageResource, &adal.ManagedIdentityOptions{IdentityResourceID: conf.ManagedIdentityResourceID})
 		if err != nil {
 			return nil, errors.E(op, err)
 		}

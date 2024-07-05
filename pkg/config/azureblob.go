@@ -5,6 +5,6 @@ type AzureBlobConfig struct {
 	AccountName               string `envconfig:"ATHENS_AZURE_ACCOUNT_NAME"                 validate:"required"`
 	AccountKey                string `envconfig:"ATHENS_AZURE_ACCOUNT_KEY"`
 	ManagedIdentityResourceID string `envconfig:"ATHENS_AZURE_MANAGED_IDENTITY_RESOURCE_ID"`
-	ResourceProvider          string `envconfig:"ATHENS_AZURE_RESOURCE_PROVIDER"`
+	StorageResource           string `envconfig:"ATHENS_AZURE_STORAGE_RESOURCE"`
 	ContainerName             string `envconfig:"ATHENS_AZURE_CONTAINER_NAME"               validate:"required"`
 }
