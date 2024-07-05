@@ -22,6 +22,9 @@ import (
 func WithAzureBlobLock(conf *config.AzureBlobConfig, timeout time.Duration, checker storage.Checker) (Wrapper, error) {
 	const op errors.Op = "stash.WithAzureBlobLock"
 
+	if conf.AccountKey == "" && (conf.ManagedIdentityResourceID == "" || conf.StorageResource == "") {
+		return nil, errors.E(op, "either account key or managed identity resource id and storage resource must be set")
+	}
 	accountURL, err := url.Parse(fmt.Sprintf("https://%s.blob.core.windows.net", conf.AccountName))
 	if err != nil {
 		return nil, errors.E(op, err)
