@@ -343,8 +343,8 @@ It assumes that you already have the following:
             # Env override: ATHENS_AZURE_MANAGED_IDENTITY_RESOURCE_ID
             ManagedIdentityResourceId = "MY_AZURE_MANAGED_IDENTITY_RESOURCE_ID"
 
-            # Resource Provider to use with the storage account
-            # Env override: ATHENS_AZURE_RESOURCE_PROVIDER
+            # Storage Resource to use with the storage account
+            # Env override: ATHENS_AZURE_STORAGE_RESOURCE
             StorageResource = "MY_AZURE_STORAGE_RESOURCE"
 
             # Name of container in the blob storage
