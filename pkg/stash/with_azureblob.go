@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/Azure/azure-storage-blob-go/azblob"
+	"github.com/Azure/go-autorest/autorest/adal"
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/observ"
@@ -21,13 +22,30 @@ import (
 func WithAzureBlobLock(conf *config.AzureBlobConfig, timeout time.Duration, checker storage.Checker) (Wrapper, error) {
 	const op errors.Op = "stash.WithAzureBlobLock"
 
+	if conf.AccountKey == "" && (conf.ManagedIdentityResourceID == "" || conf.StorageResource == "") {
+		return nil, errors.E(op, "either account key or managed identity resource id and storage resource must be set")
+	}
 	accountURL, err := url.Parse(fmt.Sprintf("https://%s.blob.core.windows.net", conf.AccountName))
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
-	cred, err := azblob.NewSharedKeyCredential(conf.AccountName, conf.AccountKey)
-	if err != nil {
-		return nil, errors.E(op, err)
+	var cred azblob.Credential
+	if conf.AccountKey != "" {
+		cred, err = azblob.NewSharedKeyCredential(conf.AccountName, conf.AccountKey)
+		if err != nil {
+			return nil, errors.E(op, err)
+		}
+	}
+	if conf.ManagedIdentityResourceID != "" {
+		spStorageToken, err := adal.NewServicePrincipalTokenFromManagedIdentity(conf.StorageResource, &adal.ManagedIdentityOptions{IdentityResourceID: conf.ManagedIdentityResourceID})
+		if err != nil {
+			return nil, errors.E(op, err)
+		}
+		err = spStorageToken.Refresh()
+		if err != nil {
+			return nil, errors.E(op, err)
+		}
+		cred = azblob.NewTokenCredential(spStorageToken.OAuthToken(), nil)
 	}
 	pipe := azblob.NewPipeline(cred, azblob.PipelineOptions{})
 	serviceURL := azblob.NewServiceURL(*accountURL, pipe)
