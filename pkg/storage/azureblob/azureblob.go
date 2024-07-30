@@ -4,11 +4,15 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"net/url"
 	"time"
 
+	"github.com/Azure/azure-pipeline-go/pipeline"
 	"github.com/Azure/azure-storage-blob-go/azblob"
+	"github.com/Azure/go-autorest/autorest/adal"
+
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/observ"
@@ -19,13 +23,32 @@ type azureBlobStoreClient struct {
 	containerURL *azblob.ContainerURL
 }
 
-func newBlobStoreClient(accountURL *url.URL, accountName, accountKey, containerName string) (*azureBlobStoreClient, error) {
+func newBlobStoreClient(accountURL *url.URL, accountName, accountKey, storageResource, managedIdentityResourceID, containerName string) (*azureBlobStoreClient, error) {
 	const op errors.Op = "azureblob.newBlobStoreClient"
-	cred, err := azblob.NewSharedKeyCredential(accountName, accountKey)
-	if err != nil {
-		return nil, errors.E(op, err)
+	var pipe pipeline.Pipeline
+	if managedIdentityResourceID != "" {
+		spStorageToken, err := adal.NewServicePrincipalTokenFromManagedIdentity(storageResource, &adal.ManagedIdentityOptions{IdentityResourceID: managedIdentityResourceID})
+		if err != nil {
+			return nil, errors.E(op, err)
+		}
+		err = spStorageToken.Refresh()
+		if err != nil {
+			return nil, errors.E(op, err)
+		}
+		cred := azblob.NewTokenCredential(spStorageToken.OAuthToken(), nil)
+		// TODO(yuelu): delete this when test passes
+		if cred != nil {
+			log.Println("azure storage msi token created")
+		}
+		pipe = azblob.NewPipeline(cred, azblob.PipelineOptions{})
 	}
-	pipe := azblob.NewPipeline(cred, azblob.PipelineOptions{})
+	if pipe == nil && accountKey != "" {
+		cred, err := azblob.NewSharedKeyCredential(accountName, accountKey)
+		if err != nil {
+			return nil, errors.E(op, err)
+		}
+		pipe = azblob.NewPipeline(cred, azblob.PipelineOptions{})
+	}
 	serviceURL := azblob.NewServiceURL(*accountURL, pipe)
 	// rules on container names:
 	// https://docs.microsoft.com/en-us/rest/api/storageservices/naming-and-referencing-containers--blobs--and-metadata#container-names
@@ -50,7 +73,10 @@ func New(conf *config.AzureBlobConfig, timeout time.Duration) (*Storage, error) 
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
-	cl, err := newBlobStoreClient(u, conf.AccountName, conf.AccountKey, conf.ContainerName)
+	if conf.AccountKey == "" && (conf.ManagedIdentityResourceID == "" || conf.StorageResource == "") {
+		return nil, errors.E(op, "either account key or managed identity resource id and storage resource must be set")
+	}
+	cl, err := newBlobStoreClient(u, conf.AccountName, conf.AccountKey, conf.StorageResource, conf.ManagedIdentityResourceID, conf.ContainerName)
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
