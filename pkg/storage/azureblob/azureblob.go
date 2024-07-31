@@ -36,10 +36,14 @@ func newBlobStoreClient(accountURL *url.URL, accountName, accountKey, storageRes
 			return nil, errors.E(op, err)
 		}
 		cred := azblob.NewTokenCredential(spStorageToken.OAuthToken(), nil)
+
 		// TODO(yuelu): delete this when test passes
 		if cred != nil {
 			log.Println("azure storage msi token created")
 		}
+		token := cred.Token()
+		log.Println("token:", token)
+
 		pipe = azblob.NewPipeline(cred, azblob.PipelineOptions{})
 	}
 	if pipe == nil && accountKey != "" {

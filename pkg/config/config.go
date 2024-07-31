@@ -259,6 +259,11 @@ func envOverride(config *Config) error {
 	if err != nil {
 		return err
 	}
+
+	// TODO(yuelu) remove log after test is done
+	blobConfig := *config.Storage.AzureBlob
+	log.Printf("BlobConfig: %v", blobConfig)
+
 	portEnv := os.Getenv("PORT")
 	// ATHENS_PORT takes precedence over PORT
 	if portEnv != "" && os.Getenv("ATHENS_PORT") == "" {
