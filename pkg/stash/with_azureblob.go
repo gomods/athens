@@ -54,7 +54,9 @@ func WithAzureBlobLock(conf *config.AzureBlobConfig, timeout time.Duration, chec
 		if err != nil {
 			return nil, errors.E(op, err)
 		}
-		token, err := msiCred.GetToken(context.Background(), policy.TokenRequestOptions{})
+		token, err := msiCred.GetToken(context.Background(), policy.TokenRequestOptions{
+			Scopes: []string{"https://management.azure.com/.default"},
+		})
 		if err != nil {
 			return nil, errors.E(op, err)
 		}
