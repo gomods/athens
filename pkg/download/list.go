@@ -32,6 +32,7 @@ func ListHandler(dp Protocol, lggr log.Entry, df *mode.DownloadFile) http.Handle
 			err = errors.E(op, err, severityLevel)
 			lggr.SystemErr(err)
 			w.WriteHeader(errors.Kind(err))
+			_, _ = fmt.Fprintf(w, "not found: %s", strings.Replace(err.Error(), "exit status 1: go: ", "", 1))
 			return
 		}
 
