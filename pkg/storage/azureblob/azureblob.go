@@ -10,8 +10,9 @@ import (
 	"time"
 
 	"github.com/Azure/azure-pipeline-go/pipeline"
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore/policy"
+	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
 	"github.com/Azure/azure-storage-blob-go/azblob"
-	"github.com/Azure/go-autorest/autorest/adal"
 
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/errors"
@@ -27,24 +28,29 @@ func newBlobStoreClient(accountURL *url.URL, accountName, accountKey, storageRes
 	const op errors.Op = "azureblob.newBlobStoreClient"
 	var pipe pipeline.Pipeline
 	if managedIdentityResourceID != "" {
-		spStorageToken, err := adal.NewServicePrincipalTokenFromManagedIdentity(storageResource, &adal.ManagedIdentityOptions{IdentityResourceID: managedIdentityResourceID})
-		if err != nil {
-			return nil, errors.E(op, err)
-		}
-		err = spStorageToken.Refresh()
-		if err != nil {
-			return nil, errors.E(op, err)
-		}
-		cred := azblob.NewTokenCredential(spStorageToken.OAuthToken(), nil)
+		// spStorageToken, err := adal.NewServicePrincipalTokenFromManagedIdentity(storageResource, &adal.ManagedIdentityOptions{IdentityResourceID: managedIdentityResourceID})
+		// if err != nil {
+		// 	return nil, errors.E(op, err)
+		// }
+		// err = spStorageToken.Refresh()
+		// if err != nil {
+		// 	return nil, errors.E(op, err)
+		// }
 
+		msiCred, err := azidentity.NewManagedIdentityCredential(&azidentity.ManagedIdentityCredentialOptions{
+			ID: azidentity.ResourceID(managedIdentityResourceID),
+		})
+		if err != nil {
+			return nil, errors.E(op, err)
+		}
+		token, err := msiCred.GetToken(context.Background(), policy.TokenRequestOptions{})
+		if err != nil {
+			return nil, errors.E(op, err)
+		}
 		// TODO(yuelu): delete this when test passes
-		if cred != nil {
-			log.Println("azure storage msi token created")
-		}
-		token := cred.Token()
 		log.Println("token:", token)
-
-		pipe = azblob.NewPipeline(cred, azblob.PipelineOptions{})
+		tokenCred := azblob.NewTokenCredential(token.Token, nil)
+		pipe = azblob.NewPipeline(tokenCred, azblob.PipelineOptions{})
 	}
 	if pipe == nil && accountKey != "" {
 		cred, err := azblob.NewSharedKeyCredential(accountName, accountKey)

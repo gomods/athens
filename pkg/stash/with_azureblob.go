@@ -8,8 +8,9 @@ import (
 	"net/url"
 	"time"
 
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore/policy"
+	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
 	"github.com/Azure/azure-storage-blob-go/azblob"
-	"github.com/Azure/go-autorest/autorest/adal"
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/observ"
@@ -37,15 +38,27 @@ func WithAzureBlobLock(conf *config.AzureBlobConfig, timeout time.Duration, chec
 		}
 	}
 	if conf.ManagedIdentityResourceID != "" {
-		spStorageToken, err := adal.NewServicePrincipalTokenFromManagedIdentity(conf.StorageResource, &adal.ManagedIdentityOptions{IdentityResourceID: conf.ManagedIdentityResourceID})
+		// spStorageToken, err := adal.NewServicePrincipalTokenFromManagedIdentity(conf.StorageResource, &adal.ManagedIdentityOptions{IdentityResourceID: conf.ManagedIdentityResourceID})
+		// if err != nil {
+		// 	return nil, errors.E(op, err)
+		// }
+		// err = spStorageToken.Refresh()
+		// if err != nil {
+		// 	return nil, errors.E(op, err)
+		// }
+		// cred = azblob.NewTokenCredential(spStorageToken.OAuthToken(), nil)
+
+		msiCred, err := azidentity.NewManagedIdentityCredential(&azidentity.ManagedIdentityCredentialOptions{
+			ID: azidentity.ResourceID(conf.ManagedIdentityResourceID),
+		})
 		if err != nil {
 			return nil, errors.E(op, err)
 		}
-		err = spStorageToken.Refresh()
+		token, err := msiCred.GetToken(context.Background(), policy.TokenRequestOptions{})
 		if err != nil {
 			return nil, errors.E(op, err)
 		}
-		cred = azblob.NewTokenCredential(spStorageToken.OAuthToken(), nil)
+		cred = azblob.NewTokenCredential(token.Token, nil)
 	}
 	pipe := azblob.NewPipeline(cred, azblob.PipelineOptions{})
 	serviceURL := azblob.NewServiceURL(*accountURL, pipe)
