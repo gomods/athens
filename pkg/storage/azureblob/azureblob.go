@@ -43,7 +43,9 @@ func newBlobStoreClient(accountURL *url.URL, accountName, accountKey, storageRes
 		if err != nil {
 			return nil, errors.E(op, err)
 		}
-		token, err := msiCred.GetToken(context.Background(), policy.TokenRequestOptions{})
+		token, err := msiCred.GetToken(context.Background(), policy.TokenRequestOptions{
+			Scopes: []string{"https://management.azure.com/.default"},
+		})
 		if err != nil {
 			return nil, errors.E(op, err)
 		}
