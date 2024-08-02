@@ -236,9 +236,9 @@ func TestParseExampleConfig(t *testing.T) {
 		},
 		AzureBlob: &AzureBlobConfig{
 			AccountName:               "MY_AZURE_BLOB_ACCOUNT_NAME",
-			AccountKey:                "MY_AZURE_BLOB_ACCOUNT_KEY",
-			ManagedIdentityResourceID: "MY_AZURE_MANAGED_IDENTITY_RESOURCE_ID",
-			StorageResource:           "MY_AZURE_STORAGE_RESOURCE",
+			AccountKey:                "",
+			ManagedIdentityResourceID: "",
+			StorageResource:           "",
 			ContainerName:             "MY_AZURE_BLOB_CONTAINER_NAME",
 		},
 		External: &External{URL: ""},
