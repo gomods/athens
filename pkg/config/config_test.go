@@ -235,9 +235,11 @@ func TestParseExampleConfig(t *testing.T) {
 			Bucket: "MY_S3_BUCKET_NAME",
 		},
 		AzureBlob: &AzureBlobConfig{
-			AccountName:   "MY_AZURE_BLOB_ACCOUNT_NAME",
-			AccountKey:    "MY_AZURE_BLOB_ACCOUNT_KEY",
-			ContainerName: "MY_AZURE_BLOB_CONTAINER_NAME",
+			AccountName:               "MY_AZURE_BLOB_ACCOUNT_NAME",
+			AccountKey:                "MY_AZURE_BLOB_ACCOUNT_KEY",
+			ManagedIdentityResourceID: "MY_AZURE_MANAGED_IDENTITY_RESOURCE_ID",
+			StorageResource:           "MY_AZURE_STORAGE_RESOURCE",
+			ContainerName:             "MY_AZURE_BLOB_CONTAINER_NAME",
 		},
 		External: &External{URL: ""},
 	}
