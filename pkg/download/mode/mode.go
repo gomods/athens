@@ -3,7 +3,6 @@ package mode
 import (
 	"encoding/base64"
 	"fmt"
-	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -67,13 +66,8 @@ func NewFile(m Mode, downloadURL string) (*DownloadFile, error) {
 		}
 		return parseFile(bts)
 	} else if strings.HasPrefix(string(m), "custom:") {
-		// TODO(yuelu) remove this line after test passes
-		log.Printf("mode: %s", string(m[7:]))
-
 		bts, err := base64.StdEncoding.DecodeString(string(m[7:]))
 		if err != nil {
-			// TODO(yuelu) remove this line after test passes
-			log.Println("[NewFile] error decoding base64 string")
 			return nil, err
 		}
 		return parseFile(bts)

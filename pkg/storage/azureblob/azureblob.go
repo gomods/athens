@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"net/url"
 	"time"
@@ -24,19 +23,10 @@ type azureBlobStoreClient struct {
 	containerURL *azblob.ContainerURL
 }
 
-func newBlobStoreClient(accountURL *url.URL, accountName, accountKey, storageResource, managedIdentityResourceID, containerName string) (*azureBlobStoreClient, error) {
+func newBlobStoreClient(accountURL *url.URL, accountName, accountKey, credScope, managedIdentityResourceID, containerName string) (*azureBlobStoreClient, error) {
 	const op errors.Op = "azureblob.newBlobStoreClient"
 	var pipe pipeline.Pipeline
 	if managedIdentityResourceID != "" {
-		// spStorageToken, err := adal.NewServicePrincipalTokenFromManagedIdentity(storageResource, &adal.ManagedIdentityOptions{IdentityResourceID: managedIdentityResourceID})
-		// if err != nil {
-		// 	return nil, errors.E(op, err)
-		// }
-		// err = spStorageToken.Refresh()
-		// if err != nil {
-		// 	return nil, errors.E(op, err)
-		// }
-
 		msiCred, err := azidentity.NewManagedIdentityCredential(&azidentity.ManagedIdentityCredentialOptions{
 			ID: azidentity.ResourceID(managedIdentityResourceID),
 		})
@@ -44,13 +34,11 @@ func newBlobStoreClient(accountURL *url.URL, accountName, accountKey, storageRes
 			return nil, errors.E(op, err)
 		}
 		token, err := msiCred.GetToken(context.Background(), policy.TokenRequestOptions{
-			Scopes: []string{"https://management.azure.com/.default"},
+			Scopes: []string{credScope},
 		})
 		if err != nil {
 			return nil, errors.E(op, err)
 		}
-		// TODO(yuelu): delete this when test passes
-		log.Println("token:", token)
 		tokenCred := azblob.NewTokenCredential(token.Token, nil)
 		pipe = azblob.NewPipeline(tokenCred, azblob.PipelineOptions{})
 	}
@@ -85,10 +73,10 @@ func New(conf *config.AzureBlobConfig, timeout time.Duration) (*Storage, error) 
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
-	if conf.AccountKey == "" && (conf.ManagedIdentityResourceID == "" || conf.StorageResource == "") {
+	if conf.AccountKey == "" && (conf.ManagedIdentityResourceID == "" || conf.CredentialScope == "") {
 		return nil, errors.E(op, "either account key or managed identity resource id and storage resource must be set")
 	}
-	cl, err := newBlobStoreClient(u, conf.AccountName, conf.AccountKey, conf.StorageResource, conf.ManagedIdentityResourceID, conf.ContainerName)
+	cl, err := newBlobStoreClient(u, conf.AccountName, conf.AccountKey, conf.CredentialScope, conf.ManagedIdentityResourceID, conf.ContainerName)
 	if err != nil {
 		return nil, errors.E(op, err)
 	}

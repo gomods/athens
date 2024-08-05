@@ -541,8 +541,8 @@ ShutdownTimeout = 60
         ManagedIdentityResourceId = ""
 
         # Storage Resource to use with the storage account
-        # Env override: ATHENS_AZURE_STORAGE_RESOURCE
-        StorageResource = ""
+        # Env override: ATHENS_AZURE_CREDENTIAL_SCOPE
+        CredentialScope = ""
 
         # Name of container in the blob storage
         # Env override: ATHENS_AZURE_CONTAINER_NAME

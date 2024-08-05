@@ -41,7 +41,6 @@ func addProxyRoutes(
 
 	indexer, err := getIndex(c)
 	if err != nil {
-		l.Println("error creating indexer")
 		return err
 	}
 	r.HandleFunc("/index", indexHandler(indexer))
@@ -49,11 +48,9 @@ func addProxyRoutes(
 	for _, sumdb := range c.SumDBs {
 		sumdbURL, err := url.Parse(sumdb)
 		if err != nil {
-			l.Println("error parsing sumdb URL")
 			return err
 		}
 		if sumdbURL.Scheme != "https" {
-			l.Println("sumdb must have an https scheme")
 			return fmt.Errorf("sumdb: %v must have an https scheme", sumdb)
 		}
 		supportPath := path.Join("/sumdb", sumdbURL.Host, "/supported")
@@ -95,12 +92,10 @@ func addProxyRoutes(
 		c.GoBinaryEnvVars.Add("GONOSUMDB", strings.Join(c.NoSumPatterns, ","))
 	}
 	if err := c.GoBinaryEnvVars.Validate(); err != nil {
-		l.Println("error validating GoBinaryEnvVars")
 		return err
 	}
 	mf, err := module.NewGoGetFetcher(c.GoBinary, c.GoGetDir, c.GoBinaryEnvVars, fs)
 	if err != nil {
-		l.Println("error creating module fetcher")
 		return err
 	}
 
@@ -108,14 +103,12 @@ func addProxyRoutes(
 	checker := storage.WithChecker(s)
 	withSingleFlight, err := getSingleFlight(l, c, s, checker)
 	if err != nil {
-		l.Println("error creating single flight")
 		return err
 	}
 	st := stash.New(mf, s, indexer, stash.WithPool(c.GoGetWorkers), withSingleFlight)
 
 	df, err := mode.NewFile(c.DownloadMode, c.DownloadURL)
 	if err != nil {
-		l.Println("error creating download file")
 		return err
 	}
 
