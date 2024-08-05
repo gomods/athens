@@ -87,8 +87,8 @@ func (ms *mockAzureBlobStasher) Stash(ctx context.Context, mod, ver string) (str
 func getAzureTestConfig(containerName string) *config.AzureBlobConfig {
 	key := os.Getenv("ATHENS_AZURE_ACCOUNT_KEY")
 	resourceId := os.Getenv("ATHENS_AZURE_MANAGED_IDENTITY_RESOURCE_ID")
-	storageResource := os.Getenv("ATHENS_AZURE_STORAGE_RESOURCE")
-	if key == "" && (resourceId == "" || storageResource == "") {
+	credentialScope := os.Getenv("ATHENS_AZURE_CREDENTIAL_SCOPE")
+	if key == "" && (resourceId == "" || credentialScope == "") {
 		return nil
 	}
 	name := os.Getenv("ATHENS_AZURE_ACCOUNT_NAME")
@@ -99,7 +99,7 @@ func getAzureTestConfig(containerName string) *config.AzureBlobConfig {
 		AccountName:               name,
 		AccountKey:                key,
 		ManagedIdentityResourceID: resourceId,
-		StorageResource:           storageResource,
+		CredentialScope:           credentialScope,
 		ContainerName:             containerName,
 	}
 }
