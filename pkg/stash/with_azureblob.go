@@ -48,6 +48,12 @@ func WithAzureBlobLock(conf *config.AzureBlobConfig, timeout time.Duration, chec
 		if err != nil {
 			return nil, errors.E(op, err)
 		}
+		if token.Token == "" || token.ExpiresOn.Before(time.Now().Add(time.Hour)) {
+			token, err = msiCred.GetToken(context.Background(), policy.TokenRequestOptions{Scopes: []string{conf.CredentialScope}})
+		}
+		if err != nil {
+			return nil, errors.E(op, err)
+		}
 		cred = azblob.NewTokenCredential(token.Token, nil)
 	}
 	pipe := azblob.NewPipeline(cred, azblob.PipelineOptions{})

@@ -38,6 +38,12 @@ func newBlobStoreClient(accountURL *url.URL, accountName, accountKey, credScope,
 		if err != nil {
 			return nil, errors.E(op, err)
 		}
+		if token.Token == "" || token.ExpiresOn.Before(time.Now().Add(time.Hour)) {
+			token, err = msiCred.GetToken(context.Background(), policy.TokenRequestOptions{Scopes: []string{credScope}})
+		}
+		if err != nil {
+			return nil, errors.E(op, err)
+		}
 		tokenCred := azblob.NewTokenCredential(token.Token, nil)
 		pipe = azblob.NewPipeline(tokenCred, azblob.PipelineOptions{})
 	}
