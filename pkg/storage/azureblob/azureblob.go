@@ -23,6 +23,9 @@ type azureBlobStoreClient struct {
 }
 
 const (
+	// TokenRefreshTolerance defines the duration before the token's actual expiration time
+	// during which the token should be refreshed. This helps ensure that the token is
+	// refreshed in a timely manner, avoiding potential issues with token expiration.
 	TokenRefreshTolerance = time.Hour
 )
 
