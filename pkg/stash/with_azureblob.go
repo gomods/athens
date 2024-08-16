@@ -15,6 +15,7 @@ import (
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/observ"
 	"github.com/gomods/athens/pkg/storage"
+	"github.com/gomods/athens/pkg/storage/azureblob"
 	"github.com/google/uuid"
 )
 
@@ -48,13 +49,16 @@ func WithAzureBlobLock(conf *config.AzureBlobConfig, timeout time.Duration, chec
 		if err != nil {
 			return nil, errors.E(op, err)
 		}
-		if token.Token == "" || token.ExpiresOn.Before(time.Now().Add(time.Hour)) {
-			token, err = msiCred.GetToken(context.Background(), policy.TokenRequestOptions{Scopes: []string{conf.CredentialScope}})
-		}
-		if err != nil {
-			return nil, errors.E(op, err)
-		}
-		cred = azblob.NewTokenCredential(token.Token, nil)
+		cred = azblob.NewTokenCredential(token.Token, func(tc azblob.TokenCredential) time.Duration {
+			token, err := msiCred.GetToken(context.Background(), policy.TokenRequestOptions{
+				Scopes: []string{conf.CredentialScope},
+			})
+			if err != nil {
+				fmt.Printf("error getting token: %s during token refresh process", err)
+				return 0
+			}
+			return time.Until(token.ExpiresOn.Add(-azureblob.TokenRefreshTolerance))
+		})
 	}
 	pipe := azblob.NewPipeline(cred, azblob.PipelineOptions{})
 	serviceURL := azblob.NewServiceURL(*accountURL, pipe)

@@ -22,6 +22,10 @@ type azureBlobStoreClient struct {
 	containerURL *azblob.ContainerURL
 }
 
+const (
+	TokenRefreshTolerance = time.Hour
+)
+
 func newBlobStoreClient(accountURL *url.URL, accountName, accountKey, credScope, managedIdentityResourceID, containerName string) (*azureBlobStoreClient, error) {
 	const op errors.Op = "azureblob.newBlobStoreClient"
 	var pipe pipeline.Pipeline
@@ -38,13 +42,16 @@ func newBlobStoreClient(accountURL *url.URL, accountName, accountKey, credScope,
 		if err != nil {
 			return nil, errors.E(op, err)
 		}
-		if token.Token == "" || token.ExpiresOn.Before(time.Now().Add(time.Hour)) {
-			token, err = msiCred.GetToken(context.Background(), policy.TokenRequestOptions{Scopes: []string{credScope}})
-		}
-		if err != nil {
-			return nil, errors.E(op, err)
-		}
-		tokenCred := azblob.NewTokenCredential(token.Token, nil)
+		tokenCred := azblob.NewTokenCredential(token.Token, func(tc azblob.TokenCredential) time.Duration {
+			token, err := msiCred.GetToken(context.Background(), policy.TokenRequestOptions{
+				Scopes: []string{credScope},
+			})
+			if err != nil {
+				fmt.Printf("error getting token: %s during token refresh process", err)
+				return 0
+			}
+			return time.Until(token.ExpiresOn.Add(-TokenRefreshTolerance))
+		})
 		pipe = azblob.NewPipeline(tokenCred, azblob.PipelineOptions{})
 	}
 	if pipe == nil && accountKey != "" {
