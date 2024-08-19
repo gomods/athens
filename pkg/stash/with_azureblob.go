@@ -53,6 +53,7 @@ func WithAzureBlobLock(conf *config.AzureBlobConfig, timeout time.Duration, chec
 			token, err := msiCred.GetToken(context.Background(), policy.TokenRequestOptions{
 				Scopes: []string{conf.CredentialScope},
 			})
+			tc.SetToken(token.Token)
 			if err != nil {
 				fmt.Printf("error getting token: %s during token refresh process", err)
 				return 0

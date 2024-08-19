@@ -49,6 +49,7 @@ func newBlobStoreClient(accountURL *url.URL, accountName, accountKey, credScope,
 			token, err := msiCred.GetToken(context.Background(), policy.TokenRequestOptions{
 				Scopes: []string{credScope},
 			})
+			tc.SetToken(token.Token)
 			if err != nil {
 				fmt.Printf("error getting token: %s during token refresh process", err)
 				return 0
