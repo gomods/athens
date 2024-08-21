@@ -46,13 +46,16 @@ func newBlobStoreClient(accountURL *url.URL, accountName, accountKey, credScope,
 			return nil, errors.E(op, err)
 		}
 		tokenCred := azblob.NewTokenCredential(token.Token, func(tc azblob.TokenCredential) time.Duration {
+			fmt.Println("refreshing token started")
 			token, err := msiCred.GetToken(context.Background(), policy.TokenRequestOptions{
 				Scopes: []string{credScope},
 			})
 			tc.SetToken(token.Token)
 			if err != nil {
 				fmt.Printf("error getting token: %s during token refresh process", err)
-				return 0
+				// token refresh may fail due to transient errors, so we return a non-zero duration
+				// to retry the token refresh after a short delay
+				return time.Minute
 			}
 			return time.Until(token.ExpiresOn.Add(-TokenRefreshTolerance))
 		})

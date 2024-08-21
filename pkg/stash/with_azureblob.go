@@ -50,13 +50,16 @@ func WithAzureBlobLock(conf *config.AzureBlobConfig, timeout time.Duration, chec
 			return nil, errors.E(op, err)
 		}
 		cred = azblob.NewTokenCredential(token.Token, func(tc azblob.TokenCredential) time.Duration {
+			fmt.Println("refreshing token started")
 			token, err := msiCred.GetToken(context.Background(), policy.TokenRequestOptions{
 				Scopes: []string{conf.CredentialScope},
 			})
 			tc.SetToken(token.Token)
 			if err != nil {
 				fmt.Printf("error getting token: %s during token refresh process", err)
-				return 0
+				// token refresh may fail due to transient errors, so we return a non-zero duration
+				// to retry the token refresh after a short delay
+				return time.Minute
 			}
 			return time.Until(token.ExpiresOn.Add(-azureblob.TokenRefreshTolerance))
 		})
