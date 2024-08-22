@@ -15,7 +15,6 @@ import (
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/observ"
 	"github.com/gomods/athens/pkg/storage"
-	"github.com/gomods/athens/pkg/storage/azureblob"
 	"github.com/google/uuid"
 )
 
@@ -51,14 +50,7 @@ func WithAzureBlobLock(conf *config.AzureBlobConfig, timeout time.Duration, chec
 		}
 		cred = azblob.NewTokenCredential(token.Token, func(tc azblob.TokenCredential) time.Duration {
 			fmt.Printf("refreshing token started at: %s", time.Now())
-			refreshedMsiCred, err := azidentity.NewManagedIdentityCredential(&azidentity.ManagedIdentityCredentialOptions{
-				ID: azidentity.ResourceID(conf.ManagedIdentityResourceID),
-			})
-			if err != nil {
-				fmt.Println("error creating managed identity credential during token refresh process")
-				return time.Minute
-			}
-			refreshedToken, err := refreshedMsiCred.GetToken(context.Background(), policy.TokenRequestOptions{
+			refreshedToken, err := msiCred.GetToken(context.Background(), policy.TokenRequestOptions{
 				Scopes: []string{conf.CredentialScope},
 			})
 			if err != nil {
@@ -69,13 +61,9 @@ func WithAzureBlobLock(conf *config.AzureBlobConfig, timeout time.Duration, chec
 			}
 			tc.SetToken(refreshedToken.Token)
 
-			refreshDuration := time.Until(refreshedToken.ExpiresOn.Add(-azureblob.TokenRefreshTolerance))
-			if refreshDuration <= 0 {
-				fmt.Println("refresh duration is non-positive, setting to default 1 minute")
-				refreshDuration = time.Minute
-			}
+			refreshDuration := time.Until(refreshedToken.ExpiresOn)
 			fmt.Printf("refresh duration: %s", refreshDuration)
-			return 5 * time.Minute
+			return refreshDuration
 		})
 	}
 	pipe := azblob.NewPipeline(cred, azblob.PipelineOptions{})

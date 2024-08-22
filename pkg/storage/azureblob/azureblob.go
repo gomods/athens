@@ -26,7 +26,7 @@ const (
 	// TokenRefreshTolerance defines the duration before the token's actual expiration time
 	// during which the token should be refreshed. This helps ensure that the token is
 	// refreshed in a timely manner, avoiding potential issues with token expiration.
-	TokenRefreshTolerance = time.Hour
+	TokenRefreshTolerance = time.Second
 )
 
 func newBlobStoreClient(accountURL *url.URL, accountName, accountKey, credScope, managedIdentityResourceID, containerName string) (*azureBlobStoreClient, error) {
@@ -47,14 +47,7 @@ func newBlobStoreClient(accountURL *url.URL, accountName, accountKey, credScope,
 		}
 		tokenCred := azblob.NewTokenCredential(token.Token, func(tc azblob.TokenCredential) time.Duration {
 			fmt.Printf("refreshing token started at: %s", time.Now())
-			refreshedMsiCred, err := azidentity.NewManagedIdentityCredential(&azidentity.ManagedIdentityCredentialOptions{
-				ID: azidentity.ResourceID(managedIdentityResourceID),
-			})
-			if err != nil {
-				fmt.Println("error creating managed identity credential during token refresh process")
-				return time.Minute
-			}
-			refreshedToken, err := refreshedMsiCred.GetToken(context.Background(), policy.TokenRequestOptions{
+			refreshedToken, err := msiCred.GetToken(context.Background(), policy.TokenRequestOptions{
 				Scopes: []string{credScope},
 			})
 			if err != nil {
@@ -65,13 +58,9 @@ func newBlobStoreClient(accountURL *url.URL, accountName, accountKey, credScope,
 			}
 			tc.SetToken(refreshedToken.Token)
 
-			refreshDuration := time.Until(refreshedToken.ExpiresOn.Add(-TokenRefreshTolerance))
-			if refreshDuration <= 0 {
-				fmt.Println("refresh duration is non-positive, setting to default 1 minute")
-				refreshDuration = time.Minute
-			}
+			refreshDuration := time.Until(refreshedToken.ExpiresOn)
 			fmt.Printf("refresh duration: %s", refreshDuration)
-			return 5 * time.Minute
+			return refreshDuration
 		})
 		pipe = azblob.NewPipeline(tokenCred, azblob.PipelineOptions{})
 	}
