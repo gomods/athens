@@ -50,18 +50,32 @@ func WithAzureBlobLock(conf *config.AzureBlobConfig, timeout time.Duration, chec
 			return nil, errors.E(op, err)
 		}
 		cred = azblob.NewTokenCredential(token.Token, func(tc azblob.TokenCredential) time.Duration {
-			fmt.Println("refreshing token started")
-			token, err := msiCred.GetToken(context.Background(), policy.TokenRequestOptions{
+			fmt.Printf("refreshing token started at: %s", time.Now())
+			refreshedMsiCred, err := azidentity.NewManagedIdentityCredential(&azidentity.ManagedIdentityCredentialOptions{
+				ID: azidentity.ResourceID(conf.ManagedIdentityResourceID),
+			})
+			if err != nil {
+				fmt.Println("error creating managed identity credential during token refresh process")
+				return time.Minute
+			}
+			refreshedToken, err := refreshedMsiCred.GetToken(context.Background(), policy.TokenRequestOptions{
 				Scopes: []string{conf.CredentialScope},
 			})
-			tc.SetToken(token.Token)
 			if err != nil {
 				fmt.Printf("error getting token: %s during token refresh process", err)
 				// token refresh may fail due to transient errors, so we return a non-zero duration
 				// to retry the token refresh after a short delay
 				return time.Minute
 			}
-			return time.Until(token.ExpiresOn.Add(-azureblob.TokenRefreshTolerance))
+			tc.SetToken(refreshedToken.Token)
+
+			refreshDuration := time.Until(refreshedToken.ExpiresOn.Add(-azureblob.TokenRefreshTolerance))
+			if refreshDuration <= 0 {
+				fmt.Println("refresh duration is non-positive, setting to default 1 minute")
+				refreshDuration = time.Minute
+			}
+			fmt.Printf("refresh duration: %s", refreshDuration)
+			return 5 * time.Minute
 		})
 	}
 	pipe := azblob.NewPipeline(cred, azblob.PipelineOptions{})
