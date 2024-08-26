@@ -15,6 +15,7 @@ import (
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/observ"
 	"github.com/gomods/athens/pkg/storage"
+	"github.com/gomods/athens/pkg/storage/azureblob"
 	"github.com/google/uuid"
 )
 
@@ -61,7 +62,7 @@ func WithAzureBlobLock(conf *config.AzureBlobConfig, timeout time.Duration, chec
 			}
 			tc.SetToken(refreshedToken.Token)
 
-			refreshDuration := time.Until(refreshedToken.ExpiresOn)
+			refreshDuration := time.Until(refreshedToken.ExpiresOn.Add(-azureblob.TokenRefreshTolerance))
 			fmt.Printf("refresh duration: %s", refreshDuration)
 			return refreshDuration
 		})

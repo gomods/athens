@@ -26,7 +26,7 @@ const (
 	// TokenRefreshTolerance defines the duration before the token's actual expiration time
 	// during which the token should be refreshed. This helps ensure that the token is
 	// refreshed in a timely manner, avoiding potential issues with token expiration.
-	TokenRefreshTolerance = time.Second
+	TokenRefreshTolerance = 5 * time.Minute
 )
 
 func newBlobStoreClient(accountURL *url.URL, accountName, accountKey, credScope, managedIdentityResourceID, containerName string) (*azureBlobStoreClient, error) {
@@ -58,7 +58,7 @@ func newBlobStoreClient(accountURL *url.URL, accountName, accountKey, credScope,
 			}
 			tc.SetToken(refreshedToken.Token)
 
-			refreshDuration := time.Until(refreshedToken.ExpiresOn)
+			refreshDuration := time.Until(refreshedToken.ExpiresOn.Add(-TokenRefreshTolerance))
 			fmt.Printf("refresh duration: %s", refreshDuration)
 			return refreshDuration
 		})
