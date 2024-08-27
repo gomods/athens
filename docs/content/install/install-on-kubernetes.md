@@ -89,7 +89,7 @@ $ helm repo update
 Next, install the chart with default values to `athens` namespace:
 
 ```
-$ helm install gomods/athens-proxy -n athens --namespace athens
+$ helm install athens gomods/athens-proxy --namespace athens
 ```
 
 This will deploy a single Athens instance in the `athens` namespace with `disk` storage enabled. Additionally, a `ClusterIP` service will be created.
@@ -101,7 +101,7 @@ This will deploy a single Athens instance in the `athens` namespace with `disk` 
 By default, the chart will install Athens with a replica count of 1. To change this, change the `replicaCount` value:
 
 ```console
-helm install gomods/athens-proxy -n athens --namespace athens --set replicaCount=3
+helm install athens gomods/athens-proxy --namespace athens --set replicaCount=3
 ```
 
 ### Resources
@@ -109,7 +109,7 @@ helm install gomods/athens-proxy -n athens --namespace athens --set replicaCount
 By default, the chart will install Athens without specific resource requests or limits. To change this, change the `resources` value:
 
 ```console
-helm install gomods/athens-proxy -n athens --namespace athens \
+helm install athens gomods/athens-proxy --namespace athens \
   --set resources.requests.cpu=100m \
   --set resources.requests.memory=64Mi \
   --set resources.limits.cpu=100m \
@@ -267,7 +267,7 @@ kubectl create secret generic netrcsecret --from-file=./netrc
 In order to instruct athens to fetch and use the secret, `netrc.enabled` flag must be set to true:
 
 ```console
-helm install gomods/athens-proxy -n athens --namespace athens --set netrc.enabled=true
+helm install athens gomods/athens-proxy --namespace athens --set netrc.enabled=true
 ```
 
 ### gitconfig support
@@ -295,7 +295,7 @@ kubectl create secret generic athens-proxy-gitconfig --from-file=gitconfig=/tmp/
 In order to instruct athens to use the secret, set appropriate flags (or parameters in `values.yaml`):
 
 ```console
-helm install gomods/athens-proxy --name athens --namespace athens \
+helm install athens gomods/athens-proxy --namespace athens \
     --set gitconfig.enabled=true \
     --set gitconfig.secretName=athens-proxy-gitconfig \
     --set gitconfig.secretKey=gitconfig
