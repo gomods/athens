@@ -8,6 +8,9 @@ import (
 	"net/url"
 	"time"
 
+	"github.com/Azure/azure-pipeline-go/pipeline"
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore/policy"
+	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
 	"github.com/Azure/azure-storage-blob-go/azblob"
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/errors"
@@ -19,13 +22,55 @@ type azureBlobStoreClient struct {
 	containerURL *azblob.ContainerURL
 }
 
-func newBlobStoreClient(accountURL *url.URL, accountName, accountKey, containerName string) (*azureBlobStoreClient, error) {
+const (
+	// TokenRefreshTolerance defines the duration before the token's actual expiration time
+	// during which the token should be refreshed. This helps ensure that the token is
+	// refreshed in a timely manner, avoiding potential issues with token expiration.
+	TokenRefreshTolerance = 5 * time.Minute
+)
+
+func newBlobStoreClient(accountURL *url.URL, accountName, accountKey, credScope, managedIdentityResourceID, containerName string) (*azureBlobStoreClient, error) {
 	const op errors.Op = "azureblob.newBlobStoreClient"
-	cred, err := azblob.NewSharedKeyCredential(accountName, accountKey)
-	if err != nil {
-		return nil, errors.E(op, err)
+	var pipe pipeline.Pipeline
+	if managedIdentityResourceID != "" {
+		msiCred, err := azidentity.NewManagedIdentityCredential(&azidentity.ManagedIdentityCredentialOptions{
+			ID: azidentity.ResourceID(managedIdentityResourceID),
+		})
+		if err != nil {
+			return nil, errors.E(op, err)
+		}
+		token, err := msiCred.GetToken(context.Background(), policy.TokenRequestOptions{
+			Scopes: []string{credScope},
+		})
+		if err != nil {
+			return nil, errors.E(op, err)
+		}
+		tokenCred := azblob.NewTokenCredential(token.Token, func(tc azblob.TokenCredential) time.Duration {
+			fmt.Printf("refreshing token started at: %s", time.Now())
+			refreshedToken, err := msiCred.GetToken(context.Background(), policy.TokenRequestOptions{
+				Scopes: []string{credScope},
+			})
+			if err != nil {
+				fmt.Printf("error getting token: %s during token refresh process", err)
+				// token refresh may fail due to transient errors, so we return a non-zero duration
+				// to retry the token refresh after a short delay
+				return time.Minute
+			}
+			tc.SetToken(refreshedToken.Token)
+
+			refreshDuration := time.Until(refreshedToken.ExpiresOn.Add(-TokenRefreshTolerance))
+			fmt.Printf("refresh duration: %s", refreshDuration)
+			return refreshDuration
+		})
+		pipe = azblob.NewPipeline(tokenCred, azblob.PipelineOptions{})
 	}
-	pipe := azblob.NewPipeline(cred, azblob.PipelineOptions{})
+	if pipe == nil && accountKey != "" {
+		cred, err := azblob.NewSharedKeyCredential(accountName, accountKey)
+		if err != nil {
+			return nil, errors.E(op, err)
+		}
+		pipe = azblob.NewPipeline(cred, azblob.PipelineOptions{})
+	}
 	serviceURL := azblob.NewServiceURL(*accountURL, pipe)
 	// rules on container names:
 	// https://docs.microsoft.com/en-us/rest/api/storageservices/naming-and-referencing-containers--blobs--and-metadata#container-names
@@ -50,7 +95,10 @@ func New(conf *config.AzureBlobConfig, timeout time.Duration) (*Storage, error) 
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
-	cl, err := newBlobStoreClient(u, conf.AccountName, conf.AccountKey, conf.ContainerName)
+	if conf.AccountKey == "" && (conf.ManagedIdentityResourceID == "" || conf.CredentialScope == "") {
+		return nil, errors.E(op, "either account key or managed identity resource id and storage resource must be set")
+	}
+	cl, err := newBlobStoreClient(u, conf.AccountName, conf.AccountKey, conf.CredentialScope, conf.ManagedIdentityResourceID, conf.ContainerName)
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
