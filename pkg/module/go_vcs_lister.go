@@ -28,15 +28,17 @@ type vcsLister struct {
 	env       []string
 	fs        afero.Fs
 	sfg       *singleflight.Group
+	timeout   time.Duration
 }
 
 // NewVCSLister creates an UpstreamLister which uses VCS to fetch a list of available versions.
-func NewVCSLister(goBinPath string, env []string, fs afero.Fs) UpstreamLister {
+func NewVCSLister(goBinPath string, env []string, fs afero.Fs, timeout time.Duration) UpstreamLister {
 	return &vcsLister{
 		goBinPath: goBinPath,
 		env:       env,
 		fs:        fs,
 		sfg:       &singleflight.Group{},
+		timeout:   timeout,
 	}
 }
 
@@ -56,7 +58,11 @@ func (l *vcsLister) List(ctx context.Context, module string) (*storage.RevInfo, 
 		}
 		defer func() { _ = l.fs.RemoveAll(tmpDir) }()
 
-		cmd := exec.Command(
+		timeoutCtx, cancel := context.WithTimeout(ctx, l.timeout)
+		defer cancel()
+
+		cmd := exec.CommandContext(
+			timeoutCtx,
 			l.goBinPath,
 			"list", "-m", "-versions", "-json",
 			config.FmtModVer(module, "latest"),
@@ -77,6 +83,10 @@ func (l *vcsLister) List(ctx context.Context, module string) (*storage.RevInfo, 
 		err = cmd.Run()
 		if err != nil {
 			err = fmt.Errorf("%w: %s", err, stderr)
+			if errors.IsErr(timeoutCtx.Err(), context.DeadlineExceeded) {
+				return nil, errors.E(op, err, errors.KindGatewayTimeout)
+			}
+
 			// as of now, we can't recognize between a true NotFound
 			// and an unexpected error, so we choose the more
 			// hopeful path of NotFound. This way the Go command
