@@ -18,6 +18,7 @@ const (
 	KindRateLimit      = http.StatusTooManyRequests
 	KindNotImplemented = http.StatusNotImplemented
 	KindRedirect       = http.StatusMovedPermanently
+	KindGatewayTimeout = http.StatusGatewayTimeout
 )
 
 // Error is an Athens system error.

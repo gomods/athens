@@ -99,7 +99,7 @@ func addProxyRoutes(
 		return err
 	}
 
-	lister := module.NewVCSLister(c.GoBinary, c.GoBinaryEnvVars, fs)
+	lister := module.NewVCSLister(c.GoBinary, c.GoBinaryEnvVars, fs, c.TimeoutDuration())
 	checker := storage.WithChecker(s)
 	withSingleFlight, err := getSingleFlight(l, c, s, checker)
 	if err != nil {

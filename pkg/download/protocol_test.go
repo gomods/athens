@@ -50,7 +50,7 @@ func getDP(t *testing.T) Protocol {
 	return New(&Opts{
 		Storage:     s,
 		Stasher:     st,
-		Lister:      module.NewVCSLister(goBin, conf.GoBinaryEnvVars, fs),
+		Lister:      module.NewVCSLister(goBin, conf.GoBinaryEnvVars, fs, conf.TimeoutDuration()),
 		NetworkMode: Strict,
 	})
 }
