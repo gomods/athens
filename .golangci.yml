@@ -28,8 +28,8 @@ linters:
     - errchkjson
     - exhaustive
     - exhaustruct
-    - execinquery
-    - exportloopref
+    - execinquery # deprecated
+    - exportloopref # deprecated
     - forcetypeassert
     - funlen
     - gochecknoglobals
