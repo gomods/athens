@@ -73,9 +73,10 @@ func benchSave(b *testing.B, s storage.Backend, reset func() error) {
 	})
 }
 
-func benchDelete(b *testing.B, s storage.Backend, clear func() error) {
-	require.NoError(b, clear())
-	defer require.NoError(b, clear())
+func benchDelete(b *testing.B, s storage.Backend, reset func() error) {
+	b.Helper()
+	require.NoError(b, reset())
+	defer require.NoError(b, reset())
 
 	module, version := "benchDeleteModule", "1.0.1"
 	mock := getMockModule()
@@ -94,9 +95,10 @@ func benchDelete(b *testing.B, s storage.Backend, clear func() error) {
 	})
 }
 
-func benchExists(b *testing.B, s storage.Backend, clear func() error) {
-	require.NoError(b, clear())
-	defer require.NoError(b, clear())
+func benchExists(b *testing.B, s storage.Backend, reset func() error) {
+	b.Helper()
+	require.NoError(b, reset())
+	defer require.NoError(b, reset())
 
 	module, version := "benchExistsModule", "1.0.1"
 	mock := getMockModule()
