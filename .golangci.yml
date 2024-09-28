@@ -16,26 +16,27 @@ linters-settings:
 linters:
   enable-all: true
   disable:
-    - interfacer # deprecated
-    - scopelint # deprecated
-    - maligned # deprecated
-    - golint # deprecated
-    - structcheck # deprecated
-    - deadcode # deprecated
-    - varcheck # deprecated
-    - nosnakecase # deprecated
-    - ifshort # deprecated
+    - perfsprint # new
+    - testifylint # new
+    - spancheck # new
+    - rowserrcheck # new
+    - mnd # new
+    - intrange # new
+    - depguard # new
+    - revive # new
+    - errcheck # new
     - errchkjson
     - exhaustive
-    - exhaustivestruct
     - exhaustruct
+    - execinquery # deprecated
+    - exportloopref # deprecated
     - forcetypeassert
     - funlen
     - gochecknoglobals
     - gochecknoinits
     - goconst
     - godox
-    - goerr113
+    - err113
     - gomnd
     - ireturn
     - lll
@@ -60,6 +61,7 @@ issues:
     - "G204: Subprocess launched with variable"
     - "G402: TLS MinVersion too low."
     - "const `op` is unused"
+    - "G115: integer overflow conversion int -> int32"
   exclude-rules:
     - path: cmd/proxy/main.go
       text: "G108: Profiling endpoint is automatically exposed on /debug/pprof"
