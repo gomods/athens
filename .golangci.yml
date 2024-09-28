@@ -28,6 +28,8 @@ linters:
     - errchkjson
     - exhaustive
     - exhaustruct
+    - execinquery
+    - exportloopref
     - forcetypeassert
     - funlen
     - gochecknoglobals
