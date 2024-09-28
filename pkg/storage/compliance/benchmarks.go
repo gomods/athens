@@ -13,16 +13,18 @@ import (
 
 // RunBenchmarks takes a backend and runs benchmarks against
 // saving and loading modules.
-func RunBenchmarks(b *testing.B, s storage.Backend, clear func() error) {
-	benchList(b, s, clear)
-	benchSave(b, s, clear)
-	benchDelete(b, s, clear)
-	benchExists(b, s, clear)
+func RunBenchmarks(b *testing.B, s storage.Backend, reset func() error) {
+	b.Helper()
+	benchList(b, s, reset)
+	benchSave(b, s, reset)
+	benchDelete(b, s, reset)
+	benchExists(b, s, reset)
 }
 
-func benchList(b *testing.B, s storage.Backend, clear func() error) {
-	require.NoError(b, clear())
-	defer require.NoError(b, clear())
+func benchList(b *testing.B, s storage.Backend, reset func() error) {
+	b.Helper()
+	require.NoError(b, reset())
+	defer require.NoError(b, reset())
 	module, version := "benchListModule", "1.0.1"
 	mock := getMockModule()
 	err := s.Save(
@@ -43,9 +45,10 @@ func benchList(b *testing.B, s storage.Backend, clear func() error) {
 	})
 }
 
-func benchSave(b *testing.B, s storage.Backend, clear func() error) {
-	require.NoError(b, clear())
-	defer require.NoError(b, clear())
+func benchSave(b *testing.B, s storage.Backend, reset func() error) {
+	b.Helper()
+	require.NoError(b, reset())
+	defer require.NoError(b, reset())
 
 	module, version := "benchSaveModule", "1.0.1"
 	mock := getMockModule()
@@ -70,9 +73,10 @@ func benchSave(b *testing.B, s storage.Backend, clear func() error) {
 	})
 }
 
-func benchDelete(b *testing.B, s storage.Backend, clear func() error) {
-	require.NoError(b, clear())
-	defer require.NoError(b, clear())
+func benchDelete(b *testing.B, s storage.Backend, reset func() error) {
+	b.Helper()
+	require.NoError(b, reset())
+	defer require.NoError(b, reset())
 
 	module, version := "benchDeleteModule", "1.0.1"
 	mock := getMockModule()
@@ -91,9 +95,10 @@ func benchDelete(b *testing.B, s storage.Backend, clear func() error) {
 	})
 }
 
-func benchExists(b *testing.B, s storage.Backend, clear func() error) {
-	require.NoError(b, clear())
-	defer require.NoError(b, clear())
+func benchExists(b *testing.B, s storage.Backend, reset func() error) {
+	b.Helper()
+	require.NoError(b, reset())
+	defer require.NoError(b, reset())
 
 	module, version := "benchExistsModule", "1.0.1"
 	mock := getMockModule()
