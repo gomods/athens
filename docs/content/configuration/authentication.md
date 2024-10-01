@@ -327,13 +327,13 @@ Configure your [global Git config](https://git-scm.com/docs/git-config) as follo
     useHttpPath = true
 
 [credential "https://github.com"]
-    helper = "cache --timeout=3500"
+    helper = "cache --timeout=3600"
 
 [url "https://github.com"]
     insteadOf = ssh://git@github.com
 ```
 
-This instructs Git to authenticate with the GitHub App and cache the results for 3500s (the authentication token is valid for 1 hour).
+This instructs Git to authenticate with the GitHub App and cache the results for 3600s (the authentication token is valid for 1 hour).
 
 Now, builds executed through the Athens proxy should be able to clone the `github.com/your-org/your-repo` dependency over GitHub Apps.
 
