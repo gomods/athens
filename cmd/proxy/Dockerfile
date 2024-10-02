@@ -47,7 +47,7 @@ RUN apk add --update git git-lfs mercurial openssh-client subversion procps foss
 ARG USER=athens
 RUN adduser -D -h /home/$USER $USER
 
-CMD mkdir /go
+RUN mkdir /go
 
 EXPOSE 3000
 
