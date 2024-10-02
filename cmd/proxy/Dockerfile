@@ -27,9 +27,12 @@ RUN DATE="$(date -u +%Y-%m-%d-%H:%M:%S-%Z)" && \
     -ldflags "-X github.com/gomods/athens/pkg/build.version=$VERSION -X github.com/gomods/athens/pkg/build.buildDate=$DATE -s -w" \
     -o /bin/athens-proxy ./cmd/proxy
 
-FROM golang:${GOLANG_VERSION}-alpine
+FROM golang:alpine
 
-ENV GO111MODULE=on
+ENV GOPROXY="https://proxy.golang.org,direct" \
+    GOSUMDB="sum.golang.org" \
+    GOROOT="/go" \
+    GO111MODULE=on
 
 COPY --from=builder /bin/athens-proxy /bin/athens-proxy
 COPY --from=builder /go/src/github.com/gomods/athens/config.dev.toml /config/config.toml
@@ -41,6 +44,8 @@ RUN apk add --update git git-lfs mercurial openssh-client subversion procps foss
 
 ARG USER=athens
 RUN adduser -D -h /home/$USER $USER
+
+CMD mkdir /go
 
 EXPOSE 3000
 
