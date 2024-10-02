@@ -29,6 +29,8 @@ func prepareEnv(gopath string, envVars []string) []string {
 		"HTTP_PROXY",
 		"HTTPS_PROXY",
 		"NO_PROXY",
+		// GOROOT needs to be propagated if it exists.
+		"GOROOT",
 		// Need to also check the lower case version of just these three env variables.
 		"http_proxy",
 		"https_proxy",

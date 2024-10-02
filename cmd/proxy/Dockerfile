@@ -29,25 +29,22 @@ RUN DATE="$(date -u +%Y-%m-%d-%H:%M:%S-%Z)" && \
 
 FROM alpine:${ALPINE_VERSION}
 
-ENV GOPROXY="https://proxy.golang.org,direct" \
-    GOSUMDB="sum.golang.org" \
-    GOROOT="/go" \
+ENV GOROOT="/usr/local/go" \
+    PATH=/go/bin:/usr/local/go/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
     GO111MODULE=on
 
 COPY --from=builder /bin/athens-proxy /bin/athens-proxy
 COPY --from=builder /go/src/github.com/gomods/athens/config.dev.toml /config/config.toml
-COPY --from=builder /usr/local/go/bin/go /bin/go
+COPY --from=builder /usr/local/go/bin/go /usr/local/go/bin/go
+COPY --from=builder /usr/local/go/go.env /usr/local/go/go.env
 
 RUN chmod 644 /config/config.toml
 
 # Add tini, see https://github.com/gomods/athens/issues/1155 for details.
-RUN apk add --update git git-lfs mercurial openssh-client subversion procps fossil tini && \
-    mkdir -p /usr/local/go
+RUN apk add --update git git-lfs mercurial openssh-client subversion procps fossil tini
 
 ARG USER=athens
 RUN adduser -D -h /home/$USER $USER
-
-RUN mkdir /go
 
 EXPOSE 3000
 
