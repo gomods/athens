@@ -337,3 +337,20 @@ This instructs Git to authenticate with the GitHub App and cache the results for
 
 Now, builds executed through the Athens proxy should be able to clone the `github.com/your-org/your-repo` dependency over GitHub Apps.
 
+### GitHub Enterprise Self-hosted
+
+To authenticate against a self-hosted GitHub Enterprise, the instructions are the same for GitHub hosted Apps
+with the exception for the Git config, which should include your domain, as follows:
+
+```
+[credential "https://github.example.com/your-org"]
+    helper = "github-app -username <app-name> -appId <app-id> -privateKeyFile <path-to-private-key> -installationId <installation-id> -domain github.example.com"
+    useHttpPath = true
+
+[credential "https://github.example.com"]
+    helper = "cache --timeout=3600"
+
+[url "https://github.example.com"]
+    insteadOf = ssh://git@github.com
+```
+
