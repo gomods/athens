@@ -32,11 +32,11 @@ func getRedisClientOptions(endpoint string, password string) (*redis.Options, er
 	// which passed in arguments.
 	options, err := redis.ParseURL(endpoint)
 	if err != nil {
-		return &redis.Options{
+		return &redis.Options{ //nolint:nilerr // We are specifically falling back here and ignoring the error on purpose.
 			Network:  "tcp",
 			Addr:     endpoint,
 			Password: password,
-		}, nil //nolint: nilerr
+		}, nil
 	}
 
 	// Ensure the password is either empty or that it matches the password
