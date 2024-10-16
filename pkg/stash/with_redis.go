@@ -26,7 +26,7 @@ var errPasswordsDoNotMatch = goerrors.New("a redis url was parsed that contained
 // url has produced the same password. Preferably, one should use EITHER a redis url or a host:port
 // combination w/password but not both. More information on the redis url structure can be found
 // here: https://github.com/redis/redis-specifications/blob/master/uri/redis.txt
-func getRedisClientOptions(endpoint string, password string) (*redis.Options, error) {
+func getRedisClientOptions(endpoint, password string) (*redis.Options, error) {
 	// Try parsing the endpoint as a redis url first. The redis library does not define
 	// a specific error when parsing the url so we fall back on the old config here
 	// which passed in arguments.
