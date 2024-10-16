@@ -29,14 +29,14 @@ var errPasswordsDoNotMatch = goerrors.New("a redis url was parsed that contained
 func getRedisClientOptions(endpoint string, password string) (*redis.Options, error) {
 	// Try parsing the endpoint as a redis url first. The redis library does not define
 	// a specific error when parsing the url so we fall back on the old config here
-	//which passed in arguments.
+	// which passed in arguments.
 	options, err := redis.ParseURL(endpoint)
 	if err != nil {
 		return &redis.Options{
 			Network:  "tcp",
 			Addr:     endpoint,
 			Password: password,
-		}, nil
+		}, nil //nolint: nilerr
 	}
 
 	// Ensure the password is either empty or that it matches the password
