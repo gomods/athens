@@ -445,6 +445,22 @@ You can also optionally specify a password to connect to the redis server with
             # Env override: ATHENS_REDIS_PASSWORD
             Password = ""
 
+Connecting to Redis via a [redis url](https://github.com/redis/redis-specifications/blob/master/uri/redis.txt) is also
+supported:
+
+    SingleFlightType = "redis"
+
+    [SingleFlight]
+        [SingleFlight.Redis]
+            # Endpoint is the redis endpoint for the single flight mechanism
+            # Env override: ATHENS_REDIS_ENDPOINT
+            # Note, if TLS is required use rediss:// instead.
+            Endpoint = "redis://user:password@127.0.0.1:6379:6379/0?protocol=3"
+
+If the redis url is invalid or cannot be parsed, Athens will fall back to treating `Endpoint` as if it were
+a normal `host:port` pair. If a password is supplied in the redis url, in addition to being provided in the `Password`
+configuration option, the two values must match otherwise Athens will fail to start.
+
 ##### Customizing lock configurations:
 If you would like to customize the distributed lock options then you can optionally override the default lock config to better suit your use-case:
 
