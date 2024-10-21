@@ -308,3 +308,49 @@ $ docker run --rm -d \
     -e "SSH_AUTH_SOCK=/.ssh_agent_sock" \
     -e ATHENS_DISK_STORAGE_ROOT=/var/lib/athens -e ATHENS_STORAGE_TYPE=disk --name athens-proxy -p 3000:3000 gomods/athens:canary
 ```
+
+## GitHub Apps
+
+Instead of using a Machine User on GitHub, it is possible to create a GitHub App and authenticate via it. 
+
+Create a GitHub App in **Settings > Developer settings > GitHub Apps** and install it. The AppID/ClientID, Installation ID and Private Key are
+required from the App.
+
+Install the [GitHub App Git Credential Helper](https://github.com/bdellegrazie/git-credential-github-app) in your `$PATH`. The Athens Docker image comes
+with this pre-installed.
+
+Configure your [global Git config](https://git-scm.com/docs/git-config) as follows:
+
+```
+[credential "https://github.com/your-org"]
+    helper = "github-app -username <app-name> -appId <app-id> -privateKeyFile <path-to-private-key> -installationId <installation-id>"
+    useHttpPath = true
+
+[credential "https://github.com"]
+    helper = "cache --timeout=3600"
+
+[url "https://github.com"]
+    insteadOf = ssh://git@github.com
+```
+
+This instructs Git to authenticate with the GitHub App and cache the results for 3600s (the authentication token is valid for 1 hour).
+
+Now, builds executed through the Athens proxy should be able to clone the `github.com/your-org/your-repo` dependency over GitHub Apps.
+
+### GitHub Enterprise Self-hosted
+
+To authenticate against a self-hosted GitHub Enterprise, the instructions are the same for GitHub hosted Apps
+with the exception for the Git config, which should include your domain, as follows:
+
+```
+[credential "https://github.example.com/your-org"]
+    helper = "github-app -username <app-name> -appId <app-id> -privateKeyFile <path-to-private-key> -installationId <installation-id> -domain github.example.com"
+    useHttpPath = true
+
+[credential "https://github.example.com"]
+    helper = "cache --timeout=3600"
+
+[url "https://github.example.com"]
+    insteadOf = ssh://git@github.com
+```
+
