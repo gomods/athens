@@ -9,7 +9,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/go-redis/redis/v8"
 	"github.com/gomods/athens/pkg/config"
+	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/storage"
 	"github.com/gomods/athens/pkg/storage/mem"
 	"golang.org/x/sync/errgroup"
@@ -117,6 +119,73 @@ func TestWithRedisLockWithWrongPassword(t *testing.T) {
 
 	if !strings.Contains(err.Error(), "NOAUTH Authentication required.") {
 		t.Fatalf("Wrong error was thrown %q\n", err.Error())
+	}
+}
+
+type getRedisClientOptionsFacet struct {
+	endpoint string
+	password string
+	options  *redis.Options
+	err      error
+}
+
+func Test_getRedisClientOptions(t *testing.T) {
+	facets := []*getRedisClientOptionsFacet{
+		{
+			endpoint: "127.0.0.1:6379",
+			options: &redis.Options{
+				Addr: "127.0.0.1:6379",
+			},
+		},
+		{
+			endpoint: "127.0.0.1:6379",
+			password: "1234",
+			options: &redis.Options{
+				Addr:     "127.0.0.1:6379",
+				Password: "1234",
+			},
+		},
+		{
+			endpoint: "rediss://username:password@127.0.0.1:6379",
+			password: "1234", // Ignored because password was parsed
+			err:      errors.E("stash.WithRedisLock", errPasswordsDoNotMatch),
+		},
+		{
+			endpoint: "rediss://username:password@127.0.0.1:6379",
+			password: "1234", // Ignored because password was parsed
+			err:      errors.E("stash.WithRedisLock", errPasswordsDoNotMatch),
+		},
+	}
+
+	for i, facet := range facets {
+		options, err := getRedisClientOptions(facet.endpoint, facet.password)
+		if err != nil && facet.err == nil {
+			t.Errorf("Facet %d: no error produced", i)
+			continue
+		}
+		if facet.err != nil {
+			if err == nil {
+				t.Errorf("Facet %d: no error produced", i)
+			} else {
+				if err.Error() != facet.err.Error() {
+					t.Errorf("Facet %d: expected %q, got %q", i, facet.err, err)
+				}
+			}
+		}
+
+		if err != nil {
+			continue
+		}
+		if facet.options.Addr != options.Addr {
+			t.Errorf("Facet %d: Expected Addr %q, got %q", i, facet.options.Addr, options.Addr)
+		}
+		if facet.options.Username != options.Username {
+			t.Errorf("Facet %d: Expected Username %q, got %q", i, facet.options.Username, options.Username)
+		}
+		if facet.options.Password != options.Password {
+			t.Errorf("Facet %d: Expected Password %q, got %q", i, facet.options.Password, options.Password)
+		}
+
 	}
 }
 

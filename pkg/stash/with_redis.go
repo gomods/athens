@@ -18,19 +18,53 @@ type RedisLogger interface {
 	Printf(ctx context.Context, format string, v ...any)
 }
 
+var errPasswordsDoNotMatch = goerrors.New("a redis url was parsed that contained a password but the configuration also defined a specific redis password, please ensure these values match or use only one of them")
+
+// getRedisClientOptions takes an endpoint and password and returns *redis.Options to use
+// with the redis client. endpoint may be a redis url or host:port combination. If a redis
+// url is used and a password is also used this function checks to make sure the parsed redis
+// url has produced the same password. Preferably, one should use EITHER a redis url or a host:port
+// combination w/password but not both. More information on the redis url structure can be found
+// here: https://github.com/redis/redis-specifications/blob/master/uri/redis.txt
+func getRedisClientOptions(endpoint, password string) (*redis.Options, error) {
+	// Try parsing the endpoint as a redis url first. The redis library does not define
+	// a specific error when parsing the url so we fall back on the old config here
+	// which passed in arguments.
+	options, err := redis.ParseURL(endpoint)
+	if err != nil {
+		return &redis.Options{ //nolint:nilerr // We are specifically falling back here and ignoring the error on purpose.
+			Network:  "tcp",
+			Addr:     endpoint,
+			Password: password,
+		}, nil
+	}
+
+	// Ensure the password is either empty or that it matches the password
+	// parsed from the url into redis.Options. This ensures that if the
+	// config supplies the password but a redis url doesn't the behavior
+	// is clear vs. failing later on at the time of the first connection
+	// with an 'invalid password' like error.
+	if password != "" && options.Password != password {
+		return nil, errPasswordsDoNotMatch
+	}
+
+	return options, nil
+}
+
 // WithRedisLock returns a distributed singleflight
 // using a redis cluster. If it cannot connect, it will return an error.
 func WithRedisLock(l RedisLogger, endpoint, password string, checker storage.Checker, lockConfig *config.RedisLockConfig) (Wrapper, error) {
 	redis.SetLogger(l)
 
 	const op errors.Op = "stash.WithRedisLock"
-	client := redis.NewClient(&redis.Options{
-		Network:  "tcp",
-		Addr:     endpoint,
-		Password: password,
-	})
-	_, err := client.Ping(context.Background()).Result()
+
+	options, err := getRedisClientOptions(endpoint, password)
 	if err != nil {
+		return nil, errors.E(op, err)
+	}
+
+	client := redis.NewClient(options)
+	if _, err := client.Ping(context.Background()).Result(); err != nil {
 		return nil, errors.E(op, err)
 	}
 
