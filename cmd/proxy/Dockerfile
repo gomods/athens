@@ -44,7 +44,7 @@ RUN chmod 644 /config/config.toml
 RUN apk add --update git git-lfs mercurial openssh-client subversion procps fossil tini
 
 # Add git-credential-github-app for native integration with GitHub Apps
-RUN wget -O git-credential-github-app.tar.gz https://github.com/bdellegrazie/git-credential-github-app/releases/download/v0.3.0/git-credential-github-app_v0.2.0_Linux_x86_64.tar.gz \
+RUN wget -O git-credential-github-app.tar.gz https://github.com/bdellegrazie/git-credential-github-app/releases/download/v0.3.0/git-credential-github-app_v0.3.0_Linux_x86_64.tar.gz \
   && tar xvzf 'git-credential-github-app.tar.gz' git-credential-github-app -C /usr/local/bin \
   && rm git-credential-github-app.tar.gz || true;
 
