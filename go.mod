@@ -22,7 +22,7 @@ require (
 	github.com/bsm/redislock v0.7.2
 	github.com/fatih/color v1.13.0
 	github.com/go-playground/validator/v10 v10.19.0
-	github.com/go-redis/redis/v8 v8.11.4
+	github.com/go-redis/redis/v8 v8.11.5
 	github.com/go-sql-driver/mysql v1.6.0
 	github.com/gobuffalo/envy v1.7.0
 	github.com/gobuffalo/httptest v1.0.4
