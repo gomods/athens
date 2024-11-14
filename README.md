@@ -9,6 +9,7 @@
 [![Docker Pulls](https://img.shields.io/docker/pulls/gomods/athens.svg?maxAge=604800)](https://hub.docker.com/r/gomods/athens/)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com)
 [![Open Source Helpers](https://www.codetriage.com/gomods/athens/badges/users.svg)](https://www.codetriage.com/gomods/athens)
+[![Gurubase](https://img.shields.io/badge/Gurubase-Ask%20Athens%20Guru-006BFF)](https://gurubase.io/g/athens)
 
 Welcome to the Athens project! Athens is an open source, enterprise ready implementation of the [Go Module proxy](https://go.dev/ref/mod#module-proxy) for the [Go Modules download API](https://docs.gomods.io/intro/protocol/).
 
