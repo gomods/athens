@@ -24,12 +24,12 @@ func (s *Storage) Catalog(ctx context.Context, token string, pageSize int) ([]pa
 	res := make([]paths.AllPathParams, 0)
 	count := pageSize
 	for count > 0 {
-		lsParams := &s3.ListObjectsInput{
-			Bucket: aws.String(s.bucket),
-			Marker: &queryToken,
+		lsParams := &s3.ListObjectsV2Input{
+			Bucket:     aws.String(s.bucket),
+			StartAfter: &queryToken,
 		}
 
-		loo, err := s.s3API.ListObjects(ctx, lsParams)
+		loo, err := s.s3API.ListObjectsV2(ctx, lsParams)
 		if err != nil {
 			return nil, "", errors.E(op, err)
 		}
