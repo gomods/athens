@@ -18,7 +18,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/credentials v1.17.11
 	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.16.15
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.53.1
-	github.com/aws/smithy-go v1.20.2
+	github.com/aws/smithy-go v1.22.1
 	github.com/bsm/redislock v0.7.2
 	github.com/fatih/color v1.13.0
 	github.com/go-playground/validator/v10 v10.19.0
