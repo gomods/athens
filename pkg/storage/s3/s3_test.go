@@ -30,7 +30,7 @@ func (s *Storage) clear() error {
 	ctx, cancel := context.WithTimeout(context.Background(), s.timeout)
 	defer cancel()
 
-	objects, err := s.s3API.ListObjects(ctx, &s3.ListObjectsInput{Bucket: aws.String(s.bucket)})
+	objects, err := s.s3API.ListObjectsV2(ctx, &s3.ListObjectsV2Input{Bucket: aws.String(s.bucket)})
 	if err != nil {
 		return err
 	}

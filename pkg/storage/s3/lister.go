@@ -19,12 +19,13 @@ func (s *Storage) List(ctx context.Context, module string) ([]string, error) {
 	defer span.End()
 
 	modulePrefix := strings.TrimSuffix(module, "/") + "/@v"
-	lsParams := &s3.ListObjectsInput{
+
+	lsParams := &s3.ListObjectsV2Input{
 		Bucket: aws.String(s.bucket),
 		Prefix: aws.String(modulePrefix),
 	}
 
-	loo, err := s.s3API.ListObjects(ctx, lsParams)
+	loo, err := s.s3API.ListObjectsV2(ctx, lsParams)
 	if err != nil {
 		return nil, errors.E(op, err, errors.M(module))
 	}
