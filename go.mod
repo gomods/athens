@@ -25,7 +25,7 @@ require (
 	github.com/go-redis/redis/v8 v8.11.5
 	github.com/go-sql-driver/mysql v1.6.0
 	github.com/gobuffalo/envy v1.7.0
-	github.com/gobuffalo/httptest v1.0.4
+	github.com/gobuffalo/httptest v1.5.2
 	github.com/google/go-cmp v0.6.0
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/mux v1.8.1
@@ -68,7 +68,6 @@ require (
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric v0.48.1 // indirect
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.48.1 // indirect
 	github.com/agext/levenshtein v1.2.1 // indirect
-	github.com/ajg/form v0.0.0-20160822230020-523a5da1a92f // indirect
 	github.com/apparentlymart/go-textseg v1.0.0 // indirect
 	github.com/aws/aws-sdk-go v1.44.220 // indirect
 	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.6.2 // indirect
@@ -127,7 +126,6 @@ require (
 	github.com/klauspost/cpuid v1.2.3 // indirect
 	github.com/kylelemons/godebug v1.1.0 // indirect
 	github.com/leodido/go-urn v1.4.0 // indirect
-	github.com/markbates/hmax v1.0.0 // indirect
 	github.com/mattn/go-colorable v0.1.12 // indirect
 	github.com/mattn/go-ieproxy v0.0.0-20190702010315-6dee0af9227d // indirect
 	github.com/mattn/go-isatty v0.0.14 // indirect
