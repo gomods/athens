@@ -77,7 +77,7 @@ func App(logger *log.Logger, conf *config.Config) (http.Handler, error) {
 		conf.GoEnv,
 	)
 	if err != nil {
-		logger.Info(err)
+		logger.Info(err.Error())
 	} else {
 		defer flushTraces()
 	}
@@ -87,7 +87,7 @@ func App(logger *log.Logger, conf *config.Config) (http.Handler, error) {
 	// was specified by the user.
 	flushStats, err := observ.RegisterStatsExporter(r, conf.StatsExporter, Service)
 	if err != nil {
-		logger.Info(err)
+		logger.Info(err.Error())
 	} else {
 		defer flushStats()
 	}

@@ -507,8 +507,12 @@ func (e *testEntry) Debugf(format string, args ...any) {
 func (*testEntry) Infof(format string, args ...any)           {}
 func (*testEntry) Warnf(format string, args ...any)           {}
 func (*testEntry) Errorf(format string, args ...any)          {}
+func (*testEntry) Fatalf(format string, args ...any)          {}
 func (*testEntry) WithFields(fields map[string]any) log.Entry { return nil }
 func (*testEntry) SystemErr(err error)                        {}
+func (*testEntry) WithContext(ctx context.Context) log.Entry  { return nil }
+func (*testEntry) WithError(err error) log.Entry              { return nil }
+func (*testEntry) WithField(key string, value any) log.Entry  { return nil }
 
 func Test_copyContextWithCustomTimeout(t *testing.T) {
 	testEntry := &testEntry{}

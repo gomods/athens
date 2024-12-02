@@ -2,15 +2,14 @@ package middleware
 
 import (
 	"bytes"
-	"fmt"
+	"encoding/json"
+	"log/slog"
 	"net/http"
 	"net/http/httptest"
-	"strings"
 	"testing"
 
 	"github.com/gomods/athens/pkg/log"
 	"github.com/gorilla/mux"
-	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -23,10 +22,8 @@ func TestLogContext(t *testing.T) {
 	r := mux.NewRouter()
 	r.HandleFunc("/test", h)
 
-	var buf bytes.Buffer
-	lggr := log.New("", logrus.DebugLevel, "")
-	lggr.Formatter = &logrus.JSONFormatter{DisableTimestamp: true}
-	lggr.Out = &buf
+	buf := new(bytes.Buffer)
+	lggr := log.New("", slog.LevelInfo, "")
 
 	r.Use(LogEntryMiddleware(lggr))
 
@@ -34,6 +31,19 @@ func TestLogContext(t *testing.T) {
 	req, _ := http.NewRequest("GET", "/test", nil)
 	r.ServeHTTP(w, req)
 
-	expected := `{"http-method":"GET","http-path":"/test","level":"info","msg":"test","request-id":""}`
-	assert.True(t, strings.Contains(buf.String(), expected), fmt.Sprintf("%s should contain: %s", buf.String(), expected))
+	var logEntry map[string]interface{}
+	err := json.Unmarshal(buf.Bytes(), &logEntry)
+	assert.NoError(t, err)
+
+	expectedFields := map[string]interface{}{
+		"level":       "INFO",
+		"msg":         "test",
+		"http-method": "GET",
+		"http-path":   "/test",
+		"request-id":  "",
+	}
+
+	for k, v := range expectedFields {
+		assert.Equal(t, v, logEntry[k], "Log entry should contain %s with value %v", k, v)
+	}
 }

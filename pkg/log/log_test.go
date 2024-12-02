@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/sirupsen/logrus"
+	"log/slog"
 	"github.com/stretchr/testify/require"
 )
 
@@ -15,8 +15,8 @@ type input struct {
 	name          string
 	cloudProvider string
 	format        string
-	level         logrus.Level
-	fields        logrus.Fields
+	level         slog.Level
+	fields        map[string]any
 	logFunc       func(e Entry) time.Time
 	output        string
 }
@@ -25,8 +25,8 @@ var testCases = []input{
 	{
 		name:          "gcp_debug",
 		cloudProvider: "GCP",
-		level:         logrus.DebugLevel,
-		fields:        logrus.Fields{},
+		level:         slog.LevelDebug,
+		fields:        map[string]any{},
 		logFunc: func(e Entry) time.Time {
 			t := time.Now()
 			e.Infof("info message")
@@ -37,8 +37,8 @@ var testCases = []input{
 	{
 		name:          "gcp_error",
 		cloudProvider: "GCP",
-		level:         logrus.DebugLevel,
-		fields:        logrus.Fields{},
+		level:         slog.LevelDebug,
+		fields:        map[string]any{},
 		logFunc: func(e Entry) time.Time {
 			t := time.Now()
 			e.Errorf("err message")
@@ -49,8 +49,8 @@ var testCases = []input{
 	{
 		name:          "gcp_empty",
 		cloudProvider: "GCP",
-		level:         logrus.ErrorLevel,
-		fields:        logrus.Fields{},
+		level:         slog.LevelError,
+		fields:        map[string]any{},
 		logFunc: func(e Entry) time.Time {
 			t := time.Now()
 			e.Infof("info message")
@@ -61,8 +61,8 @@ var testCases = []input{
 	{
 		name:          "gcp_fields",
 		cloudProvider: "GCP",
-		level:         logrus.DebugLevel,
-		fields:        logrus.Fields{"field1": "value1", "field2": 2},
+		level:         slog.LevelDebug,
+		fields:        map[string]any{"field1": "value1", "field2": 2},
 		logFunc: func(e Entry) time.Time {
 			t := time.Now()
 			e.Debugf("debug message")
@@ -73,8 +73,8 @@ var testCases = []input{
 	{
 		name:          "gcp_logs",
 		cloudProvider: "GCP",
-		level:         logrus.DebugLevel,
-		fields:        logrus.Fields{},
+		level:         slog.LevelDebug,
+		fields:        map[string]any{},
 		logFunc: func(e Entry) time.Time {
 			t := time.Now()
 			e.Warnf("warn message")
@@ -86,8 +86,8 @@ var testCases = []input{
 		name:          "default plain",
 		format:        "plain",
 		cloudProvider: "none",
-		level:         logrus.DebugLevel,
-		fields:        logrus.Fields{"xyz": "abc", "abc": "xyz"},
+		level:         slog.LevelDebug,
+		fields:        	map[string]any{"xyz": "abc", "abc": "xyz"},
 		logFunc: func(e Entry) time.Time {
 			t := time.Now()
 			e.Warnf("warn message")
@@ -98,8 +98,8 @@ var testCases = []input{
 	{
 		name:          "default",
 		cloudProvider: "none",
-		level:         logrus.DebugLevel,
-		fields:        logrus.Fields{"xyz": "abc", "abc": "xyz"},
+		level:         slog.LevelDebug,
+		fields:        map[string]any{"xyz": "abc", "abc": "xyz"},
 		logFunc: func(e Entry) time.Time {
 			t := time.Now()
 			e.Warnf("warn message")
@@ -111,8 +111,8 @@ var testCases = []input{
 		name:          "default json",
 		format:        "json",
 		cloudProvider: "none",
-		level:         logrus.DebugLevel,
-		fields:        logrus.Fields{"xyz": "abc", "abc": "xyz"},
+		level:         slog.LevelDebug,
+		fields:        	map[string]any{"xyz": "abc", "abc": "xyz"},
 		logFunc: func(e Entry) time.Time {
 			t := time.Now()
 			e.Warnf("warn message")
@@ -147,5 +147,5 @@ func TestCloudLogger(t *testing.T) {
 
 func TestNoOpLogger(t *testing.T) {
 	l := NoOpLogger()
-	require.NotPanics(t, func() { l.Infof("test") })
+	require.NotPanics(t, func() { l.Info("test") })
 }

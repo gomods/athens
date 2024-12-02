@@ -9,7 +9,7 @@ type ctxKey string
 const logEntryKey ctxKey = "log-entry-context-key"
 
 // SetEntryInContext stores an Entry in the request context.
-func SetEntryInContext(ctx context.Context, e Entry) context.Context {
+func SetEntryInContext(ctx context.Context, e *Entry) context.Context {
 	return context.WithValue(ctx, logEntryKey, e)
 }
 
@@ -19,7 +19,8 @@ func SetEntryInContext(ctx context.Context, e Entry) context.Context {
 func EntryFromContext(ctx context.Context) Entry {
 	e, ok := ctx.Value(logEntryKey).(Entry)
 	if !ok || e == nil {
-		return NoOpLogger()
+		//return a new entry
+		return &Entry{}
 	}
 	return e
 }

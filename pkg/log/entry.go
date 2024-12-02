@@ -1,8 +1,10 @@
 package log
 
 import (
+	"context"
+	"log/slog"
+
 	"github.com/gomods/athens/pkg/errors"
-	"github.com/sirupsen/logrus"
 )
 
 // Entry is an abstraction to the
@@ -16,9 +18,16 @@ type Entry interface {
 	Infof(format string, args ...any)
 	Warnf(format string, args ...any)
 	Errorf(format string, args ...any)
+	Fatalf(format string, args ...any)
 
 	// Attach contextual information to the logging entry
 	WithFields(fields map[string]any) Entry
+
+	WithField(key string, value any) Entry
+
+	WithError(err error) Entry
+
+	WithContext(ctx context.Context) Entry
 
 	// SystemErr is a method that disects the error
 	// and logs the appropriate level and fields for it.
@@ -26,36 +35,35 @@ type Entry interface {
 }
 
 type entry struct {
-	*logrus.Entry
+	*slog.Logger
 }
 
 func (e *entry) WithFields(fields map[string]any) Entry {
-	ent := e.Entry.WithFields(fields)
-	return &entry{ent}
+	ent := e.WithFields(fields)
+	return ent
 }
 
 func (e *entry) SystemErr(err error) {
 	var athensErr errors.Error
 	if !errors.AsErr(err, &athensErr) {
-		e.Error(err)
+		e.Error(err.Error())
 		return
 	}
 
 	ent := e.WithFields(errFields(athensErr))
 	switch errors.Severity(err) {
-	case logrus.WarnLevel:
+	case slog.LevelWarn:
 		ent.Warnf("%v", err)
-	case logrus.InfoLevel:
+	case slog.LevelInfo:
 		ent.Infof("%v", err)
-	case logrus.DebugLevel:
+	case slog.LevelDebug:
 		ent.Debugf("%v", err)
 	default:
 		ent.Errorf("%v", err)
 	}
 }
-
-func errFields(err errors.Error) logrus.Fields {
-	f := logrus.Fields{}
+func errFields(err errors.Error) map[string]any {
+	f := map[string]any{}
 	f["operation"] = err.Op
 	f["kind"] = errors.KindText(err)
 	f["module"] = err.Module
