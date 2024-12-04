@@ -2,10 +2,11 @@ package middleware
 
 import (
 	"bytes"
-	"encoding/json"
+	"fmt"
 	"log/slog"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/gomods/athens/pkg/log"
@@ -22,8 +23,11 @@ func TestLogContext(t *testing.T) {
 	r := mux.NewRouter()
 	r.HandleFunc("/test", h)
 
-	buf := new(bytes.Buffer)
-	lggr := log.New("", slog.LevelInfo, "")
+	var buf bytes.Buffer
+	lggr := log.New("", slog.LevelDebug, "")
+	opts := slog.HandlerOptions{Level: slog.LevelDebug}
+	handler := slog.NewJSONHandler(&buf, &opts)
+	lggr.Logger = slog.New(handler)
 
 	r.Use(LogEntryMiddleware(lggr))
 
@@ -31,19 +35,6 @@ func TestLogContext(t *testing.T) {
 	req, _ := http.NewRequest("GET", "/test", nil)
 	r.ServeHTTP(w, req)
 
-	var logEntry map[string]interface{}
-	err := json.Unmarshal(buf.Bytes(), &logEntry)
-	assert.NoError(t, err)
-
-	expectedFields := map[string]interface{}{
-		"level":       "INFO",
-		"msg":         "test",
-		"http-method": "GET",
-		"http-path":   "/test",
-		"request-id":  "",
-	}
-
-	for k, v := range expectedFields {
-		assert.Equal(t, v, logEntry[k], "Log entry should contain %s with value %v", k, v)
-	}
+	expected := `{"http-method":"GET","http-path":"/test","level":"info","msg":"test","request-id":""}`
+	assert.True(t, strings.Contains(buf.String(), expected), fmt.Sprintf("%s should contain: %s", buf.String(), expected))
 }

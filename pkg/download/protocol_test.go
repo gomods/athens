@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"io"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -504,15 +505,27 @@ var _ log.Entry = &testEntry{}
 func (e *testEntry) Debugf(format string, args ...any) {
 	e.msg = format
 }
-func (*testEntry) Infof(format string, args ...any)           {}
-func (*testEntry) Warnf(format string, args ...any)           {}
-func (*testEntry) Errorf(format string, args ...any)          {}
-func (*testEntry) Fatalf(format string, args ...any)          {}
-func (*testEntry) WithFields(fields map[string]any) log.Entry { return nil }
-func (*testEntry) SystemErr(err error)                        {}
-func (*testEntry) WithContext(ctx context.Context) log.Entry  { return nil }
-func (*testEntry) WithError(err error) log.Entry              { return nil }
-func (*testEntry) WithField(key string, value any) log.Entry  { return nil }
+func (*testEntry) Infof(format string, args ...any)  {}
+func (*testEntry) Warnf(format string, args ...any)  {}
+func (*testEntry) Errorf(format string, args ...any) {}
+func (*testEntry) Fatalf(format string, args ...any) {}
+func (*testEntry) Panicf(format string, args ...any) {}
+func (*testEntry) Printf(format string, args ...any) {}
+
+func (*testEntry) Debug(args ...any) {}
+func (*testEntry) Info(args ...any)  {}
+func (*testEntry) Warn(args ...any)  {}
+func (*testEntry) Error(args ...any) {}
+func (*testEntry) Fatal(args ...any) {}
+func (*testEntry) Panic(args ...any) {}
+func (*testEntry) Print(args ...any) {}
+
+func (*testEntry) WithFields(fields map[string]any) log.Entry  { return nil }
+func (*testEntry) SystemErr(err error)                         {}
+func (*testEntry) WithField(key string, value any) log.Entry   { return nil }
+func (*testEntry) WithError(err error) log.Entry               { return nil }
+func (*testEntry) WithContext(ctx context.Context) log.Entry   { return nil }
+func (*testEntry) WriterLevel(level slog.Level) *io.PipeWriter { return nil }
 
 func Test_copyContextWithCustomTimeout(t *testing.T) {
 	testEntry := &testEntry{}

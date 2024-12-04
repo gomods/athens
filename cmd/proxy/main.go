@@ -37,7 +37,7 @@ func main() {
 		stdlog.Fatalf("Could not load config file: %v", err)
 	}
 
-	logLvl := slog.Level(0)
+	var logLvl slog.Level
 	err = logLvl.UnmarshalText([]byte(conf.LogLevel))
 	if err != nil {
 		stdlog.Fatalf("Could not parse log level %q: %v", conf.LogLevel, err)
@@ -45,9 +45,19 @@ func main() {
 
 	logger := athenslog.New(conf.CloudRuntime, logLvl, conf.LogFormat)
 
+	// Turn standard logger output into slog Errors.
+	logrusErrorWriter := logger.WriterLevel(slog.LevelError)
+	defer func() {
+		if err := logrusErrorWriter.Close(); err != nil {
+			logger.WithError(err).Warn("Could not close logrus writer pipe")
+		}
+	}()
+	stdlog.SetOutput(logrusErrorWriter)
+	stdlog.SetFlags(stdlog.Flags() &^ (stdlog.Ldate | stdlog.Ltime))
+
 	handler, err := actions.App(logger, conf)
 	if err != nil {
-		logger.With(err.Error()).Error("Could not create App")
+		logger.WithError(err).Fatal("Could not create App")
 	}
 
 	srv := &http.Server{
@@ -66,7 +76,7 @@ func main() {
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(conf.ShutdownTimeout))
 		defer cancel()
 		if err := srv.Shutdown(ctx); err != nil {
-			logger.With(err).Error("Could not shut down server")
+			logger.WithError(err).Fatal("Could not shut down server")
 		}
 		close(idleConnsClosed)
 	}()
@@ -77,7 +87,7 @@ func main() {
 			// not to expose profiling data and avoid DoS attacks (profiling slows down the service)
 			// https://www.farsightsecurity.com/txt-record/2016/10/28/cmikk-go-remote-profiling/
 			logger.WithField("port", conf.PprofPort).Infof("starting pprof")
-			logger.Error(http.ListenAndServe(conf.PprofPort, nil).Error()) //nolint:gosec // This should not be exposed to the world.
+			logger.Fatal(http.ListenAndServe(conf.PprofPort, nil)) //nolint:gosec // This should not be exposed to the world.
 		}()
 	}
 
@@ -86,19 +96,19 @@ func main() {
 
 	if conf.UnixSocket != "" {
 		logger := logger.WithField("unixSocket", conf.UnixSocket)
-		logger.Infof("Starting application")
+		logger.Info("Starting application")
 
 		ln, err = net.Listen("unix", conf.UnixSocket)
 		if err != nil {
-			logger.WithError(err).Fatalf("Could not listen on Unix domain socket")
+			logger.WithError(err).Fatal("Could not listen on Unix domain socket")
 		}
 	} else {
 		logger := logger.WithField("tcpPort", conf.Port)
-		logger.Infof("Starting application")
+		logger.Info("Starting application")
 
 		ln, err = net.Listen("tcp", conf.Port)
 		if err != nil {
-			logger.WithError(err).Fatalf("Could not listen on TCP port")
+			logger.WithError(err).Fatal("Could not listen on TCP port")
 		}
 	}
 
@@ -109,8 +119,9 @@ func main() {
 	}
 
 	if !errors.Is(err, http.ErrServerClosed) {
-		logger.WithError(err).Fatalf("Could not start server")
+		logger.WithError(err).Fatal("Could not start server")
 	}
 
 	<-idleConnsClosed
+
 }

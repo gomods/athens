@@ -134,7 +134,7 @@ type athensLoggerForRedis struct {
 }
 
 func (l *athensLoggerForRedis) Printf(ctx context.Context, format string, v ...any) {
-	l.logger.WithContext(ctx).Infof(format, v...)
+	l.logger.WithContext(ctx).Printf(format, v...)
 }
 
 func getSingleFlight(l *log.Logger, c *config.Config, s storage.Backend, checker storage.Checker) (stash.Wrapper, error) {

@@ -1,8 +1,10 @@
 package log
 
 import (
+	"bufio"
 	"bytes"
 	"context"
+	"io"
 	"log/slog"
 	"os"
 )
@@ -33,13 +35,17 @@ func New(cloudProvider string, level slog.Level, format string) *Logger {
 
 // SystemErr Entry implementation.
 func (l *Logger) SystemErr(err error) {
-	e := &entry{Logger: l.Logger}
+	e := &entry{l.Logger}
 	e.SystemErr(err)
 }
 
 // WithFields Entry implementation.
 func (l *Logger) WithFields(fields map[string]any) Entry {
-	return l.WithFields(fields)
+	attrs := make([]any, 0, len(fields))
+	for k, v := range fields {
+		attrs = append(attrs, slog.Any(k, v))
+	}
+	return &entry{logger: l.Logger.With(attrs...)}
 }
 
 func (l *Logger) WithField(key string, value any) Entry {
@@ -63,8 +69,22 @@ func (l *Logger) WithContext(ctx context.Context) Entry {
 	return l.WithFields(keys)
 }
 
+// Define WriterLevel
+func (l *Logger) WriterLevel(level slog.Level) *io.PipeWriter {
+	pipeReader, pipeWriter := io.Pipe()
+	go func() {
+		scanner := bufio.NewScanner(pipeReader)
+		for scanner.
+			Scan() {
+			l.Info(scanner.Text())
+		}
+	}()
+	return pipeWriter
+}
+
 // NoOpLogger provides a Logger that does nothing.
 func NoOpLogger() *Logger {
-	l := slog.New(slog.NewTextHandler(os.Stdout, nil))
-	return &Logger{Logger: l}
+	return &Logger{
+		Logger: &slog.Logger{},
+	}
 }

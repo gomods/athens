@@ -3,12 +3,11 @@ package actions
 import (
 	"bytes"
 	"context"
+	"log/slog"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
-
-	"log/slog"
 
 	"github.com/gomods/athens/pkg/log"
 )
