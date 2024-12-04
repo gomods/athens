@@ -11,6 +11,11 @@ import (
 	"github.com/gomods/athens/pkg/errors"
 )
 
+// Entry is an abstraction to the
+// Logger and the logrus.Entry
+// so that *Logger always creates
+// an Entry copy which ensures no
+// Fields are being overwritten.
 type Entry interface {
 	// Keep the existing interface methods unchanged
 	Debugf(string, ...interface{})
@@ -98,11 +103,12 @@ func (e *entry) Error(args ...interface{}) {
 }
 
 func (e *entry) Fatal(args ...interface{}) {
-	e.logger.Error(fmt.Sprint(args...)) // slog doesn't have Fatal, using Error
+	e.logger.Error(fmt.Sprint(args...))
+	os.Exit(1)
 }
 
 func (e *entry) Panic(args ...interface{}) {
-	e.logger.Error(fmt.Sprint(args...)) // slog doesn't have Panic, using Error
+	e.logger.Error(fmt.Sprint(args...))
 }
 
 func (e *entry) Print(args ...interface{}) {

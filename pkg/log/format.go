@@ -80,7 +80,7 @@ func sortFields(data map[string]any) []string {
 
 func parseFormat(format string, level slog.Level) *slog.Logger {
 	if format == "json" {
-		return slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug}))
+		return slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: level}))
 	}
 
 	return getDevFormatter(level)
