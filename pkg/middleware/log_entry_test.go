@@ -23,10 +23,10 @@ func TestLogContext(t *testing.T) {
 	r := mux.NewRouter()
 	r.HandleFunc("/test", h)
 
-	var buf bytes.Buffer
+	buf := &bytes.Buffer{}
 	lggr := log.New("", slog.LevelDebug, "")
 	opts := slog.HandlerOptions{Level: slog.LevelDebug}
-	handler := slog.NewJSONHandler(&buf, &opts)
+	handler := slog.NewJSONHandler(buf, &opts)
 	lggr.Logger = slog.New(handler)
 
 	r.Use(LogEntryMiddleware(lggr))

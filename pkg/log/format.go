@@ -10,9 +10,21 @@ import (
 )
 
 func getGCPFormatter(level slog.Level) *slog.Logger {
-
-	l := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: level}))
-	return l
+	return slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
+		Level: level,
+		ReplaceAttr: func(groups []string, a slog.Attr) slog.Attr {
+			switch a.Key {
+			case slog.LevelKey:
+				return slog.String("severity", a.Value.String())
+			case slog.MessageKey:
+				return slog.String("message", a.Value.String())
+			case slog.TimeKey:
+				return slog.String("timestamp", a.Value.Time().Format(time.RFC3339))
+			default:
+				return a
+			}
+		},
+	}))
 }
 
 const lightGrey = 0xffccc
