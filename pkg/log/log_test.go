@@ -3,11 +3,11 @@ package log
 import (
 	"bytes"
 	"fmt"
+	"log/slog"
 	"strings"
 	"testing"
 	"time"
-	"log/slog"
-	
+
 	"github.com/stretchr/testify/require"
 )
 
@@ -87,7 +87,7 @@ var testCases = []input{
 		format:        "plain",
 		cloudProvider: "none",
 		level:         slog.LevelDebug,
-		fields:        	map[string]any{"xyz": "abc", "abc": "xyz"},
+		fields:        map[string]any{"xyz": "abc", "abc": "xyz"},
 		logFunc: func(e Entry) time.Time {
 			t := time.Now()
 			e.Warnf("warn message")
@@ -112,7 +112,7 @@ var testCases = []input{
 		format:        "json",
 		cloudProvider: "none",
 		level:         slog.LevelDebug,
-		fields:        	map[string]any{"xyz": "abc", "abc": "xyz"},
+		fields:        map[string]any{"xyz": "abc", "abc": "xyz"},
 		logFunc: func(e Entry) time.Time {
 			t := time.Now()
 			e.Warnf("warn message")
@@ -125,9 +125,8 @@ var testCases = []input{
 func TestCloudLogger(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			lggr := New(tc.cloudProvider, tc.level, tc.format)
-			var buf bytes.Buffer
-			lggr.Out = &buf
+			buf := &bytes.Buffer{}
+			lggr := New(tc.cloudProvider, tc.level, tc.format, buf)
 			e := lggr.WithFields(tc.fields)
 			entryTime := tc.logFunc(e)
 			out := buf.String()
@@ -144,7 +143,6 @@ func TestCloudLogger(t *testing.T) {
 		})
 	}
 }
-
 func TestNoOpLogger(t *testing.T) {
 	l := NoOpLogger()
 	require.NotPanics(t, func() { l.Info("test") })

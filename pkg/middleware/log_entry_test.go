@@ -24,7 +24,7 @@ func TestLogContext(t *testing.T) {
 	r.HandleFunc("/test", h)
 
 	buf := &bytes.Buffer{}
-	lggr := log.New("", slog.LevelDebug, "")
+	lggr := log.New("", slog.LevelDebug, "", buf)
 	opts := slog.HandlerOptions{Level: slog.LevelDebug}
 	handler := slog.NewJSONHandler(buf, &opts)
 	lggr.Logger = slog.New(handler)

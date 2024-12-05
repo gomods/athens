@@ -70,10 +70,10 @@ func TestBasicAuth(t *testing.T) {
 			w := httptest.NewRecorder()
 			r := httptest.NewRequest(http.MethodGet, tc.path, nil)
 			r.SetBasicAuth(tc.user, tc.pass)
-			lggr := log.New("none", slog.LevelDebug, "")
 			buf := &bytes.Buffer{}
-			lggr.Out = buf
-			ctx := log.SetEntryInContext(context.Background(), lggr)
+			lggr := log.New("none", slog.LevelDebug, "", buf)
+			entry := lggr.WithFields(map[string]any{})
+			ctx := log.SetEntryInContext(context.Background(), entry)
 			r = r.WithContext(ctx)
 			handler.ServeHTTP(w, r)
 			resp := w.Result()

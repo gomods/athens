@@ -17,28 +17,64 @@ import (
 // an Entry copy which ensures no
 // Fields are being overwritten.
 type Entry interface {
-	// Keep the existing interface methods unchanged
+	// Debugf logs a debug message with formatting
 	Debugf(string, ...interface{})
+
+	// Infof logs an info message with formatting
 	Infof(string, ...interface{})
+
+	// Warnf logs a warning message with formatting
 	Warnf(string, ...interface{})
+
+	// Errorf logs an error message with formatting
 	Errorf(string, ...interface{})
+
+	// Fatalf logs a fatal message with formatting and terminates the program
 	Fatalf(string, ...interface{})
+
+	// Panicf logs a panic message with formatting and panics
 	Panicf(string, ...interface{})
+
+	// Printf logs a message with formatting at default level
 	Printf(string, ...interface{})
 
+	// Debug logs a debug message
 	Debug(...interface{})
+
+	// Info logs an info message
 	Info(...interface{})
+
+	// Warn logs a warning message
 	Warn(...interface{})
+
+	// Error logs an error message
 	Error(...interface{})
+
+	// Fatal logs a fatal message and terminates the program
 	Fatal(...interface{})
+
+	// Panic logs a panic message and panics
 	Panic(...interface{})
+
+	// Print logs a message at default level
 	Print(...interface{})
 
+	// WithFields returns a new Entry with the provided fields added
 	WithFields(fields map[string]any) Entry
+
+	// WithField returns a new Entry with a single field added
 	WithField(key string, value any) Entry
+
+	// WithError returns a new Entry with the error added to the fields
 	WithError(err error) Entry
+
+	// WithContext returns a new Entry with the context added to the fields
 	WithContext(ctx context.Context) Entry
+
+	// SystemErr handles system errors with appropriate logging levels
 	SystemErr(err error)
+
+	// WriterLevel returns an io.PipeWriter for the specified logging level
 	WriterLevel(level slog.Level) *io.PipeWriter
 }
 

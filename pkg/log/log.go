@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"context"
+	"fmt"
 	"io"
 	"log/slog"
 	"os"
@@ -21,13 +22,16 @@ type Logger struct {
 // environment and the cloud platform it is
 // running on. TODO: take cloud arg and env
 // to construct the correct JSON formatter.
-func New(cloudProvider string, level slog.Level, format string) *Logger {
-	l := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: level}))
+func New(cloudProvider string, level slog.Level, format string, w io.Writer) *Logger {
+	var l *slog.Logger
 	switch cloudProvider {
 	case "GCP":
-		l = getGCPFormatter(level)
+		l = getGCPFormatter(level, w)
 	default:
-		l = parseFormat(format, level)
+		l = parseFormat(format, level, w)
+	}
+	if l == nil {
+		l = slog.New(slog.NewTextHandler(w, &slog.HandlerOptions{Level: level}))
 	}
 	slog.SetDefault(l)
 	return &Logger{Logger: l}
@@ -69,7 +73,6 @@ func (l *Logger) WithContext(ctx context.Context) Entry {
 	return l.WithFields(keys)
 }
 
-// Define WriterLevel
 func (l *Logger) WriterLevel(level slog.Level) *io.PipeWriter {
 	pipeReader, pipeWriter := io.Pipe()
 	go func() {
@@ -80,6 +83,11 @@ func (l *Logger) WriterLevel(level slog.Level) *io.PipeWriter {
 		}
 	}()
 	return pipeWriter
+}
+
+func (l *Logger) Fatal(args ...any) {
+	l.Logger.Error(fmt.Sprint(args...))
+	os.Exit(1)
 }
 
 // NoOpLogger provides a Logger that does nothing.

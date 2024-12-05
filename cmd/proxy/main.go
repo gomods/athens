@@ -43,16 +43,16 @@ func main() {
 		stdlog.Fatalf("Could not parse log level %q: %v", conf.LogLevel, err)
 	}
 
-	logger := athenslog.New(conf.CloudRuntime, logLvl, conf.LogFormat)
+	logger := athenslog.New(conf.CloudRuntime, logLvl, conf.LogFormat, os.Stdout)
 
 	// Turn standard logger output into slog Errors.
-	logrusErrorWriter := logger.WriterLevel(slog.LevelError)
+	slogErrorWriter := logger.WriterLevel(slog.LevelError)
 	defer func() {
-		if err := logrusErrorWriter.Close(); err != nil {
+		if err := slogErrorWriter.Close(); err != nil {
 			logger.WithError(err).Warn("Could not close logrus writer pipe")
 		}
 	}()
-	stdlog.SetOutput(logrusErrorWriter)
+	stdlog.SetOutput(slogErrorWriter)
 	stdlog.SetFlags(stdlog.Flags() &^ (stdlog.Ldate | stdlog.Ltime))
 
 	handler, err := actions.App(logger, conf)

@@ -1,6 +1,7 @@
 package log
 
 import (
+	"io"
 	"log/slog"
 	"os"
 	"sort"
@@ -9,8 +10,8 @@ import (
 	"github.com/fatih/color"
 )
 
-func getGCPFormatter(level slog.Level) *slog.Logger {
-	return slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
+func getGCPFormatter(level slog.Level, w io.Writer) *slog.Logger {
+	return slog.New(slog.NewJSONHandler(w, &slog.HandlerOptions{
 		Level: level,
 		ReplaceAttr: func(groups []string, a slog.Attr) slog.Attr {
 			switch a.Key {
@@ -78,9 +79,9 @@ func sortFields(data map[string]any) []string {
 	return keys
 }
 
-func parseFormat(format string, level slog.Level) *slog.Logger {
+func parseFormat(format string, level slog.Level, w io.Writer) *slog.Logger {
 	if format == "json" {
-		return slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: level}))
+		return slog.New(slog.NewJSONHandler(w, &slog.HandlerOptions{Level: level}))
 	}
 
 	return getDevFormatter(level)
