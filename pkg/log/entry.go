@@ -12,7 +12,7 @@ import (
 )
 
 // Entry is an abstraction to the
-// Logger and the logrus.Entry
+// Logger and the slog.Entry
 // so that *Logger always creates
 // an Entry copy which ensures no
 // Fields are being overwritten.

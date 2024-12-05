@@ -6,8 +6,6 @@ import (
 	"log/slog"
 	"net/http"
 	"runtime"
-
-	"github.com/sirupsen/logrus"
 )
 
 // Kind enums.
@@ -133,9 +131,7 @@ func Severity(err error) slog.Level {
 		return slog.LevelError
 	}
 
-	// if there's no severity (0 is Panic level in logrus
-	// which we should not use since cloud providers only have
-	// debug, info, warn, and error) then look for the
+	// if there's no severity then look for the
 	// child's severity.
 	if e.Severity < slog.LevelError {
 		return Severity(e.Err)
@@ -147,13 +143,13 @@ func Severity(err error) slog.Level {
 // Expect is a helper that returns an Info level
 // if the error has the expected kind, otherwise
 // it returns an Error level.
-func Expect(err error, kinds ...int) logrus.Level {
+func Expect(err error, kinds ...int) slog.Level {
 	for _, kind := range kinds {
 		if Kind(err) == kind {
-			return logrus.InfoLevel
+			return slog.LevelInfo
 		}
 	}
-	return logrus.ErrorLevel
+	return slog.LevelError
 }
 
 // Kind recursively searches for the

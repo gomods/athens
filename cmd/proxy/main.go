@@ -49,7 +49,7 @@ func main() {
 	slogErrorWriter := logger.WriterLevel(slog.LevelError)
 	defer func() {
 		if err := slogErrorWriter.Close(); err != nil {
-			logger.WithError(err).Warn("Could not close logrus writer pipe")
+			logger.WithError(err).Warn("Could not close slog writer pipe")
 		}
 	}()
 	stdlog.SetOutput(slogErrorWriter)

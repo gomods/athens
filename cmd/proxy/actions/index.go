@@ -3,6 +3,7 @@ package actions
 import (
 	"encoding/json"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"strconv"
 	"time"
@@ -10,7 +11,6 @@ import (
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/index"
 	"github.com/gomods/athens/pkg/log"
-	"github.com/sirupsen/logrus"
 )
 
 // indexHandler implements GET baseURL/index.
@@ -46,13 +46,13 @@ func getIndexLines(r *http.Request, index index.Indexer) ([]*index.Line, error) 
 	if limitStr := r.FormValue("limit"); limitStr != "" {
 		limit, err = strconv.Atoi(limitStr)
 		if err != nil || limit <= 0 {
-			return nil, errors.E(op, err, errors.KindBadRequest, logrus.InfoLevel)
+			return nil, errors.E(op, err, errors.KindBadRequest, slog.LevelInfo)
 		}
 	}
 	if sinceStr := r.FormValue("since"); sinceStr != "" {
 		since, err = time.Parse(time.RFC3339, sinceStr)
 		if err != nil {
-			return nil, errors.E(op, err, errors.KindBadRequest, logrus.InfoLevel)
+			return nil, errors.E(op, err, errors.KindBadRequest, slog.LevelInfo)
 		}
 	}
 	list, err := index.Lines(r.Context(), since, limit)
