@@ -4,7 +4,6 @@ import (
 	"io"
 	"log/slog"
 	"os"
-	"sort"
 	"time"
 
 	"github.com/fatih/color"
@@ -29,8 +28,6 @@ func getGCPFormatter(level slog.Level, w io.Writer) *slog.Logger {
 }
 
 const lightGrey = 0xffccc
-
-type devFormatter struct{}
 
 func getDevFormatter(level slog.Level) *slog.Logger {
 	return slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
@@ -64,19 +61,6 @@ func getDevFormatter(level slog.Level) *slog.Logger {
 			return a
 		},
 	}))
-}
-
-func sortFields(data map[string]any) []string {
-	if data == nil {
-		return nil
-	}
-
-	keys := make([]string, 0, len(data))
-	for k := range data {
-		keys = append(keys, k)
-	}
-	sort.Strings(keys)
-	return keys
 }
 
 func parseFormat(format string, level slog.Level, w io.Writer) *slog.Logger {
