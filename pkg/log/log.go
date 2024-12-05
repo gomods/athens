@@ -2,7 +2,6 @@ package log
 
 import (
 	"bufio"
-	"bytes"
 	"context"
 	"fmt"
 	"io"
@@ -14,8 +13,6 @@ import (
 // internal service should use to communicate things.
 type Logger struct {
 	*slog.Logger
-
-	Out *bytes.Buffer
 }
 
 // New constructs a new logger based on the
