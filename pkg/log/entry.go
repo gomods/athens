@@ -11,72 +11,76 @@ import (
 	"github.com/gomods/athens/pkg/errors"
 )
 
-// Logger handles basic logging operations
+// Logger handles basic logging operations.
 type LogOps interface {
-	// Debug logs a debug message
+	// Debug logs a debug message.
 	Debug(args ...interface{})
 
-	// Info logs an info message
+	// Info logs an info message.
 	Info(args ...interface{})
 
-	// Warn logs a warning message
+	// Warn logs a warning message.
 	Warn(args ...interface{})
 
-	// Error logs an error message
+	// Error logs an error message.
 	Error(args ...interface{})
 
-	// Fatal logs a fatal message and terminates the program
+	// Fatal logs a fatal message and terminates the program.
 	Fatal(args ...interface{})
 
-	// Panic logs a panic message and panics
+	// Panic logs a panic message and panics.
 	Panic(args ...interface{})
 
-	// Print logs a message at default level
+	// Print logs a message at default level.
 	Print(args ...interface{})
 }
 
+// FormattedLogOps is an extension of LogOps that supports formatted logging.
 type FormattedLogOps interface {
-	// Debugf logs a debug message with formatting
+	// Debugf logs a debug message with formatting.
 	Debugf(format string, args ...interface{})
 
-	// Infof logs an info message with formatting
+	// Infof logs an info message with formatting.
 	Infof(format string, args ...interface{})
 
-	// Warnf logs a warning message with formatting
+	// Warnf logs a warning message with formatting.
 	Warnf(format string, args ...interface{})
 
-	// Errorf logs an error message with formatting
+	// Errorf logs an error message with formatting.
 	Errorf(format string, args ...interface{})
 
-	// Fatalf logs a fatal message with formatting and terminates the program
+	// Fatalf logs a fatal message with formatting and terminates the program.
 	Fatalf(format string, args ...interface{})
 
-	// Panicf logs a panic message with formatting and panics
+	// Panicf logs a panic message with formatting and panics.
 	Panicf(format string, args ...interface{})
 
-	// Printf logs a message with formatting at default level
+	// Printf logs a message with formatting at default level.
 	Printf(format string, args ...interface{})
 }
 
+// Entry is a contextual logger that can be used to log messages with additional
+// fields.
 type ContextualLogOps interface {
-	// WithFields returns a new Entry with the provided fields added
+	// WithFields returns a new Entry with the provided fields added.
 	WithFields(fields map[string]any) Entry
 
-	// WithField returns a new Entry with a single field added
+	// WithField returns a new Entry with a single field added.
 	WithField(key string, value any) Entry
 
-	// WithError returns a new Entry with the error added to the fields
+	// WithError returns a new Entry with the error added to the fields.
 	WithError(err error) Entry
 
-	// WithContext returns a new Entry with the context added to the fields
+	// WithContext returns a new Entry with the context added to the fields.
 	WithContext(ctx context.Context) Entry
 }
 
+// SystemLogger is an interface to handle system errors.
 type SystemLogger interface {
-	// SystemErr handles system errors with appropriate logging levels
+	// SystemErr handles system errors with appropriate logging levels.
 	SystemErr(err error)
 
-	// WriterLevel returns an io.PipeWriter for the specified logging level
+	// WriterLevel returns an io.PipeWriter for the specified logging level.
 	WriterLevel(level slog.Level) *io.PipeWriter
 }
 
