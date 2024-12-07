@@ -11,33 +11,8 @@ import (
 	"github.com/gomods/athens/pkg/errors"
 )
 
-// Entry is an abstraction to the
-// Logger and the slog.Entry
-// so that *Logger always creates
-// an Entry copy which ensures no
-// Fields are being overwritten.
-type Entry interface {
-	// Debugf logs a debug message with formatting
-	Debugf(format string, args ...interface{})
-
-	// Infof logs an info message with formatting
-	Infof(format string, args ...interface{})
-
-	// Warnf logs a warning message with formatting
-	Warnf(format string, args ...interface{})
-
-	// Errorf logs an error message with formatting
-	Errorf(format string, args ...interface{})
-
-	// Fatalf logs a fatal message with formatting and terminates the program
-	Fatalf(format string, args ...interface{})
-
-	// Panicf logs a panic message with formatting and panics
-	Panicf(format string, args ...interface{})
-
-	// Printf logs a message with formatting at default level
-	Printf(format string, args ...interface{})
-
+// Logger handles basic logging operations
+type LogOps interface {
 	// Debug logs a debug message
 	Debug(args ...interface{})
 
@@ -58,7 +33,32 @@ type Entry interface {
 
 	// Print logs a message at default level
 	Print(args ...interface{})
+}
 
+type FormattedLogOps interface {
+	// Debugf logs a debug message with formatting
+	Debugf(format string, args ...interface{})
+
+	// Infof logs an info message with formatting
+	Infof(format string, args ...interface{})
+
+	// Warnf logs a warning message with formatting
+	Warnf(format string, args ...interface{})
+
+	// Errorf logs an error message with formatting
+	Errorf(format string, args ...interface{})
+
+	// Fatalf logs a fatal message with formatting and terminates the program
+	Fatalf(format string, args ...interface{})
+
+	// Panicf logs a panic message with formatting and panics
+	Panicf(format string, args ...interface{})
+
+	// Printf logs a message with formatting at default level
+	Printf(format string, args ...interface{})
+}
+
+type ContextualLogOps interface {
 	// WithFields returns a new Entry with the provided fields added
 	WithFields(fields map[string]any) Entry
 
@@ -70,12 +70,26 @@ type Entry interface {
 
 	// WithContext returns a new Entry with the context added to the fields
 	WithContext(ctx context.Context) Entry
+}
 
+type SystemLogger interface {
 	// SystemErr handles system errors with appropriate logging levels
 	SystemErr(err error)
 
 	// WriterLevel returns an io.PipeWriter for the specified logging level
 	WriterLevel(level slog.Level) *io.PipeWriter
+}
+
+// Entry is an abstraction to the
+// Logger and the slog.Entry
+// so that *Logger always creates
+// an Entry copy which ensures no
+// Fields are being overwritten.
+type Entry interface {
+	LogOps
+	FormattedLogOps
+	ContextualLogOps
+	SystemLogger
 }
 
 type entry struct {
