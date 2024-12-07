@@ -18,25 +18,25 @@ import (
 // Fields are being overwritten.
 type Entry interface {
 	// Debugf logs a debug message with formatting
-	Debugf(string, ...interface{})
+	Debugf(format string, args ...interface{})
 
 	// Infof logs an info message with formatting
-	Infof(string, ...interface{})
+	Infof(format string, args ...interface{})
 
 	// Warnf logs a warning message with formatting
-	Warnf(string, ...interface{})
+	Warnf(format string, args ...interface{})
 
 	// Errorf logs an error message with formatting
-	Errorf(string, ...interface{})
+	Errorf(format string, args ...interface{})
 
 	// Fatalf logs a fatal message with formatting and terminates the program
-	Fatalf(string, ...interface{})
+	Fatalf(format string, args ...interface{})
 
 	// Panicf logs a panic message with formatting and panics
-	Panicf(string, ...interface{})
+	Panicf(format string, args ...interface{})
 
 	// Printf logs a message with formatting at default level
-	Printf(string, ...interface{})
+	Printf(format string, args ...interface{})
 
 	// Debug logs a debug message
 	Debug(...interface{})
