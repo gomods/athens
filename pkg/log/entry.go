@@ -11,7 +11,7 @@ import (
 	"github.com/gomods/athens/pkg/errors"
 )
 
-// Logger handles basic logging operations.
+// LogOps handles basic logging operations.
 type LogOps interface {
 	// Debug logs a debug message.
 	Debug(args ...interface{})
@@ -59,8 +59,7 @@ type FormattedLogOps interface {
 	Printf(format string, args ...interface{})
 }
 
-// Entry is a contextual logger that can be used to log messages with additional
-// fields.
+// ContextualLogOps is a contextual logger that can be used to log messages with additional fields.
 type ContextualLogOps interface {
 	// WithFields returns a new Entry with the provided fields added.
 	WithFields(fields map[string]any) Entry
