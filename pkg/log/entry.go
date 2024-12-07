@@ -39,25 +39,25 @@ type Entry interface {
 	Printf(format string, args ...interface{})
 
 	// Debug logs a debug message
-	Debug(...interface{})
+	Debug(args ...interface{})
 
 	// Info logs an info message
-	Info(...interface{})
+	Info(args ...interface{})
 
 	// Warn logs a warning message
-	Warn(...interface{})
+	Warn(args ...interface{})
 
 	// Error logs an error message
-	Error(...interface{})
+	Error(args ...interface{})
 
 	// Fatal logs a fatal message and terminates the program
-	Fatal(...interface{})
+	Fatal(args ...interface{})
 
 	// Panic logs a panic message and panics
-	Panic(...interface{})
+	Panic(args ...interface{})
 
 	// Print logs a message at default level
-	Print(...interface{})
+	Print(args ...interface{})
 
 	// WithFields returns a new Entry with the provided fields added
 	WithFields(fields map[string]any) Entry
@@ -206,7 +206,10 @@ func (e *entry) WriterLevel(level slog.Level) *io.PipeWriter {
 		for scanner.Scan() {
 			logFn(scanner.Text())
 		}
-		r.Close()
+		err := r.Close()
+		if err != nil {
+			e.Error(err)
+		}
 	}(reader, logFunc)
 
 	return writer

@@ -123,5 +123,4 @@ func main() {
 	}
 
 	<-idleConnsClosed
-
 }
