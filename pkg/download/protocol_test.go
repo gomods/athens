@@ -502,11 +502,12 @@ type testEntry struct {
 
 var _ log.Entry = &testEntry{}
 
-func (e *testEntry) Debugf(format string, args ...any) {e.msg = format}
-func (e *testEntry) Infof(format string, args ...any)  {e.msg = format}
-func (e *testEntry) Warnf(format string, args ...any)  {e.msg = format}
-func (e *testEntry) Errorf(format string, args ...any) {e.msg = format}
-func (e *testEntry) Fatalf(format string, args ...any) {e.msg = format}
+func (e *testEntry) Debugf(format string, args ...any) { e.msg = format }
+func (e *testEntry) Infof(format string, args ...any)  { e.msg = format }
+func (e *testEntry) Warnf(format string, args ...any)  { e.msg = format }
+func (e *testEntry) Errorf(format string, args ...any) { e.msg = format }
+func (e *testEntry) Fatalf(format string, args ...any) { e.msg = format }
+func (e *testEntry) Printf(format string, args ...any) { e.msg = format }
 
 func (*testEntry) Debug(args ...any) {}
 func (*testEntry) Info(args ...any)  {}

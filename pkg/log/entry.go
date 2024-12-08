@@ -45,6 +45,9 @@ type FormattedLogOps interface {
 
 	// Fatalf logs a fatal message with formatting and terminates the program.
 	Fatalf(format string, args ...interface{})
+
+	//Printf logs a message with formatting.
+	Printf(format string, args ...interface{})
 }
 
 // ContextualLogOps is a contextual logger that can be used to log messages with additional fields.
