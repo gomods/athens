@@ -27,12 +27,6 @@ type LogOps interface {
 
 	// Fatal logs a fatal message and terminates the program.
 	Fatal(args ...interface{})
-
-	// Panic logs a panic message and panics.
-	Panic(args ...interface{})
-
-	// Print logs a message at default level.
-	Print(args ...interface{})
 }
 
 // FormattedLogOps is an extension of LogOps that supports formatted logging.
@@ -51,12 +45,6 @@ type FormattedLogOps interface {
 
 	// Fatalf logs a fatal message with formatting and terminates the program.
 	Fatalf(format string, args ...interface{})
-
-	// Panicf logs a panic message with formatting and panics.
-	Panicf(format string, args ...interface{})
-
-	// Printf logs a message with formatting at default level.
-	Printf(format string, args ...interface{})
 }
 
 // ContextualLogOps is a contextual logger that can be used to log messages with additional fields.
