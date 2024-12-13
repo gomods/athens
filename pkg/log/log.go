@@ -90,6 +90,6 @@ func (l *Logger) Fatal(args ...any) {
 // NoOpLogger provides a Logger that does nothing.
 func NoOpLogger() *Logger {
 	return &Logger{
-		Logger: &slog.Logger{},
+		Logger: slog.New(slog.NewTextHandler(io.Discard, &slog.HandlerOptions{})),
 	}
 }
