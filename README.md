@@ -64,7 +64,7 @@ It's not too long and it's ok for you to "skim" it (or even just read the first 
 
 If you're not ready to contribute code yet, there are plenty of other great ways to get involved:
 
-- Come talk to us in the `#athens` channel in the [Gophers slack](http://gophers.slack.com/). We’re a really friendly group, so come say hi and join us! Ping me (`@arschles` on slack) in the channel and I’ll give you the lowdown
+- Come talk to us in the `#athens` channel in the [Gophers slack](https://join.slack.com/t/gophers/shared_invite/zt-2x2fraaj5-Gai4CThbNTLvXKOxhbrDOQ). We’re a really friendly group, so come say hi and join us! Ping me (`@arschles` on slack) in the channel and I’ll give you the lowdown
 - Get familiar with the technology. There's lots to read about. Here are some places to start:
     - [Gentle Introduction to the Project](https://medium.com/@arschles/project-athens-c80606497ce1) - the basics of why we started this project
     - [The Download Protocol](https://medium.com/@arschles/project-athens-the-download-protocol-2b346926a818) - the core API that the proxy implements and the `go` CLI uses to download packages
