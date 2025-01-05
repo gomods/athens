@@ -14,6 +14,7 @@ import (
 const homepage = `<!DOCTYPE html>
 <html>
 <head>
+	<meta charset="utf-8"></meta>
 	<title>Athens</title>
 	<style>
 		body {

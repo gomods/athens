@@ -28,6 +28,7 @@ For more advanced formatting read more about [Go HTML templates](https://pkg.go.
 <!DOCTYPE html>
 <html>
 <head>
+	<meta charset="utf-8"></meta>
 	<title>Athens</title>
 	<style>
 		body {
