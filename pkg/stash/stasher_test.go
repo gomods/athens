@@ -5,10 +5,10 @@ import (
 	"io"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/gomods/athens/pkg/index/nop"
 	"github.com/gomods/athens/pkg/storage"
-	"time"
 )
 
 type stashTest struct {
