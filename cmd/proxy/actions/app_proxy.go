@@ -105,7 +105,7 @@ func addProxyRoutes(
 	if err != nil {
 		return err
 	}
-	st := stash.New(mf, s, indexer, stash.WithPool(c.GoGetWorkers), withSingleFlight)
+	st := stash.New(mf, s, indexer, c.TimeoutDuration(), stash.WithPool(c.GoGetWorkers), withSingleFlight)
 
 	df, err := mode.NewFile(c.DownloadMode, c.DownloadURL)
 	if err != nil {
