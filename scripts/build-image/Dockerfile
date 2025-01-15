@@ -1,4 +1,4 @@
-FROM golang:1.23-bookworm
+FROM golang:1.23.4-bookworm
 
 WORKDIR /tmp
 
