@@ -10,7 +10,7 @@ environment:
   GOPROXY: https://proxy.golang.org
   SKIP_UNTIL_113: true
 
-stack: go 1.23.4
+stack: go 1.23.5
 
 test_script:
   - go version
