@@ -23,7 +23,7 @@ This is a quick recap of the [Walkthrough](/walkthrough)
 
 ### Using the `docker` cli
 
-In order to run the Athens Proxy using docker, we need first to create a directory that will store the persitant modules.
+In order to run the Athens Proxy using docker, we need first to create a directory that will store the persistant modules.
 In the example below, the new directory is named `athens-storage` and is located in our userspace (i.e. `$HOME`). 
 Then we need to set the `ATHENS_STORAGE_TYPE` and `ATHENS_DISK_STORAGE_ROOT` environment variables when we run the Docker container.
 
@@ -56,7 +56,7 @@ docker run -d -v "$($env:ATHENS_STORAGE):/var/lib/athens" `
 ## Non-Root User
 
 The Athens docker images comes with a non-root user `athens` with `uid: 1000`, `gid: 1000` and home directory `/home/athens`.
-In situations where running as root is not permitted, this user can be used instead. In all other instuctions
+In situations where running as root is not permitted, this user can be used instead. In all other instructions
 replace `/root/` with `/home/athens/` and set the user and group ids in the run environment to `1000`.
 
 ```shell
