@@ -6,6 +6,7 @@ import (
 	"flag"
 	"fmt"
 	stdlog "log"
+	"log/slog"
 	"net"
 	"net/http"
 	_ "net/http/pprof"
@@ -18,7 +19,6 @@ import (
 	"github.com/gomods/athens/pkg/build"
 	"github.com/gomods/athens/pkg/config"
 	athenslog "github.com/gomods/athens/pkg/log"
-	"github.com/sirupsen/logrus"
 )
 
 var (
@@ -37,21 +37,22 @@ func main() {
 		stdlog.Fatalf("Could not load config file: %v", err)
 	}
 
-	logLvl, err := logrus.ParseLevel(conf.LogLevel)
+	var logLvl slog.Level
+	err = logLvl.UnmarshalText([]byte(conf.LogLevel))
 	if err != nil {
 		stdlog.Fatalf("Could not parse log level %q: %v", conf.LogLevel, err)
 	}
 
-	logger := athenslog.New(conf.CloudRuntime, logLvl, conf.LogFormat)
+	logger := athenslog.New(conf.CloudRuntime, logLvl, conf.LogFormat, os.Stdout)
 
-	// Turn standard logger output into logrus Errors.
-	logrusErrorWriter := logger.WriterLevel(logrus.ErrorLevel)
+	// Turn standard logger output into slog Errors.
+	slogErrorWriter := logger.WriterLevel(slog.LevelError)
 	defer func() {
-		if err := logrusErrorWriter.Close(); err != nil {
-			logger.WithError(err).Warn("Could not close logrus writer pipe")
+		if err := slogErrorWriter.Close(); err != nil {
+			logger.WithError(err).Warn("Could not close slog writer pipe")
 		}
 	}()
-	stdlog.SetOutput(logrusErrorWriter)
+	stdlog.SetOutput(slogErrorWriter)
 	stdlog.SetFlags(stdlog.Flags() &^ (stdlog.Ldate | stdlog.Ltime))
 
 	handler, err := actions.App(logger, conf)

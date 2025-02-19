@@ -2,10 +2,10 @@ package errors
 
 import (
 	"errors"
+	"log/slog"
 	"net/http"
 	"testing"
 
-	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 )
@@ -35,16 +35,16 @@ func TestSeverity(t *testing.T) {
 	msg := "test error"
 
 	err := E(op, msg)
-	require.Equal(t, logrus.ErrorLevel, Severity(err))
+	require.Equal(t, slog.LevelError, Severity(err))
 
-	err = E(op, msg, logrus.WarnLevel)
-	require.Equal(t, logrus.WarnLevel, Severity(err))
+	err = E(op, msg, slog.LevelWarn)
+	require.Equal(t, slog.LevelWarn, Severity(err))
 
 	err = E(op, err)
-	require.Equal(t, logrus.WarnLevel, Severity(err))
+	require.Equal(t, slog.LevelWarn, Severity(err))
 
-	err = E(op, err, logrus.InfoLevel)
-	require.Equal(t, logrus.InfoLevel, Severity(err))
+	err = E(op, err, slog.LevelInfo)
+	require.Equal(t, slog.LevelInfo, Severity(err))
 }
 
 func TestKind(t *testing.T) {
@@ -85,14 +85,14 @@ func TestExpect(t *testing.T) {
 	err := E("TestExpect", "error message", KindBadRequest)
 
 	severity := Expect(err, KindBadRequest)
-	require.Equalf(t, severity, logrus.InfoLevel, "expected an info level log but got %v", severity)
+	require.Equalf(t, severity, slog.LevelInfo, "expected an info level log but got %v", severity)
 
 	severity = Expect(err, KindAlreadyExists)
-	require.Equalf(t, severity, logrus.ErrorLevel, "expected an error level but got %v", severity)
+	require.Equalf(t, severity, slog.LevelError, "expected an error level but got %v", severity)
 
 	severity = Expect(err, KindAlreadyExists, KindBadRequest)
-	require.Equalf(t, severity, logrus.InfoLevel, "expected an info level log but got %v", severity)
+	require.Equalf(t, severity, slog.LevelInfo, "expected an info level log but got %v", severity)
 
 	severity = Expect(err, KindAlreadyExists, KindNotImplemented)
-	require.Equalf(t, severity, logrus.ErrorLevel, "expected an error level but got %v", severity)
+	require.Equalf(t, severity, slog.LevelError, "expected an error level but got %v", severity)
 }
