@@ -31,6 +31,8 @@ type RedisSentinel struct {
 	Endpoints        []string `envconfig:"ATHENS_REDIS_SENTINEL_ENDPOINTS"`
 	MasterName       string   `envconfig:"ATHENS_REDIS_SENTINEL_MASTER_NAME"`
 	SentinelPassword string   `envconfig:"ATHENS_REDIS_SENTINEL_PASSWORD"`
+	RedisUsername    string   `envconfig:"ATHENS_REDIS_USERNAME"`
+	RedisPassword    string   `envconfig:"ATHENS_REDIS_PASSWORD"`
 	LockConfig       *RedisLockConfig
 }
 

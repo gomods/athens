@@ -375,7 +375,7 @@ func getEnvMap(config *Config) map[string]string {
 		if singleFlight.Redis != nil {
 			envVars["ATHENS_SINGLE_FLIGHT_TYPE"] = "redis"
 			envVars["ATHENS_REDIS_ENDPOINT"] = singleFlight.Redis.Endpoint
-			envVars["ATHENS_REDIS_PASSWORD"] = singleFlight.Redis.Endpoint
+			envVars["ATHENS_REDIS_PASSWORD"] = singleFlight.Redis.Password
 			if singleFlight.Redis.LockConfig != nil {
 				envVars["ATHENS_REDIS_LOCK_TTL"] = strconv.Itoa(singleFlight.Redis.LockConfig.TTL)
 				envVars["ATHENS_REDIS_LOCK_TIMEOUT"] = strconv.Itoa(singleFlight.Redis.LockConfig.Timeout)
@@ -386,6 +386,8 @@ func getEnvMap(config *Config) map[string]string {
 			envVars["ATHENS_REDIS_SENTINEL_ENDPOINTS"] = strings.Join(singleFlight.RedisSentinel.Endpoints, ",")
 			envVars["ATHENS_REDIS_SENTINEL_MASTER_NAME"] = singleFlight.RedisSentinel.MasterName
 			envVars["ATHENS_REDIS_SENTINEL_PASSWORD"] = singleFlight.RedisSentinel.SentinelPassword
+			envVars["ATHENS_REDIS_USERNAME"] = singleFlight.RedisSentinel.RedisUsername
+			envVars["ATHENS_REDIS_PASSWORD"] = singleFlight.RedisSentinel.RedisPassword
 			if singleFlight.RedisSentinel.LockConfig != nil {
 				envVars["ATHENS_REDIS_LOCK_TTL"] = strconv.Itoa(singleFlight.RedisSentinel.LockConfig.TTL)
 				envVars["ATHENS_REDIS_LOCK_TIMEOUT"] = strconv.Itoa(singleFlight.RedisSentinel.LockConfig.Timeout)

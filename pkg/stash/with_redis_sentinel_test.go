@@ -1,6 +1,7 @@
 package stash
 
 import (
+	"cmp"
 	"context"
 	"os"
 	"testing"
@@ -18,8 +19,10 @@ import (
 func TestWithRedisSentinelLock(t *testing.T) {
 	endpoint := os.Getenv("REDIS_SENTINEL_TEST_ENDPOINT")
 	masterName := os.Getenv("REDIS_SENTINEL_TEST_MASTER_NAME")
-	password := os.Getenv("REDIS_SENTINEL_TEST_PASSWORD")
-	if len(endpoint) == 0 || len(masterName) == 0 || len(password) == 0 {
+	sentinelPassword := os.Getenv("REDIS_SENTINEL_TEST_PASSWORD")
+	redisUsername := cmp.Or(os.Getenv("REDIS_TEST_USERNAME"), "")
+	redisPassword := cmp.Or(os.Getenv("REDIS_TEST_PASSWORD"), "")
+	if len(endpoint) == 0 || len(masterName) == 0 || len(sentinelPassword) == 0 {
 		t.SkipNow()
 	}
 	strg, err := mem.NewStorage()
@@ -29,7 +32,7 @@ func TestWithRedisSentinelLock(t *testing.T) {
 	ms := &mockRedisStasher{strg: strg}
 	l := &testingRedisLogger{t: t}
 
-	wrapper, err := WithRedisSentinelLock(l, []string{endpoint}, masterName, password, storage.WithChecker(strg), config.DefaultRedisLockConfig())
+	wrapper, err := WithRedisSentinelLock(l, []string{endpoint}, masterName, sentinelPassword, redisUsername, redisPassword, storage.WithChecker(strg), config.DefaultRedisLockConfig())
 	if err != nil {
 		t.Fatal(err)
 	}

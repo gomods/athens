@@ -179,6 +179,8 @@ func defaultConfig() *Config {
 				Endpoints:        []string{"127.0.0.1:26379"},
 				MasterName:       "redis-1",
 				SentinelPassword: "sekret",
+				RedisUsername:    "",
+				RedisPassword:    "",
 				LockConfig:       DefaultRedisLockConfig(),
 			},
 			GCP: DefaultGCPConfig(),
