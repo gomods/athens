@@ -34,6 +34,9 @@ jobs:
       REDIS_SENTINEL_TEST_MASTER_NAME: redis-1
       REDIS_SENTINEL_TEST_PASSWORD: sekret
       PROTECTED_REDIS_TEST_ENDPOINT: localhost:6380
+      PROTECTED_REDIS_TEST_USERNAME: default
+      REDIS_SENTINEL_TEST_PROTECTED_ENDPOINT: localhost:26380
+      REDIS_SENTINEL_TEST_PROTECTED_MASTER_NAME: protectedredis-1
       ATHENS_PROTECTED_REDIS_PASSWORD: AthensPass1
       GA_PULL_REQUEST: ${{github.event.number}}
     runs-on: ubuntu-latest
@@ -69,6 +72,17 @@ jobs:
         env:
           REDIS_PORT_NUMBER: 6380
           REDIS_PASSWORD: AthensPass1
+      redis-sentinel-protected-redis:
+        image: bitnami/redis-sentinel
+        env:
+          REDIS_MASTER_HOST: protectedredis
+          REDIS_MASTER_PORT_NUMBER: 6380
+          REDIS_MASTER_SET: protectedredis-1
+          REDIS_SENTINEL_PASSWORD: sekret
+          REDIS_SENTINEL_QUORUM: "1"
+          REDIS_SENTINEL_PORT_NUMBER: 26380
+        ports:
+          - 26380:26380
     steps:
       - uses: actions/checkout@v4
       - name: Set up Go
