@@ -16,7 +16,6 @@ import (
 // NewValidationMiddleware builds a middleware function that performs validation checks by calling
 // an external webhook.
 func NewValidationMiddleware(client *http.Client, validatorHook string) mux.MiddlewareFunc {
-	const op errors.Op = "actions.NewValidationMiddleware"
 	return func(h http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			mod, err := paths.GetModule(r)

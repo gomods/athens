@@ -26,7 +26,6 @@ type checker struct {
 }
 
 func (c *checker) Exists(ctx context.Context, module, version string) (bool, error) {
-	const op errors.Op = "checker.Exists"
 	_, err := c.strg.Info(ctx, module, version)
 	if err != nil {
 		if errors.Is(err, errors.KindNotFound) {

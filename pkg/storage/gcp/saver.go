@@ -156,8 +156,8 @@ func (s *Storage) upload(ctx context.Context, path string, stream io.Reader, fir
 	// We set this metadata only for the first of the three files uploaded,
 	// for use as a singleflight lock.
 	if first {
-		wc.ObjectAttrs.Metadata = make(map[string]string)
-		wc.ObjectAttrs.Metadata["in_progress"] = "true"
+		wc.Metadata = make(map[string]string)
+		wc.Metadata["in_progress"] = "true"
 	}
 
 	// NOTE: content type is auto detected on GCP side and ACL defaults to public

@@ -5,7 +5,6 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/module"
 	"github.com/gomods/athens/pkg/paths"
 	"github.com/gorilla/mux"
@@ -14,7 +13,6 @@ import (
 // NewFilterMiddleware builds a middleware function that implements the
 // filters configured in the filter file.
 func NewFilterMiddleware(mf *module.Filter, upstreamEndpoint string) mux.MiddlewareFunc {
-	const op errors.Op = "actions.NewFilterMiddleware"
 	return func(h http.Handler) http.Handler {
 		f := func(w http.ResponseWriter, r *http.Request) {
 			mod, err := paths.GetModule(r)

@@ -100,7 +100,6 @@ func (el *EnvList) Add(key, value string) {
 // See the below link for more information:
 // https://github.com/gomods/athens/issues/1404
 func (el *EnvList) Decode(value string) error {
-	const op errors.Op = "envList.Decode"
 	if value == "" {
 		return nil
 	}

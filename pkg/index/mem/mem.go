@@ -20,7 +20,7 @@ type indexer struct {
 	lines []*index.Line
 }
 
-func (i *indexer) Index(ctx context.Context, mod, ver string) error {
+func (i *indexer) Index(_ context.Context, mod, ver string) error {
 	const op errors.Op = "mem.Index"
 	i.mu.Lock()
 	defer i.mu.Unlock()
@@ -37,8 +37,7 @@ func (i *indexer) Index(ctx context.Context, mod, ver string) error {
 	return nil
 }
 
-func (i *indexer) Lines(ctx context.Context, since time.Time, limit int) ([]*index.Line, error) {
-	const op errors.Op = "mem.Lines"
+func (i *indexer) Lines(_ context.Context, since time.Time, limit int) ([]*index.Line, error) {
 	lines := []*index.Line{}
 	var count int
 	i.mu.RLock()
