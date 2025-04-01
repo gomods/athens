@@ -2,6 +2,7 @@ package s3
 
 import (
 	"context"
+	"slices"
 	"strings"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -24,13 +25,17 @@ func (s *Storage) List(ctx context.Context, module string) ([]string, error) {
 		Bucket: aws.String(s.bucket),
 		Prefix: aws.String(modulePrefix),
 	}
+	paginator := s3.NewListObjectsV2Paginator(s.s3API, lsParams)
 
-	loo, err := s.s3API.ListObjectsV2(ctx, lsParams)
-	if err != nil {
-		return nil, errors.E(op, err, errors.M(module))
+	var versions []string
+	for paginator.HasMorePages() {
+		loo, err := paginator.NextPage(ctx)
+		if err != nil {
+			return nil, errors.E(op, err, errors.M(module))
+		}
+		versions = slices.Concat(versions, extractVersions(loo.Contents))
 	}
-
-	return extractVersions(loo.Contents), nil
+	return versions, nil
 }
 
 func extractVersions(objects []types.Object) []string {
