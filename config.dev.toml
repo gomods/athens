@@ -369,6 +369,12 @@ ShutdownTimeout = 60
         # Env override: ATHENS_REDIS_SENTINEL_PASSWORD
         SentinelPassword = "sekret"
 
+        # The Redis master authorization parameters
+        # Env override: ATHENS_REDIS_USERNAME
+        RedisUsername = ""
+        # Env override: ATHENS_REDIS_PASSWORD
+        RedisPassword = ""
+
         [SingleFlight.RedisSentinel.LockConfig]
             # TTL for the lock in seconds. Defaults to 900 seconds (15 minutes).
             # Env override: ATHENS_REDIS_LOCK_TTL
