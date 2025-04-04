@@ -63,22 +63,6 @@ func main() {
 		Handler:           handler,
 		ReadHeaderTimeout: 2 * time.Second,
 	}
-	idleConnsClosed := make(chan struct{})
-
-	go func() {
-		sigint := make(chan os.Signal, 1)
-		signal.Notify(sigint, shutdown.GetSignals()...)
-		s := <-sigint
-		logger.WithField("signal", s).Infof("Received signal, shutting down server")
-
-		// We received an interrupt signal, shut down.
-		ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(conf.ShutdownTimeout))
-		defer cancel()
-		if err := srv.Shutdown(ctx); err != nil {
-			logger.WithError(err).Fatal("Could not shut down server")
-		}
-		close(idleConnsClosed)
-	}()
 
 	if conf.EnablePprof {
 		go func() {
@@ -111,15 +95,31 @@ func main() {
 		}
 	}
 
-	if conf.TLSCertFile != "" && conf.TLSKeyFile != "" {
-		err = srv.ServeTLS(ln, conf.TLSCertFile, conf.TLSKeyFile)
-	} else {
-		err = srv.Serve(ln)
-	}
+	signalCtx, signalStop := signal.NotifyContext(context.Background(), shutdown.GetSignals()...)
+	reaper := shutdown.ChildProcReaper(signalCtx, logger.Logger)
 
-	if !errors.Is(err, http.ErrServerClosed) {
-		logger.WithError(err).Fatal("Could not start server")
-	}
+	go func() {
+		defer signalStop()
+		if conf.TLSCertFile != "" && conf.TLSKeyFile != "" {
+			err = srv.ServeTLS(ln, conf.TLSCertFile, conf.TLSKeyFile)
+		} else {
+			err = srv.Serve(ln)
+		}
 
-	<-idleConnsClosed
+		if !errors.Is(err, http.ErrServerClosed) {
+			logger.WithError(err).Fatal("Could not start server")
+		}
+	}()
+
+	// Wait for shutdown signal, then cleanup before exit.
+	<-signalCtx.Done()
+	logger.Infof("Shutting down server")
+
+	// We received an interrupt signal, shut down.
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(conf.ShutdownTimeout))
+	defer cancel()
+	if err := srv.Shutdown(shutdownCtx); err != nil {
+		logger.WithError(err).Fatal("Could not shut down server")
+	}
+	<-reaper.Done()
 }
