@@ -3,10 +3,10 @@ package stash
 import (
 	"context"
 
-	"github.com/go-redis/redis/v8"
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/storage"
+	"github.com/redis/go-redis/v9"
 )
 
 // WithRedisSentinelLock returns a distributed singleflight

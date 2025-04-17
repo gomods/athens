@@ -22,7 +22,6 @@ require (
 	github.com/bsm/redislock v0.9.4
 	github.com/fatih/color v1.13.0
 	github.com/go-playground/validator/v10 v10.23.0
-	github.com/go-redis/redis/v8 v8.11.5
 	github.com/go-sql-driver/mysql v1.6.0
 	github.com/gobuffalo/envy v1.7.0
 	github.com/gobuffalo/httptest v1.5.2
@@ -35,6 +34,7 @@ require (
 	github.com/lib/pq v1.10.9
 	github.com/minio/minio-go/v6 v6.0.57
 	github.com/mitchellh/go-homedir v1.1.0
+	github.com/redis/go-redis/v9 v9.0.3
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/afero v1.11.0
 	github.com/stretchr/testify v1.9.0
@@ -144,7 +144,6 @@ require (
 	github.com/prometheus/common v0.47.0 // indirect
 	github.com/prometheus/procfs v0.12.0 // indirect
 	github.com/prometheus/prometheus v0.35.0 // indirect
-	github.com/redis/go-redis/v9 v9.0.3 // indirect
 	github.com/rogpeppe/go-internal v1.12.0 // indirect
 	github.com/soheilhy/cmux v0.1.5 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
