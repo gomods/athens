@@ -1,10 +1,13 @@
+version: 2
+project_name: athens
+
 before:
   hooks:
     - go mod download
 env:
 - CGO_ENABLED=0
 - GOPROXY=https://proxy.golang.org
-project_name: athens
+
 builds:
 - id: builds
   goos:
@@ -18,10 +21,11 @@ builds:
   ldflags:
     - -X "github.com/gomods/athens/pkg/build.version={{ .Tag }}"
     - -X "github.com/gomods/athens/pkg/build.buildDate={{ .Env.DATE }}"
+
 checksum:
   name_template: 'checksums.txt'
 snapshot:
-  name_template: "{{ .Tag }}-next"
+  version_template: "{{ .Tag }}-next"
 changelog:
   sort: asc
   filters:
