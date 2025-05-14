@@ -143,11 +143,8 @@ func downloadModule(
 	cmd.Stderr = stderr
 
 	err := cmd.Run()
-	if errors.IsNoChildProcessesErr(err) {
-		err = nil
-	}
 
-	if err != nil {
+	if err != nil && !errors.IsNoChildProcessesErr(err) {
 		err = fmt.Errorf("%w: %s", err, stderr)
 		var m goModule
 		if jsonErr := json.NewDecoder(stdout).Decode(&m); jsonErr != nil {
