@@ -81,7 +81,6 @@ func (l *vcsLister) List(ctx context.Context, module string) (*storage.RevInfo, 
 		cmd.Env = prepareEnv(gopath, l.env)
 
 		err = cmd.Run()
-
 		if err != nil && !errors.IsNoChildProcessesErr(err) {
 			err = fmt.Errorf("%w: %s", err, stderr)
 			if errors.IsErr(timeoutCtx.Err(), context.DeadlineExceeded) {

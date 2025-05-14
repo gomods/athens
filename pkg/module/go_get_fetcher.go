@@ -143,7 +143,6 @@ func downloadModule(
 	cmd.Stderr = stderr
 
 	err := cmd.Run()
-
 	if err != nil && !errors.IsNoChildProcessesErr(err) {
 		err = fmt.Errorf("%w: %s", err, stderr)
 		var m goModule
