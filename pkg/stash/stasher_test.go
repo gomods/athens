@@ -5,6 +5,7 @@ import (
 	"io"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/gomods/athens/pkg/index/nop"
 	"github.com/gomods/athens/pkg/storage"
@@ -54,7 +55,7 @@ func TestStash(t *testing.T) {
 			var mf mockFetcher
 			mf.ver = testCase.modVer
 
-			s := New(&mf, &ms, nop.New())
+			s := New(&mf, &ms, nop.New(), 10*time.Minute)
 			newVersion, err := s.Stash(context.Background(), "module", testCase.ver)
 			if err != nil {
 				t.Fatal(err)
