@@ -13,10 +13,6 @@ import (
 	googleapi "google.golang.org/api/googleapi"
 )
 
-// Fallback for how long we consider an "in_progress" metadata key stale,
-// due to failure to remove it.
-const fallbackInProgressStaleThreshold = 2 * time.Minute
-
 // Save uploads the module's .mod, .zip and .info files for a given version
 // It expects a context, which can be provided using context.Background
 // from the standard library until context has been threaded down the stack.
