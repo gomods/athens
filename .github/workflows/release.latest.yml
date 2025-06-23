@@ -1,8 +1,10 @@
-name: release-latest
+name: Release Docker Images
+
 on:
   push:
     tags:
       - '**'
+
 jobs:
   docker-push-main:
     runs-on: ubuntu-latest

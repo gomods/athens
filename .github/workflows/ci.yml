@@ -1,31 +1,47 @@
----
-name: continuous-integration
+name: Continuous Integration
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
   pull_request:
-    branches: [main]
+    branches:
+      - main
 
 jobs:
   lint:
     runs-on: ubuntu-latest
     env:
-      GOLANGCI_LINT_VERSION: v2.0.2
+      GOLANGCI_LINT_VERSION: v2.1.6
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # We need to set a cache marker to ensure that the cache is individual for each job.
+      - name: Add Cache Marker
+        run: echo "lint" > env.txt
+
       - name: Set up Go
+        id: install-go
         uses: actions/setup-go@v5
         with:
           go-version-file: 'go.mod'
-          cache: true
+          cache-dependency-path: |
+            go.sum
+            env.txt
+
+      - name: Download dependencies
+        run: go mod download
+        if: steps.install-go.outputs.cache-hit != 'true'
+
       - name: Lint code
-        uses: golangci/golangci-lint-action@v7
+        uses: golangci/golangci-lint-action@v8
         with:
           version: ${{ env.GOLANGCI_LINT_VERSION }}
 
-  build:
+  test:
+    runs-on: ubuntu-latest
     env:
       ATHENS_MONGO_STORAGE_URL: mongodb://localhost:27017
       ATHENS_MINIO_ENDPOINT: http://localhost:9000
@@ -39,12 +55,13 @@ jobs:
       REDIS_SENTINEL_TEST_PROTECTED_MASTER_NAME: protectedredis-1
       ATHENS_PROTECTED_REDIS_PASSWORD: AthensPass1
       GA_PULL_REQUEST: ${{github.event.number}}
-    runs-on: ubuntu-latest
+
     services:
       mongo:
         image: mongo
         ports:
           - 27017:27017
+
       minio:
         image: minio/minio:edge-cicd
         ports:
@@ -52,10 +69,12 @@ jobs:
         env:
           MINIO_ACCESS_KEY: minio
           MINIO_SECRET_KEY: minio123
+
       redis:
         image: redis
         ports:
           - 6379:6379
+
       redis-sentinel:
         image: bitnami/redis-sentinel
         env:
@@ -65,6 +84,7 @@ jobs:
           REDIS_SENTINEL_QUORUM: "1"
         ports:
           - 26379:26379
+
       protectedredis:
         image: bitnami/redis
         ports:
@@ -72,6 +92,7 @@ jobs:
         env:
           REDIS_PORT_NUMBER: 6380
           REDIS_PASSWORD: AthensPass1
+
       redis-sentinel-protected-redis:
         image: bitnami/redis-sentinel
         env:
@@ -83,17 +104,64 @@ jobs:
           REDIS_SENTINEL_PORT_NUMBER: 26380
         ports:
           - 26380:26380
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # We need to set a cache marker to ensure that the cache is individual for each job.
+      - name: Add Cache Marker
+        run: echo "test" > env.txt
+
       - name: Set up Go
+        id: install-go
         uses: actions/setup-go@v5
         with:
           go-version-file: 'go.mod'
-          cache: true
+          cache-dependency-path: |
+            go.sum
+            env.txt
+
+      - name: Download dependencies
+        run: go mod download
+        if: steps.install-go.outputs.cache-hit != 'true'
+
       - name: Verify changes
         run: make verify
+
       - name: Unit tests
         run: go test -v -race ./...
+
       - name: End to end tests
         if: success() || failure()
         run: make test-e2e
+
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # We need to set a cache marker to ensure that the cache is individual for each job.
+      - name: Add Cache Marker
+        run: echo "build" > env.txt
+
+      - name: Set up Go
+        id: install-go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: 'go.mod'
+          cache-dependency-path: |
+            go.sum
+            env.txt
+
+      - name: Download dependencies
+        run: go mod download
+        if: steps.install-go.outputs.cache-hit != 'true'
+
+      - name: Run GoReleaser
+        uses: goreleaser/goreleaser-action@v6
+        with:
+          version: latest
+          args: release --clean --snapshot
