@@ -142,6 +142,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       # We need to set a cache marker to ensure that the cache is individual for each job.
       - name: Add Cache Marker
