@@ -24,7 +24,7 @@ jobs:
         run: go mod download
         if: steps.install-go.outputs.cache-hit != 'true'
 
-      - name: capture current date
+      - name: Capture Current Date
         id: date
         run: echo "::set-output name=date::$(date -u '+%Y-%m-%d-%H:%M:%S-%Z')"
 

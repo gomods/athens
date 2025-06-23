@@ -160,8 +160,14 @@ jobs:
         run: go mod download
         if: steps.install-go.outputs.cache-hit != 'true'
 
+      - name: Capture Current Date
+        id: date
+        run: echo "::set-output name=date::$(date -u '+%Y-%m-%d-%H:%M:%S-%Z')"
+
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v6
         with:
           version: latest
           args: release --clean --snapshot
+        env:
+          DATE: ${{ steps.date.outputs.date }}
