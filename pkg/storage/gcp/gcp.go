@@ -15,8 +15,9 @@ import (
 
 // Storage implements the (./pkg/storage).Backend interface.
 type Storage struct {
-	bucket         *storage.BucketHandle
-	timeout        time.Duration
+	bucket  *storage.BucketHandle
+	timeout time.Duration
+	// Deprecated: left for config backwards compatibility.
 	staleThreshold time.Duration
 }
 
