@@ -61,8 +61,8 @@ For more advanced formatting read more about [Go HTML templates](https://pkg.go.
 	<pre>GOPROXY={{ .Host }},direct</pre>
 	{{ if .NoSumPatterns }}
 	<h3>Excluding checksum database</h3>
-	<p>Use the following GONOSUM environment variable to exclude checksum database:</p>
-	<pre>GONOSUM={{ .NoSumPatterns }}</pre>
+	<p>Use the following GONOSUMDB environment variable to exclude checksum database:</p>
+	<pre>GONOSUMDB={{ .NoSumPatterns }}</pre>
 	{{ end }}
 
 	<h2>How to use the Athens API</h2>
