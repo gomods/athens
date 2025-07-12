@@ -128,12 +128,12 @@ Now, we need to clear the local Go modules storage. This is needed so that your 
 
 **Bash**
 ```bash
-sudo rm -fr "$(go env GOPATH)/pkg/mod"
+sudo rm -fr "$(go env GOPATH)/pkg/mod/github.com/athens-artifacts"
 ```
 
 **PowerShell**
 ```powershell
-rm -recurse -force $(go env GOPATH)\pkg\mod
+rm -recurse -force $(go env GOPATH)\pkg\mod\github.com\athens-artifacts
 ```
 
 Now, we can re-run the Athens container:
