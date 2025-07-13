@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"io"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -501,14 +502,25 @@ type testEntry struct {
 
 var _ log.Entry = &testEntry{}
 
-func (e *testEntry) Debugf(format string, args ...any) {
-	e.msg = format
-}
-func (*testEntry) Infof(format string, args ...any)           {}
-func (*testEntry) Warnf(format string, args ...any)           {}
-func (*testEntry) Errorf(format string, args ...any)          {}
-func (*testEntry) WithFields(fields map[string]any) log.Entry { return nil }
-func (*testEntry) SystemErr(err error)                        {}
+func (e *testEntry) Debugf(format string, args ...any) { e.msg = format }
+func (e *testEntry) Infof(format string, args ...any)  { e.msg = format }
+func (e *testEntry) Warnf(format string, args ...any)  { e.msg = format }
+func (e *testEntry) Errorf(format string, args ...any) { e.msg = format }
+func (e *testEntry) Fatalf(format string, args ...any) { e.msg = format }
+func (e *testEntry) Printf(format string, args ...any) { e.msg = format }
+
+func (*testEntry) Debug(args ...any) {}
+func (*testEntry) Info(args ...any)  {}
+func (*testEntry) Warn(args ...any)  {}
+func (*testEntry) Error(args ...any) {}
+func (*testEntry) Fatal(args ...any) {}
+
+func (*testEntry) WithFields(fields map[string]any) log.Entry  { return nil }
+func (*testEntry) SystemErr(err error)                         {}
+func (*testEntry) WithField(key string, value any) log.Entry   { return nil }
+func (*testEntry) WithError(err error) log.Entry               { return nil }
+func (*testEntry) WithContext(ctx context.Context) log.Entry   { return nil }
+func (*testEntry) WriterLevel(level slog.Level) *io.PipeWriter { return nil }
 
 func Test_copyContextWithCustomTimeout(t *testing.T) {
 	testEntry := &testEntry{}
