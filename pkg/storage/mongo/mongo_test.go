@@ -59,7 +59,7 @@ func TestQueryModuleVersionExists(t *testing.T) {
 	backend := getStorage(t)
 
 	zipBts, _ := io.ReadAll(mock.Zip)
-	backend.Save(ctx, modname, ver, mock.Mod, bytes.NewReader(zipBts), mock.Info)
+	backend.Save(ctx, modname, ver, mock.Mod, bytes.NewReader(zipBts), mock.ZipMD5, mock.Info)
 	defer backend.Delete(ctx, modname, ver)
 
 	info, err := query(ctx, backend, modname, ver)
@@ -80,7 +80,7 @@ func TestQueryKindNotFoundErrorCases(t *testing.T) {
 	backend := getStorage(t)
 
 	zipBts, _ := io.ReadAll(mock.Zip)
-	backend.Save(ctx, modname, ver, mock.Mod, bytes.NewReader(zipBts), mock.Info)
+	backend.Save(ctx, modname, ver, mock.Mod, bytes.NewReader(zipBts), nil, mock.Info)
 	defer backend.Delete(ctx, modname, ver)
 
 	testCases := []struct {

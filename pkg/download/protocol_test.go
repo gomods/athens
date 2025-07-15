@@ -165,7 +165,7 @@ func TestListMode(t *testing.T) {
 			networkMode: tc.networkmode,
 		}
 		for _, tag := range tc.storageTags {
-			err := strg.Save(ctx, tc.path, tag, []byte("mod"), bytes.NewReader([]byte("zip")), []byte("info"))
+			err := strg.Save(ctx, tc.path, tag, []byte("mod"), bytes.NewReader([]byte("zip")), nil, []byte("info"))
 			require.NoError(t, err)
 		}
 		t.Run(tc.name, func(t *testing.T) {
@@ -429,7 +429,7 @@ func TestDownloadProtocolWhenFetchFails(t *testing.T) {
 	}
 	fakeMod := testMod{"github.com/athens-artifacts/samplelib", "v1.0.0"}
 	bts := []byte(fakeMod.mod + "@" + fakeMod.ver)
-	err = s.Save(context.Background(), fakeMod.mod, fakeMod.ver, bts, io.NopCloser(bytes.NewReader(bts)), bts)
+	err = s.Save(context.Background(), fakeMod.mod, fakeMod.ver, bts, io.NopCloser(bytes.NewReader(bts)), nil, bts)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -472,7 +472,7 @@ type mockStasher struct {
 }
 
 func (ms *mockStasher) Stash(ctx context.Context, mod string, ver string) (string, error) {
-	err := ms.s.Save(ctx, mod, ver, []byte("mod"), strings.NewReader("zip"), []byte("info"))
+	err := ms.s.Save(ctx, mod, ver, []byte("mod"), strings.NewReader("zip"), nil, []byte("info"))
 	ms.ch <- true // signal async stashing is done
 	return ver, err
 }

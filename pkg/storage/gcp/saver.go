@@ -20,11 +20,11 @@ import (
 //
 // Uploaded files are publicly accessible in the storage bucket as per
 // an ACL rule.
-func (s *Storage) Save(ctx context.Context, module, version string, mod []byte, zip io.Reader, info []byte) error {
+func (s *Storage) Save(ctx context.Context, module, version string, mod []byte, zip io.Reader, zipMD5, info []byte) error {
 	const op errors.Op = "gcp.save"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
-	err := s.save(ctx, module, version, mod, zip, info)
+	err := s.save(ctx, module, version, mod, zip, zipMD5, info)
 	if err != nil {
 		return errors.E(op, err)
 	}
@@ -37,26 +37,26 @@ func (s *Storage) SetStaleThreshold(threshold time.Duration) {
 	s.staleThreshold = threshold
 }
 
-func (s *Storage) save(ctx context.Context, module, version string, mod []byte, zip io.Reader, info []byte) error {
+func (s *Storage) save(ctx context.Context, module, version string, mod []byte, zip io.Reader, zipMD5, info []byte) error {
 	const op errors.Op = "gcp.save"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 
 	gomodPath := config.PackageVersionedName(module, version, "mod")
-	err := s.upload(ctx, gomodPath, bytes.NewReader(mod), false)
+	err := s.upload(ctx, gomodPath, bytes.NewReader(mod), nil, false)
 	// KindAlreadyExists means the file is uploaded (somewhere else) successfully.
 	if err != nil && !errors.Is(err, errors.KindAlreadyExists) {
 		return errors.E(op, err)
 	}
 
 	zipPath := config.PackageVersionedName(module, version, "zip")
-	err = s.upload(ctx, zipPath, zip, true)
+	err = s.upload(ctx, zipPath, zip, zipMD5, true)
 	if err != nil && !errors.Is(err, errors.KindAlreadyExists) {
 		return errors.E(op, err)
 	}
 
 	infoPath := config.PackageVersionedName(module, version, "info")
-	err = s.upload(ctx, infoPath, bytes.NewReader(info), false)
+	err = s.upload(ctx, infoPath, bytes.NewReader(info), nil, false)
 	if err != nil && !errors.Is(err, errors.KindAlreadyExists) {
 		return errors.E(op, err)
 	}
@@ -64,7 +64,7 @@ func (s *Storage) save(ctx context.Context, module, version string, mod []byte, 
 	return nil
 }
 
-func (s *Storage) upload(ctx context.Context, path string, stream io.Reader, checkBefore bool) error {
+func (s *Storage) upload(ctx context.Context, path string, stream io.Reader, md5 []byte, checkBefore bool) error {
 	const op errors.Op = "gcp.upload"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
@@ -89,6 +89,10 @@ func (s *Storage) upload(ctx context.Context, path string, stream io.Reader, che
 	wc := s.bucket.Object(path).If(storage.Conditions{
 		DoesNotExist: true,
 	}).NewWriter(cancelCtx)
+
+	if len(md5) > 0 {
+		wc.MD5 = md5
+	}
 
 	// NOTE: content type is auto detected on GCP side and ACL defaults to public
 	// Once we support private storage buckets this may need refactoring

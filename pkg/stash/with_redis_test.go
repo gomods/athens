@@ -210,6 +210,7 @@ func (ms *mockRedisStasher) Stash(ctx context.Context, mod, ver string) (string,
 			ver,
 			[]byte("mod file"),
 			strings.NewReader("zip file"),
+			nil,
 			[]byte("info file"),
 		)
 		if err != nil {
