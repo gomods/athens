@@ -3,8 +3,10 @@ package module
 import (
 	"bytes"
 	"context"
+	"crypto/md5" //nolint:gosec
 	"encoding/json"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -96,6 +98,26 @@ func (g *goGetFetcher) Fetch(ctx context.Context, mod, ver string) (*storage.Ver
 	}
 	storageVer.Mod = gomod
 
+	zipMD5, err := func() ([]byte, error) {
+		// Perform in a separate function to ensure file is closed
+		zipForChecksum, err := g.fs.Open(m.Zip)
+		if err != nil {
+			return nil, errors.E(op, err)
+		}
+		defer zipForChecksum.Close()
+
+		//nolint:gosec
+		hash := md5.New()
+		if _, err := io.Copy(hash, zipForChecksum); err != nil {
+			return nil, errors.E(op, err)
+		}
+
+		return hash.Sum(nil), nil
+	}()
+	if err != nil {
+		return nil, err
+	}
+
 	zip, err := g.fs.Open(m.Zip)
 	if err != nil {
 		return nil, errors.E(op, err)
@@ -105,6 +127,7 @@ func (g *goGetFetcher) Fetch(ctx context.Context, mod, ver string) (*storage.Ver
 	// if we close, then the caller will panic, and the alternative to make this work is
 	// that we read into memory and return an io.ReadCloser that reads out of memory
 	storageVer.Zip = &zipReadCloser{zip, g.fs, goPathRoot}
+	storageVer.ZipMD5 = zipMD5
 
 	return &storageVer, nil
 }

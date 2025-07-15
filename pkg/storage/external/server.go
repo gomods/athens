@@ -109,7 +109,7 @@ func NewServer(strg storage.Backend) http.Handler {
 			return
 		}
 		defer func() { _ = modZ.Close() }()
-		err = strg.Save(r.Context(), params.Module, params.Version, modFile, modZ, info)
+		err = strg.Save(r.Context(), params.Module, params.Version, modFile, modZ, nil, info)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
