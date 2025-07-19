@@ -46,7 +46,7 @@ require (
 	go.mongodb.org/mongo-driver v1.8.3
 	go.opencensus.io v0.24.0
 	golang.org/x/mod v0.17.0
-	golang.org/x/oauth2 v0.23.0
+	golang.org/x/oauth2 v0.27.0
 	golang.org/x/sync v0.12.0
 	google.golang.org/api v0.203.0
 )
