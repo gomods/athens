@@ -71,7 +71,7 @@ func (s *stasher) Stash(ctx context.Context, mod, ver string) (string, error) {
 				return v.Semver, nil
 			}
 		}
-		err = s.storage.Save(ctx, mod, v.Semver, v.Mod, v.Zip, v.Info)
+		err = s.storage.Save(ctx, mod, v.Semver, v.Mod, v.Zip, v.ZipMD5, v.Info)
 		if err != nil {
 			return "", errors.E(op, err)
 		}

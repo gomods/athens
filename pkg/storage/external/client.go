@@ -81,7 +81,7 @@ func (s *service) Zip(ctx context.Context, mod, ver string) (storage.SizeReadClo
 	return storage.NewSizer(body, size), nil
 }
 
-func (s *service) Save(ctx context.Context, mod, ver string, modFile []byte, zip io.Reader, info []byte) error {
+func (s *service) Save(ctx context.Context, mod, ver string, modFile []byte, zip io.Reader, zipMD5, info []byte) error {
 	const op errors.Op = "external.Save"
 	var err error
 	mod, err = module.EscapePath(mod)

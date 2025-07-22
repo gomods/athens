@@ -84,7 +84,7 @@ type mockStorage struct {
 	existsResponse bool
 }
 
-func (ms *mockStorage) Save(ctx context.Context, module, version string, mod []byte, zip io.Reader, info []byte) error {
+func (ms *mockStorage) Save(ctx context.Context, module, version string, mod []byte, zip io.Reader, zipMD5 []byte, info []byte) error {
 	ms.saveCalled = true
 	ms.givenVersion = version
 	return nil
