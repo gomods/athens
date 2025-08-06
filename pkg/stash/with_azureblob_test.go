@@ -73,6 +73,7 @@ func (ms *mockAzureBlobStasher) Stash(ctx context.Context, mod, ver string) (str
 			ver,
 			[]byte("mod file"),
 			strings.NewReader("zip file"),
+			nil,
 			[]byte("info file"),
 		)
 		if err != nil {

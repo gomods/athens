@@ -13,7 +13,7 @@ import (
 	minio "github.com/minio/minio-go/v6"
 )
 
-func (s *storageImpl) Save(ctx context.Context, module, vsn string, mod []byte, zip io.Reader, info []byte) error {
+func (s *storageImpl) Save(ctx context.Context, module, vsn string, mod []byte, zip io.Reader, zipMD5, info []byte) error {
 	const op errors.Op = "storage.minio.Save"
 	_, span := observ.StartSpan(ctx, op.String())
 	defer span.End()

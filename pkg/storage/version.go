@@ -6,6 +6,7 @@ import "io"
 type Version struct {
 	Mod    []byte
 	Zip    io.ReadCloser
+	ZipMD5 []byte
 	Info   []byte
 	Semver string
 }

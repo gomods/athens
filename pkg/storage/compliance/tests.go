@@ -3,6 +3,7 @@ package compliance
 import (
 	"bytes"
 	"context"
+	"crypto/md5"
 	"fmt"
 	"io"
 	"math/rand"
@@ -76,6 +77,7 @@ func testListSuffix(t *testing.T, b storage.Backend) {
 				version,
 				mock.Mod,
 				mock.Zip,
+				mock.ZipMD5,
 				mock.Info,
 			)
 			require.NoError(t, err, "Save for storage failed")
@@ -114,6 +116,7 @@ func testList(t *testing.T, b storage.Backend) {
 			version,
 			mock.Mod,
 			mock.Zip,
+			mock.ZipMD5,
 			mock.Info,
 		)
 		require.NoError(t, err, "Save for storage failed")
@@ -135,7 +138,7 @@ func testGet(t *testing.T, b storage.Backend) {
 	ver := "v1.2.3"
 	mock := getMockModule()
 	zipBts, _ := io.ReadAll(mock.Zip)
-	b.Save(ctx, modname, ver, mock.Mod, bytes.NewReader(zipBts), mock.Info)
+	b.Save(ctx, modname, ver, mock.Mod, bytes.NewReader(zipBts), mock.ZipMD5, mock.Info)
 	defer b.Delete(ctx, modname, ver)
 
 	info, err := b.Info(ctx, modname, ver)
@@ -160,7 +163,7 @@ func testExists(t *testing.T, b storage.Backend) {
 	ver := "v1.2.3"
 	mock := getMockModule()
 	zipBts, _ := io.ReadAll(mock.Zip)
-	b.Save(ctx, modname, ver, mock.Mod, bytes.NewReader(zipBts), mock.Info)
+	b.Save(ctx, modname, ver, mock.Mod, bytes.NewReader(zipBts), mock.ZipMD5, mock.Info)
 	defer b.Delete(ctx, modname, ver)
 	checker := storage.WithChecker(b)
 	exists, err := checker.Exists(ctx, modname, ver)
@@ -174,7 +177,7 @@ func testShouldNotExist(t *testing.T, b storage.Backend) {
 	ver := "v1.2.3-pre.1"
 	mock := getMockModule()
 	zipBts, _ := io.ReadAll(mock.Zip)
-	err := b.Save(ctx, mod, ver, mock.Mod, bytes.NewReader(zipBts), mock.Info)
+	err := b.Save(ctx, mod, ver, mock.Mod, bytes.NewReader(zipBts), mock.ZipMD5, mock.Info)
 	require.NoError(t, err, "should successfully safe a mock module")
 	defer b.Delete(ctx, mod, ver)
 
@@ -196,7 +199,7 @@ func testDelete(t *testing.T, b storage.Backend) {
 	version := fmt.Sprintf("%s%d", "delete", rand.Int())
 
 	mock := getMockModule()
-	err := b.Save(ctx, modname, version, mock.Mod, mock.Zip, mock.Info)
+	err := b.Save(ctx, modname, version, mock.Mod, mock.Zip, mock.ZipMD5, mock.Info)
 	require.NoError(t, err)
 
 	err = b.Delete(ctx, modname, version)
@@ -209,8 +212,9 @@ func testDelete(t *testing.T, b storage.Backend) {
 
 func getMockModule() *storage.Version {
 	return &storage.Version{
-		Info: []byte("123"),
-		Mod:  []byte("456"),
-		Zip:  io.NopCloser(bytes.NewReader([]byte("789"))),
+		Info:   []byte("123"),
+		Mod:    []byte("456"),
+		Zip:    io.NopCloser(bytes.NewReader([]byte("789"))),
+		ZipMD5: md5.New().Sum([]byte("789")),
 	}
 }

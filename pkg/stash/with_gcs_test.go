@@ -119,7 +119,7 @@ func TestWithGCSPartialFailure(t *testing.T) {
 	}
 	s := gs(ms)
 	// We simulate a failure by manually passing an io.Reader that will fail.
-	err = ms.strg.Save(ctx, "stashmod", "v1.0.0", []byte(ms.content), fr, []byte(ms.content))
+	err = ms.strg.Save(ctx, "stashmod", "v1.0.0", []byte(ms.content), fr, nil, []byte(ms.content))
 	if err == nil {
 		// We *want* to fail.
 		t.Fatal(err)
@@ -172,6 +172,7 @@ func (ms *mockGCPStasher) Stash(ctx context.Context, mod, ver string) (string, e
 		ver,
 		[]byte(ms.content),
 		strings.NewReader(ms.content),
+		nil,
 		[]byte(ms.content),
 	)
 	return "", err
