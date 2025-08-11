@@ -21,7 +21,6 @@ updates:
     target-branch: main
   - package-ecosystem: docker
     directories:
-      - /
       - /cmd/proxy
     schedule:
       interval: weekly
