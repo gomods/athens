@@ -24,3 +24,8 @@ updates:
       - /cmd/proxy
     schedule:
       interval: weekly
+    commit-message:
+      prefix: update-docker-image
+      include: scope
+    open-pull-requests-limit: 2
+    target-branch: main
