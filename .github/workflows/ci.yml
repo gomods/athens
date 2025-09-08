@@ -24,7 +24,7 @@ jobs:
 
       - name: Set up Go
         id: install-go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
         with:
           go-version-file: 'go.mod'
           cache-dependency-path: |
@@ -115,7 +115,7 @@ jobs:
 
       - name: Set up Go
         id: install-go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
         with:
           go-version-file: 'go.mod'
           cache-dependency-path: |
@@ -151,7 +151,7 @@ jobs:
 
       - name: Set up Go
         id: install-go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
         with:
           go-version-file: 'go.mod'
           cache-dependency-path: |
