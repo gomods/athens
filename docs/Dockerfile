@@ -1,4 +1,4 @@
-FROM alpine:3.8 as builder
+FROM alpine:3.8 AS builder
 
 ARG HUGO_VERSION=0.125.1
 ENV HUGO_BINARY=hugo_${HUGO_VERSION}_Linux-64bit.tar.gz

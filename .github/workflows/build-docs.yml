@@ -1,0 +1,22 @@
+name: Build docs
+on:
+  push:
+
+jobs:
+  ci:
+    name: Run build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Hugo
+        uses: peaceiris/actions-hugo@v3
+        with:
+          hugo-version: 'latest'
+
+      - name: Build site
+        shell: bash
+        run: |
+          hugo --gc --minify --source ./docs
