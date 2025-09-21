@@ -1,12 +1,12 @@
 name: Build docs
 on:
   push:
+  workflow_dispatch: # Allow this task to be manually started (you'll never know)
 
 jobs:
-  ci:
+  build-docs:
     name: Run build
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
