@@ -48,7 +48,7 @@ jobs:
           path: ./docs/public
 
   deploy:
-    if: github.ref == 'refs/heads/main'
+    #if: github.ref == 'refs/heads/main'
     permissions:
       id-token: write
       pages: write
