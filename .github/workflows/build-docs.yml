@@ -64,6 +64,7 @@ jobs:
   deploy:
     permissions:
       id-token: write
+      pages: write
     environment:
       name: pages-stage
       url: ${{ steps.deployment.outputs.page_url }}
