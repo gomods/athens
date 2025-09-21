@@ -1,7 +1,10 @@
-name: Build docs
+name: Build docs and deploy GitHub Pages
 on:
   push: # run on any branch, but deploy only on main
-  workflow_dispatch: # Allow this task to be manually started (you'll never know)
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch: # allow this task to be manually started
 
 jobs:
   build-docs:
