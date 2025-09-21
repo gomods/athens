@@ -40,7 +40,7 @@ jobs:
 
       - name: Build the site
         run: |
-          hugo --gc --minify --source ./docs --baseURL https://athens.sickhub.org
+          hugo --gc --minify --source ./docs
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
@@ -48,7 +48,7 @@ jobs:
           path: ./docs/public
 
   deploy:
-    #if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main'
     permissions:
       id-token: write
       pages: write
