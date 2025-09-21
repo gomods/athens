@@ -40,7 +40,7 @@ jobs:
 
       - name: Build the site
         run: |
-          hugo --gc --minify --source ./docs
+          hugo --gc --minify --source ./docs --baseURL https://athens.sickhub.org
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
