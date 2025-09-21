@@ -5,25 +5,66 @@ on:
 
 jobs:
   build-docs:
-    name: Run build
+    name: Run build docs
     runs-on: ubuntu-latest
+    env:
+      GO_VERSION: 1.25.1
+      HUGO_VERSION: 0.125.1
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
+#      # doing it this way ('gh_pages' branch), workflows require "write" permission to the repo (Settings-> Actions -> General)
+#      - name: Checkout repo
+#        uses: actions/checkout@v4
+#
+#      - name: Setup Hugo
+#        uses: peaceiris/actions-hugo@v3
+#        with:
+#          hugo-version: '0.125.1'
+#
+#      - name: Build site
+#        shell: bash
+#        run: |
+#          hugo --gc --minify --source ./docs
+#
+#      - name: Deploy
+#        uses: peaceiris/actions-gh-pages@v3
+#        #if: github.ref == 'refs/heads/main'
+#        with:
+#          github_token: ${{ secrets.GITHUB_TOKEN }}
+#          publish_dir: ./docs/public
 
-      - name: Setup Hugo
-        uses: peaceiris/actions-hugo@v3
+      - name: Checkout
+        uses: actions/checkout@v5
         with:
-          hugo-version: '0.125.1'
+          submodules: recursive
+          fetch-depth: 0
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache: false
+      - name: Install Hugo
+        run: |
+          curl -sLJO "https://github.com/gohugoio/hugo/releases/download/v${HUGO_VERSION}/hugo_extended_${HUGO_VERSION}_linux-amd64.tar.gz"
+          mkdir "${HOME}/.local/hugo"
+          tar -C "${HOME}/.local/hugo" -xf "hugo_extended_${HUGO_VERSION}_linux-amd64.tar.gz"
+          rm "hugo_extended_${HUGO_VERSION}_linux-amd64.tar.gz"
+          echo "${HOME}/.local/hugo" >> "${GITHUB_PATH}"
 
-      - name: Build site
-        shell: bash
+      - name: Build the site
         run: |
           hugo --gc --minify --source ./docs
-
-      - name: Deploy
-        uses: peaceiris/actions-gh-pages@v3
-        #if: github.ref == 'refs/heads/main'
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./docs/public
+          path: ./docs/public
+
+  deploy:
+    environment:
+      name: pages-stage
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build-docs
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
