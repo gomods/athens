@@ -1,6 +1,6 @@
 name: Build docs
 on:
-  push:
+  push: # run on any branch, but deploy only on main
   workflow_dispatch: # Allow this task to be manually started (you'll never know)
 
 jobs:
@@ -11,40 +11,22 @@ jobs:
       GO_VERSION: 1.25.1
       HUGO_VERSION: 0.125.1
     steps:
-#      # doing it this way ('gh_pages' branch), workflows require "write" permission to the repo (Settings-> Actions -> General)
-#      - name: Checkout repo
-#        uses: actions/checkout@v4
-#
-#      - name: Setup Hugo
-#        uses: peaceiris/actions-hugo@v3
-#        with:
-#          hugo-version: '0.125.1'
-#
-#      - name: Build site
-#        shell: bash
-#        run: |
-#          hugo --gc --minify --source ./docs
-#
-#      - name: Deploy
-#        uses: peaceiris/actions-gh-pages@v3
-#        #if: github.ref == 'refs/heads/main'
-#        with:
-#          github_token: ${{ secrets.GITHUB_TOKEN }}
-#          publish_dir: ./docs/public
-
       - name: Checkout
         uses: actions/checkout@v5
         with:
           submodules: recursive
           fetch-depth: 0
+
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
           go-version: ${{ env.GO_VERSION }}
           cache: false
+
       - name: Create directory for user-specific executable files
         run: |
           mkdir -p "${HOME}/.local"
+
       - name: Install Hugo
         run: |
           curl -sLJO "https://github.com/gohugoio/hugo/releases/download/v${HUGO_VERSION}/hugo_extended_${HUGO_VERSION}_linux-amd64.tar.gz"
@@ -56,17 +38,19 @@ jobs:
       - name: Build the site
         run: |
           hugo --gc --minify --source ./docs
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: ./docs/public
 
   deploy:
+    if: github.ref == 'refs/heads/main'
     permissions:
       id-token: write
       pages: write
     environment:
-      name: pages-stage
+      name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     needs: build-docs

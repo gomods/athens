@@ -1,5 +1,4 @@
-#baseURL = "https://docs.gomods.io"
-baseURL = "https://drpsychick.github.io/athens/"
+baseURL = "https://docs.gomods.io"
 theme = "hugo-theme-relearn"
 languageCode = "en-us"
 title = "Athens"
