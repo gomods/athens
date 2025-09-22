@@ -109,6 +109,11 @@ func proxyHomeHandler(c *config.Config) http.HandlerFunc {
 		// This should be correct in most cases. If it is not, users can supply their own template
 		templateData["Host"] = r.Host
 
+		// make sure our port is part of the 'Host'
+		if !strings.HasSuffix(templateData["Host"], c.Port) {
+			templateData["Host"] += c.Port
+		}
+
 		// if the host does not have a scheme, add one based on the request
 		if !strings.HasPrefix(templateData["Host"], "http://") && !strings.HasPrefix(templateData["Host"], "https://") {
 			if r.TLS != nil {
