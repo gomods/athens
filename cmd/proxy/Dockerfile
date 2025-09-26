@@ -9,8 +9,8 @@ ARG GOLANG_VERSION=1.23.5
 
 FROM golang:${GOLANG_VERSION}-alpine AS builder
 
-ARG VERSION="unset" \
-    TARGETARCH
+ARG VERSION="unset"
+ARG TARGETARCH
 
 ENV GOARCH=${TARGETARCH} \
     GO111MODULE=on \
@@ -41,7 +41,7 @@ COPY --from=builder /usr/local/go/go.env /usr/local/go/go.env
 RUN chmod 644 /config/config.toml
 
 # Add tini, see https://github.com/gomods/athens/issues/1155 for details.
-RUN apk add --update git git-lfs mercurial openssh-client subversion procps fossil tini
+RUN apk add --update git git-lfs mercurial openssh-client subversion procps fossil tini tzdata
 
 # Add git-credential-github-app for native integration with GitHub Apps
 RUN if [ "${TARGETARCH}" = "arm64" ]; then ARCH="arm64"; else ARCH="x86_64"; fi \
