@@ -116,7 +116,7 @@ func proxyHomeHandler(c *config.Config) http.HandlerFunc {
 
 		// if the host does not have a scheme, add one based on the request
 		if !strings.HasPrefix(templateData["Host"], "http://") && !strings.HasPrefix(templateData["Host"], "https://") {
-			if r.TLS != nil {
+			if r.TLS != nil || r.Header.Get("X-Forwarded-Proto") == "https" {
 				templateData["Host"] = "https://" + templateData["Host"]
 			} else {
 				templateData["Host"] = "http://" + templateData["Host"]
