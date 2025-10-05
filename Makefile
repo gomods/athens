@@ -1,10 +1,10 @@
 VERSION = "unset"
 DATE=$(shell date -u +%Y-%m-%d-%H:%M:%S-%Z)
 
-GOLANGCI_LINT_VERSION=v1.61.0
+GOLANGCI_LINT_VERSION=v2.1.6
 
 ifndef GOLANG_VERSION
-override GOLANG_VERSION = 1.23.5
+override GOLANG_VERSION = 1.25.1
 endif
 
 .PHONY: build
@@ -22,7 +22,7 @@ athens:
 # to perform some CI build steps, instead of relying on them being installed locally
 .PHONY: build-image
 build-image:
-	docker build -t athens-build ./scripts/build-image
+	docker build -t athens-build --build-arg GOLANG_VERSION=${GOLANG_VERSION} ./scripts/build-image
 
 .PHONY: run
 run: ## run the athens proxy with dev configs
