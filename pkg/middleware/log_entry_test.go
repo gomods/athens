@@ -3,6 +3,7 @@ package middleware
 import (
 	"bytes"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -10,7 +11,6 @@ import (
 
 	"github.com/gomods/athens/pkg/log"
 	"github.com/gorilla/mux"
-	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -23,10 +23,11 @@ func TestLogContext(t *testing.T) {
 	r := mux.NewRouter()
 	r.HandleFunc("/test", h)
 
-	var buf bytes.Buffer
-	lggr := log.New("", logrus.DebugLevel, "")
-	lggr.Formatter = &logrus.JSONFormatter{DisableTimestamp: true}
-	lggr.Out = &buf
+	buf := &bytes.Buffer{}
+	lggr := log.New("", slog.LevelDebug, "", buf)
+	opts := slog.HandlerOptions{Level: slog.LevelDebug}
+	handler := slog.NewJSONHandler(buf, &opts)
+	lggr.Logger = slog.New(handler)
 
 	r.Use(LogEntryMiddleware(lggr))
 
