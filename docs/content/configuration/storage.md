@@ -455,7 +455,7 @@ supported:
             # Endpoint is the redis endpoint for the single flight mechanism
             # Env override: ATHENS_REDIS_ENDPOINT
             # Note, if TLS is required use rediss:// instead.
-            Endpoint = "redis://user:password@127.0.0.1:6379:6379/0?protocol=3"
+            Endpoint = "redis://user:password@127.0.0.1:6379/0?protocol=3"
 
 If the redis url is invalid or cannot be parsed, Athens will fall back to treating `Endpoint` as if it were
 a normal `host:port` pair. If a password is supplied in the redis url, in addition to being provided in the `Password`
