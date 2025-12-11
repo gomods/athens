@@ -26,7 +26,7 @@ RUN DATE="$(date -u +%Y-%m-%d-%H:%M:%S-%Z)" && \
     -ldflags "-X github.com/gomods/athens/pkg/build.version=$VERSION -X github.com/gomods/athens/pkg/build.buildDate=$DATE -s -w" \
     -o /bin/athens-proxy ./cmd/proxy
 
-FROM alpine:3.22
+FROM alpine:3.23
 ARG TARGETARCH
 
 ENV GOROOT="/usr/local/go" \
