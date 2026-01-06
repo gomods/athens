@@ -4,7 +4,7 @@ DATE=$(shell date -u +%Y-%m-%d-%H:%M:%S-%Z)
 GOLANGCI_LINT_VERSION=v2.1.6
 
 ifndef GOLANG_VERSION
-override GOLANG_VERSION = 1.25.1
+override GOLANG_VERSION = 1.25.5
 endif
 
 .PHONY: build

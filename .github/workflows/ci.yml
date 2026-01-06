@@ -12,7 +12,7 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     env:
-      GOLANGCI_LINT_VERSION: v2.1.6
+      GOLANGCI_LINT_VERSION: v2.5.0
 
     steps:
       - name: Checkout
@@ -167,9 +167,10 @@ jobs:
         run: echo "::set-output name=date::$(date -u '+%Y-%m-%d-%H:%M:%S-%Z')"
 
       - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v6
+        uses: goreleaser/goreleaser-action@e435ccd777264be153ace6237001ef4d979d3a7a # v6.4.0
         with:
-          version: latest
+          distribution: goreleaser
+          version: "~> v2"
           args: release --clean --snapshot
         env:
           DATE: ${{ steps.date.outputs.date }}

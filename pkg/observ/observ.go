@@ -67,11 +67,15 @@ func traceRegisterExporter(exporter trace.Exporter, env string) {
 // registerDatadogTracerExporter creates a datadog exporter.
 // Currently uses the 'TraceExporter' variable in the config file.
 func registerDatadogExporter(url, service, env string) (func(), error) {
-	ex := datadog.NewExporter(
+	const op errors.Op = "observ.registerDatadogExporter"
+	ex, err := datadog.NewExporter(
 		datadog.Options{
 			TraceAddr: url,
 			Service:   service,
 		})
+	if err != nil {
+		return nil, errors.E(op, err)
+	}
 	traceRegisterExporter(ex, env)
 	return ex.Stop, nil
 }

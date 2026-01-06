@@ -65,9 +65,9 @@ func registerPrometheusExporter(r *mux.Router, service string) error {
 func registerStatsDataDogExporter(service string) (func(), error) {
 	const op errors.Op = "observ.registerStatsDataDogExporter"
 
-	dd := datadog.NewExporter(datadog.Options{Service: service})
-	if dd == nil {
-		return nil, errors.E(op, "Failed to initialize data dog exporter")
+	dd, err := datadog.NewExporter(datadog.Options{Service: service})
+	if err != nil {
+		return nil, errors.E(op, err)
 	}
 	view.RegisterExporter(dd)
 	return dd.Stop, nil
