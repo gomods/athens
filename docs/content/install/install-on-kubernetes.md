@@ -300,3 +300,8 @@ helm install athens gomods/athens-proxy --namespace athens \
     --set gitconfig.secretName=athens-proxy-gitconfig \
     --set gitconfig.secretKey=gitconfig
 ```
+
+## Further Links
+
+- [Athens as-a Service on Kubernetes (for GitLab)](https://medium.com/gitconnected/athens-go-proxy-as-a-service-on-kubernetes-8fb1f5fa320d)
+
