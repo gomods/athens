@@ -89,7 +89,7 @@ $ helm repo update
 Next, install the chart with default values to `athens` namespace:
 
 > [!NOTE]
-> Make sure that the `athens` namespace exits beforehand
+> Make sure that the `athens` namespace exists beforehand
 > `kubectl create ns athens`
 
 ```
