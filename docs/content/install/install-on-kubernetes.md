@@ -88,6 +88,10 @@ $ helm repo update
 
 Next, install the chart with default values to `athens` namespace:
 
+> [!NOTE]
+> Make sure that the `athens` namespace exists beforehand
+> `kubectl create ns athens`
+
 ```
 $ helm install athens gomods/athens-proxy --namespace athens
 ```
