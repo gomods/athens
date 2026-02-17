@@ -6,7 +6,6 @@ import (
 	"github.com/gomods/athens/pkg/log"
 	"github.com/gomods/athens/pkg/requestid"
 	"github.com/gorilla/mux"
-	"github.com/sirupsen/logrus"
 )
 
 // LogEntryMiddleware builds a log.Entry, setting the request fields
@@ -15,7 +14,7 @@ func LogEntryMiddleware(lggr *log.Logger) mux.MiddlewareFunc {
 	return func(h http.Handler) http.Handler {
 		f := func(w http.ResponseWriter, r *http.Request) {
 			ctx := r.Context()
-			ent := lggr.WithFields(logrus.Fields{
+			ent := lggr.WithFields(map[string]interface{}{
 				"http-method": r.Method,
 				"http-path":   r.URL.Path,
 				"request-id":  requestid.FromContext(ctx),

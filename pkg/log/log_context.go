@@ -19,7 +19,7 @@ func SetEntryInContext(ctx context.Context, e Entry) context.Context {
 func EntryFromContext(ctx context.Context) Entry {
 	e, ok := ctx.Value(logEntryKey).(Entry)
 	if !ok || e == nil {
-		return NoOpLogger()
+		return &entry{NoOpLogger().Logger}
 	}
 	return e
 }

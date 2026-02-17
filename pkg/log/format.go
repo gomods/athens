@@ -1,73 +1,72 @@
 package log
 
 import (
-	"bytes"
-	"fmt"
-	"sort"
-	"strings"
+	"io"
+	"log/slog"
+	"os"
 	"time"
 
 	"github.com/fatih/color"
-	"github.com/sirupsen/logrus"
 )
 
-func getGCPFormatter() logrus.Formatter {
-	return &logrus.JSONFormatter{
-		FieldMap: logrus.FieldMap{
-			logrus.FieldKeyLevel: "severity",
-			logrus.FieldKeyMsg:   "message",
-			logrus.FieldKeyTime:  "timestamp",
+func getGCPFormatter(level slog.Level, w io.Writer) *slog.Logger {
+	return slog.New(slog.NewJSONHandler(w, &slog.HandlerOptions{
+		Level: level,
+		ReplaceAttr: func(groups []string, a slog.Attr) slog.Attr {
+			switch a.Key {
+			case slog.LevelKey:
+				return slog.String("severity", a.Value.String())
+			case slog.MessageKey:
+				return slog.String("message", a.Value.String())
+			case slog.TimeKey:
+				return slog.String("timestamp", a.Value.Time().Format(time.RFC3339))
+			default:
+				return a
+			}
 		},
-	}
+	}))
 }
-
-func getDevFormatter() logrus.Formatter {
-	return devFormatter{}
-}
-
-type devFormatter struct{}
 
 const lightGrey = 0xffccc
 
-func (devFormatter) Format(e *logrus.Entry) ([]byte, error) {
-	var buf bytes.Buffer
-	var sprintf func(format string, a ...any) string
-	switch e.Level {
-	case logrus.DebugLevel:
-		sprintf = color.New(lightGrey).Sprintf
-	case logrus.WarnLevel:
-		sprintf = color.YellowString
-	case logrus.ErrorLevel:
-		sprintf = color.RedString
-	default:
-		sprintf = color.CyanString
-	}
-	lvl := strings.ToUpper(e.Level.String())
-	buf.WriteString(sprintf(lvl))
-	buf.WriteString("[" + e.Time.Format(time.Kitchen) + "]")
-	buf.WriteString(": ")
-	buf.WriteString(e.Message)
-	buf.WriteByte('\t')
-	for _, k := range sortFields(e.Data) {
-		fmt.Fprintf(&buf, "%s=%s ", color.MagentaString(k), e.Data[k])
-	}
-	buf.WriteByte('\n')
-	return buf.Bytes(), nil
+func getDevFormatter(level slog.Level) *slog.Logger {
+	return slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
+		Level: level,
+		ReplaceAttr: func(groups []string, a slog.Attr) slog.Attr {
+			if a.Key == slog.TimeKey {
+				t := a.Value.Time()
+				return slog.String(slog.TimeKey, t.Format(time.Kitchen))
+			}
+			if a.Key == slog.LevelKey {
+				level := a.Value.Any().(slog.Level)
+				var colored string
+				switch level {
+				case slog.LevelDebug:
+					colored = color.New(lightGrey).Sprint(level)
+				case slog.LevelWarn:
+					colored = color.YellowString(level.String())
+				case slog.LevelError:
+					colored = color.RedString(level.String())
+				default:
+					colored = color.CyanString(level.String())
+				}
+				return slog.String(slog.LevelKey, colored)
+			}
+			if len(groups) == 0 {
+				return slog.Attr{
+					Key:   color.MagentaString(a.Key),
+					Value: a.Value,
+				}
+			}
+			return a
+		},
+	}))
 }
 
-func sortFields(data logrus.Fields) []string {
-	keys := []string{}
-	for k := range data {
-		keys = append(keys, k)
-	}
-	sort.Strings(keys)
-	return keys
-}
-
-func parseFormat(format string) logrus.Formatter {
+func parseFormat(format string, level slog.Level, w io.Writer) *slog.Logger {
 	if format == "json" {
-		return &logrus.JSONFormatter{}
+		return slog.New(slog.NewJSONHandler(w, &slog.HandlerOptions{Level: level}))
 	}
 
-	return getDevFormatter()
+	return getDevFormatter(level)
 }
