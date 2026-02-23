@@ -19,10 +19,9 @@ require (
 	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.17.43
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.71.0
 	github.com/aws/smithy-go v1.22.1
-	github.com/bsm/redislock v0.7.2
+	github.com/bsm/redislock v0.9.4
 	github.com/fatih/color v1.13.0
 	github.com/go-playground/validator/v10 v10.23.0
-	github.com/go-redis/redis/v8 v8.11.5
 	github.com/go-sql-driver/mysql v1.6.0
 	github.com/gobuffalo/envy v1.7.0
 	github.com/gobuffalo/httptest v1.5.2
@@ -35,6 +34,7 @@ require (
 	github.com/lib/pq v1.10.9
 	github.com/minio/minio-go/v6 v6.0.57
 	github.com/mitchellh/go-homedir v1.1.0
+	github.com/redis/go-redis/v9 v9.0.3
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/afero v1.11.0
 	github.com/stretchr/testify v1.9.0
