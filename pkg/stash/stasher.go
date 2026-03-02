@@ -94,7 +94,6 @@ func (s *stasher) Stash(ctx context.Context, mod, ver string) (string, error) {
 
 func (s *stasher) fetchModule(ctx context.Context, mod, ver string) (*storage.Version, error) {
 	const op errors.Op = "stasher.fetchModule"
-	time.Sleep(3 * time.Second)
 	start := time.Now()
 	v, err := s.fetcher.Fetch(ctx, mod, ver)
 	duration := time.Since(start)
