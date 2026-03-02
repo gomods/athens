@@ -2,7 +2,6 @@ package observ
 
 import (
 	"context"
-
 	"time"
 
 	"go.opencensus.io/stats"
