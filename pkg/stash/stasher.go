@@ -29,8 +29,8 @@ type Wrapper func(Stasher) Stasher
 // New returns a plain stasher that takes
 // a module from a download.Protocol and
 // stashes it into a backend.Storage.
-func New(f module.Fetcher, s storage.Backend, indexer index.Indexer, wrappers ...Wrapper) Stasher {
-	var st Stasher = &stasher{f, s, storage.WithChecker(s), indexer, &singleflight.Group{}}
+func New(f module.Fetcher, s storage.Backend, indexer index.Indexer, timeout time.Duration, wrappers ...Wrapper) Stasher {
+	var st Stasher = &stasher{f, s, storage.WithChecker(s), indexer, &singleflight.Group{}, timeout}
 	for _, w := range wrappers {
 		st = w(st)
 	}
@@ -44,6 +44,7 @@ type stasher struct {
 	checker storage.Checker
 	indexer index.Indexer
 	sfg     *singleflight.Group
+	timeout time.Duration
 }
 
 func (s *stasher) Stash(ctx context.Context, mod, ver string) (string, error) {
@@ -55,7 +56,7 @@ func (s *stasher) Stash(ctx context.Context, mod, ver string) (string, error) {
 	semver_, err, _ := s.sfg.Do(mod+"###"+ver, func() (any, error) {
 		// create a new context that ditches whatever deadline the caller passed
 		// but keep the tracing info so that we can properly trace the whole thing.
-		ctx, cancel := context.WithTimeout(trace.NewContext(context.Background(), span), time.Minute*10)
+		ctx, cancel := context.WithTimeout(trace.NewContext(context.Background(), span), s.timeout)
 		defer cancel()
 		v, err := s.fetchModule(ctx, mod, ver)
 		if err != nil {
