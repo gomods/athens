@@ -82,7 +82,7 @@ func App(logger *log.Logger, conf *config.Config) (http.Handler, func(), error) 
 		conf.GoEnv,
 	)
 	if err != nil {
-		logger.Info(err)
+		logger.Info(err.Error())
 	} else {
 		cleanupTraces = flushTraces
 	}
@@ -93,7 +93,7 @@ func App(logger *log.Logger, conf *config.Config) (http.Handler, func(), error) 
 	cleanupStats := noop
 	flushStats, err := observ.RegisterStatsExporter(r, conf.StatsExporter, Service)
 	if err != nil {
-		logger.Info(err)
+		logger.Info(err.Error())
 	} else {
 		cleanupStats = flushStats
 	}
