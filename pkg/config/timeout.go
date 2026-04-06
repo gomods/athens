@@ -16,3 +16,8 @@ func (t *TimeoutConf) TimeoutDuration() time.Duration {
 func GetTimeoutDuration(timeout int) time.Duration {
 	return time.Second * time.Duration(timeout)
 }
+
+// StashTimeoutDuration returns the stash timeout as time.Duration.
+func (c *Config) StashTimeoutDuration() time.Duration {
+	return GetTimeoutDuration(c.StashTimeout)
+}

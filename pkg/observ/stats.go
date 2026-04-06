@@ -92,7 +92,8 @@ func registerStatsStackDriverExporter(projectID string) (func(), error) {
 // registerViews register stats which should be collected in Athens.
 func registerViews() error {
 	const op errors.Op = "observ.registerViews"
-	if err := view.Register(
+
+	views := []*view.View{
 		ochttp.ServerRequestCountView,
 		ochttp.ServerResponseBytesView,
 		ochttp.ServerLatencyView,
@@ -102,7 +103,11 @@ func registerViews() error {
 		ochttp.ClientReceivedBytesDistribution,
 		ochttp.ClientRoundtripLatencyDistribution,
 		ochttp.ClientCompletedCount,
-	); err != nil {
+	}
+
+	views = append(views, customViews()...)
+
+	if err := view.Register(views...); err != nil {
 		return errors.E(op, err)
 	}
 

@@ -46,7 +46,7 @@ func getDP(t *testing.T) Protocol {
 	if err != nil {
 		t.Fatal(err)
 	}
-	st := stash.New(mf, s, nop.New())
+	st := stash.New(mf, s, nop.New(), 10*time.Minute)
 	return New(&Opts{
 		Storage:     s,
 		Stasher:     st,
@@ -382,7 +382,7 @@ func TestDownloadProtocol(t *testing.T) {
 		t.Fatal(err)
 	}
 	mp := &mockFetcher{}
-	st := stash.New(mp, s, nop.New())
+	st := stash.New(mp, s, nop.New(), 10*time.Minute)
 	dp := New(&Opts{s, st, nil, nil, Strict})
 	ctx := context.Background()
 
@@ -434,7 +434,7 @@ func TestDownloadProtocolWhenFetchFails(t *testing.T) {
 		t.Fatal(err)
 	}
 	mp := &notFoundFetcher{}
-	st := stash.New(mp, s, nop.New())
+	st := stash.New(mp, s, nop.New(), 10*time.Minute)
 	dp := New(&Opts{s, st, nil, nil, Strict})
 	ctx := context.Background()
 	_, err = dp.GoMod(ctx, fakeMod.mod, fakeMod.ver)

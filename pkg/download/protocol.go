@@ -201,7 +201,10 @@ func (p *protocol) Info(ctx context.Context, mod, ver string) ([]byte, error) {
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 	info, err := p.storage.Info(ctx, mod, ver)
-	if errors.IsNotFoundErr(err) {
+	if err == nil {
+		observ.RecordCacheLookup(ctx, "hit", "info")
+	} else if errors.IsNotFoundErr(err) {
+		observ.RecordCacheLookup(ctx, "miss", "info")
 		err = p.processDownload(ctx, mod, ver, func(newVer string) error {
 			info, err = p.storage.Info(ctx, mod, newVer)
 			return err
@@ -219,7 +222,10 @@ func (p *protocol) GoMod(ctx context.Context, mod, ver string) ([]byte, error) {
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 	goMod, err := p.storage.GoMod(ctx, mod, ver)
-	if errors.IsNotFoundErr(err) {
+	if err == nil {
+		observ.RecordCacheLookup(ctx, "hit", "gomod")
+	} else if errors.IsNotFoundErr(err) {
+		observ.RecordCacheLookup(ctx, "miss", "gomod")
 		err = p.processDownload(ctx, mod, ver, func(newVer string) error {
 			goMod, err = p.storage.GoMod(ctx, mod, newVer)
 			return err
@@ -236,7 +242,10 @@ func (p *protocol) Zip(ctx context.Context, mod, ver string) (storage.SizeReadCl
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 	zip, err := p.storage.Zip(ctx, mod, ver)
-	if errors.IsNotFoundErr(err) {
+	if err == nil {
+		observ.RecordCacheLookup(ctx, "hit", "zip")
+	} else if errors.IsNotFoundErr(err) {
+		observ.RecordCacheLookup(ctx, "miss", "zip")
 		err = p.processDownload(ctx, mod, ver, func(newVer string) error {
 			zip, err = p.storage.Zip(ctx, mod, newVer)
 			return err

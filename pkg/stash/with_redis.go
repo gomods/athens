@@ -39,13 +39,17 @@ func getRedisClientOptions(endpoint, password string) (*redis.Options, error) {
 		}, nil
 	}
 
-	// Ensure the password is either empty or that it matches the password
-	// parsed from the url into redis.Options. This ensures that if the
-	// config supplies the password but a redis url doesn't the behavior
-	// is clear vs. failing later on at the time of the first connection
-	// with an 'invalid password' like error.
-	if password != "" && options.Password != password {
+	// Ensure the passwords are consistent:
+	// - If the URL contains a password and a separate password is also provided,
+	//   they must match to avoid silent misconfigurations.
+	// - If the URL contains no password (e.g. rediss://host:6379) but a separate
+	//   password is provided, apply it to the options so it is used for AUTH.
+	//   This supports TLS endpoints (rediss://) with separately-configured passwords.
+	if options.Password != "" && password != "" && options.Password != password {
 		return nil, errPasswordsDoNotMatch
+	}
+	if options.Password == "" && password != "" {
+		options.Password = password
 	}
 
 	return options, nil

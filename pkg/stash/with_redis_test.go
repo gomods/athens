@@ -147,13 +147,18 @@ func Test_getRedisClientOptions(t *testing.T) {
 		},
 		{
 			endpoint: "rediss://username:password@127.0.0.1:6379",
-			password: "1234", // Ignored because password was parsed
+			password: "1234", // Mismatched: URL has "password", config has "1234"
 			err:      errors.E("stash.WithRedisLock", errPasswordsDoNotMatch),
 		},
 		{
-			endpoint: "rediss://username:password@127.0.0.1:6379",
-			password: "1234", // Ignored because password was parsed
-			err:      errors.E("stash.WithRedisLock", errPasswordsDoNotMatch),
+			// TLS endpoint with no embedded password + separate password:
+			// should succeed and apply the password to options.
+			endpoint: "rediss://127.0.0.1:6379",
+			password: "1234",
+			options: &redis.Options{
+				Addr:     "127.0.0.1:6379",
+				Password: "1234",
+			},
 		},
 	}
 

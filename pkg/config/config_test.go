@@ -293,6 +293,7 @@ func TestParseExampleConfig(t *testing.T) {
 		RobotsFile:       "robots.txt",
 		IndexType:        "none",
 		ShutdownTimeout:  60,
+		StashTimeout:     600,
 		Index:            &Index{},
 	}
 

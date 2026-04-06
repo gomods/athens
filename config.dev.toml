@@ -119,6 +119,13 @@ RobotsFile = "robots.txt"
 # Env override: ATHENS_TIMEOUT
 Timeout = 300
 
+# StashTimeout is the timeout for the Stash operation in seconds.
+# The Stash operation fetches a module from upstream (e.g. VCS) and stores it
+# into the storage backend. Large modules may require a higher timeout.
+# Defaults to 600 (10 minutes)
+# Env override: ATHENS_STASH_TIMEOUT
+StashTimeout = 600
+
 # StorageType sets the type of storage backend the proxy will use.
 # Possible values are memory, disk, mongo, gcp, minio, s3, azureblob, external
 # Defaults to memory

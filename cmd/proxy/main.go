@@ -54,10 +54,11 @@ func main() {
 	stdlog.SetOutput(logrusErrorWriter)
 	stdlog.SetFlags(stdlog.Flags() &^ (stdlog.Ldate | stdlog.Ltime))
 
-	handler, err := actions.App(logger, conf)
+	handler, cleanup, err := actions.App(logger, conf)
 	if err != nil {
 		logger.WithError(err).Fatal("Could not create App")
 	}
+	defer cleanup()
 
 	srv := &http.Server{
 		Handler:           handler,
