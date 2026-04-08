@@ -11,7 +11,7 @@ import (
 
 // WithRedisSentinelLock returns a distributed singleflight
 // with a redis cluster that utilizes sentinel for quorum and failover.
-func WithRedisSentinelLock(l RedisLogger, endpoints []string, master, sentinelPassword, redisUsername, redisPassword string, checker storage.Checker, lockConfig *config.RedisLockConfig) (Wrapper, error) {
+func WithRedisSentinelLock(ctx context.Context, l RedisLogger, endpoints []string, master, sentinelPassword, redisUsername, redisPassword string, checker storage.Checker, lockConfig *config.RedisLockConfig) (Wrapper, error) {
 	redis.SetLogger(l)
 
 	const op errors.Op = "stash.WithRedisSentinelLock"
@@ -20,6 +20,7 @@ func WithRedisSentinelLock(l RedisLogger, endpoints []string, master, sentinelPa
 	if len(endpoints) == 0 {
 		return nil, errors.E(op, "no endpoints specified")
 	}
+
 	client := redis.NewFailoverClient(&redis.FailoverOptions{
 		MasterName:       master,
 		SentinelAddrs:    endpoints,
@@ -27,7 +28,8 @@ func WithRedisSentinelLock(l RedisLogger, endpoints []string, master, sentinelPa
 		Username:         redisUsername,
 		Password:         redisPassword,
 	})
-	_, err := client.Ping(context.Background()).Result()
+
+	_, err := client.Ping(ctx).Result()
 	if err != nil {
 		return nil, errors.E(op, err)
 	}

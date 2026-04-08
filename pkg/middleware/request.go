@@ -11,6 +11,7 @@ import (
 
 type responseWriter struct {
 	http.ResponseWriter
+
 	statusCode int
 }
 
@@ -29,6 +30,7 @@ func RequestLogger(h http.Handler) http.Handler {
 			"http-status": fmtResponseCode(rw.statusCode),
 		}).Infof("incoming request")
 	}
+
 	return http.HandlerFunc(f)
 }
 
@@ -36,6 +38,7 @@ func fmtResponseCode(statusCode int) string {
 	if statusCode == 0 {
 		statusCode = 200
 	}
+
 	status := fmt.Sprint(statusCode)
 	switch {
 	case statusCode < http.StatusBadRequest:
@@ -45,5 +48,6 @@ func fmtResponseCode(statusCode int) string {
 	default:
 		status = color.HiRedString("%v", status)
 	}
+
 	return status
 }

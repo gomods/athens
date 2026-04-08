@@ -22,12 +22,15 @@ import (
 // an ACL rule.
 func (s *Storage) Save(ctx context.Context, module, version string, mod []byte, zip io.Reader, zipMD5, info []byte) error {
 	const op errors.Op = "gcp.save"
+
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
+
 	err := s.save(ctx, module, version, mod, zip, zipMD5, info)
 	if err != nil {
 		return errors.E(op, err)
 	}
+
 	return err
 }
 
@@ -39,6 +42,7 @@ func (s *Storage) SetStaleThreshold(threshold time.Duration) {
 
 func (s *Storage) save(ctx context.Context, module, version string, mod []byte, zip io.Reader, zipMD5, info []byte) error {
 	const op errors.Op = "gcp.save"
+
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 
@@ -50,12 +54,14 @@ func (s *Storage) save(ctx context.Context, module, version string, mod []byte, 
 	}
 
 	zipPath := config.PackageVersionedName(module, version, "zip")
+
 	err = s.upload(ctx, zipPath, zip, zipMD5, true)
 	if err != nil && !errors.Is(err, errors.KindAlreadyExists) {
 		return errors.E(op, err)
 	}
 
 	infoPath := config.PackageVersionedName(module, version, "info")
+
 	err = s.upload(ctx, infoPath, bytes.NewReader(info), nil, false)
 	if err != nil && !errors.Is(err, errors.KindAlreadyExists) {
 		return errors.E(op, err)
@@ -66,8 +72,10 @@ func (s *Storage) save(ctx context.Context, module, version string, mod []byte, 
 
 func (s *Storage) upload(ctx context.Context, path string, stream io.Reader, md5 []byte, checkBefore bool) error {
 	const op errors.Op = "gcp.upload"
+
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
+
 	cancelCtx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
@@ -97,19 +105,23 @@ func (s *Storage) upload(ctx context.Context, path string, stream io.Reader, md5
 	// NOTE: content type is auto detected on GCP side and ACL defaults to public
 	// Once we support private storage buckets this may need refactoring
 	// unless there is a way to set the default perms in the project.
-	if _, err := io.Copy(wc, stream); err != nil {
+	_, err := io.Copy(wc, stream)
+	if err != nil {
 		// Purposely do not close it to avoid creating a partial file.
 		return err
 	}
 
-	err := wc.Close()
+	err = wc.Close()
 	if err != nil {
 		kind := errors.KindBadRequest
+
 		apiErr := &googleapi.Error{}
 		if errors.AsErr(err, &apiErr) && apiErr.Code == 412 {
 			kind = errors.KindAlreadyExists
 		}
+
 		return errors.E(op, err, kind)
 	}
+
 	return nil
 }

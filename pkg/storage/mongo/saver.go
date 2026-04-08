@@ -15,6 +15,7 @@ import (
 // Save stores a module in mongo storage.
 func (s *ModuleStore) Save(ctx context.Context, module, version string, mod []byte, zip io.Reader, zipMD5, info []byte) error {
 	const op errors.Op = "mongo.Save"
+
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 
@@ -22,12 +23,14 @@ func (s *ModuleStore) Save(ctx context.Context, module, version string, mod []by
 	if err != nil {
 		return errors.E(op, err, errors.M(module), errors.V(version))
 	}
+
 	if exists {
 		return errors.E(op, "already exists", errors.M(module), errors.V(version), errors.KindAlreadyExists)
 	}
 
 	zipName := s.gridFileName(module, version)
 	db := s.client.Database(s.db)
+
 	bucket, err := gridfs.NewBucket(db, options.GridFSBucket())
 	if err != nil {
 		return errors.E(op, err, errors.M(module), errors.V(version))
@@ -37,12 +40,14 @@ func (s *ModuleStore) Save(ctx context.Context, module, version string, mod []by
 	if err != nil {
 		return errors.E(op, err, errors.M(module), errors.V(version))
 	}
+
 	defer func() { _ = uStream.Close() }()
 
 	numBytesWritten, err := io.Copy(uStream, zip)
 	if err != nil {
 		return errors.E(op, err, errors.M(module), errors.V(version))
 	}
+
 	if numBytesWritten <= 0 {
 		e := fmt.Errorf("copied %d bytes to Mongo GridFS", numBytesWritten)
 		return errors.E(op, e, errors.M(module), errors.V(version))
@@ -57,6 +62,7 @@ func (s *ModuleStore) Save(ctx context.Context, module, version string, mod []by
 
 	c := s.client.Database(s.db).Collection(s.coll)
 	tctx, cancel := context.WithTimeout(ctx, s.timeout)
+
 	defer cancel()
 
 	_, err = c.InsertOne(tctx, m, options.InsertOne().SetBypassDocumentValidation(false))

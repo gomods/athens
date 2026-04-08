@@ -18,11 +18,14 @@ import (
 // It returns a list of modules and versions contained in the storage.
 func (s *Storage) Catalog(ctx context.Context, token string, pageSize int) ([]paths.AllPathParams, string, error) {
 	const op errors.Op = "s3.Catalog"
+
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
+
 	queryToken := token
 	res := make([]paths.AllPathParams, 0)
 	count := pageSize
+
 	for count > 0 {
 		lsParams := &s3.ListObjectsV2Input{
 			Bucket:     aws.String(s.bucket),
@@ -44,19 +47,23 @@ func (s *Storage) Catalog(ctx context.Context, token string, pageSize int) ([]pa
 			if count > 0 { // it means we reached the end, no subsequent requests are necessary
 				queryToken = ""
 			}
+
 			break
 		}
 	}
+
 	return res, queryToken, nil
 }
 
 func fetchModsAndVersions(objects []types.Object, elementsNum int) ([]paths.AllPathParams, string) {
 	res := make([]paths.AllPathParams, 0)
 	lastKey := ""
+
 	for _, o := range objects {
 		if !strings.HasSuffix(*o.Key, ".info") {
 			continue
 		}
+
 		p, err := parseS3Key(o)
 		if err != nil {
 			continue
@@ -70,15 +77,18 @@ func fetchModsAndVersions(objects []types.Object, elementsNum int) ([]paths.AllP
 			break
 		}
 	}
+
 	return res, lastKey
 }
 
 func parseS3Key(o types.Object) (paths.AllPathParams, error) {
 	const op errors.Op = "s3.parseS3Key"
+
 	m, v := config.ModuleVersionFromPath(*o.Key)
 
 	if m == "" || v == "" {
 		return paths.AllPathParams{}, errors.E(op, fmt.Errorf("invalid object key format %s", *o.Key))
 	}
+
 	return paths.AllPathParams{Module: m, Version: v}, nil
 }

@@ -34,7 +34,9 @@ func NewStorage(conf *config.MongoConfig, timeout time.Duration) (*ModuleStore, 
 	if conf == nil {
 		return nil, errors.E(op, "No Mongo Configuration provided")
 	}
+
 	ms := &ModuleStore{url: conf.URL, certPath: conf.CertPath, timeout: timeout, insecure: conf.InsecureConn}
+
 	client, err := ms.newClient()
 	if err != nil {
 		return nil, errors.E(op, err)
@@ -86,6 +88,7 @@ func (s *ModuleStore) newClient() (*mongo.Client, error) {
 	if s.certPath != "" {
 		// Sets only when the env var is setup in config.dev.toml
 		tlsConfig.InsecureSkipVerify = s.insecure
+
 		var roots *x509.CertPool
 		// See if there is a system cert pool
 		roots, err := x509.SystemCertPool()
@@ -106,7 +109,9 @@ func (s *ModuleStore) newClient() (*mongo.Client, error) {
 		tlsConfig.ClientCAs = roots
 		clientOptions = clientOptions.SetTLSConfig(tlsConfig)
 	}
+
 	clientOptions = clientOptions.SetConnectTimeout(s.timeout)
+
 	client, err := mongo.Connect(context.Background(), clientOptions)
 	if err != nil {
 		return nil, errors.E(op, err)

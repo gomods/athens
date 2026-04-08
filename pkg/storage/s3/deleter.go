@@ -15,12 +15,15 @@ import (
 // if the version does not exist.
 func (s *Storage) Delete(ctx context.Context, module, version string) error {
 	const op errors.Op = "s3.Delete"
+
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
+
 	exists, err := s.Exists(ctx, module, version)
 	if err != nil {
 		return errors.E(op, err, errors.M(module), errors.V(version))
 	}
+
 	if !exists {
 		return errors.E(op, errors.M(module), errors.V(version), errors.KindNotFound)
 	}
@@ -30,6 +33,7 @@ func (s *Storage) Delete(ctx context.Context, module, version string) error {
 
 func (s *Storage) remove(ctx context.Context, path string) error {
 	const op errors.Op = "s3.Delete"
+
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 
@@ -38,7 +42,8 @@ func (s *Storage) remove(ctx context.Context, path string) error {
 		Key:    aws.String(path),
 	}
 
-	if _, err := s.s3API.DeleteObject(ctx, delParams); err != nil {
+	_, err := s.s3API.DeleteObject(ctx, delParams)
+	if err != nil {
 		return errors.E(op, err)
 	}
 

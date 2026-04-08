@@ -17,11 +17,13 @@ func basicAuth(user, pass string) mux.MiddlewareFunc {
 			if !basicAuthExcludedPaths.MatchString(r.URL.Path) && !checkAuth(r, user, pass) {
 				w.Header().Set("WWW-Authenticate", `Basic realm="basic auth required"`)
 				w.WriteHeader(http.StatusUnauthorized)
+
 				return
 			}
 
 			h.ServeHTTP(w, r)
 		}
+
 		return http.HandlerFunc(f)
 	}
 }
@@ -38,5 +40,6 @@ func checkAuth(r *http.Request, user, pass string) bool {
 	}
 
 	isPass := subtle.ConstantTimeCompare([]byte(pass), []byte(givenPass))
+
 	return isPass == 1
 }

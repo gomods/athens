@@ -17,7 +17,8 @@ import (
 // clearIndex is a function that must clear the entire storage so that
 // tests can assume a clean state.
 func RunTests(t *testing.T, indexer index.Indexer, clearIndex func() error) {
-	if err := clearIndex(); err != nil {
+	err := clearIndex()
+	if err != nil {
 		t.Fatal(err)
 	}
 
@@ -58,9 +59,12 @@ func RunTests(t *testing.T, indexer index.Indexer, clearIndex func() error) {
 				if err != nil {
 					t.Fatal(err)
 				}
+
 				time.Sleep(50 * time.Millisecond)
+
 				now := time.Now()
 				lines := seed(t, indexer, 5)
+
 				return lines, now
 			},
 			limit: 2000,
@@ -71,6 +75,7 @@ func RunTests(t *testing.T, indexer index.Indexer, clearIndex func() error) {
 			preTest: func(t *testing.T) ([]*index.Line, time.Time) {
 				seed(t, indexer, 5)
 				time.Sleep(50 * time.Millisecond)
+
 				return []*index.Line{}, time.Now()
 			},
 			limit: 2000,
@@ -89,14 +94,17 @@ func RunTests(t *testing.T, indexer index.Indexer, clearIndex func() error) {
 			desc: "if we try to index a module that already exists, a KindAlreadyExists must be returned",
 			preTest: func(t *testing.T) ([]*index.Line, time.Time) {
 				m := &index.Line{Path: "gomods.io/tobeduplicated", Version: "v0.1.0"}
+
 				err := indexer.Index(context.Background(), m.Path, m.Version)
 				if err != nil {
 					t.Fatal(err)
 				}
+
 				err = indexer.Index(context.Background(), m.Path, m.Version)
 				if !errors.Is(err, errors.KindAlreadyExists) {
 					t.Fatalf("expected an error of kind AlreadyExists but got %s", errors.KindText(err))
 				}
+
 				return []*index.Line{m}, time.Time{}
 			},
 			limit: 2000,
@@ -106,15 +114,18 @@ func RunTests(t *testing.T, indexer index.Indexer, clearIndex func() error) {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Log(tc.desc)
 			t.Cleanup(func() {
-				if err := clearIndex(); err != nil {
+				err := clearIndex()
+				if err != nil {
 					t.Fatal(err)
 				}
 			})
 			expected, since := tc.preTest(t)
+
 			given, err := indexer.Lines(context.Background(), since, tc.limit)
 			if err != nil {
 				t.Fatal(err)
 			}
+
 			opts := cmpopts.IgnoreFields(index.Line{}, "Timestamp")
 			if !cmp.Equal(given, expected, opts) {
 				t.Fatal(cmp.Diff(expected, given, opts))
@@ -124,16 +135,21 @@ func RunTests(t *testing.T, indexer index.Indexer, clearIndex func() error) {
 }
 
 func seed(t *testing.T, indexer index.Indexer, num int) []*index.Line {
-	lines := []*index.Line{}
+	lines := make([]*index.Line, 0, num)
+
 	t.Helper()
-	for i := 0; i < num; i++ {
+
+	for i := range num {
 		mod := moniker.New().NameSep("_")
 		ver := fmt.Sprintf("%d.0.0", i)
+
 		err := indexer.Index(context.Background(), mod, ver)
 		if err != nil {
 			t.Fatal(err)
 		}
+
 		lines = append(lines, &index.Line{Path: mod, Version: ver})
 	}
+
 	return lines
 }

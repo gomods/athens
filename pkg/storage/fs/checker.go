@@ -11,8 +11,10 @@ import (
 
 func (s *storageImpl) Exists(ctx context.Context, module, version string) (bool, error) {
 	const op errors.Op = "fs.Exists"
+
 	_, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
+
 	versionedPath := s.versionLocation(module, version)
 
 	files, err := afero.ReadDir(s.filesystem, versionedPath)
@@ -20,6 +22,7 @@ func (s *storageImpl) Exists(ctx context.Context, module, version string) (bool,
 		if os.IsNotExist(err) {
 			return false, nil
 		}
+
 		return false, errors.E(op, errors.M(module), errors.V(version), err)
 	}
 

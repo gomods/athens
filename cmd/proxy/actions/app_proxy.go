@@ -27,6 +27,7 @@ import (
 )
 
 func addProxyRoutes(
+	ctx context.Context,
 	r *mux.Router,
 	s storage.Backend,
 	l *log.Logger,
@@ -39,10 +40,11 @@ func addProxyRoutes(
 	r.HandleFunc("/catalog", catalogHandler(s))
 	r.HandleFunc("/robots.txt", robotsHandler(c))
 
-	indexer, err := getIndex(c)
+	indexer, err := getIndex(ctx, c)
 	if err != nil {
 		return err
 	}
+
 	r.HandleFunc("/index", indexHandler(indexer))
 
 	for _, sumdb := range c.SumDBs {
@@ -50,13 +52,16 @@ func addProxyRoutes(
 		if err != nil {
 			return err
 		}
+
 		if sumdbURL.Scheme != "https" {
 			return fmt.Errorf("sumdb: %v must have an https scheme", sumdb)
 		}
+
 		supportPath := path.Join("/sumdb", sumdbURL.Host, "/supported")
 		r.HandleFunc(supportPath, func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusOK)
 		})
+
 		sumHandler := sumdbProxy(sumdbURL, c.NoSumPatterns)
 		pathPrefix := "/sumdb/" + sumdbURL.Host
 		r.PathPrefix(pathPrefix + "/").Handler(
@@ -91,20 +96,25 @@ func addProxyRoutes(
 	if !c.GoBinaryEnvVars.HasKey("GONOSUMDB") {
 		c.GoBinaryEnvVars.Add("GONOSUMDB", strings.Join(c.NoSumPatterns, ","))
 	}
-	if err := c.GoBinaryEnvVars.Validate(); err != nil {
+
+	err = c.GoBinaryEnvVars.Validate()
+	if err != nil {
 		return err
 	}
-	mf, err := module.NewGoGetFetcher(c.GoBinary, c.GoGetDir, c.GoBinaryEnvVars, fs)
+
+	mf, err := module.NewGoGetFetcher(ctx, c.GoBinary, c.GoGetDir, c.GoBinaryEnvVars, fs)
 	if err != nil {
 		return err
 	}
 
 	lister := module.NewVCSLister(c.GoBinary, c.GoBinaryEnvVars, fs, c.TimeoutDuration())
 	checker := storage.WithChecker(s)
-	withSingleFlight, err := getSingleFlight(l, c, s, checker)
+
+	withSingleFlight, err := getSingleFlight(ctx, l, c, s, checker)
 	if err != nil {
 		return err
 	}
+
 	st := stash.New(mf, s, indexer, c.StashTimeoutDuration(), stash.WithPool(c.GoGetWorkers), withSingleFlight)
 
 	df, err := mode.NewFile(c.DownloadMode, c.DownloadURL)
@@ -137,7 +147,7 @@ func (l *athensLoggerForRedis) Printf(ctx context.Context, format string, v ...a
 	l.logger.WithContext(ctx).Printf(format, v...)
 }
 
-func getSingleFlight(l *log.Logger, c *config.Config, s storage.Backend, checker storage.Checker) (stash.Wrapper, error) {
+func getSingleFlight(ctx context.Context, l *log.Logger, c *config.Config, s storage.Backend, checker storage.Checker) (stash.Wrapper, error) {
 	switch c.SingleFlightType {
 	case "", "memory":
 		return stash.WithSingleflight, nil
@@ -145,13 +155,17 @@ func getSingleFlight(l *log.Logger, c *config.Config, s storage.Backend, checker
 		if c.SingleFlight == nil || c.SingleFlight.Etcd == nil {
 			return nil, errors.New("etcd config must be present")
 		}
+
 		endpoints := strings.Split(c.SingleFlight.Etcd.Endpoints, ",")
+
 		return stash.WithEtcd(endpoints, checker)
 	case "redis":
 		if c.SingleFlight == nil || c.SingleFlight.Redis == nil {
 			return nil, errors.New("redis config must be present")
 		}
+
 		return stash.WithRedisLock(
+			ctx,
 			&athensLoggerForRedis{logger: l},
 			c.SingleFlight.Redis.Endpoint,
 			c.SingleFlight.Redis.Password,
@@ -161,7 +175,9 @@ func getSingleFlight(l *log.Logger, c *config.Config, s storage.Backend, checker
 		if c.SingleFlight == nil || c.SingleFlight.RedisSentinel == nil {
 			return nil, errors.New("redis config must be present")
 		}
+
 		return stash.WithRedisSentinelLock(
+			ctx,
 			&athensLoggerForRedis{logger: l},
 			c.SingleFlight.RedisSentinel.Endpoints,
 			c.SingleFlight.RedisSentinel.MasterName,
@@ -175,27 +191,30 @@ func getSingleFlight(l *log.Logger, c *config.Config, s storage.Backend, checker
 		if c.StorageType != "gcp" {
 			return nil, fmt.Errorf("gcp SingleFlight only works with a gcp storage type and not: %v", c.StorageType)
 		}
+
 		return stash.WithGCSLock(c.SingleFlight.GCP.StaleThreshold, s)
 	case "azureblob":
 		if c.StorageType != "azureblob" {
 			return nil, fmt.Errorf("azureblob SingleFlight only works with a azureblob storage type and not: %v", c.StorageType)
 		}
+
 		return stash.WithAzureBlobLock(c.Storage.AzureBlob, c.TimeoutDuration(), checker)
 	default:
 		return nil, fmt.Errorf("unrecognized single flight type: %v", c.SingleFlightType)
 	}
 }
 
-func getIndex(c *config.Config) (index.Indexer, error) {
+func getIndex(ctx context.Context, c *config.Config) (index.Indexer, error) {
 	switch c.IndexType {
 	case "", "none":
 		return nop.New(), nil
 	case "memory":
 		return mem.New(), nil
 	case "mysql":
-		return mysql.New(c.Index.MySQL)
+		return mysql.New(ctx, c.Index.MySQL)
 	case "postgres":
-		return postgres.New(c.Index.Postgres)
+		return postgres.New(ctx, c.Index.Postgres)
 	}
+
 	return nil, fmt.Errorf("unknown index type: %q", c.IndexType)
 }

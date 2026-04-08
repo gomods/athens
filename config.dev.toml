@@ -627,8 +627,8 @@ ShutdownTimeout = 60
 
         # Postgres query parameters
         # Environment overrides must be in the following format:
-        # ATHENS_INDEX_POSTGRES_PARAMS="connect_timeout:30s,sslmode=disable"
+        # ATHENS_INDEX_POSTGRES_PARAMS="connect_timeout:30s,sslmode=prefer"
         # Env override: ATHENS_INDEX_POSTGRES_PARAMS
         [Index.Postgres.Params]
             connect_timeout = "30s"
-            sslmode = "disable"
+            sslmode = "prefer"

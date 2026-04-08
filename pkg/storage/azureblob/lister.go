@@ -12,14 +12,17 @@ import (
 // It returns a list of versions, if any, for a given module.
 func (s *Storage) List(ctx context.Context, module string) ([]string, error) {
 	const op errors.Op = "azureblob.List"
+
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 
 	modulePrefix := strings.TrimSuffix(module, "/") + "/@v"
+
 	blobnames, err := s.client.ListBlobs(ctx, modulePrefix)
 	if err != nil {
 		return nil, errors.E(op, err, errors.M(module))
 	}
+
 	return extractVersions(blobnames), nil
 }
 
@@ -39,5 +42,6 @@ func extractVersions(blobnames []string) []string {
 			versions = append(versions, version)
 		}
 	}
+
 	return versions
 }

@@ -42,6 +42,7 @@ func (e *entry) SystemErr(err error) {
 	}
 
 	ent := e.WithFields(errFields(athensErr))
+
 	switch errors.Severity(err) {
 	case logrus.WarnLevel:
 		ent.Warnf("%v", err)

@@ -16,6 +16,7 @@ func WithRequestID(h http.Handler) http.Handler {
 		if requestID == "" {
 			requestID = uuid.New().String()
 		}
+
 		ctx := requestid.SetInContext(r.Context(), requestID)
 		r = r.WithContext(ctx)
 		h.ServeHTTP(w, r)

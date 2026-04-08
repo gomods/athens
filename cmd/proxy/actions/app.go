@@ -1,6 +1,7 @@
 package actions
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"sync"
@@ -12,7 +13,7 @@ import (
 	"github.com/gomods/athens/pkg/observ"
 	"github.com/gorilla/mux"
 	"github.com/unrolled/secure"
-	"go.opencensus.io/plugin/ochttp"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 )
 
 // Service is the name of the service that we want to tag our processes with.
@@ -26,25 +27,29 @@ const Service = "proxy"
 // when the server is shutting down (to flush and stop exporters), and an error.
 func App(logger *log.Logger, conf *config.Config) (http.Handler, func(), error) {
 	noop := func() {}
+
 	if conf.GithubToken != "" {
 		if conf.NETRCPath != "" {
 			return nil, noop, fmt.Errorf("cannot provide both GithubToken and NETRCPath")
 		}
 
-		if err := netrcFromToken(conf.GithubToken); err != nil {
+		err := netrcFromToken(conf.GithubToken)
+		if err != nil {
 			return nil, noop, fmt.Errorf("creating netrc from token: %w", err)
 		}
 	}
 
 	// mount .netrc to home dir
 	// to have access to private repos.
-	if err := initializeAuthFile(conf.NETRCPath); err != nil {
+	err := initializeAuthFile(conf.NETRCPath)
+	if err != nil {
 		return nil, noop, fmt.Errorf("initializing auth file from netrc: %w", err)
 	}
 
 	// mount .hgrc to home dir
 	// to have access to private repos.
-	if err := initializeAuthFile(conf.HGRCPath); err != nil {
+	err = initializeAuthFile(conf.HGRCPath)
+	if err != nil {
 		return nil, noop, fmt.Errorf("initializing auth file from hgrc: %w", err)
 	}
 
@@ -60,6 +65,7 @@ func App(logger *log.Logger, conf *config.Config) (http.Handler, func(), error) 
 	)
 
 	var subRouter *mux.Router
+
 	if prefix := conf.PathPrefix; prefix != "" {
 		// certain Ingress Controllers (such as GCP Load Balancer)
 		// can not send custom headers and therefore if the proxy
@@ -75,6 +81,7 @@ func App(logger *log.Logger, conf *config.Config) (http.Handler, func(), error) 
 	// RegisterExporter returns the cleanup function that flushes remaining traces
 	// and stops the exporter. The caller is responsible for calling it at shutdown.
 	cleanupTraces := noop
+
 	flushTraces, err := observ.RegisterExporter(
 		conf.TraceExporter,
 		conf.TraceExporterURL,
@@ -91,6 +98,7 @@ func App(logger *log.Logger, conf *config.Config) (http.Handler, func(), error) 
 	// The error from the RegisterStatsExporter would be nil if the proper stats exporter
 	// was specified by the user.
 	cleanupStats := noop
+
 	flushStats, err := observ.RegisterStatsExporter(r, conf.StatsExporter, Service)
 	if err != nil {
 		logger.Info(err)
@@ -99,6 +107,7 @@ func App(logger *log.Logger, conf *config.Config) (http.Handler, func(), error) 
 	}
 
 	var once sync.Once
+
 	cleanup := func() {
 		once.Do(func() {
 			cleanupTraces()
@@ -116,13 +125,12 @@ func App(logger *log.Logger, conf *config.Config) (http.Handler, func(), error) 
 		if err != nil {
 			return nil, cleanup, fmt.Errorf("creating new filter: %w", err)
 		}
+
 		r.Use(mw.NewFilterMiddleware(mf, conf.GlobalEndpoint))
 	}
 
 	client := &http.Client{
-		Transport: &ochttp.Transport{
-			Base: http.DefaultTransport,
-		},
+		Transport: otelhttp.NewTransport(http.DefaultTransport),
 	}
 
 	// Having the hook set means we want to use it
@@ -139,13 +147,13 @@ func App(logger *log.Logger, conf *config.Config) (http.Handler, func(), error) 
 	if subRouter != nil {
 		proxyRouter = subRouter
 	}
-	if err := addProxyRoutes(proxyRouter, store, logger, conf); err != nil {
+
+	err = addProxyRoutes(context.Background(), proxyRouter, store, logger, conf)
+	if err != nil {
 		return nil, cleanup, fmt.Errorf("adding proxy routes: %w", err)
 	}
 
-	h := &ochttp.Handler{
-		Handler: r,
-	}
+	h := otelhttp.NewHandler(r, "athens-proxy")
 
 	return h, cleanup, nil
 }

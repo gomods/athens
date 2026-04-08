@@ -23,8 +23,10 @@ func RunBenchmarks(b *testing.B, s storage.Backend, reset func() error) {
 
 func benchList(b *testing.B, s storage.Backend, reset func() error) {
 	b.Helper()
+
 	require.NoError(b, reset())
 	defer require.NoError(b, reset())
+
 	module, version := "benchListModule", "1.0.1"
 	mock := getMockModule()
 	err := s.Save(
@@ -48,6 +50,7 @@ func benchList(b *testing.B, s storage.Backend, reset func() error) {
 
 func benchSave(b *testing.B, s storage.Backend, reset func() error) {
 	b.Helper()
+
 	require.NoError(b, reset())
 	defer require.NoError(b, reset())
 
@@ -58,6 +61,7 @@ func benchSave(b *testing.B, s storage.Backend, reset func() error) {
 
 	mi := 0
 	ctx := context.Background()
+
 	b.Run("save", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
 			err := s.Save(
@@ -70,6 +74,7 @@ func benchSave(b *testing.B, s storage.Backend, reset func() error) {
 				mock.Info,
 			)
 			require.NoError(b, err)
+
 			mi++
 		}
 	})
@@ -77,6 +82,7 @@ func benchSave(b *testing.B, s storage.Backend, reset func() error) {
 
 func benchDelete(b *testing.B, s storage.Backend, reset func() error) {
 	b.Helper()
+
 	require.NoError(b, reset())
 	defer require.NoError(b, reset())
 
@@ -84,6 +90,7 @@ func benchDelete(b *testing.B, s storage.Backend, reset func() error) {
 	mock := getMockModule()
 	zipBts, err := io.ReadAll(mock.Zip)
 	require.NoError(b, err)
+
 	ctx := context.Background()
 
 	b.Run("delete", func(b *testing.B) {
@@ -99,6 +106,7 @@ func benchDelete(b *testing.B, s storage.Backend, reset func() error) {
 
 func benchExists(b *testing.B, s storage.Backend, reset func() error) {
 	b.Helper()
+
 	require.NoError(b, reset())
 	defer require.NoError(b, reset())
 

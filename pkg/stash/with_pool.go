@@ -24,12 +24,13 @@ func WithPool(numWorkers int) Wrapper {
 			jobCh:   make(chan func()),
 		}
 		st.start(numWorkers)
+
 		return st
 	}
 }
 
 func (s *withpool) start(numWorkers int) {
-	for i := 0; i < numWorkers; i++ {
+	for range numWorkers {
 		go s.listen()
 	}
 }
@@ -42,16 +43,25 @@ func (s *withpool) listen() {
 
 func (s *withpool) Stash(ctx context.Context, mod, ver string) (string, error) {
 	const op errors.Op = "stash.Pool"
+
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
-	var err error
-	var newVer string
+
+	var (
+		err    error
+		newVer string
+	)
+
 	done := make(chan struct{}, 1)
+
 	s.jobCh <- func() {
 		newVer, err = s.stasher.Stash(ctx, mod, ver)
+
 		close(done)
 	}
+
 	<-done
+
 	if err != nil {
 		return "", errors.E(op, err)
 	}

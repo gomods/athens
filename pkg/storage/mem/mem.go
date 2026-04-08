@@ -14,6 +14,7 @@ func NewStorage() (storage.Backend, error) {
 	const op errors.Op = "mem.NewStorage"
 
 	memFs := afero.NewMemMapFs()
+
 	tmpDir, err := afero.TempDir(memFs, "", "")
 	if err != nil {
 		return nil, errors.E(op, fmt.Errorf("could not create temp dir for 'In Memory' storage: %w", err))
@@ -23,5 +24,6 @@ func NewStorage() (storage.Backend, error) {
 	if err != nil {
 		return nil, errors.E(op, fmt.Errorf("could not create storage from memory fs: %w", err))
 	}
+
 	return memStorage, nil
 }

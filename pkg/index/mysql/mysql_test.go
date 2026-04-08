@@ -1,6 +1,7 @@
 package mysql
 
 import (
+	"context"
 	"os"
 	"testing"
 
@@ -13,7 +14,7 @@ func TestMySQL(t *testing.T) {
 		t.SkipNow()
 	}
 	cfg := getTestConfig(t)
-	i, err := New(cfg)
+	i, err := New(context.Background(), cfg)
 	if err != nil {
 		t.Fatal(err)
 	}

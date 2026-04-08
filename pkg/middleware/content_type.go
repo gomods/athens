@@ -11,5 +11,6 @@ func ContentType(h http.Handler) http.Handler {
 		w.Header().Set("Content-Type", "application/json")
 		h.ServeHTTP(w, r)
 	}
+
 	return http.HandlerFunc(f)
 }

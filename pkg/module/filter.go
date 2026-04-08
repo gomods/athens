@@ -73,6 +73,7 @@ func (f *Filter) AddRule(path string, qualifiers []string, rule FilterRule) {
 // Rule returns the filter rule to be applied to the given path.
 func (f *Filter) Rule(path, version string) FilterRule {
 	segs := getPathSegments(path)
+
 	rule := f.getAssociatedRule(version, segs...)
 	if rule == Default {
 		rule = Include
@@ -89,6 +90,7 @@ func (f *Filter) ensurePath(path string) {
 		if _, ok := latest[p]; !ok {
 			latest[p] = newRule(Default)
 		}
+
 		latest = latest[p].next
 	}
 }
@@ -99,11 +101,13 @@ func (f *Filter) getAssociatedRule(version string, path ...string) FilterRule {
 	}
 
 	rules := make([]FilterRule, 0, len(path))
+
 	rn := f.root
 	for _, p := range path {
 		if _, ok := rn.next[p]; !ok {
 			break
 		}
+
 		rn = rn.next[p]
 		// default to true if no version filter, false otherwise
 		match := len(rn.qualifiers) == 0
@@ -113,6 +117,7 @@ func (f *Filter) getAssociatedRule(version string, path ...string) FilterRule {
 				break
 			}
 		}
+
 		if match || version == "" {
 			rules = append(rules, rn.rule)
 		}
@@ -133,6 +138,7 @@ func (f *Filter) getAssociatedRule(version string, path ...string) FilterRule {
 
 func initFromConfig(filePath string) (*Filter, error) {
 	const op errors.Op = "module.initFromConfig"
+
 	lines, err := getConfigLines(filePath)
 	if err != nil {
 		return nil, err
@@ -149,6 +155,7 @@ func initFromConfig(filePath string) (*Filter, error) {
 		if len(line) == 0 {
 			continue
 		}
+
 		if len(line) > 0 && line[0] == '#' {
 			continue
 		}
@@ -159,7 +166,9 @@ func initFromConfig(filePath string) (*Filter, error) {
 		}
 
 		ruleSign := strings.TrimSpace(split[0])
+
 		var rule FilterRule
+
 		switch ruleSign {
 		case "+":
 			rule = Include
@@ -175,6 +184,7 @@ func initFromConfig(filePath string) (*Filter, error) {
 			f.AddRule("", nil, rule)
 			continue
 		}
+
 		var qual []string
 		if len(split) == 3 {
 			qual = strings.Split(split[2], ",")
@@ -189,6 +199,7 @@ func initFromConfig(filePath string) (*Filter, error) {
 		path := strings.TrimSpace(split[1])
 		f.AddRule(path, qual, rule)
 	}
+
 	return f, nil
 }
 
@@ -236,27 +247,34 @@ func matches(version, qualifier string) bool {
 		if v[0] == q[0] && v[1] == q[1] && v[2] >= q[2] {
 			return true
 		}
+
 		return false
 	case '^':
 		if v[0] == q[0] && v[1] > q[1] {
 			return true
 		}
+
 		if v[0] == q[0] && v[1] == q[1] && v[2] >= q[2] {
 			return true
 		}
+
 		return false
 	case '<':
 		if v[0] < q[0] {
 			return true
 		}
+
 		if v[0] == q[0] && v[1] < q[1] {
 			return true
 		}
+
 		if v[0] == q[0] && v[1] == q[1] && v[2] <= q[2] {
 			return true
 		}
+
 		return false
 	}
+
 	return false
 }
 
@@ -266,23 +284,28 @@ func getPathSegments(path string) []string {
 
 func getVersionSegments(path string) ([]int, error) {
 	vv := getSegments(path, versionSeparator)
+
 	res := make([]int, len(vv))
 	for i, v := range vv {
 		n, err := strconv.Atoi(v)
 		if err != nil {
 			return nil, err
 		}
+
 		res[i] = n
 	}
+
 	return res, nil
 }
 
 func getSegments(path, separator string) []string {
 	path = strings.TrimSpace(path)
+
 	path = strings.Trim(path, separator)
 	if path == "" {
 		return []string{}
 	}
+
 	return strings.Split(path, separator)
 }
 
@@ -290,6 +313,7 @@ func newRule(r FilterRule) ruleNode {
 	rn := ruleNode{}
 	rn.next = make(map[string]ruleNode)
 	rn.rule = r
+
 	return rn
 }
 
@@ -302,6 +326,7 @@ func getConfigLines(filterFile string) ([]string, error) {
 	}
 
 	scanner := bufio.NewScanner(f)
+
 	var lines []string
 	for scanner.Scan() {
 		lines = append(lines, strings.TrimSpace(scanner.Text()))

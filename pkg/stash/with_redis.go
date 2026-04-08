@@ -48,6 +48,7 @@ func getRedisClientOptions(endpoint, password string) (*redis.Options, error) {
 	if options.Password != "" && password != "" && options.Password != password {
 		return nil, errPasswordsDoNotMatch
 	}
+
 	if options.Password == "" && password != "" {
 		options.Password = password
 	}
@@ -57,7 +58,7 @@ func getRedisClientOptions(endpoint, password string) (*redis.Options, error) {
 
 // WithRedisLock returns a distributed singleflight
 // using a redis cluster. If it cannot connect, it will return an error.
-func WithRedisLock(l RedisLogger, endpoint, password string, checker storage.Checker, lockConfig *config.RedisLockConfig) (Wrapper, error) {
+func WithRedisLock(ctx context.Context, l RedisLogger, endpoint, password string, checker storage.Checker, lockConfig *config.RedisLockConfig) (Wrapper, error) {
 	redis.SetLogger(l)
 
 	const op errors.Op = "stash.WithRedisLock"
@@ -68,7 +69,9 @@ func WithRedisLock(l RedisLogger, endpoint, password string, checker storage.Che
 	}
 
 	client := redis.NewClient(options)
-	if _, err := client.Ping(context.Background()).Result(); err != nil {
+
+	_, err = client.Ping(ctx).Result()
+	if err != nil {
 		return nil, errors.E(op, err)
 	}
 
@@ -86,6 +89,7 @@ func lockOptionsFromConfig(lockConfig *config.RedisLockConfig) (redisLockOptions
 	if lockConfig.TTL <= 0 || lockConfig.Timeout <= 0 || lockConfig.MaxRetries <= 0 {
 		return redisLockOptions{}, goerrors.New("invalid lock options")
 	}
+
 	return redisLockOptions{
 		ttl:        time.Duration(lockConfig.TTL) * time.Second,
 		timeout:    time.Duration(lockConfig.Timeout) * time.Second,
@@ -108,9 +112,12 @@ type redisLock struct {
 
 func (s *redisLock) Stash(ctx context.Context, mod, ver string) (newVer string, err error) {
 	const op errors.Op = "redis.Stash"
+
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
+
 	mv := config.FmtModVer(mod, ver)
+
 	lockCtx, cancel := context.WithTimeout(ctx, s.options.timeout)
 	defer cancel()
 
@@ -121,23 +128,29 @@ func (s *redisLock) Stash(ctx context.Context, mod, ver string) (newVer string, 
 	if err != nil {
 		return ver, errors.E(op, err)
 	}
+
 	defer func() {
 		const op errors.Op = "redis.Release"
+
 		lockErr := lock.Release(ctx)
 		if err == nil && lockErr != nil {
 			err = errors.E(op, lockErr)
 		}
 	}()
+
 	ok, err := s.checker.Exists(ctx, mod, ver)
 	if err != nil {
 		return ver, errors.E(op, err)
 	}
+
 	if ok {
 		return ver, nil
 	}
+
 	newVer, err = s.stasher.Stash(ctx, mod, ver)
 	if err != nil {
 		return ver, errors.E(op, err)
 	}
+
 	return newVer, nil
 }

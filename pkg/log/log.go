@@ -16,13 +16,16 @@ type Logger struct {
 // to construct the correct JSON formatter.
 func New(cloudProvider string, level logrus.Level, format string) *Logger {
 	l := logrus.New()
+
 	switch cloudProvider {
 	case "GCP":
 		l.Formatter = getGCPFormatter()
 	default:
 		l.Formatter = parseFormat(format)
 	}
+
 	l.Level = level
+
 	return &Logger{Logger: l}
 }
 

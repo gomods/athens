@@ -21,6 +21,7 @@ const defaultConfigFile = "athens.toml"
 // Config provides configuration values for all components.
 type Config struct {
 	TimeoutConf
+
 	GoEnv            string    `envconfig:"GO_ENV"                    validate:"required"`
 	GoBinary         string    `envconfig:"GO_BINARY_PATH"            validate:"required"`
 	GoBinaryEnvVars  EnvList   `envconfig:"ATHENS_GO_BINARY_ENV_VARS"`
@@ -79,6 +80,7 @@ func (el EnvList) HasKey(key string) bool {
 			return true
 		}
 	}
+
 	return false
 }
 
@@ -104,11 +106,14 @@ func (el *EnvList) Decode(value string) error {
 	if value == "" {
 		return nil
 	}
+
 	*el = EnvList{} // env vars must override config file
-	assignments := strings.Split(value, ";")
-	for _, assignment := range assignments {
+
+	assignments := strings.SplitSeq(value, ";")
+	for assignment := range assignments {
 		*el = append(*el, strings.TrimSpace(assignment))
 	}
+
 	return el.Validate()
 }
 
@@ -116,12 +121,14 @@ func (el *EnvList) Decode(value string) error {
 // list are of the key=value format.
 func (el EnvList) Validate() error {
 	const op errors.Op = "EnvList.Validate"
+
 	for _, env := range el {
 		// some strings can have multiple "=", such as GODEBUG=netdns=cgo
 		if strings.Count(env, "=") < 1 {
 			return errors.E(op, fmt.Errorf("incorrect env format: %v", env))
 		}
 	}
+
 	return nil
 }
 
@@ -134,13 +141,16 @@ func Load(configFile string) (*Config, error) {
 	}
 
 	// There is a config in the current directory
-	if fi, err := os.Stat(defaultConfigFile); err == nil {
+	fi, err := os.Stat(defaultConfigFile)
+	if err == nil {
 		return ParseConfigFile(fi.Name())
 	}
 
 	// Use default values
 	log.Println("Running dev mode with default settings, consult config when you're ready to run in production")
+
 	cfg := defaultConfig()
+
 	return cfg, envOverride(cfg)
 }
 
@@ -207,7 +217,7 @@ func defaultConfig() *Config {
 				Database: "athens",
 				Params: map[string]string{
 					"connect_timeout": "30",
-					"sslmode":         "disable",
+					"sslmode":         "prefer",
 				},
 			},
 		},
@@ -220,6 +230,7 @@ func (c *Config) BasicAuth() (user, pass string, ok bool) {
 	user = c.BasicAuthUser
 	pass = c.BasicAuthPass
 	ok = user != "" && pass != ""
+
 	return user, pass, ok
 }
 
@@ -232,69 +243,85 @@ func (c *Config) FilterOff() bool {
 func ParseConfigFile(configFile string) (*Config, error) {
 	var config Config
 	// attempt to read the given config file
-	if _, err := toml.DecodeFile(configFile, &config); err != nil {
+	_, err := toml.DecodeFile(configFile, &config)
+	if err != nil {
 		return nil, err
 	}
 
 	// override values with environment variables if specified
-	if err := envOverride(&config); err != nil {
+	err = envOverride(&config)
+	if err != nil {
 		return nil, err
 	}
 
 	// Check file perms from config
 	if config.GoEnv == "production" {
-		if err := checkFilePerms(configFile, config.FilterFile); err != nil {
+		err = checkFilePerms(configFile, config.FilterFile)
+		if err != nil {
 			return nil, err
 		}
 	}
 
 	// validate all required fields have been populated
-	if err := validateConfig(config); err != nil {
+	err = validateConfig(config)
+	if err != nil {
 		return nil, err
 	}
+
 	return &config, nil
 }
 
 // envOverride uses Environment variables to override unspecified properties.
 func envOverride(config *Config) error {
 	const defaultPort = ":3000"
+
 	err := envconfig.Process("athens", config)
 	if err != nil {
 		return err
 	}
+
 	portEnv := os.Getenv("PORT")
 	// ATHENS_PORT takes precedence over PORT
 	if portEnv != "" && os.Getenv("ATHENS_PORT") == "" {
 		config.Port = portEnv
 	}
+
 	if config.Port == "" {
 		config.Port = defaultPort
 	}
+
 	config.Port = ensurePortFormat(config.Port)
+
 	return nil
 }
 
 func ensurePortFormat(s string) string {
-	if _, err := strconv.Atoi(s); err == nil {
+	_, err := strconv.Atoi(s)
+	if err == nil {
 		return ":" + s
 	}
+
 	return s
 }
 
 func validateConfig(config Config) error {
 	validate := validator.New()
+
 	err := validate.StructExcept(config, "Storage", "Index")
 	if err != nil {
 		return err
 	}
+
 	err = validateStorage(validate, config.StorageType, config.Storage)
 	if err != nil {
 		return err
 	}
+
 	err = validateIndex(validate, config.IndexType, config.Index)
 	if err != nil {
 		return err
 	}
+
 	return nil
 }
 
@@ -341,10 +368,12 @@ func GetConf(path string) (*Config, error) {
 	if err != nil {
 		return nil, fmt.Errorf("unable to construct absolute path to test config file")
 	}
+
 	conf, err := ParseConfigFile(absPath)
 	if err != nil {
 		return nil, fmt.Errorf("unable to parse test config file: %w", err)
 	}
+
 	return conf, nil
 }
 

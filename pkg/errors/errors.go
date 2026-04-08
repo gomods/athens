@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"runtime"
+	"slices"
 
 	"github.com/sirupsen/logrus"
 )
@@ -55,6 +56,7 @@ func Is(err error, kind int) bool {
 	if err == nil {
 		return false
 	}
+
 	return Kind(err) == kind
 }
 
@@ -93,14 +95,18 @@ type V string
 // the log level of an error based on the context it was constructed in.
 func E(op Op, args ...any) error {
 	e := Error{Op: op}
+
 	if len(args) == 0 {
 		msg := "errors.E called with 0 args"
+
 		_, file, line, ok := runtime.Caller(1)
 		if ok {
 			msg = fmt.Sprintf("%v - %v:%v", msg, file, line)
 		}
+
 		e.Err = errors.New(msg)
 	}
+
 	for _, a := range args {
 		switch a := a.(type) {
 		case error:
@@ -117,9 +123,11 @@ func E(op Op, args ...any) error {
 			e.Kind = a
 		}
 	}
+
 	if e.Err == nil {
 		e.Err = errors.New(KindText(e))
 	}
+
 	return e
 }
 
@@ -147,11 +155,10 @@ func Severity(err error) logrus.Level {
 // if the error has the expected kind, otherwise
 // it returns an Error level.
 func Expect(err error, kinds ...int) logrus.Level {
-	for _, kind := range kinds {
-		if Kind(err) == kind {
-			return logrus.InfoLevel
-		}
+	if slices.Contains(kinds, Kind(err)) {
+		return logrus.InfoLevel
 	}
+
 	return logrus.ErrorLevel
 }
 

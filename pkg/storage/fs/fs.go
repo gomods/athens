@@ -28,19 +28,24 @@ func (s *storageImpl) versionLocation(module, version string) string {
 // If the root directory does not exist an error is returned.
 func NewStorage(rootDir string, filesystem afero.Fs) (storage.Backend, error) {
 	const op errors.Op = "fs.NewStorage"
+
 	exists, err := afero.Exists(filesystem, rootDir)
 	if err != nil {
 		return nil, errors.E(op, fmt.Errorf("could not check if root directory `%s` exists: %w", rootDir, err))
 	}
+
 	if !exists {
 		return nil, errors.E(op, fmt.Errorf("root directory `%s` does not exist", rootDir))
 	}
+
 	return &storageImpl{rootDir: rootDir, filesystem: filesystem}, nil
 }
 
 func (s *storageImpl) Clear() error {
-	if err := s.filesystem.RemoveAll(s.rootDir); err != nil {
+	err := s.filesystem.RemoveAll(s.rootDir)
+	if err != nil {
 		return err
 	}
+
 	return s.filesystem.Mkdir(s.rootDir, os.ModeDir|os.ModePerm)
 }

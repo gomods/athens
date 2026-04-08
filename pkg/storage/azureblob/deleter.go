@@ -13,6 +13,7 @@ import (
 // if the version does not exist.
 func (s *Storage) Delete(ctx context.Context, module, version string) error {
 	const op errors.Op = "azureblob.Delete"
+
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 
@@ -20,6 +21,7 @@ func (s *Storage) Delete(ctx context.Context, module, version string) error {
 	if err != nil {
 		return errors.E(op, err, errors.M(module), errors.V(version))
 	}
+
 	if !exists {
 		return errors.E(op, errors.M(module), errors.V(version), errors.KindNotFound)
 	}

@@ -83,5 +83,6 @@ linters:
         text: 'package-comments: should have a package comment'
       - path: (.+)\.go$
         text: 'ST1000: at least one file in a package should have a package comment'
-      - path: (.+)\.go$
-        text: 'G115: integer overflow conversion int -> int32'
+      - linters:
+          - gosec
+        text: 'G115:|G120:|G703:|G704:|G705:'

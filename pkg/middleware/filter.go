@@ -21,10 +21,12 @@ func NewFilterMiddleware(mf *module.Filter, upstreamEndpoint string) mux.Middlew
 				h.ServeHTTP(w, r)
 				return
 			}
+
 			ver, err := paths.GetVersion(r)
 			if err != nil {
 				ver = ""
 			}
+
 			rule := mf.Rule(mod, ver)
 			switch rule {
 			case module.Exclude:
@@ -39,10 +41,13 @@ func NewFilterMiddleware(mf *module.Filter, upstreamEndpoint string) mux.Middlew
 				// Direct: do not store modules locally, use upstream proxy
 				newURL := redirectToUpstreamURL(upstreamEndpoint, r.URL)
 				http.Redirect(w, r, newURL, http.StatusSeeOther)
+
 				return
 			}
+
 			h.ServeHTTP(w, r)
 		}
+
 		return http.HandlerFunc(f)
 	}
 }

@@ -30,12 +30,13 @@ func WithPool(workers int) download.Wrapper {
 		p := &withpool{dp: dp, jobCh: jobCh}
 
 		p.start(workers)
+
 		return p
 	}
 }
 
 func (p *withpool) start(numWorkers int) {
-	for i := 0; i < numWorkers; i++ {
+	for range numWorkers {
 		go p.listen()
 	}
 }
@@ -48,14 +49,22 @@ func (p *withpool) listen() {
 
 func (p *withpool) List(ctx context.Context, mod string) ([]string, error) {
 	const op errors.Op = "pool.List"
-	var vers []string
-	var err error
+
+	var (
+		vers []string
+		err  error
+	)
+
 	done := make(chan struct{}, 1)
+
 	p.jobCh <- func() {
 		vers, err = p.dp.List(ctx, mod)
+
 		close(done)
 	}
+
 	<-done
+
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
@@ -65,64 +74,100 @@ func (p *withpool) List(ctx context.Context, mod string) ([]string, error) {
 
 func (p *withpool) Info(ctx context.Context, mod, ver string) ([]byte, error) {
 	const op errors.Op = "pool.Info"
-	var info []byte
-	var err error
+
+	var (
+		info []byte
+		err  error
+	)
+
 	done := make(chan struct{}, 1)
+
 	p.jobCh <- func() {
 		info, err = p.dp.Info(ctx, mod, ver)
+
 		close(done)
 	}
+
 	<-done
+
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
+
 	return info, nil
 }
 
 func (p *withpool) Latest(ctx context.Context, mod string) (*storage.RevInfo, error) {
 	const op errors.Op = "pool.Latest"
-	var info *storage.RevInfo
-	var err error
+
+	var (
+		info *storage.RevInfo
+		err  error
+	)
+
 	done := make(chan struct{}, 1)
+
 	p.jobCh <- func() {
 		info, err = p.dp.Latest(ctx, mod)
+
 		close(done)
 	}
+
 	<-done
+
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
+
 	return info, nil
 }
 
 func (p *withpool) GoMod(ctx context.Context, mod, ver string) ([]byte, error) {
 	const op errors.Op = "pool.GoMod"
-	var goMod []byte
-	var err error
+
+	var (
+		goMod []byte
+		err   error
+	)
+
 	done := make(chan struct{}, 1)
+
 	p.jobCh <- func() {
 		goMod, err = p.dp.GoMod(ctx, mod, ver)
+
 		close(done)
 	}
+
 	<-done
+
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
+
 	return goMod, nil
 }
 
 func (p *withpool) Zip(ctx context.Context, mod, ver string) (storage.SizeReadCloser, error) {
 	const op errors.Op = "pool.Zip"
-	var zip storage.SizeReadCloser
-	var err error
+
+	var (
+		zip storage.SizeReadCloser
+		err error
+	)
+
 	done := make(chan struct{}, 1)
+
 	p.jobCh <- func() {
 		zip, err = p.dp.Zip(ctx, mod, ver)
+
 		close(done)
 	}
+
 	<-done
+
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
+
 	return zip, nil
 }

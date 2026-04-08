@@ -28,9 +28,12 @@ func GetSignals() []os.Signal {
 func ChildProcReaper(ctx context.Context, logger logrus.FieldLogger) context.Context {
 	sigChld := make(chan os.Signal, 1)
 	signal.Notify(sigChld, syscall.SIGCHLD)
+
 	done, cancel := context.WithCancel(context.WithoutCancel(ctx))
+
 	go func() {
 		defer cancel()
+
 		for {
 			select {
 			case <-ctx.Done():
@@ -41,12 +44,14 @@ func ChildProcReaper(ctx context.Context, logger logrus.FieldLogger) context.Con
 			}
 		}
 	}()
+
 	return done
 }
 
 func reap(logger logrus.FieldLogger) {
 	for {
 		var wstatus syscall.WaitStatus
+
 		pid, err := syscall.Wait4(-1, &wstatus, syscall.WNOHANG, nil)
 		if err != nil && !errors.Is(err, syscall.ECHILD) {
 			logger.Errorf("failed to reap child process: %v", err)
@@ -54,6 +59,7 @@ func reap(logger logrus.FieldLogger) {
 		} else if pid <= 0 {
 			return
 		}
+
 		logger.Infof("reaped child process %v, exit status: %v", pid, wstatus.ExitStatus())
 	}
 }

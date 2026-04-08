@@ -16,7 +16,9 @@ import (
 // It returns a list of modules and versions contained in the storage.
 func (s *ModuleStore) Catalog(ctx context.Context, token string, pageSize int) ([]paths.AllPathParams, string, error) {
 	const op errors.Op = "mongo.Catalog"
+
 	q := bson.M{}
+
 	if token != "" {
 		t, err := primitive.ObjectIDFromHex(token)
 		if err == nil {
@@ -31,17 +33,22 @@ func (s *ModuleStore) Catalog(ctx context.Context, token string, pageSize int) (
 
 	tctx, cancel := context.WithTimeout(ctx, s.timeout)
 	defer cancel()
+
 	modules := make([]storage.Module, 0)
 	findOptions := options.Find().SetProjection(projection).SetSort(sort).SetLimit(int64(pageSize))
+
 	cursor, err := c.Find(tctx, q, findOptions)
 	if err != nil {
 		return nil, "", errors.E(op, err)
 	}
 
 	var errs error
+
 	for cursor.Next(ctx) {
 		var module storage.Module
-		if err := cursor.Decode(&module); err != nil {
+
+		err := cursor.Decode(&module)
+		if err != nil {
 			errs = multierror.Append(errs, err)
 		} else {
 			modules = append(modules, module)
@@ -63,5 +70,6 @@ func (s *ModuleStore) Catalog(ctx context.Context, token string, pageSize int) (
 	if len(modules) < pageSize {
 		return versions, "", nil
 	}
+
 	return versions, next, nil
 }

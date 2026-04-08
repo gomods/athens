@@ -28,6 +28,7 @@ func NewSizer(rc io.ReadCloser, size int64) SizeReadCloser {
 
 type sizeReadCloser struct {
 	io.ReadCloser
+
 	size int64
 }
 

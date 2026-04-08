@@ -21,5 +21,6 @@ func EntryFromContext(ctx context.Context) Entry {
 	if !ok || e == nil {
 		return NoOpLogger()
 	}
+
 	return e
 }

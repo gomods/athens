@@ -31,7 +31,9 @@ const lightGrey = 0xffccc
 
 func (devFormatter) Format(e *logrus.Entry) ([]byte, error) {
 	var buf bytes.Buffer
+
 	var sprintf func(format string, a ...any) string
+
 	switch e.Level {
 	case logrus.DebugLevel:
 		sprintf = color.New(lightGrey).Sprintf
@@ -42,25 +44,31 @@ func (devFormatter) Format(e *logrus.Entry) ([]byte, error) {
 	default:
 		sprintf = color.CyanString
 	}
+
 	lvl := strings.ToUpper(e.Level.String())
 	buf.WriteString(sprintf(lvl))
 	buf.WriteString("[" + e.Time.Format(time.Kitchen) + "]")
 	buf.WriteString(": ")
 	buf.WriteString(e.Message)
 	buf.WriteByte('\t')
+
 	for _, k := range sortFields(e.Data) {
 		fmt.Fprintf(&buf, "%s=%s ", color.MagentaString(k), e.Data[k])
 	}
+
 	buf.WriteByte('\n')
+
 	return buf.Bytes(), nil
 }
 
 func sortFields(data logrus.Fields) []string {
-	keys := []string{}
+	keys := make([]string, 0, len(data))
 	for k := range data {
 		keys = append(keys, k)
 	}
+
 	sort.Strings(keys)
+
 	return keys
 }
 

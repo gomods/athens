@@ -29,7 +29,7 @@ func TestWithRedisSentinelLock(t *testing.T) {
 	ms := &mockRedisStasher{strg: strg}
 	l := &testingRedisLogger{t: t}
 
-	wrapper, err := WithRedisSentinelLock(l, []string{endpoint}, masterName, sentinelPassword, "", "", storage.WithChecker(strg), config.DefaultRedisLockConfig())
+	wrapper, err := WithRedisSentinelLock(context.Background(), l, []string{endpoint}, masterName, sentinelPassword, "", "", storage.WithChecker(strg), config.DefaultRedisLockConfig())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -67,7 +67,7 @@ func TestWithRedisSentinelLockWithRedisPassword(t *testing.T) {
 	}
 	ms := &mockRedisStasher{strg: strg}
 	l := &testingRedisLogger{t: t}
-	wrapper, err := WithRedisSentinelLock(l, []string{endpoint}, masterName, sentinelPassword, "", redisPassword, storage.WithChecker(strg), config.DefaultRedisLockConfig())
+	wrapper, err := WithRedisSentinelLock(context.Background(), l, []string{endpoint}, masterName, sentinelPassword, "", redisPassword, storage.WithChecker(strg), config.DefaultRedisLockConfig())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -106,7 +106,7 @@ func TestWithRedisSentinelLockWithUsernameAndPassword(t *testing.T) {
 	}
 	ms := &mockRedisStasher{strg: strg}
 	l := &testingRedisLogger{t: t}
-	wrapper, err := WithRedisSentinelLock(l, []string{endpoint}, masterName, sentinelPassword, redisUsername, redisPassword, storage.WithChecker(strg), config.DefaultRedisLockConfig())
+	wrapper, err := WithRedisSentinelLock(context.Background(), l, []string{endpoint}, masterName, sentinelPassword, redisUsername, redisPassword, storage.WithChecker(strg), config.DefaultRedisLockConfig())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -145,13 +145,13 @@ func TestWithRedisSentinelLockWithWrongRedisPassword(t *testing.T) {
 	l := &testingRedisLogger{t: t}
 
 	// Test with wrong sentinel password
-	_, err = WithRedisSentinelLock(l, []string{endpoint}, masterName, "wrong-sentinel-password", "", redisPassword, storage.WithChecker(strg), config.DefaultRedisLockConfig())
+	_, err = WithRedisSentinelLock(context.Background(), l, []string{endpoint}, masterName, "wrong-sentinel-password", "", redisPassword, storage.WithChecker(strg), config.DefaultRedisLockConfig())
 	if err == nil {
 		t.Fatal("Expected Connection Error for wrong sentinel password")
 	}
 
 	// Test with wrong redis password
-	_, err = WithRedisSentinelLock(l, []string{endpoint}, masterName, sentinelPassword, "", "wrong-redis-password", storage.WithChecker(strg), config.DefaultRedisLockConfig())
+	_, err = WithRedisSentinelLock(context.Background(), l, []string{endpoint}, masterName, sentinelPassword, "", "wrong-redis-password", storage.WithChecker(strg), config.DefaultRedisLockConfig())
 	if err == nil {
 		t.Fatal("Expected Connection Error for wrong redis password")
 	}

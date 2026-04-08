@@ -24,6 +24,7 @@ func LogEntryMiddleware(lggr *log.Logger) mux.MiddlewareFunc {
 			r = r.WithContext(ctx)
 			h.ServeHTTP(w, r)
 		}
+
 		return http.HandlerFunc(f)
 	}
 }
