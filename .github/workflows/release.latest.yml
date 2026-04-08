@@ -38,7 +38,7 @@ jobs:
             type=raw,value=latest
 
       - name: Build and push images
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           file: cmd/proxy/Dockerfile
