@@ -1,6 +1,6 @@
 module github.com/gomods/athens
 
-go 1.23.12
+go 1.24
 
 require (
 	cloud.google.com/go/storage v1.45.0
@@ -18,7 +18,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/credentials v1.17.47
 	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.17.43
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.71.0
-	github.com/aws/smithy-go v1.22.1
+	github.com/aws/smithy-go v1.24.2
 	github.com/bsm/redislock v0.7.2
 	github.com/fatih/color v1.13.0
 	github.com/go-playground/validator/v10 v10.23.0
@@ -70,7 +70,7 @@ require (
 	github.com/agext/levenshtein v1.2.1 // indirect
 	github.com/apparentlymart/go-textseg v1.0.0 // indirect
 	github.com/aws/aws-sdk-go v1.44.220 // indirect
-	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.6.7 // indirect
+	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.7.8 // indirect
 	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.16.21 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/configsources v1.3.25 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.6.25 // indirect
