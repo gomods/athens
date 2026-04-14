@@ -2,7 +2,6 @@ package compliance
 
 import (
 	"bytes"
-	"context"
 	"fmt"
 	"io"
 	"testing"
@@ -28,7 +27,7 @@ func benchList(b *testing.B, s storage.Backend, reset func() error) {
 	module, version := "benchListModule", "1.0.1"
 	mock := getMockModule()
 	err := s.Save(
-		context.Background(),
+		b.Context(),
 		module,
 		version,
 		mock.Mod,
