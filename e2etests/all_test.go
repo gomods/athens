@@ -54,7 +54,7 @@ func (m *E2eSuite) SetupSuite() {
 	stopAthens() // in case a dangling instance was around.
 	// ignoring error as if no athens is running it fails.
 
-	ctx := t.Context()
+	ctx := context.Background()
 	ctx, m.stopAthens = context.WithCancel(ctx)
 	runAthensAndWait(ctx, athensBin, m.getEnv())
 	setupTestRepo(m.sampleRepoPath, "https://github.com/athens-artifacts/happy-path.git")
