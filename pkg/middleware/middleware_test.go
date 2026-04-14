@@ -77,8 +77,7 @@ func Test_FilterMiddleware(t *testing.T) {
 	r.NoError(err, "app should be successfully created in the test")
 	w := ht.New(app)
 
-	path := "/github.com/gomods/athens/@v/list"
-	res := w.JSON(path).Get()
+	res := w.JSON("/github.com/gomods/athens/@v/list").Get()
 	r.Equal(http.StatusSeeOther, res.Code)
 	r.Equal(conf.GlobalEndpoint+"/github.com/gomods/athens/@v/list", res.HeaderMap.Get("Location"))
 
