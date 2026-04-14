@@ -82,6 +82,7 @@ func main() {
 		logger := logger.WithField("unixSocket", conf.UnixSocket)
 		logger.Info("Starting application")
 
+		//nolint:noctx
 		ln, err = net.Listen("unix", conf.UnixSocket)
 		if err != nil {
 			logger.WithError(err).Fatal("Could not listen on Unix domain socket")
@@ -90,6 +91,7 @@ func main() {
 		logger := logger.WithField("tcpPort", conf.Port)
 		logger.Info("Starting application")
 
+		//nolint:noctx
 		ln, err = net.Listen("tcp", conf.Port)
 		if err != nil {
 			logger.WithError(err).Fatal("Could not listen on TCP port")

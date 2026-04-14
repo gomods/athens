@@ -56,7 +56,7 @@ func (devFormatter) Format(e *logrus.Entry) ([]byte, error) {
 }
 
 func sortFields(data logrus.Fields) []string {
-	keys := []string{}
+	keys := make([]string, 0, len(data))
 	for k := range data {
 		keys = append(keys, k)
 	}

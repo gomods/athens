@@ -96,6 +96,7 @@ func registerStatsStackDriverExporter(projectID string) (func(), error) {
 func registerViews() error {
 	const op errors.Op = "observ.registerViews"
 
+	//nolint:prealloc
 	views := []*view.View{
 		ochttp.ServerRequestCountView,
 		ochttp.ServerResponseBytesView,

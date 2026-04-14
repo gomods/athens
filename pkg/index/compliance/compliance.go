@@ -123,7 +123,7 @@ func RunTests(t *testing.T, indexer index.Indexer, clearIndex func() error) {
 }
 
 func seed(t *testing.T, indexer index.Indexer, num int) []*index.Line {
-	lines := []*index.Line{}
+	lines := make([]*index.Line, 0, num)
 	t.Helper()
 	for i := range num {
 		mod := moniker.New().NameSep("_")

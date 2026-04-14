@@ -21,10 +21,12 @@ func New(cfg *config.MySQL) (index.Indexer, error) {
 	if err != nil {
 		return nil, err
 	}
-	if err = db.Ping(); err != nil {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	if err = db.PingContext(ctx); err != nil {
 		return nil, err
 	}
-	_, err = db.Exec(schema)
+	_, err = db.ExecContext(ctx, schema)
 	if err != nil {
 		return nil, err
 	}
