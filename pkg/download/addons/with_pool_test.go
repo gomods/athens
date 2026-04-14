@@ -21,10 +21,9 @@ func TestPoolLogic(t *testing.T) {
 	m := &mockPool{}
 	workers := 5
 	dp := WithPool(workers)(m)
-	ctx := context.Background()
 	m.ch = make(chan struct{})
 	for i := 0; i < 10; i++ {
-		go dp.List(ctx, "")
+		go dp.List(t.Context(), "")
 	}
 	<-m.ch
 	if m.num != workers {
@@ -56,7 +55,6 @@ func (m *mockPool) List(ctx context.Context, mod string) ([]string, error) {
 func TestPoolWrapper(t *testing.T) {
 	m := &mockDP{}
 	dp := WithPool(1)(m)
-	ctx := context.Background()
 	mod := "pkg"
 	ver := "v0.1.0"
 	m.inputMod = mod
@@ -65,7 +63,7 @@ func TestPoolWrapper(t *testing.T) {
 	m.catalog = []paths.AllPathParams{
 		{Module: "pkg", Version: "v0.1.0"},
 	}
-	givenList, err := dp.List(ctx, mod)
+	givenList, err := dp.List(t.Context(), mod)
 	if err != m.err {
 		t.Fatalf("expected dp.List err to be %v but got %v", m.err, err)
 	}
@@ -73,7 +71,7 @@ func TestPoolWrapper(t *testing.T) {
 		t.Fatalf("dp.List: expected %v and %v to be equal", m.list, givenList)
 	}
 	m.info = []byte("info response")
-	givenInfo, err := dp.Info(ctx, mod, ver)
+	givenInfo, err := dp.Info(t.Context(), mod, ver)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -81,11 +79,11 @@ func TestPoolWrapper(t *testing.T) {
 		t.Fatalf("dp.Info: expected %s and %s to be equal", m.info, givenInfo)
 	}
 	m.err = fmt.Errorf("mod err")
-	_, err = dp.GoMod(ctx, mod, ver)
+	_, err = dp.GoMod(t.Context(), mod, ver)
 	if m.err.Error() != err.Error() {
 		t.Fatalf("dp.GoMod: expected err to be `%v` but got `%v`", m.err, err)
 	}
-	_, err = dp.Zip(ctx, mod, ver)
+	_, err = dp.Zip(t.Context(), mod, ver)
 	if m.err.Error() != err.Error() {
 		t.Fatalf("dp.Zip: expected err to be `%v` but got `%v`", m.err, err)
 	}

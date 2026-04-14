@@ -1,7 +1,6 @@
 package module
 
 import (
-	"context"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -12,8 +11,6 @@ import (
 	"github.com/spf13/afero"
 	"github.com/stretchr/testify/assert"
 )
-
-var ctx = context.Background()
 
 func (s *ModuleSuite) TestNewGoGetFetcher() {
 	r := s.Require()
@@ -40,7 +37,7 @@ func (s *ModuleSuite) TestGoGetFetcherFetch() {
 	// always writes to the filesystem
 	fetcher, err := NewGoGetFetcher(s.goBinaryName, "", s.env, afero.NewOsFs())
 	r.NoError(err)
-	ver, err := fetcher.Fetch(ctx, repoURI, version)
+	ver, err := fetcher.Fetch(s.T().Context(), repoURI, version)
 	r.NoError(err)
 	defer ver.Zip.Close()
 
@@ -62,7 +59,7 @@ func (s *ModuleSuite) TestNotFoundFetches() {
 	r.NoError(err)
 	// when someone buys laks47dfjoijskdvjxuyyd.com, and implements
 	// a git server on top of it, this test will fail :)
-	_, err = fetcher.Fetch(ctx, "laks47dfjoijskdvjxuyyd.com/pkg/errors", "v0.8.1")
+	_, err = fetcher.Fetch(s.T().Context(), "laks47dfjoijskdvjxuyyd.com/pkg/errors", "v0.8.1")
 	if err == nil {
 		s.Fail("expected an error but got nil")
 	}
@@ -88,13 +85,13 @@ func (s *ModuleSuite) TestGoGetFetcherSumDB() {
 
 	fetcher, err := NewGoGetFetcher(s.goBinaryName, "", []string{"GOPROXY=" + proxyAddr}, afero.NewOsFs())
 	r.NoError(err)
-	_, err = fetcher.Fetch(ctx, "mockmod.xyz", "v1.2.3")
+	_, err = fetcher.Fetch(s.T().Context(), "mockmod.xyz", "v1.2.3")
 	if err == nil {
 		s.T().Fatal("expected a gosum error but got nil")
 	}
 	fetcher, err = NewGoGetFetcher(s.goBinaryName, "", []string{"GONOSUMDB=mockmod.xyz", "GOPROXY=" + proxyAddr}, afero.NewOsFs())
 	r.NoError(err)
-	_, err = fetcher.Fetch(ctx, "mockmod.xyz", "v1.2.3")
+	_, err = fetcher.Fetch(s.T().Context(), "mockmod.xyz", "v1.2.3")
 	r.NoError(err, "expected the go sum to not be consulted but got an error")
 }
 
@@ -109,7 +106,7 @@ func (s *ModuleSuite) TestGoGetDir() {
 	fetcher, err := NewGoGetFetcher(s.goBinaryName, dir, s.env, afero.NewOsFs())
 	r.NoError(err)
 
-	ver, err := fetcher.Fetch(ctx, repoURI, version)
+	ver, err := fetcher.Fetch(s.T().Context(), repoURI, version)
 	r.NoError(err)
 	defer ver.Zip.Close()
 

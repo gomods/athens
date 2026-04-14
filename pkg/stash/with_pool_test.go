@@ -9,7 +9,7 @@ import (
 func TestPoolWrapper(t *testing.T) {
 	m := &mockPoolStasher{inputMod: "mod", inputVer: "ver", err: fmt.Errorf("wrapped err")}
 	s := WithPool(2)(m)
-	_, err := s.Stash(context.Background(), m.inputMod, m.inputVer)
+	_, err := s.Stash(t.Context(), m.inputMod, m.inputVer)
 	if err.Error() != m.err.Error() {
 		t.Fatalf("expected err to be `%v` but got `%v`", m.err, err)
 	}

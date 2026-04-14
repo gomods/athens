@@ -6,7 +6,7 @@ import (
 	"io"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/aws/aws-sdk-go-v2/feature/s3/transfermanager"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/observ"
 	moduploader "github.com/gomods/athens/pkg/storage/module"
@@ -32,14 +32,14 @@ func (s *Storage) upload(ctx context.Context, path, contentType string, stream i
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 
-	upParams := &s3.PutObjectInput{
+	upParams := &transfermanager.UploadObjectInput{
 		Bucket:      aws.String(s.bucket),
 		Key:         aws.String(path),
 		Body:        stream,
 		ContentType: aws.String(contentType),
 	}
 
-	if _, err := s.uploader.Upload(ctx, upParams); err != nil {
+	if _, err := s.uploader.UploadObject(ctx, upParams); err != nil {
 		return errors.E(op, err)
 	}
 

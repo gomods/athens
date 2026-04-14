@@ -1,7 +1,6 @@
 package compliance
 
 import (
-	"context"
 	"fmt"
 	"testing"
 	"time"
@@ -54,7 +53,7 @@ func RunTests(t *testing.T, indexer index.Indexer, clearIndex func() error) {
 			name: "respect the time",
 			desc: "given 10 modules, 'since' should filter out the ones that came before it",
 			preTest: func(t *testing.T) ([]*index.Line, time.Time) {
-				err := indexer.Index(context.Background(), "tobeignored", "v1.2.3")
+				err := indexer.Index(t.Context(), "tobeignored", "v1.2.3")
 				if err != nil {
 					t.Fatal(err)
 				}
@@ -89,11 +88,11 @@ func RunTests(t *testing.T, indexer index.Indexer, clearIndex func() error) {
 			desc: "if we try to index a module that already exists, a KindAlreadyExists must be returned",
 			preTest: func(t *testing.T) ([]*index.Line, time.Time) {
 				m := &index.Line{Path: "gomods.io/tobeduplicated", Version: "v0.1.0"}
-				err := indexer.Index(context.Background(), m.Path, m.Version)
+				err := indexer.Index(t.Context(), m.Path, m.Version)
 				if err != nil {
 					t.Fatal(err)
 				}
-				err = indexer.Index(context.Background(), m.Path, m.Version)
+				err = indexer.Index(t.Context(), m.Path, m.Version)
 				if !errors.Is(err, errors.KindAlreadyExists) {
 					t.Fatalf("expected an error of kind AlreadyExists but got %s", errors.KindText(err))
 				}
@@ -111,7 +110,7 @@ func RunTests(t *testing.T, indexer index.Indexer, clearIndex func() error) {
 				}
 			})
 			expected, since := tc.preTest(t)
-			given, err := indexer.Lines(context.Background(), since, tc.limit)
+			given, err := indexer.Lines(t.Context(), since, tc.limit)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -129,7 +128,7 @@ func seed(t *testing.T, indexer index.Indexer, num int) []*index.Line {
 	for i := 0; i < num; i++ {
 		mod := moniker.New().NameSep("_")
 		ver := fmt.Sprintf("%d.0.0", i)
-		err := indexer.Index(context.Background(), mod, ver)
+		err := indexer.Index(t.Context(), mod, ver)
 		if err != nil {
 			t.Fatal(err)
 		}

@@ -14,13 +14,13 @@ import (
 
 func TestBackend(t *testing.T) {
 	backend := getStorage(t)
-	defer backend.client.containerURL.Delete(context.Background(), azblob.ContainerAccessConditions{})
+	defer backend.client.containerURL.Delete(t.Context(), azblob.ContainerAccessConditions{})
 	compliance.RunTests(t, backend, backend.clear)
 }
 
 func BenchmarkBackend(b *testing.B) {
 	backend := getStorage(b)
-	defer backend.client.containerURL.Delete(context.Background(), azblob.ContainerAccessConditions{})
+	defer backend.client.containerURL.Delete(b.Context(), azblob.ContainerAccessConditions{})
 	compliance.RunBenchmarks(b, backend, backend.clear)
 }
 
@@ -60,7 +60,7 @@ func getStorage(t testing.TB) *Storage {
 	if err != nil {
 		t.Fatal(err)
 	}
-	_, err = s.client.containerURL.Create(context.Background(), azblob.Metadata{}, azblob.PublicAccessNone)
+	_, err = s.client.containerURL.Create(t.Context(), azblob.Metadata{}, azblob.PublicAccessNone)
 	if err != nil {
 		t.Fatal(err)
 	}

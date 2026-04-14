@@ -2,7 +2,6 @@ package compliance
 
 import (
 	"bytes"
-	"context"
 	"crypto/md5"
 	"fmt"
 	"io"
@@ -33,7 +32,7 @@ func RunTests(t *testing.T, b storage.Backend, clearBackend func() error) {
 // non existing modules.
 func testNotFound(t *testing.T, b storage.Backend) {
 	mod, ver := "github.com/gomods/athens", "yyy"
-	ctx := context.Background()
+	ctx := t.Context()
 
 	err := b.Delete(ctx, mod, ver)
 	require.Error(t, err)
@@ -60,7 +59,7 @@ func testNotFound(t *testing.T, b storage.Backend) {
 // github.com/one/two and github.com/one/two-suffix, then the versions
 // should not be mixed just because they share a similar prefix.
 func testListSuffix(t *testing.T, b storage.Backend) {
-	ctx := context.Background()
+	ctx := t.Context()
 
 	modVers := map[string][]string{
 		"github.com/one/two":       {"v1.1.0", "v1.2.0", "v1.3.0"},
@@ -104,7 +103,7 @@ func testListSuffix(t *testing.T, b storage.Backend) {
 // testList tests that a storage Backend returns
 // the exact list of versions that are saved.
 func testList(t *testing.T, b storage.Backend) {
-	ctx := context.Background()
+	ctx := t.Context()
 
 	modname := "github.com/gomods/athens"
 	versions := []string{"v1.1.0", "v1.2.0", "v1.3.0"}
@@ -133,7 +132,7 @@ func testList(t *testing.T, b storage.Backend) {
 
 // testGet saves and retrieves a module successfully.
 func testGet(t *testing.T, b storage.Backend) {
-	ctx := context.Background()
+	ctx := t.Context()
 	modname := "github.com/gomods/athens"
 	ver := "v1.2.3"
 	mock := getMockModule()
@@ -158,7 +157,7 @@ func testGet(t *testing.T, b storage.Backend) {
 }
 
 func testExists(t *testing.T, b storage.Backend) {
-	ctx := context.Background()
+	ctx := t.Context()
 	modname := "github.com/gomods/athens"
 	ver := "v1.2.3"
 	mock := getMockModule()
@@ -172,7 +171,7 @@ func testExists(t *testing.T, b storage.Backend) {
 }
 
 func testShouldNotExist(t *testing.T, b storage.Backend) {
-	ctx := context.Background()
+	ctx := t.Context()
 	mod := "github.com/gomods/shouldNotExist"
 	ver := "v1.2.3-pre.1"
 	mock := getMockModule()
@@ -194,7 +193,7 @@ func testShouldNotExist(t *testing.T, b storage.Backend) {
 // storage Backend and the Exists method returns false
 // afterwards.
 func testDelete(t *testing.T, b storage.Backend) {
-	ctx := context.Background()
+	ctx := t.Context()
 	modname := "github.com/gomods/athens"
 	version := fmt.Sprintf("%s%d", "delete", rand.Int())
 

@@ -9,7 +9,7 @@ import (
 	awscfg "github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/credentials/endpointcreds"
-	"github.com/aws/aws-sdk-go-v2/feature/s3/manager"
+	"github.com/aws/aws-sdk-go-v2/feature/s3/transfermanager"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/errors"
@@ -26,7 +26,7 @@ import (
 // For information how to get your keyId and access key turn to official aws docs: https://docs.aws.amazon.com/sdk-for-go/v1/developer-guide/setting-up.html.
 type Storage struct {
 	bucket   string
-	uploader *manager.Uploader
+	uploader *transfermanager.Client
 	s3API    *s3.Client
 	timeout  time.Duration
 }
@@ -63,7 +63,7 @@ func New(s3Conf *config.S3Config, timeout time.Duration, options ...func(*aws.Co
 		}
 	})
 
-	uploader := manager.NewUploader(sess)
+	uploader := transfermanager.New(sess)
 
 	return &Storage{
 		bucket:   s3Conf.Bucket,
