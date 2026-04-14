@@ -387,7 +387,7 @@ func TestDownloadProtocol(t *testing.T) {
 	ctx := t.Context()
 
 	var eg errgroup.Group
-	for i := 0; i < len(mods); i++ {
+	for i := range mods {
 		m := mods[i]
 		eg.Go(func() error {
 			_, err := dp.GoMod(ctx, m.mod, m.ver)

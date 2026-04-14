@@ -112,10 +112,10 @@ func TestQueryKindUnexpectedErrorCases(t *testing.T) {
 	defer client.Disconnect(t.Context())
 	coll := client.Database("athens").Collection("modules")
 	errDocs := []struct {
-		Module  string      `bson:"module"`
-		Version string      `bson:"version"`
-		Mod     interface{} `bson:"mod"`
-		Info    interface{} `bson:"info"`
+		Module  string `bson:"module"`
+		Version string `bson:"version"`
+		Mod     any    `bson:"mod"`
+		Info    any    `bson:"info"`
 	}{
 		{"model1", "v1.1.1", 12345678, "error document with integer mod"},
 		{"model2", "v2.0.0", true, "error document with boolean mod"},

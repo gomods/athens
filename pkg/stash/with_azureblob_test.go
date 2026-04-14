@@ -37,7 +37,7 @@ func TestWithAzureBlob(t *testing.T) {
 	s := wpr(ms)
 
 	var eg errgroup.Group
-	for i := 0; i < 5; i++ {
+	for range 5 {
 		eg.Go(func() error {
 			ctx, cancel := context.WithTimeout(t.Context(), time.Second*10)
 			defer cancel()

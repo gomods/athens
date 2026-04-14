@@ -45,7 +45,7 @@ func TestWithGCS(t *testing.T) {
 	}
 
 	var eg errgroup.Group
-	for i := 0; i < 5; i++ {
+	for range 5 {
 		content := uuid.New().String()
 		ms := &mockGCPStasher{strg, content}
 		gs, err := WithGCSLock(120, strg)

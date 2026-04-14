@@ -105,8 +105,8 @@ func (el *EnvList) Decode(value string) error {
 		return nil
 	}
 	*el = EnvList{} // env vars must override config file
-	assignments := strings.Split(value, ";")
-	for _, assignment := range assignments {
+	assignments := strings.SplitSeq(value, ";")
+	for assignment := range assignments {
 		*el = append(*el, strings.TrimSpace(assignment))
 	}
 	return el.Validate()

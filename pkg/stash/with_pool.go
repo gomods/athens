@@ -29,7 +29,7 @@ func WithPool(numWorkers int) Wrapper {
 }
 
 func (s *withpool) start(numWorkers int) {
-	for i := 0; i < numWorkers; i++ {
+	for range numWorkers {
 		go s.listen()
 	}
 }

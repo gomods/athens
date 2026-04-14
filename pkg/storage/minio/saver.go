@@ -95,7 +95,7 @@ func (s *storageImpl) removeParts(mod, ver string, numParts int) error {
 	objectsCh := make(chan string)
 	go func() {
 		defer close(objectsCh)
-		for i := 0; i < numParts; i++ {
+		for i := range numParts {
 			objectsCh <- fmt.Sprintf("parts/%s/%s/%d", mod, ver, i)
 		}
 	}()

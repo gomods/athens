@@ -100,18 +100,14 @@ func (p *protocol) List(ctx context.Context, mod string) ([]string, error) {
 
 		UnionLister(listers ...Lister): combines any number of listers.
 	*/
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
+	wg.Go(func() {
 		strList, sErr = p.storage.List(ctx, mod)
-	}()
+	})
 
 	if p.networkMode != Offline {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
+		wg.Go(func() {
 			_, goList, goErr = p.lister.List(ctx, mod)
-		}()
+		})
 	}
 
 	wg.Wait()

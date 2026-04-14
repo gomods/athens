@@ -48,7 +48,7 @@ func Upload(ctx context.Context, module, version string, info, mod, zip io.Reade
 	go saveOrAbort("zip", "application/octet-stream", zip)
 
 	var errs error
-	for i := 0; i < numFiles; i++ {
+	for range numFiles {
 		err := <-errChan
 		if err != nil {
 			errs = multierror.Append(errs, err)
