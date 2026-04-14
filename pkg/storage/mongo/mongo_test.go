@@ -7,16 +7,14 @@ import (
 	"os"
 	"testing"
 
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
-
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/storage"
 	"github.com/gomods/athens/pkg/storage/compliance"
-
 	"github.com/stretchr/testify/require"
+	"go.mongodb.org/mongo-driver/v2/bson"
+	"go.mongodb.org/mongo-driver/v2/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
 
 func TestBackend(t *testing.T) {
@@ -108,7 +106,7 @@ func TestQueryKindUnexpectedErrorCases(t *testing.T) {
 	ctx := context.Background()
 	mongoStorage := getStorage(t)
 	uri := os.Getenv("ATHENS_MONGO_STORAGE_URL")
-	client, err := mongo.Connect(ctx, options.Client().ApplyURI(uri))
+	client, err := mongo.Connect(options.Client().ApplyURI(uri))
 	if err != nil {
 		t.SkipNow()
 	}
@@ -127,7 +125,7 @@ func TestQueryKindUnexpectedErrorCases(t *testing.T) {
 	for _, errDoc := range errDocs {
 		filter := bson.D{{"module", errDoc.Module}, {"version", errDoc.Version}}
 		update := bson.D{{"$set", bson.D{{"mod", errDoc.Mod}, {"info", errDoc.Info}}}}
-		opts := options.Update().SetUpsert(true).SetBypassDocumentValidation(true)
+		opts := options.UpdateOne().SetUpsert(true).SetBypassDocumentValidation(true)
 		_, err = coll.UpdateOne(ctx, filter, update, opts)
 		if err != nil {
 			t.SkipNow()

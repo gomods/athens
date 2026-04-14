@@ -8,8 +8,7 @@ import (
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/observ"
 	"github.com/gomods/athens/pkg/storage"
-	"go.mongodb.org/mongo-driver/mongo/gridfs"
-	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
 
 // Save stores a module in mongo storage.
@@ -28,12 +27,9 @@ func (s *ModuleStore) Save(ctx context.Context, module, version string, mod []by
 
 	zipName := s.gridFileName(module, version)
 	db := s.client.Database(s.db)
-	bucket, err := gridfs.NewBucket(db, options.GridFSBucket())
-	if err != nil {
-		return errors.E(op, err, errors.M(module), errors.V(version))
-	}
+	bucket := db.GridFSBucket(options.GridFSBucket())
 
-	uStream, err := bucket.OpenUploadStream(zipName, options.GridFSUpload())
+	uStream, err := bucket.OpenUploadStream(ctx, zipName, options.GridFSUpload())
 	if err != nil {
 		return errors.E(op, err, errors.M(module), errors.V(version))
 	}
