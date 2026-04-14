@@ -28,7 +28,7 @@ func (f *failReader) Read([]byte) (int, error) {
 // and it will ensure that saving to modules at the same time
 // is done synchronously so that only the first module gets saved.
 func TestWithGCS(t *testing.T) {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Minute*5)
+	ctx, cancel := context.WithTimeout(t.Context(), time.Minute*5)
 	defer cancel()
 	const (
 		mod = "stashmod"
@@ -54,7 +54,7 @@ func TestWithGCS(t *testing.T) {
 		}
 		s := gs(ms)
 		eg.Go(func() error {
-			ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+			ctx, cancel := context.WithTimeout(t.Context(), time.Second*10)
 			defer cancel()
 			_, err := s.Stash(ctx, "stashmod", "v1.0.0")
 			return err
@@ -94,7 +94,7 @@ func TestWithGCS(t *testing.T) {
 // and ensures that if one of the non-singleflight-lock files fails to
 // upload, that the cache does not remain poisoned.
 func TestWithGCSPartialFailure(t *testing.T) {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Minute*5)
+	ctx, cancel := context.WithTimeout(t.Context(), time.Minute*5)
 	defer cancel()
 	const (
 		mod = "stashmod"
@@ -185,7 +185,7 @@ func getStorage(t *testing.T) *gcp.Storage {
 		t.SkipNow()
 	}
 
-	s, err := gcp.New(context.Background(), cfg, config.GetTimeoutDuration(30))
+	s, err := gcp.New(t.Context(), cfg, config.GetTimeoutDuration(30))
 	if err != nil {
 		t.Fatal(err)
 	}

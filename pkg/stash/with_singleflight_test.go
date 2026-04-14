@@ -20,7 +20,7 @@ func TestSingleFlight(t *testing.T) {
 	var eg errgroup.Group
 	for i := 0; i < 5; i++ {
 		eg.Go(func() error {
-			_, err := s.Stash(context.Background(), "mod", "ver")
+			_, err := s.Stash(t.Context(), "mod", "ver")
 			return err
 		})
 	}
@@ -32,7 +32,7 @@ func TestSingleFlight(t *testing.T) {
 
 	for i := 0; i < 5; i++ {
 		eg.Go(func() error {
-			_, err := s.Stash(context.Background(), "mod", "ver")
+			_, err := s.Stash(t.Context(), "mod", "ver")
 			return err
 		})
 	}

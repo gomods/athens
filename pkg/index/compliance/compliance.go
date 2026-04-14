@@ -1,7 +1,6 @@
 package compliance
 
 import (
-	"context"
 	"fmt"
 	"testing"
 	"time"
@@ -54,7 +53,7 @@ func RunTests(t *testing.T, indexer index.Indexer, clearIndex func() error) {
 			name: "respect the time",
 			desc: "given 10 modules, 'since' should filter out the ones that came before it",
 			preTest: func(t *testing.T) ([]*index.Line, time.Time) {
-				err := indexer.Index(context.Background(), "tobeignored", "v1.2.3")
+				err := indexer.Index(t.Context(), "tobeignored", "v1.2.3")
 				if err != nil {
 					t.Fatal(err)
 				}

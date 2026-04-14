@@ -53,7 +53,7 @@ func TestQueryModuleVersionExists(t *testing.T) {
 		Zip:  io.NopCloser(bytes.NewReader([]byte("789"))),
 	}
 
-	ctx := context.Background()
+	ctx := t.Context()
 	backend := getStorage(t)
 
 	zipBts, _ := io.ReadAll(mock.Zip)
@@ -74,7 +74,7 @@ func TestQueryKindNotFoundErrorCases(t *testing.T) {
 		Zip:  io.NopCloser(bytes.NewReader([]byte("789"))),
 	}
 
-	ctx := context.Background()
+	ctx := t.Context()
 	backend := getStorage(t)
 
 	zipBts, _ := io.ReadAll(mock.Zip)
@@ -103,14 +103,13 @@ func TestQueryKindNotFoundErrorCases(t *testing.T) {
 func TestQueryKindUnexpectedErrorCases(t *testing.T) {
 	// Prepare error documents
 	// If there is any error in preparation phase, skip this test
-	ctx := context.Background()
 	mongoStorage := getStorage(t)
 	uri := os.Getenv("ATHENS_MONGO_STORAGE_URL")
 	client, err := mongo.Connect(options.Client().ApplyURI(uri))
 	if err != nil {
 		t.SkipNow()
 	}
-	defer client.Disconnect(ctx)
+	defer client.Disconnect(t.Context())
 	coll := client.Database("athens").Collection("modules")
 	errDocs := []struct {
 		Module  string      `bson:"module"`
@@ -126,7 +125,7 @@ func TestQueryKindUnexpectedErrorCases(t *testing.T) {
 		filter := bson.D{{"module", errDoc.Module}, {"version", errDoc.Version}}
 		update := bson.D{{"$set", bson.D{{"mod", errDoc.Mod}, {"info", errDoc.Info}}}}
 		opts := options.UpdateOne().SetUpsert(true).SetBypassDocumentValidation(true)
-		_, err = coll.UpdateOne(ctx, filter, update, opts)
+		_, err = coll.UpdateOne(t.Context(), filter, update, opts)
 		if err != nil {
 			t.SkipNow()
 		}
@@ -139,7 +138,7 @@ func TestQueryKindUnexpectedErrorCases(t *testing.T) {
 		{"model2", "v2.0.0"}, // test case: decode boolean to []byte
 	}
 	for _, test := range testCases {
-		_, err := query(ctx, mongoStorage, test.modName, test.version)
+		_, err := query(t.Context(), mongoStorage, test.modName, test.version)
 		require.Error(t, err)
 		require.Equal(t, errors.KindUnexpected, errors.Kind(err))
 	}

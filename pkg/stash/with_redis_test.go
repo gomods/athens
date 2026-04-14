@@ -50,7 +50,7 @@ func TestWithRedisLock(t *testing.T) {
 	var eg errgroup.Group
 	for i := 0; i < 5; i++ {
 		eg.Go(func() error {
-			ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+			ctx, cancel := context.WithTimeout(t.Context(), time.Second*10)
 			defer cancel()
 			_, err := s.Stash(ctx, "mod", "ver")
 			return err
@@ -86,7 +86,7 @@ func TestWithRedisLockWithPassword(t *testing.T) {
 	var eg errgroup.Group
 	for i := 0; i < 5; i++ {
 		eg.Go(func() error {
-			ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+			ctx, cancel := context.WithTimeout(t.Context(), time.Second*10)
 			defer cancel()
 			_, err := s.Stash(ctx, "mod", "ver")
 			return err

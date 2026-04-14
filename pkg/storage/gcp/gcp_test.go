@@ -14,13 +14,13 @@ import (
 
 func TestBackend(t *testing.T) {
 	backend := getStorage(t)
-	defer backend.bucket.Delete(context.Background())
+	defer backend.bucket.Delete(t.Context())
 	compliance.RunTests(t, backend, backend.clear)
 }
 
 func BenchmarkBackend(b *testing.B) {
 	backend := getStorage(b)
-	defer backend.bucket.Delete(context.Background())
+	defer backend.bucket.Delete(b.Context())
 	compliance.RunBenchmarks(b, backend, backend.clear)
 }
 
@@ -57,11 +57,11 @@ func getStorage(t testing.TB) *Storage {
 		t.SkipNow()
 	}
 
-	s, err := newClient(context.Background(), cfg, config.GetTimeoutDuration(30))
+	s, err := newClient(t.Context(), cfg, config.GetTimeoutDuration(30))
 	if err != nil {
 		t.Fatal(err)
 	}
-	err = s.bucket.Create(context.Background(), cfg.ProjectID, nil)
+	err = s.bucket.Create(t.Context(), cfg.ProjectID, nil)
 	if err != nil {
 		t.Fatal(err)
 	}

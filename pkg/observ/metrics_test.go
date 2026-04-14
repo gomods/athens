@@ -15,9 +15,7 @@ func TestCacheLookupMetric(t *testing.T) {
 	}
 	defer view.Unregister(cacheLookupView)
 
-	ctx := context.Background()
-
-	RecordCacheLookup(ctx, "hit", "info")
+	RecordCacheLookup(t.Context(), "hit", "info")
 
 	rows, err := view.RetrieveData("cache_lookup_total")
 	if err != nil {
@@ -65,9 +63,7 @@ func TestUpstreamFetchDurationHistogram(t *testing.T) {
 	}
 	defer view.Unregister(upstreamFetchLatencyView)
 
-	ctx := context.Background()
-
-	RecordUpstreamFetchDuration(ctx, "success", 2*time.Second)
+	RecordUpstreamFetchDuration(t.Context(), "success", 2*time.Second)
 
 	rows, err := view.RetrieveData("upstream_fetch_duration_seconds")
 	if err != nil {
