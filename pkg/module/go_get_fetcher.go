@@ -11,6 +11,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/observ"
@@ -194,7 +195,9 @@ func getRepoDirName(repoURI, version string) string {
 
 func validGoBinary(name string) error {
 	const op errors.Op = "module.validGoBinary"
-	err := exec.Command(name).Run()
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	err := exec.CommandContext(ctx, name).Run()
 	eErr := &exec.ExitError{}
 	if err != nil && !errors.AsErr(err, &eErr) {
 		return errors.E(op, err)

@@ -22,11 +22,13 @@ func New(cfg *config.Postgres) (index.Indexer, error) {
 	if err != nil {
 		return nil, err
 	}
-	if err = db.Ping(); err != nil {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	if err = db.PingContext(ctx); err != nil {
 		return nil, err
 	}
 	for _, statement := range schema {
-		_, err = db.Exec(statement)
+		_, err = db.ExecContext(ctx, statement)
 		if err != nil {
 			return nil, err
 		}

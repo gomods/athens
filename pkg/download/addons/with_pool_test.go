@@ -22,7 +22,7 @@ func TestPoolLogic(t *testing.T) {
 	workers := 5
 	dp := WithPool(workers)(m)
 	m.ch = make(chan struct{})
-	for i := 0; i < 10; i++ {
+	for range 10 {
 		go dp.List(t.Context(), "")
 	}
 	<-m.ch

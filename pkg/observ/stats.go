@@ -65,7 +65,10 @@ func registerPrometheusExporter(r *mux.Router, service string) error {
 func registerStatsDataDogExporter(service string) (func(), error) {
 	const op errors.Op = "observ.registerStatsDataDogExporter"
 
-	dd := datadog.NewExporter(datadog.Options{Service: service})
+	dd, err := datadog.NewExporter(datadog.Options{Service: service})
+	if err != nil {
+		return nil, errors.E(op, err)
+	}
 	if dd == nil {
 		return nil, errors.E(op, "Failed to initialize data dog exporter")
 	}
@@ -93,6 +96,7 @@ func registerStatsStackDriverExporter(projectID string) (func(), error) {
 func registerViews() error {
 	const op errors.Op = "observ.registerViews"
 
+	//nolint:prealloc
 	views := []*view.View{
 		ochttp.ServerRequestCountView,
 		ochttp.ServerResponseBytesView,

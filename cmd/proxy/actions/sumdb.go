@@ -10,11 +10,12 @@ import (
 )
 
 func sumdbProxy(url *url.URL, nosumPatterns []string) http.Handler {
-	rp := httputil.NewSingleHostReverseProxy(url)
-	rp.Director = func(req *http.Request) {
-		req.Host = url.Host
-		req.URL.Scheme = url.Scheme
-		req.URL.Host = url.Host
+	rp := &httputil.ReverseProxy{
+		Rewrite: func(req *httputil.ProxyRequest) {
+			req.Out.Host = url.Host
+			req.Out.URL.Scheme = url.Scheme
+			req.Out.URL.Host = url.Host
+		},
 	}
 	if len(nosumPatterns) > 0 {
 		return noSumWrapper(rp, nosumPatterns)

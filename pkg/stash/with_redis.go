@@ -6,14 +6,14 @@ import (
 	"time"
 
 	"github.com/bsm/redislock"
-	"github.com/go-redis/redis/v8"
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/observ"
 	"github.com/gomods/athens/pkg/storage"
+	"github.com/redis/go-redis/v9"
 )
 
-// RedisLogger mirrors github.com/go-redis/redis/v8/internal.Logging.
+// RedisLogger mirrors github.com/go-redis/redis/v9/internal.Logging.
 type RedisLogger interface {
 	Printf(ctx context.Context, format string, v ...any)
 }

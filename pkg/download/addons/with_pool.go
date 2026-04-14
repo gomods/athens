@@ -35,7 +35,7 @@ func WithPool(workers int) download.Wrapper {
 }
 
 func (p *withpool) start(numWorkers int) {
-	for i := 0; i < numWorkers; i++ {
+	for range numWorkers {
 		go p.listen()
 	}
 }

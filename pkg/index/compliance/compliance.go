@@ -123,9 +123,9 @@ func RunTests(t *testing.T, indexer index.Indexer, clearIndex func() error) {
 }
 
 func seed(t *testing.T, indexer index.Indexer, num int) []*index.Line {
-	lines := []*index.Line{}
+	lines := make([]*index.Line, 0, num)
 	t.Helper()
-	for i := 0; i < num; i++ {
+	for i := range num {
 		mod := moniker.New().NameSep("_")
 		ver := fmt.Sprintf("%d.0.0", i)
 		err := indexer.Index(t.Context(), mod, ver)

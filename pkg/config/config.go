@@ -21,6 +21,7 @@ const defaultConfigFile = "athens.toml"
 // Config provides configuration values for all components.
 type Config struct {
 	TimeoutConf
+
 	GoEnv            string    `envconfig:"GO_ENV"                    validate:"required"`
 	GoBinary         string    `envconfig:"GO_BINARY_PATH"            validate:"required"`
 	GoBinaryEnvVars  EnvList   `envconfig:"ATHENS_GO_BINARY_ENV_VARS"`
@@ -105,8 +106,8 @@ func (el *EnvList) Decode(value string) error {
 		return nil
 	}
 	*el = EnvList{} // env vars must override config file
-	assignments := strings.Split(value, ";")
-	for _, assignment := range assignments {
+	assignments := strings.SplitSeq(value, ";")
+	for assignment := range assignments {
 		*el = append(*el, strings.TrimSpace(assignment))
 	}
 	return el.Validate()

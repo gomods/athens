@@ -56,7 +56,7 @@ func newClient(ctx context.Context, gcpConf *config.GCPConfig, timeout time.Dura
 		if err != nil {
 			return nil, errors.E(op, fmt.Errorf("could not decode base64 json key: %w", err))
 		}
-		creds, err := google.CredentialsFromJSON(ctx, key, storage.ScopeReadWrite)
+		creds, err := google.CredentialsFromJSONWithType(ctx, key, google.ServiceAccount, storage.ScopeReadWrite)
 		if err != nil {
 			return nil, errors.E(op, fmt.Errorf("could not get GCS credentials: %w", err))
 		}

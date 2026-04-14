@@ -46,7 +46,7 @@ func Delete(ctx context.Context, module, version string, del Deleter, timeout ti
 	go delOrAbort("zip")
 
 	var errs error
-	for i := 0; i < numFiles; i++ {
+	for range numFiles {
 		err := <-errChan
 		if err != nil {
 			errs = multierror.Append(errs, err)
