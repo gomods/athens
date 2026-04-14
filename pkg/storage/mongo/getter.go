@@ -6,10 +6,9 @@ import (
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/observ"
 	"github.com/gomods/athens/pkg/storage"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/gridfs"
-	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/v2/bson"
+	"go.mongodb.org/mongo-driver/v2/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
 
 // Info implements storage.Getter.
@@ -48,15 +47,12 @@ func (s *ModuleStore) Zip(ctx context.Context, module, vsn string) (storage.Size
 
 	zipName := s.gridFileName(module, vsn)
 	db := s.client.Database(s.db)
-	bucket, err := gridfs.NewBucket(db, &options.BucketOptions{})
-	if err != nil {
-		return nil, errors.E(op, err, errors.M(module), errors.V(vsn))
-	}
+	bucket := db.GridFSBucket()
 
-	dStream, err := bucket.OpenDownloadStreamByName(zipName, options.GridFSName())
+	dStream, err := bucket.OpenDownloadStreamByName(ctx, zipName, options.GridFSName())
 	if err != nil {
 		kind := errors.KindUnexpected
-		if errors.IsErr(err, gridfs.ErrFileNotFound) {
+		if errors.IsErr(err, mongo.ErrFileNotFound) {
 			kind = errors.KindNotFound
 		}
 		return nil, errors.E(op, err, kind, errors.M(module), errors.V(vsn))

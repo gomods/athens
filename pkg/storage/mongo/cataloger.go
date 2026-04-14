@@ -7,9 +7,8 @@ import (
 	"github.com/gomods/athens/pkg/paths"
 	"github.com/gomods/athens/pkg/storage"
 	"github.com/hashicorp/go-multierror"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/v2/bson"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
 
 // Catalog implements the (./pkg/storage).Cataloger interface.
@@ -18,7 +17,7 @@ func (s *ModuleStore) Catalog(ctx context.Context, token string, pageSize int) (
 	const op errors.Op = "mongo.Catalog"
 	q := bson.M{}
 	if token != "" {
-		t, err := primitive.ObjectIDFromHex(token)
+		t, err := bson.ObjectIDFromHex(token)
 		if err == nil {
 			q = bson.M{"_id": bson.M{"$gt": t}}
 		}

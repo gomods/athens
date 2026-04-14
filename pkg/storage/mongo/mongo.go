@@ -11,9 +11,9 @@ import (
 
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/errors"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/v2/bson"
+	"go.mongodb.org/mongo-driver/v2/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
 
 // ModuleStore represents a mongo backed storage backend.
@@ -107,7 +107,7 @@ func (s *ModuleStore) newClient() (*mongo.Client, error) {
 		clientOptions = clientOptions.SetTLSConfig(tlsConfig)
 	}
 	clientOptions = clientOptions.SetConnectTimeout(s.timeout)
-	client, err := mongo.Connect(context.Background(), clientOptions)
+	client, err := mongo.Connect(clientOptions)
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
