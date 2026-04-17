@@ -1,0 +1,634 @@
+# This is an example configuration with all supported properties explicitly set
+# Most properties can be overridden with environment variables specified in this file
+# Most properties also have defaults (mentioned in this file) if they are not set in either the config file or the corresponding environment variable
+
+# If you put this file where you start Athens from as "athens.toml", athens will use it when starting.
+# You can also start athens with -config_file as command line argument to point out a config file.
+
+# GoBinary returns the path to the go binary to use. This value can be a name of a binary in your PATH, or the full path
+# Defaults to "go"
+# Env override: GO_BINARY_PATH
+GoBinary = "go"
+
+# GoEnv specifies the type of environment to run.
+# Supported values are: 'development' and 'production'. Defaults to "development"
+# Env override: GO_ENV
+GoEnv = "development"
+
+# GoBinaryEnvVars are environment variables that you'd like
+# to pass directly to the Go command that Athens runs under the
+# hood. Athens primarily runs two Go commands:
+# 1. `go mod download -json <module>@<version>`
+# 2. `go list -m -json <module>@latest`
+# The go command accepts multiple environment variables that
+# can affect the two processes above such as GONOSUMDB and GOPROXY.
+# Note that athens passes the NoSumPatterns to the two commands above,
+# but the existence of GONOSUMDB in this configuration takes precedence.
+# Although you can pass any key=value to the Go command here, you can see
+# the list of possible env vars by running `go env`.
+# Env override: ATHENS_GO_BINARY_ENV_VARS
+# 
+# IMPORTANT note about using the env var to override this config:
+#
+# You must use a semi-colon (;) to separate multiple env vars
+# within ATHENS_GO_BINARY_ENV_VARS. For example:
+# ATHENS_GO_BINARY_ENV_VARS='GOPROXY=proxy.golang.org,direct; GOPRIVATE=github.com/gomods/*'
+# The semi-colon is here used instead of the comma (,) because the comma is a valid value to 
+# separate arguments in certain go env vars such as GOPROXY and GOPRIVATE
+#
+# NOTE that if you use the env var, then whatever you have in this config file will be overridden 
+# and NOT appended/merged. In other words, if the config file value is 
+# GoBinaryEnvVars = ["GOPROXY=direct"]
+# And you pass the following env var: 
+# ATHENS_GO_BINARY_ENV_VARS='GODEBUG=true'
+# Then the final value that the Go binary will receive is ["GODEBUG=true"] and NOT ["GOPROXY=direct", "GODEBUG=true"]
+# Therefore, whether you use the config file or the env var, make sure you have all the values you need there.
+GoBinaryEnvVars = ["GOPROXY=direct"]
+
+# GoGetWorkers specifies how many times you can concurrently
+# go mod download, this is so that low performance instances
+# can manage go get more sanely and not run out of disk or memory.
+# One way to think about is: the number of GoGetWorkers corresponds
+# directly to how many parallel "git clones" your underlying machine
+# can handle.
+# Env override: ATHENS_GOGET_WORKERS
+GoGetWorkers = 10
+
+# GoGetDir specifies the temporary directory that Athens
+# will use to fetch modules from VCS prior to persisting
+# them to a storage backend. This is useful if you are in a
+# Kubernetes environment where a specific path is volumed into 
+# a directory that has larger disk resources. If the value is
+# empty, Athens will use the default OS temporary directory.
+# 
+# Env override: ATHENS_GOGET_DIR
+GoGetDir = ""
+
+# ProtocolWorkers specifies how many concurrent
+# requests can you handle at a time for all
+# download protocol paths. This is different from
+# GoGetWorkers in that you can potentially serve
+# 30 requests to the Download Protocol but only 5
+# at a time can stash a module from Upstream to Storage.
+# Env override: ATHENS_PROTOCOL_WORKERS
+ProtocolWorkers = 30
+
+# LogLevel returns the system's exposure to internal logs. Defaults to debug.
+# Supports all logrus log levels (https://github.com/Sirupsen/logrus#level-logging)
+# Env override: ATHENS_LOG_LEVEL
+LogLevel = "debug"
+
+# LogFormat determines the format that logs are output in. Defaults to json.
+# It is only used when CloudRuntime is set to none. Values can be "plain" or "json".
+# Env override: ATHENS_LOG_FORMAT
+LogFormat = "plain"
+
+# CloudRuntime is the Cloud Provider on which the Proxy/Registry is running.
+# Currently available options are "GCP", or "none". Defaults to "none"
+# Env override: ATHENS_CLOUD_RUNTIME
+CloudRuntime = "none"
+
+# EnablePprof specifies if the pprof endpoints should be exposed.
+# Note that this option is not meant to be activated forever on a server
+# and should be desactivated once not needed.
+EnablePprof = false
+
+# PprofPort specifies the port on which pprof will be exposed if activated.
+PprofPort = ":3001"
+
+# The filename for the include exclude filter.
+# Env override: ATHENS_FILTER_FILE
+#
+# To point Athens to an upstream proxy to fetch modules,
+# set GlobalEndpoint to "https://<url_to_upstream>"
+# and also ensure that FilterFile is  set to a fully qualified file name
+# that contains the letter `D` (for "Direct Access") in the first line.
+FilterFile = ""
+
+# The filename for the robots.txt.
+# ENV override: ATHENS_ROBOTS_FILE
+#
+# To provide /robots.txt for net crawler.
+# Default disallow all crawler.
+# Content details to see https://support.google.com/webmasters/answer/6062608
+RobotsFile = "robots.txt"
+
+# Timeout is the timeout for external network calls in seconds
+# This value is used as the default for storage backends if they don't specify timeouts
+# Defaults to 300
+# Env override: ATHENS_TIMEOUT
+Timeout = 300
+
+# StashTimeout is the timeout for the Stash operation in seconds.
+# The Stash operation fetches a module from upstream (e.g. VCS) and stores it
+# into the storage backend. Large modules may require a higher timeout.
+# Defaults to 600 (10 minutes)
+# Env override: ATHENS_STASH_TIMEOUT
+# StashTimeout = 600 # Check that defaults are loaded.
+
+# StorageType sets the type of storage backend the proxy will use.
+# Possible values are memory, disk, mongo, gcp, minio, s3, azureblob, external
+# Defaults to memory
+# Env override: ATHENS_STORAGE_TYPE
+StorageType = "memory"
+
+# Certificate and key to make athens serve using https instead of plain text http.
+# Set both to enable.
+# Env override: ATHENS_TLSCERT_FILE, ATHENS_TLSKEY_FILE
+#TLSCertFile = "server.cer"
+#TLSKeyFile = "server.key"
+
+# Port sets the port the proxy listens on
+# Env override: ATHENS_PORT or PORT
+# The PORT must be a number or a number prefixed by ":"
+Port = ":3000"
+
+# UnixSocket sets a Unix domain socket path that the proxy listens on.
+# This option, when specified, takes precedence over TCP port configuration.
+# Defaults to empty (i.e. listen on a TCP port only)
+# Env override: ATHENS_UNIX_SOCKET
+UnixSocket = ""
+
+# The endpoint for a package registry in case of a proxy cache miss
+# NOTE: Currently no registries have been implemented
+# Env override: ATHENS_GLOBAL_ENDPOINT
+#
+# To point Athens to an upstream proxy to fetch modules,
+# set GlobalEndpoint to "https://<url_to_upstream>"
+# and also ensure that FilterFile is set to a fully qualified file name
+# that contains the letter `D` (for "Direct Access") in the first line.
+GlobalEndpoint = "http://localhost:3001"
+
+# BASIC AUTH OPTIONS
+# ==================
+# PLASE NOTE THAT THIS IS A BAD HACK AROUND
+# THE FACT THAT GO DOES NOT SUPPORT PROPER AUTHENTICATION
+# YET! YOUR BASIC AUTH CREDENTIALS CAN EASILY LEAK
+# IN ATHENS LOGS AS WELL AS GO COMMAND LOGS.
+# THIS WILL BE ADDRESSED IN 1.13.
+# SEE https://github.com/golang/go/issues/30610
+
+# Username for basic auth
+# Env override: BASIC_AUTH_USER
+BasicAuthUser = ""
+
+# Password for basic auth
+# Env override: BASIC_AUTH_PASS
+BasicAuthPass = ""
+
+# A path on disk to a Go HTML template to be used on the homepage
+# Env override: ATHENS_HOME_TEMPLATE_PATH
+HomeTemplatePath = "/var/lib/athens/home.html"
+
+# Set to true to force an SSL redirect
+# Env override: PROXY_FORCE_SSL
+ForceSSL = false
+
+# ValidatorHook specifies the endpoint to validate modules against
+# Not used if left blank or not specified
+# Env override: ATHENS_PROXY_VALIDATOR
+ValidatorHook = ""
+
+# PathPrefix specifies whether the Proxy
+# should have a basepath. Certain proxies and services
+# are distinguished based on subdomain, while others are based
+# on path prefixes.
+# Env override: ATHENS_PATH_PREFIX
+PathPrefix = ""
+
+# NETRCPath tells you where the .netrc path initially resides.
+# This is so that you can mount the .netrc file to a secret location
+# in the fs system and then move it ~/.netrc. In certain deployments
+# like Kubernetes, we can't mount directly to ~ because it would then
+# clean out whatever is already there as part of the image (such as
+# .cache directory in the Go image).
+# Env override: ATHENS_NETRC_PATH
+NETRCPath = ""
+
+# GithubToken can be used instead of a NETRCPath to authenticate
+# the proxy to your own private repos on github. This makes it
+# easier for users and for platforms like GAE to only be provided
+# a Github token instead of a .netrc file. Internally, the proxy
+# just create a .netrc file for you.
+# Env override: ATHENS_GITHUB_TOKEN
+GithubToken = ""
+
+# HGRCPath tells you where the .hgrc path initially resides.
+# This is so that you can mount the .hgrc file to a secret location
+# in the fs system and then move it ~/.hgrc. In certain deployments
+# like Kubernetes, we can't mount directly to ~ because it would then
+# clean out whatever is already there as part of the image (such as
+# .cache directory in the Go image).
+# Env override: ATHENS_HGRC_PATH
+HGRCPath = ""
+
+# Tracing is not a requirement for Athens. If the infrastructure is not set up,
+# Athens will keep on running and traces won't be exported.
+# TraceExporter is the service to which the data collected by OpenCensus can be exported to.
+# Possible values are: jaeger, datadog, and stackdriver.
+# Env override: ATHENS_TRACE_EXPORTER
+TraceExporter = ""
+
+# TraceExporterURL is the URL to which Athens populates distributed tracing
+# information such as Jaeger. In Stackdriver, use this as the GCP ProjectID.
+# Env override: ATHENS_TRACE_EXPORTER_URL
+TraceExporterURL = "http://localhost:14268"
+
+# Stats is not a requirement for Athens. If the value is not set,
+# Athens will keep on running and stats won't be collected.
+# Possible values are: prometheus.
+# Env override: ATHENS_STATS_EXPORTER
+StatsExporter = "prometheus"
+
+# SumDBs specifies a list of fully qualified URLs that Athens will proxy
+# so that the go command can use as a checksum verifier.
+# See NoSumDB for enforcing the go command to use
+# GONOSUMDB.
+# Env override: ATHENS_SUM_DBS
+SumDBs = ["https://sum.golang.org"]
+
+# NoSumPatterns specifies a list of patterns that will make the
+# Sum DB proxy return a 403 if any of those patterns match.
+# This will enforce the client to run GONOSUMDB
+# Example pattern: NoSumPatterns = ["github.com/mycompany/*"]
+# Env override: ATHENS_GONOSUM_PATTERNS
+NoSumPatterns = []
+
+# DownloadMode defines how Athens behaves when a module@version
+# is not found in storage. There are 4 options:
+# 1. "sync" (default): download the module synchronously and
+# return the results to the client.
+# 2. "async": return 404, but asynchronously store the module
+# in the storage backend.
+# 3. "redirect": return a 301 redirect status to the client
+# with the base URL as the DownloadRedirectURL from below.
+# 4. "async_redirect": same as option number 3 but it will
+# asynchronously store the module to the backend.
+# 5. "none": return 404 if a module is not found and do nothing.
+# 6. "file:<path>": will point to an HCL file that specifies
+# any of the 5 options above based on different import paths.
+# 7. "custom:<base64-encoded-hcl>" is the same as option 6
+# but the file is fully encoded in the option. This is
+# useful for using an environment variable in serverless
+# deployments.
+# Env override: ATHENS_DOWNLOAD_MODE
+DownloadMode = "sync"
+
+# NetworkMode configures how Athens will return the results
+# of the /list endpoint as it can be assembled from both its own
+# storage and the upstream VCS.
+# 
+# Note, that for better error messaging, this would also affect how other
+# endpoints behave.
+# 
+# Modes:
+# 1. strict: merge VCS versions with storage versions, but fail if either of them fails.
+# 2. offline: only get storage versions, never reach out to VCS.
+# 3. fallback: only return storage versions, if VCS fails. Note this means that you may
+# see inconsistent results since fallback mode does a best effort of giving you what's
+# available at the time of requesting versions.
+NetworkMode = "strict"
+
+# DownloadURL is the URL that will be used if
+# DownloadMode is set to "redirect"
+# Env override: ATHENS_DOWNLOAD_URL
+DownloadURL = ""
+
+# SingleFlightType determines what mechanism Athens uses
+# to manage concurrency flowing into the Athens Backend.
+# This is important for the following scenario: if two concurrent requests
+# were made to Athens that wanted to store the same module at the same time,
+# we want to make sure only the first request gets to store the module,
+# and the second request will wait for the first one to finish so that
+# it doesn't override the storage.
+
+# Options are ["memory", "etcd", "redis", "redis-sentinel", "gcp", "azureblob"]
+
+# The default option is "memory" which means that only one instance of Athens
+# should be used.
+# The "gcp" single flight will assume that you have a "gcp" StorageType
+# and therefore it will use its strong-consistency features to ensure
+# that only one module is ever written even when concurrent saves happen
+# at the same time.
+# The "azureblob" single flight will assume that you have a "azureblob" StorageType
+# and therefore it will use its strong-consistency features to ensure
+# that only one module is ever written even when concurrent saves happen
+# at the same time.
+# The "redis" single flight will use a single redis instance as a locking mechanism
+# for updating the underlying storage
+# The "redis-sentinel" single flight works similarly to "redis" but obtains a redis connection
+# via a redis-sentinel
+# Env override: ATHENS_SINGLE_FLIGHT_TYPE
+SingleFlightType = "memory"
+
+# IndexType sets the type of an index backend Athens will use.
+# Possible values are none, memory, mysql, postgres
+# Defaults to none
+# Env override: ATHENS_INDEX_TYPE
+IndexType = "none"
+
+# ShutdownTimeout sets the timeout (in seconds) for open connections when shutting down
+# (via SIGINT or SIGTERM). Connections still open after the timeout will be dropped.
+# Defaults to 60
+# Env override: ATHENS_SHUTDOWN_TIMEOUT
+ShutdownTimeout = 60
+
+[SingleFlight]
+    [SingleFlight.Etcd]
+        # Endpoints are comma separated URLs that determine all distributed etcd servers.
+        # It defaults to what we have in our docker-compose file. It is by default ignored
+        # as the SingleFlightType field above determines whether Etcd is used or not.
+        # Env override: ATHENS_ETCD_ENDPOINTS
+        Endpoints = "localhost:2379,localhost:22379,localhost:32379"
+    [SingleFlight.Redis]
+        # Endpoint is the redis endpoint for a SingleFlight lock. Should be either a host:port
+        # pair or redis url such as:
+        #    redis[s]://user:password@127.0.0.1:6379/0?protocol=3
+        # TODO(marwan): enable multiple endpoints for redis clusters.
+        # Env override: ATHENS_REDIS_ENDPOINT
+        Endpoint = "127.0.0.1:6379"
+        # Password is the password for a redis SingleFlight lock.
+        # Env override: ATHENS_REDIS_PASSWORD
+        Password = ""
+
+        [SingleFlight.Redis.LockConfig]
+            # TTL for the lock in seconds. Defaults to 900 seconds (15 minutes).
+            # Env override: ATHENS_REDIS_LOCK_TTL
+            TTL = 900
+            # Timeout for acquiring the lock in seconds. Defaults to 15 seconds.
+            # Env override: ATHENS_REDIS_LOCK_TIMEOUT
+            Timeout = 15
+            # Max retries while acquiring the lock. Defaults to 10.
+            # Env override: ATHENS_REDIS_LOCK_MAX_RETRIES
+            MaxRetries = 10
+
+    [SingleFlight.RedisSentinel]
+        # Endpoints is the redis sentinel endpoints to discover a redis 
+        # master for a SingleFlight lock.
+        # Env override: ATHENS_REDIS_SENTINEL_ENDPOINTS
+        Endpoints = ["127.0.0.1:26379"]
+        # MasterName is the redis sentinel master name to use to discover
+        # the master for a SingleFlight lock
+        # Env override: ATHENS_REDIS_SENTINEL_MASTER_NAME
+        MasterName = "redis-1"
+        # SentinelPassword is an optional password for authenticating with
+        # redis sentinel
+        # Env override: ATHENS_REDIS_SENTINEL_PASSWORD
+        SentinelPassword = "sekret"
+
+        # The Redis master authorization parameters
+        # Env override: ATHENS_REDIS_USERNAME
+        RedisUsername = ""
+        # Env override: ATHENS_REDIS_PASSWORD
+        RedisPassword = ""
+
+        [SingleFlight.RedisSentinel.LockConfig]
+            # TTL for the lock in seconds. Defaults to 900 seconds (15 minutes).
+            # Env override: ATHENS_REDIS_LOCK_TTL
+            TTL = 900
+            # Timeout for acquiring the lock in seconds. Defaults to 15 seconds.
+            # Env override: ATHENS_REDIS_LOCK_TIMEOUT
+            Timeout = 15
+            # Max retries while acquiring the lock. Defaults to 10.
+            # Env override: ATHENS_REDIS_LOCK_MAX_RETRIES
+            MaxRetries = 10
+    [SingleFlight.GCP]
+        # Threshold for how long to wait in seconds for an in-progress GCP upload to
+        # be considered to have failed to unlock.
+        StaleThreshold = 120
+[Storage]
+    # Only storage backends that are specified in Proxy.StorageType are required here
+    [Storage.CDN]
+        # Endpoint for CDN storage
+        # Env override: CDN_ENDPOINT
+        Endpoint = "cdn.example.com"
+
+    [Storage.Disk]
+        # RootPath is the Athens Disk Root folder
+        # Env override: ATHENS_DISK_STORAGE_ROOT
+        RootPath = "/path/on/disk"
+
+    [Storage.GCP]
+        # Required IAM Roles (https://cloud.google.com/storage/docs/access-control/iam-roles):
+        # - roles/storage.objectCreator
+        # - roles/storage.objectViewer
+        # - roles/storage.legacyBucketReader
+
+        # ProjectID to use for GCP Storage
+        # Env override: GOOGLE_CLOUD_PROJECT
+        ProjectID = "MY_GCP_PROJECT_ID"
+
+        # Bucket to use for GCP Storage
+        # Env override: ATHENS_STORAGE_GCP_BUCKET
+        Bucket = "MY_GCP_BUCKET"
+
+        # JSONKey is a base64 encoded service account 
+        # key that allows Athens to be run outside of GCP
+        # but still be able to access GCS. This is not needed
+        # when relying on default GCP authentication with 
+        # GOOGLE_APPLICATION_CREDENTIALS variable set up. 
+        # See https://cloud.google.com/docs/authentication/getting-started.
+        #
+        # Env override: ATHENS_STORAGE_GCP_JSON_KEY
+        JSONKey = ""
+
+    [Storage.Minio]
+        # Endpoint for Minio storage
+        # Env override: ATHENS_MINIO_ENDPOINT
+        Endpoint = "127.0.0.1:9001"
+
+        # Access Key for Minio storage
+        # Env override: ATHENS_MINIO_ACCESS_KEY_ID
+        Key = "minio"
+
+        # Secret Key for Minio storage
+        # Env override: ATHENS_MINIO_SECRET_ACCESS_KEY
+        Secret = "minio123"
+
+        # Enable SSL for Minio connections
+        # Defaults to true
+        # Env override: ATHENS_MINIO_USE_SSL
+        EnableSSL = false
+
+        # Minio Bucket to use for storage
+        # Defaults to gomods
+        # Env override: ATHENS_MINIO_BUCKET_NAME
+        Bucket = "gomods"
+
+        # Region for Minio storage
+        # Env override: ATHENS_MINIO_REGION
+        Region = ""
+
+    [Storage.Mongo]
+        # Full connection string for mongo storage
+        # Env override: ATHENS_MONGO_STORAGE_URL
+        URL = "mongodb://127.0.0.1:27017"
+
+        # Sets default database name for mongo storage if not set by URL
+        # Env override: ATHENS_MONGO_DEFAULT_DATABASE
+        DefaultDBName = "athens"
+
+        # Path to certificate to use for the mongo connection
+        # Env override: ATHENS_MONGO_CERT_PATH
+        CertPath = ""
+
+        # Allows for insecure SSL / http connections to mongo storage
+        # Should be used for testing or development only
+        # Env override: ATHENS_MONGO_INSECURE
+        Insecure = false
+
+    [Storage.S3]
+        ### The authentication model is as below for S3 in the following order
+        ### If AWS_CREDENTIALS_ENDPOINT is specified and it returns valid results, then it is used
+        ### If config variables are specified and they are valid, then they return valid results, then it is used
+        ### Otherwise, it will default to default configurations which is as follows
+        # attempt to find credentials in the environment, in the shared
+        # configuration (~/.aws/credentials) and from ec2 instance role
+        # credentials. See
+        # https://godoc.org/github.com/aws/aws-sdk-go#hdr-Configuring_Credentials
+        # and
+        # https://godoc.org/github.com/aws/aws-sdk-go/aws/session#hdr-Environment_Variables
+        # for environment variables that will affect the aws configuration.
+        # Setting UseDefaultConfiguration would only use default configuration. It will be deprecated in future releases
+        # and is recommended not to use it.
+
+        # Region for S3 storage
+        # Env override: AWS_REGION
+        Region = "MY_AWS_REGION"
+
+        # Access Key for S3 storage
+        # Env override: AWS_ACCESS_KEY_ID
+        Key = "MY_AWS_ACCESS_KEY_ID"
+
+        # Secret Key for S3 storage
+        # Env override: AWS_SECRET_ACCESS_KEY
+        Secret = "MY_AWS_SECRET_ACCESS_KEY"
+
+        # Session Token for S3 storage
+        # Env override: AWS_SESSION_TOKEN
+        Token = ""
+
+        # S3 Bucket to use for storage
+        # Env override: ATHENS_S3_BUCKET_NAME
+        Bucket = "MY_S3_BUCKET_NAME"
+
+        # If true then path style url for s3 endpoint will be used
+        # Env override: AWS_FORCE_PATH_STYLE
+        ForcePathStyle = false
+
+        # If true then the default aws configuration will be used. This will
+        # attempt to find credentials in the environment, in the shared
+        # configuration (~/.aws/credentials) and from ec2 instance role
+        # credentials. See
+        # https://godoc.org/github.com/aws/aws-sdk-go#hdr-Configuring_Credentials
+        # and
+        # https://godoc.org/github.com/aws/aws-sdk-go/aws/session#hdr-Environment_Variables
+        # for environment variables that will affect the aws configuration.
+        UseDefaultConfiguration = false
+
+        # https://docs.aws.amazon.com/sdk-for-go/api/aws/credentials/endpointcreds/
+        CredentialsEndpoint = ""
+
+        # conainer relative url (used by fargate) /v2/....
+        # If this is present, it will concatenate to CredentialsEndpoint
+        # If you are planning to use AWS Fargate, please use http://169.254.170.2 for CredentialsEndpoint
+        # Ref: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-metadata-endpoint-v2.html
+        AwsContainerCredentialsRelativeURI = ""
+
+        # An optional endpoint URL (hostname only or fully qualified URI)
+        # that overrides the default generated endpoint for S3 storage client.
+        #
+        # You must still provide a `Region` value when specifying an endpoint.
+        # Env override: AWS_ENDPOINT
+        Endpoint = ""
+
+   [Storage.AzureBlob]
+        # Storage Account name for Azure Blob
+        # Env override: ATHENS_AZURE_ACCOUNT_NAME
+        AccountName = "MY_AZURE_BLOB_ACCOUNT_NAME"
+
+        # Account Key to use with the storage account
+        # Env override: ATHENS_AZURE_ACCOUNT_KEY
+        AccountKey = ""
+
+        # Managed Identity Resource Id to use with the storage account
+        # Env override: ATHENS_AZURE_MANAGED_IDENTITY_RESOURCE_ID
+        ManagedIdentityResourceId = ""
+
+        # Storage Resource to use with the storage account
+        # Env override: ATHENS_AZURE_CREDENTIAL_SCOPE
+        CredentialScope = ""
+
+        # Name of container in the blob storage
+        # Env override: ATHENS_AZURE_CONTAINER_NAME
+        ContainerName = "MY_AZURE_BLOB_CONTAINER_NAME"
+
+   [Storage.External]
+        # URL is the external storage URL that Athens 
+        # will use to interact with the backend storage layer.
+        # See https://docs.gomods.io/configuration/storage for implementation 
+        # details.
+        # Env override: ATHENS_EXTERNAL_STORAGE_URL
+        URL = ""
+
+[Index]
+    [Index.MySQL]
+        # MySQL protocol
+        # Env override: ATHENS_INDEX_MYSQL_PROTOCOL
+        Protocol = "tcp"
+
+        # MySQL user name
+        # Env override: ATHENS_INDEX_MYSQL_HOST
+        Host = "localhost"
+
+        # MySQL user name
+        # Env override: ATHENS_INDEX_MYSQL_PORT
+        Port = 3306
+
+        # MySQL user name
+        # Env override: ATHENS_INDEX_MYSQL_USER
+        User = "root"
+
+        # MySQL user name
+        # Env override: ATHENS_INDEX_MYSQL_PASSWORD
+        Password = ""
+
+        # MySQL database
+        # Env override: ATHENS_INDEX_MYSQL_DATABASE
+        Database = "athens"
+
+        # MySQL query parameters
+        # Environment overrides must be in the following format:
+        # ATHENS_INDEX_MYSQL_PARAMS="parseTime:true,timeout=90s"
+        # Env override: ATHENS_INDEX_MYSQL_PARAMS
+        [Index.MySQL.Params]
+            parseTime = "true"
+            timeout = "30s"
+    [Index.Postgres]
+        # Postgres user name
+        # Env override: ATHENS_INDEX_POSTGRES_HOST
+        Host = "localhost"
+
+        # Postgres user name
+        # Env override: ATHENS_INDEX_POSTGRES_PORT
+        Port = 5432
+
+        # Postgres user name
+        # Env override: ATHENS_INDEX_POSTGRES_USER
+        User = "postgres"
+
+        # Postgres user name
+        # Env override: ATHENS_INDEX_POSTGRES_PASSWORD
+        Password = ""
+
+        # Postgres database
+        # Env override: ATHENS_INDEX_POSTGRES_DATABASE
+        Database = "athens"
+
+        # Postgres query parameters
+        # Environment overrides must be in the following format:
+        # ATHENS_INDEX_POSTGRES_PARAMS="connect_timeout:30s,sslmode=disable"
+        # Env override: ATHENS_INDEX_POSTGRES_PARAMS
+        [Index.Postgres.Params]
+            connect_timeout = "30s"
+            sslmode = "disable"
