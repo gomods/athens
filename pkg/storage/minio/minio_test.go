@@ -3,6 +3,7 @@ package minio
 import (
 	"os"
 	"testing"
+	"time"
 
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/storage/compliance"
@@ -29,12 +30,12 @@ func TestNewStorageExists(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		backend, err := NewStorage(&config.MinioConfig{
+		backend, err := NewStorage(&config.MinioStorage{
 			Endpoint: url,
 			Key:      "minio",
 			Secret:   "minio123",
 			Bucket:   test.name,
-		}, config.GetTimeoutDuration(300))
+		}, 300*time.Second)
 		if err != nil {
 			t.Fatalf("TestNewStorageExists failed for bucketname:  %s, error: %v\n", test.name, err)
 		}
@@ -61,12 +62,12 @@ func TestNewStorageError(t *testing.T) {
 	tests := []string{"test_bucket", "1"}
 
 	for _, bucketName := range tests {
-		_, err := NewStorage(&config.MinioConfig{
+		_, err := NewStorage(&config.MinioStorage{
 			Endpoint: url,
 			Key:      "minio",
 			Secret:   "minio123",
 			Bucket:   bucketName,
-		}, config.GetTimeoutDuration(300))
+		}, 300*time.Second)
 		if err == nil {
 			t.Fatalf("TestNewStorageError failed for bucketname:  %s\n", bucketName)
 		}
@@ -97,12 +98,12 @@ func getStorage(t testing.TB) *storageImpl {
 		t.SkipNow()
 	}
 
-	backend, err := NewStorage(&config.MinioConfig{
+	backend, err := NewStorage(&config.MinioStorage{
 		Endpoint: url,
 		Key:      "minio",
 		Secret:   "minio123",
 		Bucket:   "gomods",
-	}, config.GetTimeoutDuration(300))
+	}, 300*time.Second)
 	if err != nil {
 		t.Fatal(err)
 	}

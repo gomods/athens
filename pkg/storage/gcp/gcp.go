@@ -29,7 +29,7 @@ type Storage struct {
 // to the path of your service account file. If you're running on GCP (e.g. AppEngine),
 // credentials will be automatically provided.
 // See https://cloud.google.com/docs/authentication/getting-started.
-func New(ctx context.Context, gcpConf *config.GCPConfig, timeout time.Duration) (*Storage, error) {
+func New(ctx context.Context, gcpConf *config.GCPStorage, timeout time.Duration) (*Storage, error) {
 	const op errors.Op = "gcp.New"
 	s, err := newClient(ctx, gcpConf, timeout)
 	if err != nil {
@@ -48,7 +48,7 @@ func New(ctx context.Context, gcpConf *config.GCPConfig, timeout time.Duration) 
 
 // newClient handles the GCS client creation but does not check whether the bucket exists or not
 // this is so that the unit tests can use this to create their own short-lived buckets.
-func newClient(ctx context.Context, gcpConf *config.GCPConfig, timeout time.Duration) (*Storage, error) {
+func newClient(ctx context.Context, gcpConf *config.GCPStorage, timeout time.Duration) (*Storage, error) {
 	const op errors.Op = "gcp.newClient"
 	var opts []option.ClientOption
 	if gcpConf.JSONKey != "" {

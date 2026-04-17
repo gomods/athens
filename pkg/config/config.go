@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"path/filepath"
 	"runtime"
 	"strconv"
 	"strings"
@@ -20,7 +19,7 @@ const defaultConfigFile = "athens.toml"
 
 // Config provides configuration values for all components.
 type Config struct {
-	TimeoutConf
+	TimeoutConfig
 
 	GoEnv            string    `envconfig:"GO_ENV"                    validate:"required"`
 	GoBinary         string    `envconfig:"GO_BINARY_PATH"            validate:"required"`
@@ -37,8 +36,7 @@ type Config struct {
 	TraceExporterURL string    `envconfig:"ATHENS_TRACE_EXPORTER_URL"`
 	TraceExporter    string    `envconfig:"ATHENS_TRACE_EXPORTER"`
 	StatsExporter    string    `envconfig:"ATHENS_STATS_EXPORTER"`
-	StorageType      string    `envconfig:"ATHENS_STORAGE_TYPE"       validate:"required"`
-	GlobalEndpoint   string    `envconfig:"ATHENS_GLOBAL_ENDPOINT"` // This feature is not yet implemented
+	GlobalEndpoint   string    `envconfig:"ATHENS_GLOBAL_ENDPOINT"`
 	Port             string    `envconfig:"ATHENS_PORT"`
 	UnixSocket       string    `envconfig:"ATHENS_UNIX_SOCKET"`
 	BasicAuthUser    string    `envconfig:"BASIC_AUTH_USER"`
@@ -57,14 +55,30 @@ type Config struct {
 	DownloadMode     mode.Mode `envconfig:"ATHENS_DOWNLOAD_MODE"`
 	DownloadURL      string    `envconfig:"ATHENS_DOWNLOAD_URL"`
 	NetworkMode      string    `envconfig:"ATHENS_NETWORK_MODE"       validate:"oneof=strict offline fallback"`
-	SingleFlightType string    `envconfig:"ATHENS_SINGLE_FLIGHT_TYPE"`
 	RobotsFile       string    `envconfig:"ATHENS_ROBOTS_FILE"`
-	IndexType        string    `envconfig:"ATHENS_INDEX_TYPE"`
-	ShutdownTimeout  int       `envconfig:"ATHENS_SHUTDOWN_TIMEOUT"   validate:"min=0"`
-	StashTimeout     int       `envconfig:"ATHENS_STASH_TIMEOUT"`
+
+	SingleFlightType string `envconfig:"ATHENS_SINGLE_FLIGHT_TYPE"`
 	SingleFlight     *SingleFlight
-	Storage          *Storage
-	Index            *Index
+
+	StorageType string `envconfig:"ATHENS_STORAGE_TYPE"       validate:"required"`
+	Storage     *Storage
+
+	IndexType string `envconfig:"ATHENS_INDEX_TYPE"`
+	Index     *Index
+}
+
+// BasicAuth returns BasicAuthUser and BasicAuthPassword
+// and ok if neither of them are empty.
+func (c *Config) BasicAuth() (user, pass string, ok bool) {
+	user = c.BasicAuthUser
+	pass = c.BasicAuthPass
+	ok = user != "" && pass != ""
+	return user, pass, ok
+}
+
+// FilterOff returns true if the FilterFile is empty.
+func (c *Config) FilterOff() bool {
+	return c.FilterFile == ""
 }
 
 // EnvList is a list of key-value environment
@@ -126,39 +140,24 @@ func (el EnvList) Validate() error {
 	return nil
 }
 
-// Load loads the config from a file.
-// If file is not present returns default config.
-func Load(configFile string) (*Config, error) {
-	// User explicitly specified a config file
-	if configFile != "" {
-		return ParseConfigFile(configFile)
-	}
-
-	// There is a config in the current directory
-	if fi, err := os.Stat(defaultConfigFile); err == nil {
-		return ParseConfigFile(fi.Name())
-	}
-
-	// Use default values
-	log.Println("Running dev mode with default settings, consult config when you're ready to run in production")
-	cfg := defaultConfig()
-	return cfg, envOverride(cfg)
-}
-
 func defaultConfig() *Config {
 	return &Config{
-		GoBinary:         "go",
-		GoBinaryEnvVars:  EnvList{"GOPROXY=direct"},
-		GoEnv:            "development",
-		GoGetWorkers:     10,
-		ProtocolWorkers:  30,
-		LogLevel:         "debug",
-		LogFormat:        "plain",
-		CloudRuntime:     "none",
-		EnablePprof:      false,
-		PprofPort:        ":3001",
-		StatsExporter:    "prometheus",
-		TimeoutConf:      TimeoutConf{Timeout: 300},
+		GoBinary:        "go",
+		GoBinaryEnvVars: EnvList{"GOPROXY=direct"},
+		GoEnv:           "development",
+		GoGetWorkers:    10,
+		ProtocolWorkers: 30,
+		LogLevel:        "debug",
+		LogFormat:       "plain",
+		CloudRuntime:    "none",
+		EnablePprof:     false,
+		PprofPort:       ":3001",
+		StatsExporter:   "prometheus",
+		TimeoutConfig: TimeoutConfig{
+			Timeout:         300,
+			ShutdownTimeout: 60,
+			StashTimeout:    600,
+		},
 		HomeTemplatePath: "/var/lib/athens/home.html",
 		StorageType:      "memory",
 		Port:             ":3000",
@@ -172,12 +171,16 @@ func defaultConfig() *Config {
 		NetworkMode:      "strict",
 		RobotsFile:       "robots.txt",
 		IndexType:        "none",
-		ShutdownTimeout:  60,
-		StashTimeout:     600,
 		SingleFlight: &SingleFlight{
-			Etcd:  &Etcd{"localhost:2379,localhost:22379,localhost:32379"},
-			Redis: &Redis{"127.0.0.1:6379", "", DefaultRedisLockConfig()},
-			RedisSentinel: &RedisSentinel{
+			Etcd: &EtcdSingleFlight{
+				Endpoints: "localhost:2379,localhost:22379,localhost:32379",
+			},
+			Redis: &RedisSingleFlight{
+				Endpoint:   "127.0.0.1:6379",
+				Password:   "",
+				LockConfig: DefaultRedisLockConfig(),
+			},
+			RedisSentinel: &RedisSentinelSingleFlight{
 				Endpoints:        []string{"127.0.0.1:26379"},
 				MasterName:       "redis-1",
 				SentinelPassword: "sekret",
@@ -185,10 +188,12 @@ func defaultConfig() *Config {
 				RedisPassword:    "",
 				LockConfig:       DefaultRedisLockConfig(),
 			},
-			GCP: DefaultGCPConfig(),
+			GCP: &GCPSingleFlight{
+				StaleThreshold: 120,
+			},
 		},
 		Index: &Index{
-			MySQL: &MySQL{
+			MySQL: &MySQLIndex{
 				Protocol: "tcp",
 				Host:     "localhost",
 				Port:     3306,
@@ -200,7 +205,7 @@ func defaultConfig() *Config {
 					"timeout":   "30s",
 				},
 			},
-			Postgres: &Postgres{
+			Postgres: &PostgresIndex{
 				Host:     "localhost",
 				Port:     5432,
 				User:     "postgres",
@@ -215,43 +220,43 @@ func defaultConfig() *Config {
 	}
 }
 
-// BasicAuth returns BasicAuthUser and BasicAuthPassword
-// and ok if neither of them are empty.
-func (c *Config) BasicAuth() (user, pass string, ok bool) {
-	user = c.BasicAuthUser
-	pass = c.BasicAuthPass
-	ok = user != "" && pass != ""
-	return user, pass, ok
-}
-
-// FilterOff returns true if the FilterFile is empty.
-func (c *Config) FilterOff() bool {
-	return c.FilterFile == ""
-}
-
-// ParseConfigFile parses the given file into an athens config struct.
-func ParseConfigFile(configFile string) (*Config, error) {
-	// Always start from a default config.
-	config := defaultConfig()
-
-	// attempt to read the given config file
-	if _, err := toml.DecodeFile(configFile, config); err != nil {
-		return nil, err
+// Load loads the config from a file.
+// If file is not present returns default config.
+func Load(path string) (*Config, error) {
+	// User explicitly specified a config file
+	if path != "" {
+		return ParseFile(path)
 	}
 
-	// override values with environment variables if specified
+	// There is a config in the current directory
+	if fi, err := os.Stat(defaultConfigFile); err == nil {
+		return ParseFile(fi.Name())
+	}
+
+	// Use default values
+	log.Println("Running dev mode with default settings, consult config when you're ready to run in production")
+	cfg := defaultConfig()
+	return cfg, envOverride(cfg)
+}
+
+// ParseFile parses the given file into an athens config struct.
+func ParseFile(path string) (*Config, error) {
+	config := defaultConfig()
+	if _, err := toml.DecodeFile(path, config); err != nil {
+		return nil, err
+	}
 	if err := envOverride(config); err != nil {
 		return nil, err
 	}
 
-	// Check file perms from config
+	// Check file perms from config and port formatting.
 	if config.GoEnv == "production" {
-		if err := checkFilePerms(configFile, config.FilterFile); err != nil {
+		if err := checkFilePerms(path, config.FilterFile); err != nil {
 			return nil, err
 		}
 	}
+	config.Port = ensurePortFormat(config.Port)
 
-	// validate all required fields have been populated
 	if err := validateConfig(*config); err != nil {
 		return nil, err
 	}
@@ -260,21 +265,45 @@ func ParseConfigFile(configFile string) (*Config, error) {
 
 // envOverride uses Environment variables to override unspecified properties.
 func envOverride(config *Config) error {
-	const defaultPort = ":3000"
 	err := envconfig.Process("athens", config)
 	if err != nil {
 		return err
 	}
-	portEnv := os.Getenv("PORT")
+
 	// ATHENS_PORT takes precedence over PORT
+	portEnv := os.Getenv("PORT")
 	if portEnv != "" && os.Getenv("ATHENS_PORT") == "" {
 		config.Port = portEnv
 	}
-	if config.Port == "" {
-		config.Port = defaultPort
-	}
-	config.Port = ensurePortFormat(config.Port)
 	return nil
+}
+
+// checkFilePerms given a list of files.
+func checkFilePerms(files ...string) error {
+	const op = "config.checkFilePerms"
+
+	var errs error
+	for _, f := range files {
+		if f == "" {
+			continue
+		}
+
+		// There is a subtle bug in the filter module which ignores the filter file if it does not find it.
+		// This check can be removed once that has been fixed
+		fInfo, err := os.Stat(f)
+		if err != nil {
+			errs = errors.Join(errs, errors.E(op, fmt.Errorf("checking file %q: %w", f, err)))
+			continue
+		}
+
+		// Assume unix based system (MacOS and Linux)
+		// the bit mask is calculated using the umask command which tells which permissions
+		// should not be allowed for a particular user, group or world
+		if fInfo.Mode()&0o033 != 0 && runtime.GOOS != "windows" {
+			errs = errors.Join(errs, errors.E(op, f+" should have at most rwx,-, - (bit mask 077) as permission"))
+		}
+	}
+	return errs
 }
 
 func ensurePortFormat(s string) string {
@@ -335,46 +364,4 @@ func validateIndex(validate *validator.Validate, indexType string, config *Index
 	default:
 		return fmt.Errorf("index type %q is unknown", indexType)
 	}
-}
-
-// GetConf accepts the path to a file, constructs an absolute path to the file,
-// and attempts to parse it into a Config struct.
-func GetConf(path string) (*Config, error) {
-	absPath, err := filepath.Abs(path)
-	if err != nil {
-		return nil, fmt.Errorf("unable to construct absolute path to test config file")
-	}
-	conf, err := ParseConfigFile(absPath)
-	if err != nil {
-		return nil, fmt.Errorf("unable to parse test config file: %w", err)
-	}
-	return conf, nil
-}
-
-// checkFilePerms given a list of files.
-func checkFilePerms(files ...string) error {
-	const op = "config.checkFilePerms"
-
-	for _, f := range files {
-		if f == "" {
-			continue
-		}
-
-		// TODO: Do not ignore errors when a file is not found
-		// There is a subtle bug in the filter module which ignores the filter file if it does not find it.
-		// This check can be removed once that has been fixed
-		fInfo, err := os.Stat(f)
-		if err != nil {
-			continue
-		}
-
-		// Assume unix based system (MacOS and Linux)
-		// the bit mask is calculated using the umask command which tells which permissions
-		// should not be allowed for a particular user, group or world
-		if fInfo.Mode()&0o033 != 0 && runtime.GOOS != "windows" {
-			return errors.E(op, f+" should have at most rwx,-, - (bit mask 077) as permission")
-		}
-	}
-
-	return nil
 }

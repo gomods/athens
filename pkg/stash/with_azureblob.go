@@ -21,7 +21,7 @@ import (
 
 // WithAzureBlobLock returns a distributed singleflight
 // using a Azure Blob Storage backend. See the config.toml documentation for details.
-func WithAzureBlobLock(conf *config.AzureBlobConfig, timeout time.Duration, checker storage.Checker) (Wrapper, error) {
+func WithAzureBlobLock(conf *config.AzureBlobStorage, timeout time.Duration, checker storage.Checker) (Wrapper, error) {
 	const op errors.Op = "stash.WithAzureBlobLock"
 
 	if conf.AccountKey == "" && (conf.ManagedIdentityResourceID == "" || conf.CredentialScope == "") {

@@ -15,7 +15,7 @@ import (
 // New returns a new Indexer with a MySQL implementation.
 // It attempts to connect to the DB and create the index table
 // if it doesn ot already exist.
-func New(cfg *config.MySQL) (index.Indexer, error) {
+func New(cfg *config.MySQLIndex) (index.Indexer, error) {
 	dataSource := getMySQLSource(cfg)
 	db, err := sql.Open("mysql", dataSource)
 	if err != nil {
@@ -98,7 +98,7 @@ func (i *indexer) Lines(ctx context.Context, since time.Time, limit int) ([]*ind
 	return lines, nil
 }
 
-func getMySQLSource(cfg *config.MySQL) string {
+func getMySQLSource(cfg *config.MySQLIndex) string {
 	c := mysql.NewConfig()
 	c.Net = cfg.Protocol
 	c.Addr = fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)

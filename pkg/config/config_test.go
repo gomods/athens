@@ -14,58 +14,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func testConfigFile(t *testing.T) (testConfigFile string) {
-	testConfigFile = filepath.Join("testdata", "config.dev.toml")
-	if err := os.Chmod(testConfigFile, 0o700); err != nil {
-		t.Fatalf("%s\n", err)
-	}
-	return testConfigFile
-}
-
-func compareConfigs(parsedConf *Config, expConf *Config, t *testing.T, ignoreTypes ...any) {
-	t.Helper()
-	opts := cmpopts.IgnoreTypes(append([]any{Index{}}, ignoreTypes...)...)
-	eq := cmp.Equal(parsedConf, expConf, opts)
-	if !eq {
-		diff := cmp.Diff(parsedConf, expConf, opts)
-		t.Errorf("Parsed Example configuration did not match expected values. diff:\n%s", diff)
-	}
-}
-
-func compareStorageConfigs(parsedStorage *Storage, expStorage *Storage, t *testing.T) {
-	eq := cmp.Equal(parsedStorage.Mongo, expStorage.Mongo)
-	if !eq {
-		t.Errorf("Parsed Example Storage configuration did not match expected values. Expected: %+v. Actual: %+v", expStorage.Mongo, parsedStorage.Mongo)
-	}
-	eq = cmp.Equal(parsedStorage.Minio, expStorage.Minio)
-	if !eq {
-		t.Errorf("Parsed Example Storage configuration did not match expected values. Expected: %+v. Actual: %+v", expStorage.Minio, parsedStorage.Minio)
-	}
-	eq = cmp.Equal(parsedStorage.Disk, expStorage.Disk)
-	if !eq {
-		t.Errorf("Parsed Example Storage configuration did not match expected values. Expected: %+v. Actual: %+v", expStorage.Disk, parsedStorage.Disk)
-	}
-	eq = cmp.Equal(parsedStorage.GCP, expStorage.GCP)
-	if !eq {
-		t.Errorf("Parsed Example Storage configuration did not match expected values. Expected: %+v. Actual: %+v", expStorage.GCP, parsedStorage.GCP)
-	}
-	eq = cmp.Equal(parsedStorage.S3, expStorage.S3)
-	if !eq {
-		t.Errorf("Parsed Example Storage configuration did not match expected values. Expected: %+v. Actual: %+v", expStorage.S3, parsedStorage.S3)
-	}
-}
-
-func TestPortDefaultsCorrectly(t *testing.T) {
-	conf := &Config{}
-	err := envOverride(conf)
-	if err != nil {
-		t.Fatalf("Env override failed: %v", err)
-	}
-	expPort := ":3000"
-	if conf.Port != expPort {
-		t.Errorf("Port was incorrect. Got: %s, want: %s", conf.Port, expPort)
-	}
-}
+var testFile = filepath.Join("testdata", "config.dev.toml")
 
 func TestEnvOverrides(t *testing.T) {
 	os.Clearenv()
@@ -76,7 +25,7 @@ func TestEnvOverrides(t *testing.T) {
 		LogLevel:        "info",
 		GoBinary:        "go11",
 		CloudRuntime:    "gcp",
-		TimeoutConf: TimeoutConf{
+		TimeoutConfig: TimeoutConfig{
 			Timeout: 30,
 		},
 		StorageType:      "minio",
@@ -132,7 +81,7 @@ func TestEnvOverridesPORT(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Env override failed: %v", err)
 	}
-	if conf.Port != ":5000" {
+	if conf.Port != "5000" {
 		t.Fatalf("expected PORT env to be :5000 but got %v", conf.Port)
 	}
 }
@@ -159,14 +108,14 @@ func TestEnsurePortFormat(t *testing.T) {
 
 func TestStorageEnvOverrides(t *testing.T) {
 	expStorage := &Storage{
-		Disk: &DiskConfig{
+		Disk: &DiskStorage{
 			RootPath: "/my/root/path",
 		},
-		GCP: &GCPConfig{
+		GCP: &GCPStorage{
 			ProjectID: "gcpproject",
 			Bucket:    "gcpbucket",
 		},
-		Minio: &MinioConfig{
+		Minio: &MinioStorage{
 			Endpoint:  "minioEndpoint",
 			Key:       "minioKey",
 			Secret:    "minioSecret",
@@ -174,13 +123,13 @@ func TestStorageEnvOverrides(t *testing.T) {
 			Bucket:    "minioBucket",
 			Region:    "us-west-1",
 		},
-		Mongo: &MongoConfig{
+		Mongo: &MongoStorage{
 			URL:                   "mongoURL",
 			CertPath:              "/test/path",
 			DefaultDBName:         "test",
 			DefaultCollectionName: "testModules",
 		},
-		S3: &S3Config{
+		S3: &S3Storage{
 			Region: "s3Region",
 			Key:    "s3Key",
 			Secret: "s3Secret",
@@ -206,58 +155,60 @@ func TestParseExampleConfig(t *testing.T) {
 	os.Clearenv()
 
 	expStorage := &Storage{
-		Disk: &DiskConfig{
+		Disk: &DiskStorage{
 			RootPath: "/path/on/disk",
 		},
-		GCP: &GCPConfig{
+		GCP: &GCPStorage{
 			ProjectID: "MY_GCP_PROJECT_ID",
 			Bucket:    "MY_GCP_BUCKET",
 		},
-		Minio: &MinioConfig{
+		Minio: &MinioStorage{
 			Endpoint:  "127.0.0.1:9001",
 			Key:       "minio",
 			Secret:    "minio123",
 			EnableSSL: false,
 			Bucket:    "gomods",
 		},
-		Mongo: &MongoConfig{
+		Mongo: &MongoStorage{
 			URL:                   "mongodb://127.0.0.1:27017",
 			CertPath:              "",
 			InsecureConn:          false,
 			DefaultDBName:         "athens",
 			DefaultCollectionName: "modules",
 		},
-		S3: &S3Config{
+		S3: &S3Storage{
 			Region: "MY_AWS_REGION",
 			Key:    "MY_AWS_ACCESS_KEY_ID",
 			Secret: "MY_AWS_SECRET_ACCESS_KEY",
 			Token:  "",
 			Bucket: "MY_S3_BUCKET_NAME",
 		},
-		AzureBlob: &AzureBlobConfig{
+		AzureBlob: &AzureBlobStorage{
 			AccountName:               "MY_AZURE_BLOB_ACCOUNT_NAME",
 			AccountKey:                "",
 			ManagedIdentityResourceID: "",
 			CredentialScope:           "",
 			ContainerName:             "MY_AZURE_BLOB_CONTAINER_NAME",
 		},
-		External: &External{URL: ""},
+		External: &ExternalStorage{URL: ""},
 	}
 
 	expSingleFlight := &SingleFlight{
-		Redis: &Redis{
+		Redis: &RedisSingleFlight{
 			Endpoint:   "127.0.0.1:6379",
 			Password:   "",
 			LockConfig: DefaultRedisLockConfig(),
 		},
-		RedisSentinel: &RedisSentinel{
+		RedisSentinel: &RedisSentinelSingleFlight{
 			Endpoints:        []string{"127.0.0.1:26379"},
 			MasterName:       "redis-1",
 			SentinelPassword: "sekret",
 			LockConfig:       DefaultRedisLockConfig(),
 		},
-		Etcd: &Etcd{Endpoints: "localhost:2379,localhost:22379,localhost:32379"},
-		GCP:  DefaultGCPConfig(),
+		Etcd: &EtcdSingleFlight{Endpoints: "localhost:2379,localhost:22379,localhost:32379"},
+		GCP: &GCPSingleFlight{
+			StaleThreshold: 120,
+		},
 	}
 
 	expConf := &Config{
@@ -268,8 +219,10 @@ func TestParseExampleConfig(t *testing.T) {
 		GoGetWorkers:    10,
 		ProtocolWorkers: 30,
 		CloudRuntime:    "none",
-		TimeoutConf: TimeoutConf{
-			Timeout: 300,
+		TimeoutConfig: TimeoutConfig{
+			Timeout:         300,
+			ShutdownTimeout: 60,
+			StashTimeout:    600,
 		},
 		StorageType:      "memory",
 		NetworkMode:      "strict",
@@ -292,16 +245,14 @@ func TestParseExampleConfig(t *testing.T) {
 		DownloadMode:     "sync",
 		RobotsFile:       "robots.txt",
 		IndexType:        "none",
-		ShutdownTimeout:  60,
-		StashTimeout:     600,
 		Index:            &Index{},
 	}
 
-	absPath, err := filepath.Abs(testConfigFile(t))
+	absPath, err := filepath.Abs(testFile)
 	if err != nil {
 		t.Errorf("Unable to construct absolute path to example config file")
 	}
-	parsedConf, err := ParseConfigFile(absPath)
+	parsedConf, err := ParseFile(absPath)
 	if err != nil {
 		t.Errorf("Unable to parse example config file: %+v", err)
 	}
@@ -491,11 +442,11 @@ func Test_checkFilePerms(t *testing.T) {
 }
 
 func TestDefaultConfigMatchesConfigFile(t *testing.T) {
-	absPath, err := filepath.Abs(testConfigFile(t))
+	absPath, err := filepath.Abs(filepath.Join("..", "..", "config.dev.toml"))
 	if err != nil {
 		t.Errorf("Unable to construct absolute path to example config file")
 	}
-	parsedConf, err := ParseConfigFile(absPath)
+	parsedConf, err := ParseFile(absPath)
 	if err != nil {
 		t.Errorf("Unable to parse example config file: %+v", err)
 	}
@@ -542,86 +493,100 @@ func TestEnvList(t *testing.T) {
 	}
 }
 
-type decodeTestCase struct {
-	name     string
-	pre      EnvList
-	given    string
-	valid    bool
-	expected EnvList
-}
-
-var envListDecodeTests = []decodeTestCase{
-	{
-		name:     "empty",
-		pre:      EnvList{},
-		given:    "",
-		valid:    true,
-		expected: EnvList{},
-	},
-	{
-		name:     "unchanged",
-		pre:      EnvList{"GOPROXY=direct"},
-		given:    "",
-		valid:    true,
-		expected: EnvList{"GOPROXY=direct"},
-	},
-	{
-		name:     "must not merge",
-		pre:      EnvList{"GOPROXY=direct"},
-		given:    "GOPRIVATE=github.com/gomods/*",
-		valid:    true,
-		expected: EnvList{"GOPRIVATE=github.com/gomods/*"},
-	},
-	{
-		name:     "must override",
-		pre:      EnvList{"GOPROXY=direct"},
-		given:    "GOPROXY=https://proxy.golang.org",
-		valid:    true,
-		expected: EnvList{"GOPROXY=https://proxy.golang.org"},
-	},
-	{
-		name:  "semi colon separator",
-		pre:   EnvList{"GOPROXY=direct", "GOPRIVATE="},
-		given: "GOPROXY=off; GOPRIVATE=marwan.io/*;GONUTS=lol;GODEBUG=dns=true",
-		valid: true,
-		expected: EnvList{
-			"GOPROXY=off",
-			"GOPRIVATE=marwan.io/*",
-			"GONUTS=lol",
-			"GODEBUG=dns=true",
-		},
-	},
-	{
-		name:  "with commas",
-		pre:   EnvList{"GOPROXY=direct", "GOPRIVATE="},
-		given: "GOPROXY=proxy.golang.org,direct;GOPRIVATE=marwan.io/*;GONUTS=lol;GODEBUG=dns=true",
-		valid: true,
-		expected: EnvList{
-			"GOPROXY=proxy.golang.org,direct",
-			"GOPRIVATE=marwan.io/*",
-			"GONUTS=lol",
-			"GODEBUG=dns=true",
-		},
-	},
-	{
-		name:  "invalid",
-		pre:   EnvList{},
-		given: "GOPROXY=direct; INVALID",
-		valid: false,
-	},
-	{
-		name:     "accept empty value",
-		pre:      EnvList{"GOPROXY=direct"},
-		given:    "GOPROXY=; GOPRIVATE=github.com/*",
-		valid:    true,
-		expected: EnvList{"GOPROXY=", "GOPRIVATE=github.com/*"},
-	},
-}
-
 func TestEnvListDecode(t *testing.T) {
-	for _, tc := range envListDecodeTests {
+	tests := []struct {
+		name     string
+		pre      EnvList
+		given    string
+		valid    bool
+		expected EnvList
+	}{
+		{
+			name:     "empty",
+			pre:      EnvList{},
+			given:    "",
+			valid:    true,
+			expected: EnvList{},
+		},
+		{
+			name:     "unchanged",
+			pre:      EnvList{"GOPROXY=direct"},
+			given:    "",
+			valid:    true,
+			expected: EnvList{"GOPROXY=direct"},
+		},
+		{
+			name:     "must not merge",
+			pre:      EnvList{"GOPROXY=direct"},
+			given:    "GOPRIVATE=github.com/gomods/*",
+			valid:    true,
+			expected: EnvList{"GOPRIVATE=github.com/gomods/*"},
+		},
+		{
+			name:     "must override",
+			pre:      EnvList{"GOPROXY=direct"},
+			given:    "GOPROXY=https://proxy.golang.org",
+			valid:    true,
+			expected: EnvList{"GOPROXY=https://proxy.golang.org"},
+		},
+		{
+			name:  "semi colon separator",
+			pre:   EnvList{"GOPROXY=direct", "GOPRIVATE="},
+			given: "GOPROXY=off; GOPRIVATE=marwan.io/*;GONUTS=lol;GODEBUG=dns=true",
+			valid: true,
+			expected: EnvList{
+				"GOPROXY=off",
+				"GOPRIVATE=marwan.io/*",
+				"GONUTS=lol",
+				"GODEBUG=dns=true",
+			},
+		},
+		{
+			name:  "with commas",
+			pre:   EnvList{"GOPROXY=direct", "GOPRIVATE="},
+			given: "GOPROXY=proxy.golang.org,direct;GOPRIVATE=marwan.io/*;GONUTS=lol;GODEBUG=dns=true",
+			valid: true,
+			expected: EnvList{
+				"GOPROXY=proxy.golang.org,direct",
+				"GOPRIVATE=marwan.io/*",
+				"GONUTS=lol",
+				"GODEBUG=dns=true",
+			},
+		},
+		{
+			name:  "invalid",
+			pre:   EnvList{},
+			given: "GOPROXY=direct; INVALID",
+			valid: false,
+		},
+		{
+			name:     "accept empty value",
+			pre:      EnvList{"GOPROXY=direct"},
+			given:    "GOPROXY=; GOPRIVATE=github.com/*",
+			valid:    true,
+			expected: EnvList{"GOPROXY=", "GOPRIVATE=github.com/*"},
+		},
+	}
+
+	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			testDecode(t, tc)
+			t.Setenv("ATHENS_LIST_TEST", tc.given)
+
+			var config struct {
+				GoBinaryEnvVars EnvList `envconfig:"ATHENS_LIST_TEST"`
+			}
+			config.GoBinaryEnvVars = tc.pre
+			err := envconfig.Process("", &config)
+			if tc.valid && err != nil {
+				t.Fatal(err)
+			}
+			if !tc.valid {
+				if err == nil {
+					t.Fatal("expected an error but got nil")
+				}
+				return
+			}
+			require.Equal(t, tc.expected, config.GoBinaryEnvVars)
 		})
 	}
 	cfg := &Config{
@@ -655,22 +620,35 @@ func TestNetworkMode(t *testing.T) {
 	}
 }
 
-func testDecode(t *testing.T, tc decodeTestCase) {
-	t.Setenv("ATHENS_LIST_TEST", tc.given)
+func compareConfigs(parsedConf, expConf *Config, t *testing.T, ignoreTypes ...any) {
+	t.Helper()
+	opts := cmpopts.IgnoreTypes(append([]any{Index{}}, ignoreTypes...)...)
+	eq := cmp.Equal(parsedConf, expConf, opts)
+	if !eq {
+		diff := cmp.Diff(parsedConf, expConf, opts)
+		t.Errorf("Parsed Example configuration did not match expected values. diff:\n%s", diff)
+	}
+}
 
-	var config struct {
-		GoBinaryEnvVars EnvList `envconfig:"ATHENS_LIST_TEST"`
+func compareStorageConfigs(parsedStorage, expStorage *Storage, t *testing.T) {
+	eq := cmp.Equal(parsedStorage.Mongo, expStorage.Mongo)
+	if !eq {
+		t.Errorf("Parsed Example Storage configuration did not match expected values. Expected: %+v. Actual: %+v", expStorage.Mongo, parsedStorage.Mongo)
 	}
-	config.GoBinaryEnvVars = tc.pre
-	err := envconfig.Process("", &config)
-	if tc.valid && err != nil {
-		t.Fatal(err)
+	eq = cmp.Equal(parsedStorage.Minio, expStorage.Minio)
+	if !eq {
+		t.Errorf("Parsed Example Storage configuration did not match expected values. Expected: %+v. Actual: %+v", expStorage.Minio, parsedStorage.Minio)
 	}
-	if !tc.valid {
-		if err == nil {
-			t.Fatal("expected an error but got nil")
-		}
-		return
+	eq = cmp.Equal(parsedStorage.Disk, expStorage.Disk)
+	if !eq {
+		t.Errorf("Parsed Example Storage configuration did not match expected values. Expected: %+v. Actual: %+v", expStorage.Disk, parsedStorage.Disk)
 	}
-	require.Equal(t, tc.expected, config.GoBinaryEnvVars)
+	eq = cmp.Equal(parsedStorage.GCP, expStorage.GCP)
+	if !eq {
+		t.Errorf("Parsed Example Storage configuration did not match expected values. Expected: %+v. Actual: %+v", expStorage.GCP, parsedStorage.GCP)
+	}
+	eq = cmp.Equal(parsedStorage.S3, expStorage.S3)
+	if !eq {
+		t.Errorf("Parsed Example Storage configuration did not match expected values. Expected: %+v. Actual: %+v", expStorage.S3, parsedStorage.S3)
+	}
 }

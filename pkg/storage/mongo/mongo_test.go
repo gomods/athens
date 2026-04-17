@@ -6,6 +6,7 @@ import (
 	"io"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/errors"
@@ -39,7 +40,7 @@ func getStorage(tb testing.TB) *ModuleStore {
 		tb.SkipNow()
 	}
 
-	backend, err := NewStorage(&config.MongoConfig{URL: url}, config.GetTimeoutDuration(300))
+	backend, err := NewStorage(&config.MongoStorage{URL: url}, 300*time.Second)
 	require.NoError(tb, err)
 
 	return backend
@@ -169,7 +170,7 @@ func TestNewStorageWithDefaultOverrides(t *testing.T) {
 
 	for _, test := range testCases {
 		t.Run(test.name, func(t *testing.T) {
-			backend, err := NewStorage(&config.MongoConfig{URL: url, DefaultDBName: test.dbName, DefaultCollectionName: test.collName}, config.GetTimeoutDuration(300))
+			backend, err := NewStorage(&config.MongoStorage{URL: url, DefaultDBName: test.dbName, DefaultCollectionName: test.collName}, 300*time.Second)
 			require.NoError(t, err)
 			require.Equal(t, test.expDbName, backend.db)
 			require.Equal(t, test.expCollName, backend.coll)
@@ -190,7 +191,7 @@ func TestMongoConfigVerification(t *testing.T) {
 
 	for _, test := range testCases {
 		t.Run(test.testName, func(t *testing.T) {
-			backend := &ModuleStore{url: test.url, timeout: config.GetTimeoutDuration(300)}
+			backend := &ModuleStore{url: test.url, timeout: 300 * time.Second}
 			_, err := backend.newClient()
 			if test.requireError {
 				require.Error(t, err)

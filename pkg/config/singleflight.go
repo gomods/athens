@@ -1,33 +1,30 @@
 package config
 
-// SingleFlight holds the various
-// backend configurations for a distributed
-// lock or single flight mechanism.
+// SingleFlight holds the various backend configurations for a distributed lock or single flight mechanism.
 type SingleFlight struct {
-	Etcd          *Etcd
-	Redis         *Redis
-	RedisSentinel *RedisSentinel
-	GCP           *GCP
+	Etcd          *EtcdSingleFlight
+	Redis         *RedisSingleFlight
+	RedisSentinel *RedisSentinelSingleFlight
+	GCP           *GCPSingleFlight
 }
 
-// Etcd holds client side configuration
-// that helps Athens connect to the
-// Etcd backends.
-type Etcd struct {
+// EtcdSingleFlight holds client side configuration
+// that helps Athens connect to the Etcd backends.
+type EtcdSingleFlight struct {
 	Endpoints string `envconfig:"ATHENS_ETCD_ENDPOINTS"`
 }
 
-// Redis holds the client side configuration
+// RedisSingleFlight holds the client side configuration
 // to connect to redis as a SingleFlight implementation.
-type Redis struct {
+type RedisSingleFlight struct {
 	Endpoint   string `envconfig:"ATHENS_REDIS_ENDPOINT"`
 	Password   string `envconfig:"ATHENS_REDIS_PASSWORD"`
 	LockConfig *RedisLockConfig
 }
 
-// RedisSentinel is the configuration for using redis with sentinel
+// RedisSentinelSingleFlight is the configuration for using redis with sentinel
 // for SingleFlight.
-type RedisSentinel struct {
+type RedisSentinelSingleFlight struct {
 	Endpoints        []string `envconfig:"ATHENS_REDIS_SENTINEL_ENDPOINTS"`
 	MasterName       string   `envconfig:"ATHENS_REDIS_SENTINEL_MASTER_NAME"`
 	SentinelPassword string   `envconfig:"ATHENS_REDIS_SENTINEL_PASSWORD"`
@@ -52,14 +49,7 @@ func DefaultRedisLockConfig() *RedisLockConfig {
 	}
 }
 
-// GCP is the configuration for GCP locking.
-type GCP struct {
+// GCPSingleFlight is the configuration for GCP locking.
+type GCPSingleFlight struct {
 	StaleThreshold int `envconfig:"ATHENS_GCP_STALE_THRESHOLD"`
-}
-
-// DefaultGCPConfig returns the default GCP locking configuration.
-func DefaultGCPConfig() *GCP {
-	return &GCP{
-		StaleThreshold: 120,
-	}
 }
