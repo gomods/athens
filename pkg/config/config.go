@@ -60,7 +60,7 @@ type Config struct {
 	SingleFlightType string `envconfig:"ATHENS_SINGLE_FLIGHT_TYPE"`
 	SingleFlight     *SingleFlight
 
-	StorageType string `envconfig:"ATHENS_STORAGE_TYPE"       validate:"required"`
+	StorageType string `envconfig:"ATHENS_STORAGE_TYPE" validate:"required"`
 	Storage     *Storage
 
 	IndexType string `envconfig:"ATHENS_INDEX_TYPE"`

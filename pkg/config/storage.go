@@ -70,4 +70,3 @@ type AzureBlobStorage struct {
 type ExternalStorage struct {
 	URL string `envconfig:"ATHENS_EXTERNAL_STORAGE_URL" validate:"required"`
 }
-
