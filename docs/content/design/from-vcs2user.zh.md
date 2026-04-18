@@ -127,7 +127,7 @@ dpOpts := &download.Opts{
 dp := download.New(dpOpts, addons.WithPool(protocolWorkers))
 ```
 
-它包含两个组件：`Storage`、`Stasher` 和一个额外的：`Lister`。
+它包含我们前面提到的两个组件：`Storage` 和 `Stasher`，以及一个额外的组件：`Lister`。
 
 `Lister` 用于在 `List` 和 `Latest` 函数中用于在上游代理中查找可用版本。
 
