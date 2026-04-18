@@ -52,7 +52,7 @@ This command downloads the module into the storage. Once the download is complet
 - The exact path of module files is returned by `go mod` as part of `JSON` response.
 
 ### Stash
-As it is important for us to keep components small and readable, we did not want to bloat `Fetcher` with storing functionality. For storing modules into a storage we use `Stash`er. This is the single responsibility of a simple Stasher.
+As it is important for us to keep components small and readable, we did not want to bloat `Fetcher` with storing functionality. For storing modules into a storage we use `Stasher`. This is the single responsibility of a simple Stasher.
 
 We think it's important to keep components small and orthogonal, so the `Fetcher` and the `storage.Backend` don't interact. Instead, the `Stasher` composes them together and orchestrates the process of fetching code and then storing it.
 
@@ -70,10 +70,10 @@ I think this does two things:
 - invokes `Fetcher` to get module bits
 - stores the bits using a `storage`
 
-If you read carefully you noticed wrappers passed into a basic `Stash`er implementation.
+If you read carefully you noticed wrappers passed into a basic `Stasher` implementation.
 These wrappers add more advanced logic and help to keep components clean.
 
-The new method then returns a `Stasher` which is a result of wrapping basic `Stash`er with wrappers.
+The new method then returns a `Stasher` which is a result of wrapping basic `Stasher` with wrappers.
 
 ```go
 for _, w := range wrappers {
@@ -87,7 +87,7 @@ As downloading a module is resource heavy (memory) operation, `Pool` (pkg/stash/
 
 It uses N-worker pattern which spins up the specified number of workers which then waits for a job to complete. Once they complete their job, they return the result and are ready for the next one.
 
-A job, in this case, is a call to Stash function on a backing `Stash`er.
+A job, in this case, is a call to Stash function on a backing `Stasher`.
 
 ### Stash wrapper - SingleFlight
 We know that module fetching is a resource-heavy operation and we just put a limit on a number of parallel downloads. To help us save more resources we wanted to avoid processing the same module multiple times.
