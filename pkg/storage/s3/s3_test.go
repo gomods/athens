@@ -6,13 +6,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/aws/aws-sdk-go-v2/service/s3/types"
-	"github.com/aws/smithy-go"
-	"github.com/gomods/athens/pkg/errors"
-
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/aws/aws-sdk-go-v2/service/s3/types"
+	"github.com/aws/smithy-go"
 	"github.com/gomods/athens/pkg/config"
+	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/storage/compliance"
 )
 
@@ -86,14 +85,14 @@ func getStorage(t testing.TB) *Storage {
 	}
 
 	backend, err := New(
-		&config.S3Config{
+		&config.S3Storage{
 			Key:            "minio",
 			Secret:         "minio123",
 			Bucket:         "gomodsaws",
 			Region:         "us-west-1",
 			ForcePathStyle: true,
 		},
-		config.GetTimeoutDuration(300),
+		300*time.Second,
 		options,
 	)
 	if err != nil {

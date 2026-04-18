@@ -23,7 +23,7 @@ func (s *storageImpl) versionLocation(module, version string) string {
 
 // NewStorage returns a connected Minio or DigitalOcean Spaces storage
 // that implements storage.Backend.
-func NewStorage(conf *config.MinioConfig, timeout time.Duration) (storage.Backend, error) {
+func NewStorage(conf *config.MinioStorage, timeout time.Duration) (storage.Backend, error) {
 	const op errors.Op = "minio.NewStorage"
 	endpoint := TrimHTTP(conf.Endpoint)
 	accessKeyID := conf.Key

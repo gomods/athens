@@ -2,22 +2,28 @@ package config
 
 import "time"
 
-// TimeoutConf is a common struct for anything with a timeout.
-type TimeoutConf struct {
-	Timeout int `validate:"required"`
+// TimeoutConfig is a common struct for anything with a timeout.
+type TimeoutConfig struct {
+	Timeout         int `envconfig:"ATHENS_TIMEOUT"          validate:"required"`
+	ShutdownTimeout int `envconfig:"ATHENS_SHUTDOWN_TIMEOUT" validate:"min=0"`
+	StashTimeout    int `envconfig:"ATHENS_STASH_TIMEOUT"`
 }
 
-// TimeoutDuration returns the timeout as time.duration.
-func (t *TimeoutConf) TimeoutDuration() time.Duration {
-	return GetTimeoutDuration(t.Timeout)
+// TimeoutDuration returns the timeout as time.Duration.
+func (t *TimeoutConfig) TimeoutDuration() time.Duration {
+	return timeoutAsSeconds(t.Timeout)
 }
 
-// GetTimeoutDuration returns the timeout as time.duration.
-func GetTimeoutDuration(timeout int) time.Duration {
-	return time.Second * time.Duration(timeout)
+// ShutdownTimeoutDuration return the shutdown timeout as a time.Duration.
+func (t *TimeoutConfig) ShutdownTimeoutDuration() time.Duration {
+	return timeoutAsSeconds(t.ShutdownTimeout)
 }
 
 // StashTimeoutDuration returns the stash timeout as time.Duration.
-func (c *Config) StashTimeoutDuration() time.Duration {
-	return GetTimeoutDuration(c.StashTimeout)
+func (c *TimeoutConfig) StashTimeoutDuration() time.Duration {
+	return timeoutAsSeconds(c.StashTimeout)
+}
+
+func timeoutAsSeconds(timeout int) time.Duration {
+	return time.Second * time.Duration(timeout)
 }

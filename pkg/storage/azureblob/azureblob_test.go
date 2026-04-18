@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/Azure/azure-storage-blob-go/azblob"
 	"github.com/gomods/athens/pkg/config"
@@ -56,7 +57,7 @@ func getStorage(t testing.TB) *Storage {
 		t.SkipNow()
 	}
 
-	s, err := New(cfg, config.GetTimeoutDuration(30))
+	s, err := New(cfg, 30*time.Second)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -68,7 +69,7 @@ func getStorage(t testing.TB) *Storage {
 	return s
 }
 
-func getTestConfig(containerName string) *config.AzureBlobConfig {
+func getTestConfig(containerName string) *config.AzureBlobStorage {
 	key := os.Getenv("ATHENS_AZURE_ACCOUNT_KEY")
 	resourceId := os.Getenv("ATHENS_AZURE_MANAGED_IDENTITY_RESOURCE_ID")
 	credentialScope := os.Getenv("ATHENS_AZURE_CREDENTIAL_SCOPE")
@@ -79,7 +80,7 @@ func getTestConfig(containerName string) *config.AzureBlobConfig {
 	if name == "" {
 		return nil
 	}
-	return &config.AzureBlobConfig{
+	return &config.AzureBlobStorage{
 		AccountName:               name,
 		AccountKey:                key,
 		ManagedIdentityResourceID: resourceId,

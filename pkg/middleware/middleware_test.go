@@ -8,7 +8,7 @@ import (
 	"testing"
 
 	ht "github.com/gobuffalo/httptest"
-	"github.com/gomods/athens/pkg/config"
+	"github.com/gomods/athens/pkg/config/configtest"
 	"github.com/gomods/athens/pkg/module"
 	"github.com/gorilla/mux"
 	"github.com/stretchr/testify/require"
@@ -63,10 +63,7 @@ func Test_FilterMiddleware(t *testing.T) {
 	}
 	defer os.Remove(filter.Name())
 
-	conf, err := config.GetConf(testConfigFile(t))
-	if err != nil {
-		t.Fatalf("Unable to parse config file: %s", err.Error())
-	}
+	conf := configtest.Load(t, testConfigFile(t))
 
 	// Test with a filter file not existing
 	app, err := middlewareFilterApp("nofsfile", conf.GlobalEndpoint)

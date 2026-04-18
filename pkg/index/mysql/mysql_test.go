@@ -25,7 +25,7 @@ func (i *indexer) clear() error {
 	return err
 }
 
-func getTestConfig(t *testing.T) *config.MySQL {
+func getTestConfig(t *testing.T) *config.MySQLIndex {
 	t.Helper()
 	cfg, err := config.Load("")
 	if err != nil {

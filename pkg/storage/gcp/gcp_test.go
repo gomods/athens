@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/storage/compliance"
@@ -57,7 +58,7 @@ func getStorage(t testing.TB) *Storage {
 		t.SkipNow()
 	}
 
-	s, err := newClient(t.Context(), cfg, config.GetTimeoutDuration(30))
+	s, err := newClient(t.Context(), cfg, 30*time.Second)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -69,12 +70,12 @@ func getStorage(t testing.TB) *Storage {
 	return s
 }
 
-func getTestConfig(bucket string) *config.GCPConfig {
+func getTestConfig(bucket string) *config.GCPStorage {
 	creds := os.Getenv("GCS_SERVICE_ACCOUNT")
 	if creds == "" {
 		return nil
 	}
-	return &config.GCPConfig{
+	return &config.GCPStorage{
 		Bucket:    bucket,
 		JSONKey:   creds,
 		ProjectID: os.Getenv("GCS_PROJECT_ID"),

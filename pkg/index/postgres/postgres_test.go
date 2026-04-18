@@ -25,7 +25,7 @@ func (i *indexer) clear() error {
 	return err
 }
 
-func getTestConfig(t *testing.T) *config.Postgres {
+func getTestConfig(t *testing.T) *config.PostgresIndex {
 	t.Helper()
 	cfg, err := config.Load("")
 	if err != nil {

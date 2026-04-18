@@ -69,6 +69,9 @@ func AsErr(err error, target any) bool {
 	return errors.As(err, target)
 }
 
+// Join is a convenience wrapper around the std library errors.Join.
+var Join = errors.Join
+
 // Op describes any independent function or
 // method in Athens. A series of operations
 // forms a more readable stack trace.

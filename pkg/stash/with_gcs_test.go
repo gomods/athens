@@ -185,7 +185,7 @@ func getStorage(t *testing.T) *gcp.Storage {
 		t.SkipNow()
 	}
 
-	s, err := gcp.New(t.Context(), cfg, config.GetTimeoutDuration(30))
+	s, err := gcp.New(t.Context(), cfg, 30*time.Second)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -193,12 +193,12 @@ func getStorage(t *testing.T) *gcp.Storage {
 	return s
 }
 
-func getTestConfig() *config.GCPConfig {
+func getTestConfig() *config.GCPStorage {
 	creds := os.Getenv("GCS_SERVICE_ACCOUNT")
 	if creds == "" {
 		return nil
 	}
-	return &config.GCPConfig{
+	return &config.GCPStorage{
 		Bucket:  "athens_drone_stash_bucket",
 		JSONKey: creds,
 	}

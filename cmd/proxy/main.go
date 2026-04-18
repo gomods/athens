@@ -119,7 +119,7 @@ func main() {
 	logger.Infof("Shutting down server")
 
 	// We received an interrupt signal, shut down.
-	shutdownCtx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(conf.ShutdownTimeout))
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), conf.ShutdownTimeoutDuration())
 	defer cancel()
 	if err := srv.Shutdown(shutdownCtx); err != nil {
 		logger.WithError(err).Fatal("Could not shut down server")

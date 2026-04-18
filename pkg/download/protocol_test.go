@@ -13,7 +13,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/gomods/athens/pkg/config"
+	"github.com/gomods/athens/pkg/config/configtest"
 	"github.com/gomods/athens/pkg/download/mode"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/index/nop"
@@ -32,10 +32,8 @@ var testConfigPath = filepath.Join("..", "..", "config.dev.toml")
 
 func getDP(t *testing.T) Protocol {
 	t.Helper()
-	conf, err := config.GetConf(testConfigPath)
-	if err != nil {
-		t.Fatalf("Unable to parse config file: %s", err.Error())
-	}
+
+	conf := configtest.Load(t, testConfigPath)
 	goBin := conf.GoBinary
 	fs := afero.NewOsFs()
 	mf, err := module.NewGoGetFetcher(goBin, conf.GoGetDir, conf.GoBinaryEnvVars, fs)

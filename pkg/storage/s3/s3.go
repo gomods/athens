@@ -32,7 +32,7 @@ type Storage struct {
 }
 
 // New creates a new AWS S3 CDN saver.
-func New(s3Conf *config.S3Config, timeout time.Duration, options ...func(*aws.Config)) (*Storage, error) {
+func New(s3Conf *config.S3Storage, timeout time.Duration, options ...func(*aws.Config)) (*Storage, error) {
 	const op errors.Op = "s3.New"
 
 	awsConfig, err := awscfg.LoadDefaultConfig(context.TODO(), awscfg.WithRegion(s3Conf.Region))

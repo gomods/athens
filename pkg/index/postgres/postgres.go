@@ -16,7 +16,7 @@ import (
 // New returns a new Indexer with a PostgreSQL implementation.
 // It attempts to connect to the DB and create the index table
 // if it does not already exist.
-func New(cfg *config.Postgres) (index.Indexer, error) {
+func New(cfg *config.PostgresIndex) (index.Indexer, error) {
 	dataSource := getPostgresSource(cfg)
 	db, err := sql.Open("postgres", dataSource)
 	if err != nil {
@@ -95,7 +95,7 @@ func (i *indexer) Lines(ctx context.Context, since time.Time, limit int) ([]*ind
 	return lines, nil
 }
 
-func getPostgresSource(cfg *config.Postgres) string {
+func getPostgresSource(cfg *config.PostgresIndex) string {
 	args := make([]string, 0, 5+len(cfg.Params))
 	args = append(args, "host="+cfg.Host)
 	args = append(args, "port=", strconv.Itoa(cfg.Port))
