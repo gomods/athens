@@ -41,7 +41,7 @@ return upstreamDetails.baseURL
 这个算法的重要部分是 `lookUpstream`。该函数查询上游代理上的一个端点：
 
 - 如果在其存储中没有 `MxV1`，则返回 404
-- 如果有其存储中有 `MxV1`，则返回 MxV1 的 base URL
+- 如果其存储中有 `MxV1`，则返回 MxV1 的 base URL
 
 _在项目的更高版本中，我们可能会在代理上实现事件流，任何其他代理都可以订阅并监听其关心的模块的删除/弃用信息_
 
