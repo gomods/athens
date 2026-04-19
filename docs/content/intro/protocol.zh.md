@@ -4,7 +4,7 @@ date: 2018-02-11T16:58:56-05:00
 weight: 3
 ---
 
-Athens 在 Go 命令行接口的基础上建立了一些端点，用来于外部提供模块的代理通信。我们称这些端点为_下载协议_
+Athens 在 Go 命令行接口的基础上建立了一些端点，用来与外部提供模块的代理通信。我们称这些端点为_下载协议_
 
 vgo 在下载协议上的原始调研报告可以在这里找到：https://research.swtch.com/vgo-module
 
@@ -47,7 +47,7 @@ GET $HOST:$PORT/github.com/acidburn/htp/@v/v1.0.0.info
 }
 ```
 
-## 文件 Go.mod
+## Go.mod 文件
 
 ```HTTP
 GET $HOST:$PORT/github.com/acidburn/htp/@v/v1.0.0.mod
