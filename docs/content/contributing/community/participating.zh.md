@@ -5,7 +5,7 @@ weight: 1
 
 ---
 
-热烈欢迎所有人随时加入我们的社区！我们是一个友好包容的团体，很高兴有您的加入。Athens 社区有三个角色：
+随时欢迎任何人加入我们的社区！我们是一个友好包容的团体，很高兴有您的加入。Athens 社区有三个角色：
 
 - 社区成员
 - 贡献者
@@ -15,15 +15,14 @@ weight: 1
 
 # 社区成员
 
-社区成员是决定参与我们社区的人。任何人都可以随时参与。参与社区不意味着您必须承诺持续参与，但我们希望社区热情好客，工作足够有趣，让您愿意留下来 :)
+所谓社区成员，就是愿意加入我们社区的人。任何人都可以随时参与，完全不用有负担。即便你想试试看，也不代表非得一直待着——但我们真心希望，社区的热情和有趣的工作能让你愿意留下来 :)
 
-我们会提供一切帮助支持您以任何喜欢的方式贡献。如果您正在考虑加入，可以尝试以下方式：
+我们会尽可能提供帮助来支持您以任何喜欢的方式参与贡献。如果您正在考虑加入，可以尝试以下方式：
 
 - 评论您感兴趣的[问题](https://github.com/gomods/athens/issues)
-- 提交 [Pull Request](https://github.com/gomods/athens/pulls)（PR）来修复问题，或改进没有对应问题的事物
+- 提交 [Pull Request](https://github.com/gomods/athens/pulls)（PR）来修复问题，或改进没有 issue 的功能
 - 审查您感兴趣的 PR
-- 参加我们的[办公时间](/contributing/community/office-hours/)
-（或不止一个！）
+- 参加我们的[社区会议](/contributing/community/office-hours/)（或不止一个！）
     - 在[这里](https://www.youtube.com/playlist?list=PLAk08AWjk5sekD-FRjU4VVe97nltUyZ4W)查看我们过去所有会议的录像
 - 在 [gophers slack](https://invite.slack.golangbridge.org/) 的 `#athens` 频道与我们聊天
 - ... 以及任何其他适合您的事情！
@@ -36,17 +35,17 @@ weight: 1
 
 贡献者对 Athens 仓库有读取权限。这意味着作为贡献者，您可以为自己分配问题，并可以通过 [Github Pull Request 审查系统](https://help.github.com/articles/about-pull-request-reviews/) 被要求审查 Pull Request（PR）。
 
-我们严重依赖 Github PR 审查系统，这意味着如果您作为贡献者审查 PR，您可以帮助决定该 PR 何时准备好合并。不要担心您_不够了解_，最终批准和合并将由一个或多个维护者完成。
+我们非常依赖 Github PR 审查系统，这意味着如果您作为贡献者审查 PR，您可以帮助决定该 PR 何时可以合并。不要担心您 _不够了解_ ，最终批准和合并将由一个或多个维护者完成。
 
 ## 如何成为贡献者
 
 要成为贡献者，项目的核心维护者希望看到您：
 
 - 定期参加我们的开发会议<sup>1</sup>
-- 用您的经验和观点评论问题
-- 在 Pull Request 上添加您的评论和审查（任何人都可以作为社区成员这样做）
-- 提交 PR 来修复问题
-- 在发现问题时提交问题
+- 用您的和经验观点评论 issues
+- 在 Pull Request 上添加您的评论和审查（任何社区成员都可以这样做）
+- 提交 PR 来修复 issues
+- 在发现问题时打开 issues
 
 贡献者和维护者会留意可能成为优秀贡献者的社区成员。但不要害羞，如果您觉得自己就是，欢迎联系任何一位贡献者或维护者。
 

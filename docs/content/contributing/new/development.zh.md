@@ -5,7 +5,7 @@ weight: 3
 ---
 # Athens 开发指南
 
-代理使用符合 Go 语言习惯的写法编写，使用标准工具。如果您了解 Go，您就能够阅读代码并运行服务器。
+Athens 代理使用符合 Go 语言习惯的写法编写，使用标准工具。如果您了解 Go，您就能够阅读代码并运行服务器。
 
 Athens 使用 [Go Modules](https://golang.org/cmd/go/#hdr-Modules__module_versions__and_more) 进行依赖管理。您需要 [Go v1.12+](https://golang.org/dl) 才能开始开发 Athens。
 
@@ -18,7 +18,7 @@ Athens 基于 Go v1.12+ 开发。
 如需使用其他版本的 Go，请设置以下环境变量：
 ```
 GO_BINARY_PATH=go1.12.X
-# 或您想与 athens 一起使用的任何其他二进制文件
+# 或其他开发 athens 的二进制文件版本
 ```
 
 # 运行代理
