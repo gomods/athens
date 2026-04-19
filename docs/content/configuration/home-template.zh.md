@@ -6,9 +6,9 @@ weight: 8
 
 从 v0.14.0 起，Athens 自带一个默认的最小化 HTML 首页，指导用户如何连接代理。它会根据是否配置了 GoNoSumPatterns，尝试为 GO_PROXY 构建配置。它利用请求 Host 头（HTTP 1.1）或 Authority 头（HTTP 2）以及是否基于 TLS 来指导配置 `GO_PROXY` 。最后，还提供了关于如何利用 Athens API 的快速指南。
 
-当然，并非所有场景都如此简单。某些安装环境在 CI 中可达的地址可能与桌面用户不同。在这种情况下，以及其他默认首页没有意义的情况下，可以覆盖模板。
+当然，并非所有场景都如此简单。某些安装场景下，持续集成（CI）环境中的访问地址可能与桌面用户不同。在这种情况下，以及其他默认首页不适用情况下，可以覆盖模板。
 
-通过配置 `HomeTemplatePath`（通过配置或 `ATHENS_HOME_TEMPLATE_PATH` 环境变量）指向磁盘上包含 Go HTML 模板的位置，或将模板文件放置在 `/var/lib/athens/home.html`。
+通过以下方式实现：在配置文件中设置 `HomeTemplatePath`，或通过环境变量 `ATHENS_HOME_TEMPLATE_PATH` 指定一个存放 Go HTML 模板文件磁盘路径；或者直接将模板文件放在 `/var/lib/athens/home.html` 路径下。
 
 Athens 会自动向模板注入以下变量：
 
@@ -17,9 +17,9 @@ Athens 会自动向模板注入以下变量：
 | `Host` | 根据请求 Host（HTTP1）或 Authority（HTTP2）头以及 TLS 的存在构建，包含端口。 |
 | `NoSumPatterns` | 直接来自配置。 |
 
-使用这些值的方法是将它们包裹在带前置点的括号中。示例：`{{ .Host }}`
+使用这些值时，需要将其包裹在花括号中，并在变量名前加上一个点。示例：`{{ .Host }}`
 
-有关更高级的格式化，请阅读 [Go HTML 模板](https://pkg.go.dev/html/template) 相关文档。
+关于更高级的格式化方式，请参阅 [Go HTML 模板](https://pkg.go.dev/html/template) 相关文档。
 
 ```html
 <!DOCTYPE html>
