@@ -4,7 +4,7 @@ description: 如何自定义主页模板
 weight: 8
 ---
 
-从 v0.14.0 起，Athens 自带一个默认的最小化 HTML 首页，指导用户如何连接代理。它会考虑是否配置了 `GoNoSumPatterns`，并尝试为 `GO_PROXY` 构建配置。它利用请求 Host 头（HTTP 1.1）或 Authority 头（HTTP 2）以及请求是否通过 TLS 来提供配置 `GO_PROXY` 的指导。最后，首页提供关于用户如何利用 Athens API 的快速指南。
+从 v0.14.0 起，Athens 自带一个默认的最小化 HTML 首页，指导用户如何连接代理。它会根据是否配置了 GoNoSumPatterns，尝试为 GO_PROXY 构建配置。它利用请求 Host 头（HTTP 1.1）或 Authority 头（HTTP 2）以及是否基于 TLS 来指导配置 `GO_PROXY` 。最后，还提供了关于如何利用 Athens API 的快速指南。
 
 当然，并非所有场景都如此简单。某些安装环境在 CI 中可达的地址可能与桌面用户不同。在这种情况下，以及其他默认首页没有意义的情况下，可以覆盖模板。
 

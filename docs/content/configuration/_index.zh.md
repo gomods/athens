@@ -6,13 +6,13 @@ weight: 3
 
 ## 配置 Athens
 
-本文档介绍如何使用各种配置场景来配置 Athens 应用程序。
+本文档介绍如何使用各种配置方案来配置 Athens 应用程序。
 
->本文档涵盖了一些常用的配置变量，但还有很多！如果想查看所有可设置的配置变量，我们已在 [此配置文件](https://github.com/gomods/athens/blob/main/config.dev.toml) 中完整记录。
+>本文档涵盖了一些常用的配置，还有很多其他配置！如果想查看所有可设置的配置，我们已在 [此配置文件](https://github.com/gomods/athens/blob/main/config.dev.toml) 中完整记录。
 
 ### 认证
 
-作为开发者，我们有多种版本控制系统可用。本节概述如何通过提供各种格式的所需凭证来使用它们。
+作为开发者，我们有多种版本控制系统可用。本节概述如何通过提供各种格式的凭证来使用它们。
 
  - [认证](/configuration/authentication)
 
@@ -28,8 +28,8 @@ Athens 支持多种存储选项。本节描述如何配置这些存储选项。
 
   - [上游](/configuration/upstream)
 
-### 代理校验和数据库
+### 代理 Checksum 数据库
 
-本节描述如何代理校验和数据库，详见 https://go.googlesource.com/proposal/+/master/design/25530-sumdb.md
+本节描述如何代理 Checksum 数据库，详见 https://go.googlesource.com/proposal/+/master/design/25530-sumdb.md
 
-- [校验和](/configuration/sumdb)
+- [Checksum](/configuration/sumdb)
