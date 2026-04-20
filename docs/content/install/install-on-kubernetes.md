@@ -224,7 +224,7 @@ ingress:
   tls:
     - secretName: athens.mydomain.com
       hosts:
-        - "athens.mydomain.com
+        - "athens.mydomain.com"
 ```
 
 Example above sets automatic creation/retrieval of TLS certificates from [Let's Encrypt](https://letsencrypt.org/) with [cert-manager](https://hub.helm.sh/charts/jetstack/cert-manager) and uses [nginx-ingress controller](https://hub.helm.sh/charts/stable/nginx-ingress) to expose Athens externally to the Internet.
