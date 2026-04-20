@@ -33,9 +33,9 @@ weight: 1
 
 ## 成为贡献者意味着什么
 
-贡献者对 Athens 仓库有读取权限。这意味着作为贡献者，您可以为自己分配问题，并可以通过 [Github Pull Request 审查系统](https://help.github.com/articles/about-pull-request-reviews/) 被要求审查 Pull Request（PR）。
+贡献者对 Athens 仓库有读取权限。这意味着作为贡献者，您可以为自己分配问题，并可以通过 [GitHub Pull Request 审查系统](https://help.github.com/articles/about-pull-request-reviews/) 被要求审查 Pull Request（PR）。
 
-我们非常依赖 Github PR 审查系统，这意味着如果您作为贡献者审查 PR，您可以帮助决定该 PR 何时可以合并。不要担心您 _不够了解_ ，最终批准和合并将由一个或多个维护者完成。
+我们非常依赖 GitHub PR 审查系统，这意味着如果您作为贡献者审查 PR，您可以帮助决定该 PR 何时可以合并。不要担心您 _不够了解_ ，最终批准和合并将由一个或多个维护者完成。
 
 ## 如何成为贡献者
 
