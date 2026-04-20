@@ -4,7 +4,7 @@ description: 配置存储在代理上的模块
 weight: 6
 ---
 
->注意：本文档介绍的过滤文件已弃用。请参阅["使用下载模式文件进行过滤"](/configuration/download)获取有关如何在 Athens 中过滤模块的最新说明。
+>注意：本文档介绍的过滤文件已弃用。请参阅[使用下载模式文件进行过滤](/configuration/download)获取有关如何在 Athens 中过滤模块的最新说明。
 
 代理支持以下三种用例：
 
