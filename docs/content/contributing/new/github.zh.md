@@ -1,5 +1,5 @@
 ---
-title: "Github"
+title: "GitHub"
 date: 2018-09-20T13:58:58-07:00
 weight: 2
 LastModifierDisplayName: "Robbie"
