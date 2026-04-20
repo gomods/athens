@@ -115,10 +115,12 @@ data "aws_iam_policy_document" "task_role_policy" {
 以下是任务定义中的一个摘录，展示了所需的最小环境变量。
 
 ```json
-"environment": [
-  {"name": "AWS_REGION", "value": "us-east-1"},
-  {"name": "AWS_USE_DEFAULT_CONFIGURATION", "value": "true"},
-  {"name": "ATHENS_STORAGE_TYPE", "value": "s3"},
-  {"name": "ATHENS_S3_BUCKET_NAME", "value": "athens-proxy-us-east-1-123456789012"},
-]
+{
+  "environment": [
+    {"name": "AWS_REGION", "value": "us-east-1"},
+    {"name": "AWS_USE_DEFAULT_CONFIGURATION", "value": "true"},
+    {"name": "ATHENS_STORAGE_TYPE", "value": "s3"},
+    {"name": "ATHENS_S3_BUCKET_NAME", "value": "athens-proxy-us-east-1-123456789012"},
+  ]
+}
 ```

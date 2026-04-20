@@ -116,7 +116,7 @@ helm install gomods/athens-proxy -n athens --namespace athens \
 
 有关更多信息，请参阅 Kubernetes 文档中的[管理容器的计算资源](https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/)。
 
-### 通过 Github Token 授予 Athens 访问私有仓库的权限（可选）
+### 通过 GitHub Token 授予 Athens 访问私有仓库的权限（可选）
 
 1. 在 https://github.com/settings/tokens 上创建一个 Token
 2. 通过 [config.toml](https://github.com/gomods/athens/blob/main/config.dev.toml) 文件（`GithubToken` 字段）或通过设置 `ATHENS_GITHUB_TOKEN` 环境变量，将 Token 提供给 Athens 代理。
@@ -212,7 +212,7 @@ ingress:
   tls:
     - secretName: athens.mydomain.com
       hosts:
-        - "athens.mydomain.com
+        - "athens.mydomain.com"
 ```
 
 上述示例使用 [cert-manager](https://hub.helm.sh/charts/jetstack/cert-manager) 从 [Let's Encrypt](https://letsencrypt.org/) 设置 TLS 证书的自动创建/检索，并使用 [nginx-ingress controller](https://hub.helm.sh/charts/stable/nginx-ingress) 将 Athens 对外暴露于互联网中。
