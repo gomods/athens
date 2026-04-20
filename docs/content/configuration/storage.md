@@ -45,11 +45,11 @@ This storage doesn't need any specific configuration and it's also used by defau
 **This storage type should only be used for development purposes!**
 
 ##### Configuration:
-
-    # StorageType sets the type of storage backend the proxy will use.
-    # Env override: ATHENS_STORAGE_TYPE
-    StorageType = "memory"
-
+```toml
+# StorageType sets the type of storage backend the proxy will use.
+# Env override: ATHENS_STORAGE_TYPE
+StorageType = "memory"
+```
 ## Disk
 
 Disk storage allows modules to be stored on a file system. The location on disk where modules will be stored can be configured.
@@ -57,15 +57,15 @@ Disk storage allows modules to be stored on a file system. The location on disk 
 >You can pre-fill disk-based storage to enable Athens deployments that have no access to the internet. See [here](/configuration/prefill-disk-cache) for instructions on how to do that.
 
 ##### Configuration:
+```toml
+# StorageType sets the type of storage backend the proxy will use.
+# Env override: ATHENS_STORAGE_TYPE
+StorageType = "disk"
 
-    # StorageType sets the type of storage backend the proxy will use.
-    # Env override: ATHENS_STORAGE_TYPE
-    StorageType = "disk"
-
-    [Storage]
-        [Storage.Disk]
-            RootPath = "/path/on/disk"
-
+[Storage]
+    [Storage.Disk]
+        RootPath = "/path/on/disk"
+```
 where `/path/on/disk` is your desired location. Also it can be set using `ATHENS_DISK_STORAGE_ROOT` env
 
 ## Mongo
@@ -73,37 +73,38 @@ where `/path/on/disk` is your desired location. Also it can be set using `ATHENS
 This driver uses a [Mongo](https://www.mongodb.com/) server as data storage. On start this driver will create an `athens` database and `module` collection on your Mongo server.
 
 ##### Configuration:
+```toml
+# StorageType sets the type of storage backend the proxy will use.
+# Env override: ATHENS_STORAGE_TYPE
+StorageType = "mongo"
 
-    # StorageType sets the type of storage backend the proxy will use.
-    # Env override: ATHENS_STORAGE_TYPE
-    StorageType = "mongo"
+[Storage]
+    [Storage.Mongo]
+        # Full URL for mongo storage
+        # Env override: ATHENS_MONGO_STORAGE_URL
+        URL = "mongodb://127.0.0.1:27017"
 
-    [Storage]
-        [Storage.Mongo]
-            # Full URL for mongo storage
-            # Env override: ATHENS_MONGO_STORAGE_URL
-            URL = "mongodb://127.0.0.1:27017"
+        # Not required parameter
+        # Path to certificate to use for the mongo connection
+        # Env override: ATHENS_MONGO_CERT_PATH
+        CertPath = "/path/to/cert/file"
 
-            # Not required parameter
-            # Path to certificate to use for the mongo connection
-            # Env override: ATHENS_MONGO_CERT_PATH
-            CertPath = "/path/to/cert/file"
+        # Not required parameter
+        # Allows for insecure SSL / http connections to mongo storage
+        # Should be used for testing or development only
+        # Env override: ATHENS_MONGO_INSECURE
+        Insecure = false
 
-            # Not required parameter
-            # Allows for insecure SSL / http connections to mongo storage
-            # Should be used for testing or development only
-            # Env override: ATHENS_MONGO_INSECURE
-            Insecure = false
+        # Not required parameter
+        # Allows for use of custom database 
+        # Env override: ATHENS_MONGO_DEFAULT_DATABASE
+        DefaultDBName = "athens"
 
-            # Not required parameter
-            # Allows for use of custom database 
-            # Env override: ATHENS_MONGO_DEFAULT_DATABASE
-            DefaultDBName = athens
-
-            # Not required parameter
-            # Allows for use of custom collection 
-            # Env override: ATHENS_MONGO_DEFAULT_COLLECTION
-            DefaultCollectionName = modules
+        # Not required parameter
+        # Allows for use of custom collection 
+        # Env override: ATHENS_MONGO_DEFAULT_COLLECTION
+        DefaultCollectionName = "modules"
+```
 ## Google Cloud Storage
 
 This driver uses [Google Cloud Storage](https://cloud.google.com/storage/) and assumes that you already have an `account` and `bucket` in it.
@@ -111,20 +112,21 @@ If you never used Google Cloud Storage there is [quick guide](https://cloud.goog
 how to create `bucket` inside it.
 
 ##### Configuration:
+```toml
+# StorageType sets the type of storage backend the proxy will use.
+# Env override: ATHENS_STORAGE_TYPE
+StorageType = "gcp"
 
-    # StorageType sets the type of storage backend the proxy will use.
-    # Env override: ATHENS_STORAGE_TYPE
-    StorageType = "gcp"
+[Storage]
+    [Storage.GCP]
+        # ProjectID to use for GCP Storage
+        # Env overide: GOOGLE_CLOUD_PROJECT
+        ProjectID = "YOUR_GCP_PROJECT_ID"
 
-    [Storage]
-        [Storage.GCP]
-            # ProjectID to use for GCP Storage
-            # Env overide: GOOGLE_CLOUD_PROJECT
-            ProjectID = "YOUR_GCP_PROJECT_ID"
-
-            # Bucket to use for GCP Storage
-            # Env override: ATHENS_STORAGE_GCP_BUCKET
-            Bucket = "YOUR_GCP_BUCKET"
+        # Bucket to use for GCP Storage
+        # Env override: ATHENS_STORAGE_GCP_BUCKET
+        Bucket = "YOUR_GCP_BUCKET"
+```
 
 ## AWS S3
 
@@ -133,112 +135,114 @@ If you never used Amazon Web Services there is [quick guide](https://docs.aws.am
 After this you can pass your credentials inside `config.toml` file.  If the access key ID and secret access key are not specified in `config.toml`, the driver will attempt to load credentials for the default profile from the [AWS CLI configuration file](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html) created during installation.
 
 ##### Configuration:
+```toml
+# StorageType sets the type of storage backend the proxy will use.
+# Env override: ATHENS_STORAGE_TYPE
+StorageType = "s3"
 
-    # StorageType sets the type of storage backend the proxy will use.
-    # Env override: ATHENS_STORAGE_TYPE
-    StorageType = "s3"
+[Storage]
+    [Storage.S3]
+    ### The authentication model is as below for S3 in the following order
+    ### If AWS_CREDENTIALS_ENDPOINT is specified and it returns valid results, then it is used
+    ### If config variables are specified and they are valid, then they return valid results, then it is used
+    ### Otherwise, it will default to default configurations which is as follows
+    # attempt to find credentials in the environment, in the shared
+    # configuration (~/.aws/credentials) and from ec2 instance role
+    # credentials. See
+    # https://godoc.org/github.com/aws/aws-sdk-go#hdr-Configuring_Credentials
+    # and
+    # https://godoc.org/github.com/aws/aws-sdk-go/aws/session#hdr-Environment_Variables
+    # for environment variables that will affect the aws configuration.
+    # Setting UseDefaultConfiguration would only use default configuration. It will be deprecated in future releases 
+    # and is recommended not to use it.
+
+    # Region for S3 storage
+    # Env override: AWS_REGION
+    Region = "MY_AWS_REGION"
+
+    # Access Key for S3 storage
+    # Env override: AWS_ACCESS_KEY_ID
+    Key = "MY_AWS_ACCESS_KEY_ID"
+
+    # Secret Key for S3 storage
+    # Env override: AWS_SECRET_ACCESS_KEY
+    Secret = "MY_AWS_SECRET_ACCESS_KEY"
+
+    # Session Token for S3 storage
+    # Not required parameter
+    # Env override: AWS_SESSION_TOKEN
+    Token = ""
+
+    # S3 Bucket to use for storage
+    # Env override: ATHENS_S3_BUCKET_NAME
+    Bucket = "MY_S3_BUCKET_NAME"
     
-    [Storage]
-            [Storage.S3]
-            ### The authentication model is as below for S3 in the following order
-            ### If AWS_CREDENTIALS_ENDPOINT is specified and it returns valid results, then it is used
-            ### If config variables are specified and they are valid, then they return valid results, then it is used
-            ### Otherwise, it will default to default configurations which is as follows
-            # attempt to find credentials in the environment, in the shared
-            # configuration (~/.aws/credentials) and from ec2 instance role
-            # credentials. See
-            # https://godoc.org/github.com/aws/aws-sdk-go#hdr-Configuring_Credentials
-            # and
-            # https://godoc.org/github.com/aws/aws-sdk-go/aws/session#hdr-Environment_Variables
-            # for environment variables that will affect the aws configuration.
-            # Setting UseDefaultConfiguration would only use default configuration. It will be deprecated in future releases 
-            # and is recommended not to use it.
+    # If true then path style url for s3 endpoint will be used
+    # Env override: AWS_FORCE_PATH_STYLE
+    ForcePathStyle = false
 
-            # Region for S3 storage
-            # Env override: AWS_REGION
-            Region = "MY_AWS_REGION"
+    # If true then the default aws configuration will be used. This will
+    # attempt to find credentials in the environment, in the shared
+    # configuration (~/.aws/credentials) and from ec2 instance role
+    # credentials. See
+    # https://godoc.org/github.com/aws/aws-sdk-go#hdr-Configuring_Credentials
+    # and
+    # https://godoc.org/github.com/aws/aws-sdk-go/aws/session#hdr-Environment_Variables
+    # for environment variables that will affect the aws configuration.
+    # Env override: AWS_USE_DEFAULT_CONFIGURATION
+    UseDefaultConfiguration = false
 
-            # Access Key for S3 storage
-            # Env override: AWS_ACCESS_KEY_ID
-            Key = "MY_AWS_ACCESS_KEY_ID"
+    # https://docs.aws.amazon.com/sdk-for-go/api/aws/credentials/endpointcreds/
+    # Note that this the URI should not end with / when AwsContainerCredentialsRelativeURI is set
+    # Env override: AWS_CREDENTIALS_ENDPOINT
+    CredentialsEndpoint = ""
 
-            # Secret Key for S3 storage
-            # Env override: AWS_SECRET_ACCESS_KEY
-            Secret = "MY_AWS_SECRET_ACCESS_KEY"
-    
-            # Session Token for S3 storage
-            # Not required parameter
-            # Env override: AWS_SESSION_TOKEN
-            Token = ""
+    # Env override: AWS_CONTAINER_CREDENTIALS_RELATIVE_URI
+    # If you are planning to use AWS Fargate, please use http://169.254.170.2 for CredentialsEndpoint
+    # Ref: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-metadata-endpoint-v2.html
+    AwsContainerCredentialsRelativeURI = ""
 
-            # S3 Bucket to use for storage
-            # Env override: ATHENS_S3_BUCKET_NAME
-            Bucket = "MY_S3_BUCKET_NAME"
-            
-            # If true then path style url for s3 endpoint will be used
-            # Env override: AWS_FORCE_PATH_STYLE
-            ForcePathStyle = false
-
-            # If true then the default aws configuration will be used. This will
-            # attempt to find credentials in the environment, in the shared
-            # configuration (~/.aws/credentials) and from ec2 instance role
-            # credentials. See
-            # https://godoc.org/github.com/aws/aws-sdk-go#hdr-Configuring_Credentials
-            # and
-            # https://godoc.org/github.com/aws/aws-sdk-go/aws/session#hdr-Environment_Variables
-            # for environment variables that will affect the aws configuration.
-            # Env override: AWS_USE_DEFAULT_CONFIGURATION
-            UseDefaultConfiguration = false
-
-            # https://docs.aws.amazon.com/sdk-for-go/api/aws/credentials/endpointcreds/
-            # Note that this the URI should not end with / when AwsContainerCredentialsRelativeURI is set
-            # Env override: AWS_CREDENTIALS_ENDPOINT
-            CredentialsEndpoint = ""
-
-            # Env override: AWS_CONTAINER_CREDENTIALS_RELATIVE_URI
-            # If you are planning to use AWS Fargate, please use http://169.254.170.2 for CredentialsEndpoint
-            # Ref: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-metadata-endpoint-v2.html
-            AwsContainerCredentialsRelativeURI = ""
-
-            # An optional endpoint URL (hostname only or fully qualified URI)
-            # that overrides the default generated endpoint for S3 storage client.
-            #
-            # You must still provide a `Region` value when specifying an endpoint.
-            # Env override: AWS_ENDPOINT
-            Endpoint = ""
+    # An optional endpoint URL (hostname only or fully qualified URI)
+    # that overrides the default generated endpoint for S3 storage client.
+    #
+    # You must still provide a `Region` value when specifying an endpoint.
+    # Env override: AWS_ENDPOINT
+    Endpoint = ""
+```
 
 ## Minio
 
 [Minio](https://www.minio.io/) is an open source object storage server that provides an interface for S3 compatible block storages. If you have never used minio, you can read this [quick start guide](https://docs.minio.io/).  Any S3 compatible object storage is supported by Athens through the minio interface. Below, you can find different configuration options we provide for Minio. Example configuration for Digital Ocean and Alibaba OSS block storages are provided below.
 
 ##### Configuration:
+```toml
+# StorageType sets the type of storage backend the proxy will use.
+# Env override: ATHENS_STORAGE_TYPE
+StorageType = "minio"
 
-    # StorageType sets the type of storage backend the proxy will use.
-    # Env override: ATHENS_STORAGE_TYPE
-    StorageType = "minio"
+[Storage]
+    [Storage.Minio]
+        # Endpoint for Minio storage
+        # Env override: ATHENS_MINIO_ENDPOINT
+        Endpoint = "127.0.0.1:9001"
 
-    [Storage]
-        [Storage.Minio]
-            # Endpoint for Minio storage
-            # Env override: ATHENS_MINIO_ENDPOINT
-            Endpoint = "127.0.0.1:9001"
+        # Access Key for Minio storage
+        # Env override: ATHENS_MINIO_ACCESS_KEY_ID
+        Key = "YOUR_MINIO_SECRET_KEY"
 
-            # Access Key for Minio storage
-            # Env override: ATHENS_MINIO_ACCESS_KEY_ID
-            Key = "YOUR_MINIO_SECRET_KEY"
+        # Secret Key for Minio storage
+        # Env override: ATHENS_MINIO_SECRET_ACCESS_KEY
+        Secret = "YOUR_MINIO_SECRET_KEY"
 
-            # Secret Key for Minio storage
-            # Env override: ATHENS_MINIO_SECRET_ACCESS_KEY
-            Secret = "YOUR_MINIO_SECRET_KEY"
+        # Enable SSL for Minio connections
+        # Defaults to true
+        # Env override: ATHENS_MINIO_USE_SSL
+        EnableSSL = false
 
-            # Enable SSL for Minio connections
-            # Defaults to true
-            # Env override: ATHENS_MINIO_USE_SSL
-            EnableSSL = false
-
-            # Minio Bucket to use for storage
-            # Env override: ATHENS_MINIO_BUCKET_NAME
-            Bucket = "gomods"
+        # Minio Bucket to use for storage
+        # Env override: ATHENS_MINIO_BUCKET_NAME
+        Bucket = "gomods"
+```
 
 #### DigitalOcean Spaces
 
@@ -246,36 +250,37 @@ For Athens to communicate with [DigitalOcean Spaces](https://www.digitalocean.co
 Also configuration for this storage looks almost the same in our proxy as for [Minio](#minio).
 
 ##### Configuration:
+```toml
+# StorageType sets the type of storage backend the proxy will use.
+# Env override: ATHENS_STORAGE_TYPE
+StorageType = "minio"
 
-    # StorageType sets the type of storage backend the proxy will use.
-    # Env override: ATHENS_STORAGE_TYPE
-    StorageType = "minio"
+[Storage]
+    [Storage.Minio]
+        # Address of DO Spaces storage
+        # Env override: ATHENS_MINIO_ENDPOINT
+        Endpoint = "YOUR_ADDRESS.digitaloceanspaces.com"
 
-    [Storage]
-        [Storage.Minio]
-            # Address of DO Spaces storage
-            # Env override: ATHENS_MINIO_ENDPOINT
-            Endpoint = "YOUR_ADDRESS.digitaloceanspaces.com"
+        # Access Key for DO Spaces storage
+        # Env override: ATHENS_MINIO_ACCESS_KEY_ID
+        Key = "YOUR_DO_SPACE_KEY_ID"
 
-            # Access Key for DO Spaces storage
-            # Env override: ATHENS_MINIO_ACCESS_KEY_ID
-            Key = "YOUR_DO_SPACE_KEY_ID"
+        # Secret Key for DO Spaces storage
+        # Env override: ATHENS_MINIO_SECRET_ACCESS_KEY
+        Secret = "YOUR_DO_SPACE_SECRET_KEY"
 
-            # Secret Key for DO Spaces storage
-            # Env override: ATHENS_MINIO_SECRET_ACCESS_KEY
-            Secret = "YOUR_DO_SPACE_SECRET_KEY"
+        # Enable SSL
+        # Env override: ATHENS_MINIO_USE_SSL
+        EnableSSL = true
 
-            # Enable SSL
-            # Env override: ATHENS_MINIO_USE_SSL
-            EnableSSL = true
+        # Space name in your DO Spaces storage
+        # Env override: ATHENS_MINIO_BUCKET_NAME
+        Bucket = "YOUR_DO_SPACE_NAME"
 
-            # Space name in your DO Spaces storage
-            # Env override: ATHENS_MINIO_BUCKET_NAME
-            Bucket = "YOUR_DO_SPACE_NAME"
-
-            # Region for DO Spaces storage
-            # Env override: ATHENS_MINIO_REGION
-            Region = "YOUR_DO_SPACE_REGION"
+        # Region for DO Spaces storage
+        # Env override: ATHENS_MINIO_REGION
+        Region = "YOUR_DO_SPACE_REGION"
+```
 
 #### Alibaba OSS
 
@@ -283,32 +288,33 @@ For Athens to communicate with [Alibaba Cloud Object Storage Service](https://ww
 Also configuration for this storage looks almost the same in our proxy as for [Minio](#minio).
 
 ##### Configuration:
+```toml
+# StorageType sets the type of storage backend the proxy will use.
+# Env override: ATHENS_STORAGE_TYPE
+StorageType = "minio"
 
-    # StorageType sets the type of storage backend the proxy will use.
-    # Env override: ATHENS_STORAGE_TYPE
-    StorageType = "minio"
+[Storage]
+    [Storage.Minio]
+        # Address of Alibaba OSS storage
+        # Env override: ATHENS_MINIO_ENDPOINT
+        Endpoint = "YOUR_ADDRESS.aliyuncs.com"
 
-    [Storage]
-        [Storage.Minio]
-            # Address of Alibaba OSS storage
-            # Env override: ATHENS_MINIO_ENDPOINT
-            Endpoint = "YOUR_ADDRESS.aliyuncs.com"
+        # Access Key for Minio storage
+        # Env override: ATHENS_MINIO_ACCESS_KEY_ID
+        Key = "YOUR_OSS_KEY_ID"
 
-            # Access Key for Minio storage
-            # Env override: ATHENS_MINIO_ACCESS_KEY_ID
-            Key = "YOUR_OSS_KEY_ID"
+        # Secret Key for Alibaba OSS storage
+        # Env override: ATHENS_MINIO_SECRET_ACCESS_KEY
+        Secret = "YOUR_OSS_SECRET_KEY"
 
-            # Secret Key for Alibaba OSS storage
-            # Env override: ATHENS_MINIO_SECRET_ACCESS_KEY
-            Secret = "YOUR_OSS_SECRET_KEY"
+        # Enable SSL
+        # Env override: ATHENS_MINIO_USE_SSL
+        EnableSSL = true
 
-            # Enable SSL
-            # Env override: ATHENS_MINIO_USE_SSL
-            EnableSSL = true
-
-            # Parent folder in your Alibaba OSS storage
-            # Env override: ATHENS_MINIO_BUCKET_NAME
-            Bucket = "YOUR_OSS_FOLDER_PREFIX"
+        # Parent folder in your Alibaba OSS storage
+        # Env override: ATHENS_MINIO_BUCKET_NAME
+        Bucket = "YOUR_OSS_FOLDER_PREFIX"
+```
 
 ## Azure Blob Storage
 
@@ -324,32 +330,33 @@ It assumes that you already have the following:
 
 
 ##### Configuration:
+```toml
+# StorageType sets the type of storage backend the proxy will use.
+# Env override: ATHENS_STORAGE_TYPE
+StorageType = "azureblob"
 
-    # StorageType sets the type of storage backend the proxy will use.
-    # Env override: ATHENS_STORAGE_TYPE
-    StorageType = "azureblob"
+[Storage]
+    [Storage.AzureBlob]
+        # Storage Account name for Azure Blob
+        # Env override: ATHENS_AZURE_ACCOUNT_NAME
+        AccountName = "MY_AZURE_BLOB_ACCOUNT_NAME"
 
-    [Storage]
-        [Storage.AzureBlob]
-            # Storage Account name for Azure Blob
-            # Env override: ATHENS_AZURE_ACCOUNT_NAME
-            AccountName = "MY_AZURE_BLOB_ACCOUNT_NAME"
+        # Account Key to use with the storage account
+        # Env override: ATHENS_AZURE_ACCOUNT_KEY
+        AccountKey = "MY_AZURE_BLOB_ACCOUNT_KEY"
 
-            # Account Key to use with the storage account
-            # Env override: ATHENS_AZURE_ACCOUNT_KEY
-            AccountKey = "MY_AZURE_BLOB_ACCOUNT_KEY"
+        # Managed Identity Resource Id to use with the storage account
+        # Env override: ATHENS_AZURE_MANAGED_IDENTITY_RESOURCE_ID
+        ManagedIdentityResourceId = "MY_AZURE_MANAGED_IDENTITY_RESOURCE_ID"
 
-            # Managed Identity Resource Id to use with the storage account
-            # Env override: ATHENS_AZURE_MANAGED_IDENTITY_RESOURCE_ID
-            ManagedIdentityResourceId = "MY_AZURE_MANAGED_IDENTITY_RESOURCE_ID"
+        # Storage Resource to use with the storage account
+        # Env override: ATHENS_AZURE_STORAGE_RESOURCE
+        StorageResource = "MY_AZURE_STORAGE_RESOURCE"
 
-            # Storage Resource to use with the storage account
-            # Env override: ATHENS_AZURE_STORAGE_RESOURCE
-            StorageResource = "MY_AZURE_STORAGE_RESOURCE"
-
-            # Name of container in the blob storage
-            # Env override: ATHENS_AZURE_CONTAINER_NAME
-            ContainerName = "MY_AZURE_BLOB_CONTAINER_NAME"
+        # Name of container in the blob storage
+        # Env override: ATHENS_AZURE_CONTAINER_NAME
+        ContainerName = "MY_AZURE_BLOB_CONTAINER_NAME"
+```
 
 ## External Storage
 
@@ -359,13 +366,15 @@ All you have to do is implement the [storage.Backend](https://github.com/gomods/
 Once you implement the backend server, you must then configure Athens to use that storage backend as such:
 
 ##### Configuration:
-    # Env override: ATHENS_STORAGE_TYPE
-    StorageType = "external"
+```toml
+# Env override: ATHENS_STORAGE_TYPE
+StorageType = "external"
 
-    [Storage]
-        [Storage.External]
-            # Env override: ATHENS_EXTERNAL_STORAGE_URL
-            URL = "http://localhost:9090"
+[Storage]
+    [Storage.External]
+        # Env override: ATHENS_EXTERNAL_STORAGE_URL
+        URL = "http://localhost:9090"
+```
 
 Athens provides a convenience wrapper that lets you implement a storage backend with ease. See the following example: 
 
@@ -415,13 +424,14 @@ no extra configuration.
 
 Using the `etcd` mechanism is very simple, just a comma separated list of etcd endpoints.
 The recommend configuration is 3 endpoints, however, more can be used.
-  
-    SingleFlightType = "etcd"
+```toml
+SingleFlightType = "etcd"
 
-    [SingleFlight]
-        [SingleFlight.Etcd]
-            # Env override: ATHENS_ETCD_ENDPOINTS
-            Endpoints = "localhost:2379,localhost:22379,localhost:32379"
+[SingleFlight]
+    [SingleFlight.Etcd]
+        # Env override: ATHENS_ETCD_ENDPOINTS
+        Endpoints = "localhost:2379,localhost:22379,localhost:32379"
+```
 
 ### Using redis as the single flight mechanism
 
@@ -433,29 +443,33 @@ connecting via redis sentinels.
 Using a direct connection to redis is simple, and only requires a single `redis-server`.
 You can also optionally specify a password to connect to the redis server with
 
-    SingleFlightType = "redis"
+```toml
+SingleFlightType = "redis"
 
-    [SingleFlight]
-        [SingleFlight.Redis]
-            # Endpoint is the redis endpoint for the single flight mechanism
-            # Env override: ATHENS_REDIS_ENDPOINT
-            Endpoint = "127.0.0.1:6379"
+[SingleFlight]
+    [SingleFlight.Redis]
+        # Endpoint is the redis endpoint for the single flight mechanism
+        # Env override: ATHENS_REDIS_ENDPOINT
+        Endpoint = "127.0.0.1:6379"
 
-            # Password is the password for the redis instance
-            # Env override: ATHENS_REDIS_PASSWORD
-            Password = ""
+        # Password is the password for the redis instance
+        # Env override: ATHENS_REDIS_PASSWORD
+        Password = ""
+```
 
 Connecting to Redis via a [redis url](https://github.com/redis/redis-specifications/blob/master/uri/redis.txt) is also
 supported:
 
-    SingleFlightType = "redis"
+```toml
+SingleFlightType = "redis"
 
-    [SingleFlight]
-        [SingleFlight.Redis]
-            # Endpoint is the redis endpoint for the single flight mechanism
-            # Env override: ATHENS_REDIS_ENDPOINT
-            # Note, if TLS is required use rediss:// instead.
-            Endpoint = "redis://user:password@127.0.0.1:6379/0?protocol=3"
+[SingleFlight]
+    [SingleFlight.Redis]
+        # Endpoint is the redis endpoint for the single flight mechanism
+        # Env override: ATHENS_REDIS_ENDPOINT
+        # Note, if TLS is required use rediss:// instead.
+        Endpoint = "redis://user:password@127.0.0.1:6379/0?protocol=3"
+```
 
 If the redis url is invalid or cannot be parsed, Athens will fall back to treating `Endpoint` as if it were
 a normal `host:port` pair. If a password is supplied in the redis url, in addition to being provided in the `Password`
@@ -463,19 +477,20 @@ configuration option, the two values must match otherwise Athens will fail to st
 
 ##### Customizing lock configurations:
 If you would like to customize the distributed lock options then you can optionally override the default lock config to better suit your use-case:
-
-    [SingleFlight.Redis]
-        ...
-        [SingleFlight.Redis.LockConfig]
-            # TTL for the lock in seconds. Defaults to 900 seconds (15 minutes).
-            # Env override: ATHENS_REDIS_LOCK_TTL
-            TTL = 900
-            # Timeout for acquiring the lock in seconds. Defaults to 15 seconds.
-            # Env override: ATHENS_REDIS_LOCK_TIMEOUT
-            Timeout = 15
-            # Max retries while acquiring the lock. Defaults to 10.
-            # Env override: ATHENS_REDIS_LOCK_MAX_RETRIES
-            MaxRetries = 10
+```toml
+[SingleFlight.Redis]
+    #...
+    [SingleFlight.Redis.LockConfig]
+        # TTL for the lock in seconds. Defaults to 900 seconds (15 minutes).
+        # Env override: ATHENS_REDIS_LOCK_TTL
+        TTL = 900
+        # Timeout for acquiring the lock in seconds. Defaults to 15 seconds.
+        # Env override: ATHENS_REDIS_LOCK_TIMEOUT
+        Timeout = 15
+        # Max retries while acquiring the lock. Defaults to 10.
+        # Env override: ATHENS_REDIS_LOCK_MAX_RETRIES
+        MaxRetries = 10
+```
 
 Customizations may be required in some cases for eg, you can set a higher TTL if it usually takes longer than 5 mins to fetch the modules in your case.
 
@@ -499,21 +514,22 @@ Required configuration:
 - `MasterName` is the named master instance, as configured in the `redis-sentinel` [configuration](https://redis.io/topics/sentinel#configuring-sentinel)
 
 Optionally, like `redis`, you can also specify a password to connect to the `redis-sentinel` endpoints with
+```toml
+SingleFlightType = "redis-sentinel"
 
-    SingleFlightType = "redis-sentinel"
-
-    [SingleFlight]
-      [SingleFlight.RedisSentinel]
-          # Endpoints is the redis sentinel endpoints to discover a redis
-          # master for a SingleFlight lock.
-          # Env override: ATHENS_REDIS_SENTINEL_ENDPOINTS
-          Endpoints = ["127.0.0.1:26379"]
-          # MasterName is the redis sentinel master name to use to discover
-          # the master for a SingleFlight lock
-          MasterName = "redis-1"
-          # SentinelPassword is an optional password for authenticating with
-          # redis sentinel
-          SentinelPassword = "sekret"
+[SingleFlight]
+    [SingleFlight.RedisSentinel]
+        # Endpoints is the redis sentinel endpoints to discover a redis
+        # master for a SingleFlight lock.
+        # Env override: ATHENS_REDIS_SENTINEL_ENDPOINTS
+        Endpoints = ["127.0.0.1:26379"]
+        # MasterName is the redis sentinel master name to use to discover
+        # the master for a SingleFlight lock
+        MasterName = "redis-1"
+        # SentinelPassword is an optional password for authenticating with
+        # redis sentinel
+        SentinelPassword = "sekret"
+```
 
 Distributed lock options can be customised for redis sentinal as well, in a similar manner as described above for redis.
 
@@ -522,8 +538,9 @@ Distributed lock options can be customised for redis sentinal as well, in a simi
 
 The GCP singleflight mechanism does not required configuration, and works out of the box. It has a
 single option with which it can be customized:
-
-    [SingleFlight.GCP]
-        # Threshold for how long to wait in seconds for an in-progress GCP upload to
-        # be considered to have failed to unlock.
-        StaleThreshold = 120
+```toml
+[SingleFlight.GCP]
+    # Threshold for how long to wait in seconds for an in-progress GCP upload to
+    # be considered to have failed to unlock.
+    StaleThreshold = 120
+```
