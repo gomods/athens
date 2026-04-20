@@ -18,7 +18,7 @@ weight: 3
 
 ## 成为维护者的好处
 
-- 免费使用 GitHub CoPilot
+- 免费使用 GitHub Copilot
 - 成就感
 - 在安全协作环境中的有趣、复杂的工作
 - 与非常聪明的人交流的机会
