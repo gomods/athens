@@ -307,8 +307,8 @@ github.com/soheilhy/cmux v0.1.5/go.mod h1:T7TcVDs9LWfQgPlPsdngu6I6QIoyIFZDDC6sNE
 github.com/spf13/afero v1.15.0 h1:b/YBCLWAJdFWJTN9cLhiXXcD7mzKn9Dm86dNnfyQw1I=
 github.com/spf13/afero v1.15.0/go.mod h1:NC2ByUVxtQs4b3sIUphxK0NioZnmxgyCrfzeuq8lxMg=
 github.com/spf13/pflag v1.0.2/go.mod h1:DYY7MBk1bdzusC3SYhjObp+wFpr4gzcvqqNjLnInEg4=
-github.com/spf13/pflag v1.0.6 h1:jFzHGLGAlb3ruxLB8MhbI6A8+AQX/2eW4qeyNZXNp2o=
-github.com/spf13/pflag v1.0.6/go.mod h1:McXfInJRrz4CZXVZOBLb0bTZqETkiAhM9Iw0y3An2Bg=
+github.com/spf13/pflag v1.0.10 h1:4EBh2KAYBwaONj6b2Ye1GiHfwjqyROoF4RwYO+vPwFk=
+github.com/spf13/pflag v1.0.10/go.mod h1:McXfInJRrz4CZXVZOBLb0bTZqETkiAhM9Iw0y3An2Bg=
 github.com/spiffe/go-spiffe/v2 v2.6.0 h1:l+DolpxNWYgruGQVV0xsfeya3CsC7m8iBzDnMpsbLuo=
 github.com/spiffe/go-spiffe/v2 v2.6.0/go.mod h1:gm2SeUoMZEtpnzPNs2Csc0D/gX33k1xIx7lEzqblHEs=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
@@ -353,10 +353,10 @@ go.etcd.io/etcd/client/pkg/v3 v3.6.10 h1:tBT7podcPhuVbCVkAEzx8bC5I+aqxfLwBN8/As1
 go.etcd.io/etcd/client/pkg/v3 v3.6.10/go.mod h1:WEy3PpwbbEBVRdh1NVJYsuUe/8eyI21PNJRazeD8z/Y=
 go.etcd.io/etcd/client/v3 v3.6.10 h1:J598zJ+C/ZPvImypmq5waj84+bovePrlZERHklf34y0=
 go.etcd.io/etcd/client/v3 v3.6.10/go.mod h1:iHhUDUcEwaKs1YFq3MgmI9U4zhTVasp/vgdVbFf1RS8=
-go.etcd.io/etcd/pkg/v3 v3.6.7 h1:qIxdSI+LAmKFAjMy42yHQzSNqG/sWES4QjhFSGsMDpY=
-go.etcd.io/etcd/pkg/v3 v3.6.7/go.mod h1:nPbpIExp9Q6tR/EVI2aZe0VBlflLys5VGFWSCmqUOyk=
-go.etcd.io/etcd/server/v3 v3.6.7 h1:8dEGQ877tj0cQJFEfD2bDoZDA76qbS2OkvCNjwAyrSo=
-go.etcd.io/etcd/server/v3 v3.6.7/go.mod h1:LEM328bPA2uVMhN0+Ht/vAsADW127QS1oM7EuHrOTy0=
+go.etcd.io/etcd/pkg/v3 v3.6.10 h1:17TwO17SkbgIBCloGRikqVy/HdPbeXX4zPAlzRZbzDw=
+go.etcd.io/etcd/pkg/v3 v3.6.10/go.mod h1:UfjvwrKPZVnmpKD3UZKQpC7kMLsSIGlQjIVFGRXI6eo=
+go.etcd.io/etcd/server/v3 v3.6.10 h1:MfnewdUHfYUr7ytYKuYQb2WWxTstGj70Vx7nM8e2rVs=
+go.etcd.io/etcd/server/v3 v3.6.10/go.mod h1:dWedTPxlXqd9P4pxgqjSb2NwcqobmumsMWLOf4Z+OTY=
 go.etcd.io/raft/v3 v3.6.0 h1:5NtvbDVYpnfZWcIHgGRk9DyzkBIXOi8j+DDp1IcnUWQ=
 go.etcd.io/raft/v3 v3.6.0/go.mod h1:nLvLevg6+xrVtHUmVaTcTz603gQPHfh7kUAwV6YpfGo=
 go.mongodb.org/mongo-driver v1.17.6 h1:87JUG1wZfWsr6rIz3ZmpH90rL5tea7O3IHuSwHUpsss=
