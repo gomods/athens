@@ -8,14 +8,12 @@ import (
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/observ"
 	"github.com/gomods/athens/pkg/storage"
-	"go.mongodb.org/mongo-driver/mongo/gridfs"
-	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
 
 // Save stores a module in mongo storage.
 func (s *ModuleStore) Save(ctx context.Context, module, version string, mod []byte, zip io.Reader, zipMD5, info []byte) error {
 	const op errors.Op = "mongo.Save"
-
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 
@@ -23,31 +21,24 @@ func (s *ModuleStore) Save(ctx context.Context, module, version string, mod []by
 	if err != nil {
 		return errors.E(op, err, errors.M(module), errors.V(version))
 	}
-
 	if exists {
 		return errors.E(op, "already exists", errors.M(module), errors.V(version), errors.KindAlreadyExists)
 	}
 
 	zipName := s.gridFileName(module, version)
 	db := s.client.Database(s.db)
+	bucket := db.GridFSBucket(options.GridFSBucket())
 
-	bucket, err := gridfs.NewBucket(db, options.GridFSBucket())
+	uStream, err := bucket.OpenUploadStream(ctx, zipName, options.GridFSUpload())
 	if err != nil {
 		return errors.E(op, err, errors.M(module), errors.V(version))
 	}
-
-	uStream, err := bucket.OpenUploadStream(zipName, options.GridFSUpload())
-	if err != nil {
-		return errors.E(op, err, errors.M(module), errors.V(version))
-	}
-
 	defer func() { _ = uStream.Close() }()
 
 	numBytesWritten, err := io.Copy(uStream, zip)
 	if err != nil {
 		return errors.E(op, err, errors.M(module), errors.V(version))
 	}
-
 	if numBytesWritten <= 0 {
 		e := fmt.Errorf("copied %d bytes to Mongo GridFS", numBytesWritten)
 		return errors.E(op, e, errors.M(module), errors.V(version))
@@ -62,7 +53,6 @@ func (s *ModuleStore) Save(ctx context.Context, module, version string, mod []by
 
 	c := s.client.Database(s.db).Collection(s.coll)
 	tctx, cancel := context.WithTimeout(ctx, s.timeout)
-
 	defer cancel()
 
 	_, err = c.InsertOne(tctx, m, options.InsertOne().SetBypassDocumentValidation(false))

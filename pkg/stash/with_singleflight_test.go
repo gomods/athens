@@ -18,9 +18,9 @@ func TestSingleFlight(t *testing.T) {
 	s := WithSingleflight(ms)
 
 	var eg errgroup.Group
-	for i := 0; i < 5; i++ {
+	for range 5 {
 		eg.Go(func() error {
-			_, err := s.Stash(context.Background(), "mod", "ver")
+			_, err := s.Stash(t.Context(), "mod", "ver")
 			return err
 		})
 	}
@@ -30,9 +30,9 @@ func TestSingleFlight(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	for i := 0; i < 5; i++ {
+	for range 5 {
 		eg.Go(func() error {
-			_, err := s.Stash(context.Background(), "mod", "ver")
+			_, err := s.Stash(t.Context(), "mod", "ver")
 			return err
 		})
 	}

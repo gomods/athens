@@ -40,6 +40,7 @@ linters:
     - musttag
     - nilnil
     - nlreturn
+    - noinlineerr
     - nonamedreturns
     - perfsprint
     - recvcheck
@@ -51,6 +52,7 @@ linters:
     - varnamelen
     - wrapcheck
     - wsl
+    - wsl_v5
   settings:
     cyclop:
       max-complexity: 12
@@ -58,6 +60,9 @@ linters:
       excludes:
         - G204
         - G402
+        - G703
+        - G704
+        - G705
   exclusions:
     generated: lax
     rules:

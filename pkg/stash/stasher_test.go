@@ -56,7 +56,7 @@ func TestStash(t *testing.T) {
 			mf.ver = testCase.modVer
 
 			s := New(&mf, &ms, nop.New(), 10*time.Minute)
-			newVersion, err := s.Stash(context.Background(), "module", testCase.ver)
+			newVersion, err := s.Stash(t.Context(), "module", testCase.ver)
 			if err != nil {
 				t.Fatal(err)
 			}

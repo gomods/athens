@@ -7,16 +7,14 @@ import (
 	"os"
 	"testing"
 
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
-
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/storage"
 	"github.com/gomods/athens/pkg/storage/compliance"
-
 	"github.com/stretchr/testify/require"
+	"go.mongodb.org/mongo-driver/v2/bson"
+	"go.mongodb.org/mongo-driver/v2/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
 
 func TestBackend(t *testing.T) {
@@ -55,7 +53,7 @@ func TestQueryModuleVersionExists(t *testing.T) {
 		Zip:  io.NopCloser(bytes.NewReader([]byte("789"))),
 	}
 
-	ctx := context.Background()
+	ctx := t.Context()
 	backend := getStorage(t)
 
 	zipBts, _ := io.ReadAll(mock.Zip)
@@ -76,7 +74,7 @@ func TestQueryKindNotFoundErrorCases(t *testing.T) {
 		Zip:  io.NopCloser(bytes.NewReader([]byte("789"))),
 	}
 
-	ctx := context.Background()
+	ctx := t.Context()
 	backend := getStorage(t)
 
 	zipBts, _ := io.ReadAll(mock.Zip)
@@ -105,20 +103,19 @@ func TestQueryKindNotFoundErrorCases(t *testing.T) {
 func TestQueryKindUnexpectedErrorCases(t *testing.T) {
 	// Prepare error documents
 	// If there is any error in preparation phase, skip this test
-	ctx := context.Background()
 	mongoStorage := getStorage(t)
 	uri := os.Getenv("ATHENS_MONGO_STORAGE_URL")
-	client, err := mongo.Connect(ctx, options.Client().ApplyURI(uri))
+	client, err := mongo.Connect(options.Client().ApplyURI(uri))
 	if err != nil {
 		t.SkipNow()
 	}
-	defer client.Disconnect(ctx)
+	defer client.Disconnect(t.Context())
 	coll := client.Database("athens").Collection("modules")
 	errDocs := []struct {
-		Module  string      `bson:"module"`
-		Version string      `bson:"version"`
-		Mod     interface{} `bson:"mod"`
-		Info    interface{} `bson:"info"`
+		Module  string `bson:"module"`
+		Version string `bson:"version"`
+		Mod     any    `bson:"mod"`
+		Info    any    `bson:"info"`
 	}{
 		{"model1", "v1.1.1", 12345678, "error document with integer mod"},
 		{"model2", "v2.0.0", true, "error document with boolean mod"},
@@ -127,8 +124,8 @@ func TestQueryKindUnexpectedErrorCases(t *testing.T) {
 	for _, errDoc := range errDocs {
 		filter := bson.D{{Key: "module", Value: errDoc.Module}, {Key: "version", Value: errDoc.Version}}
 		update := bson.D{{Key: "$set", Value: bson.D{{Key: "mod", Value: errDoc.Mod}, {Key: "info", Value: errDoc.Info}}}}
-		opts := options.Update().SetUpsert(true).SetBypassDocumentValidation(true)
-		_, err = coll.UpdateOne(ctx, filter, update, opts)
+		opts := options.UpdateOne().SetUpsert(true).SetBypassDocumentValidation(true)
+		_, err = coll.UpdateOne(t.Context(), filter, update, opts)
 		if err != nil {
 			t.SkipNow()
 		}
@@ -141,7 +138,7 @@ func TestQueryKindUnexpectedErrorCases(t *testing.T) {
 		{"model2", "v2.0.0"}, // test case: decode boolean to []byte
 	}
 	for _, test := range testCases {
-		_, err := query(ctx, mongoStorage, test.modName, test.version)
+		_, err := query(t.Context(), mongoStorage, test.modName, test.version)
 		require.Error(t, err)
 		require.Equal(t, errors.KindUnexpected, errors.Kind(err))
 	}

@@ -32,6 +32,7 @@ func catalogHandler(s storage.Backend) http.HandlerFunc {
 		}
 
 		lggr := log.EntryFromContext(r.Context())
+		r.Body = http.MaxBytesReader(w, r.Body, 1<<20)
 		token := r.URL.Query().Get("token")
 
 		pageSize, err := getLimitFromParam(r.URL.Query().Get("pagesize"))

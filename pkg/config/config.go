@@ -241,15 +241,17 @@ func (c *Config) FilterOff() bool {
 
 // ParseConfigFile parses the given file into an athens config struct.
 func ParseConfigFile(configFile string) (*Config, error) {
-	var config Config
+	// Always start from a default config.
+	config := defaultConfig()
+
 	// attempt to read the given config file
-	_, err := toml.DecodeFile(configFile, &config)
+	_, err := toml.DecodeFile(configFile, config)
 	if err != nil {
 		return nil, err
 	}
 
 	// override values with environment variables if specified
-	err = envOverride(&config)
+	err = envOverride(config)
 	if err != nil {
 		return nil, err
 	}
@@ -263,12 +265,12 @@ func ParseConfigFile(configFile string) (*Config, error) {
 	}
 
 	// validate all required fields have been populated
-	err = validateConfig(config)
+	err = validateConfig(*config)
 	if err != nil {
 		return nil, err
 	}
 
-	return &config, nil
+	return config, nil
 }
 
 // envOverride uses Environment variables to override unspecified properties.

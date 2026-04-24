@@ -36,9 +36,9 @@ func TestWithRedisSentinelLock(t *testing.T) {
 	s := wrapper(ms)
 
 	var eg errgroup.Group
-	for i := 0; i < 5; i++ {
+	for range 5 {
 		eg.Go(func() error {
-			ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+			ctx, cancel := context.WithTimeout(t.Context(), time.Second*10)
 			defer cancel()
 			_, err := s.Stash(ctx, "mod", "ver")
 			return err
@@ -74,9 +74,9 @@ func TestWithRedisSentinelLockWithRedisPassword(t *testing.T) {
 	s := wrapper(ms)
 
 	var eg errgroup.Group
-	for i := 0; i < 5; i++ {
+	for range 5 {
 		eg.Go(func() error {
-			ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+			ctx, cancel := context.WithTimeout(t.Context(), time.Second*10)
 			defer cancel()
 			_, err := s.Stash(ctx, "mod", "ver")
 			return err
@@ -113,9 +113,9 @@ func TestWithRedisSentinelLockWithUsernameAndPassword(t *testing.T) {
 	s := wrapper(ms)
 
 	var eg errgroup.Group
-	for i := 0; i < 5; i++ {
+	for range 5 {
 		eg.Go(func() error {
-			ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+			ctx, cancel := context.WithTimeout(t.Context(), time.Second*10)
 			defer cancel()
 			_, err := s.Stash(ctx, "mod", "ver")
 			return err

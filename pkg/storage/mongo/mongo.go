@@ -11,9 +11,9 @@ import (
 
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/errors"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/v2/bson"
+	"go.mongodb.org/mongo-driver/v2/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
 
 // ModuleStore represents a mongo backed storage backend.
@@ -34,9 +34,7 @@ func NewStorage(conf *config.MongoConfig, timeout time.Duration) (*ModuleStore, 
 	if conf == nil {
 		return nil, errors.E(op, "No Mongo Configuration provided")
 	}
-
 	ms := &ModuleStore{url: conf.URL, certPath: conf.CertPath, timeout: timeout, insecure: conf.InsecureConn}
-
 	client, err := ms.newClient()
 	if err != nil {
 		return nil, errors.E(op, err)
@@ -88,7 +86,6 @@ func (s *ModuleStore) newClient() (*mongo.Client, error) {
 	if s.certPath != "" {
 		// Sets only when the env var is setup in config.dev.toml
 		tlsConfig.InsecureSkipVerify = s.insecure
-
 		var roots *x509.CertPool
 		// See if there is a system cert pool
 		roots, err := x509.SystemCertPool()
@@ -109,10 +106,8 @@ func (s *ModuleStore) newClient() (*mongo.Client, error) {
 		tlsConfig.ClientCAs = roots
 		clientOptions = clientOptions.SetTLSConfig(tlsConfig)
 	}
-
 	clientOptions = clientOptions.SetConnectTimeout(s.timeout)
-
-	client, err := mongo.Connect(context.Background(), clientOptions)
+	client, err := mongo.Connect(clientOptions)
 	if err != nil {
 		return nil, errors.E(op, err)
 	}

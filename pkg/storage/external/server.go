@@ -85,7 +85,7 @@ func NewServer(strg storage.Backend) http.Handler {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-
+		r.Body = http.MaxBytesReader(w, r.Body, zip.MaxZipFile+zip.MaxGoMod)
 		err = r.ParseMultipartForm(zip.MaxZipFile + zip.MaxGoMod)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)

@@ -13,7 +13,7 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-// RedisLogger mirrors github.com/go-redis/redis/v8/internal.Logging.
+// RedisLogger mirrors github.com/go-redis/redis/v9/internal.Logging.
 type RedisLogger interface {
 	Printf(ctx context.Context, format string, v ...any)
 }

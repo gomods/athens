@@ -104,7 +104,7 @@ func TestEtcdStash(t *testing.T) {
 			someVersion = "some version"
 		)
 
-		ctx := context.WithValue(context.Background(), testContextKey{}, struct{}{})
+		ctx := context.WithValue(t.Context(), testContextKey{}, struct{}{})
 
 		w, err := WithEtcd([]string{endpoint}, &mockChecker{
 			t:           t,
@@ -140,7 +140,7 @@ func TestEtcdStash(t *testing.T) {
 			someNewVersion = "some new version"
 		)
 
-		ctx := context.WithValue(context.Background(), testContextKey{}, struct{}{})
+		ctx := context.WithValue(t.Context(), testContextKey{}, struct{}{})
 
 		w, err := WithEtcd([]string{endpoint}, &mockChecker{
 			t:           t,
@@ -171,7 +171,7 @@ func TestEtcdStash(t *testing.T) {
 			someError testError = "some error"
 		)
 
-		ctx := context.WithValue(context.Background(), testContextKey{}, struct{}{})
+		ctx := context.WithValue(t.Context(), testContextKey{}, struct{}{})
 
 		w, err := WithEtcd([]string{endpoint}, &mockChecker{
 			t:           t,
@@ -197,7 +197,7 @@ func TestEtcdStash(t *testing.T) {
 			someError testError = "some error"
 		)
 
-		ctx := context.WithValue(context.Background(), testContextKey{}, struct{}{})
+		ctx := context.WithValue(t.Context(), testContextKey{}, struct{}{})
 
 		w, err := WithEtcd([]string{endpoint}, &mockChecker{
 			t:           t,

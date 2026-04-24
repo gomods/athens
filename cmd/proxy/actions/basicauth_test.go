@@ -2,7 +2,6 @@ package actions
 
 import (
 	"bytes"
-	"context"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -73,7 +72,7 @@ func TestBasicAuth(t *testing.T) {
 			lggr := log.New("none", logrus.DebugLevel, "")
 			buf := &bytes.Buffer{}
 			lggr.Out = buf
-			ctx := log.SetEntryInContext(context.Background(), lggr)
+			ctx := log.SetEntryInContext(t.Context(), lggr)
 			r = r.WithContext(ctx)
 			handler.ServeHTTP(w, r)
 			resp := w.Result()
