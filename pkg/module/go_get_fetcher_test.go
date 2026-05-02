@@ -135,3 +135,48 @@ func (m *mockProxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Write(resp)
 }
+
+func (s *ModuleSuite) TestIsSemverError() {
+	tests := []struct {
+		name     string
+		errMsg   string
+		expected bool
+	}{
+		{
+			name:     "major version mismatch error",
+			errMsg:   "invalid version: module contains a go.mod file, so major version must be compatible: should be v0 or v1, not v3",
+			expected: true,
+		},
+		{
+			name:     "invalid version without major version message",
+			errMsg:   "invalid version: unknown revision",
+			expected: false,
+		},
+		{
+			name:     "unrelated error",
+			errMsg:   "repository not found",
+			expected: false,
+		},
+		{
+			name:     "empty error",
+			errMsg:   "",
+			expected: false,
+		},
+		{
+			name:     "partial match - only invalid version",
+			errMsg:   "invalid version: something else",
+			expected: false,
+		},
+		{
+			name:     "partial match - only major version",
+			errMsg:   "major version must be compatible",
+			expected: false,
+		},
+	}
+	for _, tt := range tests {
+		s.Run(tt.name, func() {
+			result := isSemverError(tt.errMsg)
+			assert.Equal(s.T(), tt.expected, result)
+		})
+	}
+}

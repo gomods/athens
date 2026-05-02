@@ -168,6 +168,10 @@ func downloadModule(
 		if isLimitHit(m.Error) {
 			return goModule{}, errors.E(op, m.Error, errors.KindRateLimit)
 		}
+		// semver/major version compatibility error - return 410 Gone with descriptive message
+		if isSemverError(m.Error) {
+			return goModule{}, errors.E(op, m.Error, errors.KindGone)
+		}
 		return goModule{}, errors.E(op, m.Error, errors.KindNotFound)
 	}
 
@@ -184,6 +188,16 @@ func downloadModule(
 
 func isLimitHit(o string) bool {
 	return strings.Contains(o, "403 response from api.github.com")
+}
+
+// isSemverError detects if the error message indicates a semver/major version
+// compatibility issue. Go modules requires that v2+ modules have a major version
+// suffix in their import path (e.g., /v2, /v3). When this requirement is violated,
+// the error should be returned as 410 Gone with a descriptive message rather than
+// 404 Not Found.
+func isSemverError(errMsg string) bool {
+	return strings.Contains(errMsg, "invalid version") &&
+		strings.Contains(errMsg, "major version must be compatible")
 }
 
 // getRepoDirName takes a raw repository URI and a version and creates a directory name that the

@@ -20,6 +20,7 @@ const (
 	KindNotImplemented = http.StatusNotImplemented
 	KindRedirect       = http.StatusMovedPermanently
 	KindGatewayTimeout = http.StatusGatewayTimeout
+	KindGone           = http.StatusGone
 )
 
 // Error is an Athens system error.

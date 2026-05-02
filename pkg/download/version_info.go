@@ -24,7 +24,7 @@ func InfoHandler(dp Protocol, lggr log.Entry, df *mode.DownloadFile) http.Handle
 		}
 		info, err := dp.Info(r.Context(), mod, ver)
 		if err != nil {
-			severityLevel := errors.Expect(err, errors.KindNotFound, errors.KindRedirect)
+			severityLevel := errors.Expect(err, errors.KindNotFound, errors.KindRedirect, errors.KindGone)
 			lggr.SystemErr(errors.E(op, err, errors.M(mod), errors.V(ver), severityLevel))
 			if errors.Kind(err) == errors.KindRedirect {
 				url, err := getRedirectURL(df.URL(mod), r.URL.Path)
@@ -37,6 +37,11 @@ func InfoHandler(dp Protocol, lggr log.Entry, df *mode.DownloadFile) http.Handle
 				return
 			}
 			w.WriteHeader(errors.Kind(err))
+			// For 410 Gone errors, include the descriptive error message in the response body
+			// to help users understand what went wrong (e.g., semver mismatch)
+			if errors.Kind(err) == errors.KindGone {
+				_, _ = w.Write([]byte(err.Error()))
+			}
 		}
 
 		_, _ = w.Write(info)
