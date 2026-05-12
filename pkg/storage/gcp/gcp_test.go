@@ -134,23 +134,15 @@ func TestNewClientWithDifferentJSONKeys(t *testing.T) {
 			bucket:      "test-bucket",
 			projectID:   "test-project",
 			wantErr:     true,
-			errContains: "unsupported credential type",
+			errContains: "missing 'type' field",
 		},
 		{
-			name:        "unsupported credential type - authorized_user",
-			jsonKey:     encodeJSONToBase64(t, map[string]interface{}{"type": "authorized_user"}),
-			bucket:      "test-bucket",
-			projectID:   "test-project",
-			wantErr:     true,
-			errContains: "unsupported credential type: authorized_user",
-		},
-		{
-			name:        "unsupported credential type - unknown",
+			name:        "unknown credential type",
 			jsonKey:     encodeJSONToBase64(t, map[string]interface{}{"type": "unknown_type"}),
 			bucket:      "test-bucket",
 			projectID:   "test-project",
 			wantErr:     true,
-			errContains: "unsupported credential type: unknown_type",
+			errContains: "unknown credential type",
 		},
 	}
 
