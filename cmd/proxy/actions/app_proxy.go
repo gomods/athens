@@ -155,6 +155,7 @@ func getSingleFlight(l *log.Logger, c *config.Config, s storage.Backend, checker
 			&athensLoggerForRedis{logger: l},
 			c.SingleFlight.Redis.Endpoint,
 			c.SingleFlight.Redis.Password,
+			c.SingleFlight.Redis.Cluster,
 			checker,
 			c.SingleFlight.Redis.LockConfig)
 	case "redis-sentinel":
