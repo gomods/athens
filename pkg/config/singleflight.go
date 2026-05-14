@@ -20,13 +20,9 @@ type Etcd struct {
 // Redis holds the client side configuration
 // to connect to redis as a SingleFlight implementation.
 type Redis struct {
-	Endpoint string `envconfig:"ATHENS_REDIS_ENDPOINT"`
-	Password string `envconfig:"ATHENS_REDIS_PASSWORD"`
-	// Cluster selects a Redis Cluster Mode client (redis.NewClusterClient)
-	// instead of the default single-node client. When true, Endpoint is
-	// treated as one or more cluster seed addresses (comma-separated host:port
-	// or a single redis[s]:// URL) and the client follows MOVED/ASK redirects.
-	Cluster    bool `envconfig:"ATHENS_REDIS_CLUSTER"`
+	Endpoint   string `envconfig:"ATHENS_REDIS_ENDPOINT"`
+	Password   string `envconfig:"ATHENS_REDIS_PASSWORD"`
+	Cluster    bool   `envconfig:"ATHENS_REDIS_CLUSTER"`
 	LockConfig *RedisLockConfig
 }
 

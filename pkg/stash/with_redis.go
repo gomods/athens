@@ -116,12 +116,6 @@ func getRedisClusterClientOptions(endpoint, password string) (*redis.ClusterOpti
 
 // WithRedisLock returns a distributed singleflight
 // using a redis cluster. If it cannot connect, it will return an error.
-//
-// When cluster is true, a redis.NewClusterClient is used so MOVED/ASK redirects
-// are followed transparently. This is required when pointing at a Cluster Mode
-// Enabled Redis (e.g. AWS ElastiCache's `clustercfg.*` configuration endpoint),
-// even if the cluster is single-shard — Cluster Mode replies MOVED any time the
-// connected node doesn't own the slot for the key.
 func WithRedisLock(l RedisLogger, endpoint, password string, cluster bool, checker storage.Checker, lockConfig *config.RedisLockConfig) (Wrapper, error) {
 	redis.SetLogger(l)
 
