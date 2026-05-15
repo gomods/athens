@@ -176,7 +176,7 @@ func defaultConfig() *Config {
 		StashTimeout:     600,
 		SingleFlight: &SingleFlight{
 			Etcd:  &Etcd{"localhost:2379,localhost:22379,localhost:32379"},
-			Redis: &Redis{"127.0.0.1:6379", "", DefaultRedisLockConfig()},
+			Redis: &Redis{Endpoint: "127.0.0.1:6379", LockConfig: DefaultRedisLockConfig()},
 			RedisSentinel: &RedisSentinel{
 				Endpoints:        []string{"127.0.0.1:26379"},
 				MasterName:       "redis-1",
