@@ -38,9 +38,9 @@ require (
 	github.com/stretchr/testify v1.11.1
 	github.com/technosophos/moniker v0.0.0-20210218184952-3ea787d3943b
 	github.com/unrolled/secure v1.17.0
-	go.etcd.io/etcd/api/v3 v3.6.10
-	go.etcd.io/etcd/client/v3 v3.6.10
-	go.etcd.io/etcd/server/v3 v3.6.10
+	go.etcd.io/etcd/api/v3 v3.6.11
+	go.etcd.io/etcd/client/v3 v3.6.11
+	go.etcd.io/etcd/server/v3 v3.6.11
 	go.mongodb.org/mongo-driver/v2 v2.6.0
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.68.0
 	go.opentelemetry.io/otel v1.43.0
@@ -153,8 +153,8 @@ require (
 	github.com/youmark/pkcs8 v0.0.0-20240726163527-a2c0da244d78 // indirect
 	github.com/zclconf/go-cty v1.0.0 // indirect
 	go.etcd.io/bbolt v1.4.3 // indirect
-	go.etcd.io/etcd/client/pkg/v3 v3.6.10 // indirect
-	go.etcd.io/etcd/pkg/v3 v3.6.10 // indirect
+	go.etcd.io/etcd/client/pkg/v3 v3.6.11 // indirect
+	go.etcd.io/etcd/pkg/v3 v3.6.11 // indirect
 	go.etcd.io/raft/v3 v3.6.0 // indirect
 	go.opentelemetry.io/auto/sdk v1.2.1 // indirect
 	go.opentelemetry.io/contrib/detectors/gcp v1.43.0 // indirect
