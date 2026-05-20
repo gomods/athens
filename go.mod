@@ -19,7 +19,7 @@ require (
 	github.com/bsm/redislock v0.9.4
 	github.com/fatih/color v1.19.0
 	github.com/go-playground/validator/v10 v10.30.2
-	github.com/go-sql-driver/mysql v1.9.3
+	github.com/go-sql-driver/mysql v1.10.0
 	github.com/gobuffalo/envy v1.10.2
 	github.com/gobuffalo/httptest v1.5.2
 	github.com/google/go-cmp v0.7.0
