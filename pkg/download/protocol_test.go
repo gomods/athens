@@ -38,7 +38,7 @@ func getDP(t *testing.T) Protocol {
 	}
 	goBin := conf.GoBinary
 	fs := afero.NewOsFs()
-	mf, err := module.NewGoGetFetcher(context.Background(), goBin, conf.GoGetDir, conf.GoBinaryEnvVars, fs)
+	mf, err := module.NewGoGetFetcher(t.Context(), goBin, conf.GoGetDir, conf.GoBinaryEnvVars, fs)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -20,7 +20,6 @@ func WithRedisSentinelLock(ctx context.Context, l RedisLogger, endpoints []strin
 	if len(endpoints) == 0 {
 		return nil, errors.E(op, "no endpoints specified")
 	}
-
 	client := redis.NewFailoverClient(&redis.FailoverOptions{
 		MasterName:       master,
 		SentinelAddrs:    endpoints,
@@ -28,7 +27,6 @@ func WithRedisSentinelLock(ctx context.Context, l RedisLogger, endpoints []strin
 		Username:         redisUsername,
 		Password:         redisPassword,
 	})
-
 	_, err := client.Ping(ctx).Result()
 	if err != nil {
 		return nil, errors.E(op, err)

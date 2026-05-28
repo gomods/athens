@@ -3,6 +3,7 @@ package stash
 import (
 	"context"
 	goerrors "errors"
+	"strings"
 	"time"
 
 	"github.com/bsm/redislock"
@@ -56,22 +57,86 @@ func getRedisClientOptions(endpoint, password string) (*redis.Options, error) {
 	return options, nil
 }
 
+// getRedisClusterClientOptions takes a (possibly comma-separated) endpoint and
+// a password and returns *redis.ClusterOptions suitable for redis.NewClusterClient.
+// Each comma-separated entry is treated as a host:port pair or a redis[s]:// URL.
+// URL-embedded passwords are validated against the explicit password the same
+// way getRedisClientOptions does.
+func getRedisClusterClientOptions(endpoint, password string) (*redis.ClusterOptions, error) {
+	rawAddrs := strings.Split(endpoint, ",")
+	addrs := make([]string, 0, len(rawAddrs))
+	clusterOpts := &redis.ClusterOptions{
+		Password: password,
+	}
+	var (
+		username string
+		urlPwd   string
+	)
+
+	for _, raw := range rawAddrs {
+		raw = strings.TrimSpace(raw)
+		if raw == "" {
+			continue
+		}
+		// Try parsing as a redis[s]:// URL so TLS and credentials are honored.
+		// Fall back to host:port if it doesn't parse as a URL.
+		opts, err := redis.ParseURL(raw)
+		if err != nil {
+			addrs = append(addrs, raw)
+			continue
+		}
+		addrs = append(addrs, opts.Addr)
+		// First URL contributes TLS/username/embedded-password; subsequent URLs
+		// are expected to be homogeneous (same auth/TLS), which is the normal
+		// AWS ElastiCache / Redis Cluster setup.
+		if clusterOpts.TLSConfig == nil {
+			clusterOpts.TLSConfig = opts.TLSConfig
+		}
+		if username == "" {
+			username = opts.Username
+		}
+		if urlPwd == "" {
+			urlPwd = opts.Password
+		}
+	}
+
+	if username != "" {
+		clusterOpts.Username = username
+	}
+	// Apply the same password-consistency rule as the single-node path.
+	if urlPwd != "" && password != "" && urlPwd != password {
+		return nil, errPasswordsDoNotMatch
+	}
+	if urlPwd != "" && password == "" {
+		clusterOpts.Password = urlPwd
+	}
+
+	clusterOpts.Addrs = addrs
+	return clusterOpts, nil
+}
+
 // WithRedisLock returns a distributed singleflight
 // using a redis cluster. If it cannot connect, it will return an error.
-func WithRedisLock(ctx context.Context, l RedisLogger, endpoint, password string, checker storage.Checker, lockConfig *config.RedisLockConfig) (Wrapper, error) {
+func WithRedisLock(ctx context.Context, l RedisLogger, endpoint, password string, cluster bool, checker storage.Checker, lockConfig *config.RedisLockConfig) (Wrapper, error) {
 	redis.SetLogger(l)
 
 	const op errors.Op = "stash.WithRedisLock"
 
-	options, err := getRedisClientOptions(endpoint, password)
-	if err != nil {
-		return nil, errors.E(op, err)
+	var client redis.UniversalClient
+	if cluster {
+		clusterOpts, err := getRedisClusterClientOptions(endpoint, password)
+		if err != nil {
+			return nil, errors.E(op, err)
+		}
+		client = redis.NewClusterClient(clusterOpts)
+	} else {
+		options, err := getRedisClientOptions(endpoint, password)
+		if err != nil {
+			return nil, errors.E(op, err)
+		}
+		client = redis.NewClient(options)
 	}
-
-	client := redis.NewClient(options)
-
-	_, err = client.Ping(ctx).Result()
-	if err != nil {
+	if _, err := client.Ping(ctx).Result(); err != nil {
 		return nil, errors.E(op, err)
 	}
 
@@ -104,7 +169,7 @@ type redisLockOptions struct {
 }
 
 type redisLock struct {
-	client  *redis.Client
+	client  redis.UniversalClient
 	stasher Stasher
 	checker storage.Checker
 	options redisLockOptions

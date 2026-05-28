@@ -9,11 +9,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/redis/go-redis/v9"
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/storage"
 	"github.com/gomods/athens/pkg/storage/mem"
+	"github.com/redis/go-redis/v9"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -41,7 +41,7 @@ func TestWithRedisLock(t *testing.T) {
 	}
 	ms := &mockRedisStasher{strg: strg}
 	l := &testingRedisLogger{t: t}
-	wrapper, err := WithRedisLock(context.Background(), l, endpoint, password, storage.WithChecker(strg), config.DefaultRedisLockConfig())
+	wrapper, err := WithRedisLock(t.Context(), l, endpoint, password, false, storage.WithChecker(strg), config.DefaultRedisLockConfig())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -77,7 +77,7 @@ func TestWithRedisLockWithPassword(t *testing.T) {
 	}
 	ms := &mockRedisStasher{strg: strg}
 	l := &testingRedisLogger{t: t}
-	wrapper, err := WithRedisLock(context.Background(), l, endpoint, password, storage.WithChecker(strg), config.DefaultRedisLockConfig())
+	wrapper, err := WithRedisLock(t.Context(), l, endpoint, password, false, storage.WithChecker(strg), config.DefaultRedisLockConfig())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -112,13 +112,130 @@ func TestWithRedisLockWithWrongPassword(t *testing.T) {
 		t.Fatal(err)
 	}
 	l := &testingRedisLogger{t: t}
-	_, err = WithRedisLock(context.Background(), l, endpoint, password, storage.WithChecker(strg), config.DefaultRedisLockConfig())
+	_, err = WithRedisLock(t.Context(), l, endpoint, password, false, storage.WithChecker(strg), config.DefaultRedisLockConfig())
 	if err == nil {
 		t.Fatal("Expected Connection Error")
 	}
 
 	if !strings.Contains(err.Error(), "NOAUTH Authentication required.") {
 		t.Fatalf("Wrong error was thrown %q\n", err.Error())
+	}
+}
+
+// TestWithRedisClusterLock verifies that the cluster-mode client also produces
+// a working singleflight wrapper. Skipped unless REDIS_CLUSTER_TEST_ENDPOINT is
+// set (comma-separated seed addresses, or a single redis[s]:// URL).
+func TestWithRedisClusterLock(t *testing.T) {
+	endpoint := os.Getenv("REDIS_CLUSTER_TEST_ENDPOINT")
+	password := os.Getenv("ATHENS_REDIS_PASSWORD")
+	if len(endpoint) == 0 {
+		t.SkipNow()
+	}
+	strg, err := mem.NewStorage()
+	if err != nil {
+		t.Fatal(err)
+	}
+	ms := &mockRedisStasher{strg: strg}
+	l := &testingRedisLogger{t: t}
+	wrapper, err := WithRedisLock(t.Context(), l, endpoint, password, true, storage.WithChecker(strg), config.DefaultRedisLockConfig())
+	if err != nil {
+		t.Fatal(err)
+	}
+	s := wrapper(ms)
+
+	var eg errgroup.Group
+	for range 5 {
+		eg.Go(func() error {
+			ctx, cancel := context.WithTimeout(t.Context(), time.Second*10)
+			defer cancel()
+			_, err := s.Stash(ctx, "mod", "ver")
+			return err
+		})
+	}
+
+	err = eg.Wait()
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+type getRedisClusterClientOptionsFacet struct {
+	endpoint      string
+	password      string
+	wantAddrs     []string
+	wantPassword  string
+	wantUsername  string
+	wantTLS       bool
+	expectErrText string
+}
+
+func Test_getRedisClusterClientOptions(t *testing.T) {
+	facets := []*getRedisClusterClientOptionsFacet{
+		{
+			endpoint:  "127.0.0.1:6379",
+			wantAddrs: []string{"127.0.0.1:6379"},
+		},
+		{
+			endpoint:     "127.0.0.1:6379",
+			password:     "1234",
+			wantAddrs:    []string{"127.0.0.1:6379"},
+			wantPassword: "1234",
+		},
+		{
+			endpoint:  "127.0.0.1:6379,127.0.0.1:6380,127.0.0.1:6381",
+			wantAddrs: []string{"127.0.0.1:6379", "127.0.0.1:6380", "127.0.0.1:6381"},
+		},
+		{
+			// rediss:// URL — TLS configured, embedded password applied.
+			endpoint:     "rediss://127.0.0.1:6379",
+			password:     "1234",
+			wantAddrs:    []string{"127.0.0.1:6379"},
+			wantPassword: "1234",
+			wantTLS:      true,
+		},
+		{
+			// URL-embedded password equal to explicit password is fine.
+			endpoint:     "redis://:1234@127.0.0.1:6379",
+			password:     "1234",
+			wantAddrs:    []string{"127.0.0.1:6379"},
+			wantPassword: "1234",
+		},
+		{
+			// URL-embedded password mismatched with explicit password fails.
+			endpoint:      "redis://:url-pw@127.0.0.1:6379",
+			password:      "config-pw",
+			expectErrText: errPasswordsDoNotMatch.Error(),
+		},
+	}
+
+	for i, facet := range facets {
+		opts, err := getRedisClusterClientOptions(facet.endpoint, facet.password)
+		if facet.expectErrText != "" {
+			if err == nil {
+				t.Errorf("Facet %d: expected error %q, got nil", i, facet.expectErrText)
+				continue
+			}
+			if !strings.Contains(err.Error(), facet.expectErrText) {
+				t.Errorf("Facet %d: expected error containing %q, got %q", i, facet.expectErrText, err.Error())
+			}
+			continue
+		}
+		if err != nil {
+			t.Errorf("Facet %d: unexpected error %q", i, err.Error())
+			continue
+		}
+		if got, want := strings.Join(opts.Addrs, ","), strings.Join(facet.wantAddrs, ","); got != want {
+			t.Errorf("Facet %d: Addrs = %q, want %q", i, got, want)
+		}
+		if opts.Password != facet.wantPassword {
+			t.Errorf("Facet %d: Password = %q, want %q", i, opts.Password, facet.wantPassword)
+		}
+		if opts.Username != facet.wantUsername {
+			t.Errorf("Facet %d: Username = %q, want %q", i, opts.Username, facet.wantUsername)
+		}
+		if (opts.TLSConfig != nil) != facet.wantTLS {
+			t.Errorf("Facet %d: TLSConfig present = %v, want %v", i, opts.TLSConfig != nil, facet.wantTLS)
+		}
 	}
 }
 

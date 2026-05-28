@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"os"
 	"path/filepath"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -127,9 +128,9 @@ func (f *Filter) getAssociatedRule(version string, path ...string) FilterRule {
 		return f.root.rule
 	}
 
-	for i := len(rules) - 1; i >= 0; i-- {
-		if rules[i] != Default {
-			return rules[i]
+	for _, rule := range slices.Backward(rules) {
+		if rule != Default {
+			return rule
 		}
 	}
 

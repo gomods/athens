@@ -11,7 +11,6 @@ import (
 // It fails if the encoding is invalid or encodes an invalid path.
 func DecodePath(encoding string) (path string, err error) {
 	const op errors.Op = "paths.DecodePath"
-
 	path, ok := decodeString(encoding)
 	if !ok {
 		return "", errors.E(op, fmt.Sprintf("invalid module path encoding %q", encoding))
@@ -22,42 +21,32 @@ func DecodePath(encoding string) (path string, err error) {
 
 // Ripped from cmd/go.
 func decodeString(encoding string) (string, bool) {
-	buf := make([]byte, 0, len(encoding))
+	var buf []byte
 
 	bang := false
-
 	for _, r := range encoding {
 		if r >= utf8.RuneSelf {
 			return "", false
 		}
-
 		if bang {
 			bang = false
-
 			if r < 'a' || 'z' < r {
 				return "", false
 			}
-
 			buf = append(buf, byte(r+'A'-'a'))
-
 			continue
 		}
-
 		if r == '!' {
 			bang = true
 			continue
 		}
-
 		if 'A' <= r && r <= 'Z' {
 			return "", false
 		}
-
 		buf = append(buf, byte(r))
 	}
-
 	if bang {
 		return "", false
 	}
-
 	return string(buf), true
 }
