@@ -64,7 +64,6 @@ func New(opts *Opts, wrappers ...Wrapper) Protocol {
 	if opts.DownloadFile == nil {
 		opts.DownloadFile = &mode.DownloadFile{Mode: mode.Sync}
 	}
-
 	var p Protocol = &protocol{opts.DownloadFile, opts.Storage, opts.Stasher, opts.Lister, opts.NetworkMode}
 	for _, w := range wrappers {
 		p = w(p)
@@ -83,15 +82,12 @@ type protocol struct {
 
 func (p *protocol) List(ctx context.Context, mod string) ([]string, error) {
 	const op errors.Op = "protocol.List"
-
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 
-	var (
-		strList, goList []string
-		sErr, goErr     error
-		wg              sync.WaitGroup
-	)
+	var strList, goList []string
+	var sErr, goErr error
+	var wg sync.WaitGroup
 
 	/*
 		TODO: potential refactor:
@@ -104,7 +100,6 @@ func (p *protocol) List(ctx context.Context, mod string) ([]string, error) {
 
 		UnionLister(listers ...Lister): combines any number of listers.
 	*/
-
 	wg.Go(func() {
 		strList, sErr = p.storage.List(ctx, mod)
 	})
@@ -170,7 +165,6 @@ var pseudoVersionRE = regexp.MustCompile(`^v[0-9]+\.(0\.0-|\d+\.\d+-([^+]*\.)?0\
 
 func removePseudoVersions(allVersions []string) []string {
 	var vers []string
-
 	for _, v := range allVersions {
 		// copied from go cmd https://github.com/golang/go/blob/master/src/cmd/go/internal/modfetch/pseudo.go#L93
 		isPseudoVersion := strings.Count(v, "-") >= 2 && pseudoVersionRE.MatchString(v)
@@ -178,22 +172,18 @@ func removePseudoVersions(allVersions []string) []string {
 			vers = append(vers, v)
 		}
 	}
-
 	return vers
 }
 
 func (p *protocol) Latest(ctx context.Context, mod string) (*storage.RevInfo, error) {
 	const op errors.Op = "protocol.Latest"
-
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
-
 	if p.networkMode == Offline {
 		// Go never pings the /@latest endpoint _first_. It always tries /list and if that
 		// endpoint returns an empty list then it fallsback to calling /@latest.
 		return nil, errors.E(op, "Athens is in offline mode, use /list endpoint", errors.KindNotFound)
 	}
-
 	lr, _, err := p.lister.List(ctx, mod)
 	if err != nil {
 		return nil, errors.E(op, err)
@@ -204,10 +194,8 @@ func (p *protocol) Latest(ctx context.Context, mod string) (*storage.RevInfo, er
 
 func (p *protocol) Info(ctx context.Context, mod, ver string) ([]byte, error) {
 	const op errors.Op = "protocol.Info"
-
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
-
 	info, err := p.storage.Info(ctx, mod, ver)
 	if err == nil {
 		observ.RecordCacheLookup(ctx, "hit", "info")
@@ -218,7 +206,6 @@ func (p *protocol) Info(ctx context.Context, mod, ver string) ([]byte, error) {
 			return err
 		})
 	}
-
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
@@ -228,10 +215,8 @@ func (p *protocol) Info(ctx context.Context, mod, ver string) ([]byte, error) {
 
 func (p *protocol) GoMod(ctx context.Context, mod, ver string) ([]byte, error) {
 	const op errors.Op = "protocol.GoMod"
-
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
-
 	goMod, err := p.storage.GoMod(ctx, mod, ver)
 	if err == nil {
 		observ.RecordCacheLookup(ctx, "hit", "gomod")
@@ -242,20 +227,16 @@ func (p *protocol) GoMod(ctx context.Context, mod, ver string) ([]byte, error) {
 			return err
 		})
 	}
-
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
-
 	return goMod, nil
 }
 
 func (p *protocol) Zip(ctx context.Context, mod, ver string) (storage.SizeReadCloser, error) {
 	const op errors.Op = "protocol.Zip"
-
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
-
 	zip, err := p.storage.Zip(ctx, mod, ver)
 	if err == nil {
 		observ.RecordCacheLookup(ctx, "hit", "zip")
@@ -266,7 +247,6 @@ func (p *protocol) Zip(ctx context.Context, mod, ver string) (storage.SizeReadCl
 			return err
 		})
 	}
-
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
@@ -280,14 +260,12 @@ func (p *protocol) processDownload(ctx context.Context, mod, ver string, f func(
 	// This is needed so that the async go routines can continue even after the HTTP request is complete (which leads to context cancellation).
 	ctx, cancel := copyContextWithCustomTimeout(ctx, time.Minute*15)
 	defer cancel()
-
 	switch p.df.Match(mod) {
 	case mode.Sync:
 		newVer, err := p.stasher.Stash(ctx, mod, ver)
 		if err != nil {
 			return errors.E(op, err)
 		}
-
 		return f(newVer)
 	case mode.Async:
 		go func() { _, _ = p.stasher.Stash(ctx, mod, ver) }()
@@ -300,7 +278,6 @@ func (p *protocol) processDownload(ctx context.Context, mod, ver string, f func(
 	case mode.None:
 		return errors.E(op, "none", errors.KindNotFound)
 	}
-
 	return nil
 }
 
@@ -309,14 +286,11 @@ func union(list1, list2 []string) []string {
 	if list1 == nil {
 		list1 = []string{}
 	}
-
 	if list2 == nil {
 		list2 = []string{}
 	}
-
 	list1 = append(list1, list2...)
 	unique := []string{}
-
 	m := make(map[string]struct{})
 	for _, v := range list1 {
 		if _, ok := m[v]; !ok {
@@ -324,7 +298,6 @@ func union(list1, list2 []string) []string {
 			m[v] = struct{}{}
 		}
 	}
-
 	return unique
 }
 
@@ -332,6 +305,5 @@ func copyContextWithCustomTimeout(ctx context.Context, timeout time.Duration) (c
 	ctxCopy, cancel := context.WithTimeout(context.Background(), timeout)
 	ctxCopy = requestid.SetInContext(ctxCopy, requestid.FromContext(ctx))
 	ctxCopy = log.SetEntryInContext(ctxCopy, log.EntryFromContext(ctx))
-
 	return ctxCopy, cancel
 }

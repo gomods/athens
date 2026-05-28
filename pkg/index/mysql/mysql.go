@@ -15,24 +15,21 @@ import (
 // New returns a new Indexer with a MySQL implementation.
 // It attempts to connect to the DB and create the index table
 // if it doesn ot already exist.
-func New(ctx context.Context, cfg *config.MySQL) (index.Indexer, error) {
+func New(cfg *config.MySQL) (index.Indexer, error) {
 	dataSource := getMySQLSource(cfg)
-
 	db, err := sql.Open("mysql", dataSource)
 	if err != nil {
 		return nil, err
 	}
-
-	err = db.PingContext(ctx)
-	if err != nil {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	if err = db.PingContext(ctx); err != nil {
 		return nil, err
 	}
-
 	_, err = db.ExecContext(ctx, schema)
 	if err != nil {
 		return nil, err
 	}
-
 	return &indexer{db}, nil
 }
 
@@ -65,7 +62,6 @@ type indexer struct {
 
 func (i *indexer) Index(ctx context.Context, mod, ver string) error {
 	const op errors.Op = "mysql.Index"
-
 	_, err := i.db.ExecContext(
 		ctx,
 		`INSERT INTO indexes (path, version, timestamp) VALUES (?, ?, ?)`,
@@ -76,39 +72,29 @@ func (i *indexer) Index(ctx context.Context, mod, ver string) error {
 	if err != nil {
 		return errors.E(op, err, getKind(err))
 	}
-
 	return nil
 }
 
 func (i *indexer) Lines(ctx context.Context, since time.Time, limit int) ([]*index.Line, error) {
 	const op errors.Op = "mysql.Lines"
-
 	if since.IsZero() {
 		since = time.Unix(0, 0)
 	}
-
 	sinceStr := since.Format(time.RFC3339Nano)
-
 	rows, err := i.db.QueryContext(ctx, `SELECT path, version, timestamp FROM indexes WHERE timestamp >= ? LIMIT ?`, sinceStr, limit)
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
-
 	defer func() { _ = rows.Close() }()
-
 	var lines []*index.Line
-
 	for rows.Next() {
 		var line index.Line
-
 		err = rows.Scan(&line.Path, &line.Version, &line.Timestamp)
 		if err != nil {
 			return nil, errors.E(op, err)
 		}
-
 		lines = append(lines, &line)
 	}
-
 	return lines, nil
 }
 
@@ -120,7 +106,6 @@ func getMySQLSource(cfg *config.MySQL) string {
 	c.Passwd = cfg.Password
 	c.DBName = cfg.Database
 	c.Params = cfg.Params
-
 	return c.FormatDSN()
 }
 
@@ -129,7 +114,6 @@ func getKind(err error) int {
 	if !errors.AsErr(err, &mysqlErr) {
 		return errors.KindUnexpected
 	}
-
 	switch mysqlErr.Number {
 	case 1062:
 		return errors.KindAlreadyExists

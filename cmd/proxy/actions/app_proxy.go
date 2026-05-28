@@ -102,7 +102,7 @@ func addProxyRoutes(
 		return err
 	}
 
-	mf, err := module.NewGoGetFetcher(ctx, c.GoBinary, c.GoGetDir, c.GoBinaryEnvVars, fs)
+	mf, err := module.NewGoGetFetcher(c.GoBinary, c.GoGetDir, c.GoBinaryEnvVars, fs)
 	if err != nil {
 		return err
 	}
@@ -165,10 +165,10 @@ func getSingleFlight(ctx context.Context, l *log.Logger, c *config.Config, s sto
 		}
 
 		return stash.WithRedisLock(
-			ctx,
 			&athensLoggerForRedis{logger: l},
 			c.SingleFlight.Redis.Endpoint,
 			c.SingleFlight.Redis.Password,
+			c.SingleFlight.Redis.Cluster,
 			checker,
 			c.SingleFlight.Redis.LockConfig)
 	case "redis-sentinel":
@@ -177,7 +177,6 @@ func getSingleFlight(ctx context.Context, l *log.Logger, c *config.Config, s sto
 		}
 
 		return stash.WithRedisSentinelLock(
-			ctx,
 			&athensLoggerForRedis{logger: l},
 			c.SingleFlight.RedisSentinel.Endpoints,
 			c.SingleFlight.RedisSentinel.MasterName,
@@ -211,9 +210,9 @@ func getIndex(ctx context.Context, c *config.Config) (index.Indexer, error) {
 	case "memory":
 		return mem.New(), nil
 	case "mysql":
-		return mysql.New(ctx, c.Index.MySQL)
+		return mysql.New(c.Index.MySQL)
 	case "postgres":
-		return postgres.New(ctx, c.Index.Postgres)
+		return postgres.New(c.Index.Postgres)
 	}
 
 	return nil, fmt.Errorf("unknown index type: %q", c.IndexType)

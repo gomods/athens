@@ -17,7 +17,6 @@ type Deleter func(ctx context.Context, path string) error
 // Returns multierror containing errors from all deletes and timeouts.
 func Delete(ctx context.Context, module, version string, del Deleter, timeout time.Duration) error {
 	const op errors.Op = "module.Delete"
-
 	tctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
@@ -26,11 +25,9 @@ func Delete(ctx context.Context, module, version string, del Deleter, timeout ti
 
 		go func() {
 			defer close(ec)
-
 			p := config.PackageVersionedName(module, version, ext)
 			ec <- del(tctx, p)
 		}()
-
 		return ec
 	}
 
@@ -49,19 +46,15 @@ func Delete(ctx context.Context, module, version string, del Deleter, timeout ti
 	go delOrAbort("zip")
 
 	var errs error
-
 	for range numFiles {
 		err := <-errChan
 		if err != nil {
 			errs = multierror.Append(errs, err)
 		}
 	}
-
 	close(errChan)
-
 	if errs != nil {
 		return errors.E(op, errs)
 	}
-
 	return nil
 }

@@ -22,6 +22,7 @@ type Etcd struct {
 type Redis struct {
 	Endpoint   string `envconfig:"ATHENS_REDIS_ENDPOINT"`
 	Password   string `envconfig:"ATHENS_REDIS_PASSWORD"`
+	Cluster    bool   `envconfig:"ATHENS_REDIS_CLUSTER"`
 	LockConfig *RedisLockConfig
 }
 

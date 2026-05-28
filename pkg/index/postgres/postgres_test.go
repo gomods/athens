@@ -1,7 +1,6 @@
 package postgres
 
 import (
-	"context"
 	"os"
 	"testing"
 
@@ -14,7 +13,7 @@ func TestPostgres(t *testing.T) {
 		t.SkipNow()
 	}
 	cfg := getTestConfig(t)
-	i, err := New(context.Background(), cfg)
+	i, err := New(cfg)
 	if err != nil {
 		t.Fatal(err)
 	}

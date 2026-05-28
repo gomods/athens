@@ -11,6 +11,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/observ"
@@ -38,14 +39,11 @@ type goModule struct {
 }
 
 // NewGoGetFetcher creates fetcher which uses go get tool to fetch modules.
-func NewGoGetFetcher(ctx context.Context, goBinaryName, gogetDir string, envVars []string, fs afero.Fs) (Fetcher, error) {
+func NewGoGetFetcher(goBinaryName, gogetDir string, envVars []string, fs afero.Fs) (Fetcher, error) {
 	const op errors.Op = "module.NewGoGetFetcher"
-
-	err := validGoBinary(ctx, goBinaryName)
-	if err != nil {
+	if err := validGoBinary(goBinaryName); err != nil {
 		return nil, errors.E(op, err)
 	}
-
 	return &goGetFetcher{
 		fs:           fs,
 		goBinaryName: goBinaryName,
@@ -58,7 +56,6 @@ func NewGoGetFetcher(ctx context.Context, goBinaryName, gogetDir string, envVars
 // .info, .mod, and .zip files.
 func (g *goGetFetcher) Fetch(ctx context.Context, mod, ver string) (*storage.Version, error) {
 	const op errors.Op = "goGetFetcher.Fetch"
-
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 
@@ -67,13 +64,9 @@ func (g *goGetFetcher) Fetch(ctx context.Context, mod, ver string) (*storage.Ver
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
-
 	sourcePath := filepath.Join(goPathRoot, "src")
-
 	modPath := filepath.Join(sourcePath, getRepoDirName(mod, ver))
-
-	err = g.fs.MkdirAll(modPath, os.ModeDir|os.ModePerm)
-	if err != nil {
+	if err := g.fs.MkdirAll(modPath, os.ModeDir|os.ModePerm); err != nil {
 		_ = clearFiles(g.fs, goPathRoot)
 		return nil, errors.E(op, err)
 	}
@@ -93,21 +86,17 @@ func (g *goGetFetcher) Fetch(ctx context.Context, mod, ver string) (*storage.Ver
 	}
 
 	var storageVer storage.Version
-
 	storageVer.Semver = m.Version
-
 	info, err := afero.ReadFile(g.fs, m.Info)
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
-
 	storageVer.Info = info
 
 	gomod, err := afero.ReadFile(g.fs, m.GoMod)
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
-
 	storageVer.Mod = gomod
 
 	zipMD5, err := func() ([]byte, error) {
@@ -120,9 +109,7 @@ func (g *goGetFetcher) Fetch(ctx context.Context, mod, ver string) (*storage.Ver
 
 		//nolint:gosec
 		hash := md5.New()
-
-		_, err = io.Copy(hash, zipForChecksum)
-		if err != nil {
+		if _, err := io.Copy(hash, zipForChecksum); err != nil {
 			return nil, errors.E(op, err)
 		}
 
@@ -173,28 +160,21 @@ func downloadModule(
 	err := cmd.Run()
 	if err != nil && !errors.IsNoChildProcessesErr(err) {
 		err = fmt.Errorf("%w: %s", err, stderr)
-
 		var m goModule
-
-		jsonErr := json.NewDecoder(stdout).Decode(&m)
-		if jsonErr != nil {
+		if jsonErr := json.NewDecoder(stdout).Decode(&m); jsonErr != nil {
 			return goModule{}, errors.E(op, err)
 		}
 		// github quota exceeded
 		if isLimitHit(m.Error) {
 			return goModule{}, errors.E(op, m.Error, errors.KindRateLimit)
 		}
-
 		return goModule{}, errors.E(op, m.Error, errors.KindNotFound)
 	}
 
 	var m goModule
-
-	err = json.NewDecoder(stdout).Decode(&m)
-	if err != nil {
+	if err = json.NewDecoder(stdout).Decode(&m); err != nil {
 		return goModule{}, errors.E(op, err)
 	}
-
 	if m.Error != "" {
 		return goModule{}, errors.E(op, m.Error)
 	}
@@ -213,15 +193,14 @@ func getRepoDirName(repoURI, version string) string {
 	return fmt.Sprintf("%s-%s", escapedURI, version)
 }
 
-func validGoBinary(ctx context.Context, name string) error {
+func validGoBinary(name string) error {
 	const op errors.Op = "module.validGoBinary"
-
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
 	err := exec.CommandContext(ctx, name).Run()
-
 	eErr := &exec.ExitError{}
 	if err != nil && !errors.AsErr(err, &eErr) {
 		return errors.E(op, err)
 	}
-
 	return nil
 }

@@ -20,7 +20,6 @@ type Uploader func(ctx context.Context, path, contentType string, stream io.Read
 // Returns multierror containing errors from all uploads and timeouts.
 func Upload(ctx context.Context, module, version string, info, mod, zip io.Reader, uploader Uploader, timeout time.Duration) error {
 	const op errors.Op = "module.Upload"
-
 	tctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
@@ -29,16 +28,13 @@ func Upload(ctx context.Context, module, version string, info, mod, zip io.Reade
 
 		go func() {
 			defer close(ec)
-
 			p := config.PackageVersionedName(module, version, ext)
 			ec <- uploader(tctx, p, contentType, stream)
 		}()
-
 		return ec
 	}
 
 	errChan := make(chan error, numFiles)
-
 	saveOrAbort := func(ext, contentType string, stream io.Reader) {
 		select {
 		case err := <-save(ext, contentType, stream):
@@ -52,16 +48,13 @@ func Upload(ctx context.Context, module, version string, info, mod, zip io.Reade
 	go saveOrAbort("zip", "application/octet-stream", zip)
 
 	var errs error
-
 	for range numFiles {
 		err := <-errChan
 		if err != nil {
 			errs = multierror.Append(errs, err)
 		}
 	}
-
 	close(errChan)
-
 	if errs != nil {
 		return errors.E(op, errs)
 	}
