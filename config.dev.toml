@@ -382,6 +382,10 @@ ShutdownTimeout = 60
         # Env override: ATHENS_REDIS_SENTINEL_PASSWORD
         SentinelPassword = "sekret"
 
+        # DB is the redis database number to connect to
+        # Env override: ATHENS_REDIS_SENTINEL_DB
+        DB = 0
+
         # The Redis master authorization parameters
         # Env override: ATHENS_REDIS_USERNAME
         RedisUsername = ""

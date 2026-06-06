@@ -169,6 +169,7 @@ func getSingleFlight(l *log.Logger, c *config.Config, s storage.Backend, checker
 			c.SingleFlight.RedisSentinel.SentinelPassword,
 			c.SingleFlight.RedisSentinel.RedisUsername,
 			c.SingleFlight.RedisSentinel.RedisPassword,
+			c.SingleFlight.RedisSentinel.DB,
 			checker,
 			c.SingleFlight.RedisSentinel.LockConfig,
 		)

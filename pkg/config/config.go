@@ -183,6 +183,7 @@ func defaultConfig() *Config {
 				SentinelPassword: "sekret",
 				RedisUsername:    "",
 				RedisPassword:    "",
+				DB:               0,
 				LockConfig:       DefaultRedisLockConfig(),
 			},
 			GCP: DefaultGCPConfig(),

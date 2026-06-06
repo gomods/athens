@@ -34,6 +34,7 @@ type RedisSentinel struct {
 	SentinelPassword string   `envconfig:"ATHENS_REDIS_SENTINEL_PASSWORD"`
 	RedisUsername    string   `envconfig:"ATHENS_REDIS_USERNAME"`
 	RedisPassword    string   `envconfig:"ATHENS_REDIS_PASSWORD"`
+	DB               int      `envconfig:"ATHENS_REDIS_SENTINEL_DB"`
 	LockConfig       *RedisLockConfig
 }
 
