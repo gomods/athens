@@ -3,11 +3,10 @@ package actions
 import (
 	"encoding/json"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"strconv"
 	"time"
-
-	"log/slog"
 
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/index"

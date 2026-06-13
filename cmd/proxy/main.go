@@ -74,24 +74,20 @@ func main() {
 	var ln net.Listener
 
 	if conf.UnixSocket != "" {
-		socketLogger := logger.WithFields(map[string]any{"unixSocket": conf.UnixSocket})
-		socketLogger.Infof("Starting application")
+		logger.WithFields(map[string]any{"unixSocket": conf.UnixSocket}).Infof("Starting application")
 
 		//nolint:noctx
 		ln, err = net.Listen("unix", conf.UnixSocket)
 		if err != nil {
-			socketLogger.Errorf("Could not listen on Unix domain socket: %v", err)
-			os.Exit(1)
+			logger.Fatalf("Could not listen on Unix domain socket %q: %v", conf.UnixSocket, err)
 		}
 	} else {
-		portLogger := logger.WithFields(map[string]any{"tcpPort": conf.Port})
-		portLogger.Infof("Starting application")
+		logger.WithFields(map[string]any{"tcpPort": conf.Port}).Infof("Starting application")
 
 		//nolint:noctx
 		ln, err = net.Listen("tcp", conf.Port)
 		if err != nil {
-			portLogger.Errorf("Could not listen on TCP port: %v", err)
-			os.Exit(1)
+			logger.Fatalf("Could not listen on TCP port %q: %v", conf.Port, err)
 		}
 	}
 

@@ -13,6 +13,7 @@ import (
 // internal service should use to communicate things.
 type Logger struct {
 	*entry
+
 	handler slog.Handler
 	level   slog.Level
 }
@@ -50,10 +51,9 @@ func (l *Logger) StdLogger(level slog.Level) *stdlog.Logger {
 
 // NoOpLogger provides a Logger that does nothing.
 func NoOpLogger() *Logger {
-	h := slog.NewTextHandler(io.Discard, nil)
 	return &Logger{
-		entry:   &entry{sl: slog.New(h)},
-		handler: h,
+		entry:   &entry{sl: slog.New(slog.DiscardHandler)},
+		handler: slog.DiscardHandler,
 	}
 }
 
