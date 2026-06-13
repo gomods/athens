@@ -6,6 +6,7 @@ import (
 	"flag"
 	"fmt"
 	stdlog "log"
+	"log/slog"
 	"net"
 	"net/http"
 	_ "net/http/pprof"
@@ -18,7 +19,6 @@ import (
 	"github.com/gomods/athens/pkg/build"
 	"github.com/gomods/athens/pkg/config"
 	athenslog "github.com/gomods/athens/pkg/log"
-	"github.com/sirupsen/logrus"
 )
 
 var (
@@ -37,26 +37,21 @@ func main() {
 		stdlog.Fatalf("Could not load config file: %v", err)
 	}
 
-	logLvl, err := logrus.ParseLevel(conf.LogLevel)
+	logLvl, err := athenslog.ParseLevel(conf.LogLevel)
 	if err != nil {
 		stdlog.Fatalf("Could not parse log level %q: %v", conf.LogLevel, err)
 	}
 
 	logger := athenslog.New(conf.CloudRuntime, logLvl, conf.LogFormat)
 
-	// Turn standard logger output into logrus Errors.
-	logrusErrorWriter := logger.WriterLevel(logrus.ErrorLevel)
-	defer func() {
-		if err := logrusErrorWriter.Close(); err != nil {
-			logger.WithError(err).Warn("Could not close logrus writer pipe")
-		}
-	}()
-	stdlog.SetOutput(logrusErrorWriter)
+	// Route the standard library logger's output through our logger at the
+	// error level.
+	stdlog.SetOutput(logger.StdLogger(slog.LevelError).Writer())
 	stdlog.SetFlags(stdlog.Flags() &^ (stdlog.Ldate | stdlog.Ltime))
 
 	handler, cleanup, err := actions.App(logger, conf)
 	if err != nil {
-		logger.WithError(err).Fatal("Could not create App")
+		logger.Fatalf("Could not create App: %v", err)
 	}
 	defer cleanup()
 
@@ -70,8 +65,8 @@ func main() {
 			// pprof to be exposed on a different port than the application for security matters,
 			// not to expose profiling data and avoid DoS attacks (profiling slows down the service)
 			// https://www.farsightsecurity.com/txt-record/2016/10/28/cmikk-go-remote-profiling/
-			logger.WithField("port", conf.PprofPort).Infof("starting pprof")
-			logger.Fatal(http.ListenAndServe(conf.PprofPort, nil)) //nolint:gosec // This should not be exposed to the world.
+			logger.WithFields(map[string]any{"port": conf.PprofPort}).Infof("starting pprof")
+			logger.Fatalf("pprof server failed: %v", http.ListenAndServe(conf.PprofPort, nil)) //nolint:gosec // This should not be exposed to the world.
 		}()
 	}
 
@@ -79,27 +74,29 @@ func main() {
 	var ln net.Listener
 
 	if conf.UnixSocket != "" {
-		logger := logger.WithField("unixSocket", conf.UnixSocket)
-		logger.Info("Starting application")
+		socketLogger := logger.WithFields(map[string]any{"unixSocket": conf.UnixSocket})
+		socketLogger.Infof("Starting application")
 
 		//nolint:noctx
 		ln, err = net.Listen("unix", conf.UnixSocket)
 		if err != nil {
-			logger.WithError(err).Fatal("Could not listen on Unix domain socket")
+			socketLogger.Errorf("Could not listen on Unix domain socket: %v", err)
+			os.Exit(1)
 		}
 	} else {
-		logger := logger.WithField("tcpPort", conf.Port)
-		logger.Info("Starting application")
+		portLogger := logger.WithFields(map[string]any{"tcpPort": conf.Port})
+		portLogger.Infof("Starting application")
 
 		//nolint:noctx
 		ln, err = net.Listen("tcp", conf.Port)
 		if err != nil {
-			logger.WithError(err).Fatal("Could not listen on TCP port")
+			portLogger.Errorf("Could not listen on TCP port: %v", err)
+			os.Exit(1)
 		}
 	}
 
 	signalCtx, signalStop := signal.NotifyContext(context.Background(), shutdown.GetSignals()...)
-	reaper := shutdown.ChildProcReaper(signalCtx, logger.Logger)
+	reaper := shutdown.ChildProcReaper(signalCtx, logger)
 
 	go func() {
 		defer signalStop()
@@ -110,7 +107,7 @@ func main() {
 		}
 
 		if !errors.Is(err, http.ErrServerClosed) {
-			logger.WithError(err).Fatal("Could not start server")
+			logger.Fatalf("Could not start server: %v", err)
 		}
 	}()
 
@@ -122,7 +119,7 @@ func main() {
 	shutdownCtx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(conf.ShutdownTimeout))
 	defer cancel()
 	if err := srv.Shutdown(shutdownCtx); err != nil {
-		logger.WithError(err).Fatal("Could not shut down server")
+		logger.Fatalf("Could not shut down server: %v", err)
 	}
 	<-reaper.Done()
 }

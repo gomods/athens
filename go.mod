@@ -35,7 +35,6 @@ require (
 	github.com/minio/minio-go/v6 v6.0.57
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/redis/go-redis/v9 v9.18.0
-	github.com/sirupsen/logrus v1.9.4
 	github.com/spf13/afero v1.15.0
 	github.com/stretchr/testify v1.11.1
 	github.com/technosophos/moniker v0.0.0-20210218184952-3ea787d3943b
@@ -146,6 +145,7 @@ require (
 	github.com/prometheus/prometheus v0.311.2 // indirect
 	github.com/prometheus/statsd_exporter v0.29.0 // indirect
 	github.com/rogpeppe/go-internal v1.14.1 // indirect
+	github.com/sirupsen/logrus v1.9.4 // indirect
 	github.com/soheilhy/cmux v0.1.5 // indirect
 	github.com/spf13/pflag v1.0.10 // indirect
 	github.com/spiffe/go-spiffe/v2 v2.6.0 // indirect

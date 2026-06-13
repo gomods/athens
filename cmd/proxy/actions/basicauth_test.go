@@ -2,13 +2,13 @@ package actions
 
 import (
 	"bytes"
+	"log/slog"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
 
 	"github.com/gomods/athens/pkg/log"
-	"github.com/sirupsen/logrus"
 )
 
 var basicAuthTests = [...]struct {
@@ -69,9 +69,8 @@ func TestBasicAuth(t *testing.T) {
 			w := httptest.NewRecorder()
 			r := httptest.NewRequest(http.MethodGet, tc.path, nil)
 			r.SetBasicAuth(tc.user, tc.pass)
-			lggr := log.New("none", logrus.DebugLevel, "")
 			buf := &bytes.Buffer{}
-			lggr.Out = buf
+			lggr := log.NewWithOutput(buf, "none", slog.LevelDebug, "")
 			ctx := log.SetEntryInContext(t.Context(), lggr)
 			r = r.WithContext(ctx)
 			handler.ServeHTTP(w, r)
