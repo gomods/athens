@@ -9,7 +9,7 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/sirupsen/logrus"
+	"github.com/gomods/athens/pkg/log"
 )
 
 // GetSignals returns the appropriate signals to catch for a clean shutdown, dependent on the OS.
@@ -25,7 +25,7 @@ func GetSignals() []os.Signal {
 //
 // This only applies to Unix platforms, and returns an already canceled context
 // on Windows.
-func ChildProcReaper(ctx context.Context, logger logrus.FieldLogger) context.Context {
+func ChildProcReaper(ctx context.Context, logger log.Entry) context.Context {
 	sigChld := make(chan os.Signal, 1)
 	signal.Notify(sigChld, syscall.SIGCHLD)
 	done, cancel := context.WithCancel(context.WithoutCancel(ctx))
@@ -44,7 +44,7 @@ func ChildProcReaper(ctx context.Context, logger logrus.FieldLogger) context.Con
 	return done
 }
 
-func reap(logger logrus.FieldLogger) {
+func reap(logger log.Entry) {
 	for {
 		var wstatus syscall.WaitStatus
 		pid, err := syscall.Wait4(-1, &wstatus, syscall.WNOHANG, nil)

@@ -6,7 +6,7 @@ import (
 	"context"
 	"os"
 
-	"github.com/sirupsen/logrus"
+	"github.com/gomods/athens/pkg/log"
 )
 
 // GetSignals returns the appropriate signals to catch for a clean shutdown, dependent on the OS.
@@ -20,7 +20,7 @@ func GetSignals() []os.Signal {
 //
 // This only applies to Unix platforms, and returns an already canceled context
 // on Windows.
-func ChildProcReaper(ctx context.Context, logger logrus.FieldLogger) context.Context {
+func ChildProcReaper(ctx context.Context, logger log.Entry) context.Context {
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 	return ctx
