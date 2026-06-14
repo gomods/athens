@@ -202,6 +202,22 @@ func TestStorageEnvOverrides(t *testing.T) {
 
 // TestParseExampleConfig validates that all the properties in the example configuration file
 // can be parsed and validated without any environment variables
+func TestRedisSentinelDBConfig(t *testing.T) {
+	t.Setenv("ATHENS_SINGLE_FLIGHT_TYPE", "redis-sentinel")
+	t.Setenv("ATHENS_REDIS_SENTINEL_ENDPOINTS", "127.0.0.1:26379")
+	t.Setenv("ATHENS_REDIS_SENTINEL_MASTER_NAME", "mymaster")
+	t.Setenv("ATHENS_REDIS_SENTINEL_DB", "5")
+
+	cfg, err := Load("")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if cfg.SingleFlight.RedisSentinel.DB != 5 {
+		t.Fatalf("expected DB to be 5, got %d", cfg.SingleFlight.RedisSentinel.DB)
+	}
+}
+
 func TestParseExampleConfig(t *testing.T) {
 	os.Clearenv()
 
@@ -254,6 +270,7 @@ func TestParseExampleConfig(t *testing.T) {
 			Endpoints:        []string{"127.0.0.1:26379"},
 			MasterName:       "redis-1",
 			SentinelPassword: "sekret",
+			DB:               0,
 			LockConfig:       DefaultRedisLockConfig(),
 		},
 		Etcd: &Etcd{Endpoints: "localhost:2379,localhost:22379,localhost:32379"},
@@ -389,6 +406,7 @@ func getEnvMap(config *Config) map[string]string {
 			envVars["ATHENS_REDIS_SENTINEL_PASSWORD"] = singleFlight.RedisSentinel.SentinelPassword
 			envVars["ATHENS_REDIS_USERNAME"] = singleFlight.RedisSentinel.RedisUsername
 			envVars["ATHENS_REDIS_PASSWORD"] = singleFlight.RedisSentinel.RedisPassword
+			envVars["ATHENS_REDIS_SENTINEL_DB"] = strconv.Itoa(singleFlight.RedisSentinel.DB)
 			if singleFlight.RedisSentinel.LockConfig != nil {
 				envVars["ATHENS_REDIS_LOCK_TTL"] = strconv.Itoa(singleFlight.RedisSentinel.LockConfig.TTL)
 				envVars["ATHENS_REDIS_LOCK_TIMEOUT"] = strconv.Itoa(singleFlight.RedisSentinel.LockConfig.Timeout)
