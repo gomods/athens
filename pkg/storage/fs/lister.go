@@ -13,12 +13,9 @@ import (
 
 func (s *storageImpl) List(ctx context.Context, module string) ([]string, error) {
 	const op errors.Op = "fs.List"
-
 	_, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
-
 	loc := s.moduleLocation(module)
-
 	fileInfos, err := afero.ReadDir(s.filesystem, loc)
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -27,19 +24,15 @@ func (s *storageImpl) List(ctx context.Context, module string) ([]string, error)
 
 		return nil, errors.E(op, errors.M(module), err, errors.KindUnexpected)
 	}
-
 	ret := []string{}
-
 	for _, fileInfo := range fileInfos {
 		if !fileInfo.IsDir() {
 			continue
 		}
-
 		ver := fileInfo.Name()
 		if v := semver.Canonical(ver); v != "" && strings.HasPrefix(ver, v) {
 			ret = append(ret, ver)
 		}
 	}
-
 	return ret, nil
 }

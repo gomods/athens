@@ -3,12 +3,17 @@ package errors
 import (
 	"errors"
 	"fmt"
+	"log/slog"
+	"math"
 	"net/http"
 	"runtime"
 	"slices"
-
-	"github.com/sirupsen/logrus"
 )
+
+// severityUnset is a sentinel meaning "no severity was set on this error".
+// We need an explicit value because slog's zero level is LevelInfo (a real
+// level), unlike logrus whose zero level was an unused one.
+const severityUnset = slog.Level(math.MinInt32)
 
 // Kind enums.
 const (
@@ -38,7 +43,7 @@ type Error struct {
 	Module   M
 	Version  V
 	Err      error
-	Severity logrus.Level
+	Severity slog.Level
 }
 
 // Error returns the underlying error's
@@ -56,7 +61,6 @@ func Is(err error, kind int) bool {
 	if err == nil {
 		return false
 	}
-
 	return Kind(err) == kind
 }
 
@@ -91,22 +95,18 @@ type V string
 // Operation always comes first, module path and version
 // come second, they are optional. Args must have at least
 // an error or a string to describe what exactly went wrong.
-// You can optionally pass a Logrus severity to indicate
+// You can optionally pass a slog severity to indicate
 // the log level of an error based on the context it was constructed in.
 func E(op Op, args ...any) error {
-	e := Error{Op: op}
-
+	e := Error{Op: op, Severity: severityUnset}
 	if len(args) == 0 {
 		msg := "errors.E called with 0 args"
-
 		_, file, line, ok := runtime.Caller(1)
 		if ok {
 			msg = fmt.Sprintf("%v - %v:%v", msg, file, line)
 		}
-
 		e.Err = errors.New(msg)
 	}
-
 	for _, a := range args {
 		switch a := a.(type) {
 		case error:
@@ -117,34 +117,30 @@ func E(op Op, args ...any) error {
 			e.Module = a
 		case V:
 			e.Version = a
-		case logrus.Level:
+		case slog.Level:
 			e.Severity = a
 		case int:
 			e.Kind = a
 		}
 	}
-
 	if e.Err == nil {
 		e.Err = errors.New(KindText(e))
 	}
-
 	return e
 }
 
 // Severity returns the log level of an error
 // if none exists, then the level is Error because
 // it is an unexpected.
-func Severity(err error) logrus.Level {
+func Severity(err error) slog.Level {
 	var e Error
 	if !errors.As(err, &e) {
-		return logrus.ErrorLevel
+		return slog.LevelError
 	}
 
-	// if there's no severity (0 is Panic level in logrus
-	// which we should not use since cloud providers only have
-	// debug, info, warn, and error) then look for the
-	// child's severity.
-	if e.Severity < logrus.ErrorLevel {
+	// If no severity was set on this error, look for the
+	// child's severity. We only ever use debug/info/warn/error.
+	if e.Severity == severityUnset {
 		return Severity(e.Err)
 	}
 
@@ -154,12 +150,11 @@ func Severity(err error) logrus.Level {
 // Expect is a helper that returns an Info level
 // if the error has the expected kind, otherwise
 // it returns an Error level.
-func Expect(err error, kinds ...int) logrus.Level {
+func Expect(err error, kinds ...int) slog.Level {
 	if slices.Contains(kinds, Kind(err)) {
-		return logrus.InfoLevel
+		return slog.LevelInfo
 	}
-
-	return logrus.ErrorLevel
+	return slog.LevelError
 }
 
 // Kind recursively searches for the

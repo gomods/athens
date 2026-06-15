@@ -19,7 +19,6 @@ const tokenSeparator = "|"
 // It returns a list of modules and versions contained in the storage.
 func (s *storageImpl) Catalog(ctx context.Context, token string, pageSize int) ([]paths.AllPathParams, string, error) {
 	const op errors.Op = "fs.Catalog"
-
 	_, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 
@@ -35,7 +34,6 @@ func (s *storageImpl) Catalog(ctx context.Context, token string, pageSize int) (
 	err = afero.Walk(s.filesystem, s.rootDir, func(path string, info os.FileInfo, err error) error {
 		if strings.HasSuffix(info.Name(), ".info") {
 			verDir := filepath.Dir(path)
-
 			modVer, err := filepath.Rel(s.rootDir, verDir)
 			if err != nil {
 				return err
@@ -54,14 +52,12 @@ func (s *storageImpl) Catalog(ctx context.Context, token string, pageSize int) (
 			}
 
 			res = append(res, paths.AllPathParams{Module: module, Version: version})
-
 			count--
 			if count == 0 {
 				resToken = tokenFromModVer(module, version)
 				return io.EOF
 			}
 		}
-
 		return nil
 	})
 	if err != nil && !errors.IsErr(err, io.EOF) {
@@ -77,15 +73,12 @@ func tokenFromModVer(module, version string) string {
 
 func modVerFromToken(token string) (string, string, error) {
 	const op errors.Op = "fs.Catalog"
-
 	if token == "" {
 		return "", "", nil
 	}
-
 	values := strings.Split(token, tokenSeparator)
 	if len(values) < 2 {
 		return "", "", errors.E(op, "Invalid token")
 	}
-
 	return values[0], values[1], nil
 }

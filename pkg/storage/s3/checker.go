@@ -16,24 +16,18 @@ import (
 // returning true if the module at version exists in storage.
 func (s *Storage) Exists(ctx context.Context, module, version string) (bool, error) {
 	const op errors.Op = "s3.Exists"
-
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 
 	files := []string{"info", "mod", "zip"}
-
 	errChan := make(chan error, len(files))
 	defer close(errChan)
-
 	cancelingCtx, cancel := context.WithCancel(ctx)
-
 	var wg sync.WaitGroup
 	for _, file := range files {
 		wg.Add(1)
-
 		go func(file string) {
 			defer wg.Done()
-
 			_, err := s.s3API.HeadObject(
 				cancelingCtx,
 				&s3.HeadObjectInput{
@@ -43,27 +37,21 @@ func (s *Storage) Exists(ctx context.Context, module, version string) (bool, err
 			errChan <- err
 		}(file)
 	}
-
 	exists := true
-
 	var err error
 	for range files {
 		err = <-errChan
 		if err == nil {
 			continue
 		}
-
 		var aerr smithy.APIError
 		if errors.AsErr(err, &aerr) && aerr.ErrorCode() == "NotFound" {
 			err = nil
 			exists = false
 		}
-
 		break
 	}
-
 	cancel()
 	wg.Wait()
-
 	return exists, err
 }

@@ -17,7 +17,6 @@ import (
 // It returns a list of versions, if any, for a given module.
 func (s *Storage) Catalog(ctx context.Context, token string, pageSize int) ([]paths.AllPathParams, string, error) {
 	const op errors.Op = "gcp.Catalog"
-
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 
@@ -29,7 +28,6 @@ func (s *Storage) Catalog(ctx context.Context, token string, pageSize int) ([]pa
 	p := iterator.NewPager(it, objCount, token)
 
 	attrs := make([]*storage.ObjectAttrs, 0)
-
 	nextToken, err := p.NextPage(&attrs)
 	if err != nil {
 		return nil, "", err
@@ -41,11 +39,9 @@ func (s *Storage) Catalog(ctx context.Context, token string, pageSize int) ([]pa
 			if err != nil {
 				continue
 			}
-
 			res = append(res, p)
 		}
 	}
-
 	return res, nextToken, nil
 }
 
@@ -57,6 +53,5 @@ func parsModVer(p string) (paths.AllPathParams, error) {
 	if m == "" || v == "" {
 		return paths.AllPathParams{}, errors.E(op, fmt.Errorf("invalid object key format %s", p))
 	}
-
 	return paths.AllPathParams{Module: m, Version: v}, nil
 }

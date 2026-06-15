@@ -167,10 +167,9 @@ jobs:
         run: echo "::set-output name=date::$(date -u '+%Y-%m-%d-%H:%M:%S-%Z')"
 
       - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@5daf1e915a5f0af01ddbcd89a43b8061ff4f1a89 # v7.2.2
+        uses: goreleaser/goreleaser-action@v7
         with:
-          distribution: goreleaser
-          version: "~> v2"
+          version: latest
           args: release --clean --snapshot
         env:
           DATE: ${{ steps.date.outputs.date }}

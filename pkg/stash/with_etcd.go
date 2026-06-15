@@ -23,7 +23,6 @@ func WithEtcd(endpoints []string, checker storage.Checker) (Wrapper, error) {
 	if err != nil {
 		return nil, errors.E("stash.WithEtcd", err)
 	}
-
 	return func(s Stasher) Stasher {
 		return &etcd{client: c, stasher: s, checker: checker}
 	}, nil
@@ -37,7 +36,6 @@ type etcd struct {
 
 func (s *etcd) Stash(ctx context.Context, mod, ver string) (newVer string, err error) {
 	const op errors.Op = "etcd.Stash"
-
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 
@@ -48,9 +46,7 @@ func (s *etcd) Stash(ctx context.Context, mod, ver string) (newVer string, err e
 	defer sess.Close()
 
 	m := concurrency.NewMutex(sess, config.FmtModVer(mod, ver))
-
-	err = m.Lock(ctx)
-	if err != nil {
+	if err := m.Lock(ctx); err != nil {
 		return "", errors.E(op, err)
 	}
 	defer m.Unlock(ctx)
@@ -68,6 +64,5 @@ func (s *etcd) Stash(ctx context.Context, mod, ver string) (newVer string, err e
 	if err != nil {
 		return "", errors.E(op, err)
 	}
-
 	return newVer, nil
 }

@@ -1,7 +1,6 @@
 package actions
 
 import (
-	"context"
 	"encoding/json"
 	"io"
 	"net/http"
@@ -36,7 +35,7 @@ func TestProxyRoutes(t *testing.T) {
 	c.NoSumPatterns = []string{"*"} // catch all patterns with noSumWrapper to ensure the sumdb handler doesn't make a real http request to the sumdb server.
 	c.PathPrefix = "/prefix"
 	subRouter := r.PathPrefix(c.PathPrefix).Subrouter()
-	err = addProxyRoutes(context.Background(), subRouter, s, l, c)
+	err = addProxyRoutes(subRouter, s, l, c)
 	require.NoError(t, err)
 
 	baseURL := "https://athens.azurefd.net" + c.PathPrefix

@@ -24,7 +24,6 @@ func NewValidationMiddleware(client *http.Client, validatorHook string) mux.Midd
 				h.ServeHTTP(w, r)
 				return
 			}
-
 			ctx := r.Context()
 			// not checking the error. Not all requests include a version
 			// i.e. list requests path is like /{module:.+}/@v/list with no version parameter
@@ -35,7 +34,6 @@ func NewValidationMiddleware(client *http.Client, validatorHook string) mux.Midd
 					entry := log.EntryFromContext(ctx)
 					entry.SystemErr(err)
 					w.WriteHeader(http.StatusInternalServerError)
-
 					return
 				}
 
@@ -46,7 +44,6 @@ func NewValidationMiddleware(client *http.Client, validatorHook string) mux.Midd
 					return
 				}
 			}
-
 			h.ServeHTTP(w, r)
 		})
 	}
@@ -73,7 +70,6 @@ func validate(ctx context.Context, client *http.Client, hook, mod, ver string) (
 	const op errors.Op = "actions.validate"
 
 	toVal := &validationParams{mod, ver}
-
 	jsonVal, err := json.Marshal(toVal)
 	if err != nil {
 		return validationResponse{Valid: false}, errors.E(op, err)
@@ -83,14 +79,11 @@ func validate(ctx context.Context, client *http.Client, hook, mod, ver string) (
 	if err != nil {
 		return validationResponse{}, errors.E(op, err)
 	}
-
 	req.Header.Set("Content-Type", "application/json")
-
 	resp, err := client.Do(req)
 	if err != nil {
 		return validationResponse{Valid: false}, errors.E(op, err)
 	}
-
 	defer func() {
 		_, _ = io.Copy(io.Discard, resp.Body)
 		_ = resp.Body.Close()

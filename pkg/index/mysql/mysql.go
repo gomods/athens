@@ -15,16 +15,14 @@ import (
 // New returns a new Indexer with a MySQL implementation.
 // It attempts to connect to the DB and create the index table
 // if it doesn ot already exist.
-func New(ctx context.Context, cfg *config.MySQL) (index.Indexer, error) {
+func New(cfg *config.MySQL) (index.Indexer, error) {
 	dataSource := getMySQLSource(cfg)
 	db, err := sql.Open("mysql", dataSource)
 	if err != nil {
 		return nil, err
 	}
-
-	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-
 	if err = db.PingContext(ctx); err != nil {
 		return nil, err
 	}

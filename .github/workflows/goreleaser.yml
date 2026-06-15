@@ -28,7 +28,7 @@ jobs:
         id: date
         run: echo "::set-output name=date::$(date -u '+%Y-%m-%d-%H:%M:%S-%Z')"
 
-      - name: Release with goreleaser
+      - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@5daf1e915a5f0af01ddbcd89a43b8061ff4f1a89 # v7.2.2
         with:
           distribution: goreleaser

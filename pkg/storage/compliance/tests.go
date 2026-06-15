@@ -18,7 +18,6 @@ import (
 func RunTests(t *testing.T, b storage.Backend, clearBackend func() error) {
 	require.NoError(t, clearBackend(), "pre-clearing backend failed")
 	defer require.NoError(t, clearBackend(), "post-clearing backend failed")
-
 	testNotFound(t, b)
 	testList(t, b)
 	testListSuffix(t, b)
@@ -83,7 +82,6 @@ func testListSuffix(t *testing.T, b storage.Backend) {
 			require.NoError(t, err, "Save for storage failed")
 		}
 	}
-
 	defer func() {
 		for modname, versions := range modVers {
 			for _, version := range versions {
@@ -91,11 +89,9 @@ func testListSuffix(t *testing.T, b storage.Backend) {
 			}
 		}
 	}()
-
 	for modname, versions := range modVers {
 		retVersions, err := b.List(ctx, modname)
 		require.NoError(t, err)
-
 		if len(versions) == 0 {
 			require.Empty(t, retVersions)
 		} else {
@@ -111,7 +107,6 @@ func testList(t *testing.T, b storage.Backend) {
 
 	modname := "github.com/gomods/athens"
 	versions := []string{"v1.1.0", "v1.2.0", "v1.3.0"}
-
 	for _, version := range versions {
 		mock := getMockModule()
 		err := b.Save(
@@ -125,13 +120,11 @@ func testList(t *testing.T, b storage.Backend) {
 		)
 		require.NoError(t, err, "Save for storage failed")
 	}
-
 	defer func() {
 		for _, ver := range versions {
 			b.Delete(ctx, modname, ver)
 		}
 	}()
-
 	retVersions, err := b.List(ctx, modname)
 	require.NoError(t, err)
 	require.Equal(t, versions, retVersions)
@@ -144,7 +137,6 @@ func testGet(t *testing.T, b storage.Backend) {
 	ver := "v1.2.3"
 	mock := getMockModule()
 	zipBts, _ := io.ReadAll(mock.Zip)
-
 	b.Save(ctx, modname, ver, mock.Mod, bytes.NewReader(zipBts), mock.ZipMD5, mock.Info)
 	defer b.Delete(ctx, modname, ver)
 
@@ -170,10 +162,8 @@ func testExists(t *testing.T, b storage.Backend) {
 	ver := "v1.2.3"
 	mock := getMockModule()
 	zipBts, _ := io.ReadAll(mock.Zip)
-
 	b.Save(ctx, modname, ver, mock.Mod, bytes.NewReader(zipBts), mock.ZipMD5, mock.Info)
 	defer b.Delete(ctx, modname, ver)
-
 	checker := storage.WithChecker(b)
 	exists, err := checker.Exists(ctx, modname, ver)
 	require.NoError(t, err)
@@ -188,14 +178,12 @@ func testShouldNotExist(t *testing.T, b storage.Backend) {
 	zipBts, _ := io.ReadAll(mock.Zip)
 	err := b.Save(ctx, mod, ver, mock.Mod, bytes.NewReader(zipBts), mock.ZipMD5, mock.Info)
 	require.NoError(t, err, "should successfully safe a mock module")
-
 	defer b.Delete(ctx, mod, ver)
 
 	prefixVer := "v1.2.3-pre"
 
 	exists, err := storage.WithChecker(b).Exists(ctx, mod, prefixVer)
 	require.NoError(t, err)
-
 	if exists {
 		t.Fatal("a non existing version that has the same prefix of an existing version should not exist")
 	}

@@ -7,7 +7,6 @@ import (
 
 func extractKey(objectKey string) (key, module, version string) {
 	var err error
-
 	key, err = url.PathUnescape(objectKey)
 	if err != nil {
 		key = objectKey

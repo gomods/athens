@@ -1,13 +1,11 @@
 package minio
 
 import (
-	"context"
 	"os"
 	"testing"
 
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/storage/compliance"
-	minio "github.com/minio/minio-go/v7"
 )
 
 func TestBackend(t *testing.T) {
@@ -30,9 +28,8 @@ func TestNewStorageExists(t *testing.T) {
 		{"testbucket", true},  // test exists
 	}
 
-	ctx := context.Background()
 	for _, test := range tests {
-		backend, err := NewStorage(ctx, &config.MinioConfig{
+		backend, err := NewStorage(&config.MinioConfig{
 			Endpoint: url,
 			Key:      "minio",
 			Secret:   "minio123",
@@ -44,7 +41,7 @@ func TestNewStorageExists(t *testing.T) {
 
 		client, ok := backend.(*storageImpl)
 		if test.deleteBucket && ok {
-			client.minioClient.RemoveBucket(ctx, test.name)
+			client.minioClient.RemoveBucket(test.name)
 		}
 	}
 }
@@ -63,9 +60,8 @@ func TestNewStorageError(t *testing.T) {
 	// bucket name must be bigger than 3
 	tests := []string{"test_bucket", "1"}
 
-	ctx := context.Background()
 	for _, bucketName := range tests {
-		_, err := NewStorage(ctx, &config.MinioConfig{
+		_, err := NewStorage(&config.MinioConfig{
 			Endpoint: url,
 			Key:      "minio",
 			Secret:   "minio123",
@@ -83,18 +79,15 @@ func BenchmarkBackend(b *testing.B) {
 }
 
 func (s *storageImpl) clear() error {
-	ctx := context.Background()
-	objectCh, _ := s.minioCore.ListObjectsV2(s.bucketName, "", "", "", "", 0)
+	objectCh, _ := s.minioCore.ListObjectsV2(s.bucketName, "", "", false, "", 0, "")
 	for _, object := range objectCh.Contents {
 		if object.Err != nil {
 			return object.Err
 		}
-
-		if err := s.minioClient.RemoveObject(ctx, s.bucketName, object.Key, minio.RemoveObjectOptions{}); err != nil {
+		if err := s.minioClient.RemoveObject(s.bucketName, object.Key); err != nil {
 			return err
 		}
 	}
-
 	return nil
 }
 
@@ -104,7 +97,7 @@ func getStorage(t testing.TB) *storageImpl {
 		t.SkipNow()
 	}
 
-	backend, err := NewStorage(context.Background(), &config.MinioConfig{
+	backend, err := NewStorage(&config.MinioConfig{
 		Endpoint: url,
 		Key:      "minio",
 		Secret:   "minio123",

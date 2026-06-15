@@ -49,16 +49,13 @@ type listSFResp struct {
 
 func (l *vcsLister) List(ctx context.Context, module string) (*storage.RevInfo, []string, error) {
 	const op errors.Op = "vcsLister.List"
-
 	_, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
-
 	sfResp, err, _ := l.sfg.Do(module, func() (any, error) {
 		tmpDir, err := afero.TempDir(l.fs, "", "go-list")
 		if err != nil {
 			return nil, errors.E(op, err)
 		}
-
 		defer func() { _ = l.fs.RemoveAll(tmpDir) }()
 
 		timeoutCtx, cancel := context.WithTimeout(ctx, l.timeout)
@@ -80,9 +77,7 @@ func (l *vcsLister) List(ctx context.Context, module string) (*storage.RevInfo, 
 		if err != nil {
 			return nil, errors.E(op, err)
 		}
-
 		defer func() { _ = clearFiles(l.fs, gopath) }()
-
 		cmd.Env = prepareEnv(gopath, l.env)
 
 		err = cmd.Run()
@@ -103,17 +98,14 @@ func (l *vcsLister) List(ctx context.Context, module string) (*storage.RevInfo, 
 		}
 
 		var lr listResp
-
 		err = json.NewDecoder(stdout).Decode(&lr)
 		if err != nil {
 			return nil, errors.E(op, err)
 		}
-
 		rev := storage.RevInfo{
 			Time:    lr.Time,
 			Version: lr.Version,
 		}
-
 		return listSFResp{
 			rev:      &rev,
 			versions: lr.Versions,
@@ -122,8 +114,6 @@ func (l *vcsLister) List(ctx context.Context, module string) (*storage.RevInfo, 
 	if err != nil {
 		return nil, nil, err
 	}
-
 	ret := sfResp.(listSFResp)
-
 	return ret.rev, ret.versions, nil
 }

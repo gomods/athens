@@ -29,11 +29,8 @@ func initializeAuthFile(path string) error {
 	}
 
 	fileName := transformAuthFileName(filepath.Base(path))
-
 	rcp := filepath.Join(hdir, fileName)
-
-	err = os.WriteFile(filepath.Clean(rcp), fileBts, 0o600)
-	if err != nil {
+	if err := os.WriteFile(rcp, fileBts, 0o600); err != nil {
 		return fmt.Errorf("writing to auth file: %w", err)
 	}
 
@@ -44,19 +41,14 @@ func initializeAuthFile(path string) error {
 // file for you, overriding whatever might be already there.
 func netrcFromToken(tok string) error {
 	fileContent := fmt.Sprintf("machine github.com login %s\n", tok)
-
 	hdir, err := homedir.Dir()
 	if err != nil {
 		return fmt.Errorf("getting homedir: %w", err)
 	}
-
 	rcp := filepath.Join(hdir, getNETRCFilename())
-
-	err = os.WriteFile(rcp, []byte(fileContent), 0o600)
-	if err != nil {
+	if err := os.WriteFile(rcp, []byte(fileContent), 0o600); err != nil {
 		return fmt.Errorf("writing to netrc file: %w", err)
 	}
-
 	return nil
 }
 
@@ -64,7 +56,6 @@ func transformAuthFileName(authFileName string) string {
 	if root := strings.TrimLeft(authFileName, "._"); root == "netrc" {
 		return getNETRCFilename()
 	}
-
 	return authFileName
 }
 
@@ -72,6 +63,5 @@ func getNETRCFilename() string {
 	if runtime.GOOS == "windows" {
 		return "_netrc"
 	}
-
 	return ".netrc"
 }

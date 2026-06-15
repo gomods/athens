@@ -17,7 +17,6 @@ import (
 // Info implements the (./pkg/storage).Getter interface.
 func (s *Storage) Info(ctx context.Context, module, version string) ([]byte, error) {
 	const op errors.Op = "s3.Info"
-
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 
@@ -27,24 +26,20 @@ func (s *Storage) Info(ctx context.Context, module, version string) ([]byte, err
 		if errors.AsErr(err, &nsk) {
 			return nil, errors.E(op, errors.M(module), errors.V(version), errors.KindNotFound)
 		}
-
 		return nil, errors.E(op, err, errors.M(module), errors.V(version))
 	}
-
 	defer func() { _ = infoReader.Close() }()
 
 	infoBytes, err := io.ReadAll(infoReader)
 	if err != nil {
 		return nil, errors.E(op, err, errors.M(module), errors.V(version))
 	}
-
 	return infoBytes, nil
 }
 
 // GoMod implements the (./pkg/storage).Getter interface.
 func (s *Storage) GoMod(ctx context.Context, module, version string) ([]byte, error) {
 	const op errors.Op = "s3.GoMod"
-
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 
@@ -54,10 +49,8 @@ func (s *Storage) GoMod(ctx context.Context, module, version string) ([]byte, er
 		if errors.AsErr(err, &nsk) {
 			return nil, errors.E(op, errors.M(module), errors.V(version), errors.KindNotFound)
 		}
-
 		return nil, errors.E(op, err, errors.M(module), errors.V(version))
 	}
-
 	defer func() { _ = modReader.Close() }()
 
 	modBytes, err := io.ReadAll(modReader)
@@ -71,7 +64,6 @@ func (s *Storage) GoMod(ctx context.Context, module, version string) ([]byte, er
 // Zip implements the (./pkg/storage).Getter interface.
 func (s *Storage) Zip(ctx context.Context, module, version string) (storage.SizeReadCloser, error) {
 	const op errors.Op = "s3.Zip"
-
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 
@@ -81,7 +73,6 @@ func (s *Storage) Zip(ctx context.Context, module, version string) (storage.Size
 		if errors.AsErr(err, &nsk) {
 			return nil, errors.E(op, errors.M(module), errors.V(version), errors.KindNotFound)
 		}
-
 		return nil, errors.E(op, err, errors.M(module), errors.V(version))
 	}
 
@@ -90,10 +81,8 @@ func (s *Storage) Zip(ctx context.Context, module, version string) (storage.Size
 
 func (s *Storage) open(ctx context.Context, path string) (storage.SizeReadCloser, error) {
 	const op errors.Op = "s3.open"
-
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
-
 	getParams := &s3.GetObjectInput{
 		Bucket: aws.String(s.bucket),
 		Key:    aws.String(path),
@@ -105,14 +94,11 @@ func (s *Storage) open(ctx context.Context, path string) (storage.SizeReadCloser
 		if errors.AsErr(err, &nsk) {
 			return nil, errors.E(op, errors.KindNotFound)
 		}
-
 		return nil, errors.E(op, err)
 	}
-
 	var size int64
 	if goo.ContentLength != nil {
 		size = *goo.ContentLength
 	}
-
 	return storage.NewSizer(goo.Body, size), nil
 }

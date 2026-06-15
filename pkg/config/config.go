@@ -183,6 +183,7 @@ func defaultConfig() *Config {
 				SentinelPassword: "sekret",
 				RedisUsername:    "",
 				RedisPassword:    "",
+				DB:               0,
 				LockConfig:       DefaultRedisLockConfig(),
 			},
 			GCP: DefaultGCPConfig(),
@@ -208,7 +209,7 @@ func defaultConfig() *Config {
 				Database: "athens",
 				Params: map[string]string{
 					"connect_timeout": "30",
-					"sslmode":         "prefer",
+					"sslmode":         "disable",
 				},
 			},
 		},

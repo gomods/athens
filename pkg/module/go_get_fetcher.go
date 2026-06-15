@@ -39,9 +39,9 @@ type goModule struct {
 }
 
 // NewGoGetFetcher creates fetcher which uses go get tool to fetch modules.
-func NewGoGetFetcher(ctx context.Context, goBinaryName, gogetDir string, envVars []string, fs afero.Fs) (Fetcher, error) {
+func NewGoGetFetcher(goBinaryName, gogetDir string, envVars []string, fs afero.Fs) (Fetcher, error) {
 	const op errors.Op = "module.NewGoGetFetcher"
-	if err := validGoBinary(ctx, goBinaryName); err != nil {
+	if err := validGoBinary(goBinaryName); err != nil {
 		return nil, errors.E(op, err)
 	}
 	return &goGetFetcher{
@@ -193,12 +193,10 @@ func getRepoDirName(repoURI, version string) string {
 	return fmt.Sprintf("%s-%s", escapedURI, version)
 }
 
-func validGoBinary(ctx context.Context, name string) error {
+func validGoBinary(name string) error {
 	const op errors.Op = "module.validGoBinary"
-
-	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-
 	err := exec.CommandContext(ctx, name).Run()
 	eErr := &exec.ExitError{}
 	if err != nil && !errors.AsErr(err, &eErr) {

@@ -36,19 +36,15 @@ func clearFiles(fs afero.Fs, root string) error {
 		if err != nil {
 			return err
 		}
-
 		return fs.Chmod(path, 0o770)
 	}
-
 	err := afero.Walk(fs, root, walkFn)
 	if err != nil {
 		return errors.E(op, err)
 	}
-
 	err = fs.RemoveAll(root)
 	if err != nil {
 		return errors.E(op, err)
 	}
-
 	return nil
 }

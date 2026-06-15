@@ -14,7 +14,6 @@ import (
 // Info implements the (./pkg/storage).Getter interface.
 func (s *Storage) Info(ctx context.Context, module, version string) ([]byte, error) {
 	const op errors.Op = "azureblob.Info"
-
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 
@@ -22,7 +21,6 @@ func (s *Storage) Info(ctx context.Context, module, version string) ([]byte, err
 	if err != nil {
 		return nil, errors.E(op, err, errors.M(module), errors.V(version))
 	}
-
 	if !exists {
 		return nil, errors.E(op, errors.M(module), errors.V(version), errors.KindNotFound)
 	}
@@ -48,7 +46,6 @@ func (s *Storage) Info(ctx context.Context, module, version string) ([]byte, err
 // GoMod implements the (./pkg/storage).Getter interface.
 func (s *Storage) GoMod(ctx context.Context, module, version string) ([]byte, error) {
 	const op errors.Op = "azureblob.GoMod"
-
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 
@@ -56,7 +53,6 @@ func (s *Storage) GoMod(ctx context.Context, module, version string) ([]byte, er
 	if err != nil {
 		return nil, errors.E(op, err, errors.M(module), errors.V(version))
 	}
-
 	if !exists {
 		return nil, errors.E(op, errors.M(module), errors.V(version), errors.KindNotFound)
 	}
@@ -82,23 +78,18 @@ func (s *Storage) GoMod(ctx context.Context, module, version string) ([]byte, er
 // Zip implements the (./pkg/storage).Getter interface.
 func (s *Storage) Zip(ctx context.Context, module, version string) (storage.SizeReadCloser, error) {
 	const op errors.Op = "azureblob.Zip"
-
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
-
 	exists, err := s.Exists(ctx, module, version)
 	if err != nil {
 		return nil, errors.E(op, err, errors.M(module), errors.V(version))
 	}
-
 	if !exists {
 		return nil, errors.E(op, errors.M(module), errors.V(version), errors.KindNotFound)
 	}
-
 	zipReader, err := s.client.ReadBlob(ctx, config.PackageVersionedName(module, version, "zip"))
 	if err != nil {
 		return nil, errors.E(op, err, errors.M(module), errors.V(version))
 	}
-
 	return zipReader, nil
 }

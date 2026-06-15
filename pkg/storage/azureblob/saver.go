@@ -13,7 +13,6 @@ import (
 // Save implements the (./pkg/storage).Saver interface.
 func (s *Storage) Save(ctx context.Context, module, version string, mod []byte, zip io.Reader, zipMD5, info []byte) error {
 	const op errors.Op = "azureblob.Save"
-
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 

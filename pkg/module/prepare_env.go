@@ -36,7 +36,6 @@ func prepareEnv(gopath string, envVars []string) []string {
 		"https_proxy",
 		"no_proxy",
 	}
-
 	if runtime.GOOS == "windows" {
 		windowsSpecificKeys := []string{
 			"USERPROFILE",
@@ -47,14 +46,12 @@ func prepareEnv(gopath string, envVars []string) []string {
 		}
 		keys = append(keys, windowsSpecificKeys...)
 	}
-
 	for _, key := range keys {
 		// Prepend only if environment variable is present.
 		if v, ok := os.LookupEnv(key); ok {
 			cmdEnv = append(cmdEnv, fmt.Sprintf("%s=%s", key, v))
 		}
 	}
-
 	cmdEnv = append(cmdEnv, envVars...)
 
 	if sshAuthSockVal, hasSSHAuthSock := os.LookupEnv("SSH_AUTH_SOCK"); hasSSHAuthSock {
@@ -65,6 +62,5 @@ func prepareEnv(gopath string, envVars []string) []string {
 			cmdEnv = append(cmdEnv, sshAuthSock)
 		}
 	}
-
 	return cmdEnv
 }

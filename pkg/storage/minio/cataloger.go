@@ -8,22 +8,19 @@ import (
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/observ"
 	"github.com/gomods/athens/pkg/paths"
-	"github.com/minio/minio-go/v7"
+	"github.com/minio/minio-go/v6"
 )
 
 // Catalog implements the (./pkg/storage).Cataloger interface.
 // It returns a list of modules and versions contained in the storage.
 func (s *storageImpl) Catalog(ctx context.Context, token string, pageSize int) ([]paths.AllPathParams, string, error) {
 	const op errors.Op = "minio.Catalog"
-
 	_, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
-
 	res := make([]paths.AllPathParams, 0)
-
 	count := pageSize
 	for count > 0 {
-		loo, err := s.minioCore.ListObjectsV2(s.bucketName, "", "", token, "", 0)
+		loo, err := s.minioCore.ListObjectsV2(s.bucketName, "", token, false, "", 0, "")
 		if err != nil {
 			return nil, "", errors.E(op, err)
 		}
@@ -33,12 +30,10 @@ func (s *storageImpl) Catalog(ctx context.Context, token string, pageSize int) (
 		res = append(res, m...)
 		count -= len(m)
 		token = lastKey
-
 		if !loo.IsTruncated { // not truncated, there is no point in asking more
 			if count > 0 { // it means we reached the end, no subsequent requests are necessary
 				token = ""
 			}
-
 			break
 		}
 	}
@@ -68,7 +63,6 @@ func fetchModsAndVersions(objects []minio.ObjectInfo, elementsNum int) ([]paths.
 			break
 		}
 	}
-
 	return res, lastKey
 }
 

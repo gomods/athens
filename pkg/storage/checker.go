@@ -18,7 +18,6 @@ func WithChecker(strg Backend) Checker {
 	if checker, ok := strg.(Checker); ok {
 		return checker
 	}
-
 	return &checker{strg}
 }
 
@@ -32,9 +31,7 @@ func (c *checker) Exists(ctx context.Context, module, version string) (bool, err
 		if errors.Is(err, errors.KindNotFound) {
 			return false, nil
 		}
-
 		return false, err
 	}
-
 	return true, nil
 }

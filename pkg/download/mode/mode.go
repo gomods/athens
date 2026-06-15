@@ -60,19 +60,16 @@ func NewFile(m Mode, downloadURL string) (*DownloadFile, error) {
 
 	if strings.HasPrefix(string(m), "file:") {
 		filePath := string(m[5:])
-
 		bts, err := os.ReadFile(filepath.Clean(filePath))
 		if err != nil {
 			return nil, err
 		}
-
 		return parseFile(bts)
 	} else if strings.HasPrefix(string(m), "custom:") {
 		bts, err := base64.StdEncoding.DecodeString(string(m[7:]))
 		if err != nil {
 			return nil, err
 		}
-
 		return parseFile(bts)
 	}
 
@@ -88,30 +85,23 @@ func NewFile(m Mode, downloadURL string) (*DownloadFile, error) {
 // DownloadMode spec.
 func parseFile(file []byte) (*DownloadFile, error) {
 	const op errors.Op = "downloadmode.parseFile"
-
 	f, dig := hclparse.NewParser().ParseHCL(file, "config.hcl")
 	if dig.HasErrors() {
 		return nil, errors.E(op, dig.Error())
 	}
-
 	var df DownloadFile
-
 	dig = gohcl.DecodeBody(f.Body, nil, &df)
 	if dig.HasErrors() {
 		return nil, errors.E(op, dig.Error())
 	}
-
-	err := df.validate()
-	if err != nil {
+	if err := df.validate(); err != nil {
 		return nil, errors.E(op, err)
 	}
-
 	return &df, nil
 }
 
 func (d *DownloadFile) validate() error {
 	const op errors.Op = "downloadMode.validate"
-
 	for _, p := range d.Paths {
 		switch p.Mode {
 		case Sync, Async, Redirect, AsyncRedirect, None:
@@ -119,7 +109,6 @@ func (d *DownloadFile) validate() error {
 			return errors.E(op, fmt.Errorf("unrecognized mode for %v: %v", p.Pattern, p.Mode))
 		}
 	}
-
 	return nil
 }
 
@@ -134,7 +123,6 @@ func (d *DownloadFile) Match(mod string) Mode {
 			return p.Mode
 		}
 	}
-
 	return d.Mode
 }
 
@@ -149,6 +137,5 @@ func (d *DownloadFile) URL(mod string) string {
 			}
 		}
 	}
-
 	return d.DownloadURL
 }
