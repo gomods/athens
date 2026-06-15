@@ -164,12 +164,12 @@ jobs:
 
       - name: Capture Current Date
         id: date
-        run: echo "::set-output name=date::$(date -u '+%Y-%m-%d-%H:%M:%S-%Z')"
+        run: echo "date=$(date -u '+%Y-%m-%d-%H:%M:%S-%Z')" >> "$GITHUB_OUTPUT"
 
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v7
         with:
-          version: latest
+          version: "~> v2"
           args: release --clean --snapshot
         env:
           DATE: ${{ steps.date.outputs.date }}
