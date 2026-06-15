@@ -16,7 +16,6 @@ import (
 // It returns a list of versions, if any, for a given module.
 func (s *Storage) List(ctx context.Context, module string) ([]string, error) {
 	const op errors.Op = "s3.List"
-
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 
@@ -29,16 +28,13 @@ func (s *Storage) List(ctx context.Context, module string) ([]string, error) {
 	paginator := s3.NewListObjectsV2Paginator(s.s3API, lsParams)
 
 	var versions []string
-
 	for paginator.HasMorePages() {
 		loo, err := paginator.NextPage(ctx)
 		if err != nil {
 			return nil, errors.E(op, err, errors.M(module))
 		}
-
 		versions = slices.Concat(versions, extractVersions(loo.Contents))
 	}
-
 	return versions, nil
 }
 
@@ -58,6 +54,5 @@ func extractVersions(objects []types.Object) []string {
 			versions = append(versions, version)
 		}
 	}
-
 	return versions
 }

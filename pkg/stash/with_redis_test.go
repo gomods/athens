@@ -41,7 +41,7 @@ func TestWithRedisLock(t *testing.T) {
 	}
 	ms := &mockRedisStasher{strg: strg}
 	l := &testingRedisLogger{t: t}
-	wrapper, err := WithRedisLock(t.Context(), l, endpoint, password, false, storage.WithChecker(strg), config.DefaultRedisLockConfig())
+	wrapper, err := WithRedisLock(l, endpoint, password, false, storage.WithChecker(strg), config.DefaultRedisLockConfig())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -77,7 +77,7 @@ func TestWithRedisLockWithPassword(t *testing.T) {
 	}
 	ms := &mockRedisStasher{strg: strg}
 	l := &testingRedisLogger{t: t}
-	wrapper, err := WithRedisLock(t.Context(), l, endpoint, password, false, storage.WithChecker(strg), config.DefaultRedisLockConfig())
+	wrapper, err := WithRedisLock(l, endpoint, password, false, storage.WithChecker(strg), config.DefaultRedisLockConfig())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -112,7 +112,7 @@ func TestWithRedisLockWithWrongPassword(t *testing.T) {
 		t.Fatal(err)
 	}
 	l := &testingRedisLogger{t: t}
-	_, err = WithRedisLock(t.Context(), l, endpoint, password, false, storage.WithChecker(strg), config.DefaultRedisLockConfig())
+	_, err = WithRedisLock(l, endpoint, password, false, storage.WithChecker(strg), config.DefaultRedisLockConfig())
 	if err == nil {
 		t.Fatal("Expected Connection Error")
 	}
@@ -137,7 +137,7 @@ func TestWithRedisClusterLock(t *testing.T) {
 	}
 	ms := &mockRedisStasher{strg: strg}
 	l := &testingRedisLogger{t: t}
-	wrapper, err := WithRedisLock(t.Context(), l, endpoint, password, true, storage.WithChecker(strg), config.DefaultRedisLockConfig())
+	wrapper, err := WithRedisLock(l, endpoint, password, true, storage.WithChecker(strg), config.DefaultRedisLockConfig())
 	if err != nil {
 		t.Fatal(err)
 	}

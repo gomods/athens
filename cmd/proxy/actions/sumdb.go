@@ -12,8 +12,9 @@ import (
 func sumdbProxy(url *url.URL, nosumPatterns []string) http.Handler {
 	rp := &httputil.ReverseProxy{
 		Rewrite: func(req *httputil.ProxyRequest) {
-			req.SetURL(url)
 			req.Out.Host = url.Host
+			req.Out.URL.Scheme = url.Scheme
+			req.Out.URL.Host = url.Host
 		},
 	}
 	if len(nosumPatterns) > 0 {

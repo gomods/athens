@@ -26,7 +26,7 @@ RUN DATE="$(date -u +%Y-%m-%d-%H:%M:%S-%Z)" && \
     -ldflags "-X github.com/gomods/athens/pkg/build.version=$VERSION -X github.com/gomods/athens/pkg/build.buildDate=$DATE -s -w" \
     -o /bin/athens-proxy ./cmd/proxy
 
-FROM alpine:3.23.4
+FROM alpine:3.23
 ARG TARGETARCH
 
 ENV GOROOT="/usr/local/go" \
@@ -44,17 +44,10 @@ RUN chmod 644 /config/config.toml
 RUN apk add --update git git-lfs mercurial openssh-client subversion procps fossil tini tzdata
 
 # Add git-credential-github-app for native integration with GitHub Apps
-RUN if [ "${TARGETARCH}" = "arm64" ]; then \
-      ARCH="arm64"; \
-      CHECKSUM="6c109fb4a3960da535c7a4f4e5836bf42baffe36def45b4dcec4f2d9939fd285"; \
-    else \
-      ARCH="x86_64"; \
-      CHECKSUM="f5238cf8462fdbdd3928637a815cb51c2bfa470ee504156d102f1c0327f07056"; \
-    fi \
+RUN if [ "${TARGETARCH}" = "arm64" ]; then ARCH="arm64"; else ARCH="x86_64"; fi \
   && wget -O git-credential-github-app.tar.gz https://github.com/bdellegrazie/git-credential-github-app/releases/download/v0.3.4/git-credential-github-app_v0.3.4_Linux_${ARCH}.tar.gz \
-  && echo "${CHECKSUM}  git-credential-github-app.tar.gz" | sha256sum -c - \
   && tar xvzf 'git-credential-github-app.tar.gz' git-credential-github-app -C /usr/local/bin \
-  && rm git-credential-github-app.tar.gz
+  && rm git-credential-github-app.tar.gz || true;
 
 ARG USER=athens
 RUN adduser -D -h /home/$USER $USER

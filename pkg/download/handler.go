@@ -32,7 +32,6 @@ func LogEntryHandler(ph ProtocolHandler, opts *HandlerOpts) http.Handler {
 		handler := ph(opts.Protocol, ent, opts.DownloadFile)
 		handler.ServeHTTP(w, r)
 	}
-
 	return http.HandlerFunc(f)
 }
 
@@ -43,7 +42,6 @@ func RegisterHandlers(r *mux.Router, opts *HandlerOpts) {
 	if opts == nil || opts.Protocol == nil || opts.Logger == nil {
 		panic("absolutely unacceptable handler opts")
 	}
-
 	noCacheMw := middleware.CacheControl("no-cache, no-store, must-revalidate")
 
 	listHandler := LogEntryHandler(ListHandler, opts)
@@ -62,8 +60,6 @@ func getRedirectURL(base, downloadPath string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-
 	url.Path = path.Join(url.Path, downloadPath)
-
 	return url.String(), nil
 }

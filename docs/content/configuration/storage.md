@@ -515,7 +515,19 @@ Optionally, like `redis`, you can also specify a password to connect to the `red
           # redis sentinel
           SentinelPassword = "sekret"
 
-Distributed lock options can be customised for redis sentinal as well, in a similar manner as described above for redis.
+          # DB is the redis database number to connect to
+          # Env override: ATHENS_REDIS_SENTINEL_DB
+          DB = 0
+
+          # RedisUsername is the username for authenticating with the redis master
+          # Env override: ATHENS_REDIS_USERNAME
+          RedisUsername = ""
+
+          # RedisPassword is the password for authenticating with the redis master
+          # Env override: ATHENS_REDIS_PASSWORD
+          RedisPassword = ""
+
+Distributed lock options can be customised for redis sentinel as well, in a similar manner as described above for redis.
 
 
 ### Using GCP as a singleflight mechanism

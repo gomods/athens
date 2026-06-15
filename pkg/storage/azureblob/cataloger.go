@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/Azure/azure-sdk-for-go/sdk/storage/azblob"
+	"github.com/Azure/azure-storage-blob-go/azblob"
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/observ"
@@ -16,47 +16,32 @@ import (
 // It returns a list of versions, if any, for a given module.
 func (s *Storage) Catalog(ctx context.Context, token string, pageSize int) ([]paths.AllPathParams, string, error) {
 	const op errors.Op = "azblob.Catalog"
-
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 
 	res := make([]paths.AllPathParams, 0)
 
 	// one module@version consists of 3 pieces - info, mod, zip
-	objCount := int32(3 * pageSize)
+	objCount := 3 * pageSize
 
-	opts := &azblob.ListBlobsFlatOptions{
-		MaxResults: &objCount,
+	marker := azblob.Marker{
+		Val: &token,
 	}
-
-	if token != "" {
-		opts.Marker = &token
-	}
-
-	pager := s.client.client.NewListBlobsFlatPager(s.client.containerName, opts)
-
-	if !pager.More() {
-		return res, "", nil
-	}
-
-	resp, err := pager.NextPage(ctx)
+	blobs, err := s.client.containerURL.ListBlobsFlatSegment(ctx, marker, azblob.ListBlobsSegmentOptions{
+		MaxResults: int32(objCount),
+	})
 	if err != nil {
 		return nil, "", errors.E(op, err)
 	}
 
-	var nextToken string
+	nextToken := *blobs.NextMarker.Val
 
-	if resp.NextMarker != nil {
-		nextToken = *resp.NextMarker
-	}
-
-	for _, blob := range resp.Segment.BlobItems {
-		if strings.HasSuffix(*blob.Name, ".info") {
-			p, err := parsModVer(*blob.Name)
+	for _, blob := range blobs.Segment.BlobItems {
+		if strings.HasSuffix(blob.Name, ".info") {
+			p, err := parsModVer(blob.Name)
 			if err != nil {
 				continue
 			}
-
 			res = append(res, p)
 		}
 	}
@@ -72,6 +57,5 @@ func parsModVer(p string) (paths.AllPathParams, error) {
 	if m == "" || v == "" {
 		return paths.AllPathParams{}, errors.E(op, fmt.Errorf("invalid object key format %s", p))
 	}
-
 	return paths.AllPathParams{Module: m, Version: v}, nil
 }

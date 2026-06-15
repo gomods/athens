@@ -6,6 +6,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/Azure/azure-storage-blob-go/azblob"
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/storage/compliance"
 	"github.com/technosophos/moniker"
@@ -13,19 +14,13 @@ import (
 
 func TestBackend(t *testing.T) {
 	backend := getStorage(t)
-	defer func() {
-		_, _ = backend.client.client.DeleteContainer(context.Background(), backend.client.containerName, nil)
-	}()
-
+	defer backend.client.containerURL.Delete(t.Context(), azblob.ContainerAccessConditions{})
 	compliance.RunTests(t, backend, backend.clear)
 }
 
 func BenchmarkBackend(b *testing.B) {
 	backend := getStorage(b)
-	defer func() {
-		_, _ = backend.client.client.DeleteContainer(context.Background(), backend.client.containerName, nil)
-	}()
-
+	defer backend.client.containerURL.Delete(b.Context(), azblob.ContainerAccessConditions{})
 	compliance.RunBenchmarks(b, backend, backend.clear)
 }
 
@@ -33,16 +28,17 @@ func (s *Storage) clear() error {
 	ctx, cancel := context.WithTimeout(context.Background(), s.timeout)
 	defer cancel()
 
-	pager := s.client.client.NewListBlobsFlatPager(s.client.containerName, nil)
-
-	for pager.More() {
-		resp, err := pager.NextPage(ctx)
+	for marker := (azblob.Marker{}); marker.NotDone(); {
+		listBlob, err := s.client.containerURL.ListBlobsFlatSegment(ctx, marker, azblob.ListBlobsSegmentOptions{})
 		if err != nil {
 			return err
 		}
+		marker = listBlob.NextMarker
 
-		for _, blob := range resp.Segment.BlobItems {
-			_, err := s.client.client.DeleteBlob(ctx, s.client.containerName, *blob.Name, nil)
+		for _, blob := range listBlob.Segment.BlobItems {
+
+			blobURL := s.client.containerURL.NewBlockBlobURL(blob.Name)
+			_, err := blobURL.Delete(ctx, azblob.DeleteSnapshotsOptionNone, azblob.BlobAccessConditions{})
 			if err != nil {
 				return err
 			}
@@ -54,9 +50,7 @@ func (s *Storage) clear() error {
 
 func getStorage(t testing.TB) *Storage {
 	t.Helper()
-
 	containerName := randomContainerName(os.Getenv("GA_PULL_REQUEST"))
-
 	cfg := getTestConfig(containerName)
 	if cfg == nil {
 		t.SkipNow()
@@ -66,8 +60,7 @@ func getStorage(t testing.TB) *Storage {
 	if err != nil {
 		t.Fatal(err)
 	}
-
-	_, err = s.client.client.CreateContainer(context.Background(), s.client.containerName, nil)
+	_, err = s.client.containerURL.Create(t.Context(), azblob.Metadata{}, azblob.PublicAccessNone)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -79,16 +72,13 @@ func getTestConfig(containerName string) *config.AzureBlobConfig {
 	key := os.Getenv("ATHENS_AZURE_ACCOUNT_KEY")
 	resourceId := os.Getenv("ATHENS_AZURE_MANAGED_IDENTITY_RESOURCE_ID")
 	credentialScope := os.Getenv("ATHENS_AZURE_CREDENTIAL_SCOPE")
-
 	if key == "" && (resourceId == "" || credentialScope == "") {
 		return nil
 	}
-
 	name := os.Getenv("ATHENS_AZURE_ACCOUNT_NAME")
 	if name == "" {
 		return nil
 	}
-
 	return &config.AzureBlobConfig{
 		AccountName:               name,
 		AccountKey:                key,
@@ -102,10 +92,8 @@ func randomContainerName(prefix string) string {
 	// moniker is a cool library to produce mostly unique, human-readable names
 	// see https://github.com/technosophos/moniker for more details
 	namer := moniker.New()
-
 	if prefix != "" {
 		return fmt.Sprintf("%s_%s", prefix, namer.NameSep(""))
 	}
-
 	return namer.NameSep("")
 }

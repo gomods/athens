@@ -43,6 +43,7 @@ func decodeString(encoding string) (string, bool) {
 		if 'A' <= r && r <= 'Z' {
 			return "", false
 		}
+		//nolint:gosec // Runes larger than a byte are rejected above, so this cast is safe.
 		buf = append(buf, byte(r))
 	}
 	if bang {

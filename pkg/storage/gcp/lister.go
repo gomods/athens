@@ -14,24 +14,20 @@ import (
 // It returns a list of versions, if any, for a given module.
 func (s *Storage) List(ctx context.Context, module string) ([]string, error) {
 	const op errors.Op = "gcp.List"
-
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 
 	modulePrefix := strings.TrimSuffix(module, "/") + "/@v"
 	it := s.bucket.Objects(ctx, &storage.Query{Prefix: modulePrefix})
 	paths := []string{}
-
 	for {
 		attrs, err := it.Next()
 		if errors.IsErr(err, iterator.Done) {
 			break
 		}
-
 		if err != nil {
 			return nil, errors.E(op, err, errors.M(module))
 		}
-
 		paths = append(paths, attrs.Name)
 	}
 
@@ -40,7 +36,6 @@ func (s *Storage) List(ctx context.Context, module string) ([]string, error) {
 
 func extractVersions(paths []string) []string {
 	versions := []string{}
-
 	for _, p := range paths {
 		if strings.HasSuffix(p, ".info") {
 			segments := strings.Split(p, "/")
@@ -50,6 +45,5 @@ func extractVersions(paths []string) []string {
 			versions = append(versions, version)
 		}
 	}
-
 	return versions
 }

@@ -1,122 +1,119 @@
 package observ
 
 import (
-	"context"
 	"fmt"
-	"log"
 	"net/http"
 	"time"
 
-	mexporter "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric"
+	"contrib.go.opencensus.io/exporter/prometheus"
+	"contrib.go.opencensus.io/exporter/stackdriver"
+	datadog "github.com/DataDog/opencensus-go-exporter-datadog"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gorilla/mux"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetrichttp"
-	promexporter "go.opentelemetry.io/otel/exporters/prometheus"
-	sdkmetric "go.opentelemetry.io/otel/sdk/metric"
-	"go.opentelemetry.io/otel/sdk/resource"
-	semconv "go.opentelemetry.io/otel/semconv/v1.26.0"
+	"go.opencensus.io/plugin/ochttp"
+	"go.opencensus.io/stats/view"
 )
 
-// RegisterStatsExporter determines the type of StatsExporter service for exporting stats.
-// Currently it supports: prometheus, stackdriver, datadog.
+// RegisterStatsExporter determines the type of StatsExporter service for exporting stats from Opencensus
+// Currently it supports: prometheus.
 func RegisterStatsExporter(r *mux.Router, statsExporter, service string) (func(), error) {
 	const op errors.Op = "observ.RegisterStatsExporter"
-
+	stop := func() {}
+	var err error
 	switch statsExporter {
 	case "prometheus":
-		cleanup, err := registerPrometheusExporter(r, service)
-		if err != nil {
+		if err := registerPrometheusExporter(r, service); err != nil {
 			return nil, errors.E(op, err)
 		}
-
-		return cleanup, nil
 	case "stackdriver":
-		cleanup, err := registerStatsStackDriverExporter(service)
-		if err != nil {
+		if stop, err = registerStatsStackDriverExporter(service); err != nil {
 			return nil, errors.E(op, err)
 		}
-
-		return cleanup, nil
 	case "datadog":
-		cleanup, err := registerStatsDataDogExporter(service)
-		if err != nil {
+		if stop, err = registerStatsDataDogExporter(service); err != nil {
 			return nil, errors.E(op, err)
 		}
-
-		return cleanup, nil
 	case "":
 		return nil, errors.E(op, "StatsExporter not specified. Stats won't be collected")
 	default:
 		return nil, errors.E(op, fmt.Sprintf("StatsExporter %s not supported. Please open PR or an issue at github.com/gomods/athens", statsExporter))
 	}
-}
-
-// registerPrometheusExporter creates exporter that collects stats for Prometheus.
-func registerPrometheusExporter(r *mux.Router, service string) (func(), error) {
-	const op errors.Op = "observ.registerPrometheusExporter"
-
-	reader, err := promexporter.New()
-	if err != nil {
+	if err = registerViews(); err != nil {
 		return nil, errors.E(op, err)
 	}
 
-	res := resource.NewWithAttributes(
-		semconv.SchemaURL,
-		semconv.ServiceNameKey.String(service),
-	)
+	return stop, nil
+}
 
-	mp := sdkmetric.NewMeterProvider(sdkmetric.WithReader(reader), sdkmetric.WithResource(res))
-	otel.SetMeterProvider(mp)
+// registerPrometheusExporter creates exporter that collects stats for Prometheus.
+func registerPrometheusExporter(r *mux.Router, service string) error {
+	const op errors.Op = "observ.registerPrometheusExporter"
+	prom, err := prometheus.NewExporter(prometheus.Options{
+		Namespace: service,
+	})
+	if err != nil {
+		return errors.E(op, err)
+	}
 
-	r.Handle("/metrics", promhttp.Handler()).Methods(http.MethodGet)
+	r.Handle("/metrics", prom).Methods(http.MethodGet)
 
-	return shutdownMeterProvider(mp), nil
+	view.RegisterExporter(prom)
+
+	return nil
 }
 
 func registerStatsDataDogExporter(service string) (func(), error) {
 	const op errors.Op = "observ.registerStatsDataDogExporter"
 
-	exporter, err := otlpmetrichttp.New(context.Background(),
-		otlpmetrichttp.WithInsecure(),
-	)
+	dd, err := datadog.NewExporter(datadog.Options{Service: service})
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
-
-	res := resource.NewWithAttributes(
-		semconv.SchemaURL,
-		semconv.ServiceNameKey.String(service),
-	)
-
-	reader := sdkmetric.NewPeriodicReader(exporter, sdkmetric.WithInterval(60*time.Second))
-	mp := sdkmetric.NewMeterProvider(sdkmetric.WithReader(reader), sdkmetric.WithResource(res))
-	otel.SetMeterProvider(mp)
-
-	return shutdownMeterProvider(mp), nil
+	if dd == nil {
+		return nil, errors.E(op, "Failed to initialize data dog exporter")
+	}
+	view.RegisterExporter(dd)
+	return dd.Stop, nil
 }
 
 func registerStatsStackDriverExporter(projectID string) (func(), error) {
 	const op errors.Op = "observ.registerStatsStackDriverExporter"
 
-	exporter, err := mexporter.New(mexporter.WithProjectID(projectID))
+	sd, err := stackdriver.NewExporter(stackdriver.Options{
+		ProjectID: projectID,
+	})
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
 
-	reader := sdkmetric.NewPeriodicReader(exporter, sdkmetric.WithInterval(60*time.Second))
-	mp := sdkmetric.NewMeterProvider(sdkmetric.WithReader(reader))
-	otel.SetMeterProvider(mp)
+	view.RegisterExporter(sd)
+	view.SetReportingPeriod(60 * time.Second)
 
-	return shutdownMeterProvider(mp), nil
+	return sd.Flush, nil
 }
 
-func shutdownMeterProvider(mp *sdkmetric.MeterProvider) func() {
-	return func() {
-		err := mp.Shutdown(context.Background())
-		if err != nil {
-			log.Printf("failed to shutdown meter provider: %v", err)
-		}
+// registerViews register stats which should be collected in Athens.
+func registerViews() error {
+	const op errors.Op = "observ.registerViews"
+
+	//nolint:prealloc
+	views := []*view.View{
+		ochttp.ServerRequestCountView,
+		ochttp.ServerResponseBytesView,
+		ochttp.ServerLatencyView,
+		ochttp.ServerResponseCountByStatusCode,
+		ochttp.ServerRequestBytesView,
+		ochttp.ServerRequestCountByMethod,
+		ochttp.ClientReceivedBytesDistribution,
+		ochttp.ClientRoundtripLatencyDistribution,
+		ochttp.ClientCompletedCount,
 	}
+
+	views = append(views, customViews()...)
+
+	if err := view.Register(views...); err != nil {
+		return errors.E(op, err)
+	}
+
+	return nil
 }
