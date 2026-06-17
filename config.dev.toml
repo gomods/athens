@@ -235,6 +235,12 @@ TraceExporter = ""
 # Env override: ATHENS_TRACE_EXPORTER_URL
 TraceExporterURL = "http://localhost:4317"
 
+# TraceSamplingFraction is the fraction of root traces to sample, from 0.0 (none) to
+# 1.0 (all). It only applies outside of development; in development every trace is
+# sampled. Child spans always follow their parent's sampling decision.
+# Env override: ATHENS_TRACE_SAMPLING_FRACTION
+TraceSamplingFraction = 1.0
+
 # Stats is not a requirement for Athens. If the value is not set,
 # Athens will keep on running and stats won't be collected.
 # Possible values are: prometheus.

@@ -80,6 +80,7 @@ func App(logger *log.Logger, conf *config.Config) (http.Handler, func(), error) 
 		conf.TraceExporterURL,
 		Service,
 		conf.GoEnv,
+		conf.TraceSamplingFraction,
 	)
 	if err != nil {
 		logger.Infof("%v", err)

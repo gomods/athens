@@ -22,49 +22,50 @@ const defaultConfigFile = "athens.toml"
 type Config struct {
 	TimeoutConf
 
-	GoEnv            string    `envconfig:"GO_ENV"                    validate:"required"`
-	GoBinary         string    `envconfig:"GO_BINARY_PATH"            validate:"required"`
-	GoBinaryEnvVars  EnvList   `envconfig:"ATHENS_GO_BINARY_ENV_VARS"`
-	GoGetWorkers     int       `envconfig:"ATHENS_GOGET_WORKERS"      validate:"required"`
-	GoGetDir         string    `envconfig:"ATHENS_GOGET_DIR"`
-	ProtocolWorkers  int       `envconfig:"ATHENS_PROTOCOL_WORKERS"   validate:"required"`
-	LogLevel         string    `envconfig:"ATHENS_LOG_LEVEL"          validate:"required"`
-	LogFormat        string    `envconfig:"ATHENS_LOG_FORMAT"         validate:"oneof='' 'json' 'plain'"`
-	CloudRuntime     string    `envconfig:"ATHENS_CLOUD_RUNTIME"      validate:"required_without=LogFormat"`
-	EnablePprof      bool      `envconfig:"ATHENS_ENABLE_PPROF"`
-	PprofPort        string    `envconfig:"ATHENS_PPROF_PORT"`
-	FilterFile       string    `envconfig:"ATHENS_FILTER_FILE"`
-	TraceExporterURL string    `envconfig:"ATHENS_TRACE_EXPORTER_URL"`
-	TraceExporter    string    `envconfig:"ATHENS_TRACE_EXPORTER"`
-	StatsExporter    string    `envconfig:"ATHENS_STATS_EXPORTER"`
-	StorageType      string    `envconfig:"ATHENS_STORAGE_TYPE"       validate:"required"`
-	GlobalEndpoint   string    `envconfig:"ATHENS_GLOBAL_ENDPOINT"` // This feature is not yet implemented
-	Port             string    `envconfig:"ATHENS_PORT"`
-	UnixSocket       string    `envconfig:"ATHENS_UNIX_SOCKET"`
-	BasicAuthUser    string    `envconfig:"BASIC_AUTH_USER"`
-	BasicAuthPass    string    `envconfig:"BASIC_AUTH_PASS"`
-	HomeTemplatePath string    `envconfig:"ATHENS_HOME_TEMPLATE_PATH"`
-	ForceSSL         bool      `envconfig:"PROXY_FORCE_SSL"`
-	ValidatorHook    string    `envconfig:"ATHENS_PROXY_VALIDATOR"`
-	PathPrefix       string    `envconfig:"ATHENS_PATH_PREFIX"`
-	NETRCPath        string    `envconfig:"ATHENS_NETRC_PATH"`
-	GithubToken      string    `envconfig:"ATHENS_GITHUB_TOKEN"`
-	HGRCPath         string    `envconfig:"ATHENS_HGRC_PATH"`
-	TLSCertFile      string    `envconfig:"ATHENS_TLSCERT_FILE"`
-	TLSKeyFile       string    `envconfig:"ATHENS_TLSKEY_FILE"`
-	SumDBs           []string  `envconfig:"ATHENS_SUM_DBS"`
-	NoSumPatterns    []string  `envconfig:"ATHENS_GONOSUM_PATTERNS"`
-	DownloadMode     mode.Mode `envconfig:"ATHENS_DOWNLOAD_MODE"`
-	DownloadURL      string    `envconfig:"ATHENS_DOWNLOAD_URL"`
-	NetworkMode      string    `envconfig:"ATHENS_NETWORK_MODE"       validate:"oneof=strict offline fallback"`
-	SingleFlightType string    `envconfig:"ATHENS_SINGLE_FLIGHT_TYPE"`
-	RobotsFile       string    `envconfig:"ATHENS_ROBOTS_FILE"`
-	IndexType        string    `envconfig:"ATHENS_INDEX_TYPE"`
-	ShutdownTimeout  int       `envconfig:"ATHENS_SHUTDOWN_TIMEOUT"   validate:"min=0"`
-	StashTimeout     int       `envconfig:"ATHENS_STASH_TIMEOUT"`
-	SingleFlight     *SingleFlight
-	Storage          *Storage
-	Index            *Index
+	GoEnv                 string    `envconfig:"GO_ENV"                    validate:"required"`
+	GoBinary              string    `envconfig:"GO_BINARY_PATH"            validate:"required"`
+	GoBinaryEnvVars       EnvList   `envconfig:"ATHENS_GO_BINARY_ENV_VARS"`
+	GoGetWorkers          int       `envconfig:"ATHENS_GOGET_WORKERS"      validate:"required"`
+	GoGetDir              string    `envconfig:"ATHENS_GOGET_DIR"`
+	ProtocolWorkers       int       `envconfig:"ATHENS_PROTOCOL_WORKERS"   validate:"required"`
+	LogLevel              string    `envconfig:"ATHENS_LOG_LEVEL"          validate:"required"`
+	LogFormat             string    `envconfig:"ATHENS_LOG_FORMAT"         validate:"oneof='' 'json' 'plain'"`
+	CloudRuntime          string    `envconfig:"ATHENS_CLOUD_RUNTIME"      validate:"required_without=LogFormat"`
+	EnablePprof           bool      `envconfig:"ATHENS_ENABLE_PPROF"`
+	PprofPort             string    `envconfig:"ATHENS_PPROF_PORT"`
+	FilterFile            string    `envconfig:"ATHENS_FILTER_FILE"`
+	TraceExporterURL      string    `envconfig:"ATHENS_TRACE_EXPORTER_URL"`
+	TraceExporter         string    `envconfig:"ATHENS_TRACE_EXPORTER"`
+	TraceSamplingFraction float64   `envconfig:"ATHENS_TRACE_SAMPLING_FRACTION"`
+	StatsExporter         string    `envconfig:"ATHENS_STATS_EXPORTER"`
+	StorageType           string    `envconfig:"ATHENS_STORAGE_TYPE"       validate:"required"`
+	GlobalEndpoint        string    `envconfig:"ATHENS_GLOBAL_ENDPOINT"` // This feature is not yet implemented
+	Port                  string    `envconfig:"ATHENS_PORT"`
+	UnixSocket            string    `envconfig:"ATHENS_UNIX_SOCKET"`
+	BasicAuthUser         string    `envconfig:"BASIC_AUTH_USER"`
+	BasicAuthPass         string    `envconfig:"BASIC_AUTH_PASS"`
+	HomeTemplatePath      string    `envconfig:"ATHENS_HOME_TEMPLATE_PATH"`
+	ForceSSL              bool      `envconfig:"PROXY_FORCE_SSL"`
+	ValidatorHook         string    `envconfig:"ATHENS_PROXY_VALIDATOR"`
+	PathPrefix            string    `envconfig:"ATHENS_PATH_PREFIX"`
+	NETRCPath             string    `envconfig:"ATHENS_NETRC_PATH"`
+	GithubToken           string    `envconfig:"ATHENS_GITHUB_TOKEN"`
+	HGRCPath              string    `envconfig:"ATHENS_HGRC_PATH"`
+	TLSCertFile           string    `envconfig:"ATHENS_TLSCERT_FILE"`
+	TLSKeyFile            string    `envconfig:"ATHENS_TLSKEY_FILE"`
+	SumDBs                []string  `envconfig:"ATHENS_SUM_DBS"`
+	NoSumPatterns         []string  `envconfig:"ATHENS_GONOSUM_PATTERNS"`
+	DownloadMode          mode.Mode `envconfig:"ATHENS_DOWNLOAD_MODE"`
+	DownloadURL           string    `envconfig:"ATHENS_DOWNLOAD_URL"`
+	NetworkMode           string    `envconfig:"ATHENS_NETWORK_MODE"       validate:"oneof=strict offline fallback"`
+	SingleFlightType      string    `envconfig:"ATHENS_SINGLE_FLIGHT_TYPE"`
+	RobotsFile            string    `envconfig:"ATHENS_ROBOTS_FILE"`
+	IndexType             string    `envconfig:"ATHENS_INDEX_TYPE"`
+	ShutdownTimeout       int       `envconfig:"ATHENS_SHUTDOWN_TIMEOUT"   validate:"min=0"`
+	StashTimeout          int       `envconfig:"ATHENS_STASH_TIMEOUT"`
+	SingleFlight          *SingleFlight
+	Storage               *Storage
+	Index                 *Index
 }
 
 // EnvList is a list of key-value environment
@@ -147,33 +148,34 @@ func Load(configFile string) (*Config, error) {
 
 func defaultConfig() *Config {
 	return &Config{
-		GoBinary:         "go",
-		GoBinaryEnvVars:  EnvList{"GOPROXY=direct"},
-		GoEnv:            "development",
-		GoGetWorkers:     10,
-		ProtocolWorkers:  30,
-		LogLevel:         "debug",
-		LogFormat:        "plain",
-		CloudRuntime:     "none",
-		EnablePprof:      false,
-		PprofPort:        ":3001",
-		StatsExporter:    "prometheus",
-		TimeoutConf:      TimeoutConf{Timeout: 300},
-		HomeTemplatePath: "/var/lib/athens/home.html",
-		StorageType:      "memory",
-		Port:             ":3000",
-		SingleFlightType: "memory",
-		GlobalEndpoint:   "http://localhost:3001",
-		TraceExporterURL: "http://localhost:4317",
-		SumDBs:           []string{"https://sum.golang.org"},
-		NoSumPatterns:    []string{},
-		DownloadMode:     "sync",
-		DownloadURL:      "",
-		NetworkMode:      "strict",
-		RobotsFile:       "robots.txt",
-		IndexType:        "none",
-		ShutdownTimeout:  60,
-		StashTimeout:     600,
+		GoBinary:              "go",
+		GoBinaryEnvVars:       EnvList{"GOPROXY=direct"},
+		GoEnv:                 "development",
+		GoGetWorkers:          10,
+		ProtocolWorkers:       30,
+		LogLevel:              "debug",
+		LogFormat:             "plain",
+		CloudRuntime:          "none",
+		EnablePprof:           false,
+		PprofPort:             ":3001",
+		StatsExporter:         "prometheus",
+		TimeoutConf:           TimeoutConf{Timeout: 300},
+		HomeTemplatePath:      "/var/lib/athens/home.html",
+		StorageType:           "memory",
+		Port:                  ":3000",
+		SingleFlightType:      "memory",
+		GlobalEndpoint:        "http://localhost:3001",
+		TraceExporterURL:      "http://localhost:4317",
+		TraceSamplingFraction: 1.0,
+		SumDBs:                []string{"https://sum.golang.org"},
+		NoSumPatterns:         []string{},
+		DownloadMode:          "sync",
+		DownloadURL:           "",
+		NetworkMode:           "strict",
+		RobotsFile:            "robots.txt",
+		IndexType:             "none",
+		ShutdownTimeout:       60,
+		StashTimeout:          600,
 		SingleFlight: &SingleFlight{
 			Etcd:  &Etcd{"localhost:2379,localhost:22379,localhost:32379"},
 			Redis: &Redis{Endpoint: "127.0.0.1:6379", LockConfig: DefaultRedisLockConfig()},

@@ -26,13 +26,15 @@ const shutdownTimeout = 5 * time.Second
 // Athens exports traces via OTLP. The traceExporter argument acts as a toggle:
 // "otlp" enables export, an empty value disables it. The url argument, when set,
 // overrides the OTLP endpoint; otherwise the standard OTEL_EXPORTER_OTLP_* environment
-// variables are honored. RegisterExporter returns a cleanup function that flushes and
-// shuts down the provider; the caller is responsible for calling it at shutdown.
-func RegisterExporter(traceExporter, url, service, env string) (func(), error) {
+// variables are honored. samplingFraction is the fraction of root traces sampled outside
+// of development (0 samples nothing, 1 samples everything). RegisterExporter returns a
+// cleanup function that flushes and shuts down the provider; the caller is responsible for
+// calling it at shutdown.
+func RegisterExporter(traceExporter, url, service, env string, samplingFraction float64) (func(), error) {
 	const op errors.Op = "observ.RegisterExporter"
 	switch traceExporter {
 	case "otlp":
-		return registerOTLPExporter(url, service, env)
+		return registerOTLPExporter(url, service, env, samplingFraction)
 	case "jaeger", "datadog", "stackdriver":
 		return nil, errors.E(op, fmt.Sprintf(
 			"Exporter %q is no longer supported. Athens now exports traces via OpenTelemetry (OTLP). "+
@@ -46,9 +48,9 @@ func RegisterExporter(traceExporter, url, service, env string) (func(), error) {
 }
 
 // registerOTLPExporter creates an OTLP gRPC trace exporter and installs a global
-// TracerProvider. In development everything is sampled; otherwise sampling follows
-// the parent span, defaulting to always-on for root spans.
-func registerOTLPExporter(url, service, env string) (func(), error) {
+// TracerProvider. In development everything is sampled; otherwise root spans are sampled
+// at samplingFraction and child spans follow their parent's decision.
+func registerOTLPExporter(url, service, env string, samplingFraction float64) (func(), error) {
 	const op errors.Op = "observ.registerOTLPExporter"
 	ctx := context.Background()
 
@@ -66,7 +68,7 @@ func registerOTLPExporter(url, service, env string) (func(), error) {
 		return nil, errors.E(op, err)
 	}
 
-	sampler := sdktrace.ParentBased(sdktrace.AlwaysSample())
+	sampler := sdktrace.ParentBased(sdktrace.TraceIDRatioBased(samplingFraction))
 	if env == "development" {
 		sampler = sdktrace.AlwaysSample()
 	}
