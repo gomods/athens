@@ -49,6 +49,14 @@ func main() {
 	stdlog.SetOutput(logger.StdLogger(slog.LevelError).Writer())
 	stdlog.SetFlags(stdlog.Flags() &^ (stdlog.Ldate | stdlog.Ltime))
 
+	// Athens shells out to the Go toolchain (go, git, ssh) and relies on an init
+	// at PID 1 to reap the orphaned subprocesses they leave behind. Running as
+	// PID 1 means there is no init to do that, so warn the operator.
+	if os.Getpid() == 1 {
+		logger.Warnf("Athens is running as PID 1 with no init to reap subprocesses; " +
+			"run it under an init such as tini or `docker/podman run --init` to avoid zombie processes")
+	}
+
 	handler, cleanup, err := actions.App(logger, conf)
 	if err != nil {
 		logger.Fatalf("Could not create App: %v", err)
@@ -92,7 +100,6 @@ func main() {
 	}
 
 	signalCtx, signalStop := signal.NotifyContext(context.Background(), shutdown.GetSignals()...)
-	reaper := shutdown.ChildProcReaper(signalCtx, logger)
 
 	go func() {
 		defer signalStop()
@@ -117,5 +124,4 @@ func main() {
 	if err := srv.Shutdown(shutdownCtx); err != nil {
 		logger.Fatalf("Could not shut down server: %v", err)
 	}
-	<-reaper.Done()
 }
