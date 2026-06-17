@@ -164,7 +164,7 @@ func defaultConfig() *Config {
 		Port:             ":3000",
 		SingleFlightType: "memory",
 		GlobalEndpoint:   "http://localhost:3001",
-		TraceExporterURL: "http://localhost:14268",
+		TraceExporterURL: "http://localhost:4317",
 		SumDBs:           []string{"https://sum.golang.org"},
 		NoSumPatterns:    []string{},
 		DownloadMode:     "sync",

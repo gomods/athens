@@ -224,15 +224,16 @@ HGRCPath = ""
 
 # Tracing is not a requirement for Athens. If the infrastructure is not set up,
 # Athens will keep on running and traces won't be exported.
-# TraceExporter is the service to which the data collected by OpenCensus can be exported to.
-# Possible values are: jaeger, datadog, and stackdriver.
+# TraceExporter selects how Athens exports OpenTelemetry traces.
+# The only supported value is "otlp"; an empty value disables tracing.
 # Env override: ATHENS_TRACE_EXPORTER
 TraceExporter = ""
 
-# TraceExporterURL is the URL to which Athens populates distributed tracing
-# information such as Jaeger. In Stackdriver, use this as the GCP ProjectID.
+# TraceExporterURL is the OTLP collector endpoint Athens exports traces to.
+# When empty, the standard OTEL_EXPORTER_OTLP_ENDPOINT / OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
+# environment variables are honored (defaulting to localhost:4317).
 # Env override: ATHENS_TRACE_EXPORTER_URL
-TraceExporterURL = "http://localhost:14268"
+TraceExporterURL = "http://localhost:4317"
 
 # Stats is not a requirement for Athens. If the value is not set,
 # Athens will keep on running and stats won't be collected.

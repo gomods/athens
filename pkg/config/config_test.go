@@ -298,7 +298,7 @@ func TestParseExampleConfig(t *testing.T) {
 		BasicAuthUser:    "",
 		BasicAuthPass:    "",
 		Storage:          expStorage,
-		TraceExporterURL: "http://localhost:14268",
+		TraceExporterURL: "http://localhost:4317",
 		TraceExporter:    "",
 		StatsExporter:    "prometheus",
 		SingleFlightType: "memory",
