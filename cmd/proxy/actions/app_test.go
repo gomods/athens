@@ -23,22 +23,21 @@ func TestAppReturnsCleanup(t *testing.T) {
 	assert.NotPanics(t, cleanup)
 }
 
-func TestAppReturnsCleanupWithDatadogExporter(t *testing.T) {
+func TestAppReturnsCleanupWithExporters(t *testing.T) {
 	l := log.NoOpLogger()
 	c, err := config.Load("")
 	require.NoError(t, err)
-	c.TraceExporter = "datadog"
-	c.StatsExporter = "datadog"
+	// Exercise the real exporter registration path: OTLP traces (the gRPC
+	// exporter dials lazily, so no collector is needed) and Prometheus metrics.
+	c.TraceExporter = "otlp"
+	c.StatsExporter = "prometheus"
 
 	handler, cleanup, err := App(l, c)
 	require.NoError(t, err)
 	assert.NotNil(t, handler)
 	assert.NotNil(t, cleanup)
 
-	// Datadog's RegisterExporter returns ex.Stop (not ex.Flush).
-	// Before the fix, defer in App() called Stop() on return — before the
-	// server even started — killing the background flush loop.
-	// Now cleanup is returned to the caller and should be safe to invoke.
+	// cleanup shuts down the trace and metric providers and must be safe to call.
 	assert.NotPanics(t, cleanup)
 
 	// Calling cleanup a second time should also be safe (idempotency).
