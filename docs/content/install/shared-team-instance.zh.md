@@ -9,8 +9,7 @@ weight: 2
 
 ## 选择存储提供程序
 
-Athens目前支持许多存储驱动程序。 对于本机使用，建议从使用本地磁盘作为存储提供程序开始使用。对于其他提供商，请参阅
- [the Storage Provider documentation](/configuration/storage).
+Athens目前支持许多存储驱动程序。对于本机使用，建议从使用本地磁盘作为存储提供程序开始使用。对于其他提供商，请参阅[存储提供程序文档](/configuration/storage)。
 
 
 ## 使用本地磁盘作为存储安装Athens
@@ -48,7 +47,7 @@ docker run -d -v "$($env:ATHENS_STORAGE):/var/lib/athens" `
 
 注意：如果您之前尚未使用Docker for Windows挂载此驱动器，则可能会提示您允许访问
 
-Athens现在应该作为带有本地目录`athens-storage`的Docker容器运行。当Athens检索模块(module)时，它们将被存储在先前创建的目录中。首先，让我们确认雅典是否在运行：
+Athens现在应该作为带有本地目录`athens-storage`的Docker容器运行。当Athens检索模块(module)时，它们将被存储在先前创建的目录中。首先，让我们确认Athens是否在运行：
 
 ```console
 $ docker ps

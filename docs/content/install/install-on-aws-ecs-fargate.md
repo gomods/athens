@@ -122,10 +122,12 @@ associated with s3.
 Below is an excerpt from a task definition that shows the minimum environment variables needed.
 
 ```json
-"environment": [
-  {"name": "AWS_REGION", "value": "us-east-1"},
-  {"name": "AWS_USE_DEFAULT_CONFIGURATION", "value": "true"},
-  {"name": "ATHENS_STORAGE_TYPE", "value": "s3"},
-  {"name": "ATHENS_S3_BUCKET_NAME", "value": "athens-proxy-us-east-1-123456789012"},
-]
+{
+  "environment": [
+    {"name": "AWS_REGION", "value": "us-east-1"},
+    {"name": "AWS_USE_DEFAULT_CONFIGURATION", "value": "true"},
+    {"name": "ATHENS_STORAGE_TYPE", "value": "s3"},
+    {"name": "ATHENS_S3_BUCKET_NAME", "value": "athens-proxy-us-east-1-123456789012"},
+  ]
+}
 ```

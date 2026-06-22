@@ -27,7 +27,7 @@ go build -ldflags "-X github.com/gomods/athens/pkg/build.version=$version -X git
 ```console
  ./athens -version
 ```
-which should return something like:
+输出内容应类似于：
 ```console
 Build Details:
         Version:        0.2.0
