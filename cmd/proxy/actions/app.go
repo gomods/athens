@@ -72,6 +72,11 @@ func App(logger *log.Logger, conf *config.Config) (http.Handler, func(), error) 
 	// RegisterExporter will register an exporter where we will export our traces to.
 	// The error from the RegisterExporter would be nil if the tracer was specified by
 	// the user and the trace exporter was created successfully.
+	// RegisterPropagator installs W3C TraceContext and B3 propagation so that
+	// incoming trace headers are extracted for log correlation, regardless of
+	// whether a trace exporter is configured.
+	observ.RegisterPropagator()
+
 	// RegisterExporter returns the cleanup function that flushes remaining traces
 	// and stops the exporter. The caller is responsible for calling it at shutdown.
 	cleanupTraces := noop
