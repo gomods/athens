@@ -99,4 +99,31 @@ func TestWithRequestID(t *testing.T) {
 			t.Fatalf("expected a valid UUID but got %q: %v", givenRequestID, err)
 		}
 	})
+
+	t.Run("falls back to UUID on malformed traceparent", func(t *testing.T) {
+		h := WithRequestID(handler)
+		req := httptest.NewRequest("GET", "/", nil)
+		req.Header.Set("Traceparent", "invalid-traceparent-value")
+		w := httptest.NewRecorder()
+		h.ServeHTTP(w, req)
+		if givenRequestID == "" {
+			t.Fatal("expected a request id to be generated")
+		}
+		if _, err := uuid.Parse(givenRequestID); err != nil {
+			t.Fatalf("expected a valid UUID but got %q: %v", givenRequestID, err)
+		}
+	})
+
+	t.Run("falls back to Athens-Request-ID on malformed B3 header", func(t *testing.T) {
+		h := WithRequestID(handler)
+		req := httptest.NewRequest("GET", "/", nil)
+		req.Header.Set("X-B3-TraceId", "not-a-valid-hex-id")
+		req.Header.Set("X-B3-SpanId", "also-invalid")
+		req.Header.Set(requestid.HeaderKey, "fallback-id")
+		w := httptest.NewRecorder()
+		h.ServeHTTP(w, req)
+		if givenRequestID != "fallback-id" {
+			t.Fatalf("expected fallback %q but got %q", "fallback-id", givenRequestID)
+		}
+	})
 }
