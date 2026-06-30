@@ -43,7 +43,7 @@ GoEnv = "development"
 # ATHENS_GO_BINARY_ENV_VARS='GODEBUG=true'
 # Then the final value that the Go binary will receive is ["GODEBUG=true"] and NOT ["GOPROXY=direct", "GODEBUG=true"]
 # Therefore, whether you use the config file or the env var, make sure you have all the values you need there.
-GoBinaryEnvVars = ["GOPROXY=direct"]
+GoBinaryEnvVars = ["GOPROXY=https://proxy.golang.org,direct"]
 
 # GoGetWorkers specifies how many times you can concurrently
 # go mod download, this is so that low performance instances

@@ -149,7 +149,7 @@ func Load(configFile string) (*Config, error) {
 func defaultConfig() *Config {
 	return &Config{
 		GoBinary:              "go",
-		GoBinaryEnvVars:       EnvList{"GOPROXY=direct"},
+		GoBinaryEnvVars:       EnvList{"GOPROXY=https://proxy.golang.org,direct"},
 		GoEnv:                 "development",
 		GoGetWorkers:          10,
 		ProtocolWorkers:       30,
