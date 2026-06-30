@@ -303,7 +303,7 @@ func TestParseExampleConfig(t *testing.T) {
 		TraceSamplingFraction: 1.0,
 		StatsExporter:         "prometheus",
 		SingleFlightType:      "memory",
-		GoBinaryEnvVars:       []string{"GOPROXY=direct"},
+		GoBinaryEnvVars:       []string{"GOPROXY=https://proxy.golang.org,direct"},
 		SingleFlight:          expSingleFlight,
 		SumDBs:                []string{"https://sum.golang.org"},
 		NoSumPatterns:         []string{},
