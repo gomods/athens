@@ -67,3 +67,6 @@ The trusted checksums are all stored in `sum.golang.org`, and that server is cen
 Athens does its best to respect and use the trusted checksums while also ensuring that your private names don't get leaked to the public server. In some cases, it has to choose whether to fail your build or leak information, so it chooses to fail your build. That's why everybody using that Athens server needs to set up their `GONOSUMDB` environment variable.
 
 We believe that along with good documentation - which we hope this is! - we have struck the right balance between convenience and privacy.
+
+> If Athens served zips built by an old, buggy Go toolchain, see
+> [Verifying stored modules]({{< ref "verify-storage" >}}) to detect and purge them.
