@@ -41,7 +41,7 @@ func hashZipReader(r io.Reader) (string, error) {
 	}
 	defer os.Remove(f.Name())
 	if _, err := io.Copy(f, r); err != nil {
-		f.Close()
+		_ = f.Close()
 		return "", err
 	}
 	if err := f.Close(); err != nil {

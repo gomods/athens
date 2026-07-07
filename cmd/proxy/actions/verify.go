@@ -29,7 +29,7 @@ func ValidateVerifyFlags(verifyStorage, purge bool) error {
 // RunVerify builds the configured storage backend and sweeps it for zips that
 // disagree with the checksum database, writing a report to out. When purge is
 // true, mismatches are deleted. It does not start the server.
-func RunVerify(ctx context.Context, conf *config.Config, purge bool, out io.Writer) error {
+func RunVerify(conf *config.Config, purge bool, out io.Writer) error {
 	const op errors.Op = "actions.RunVerify"
 
 	client := &http.Client{Transport: otelhttp.NewTransport(http.DefaultTransport)}
@@ -58,7 +58,7 @@ func RunVerify(ctx context.Context, conf *config.Config, purge bool, out io.Writ
 		return false
 	}
 
-	if _, err := verify.Sweep(ctx, sweepStore, oracle, skip, purge, out); err != nil {
+	if _, err := verify.Sweep(context.Background(), sweepStore, oracle, skip, purge, out); err != nil {
 		return errors.E(op, err)
 	}
 	return nil

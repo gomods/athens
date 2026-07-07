@@ -63,7 +63,7 @@ func main() {
 	}
 
 	if *verifyStorage {
-		if err := actions.RunVerify(context.Background(), conf, *purge, os.Stdout); err != nil {
+		if err := actions.RunVerify(conf, *purge, os.Stdout); err != nil {
 			logger.Fatalf("verify-storage failed: %v", err)
 		}
 		return
