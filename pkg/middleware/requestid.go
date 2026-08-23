@@ -18,7 +18,10 @@ import (
 func WithRequestID(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var requestID string
-		if sc := extractRemoteSpanContext(context.Background(), r.Header); sc.HasTraceID() && sc.IsRemote() {
+		// Derive a context from the request context but clear any existing
+		// SpanContext so extraction reflects only incoming headers.
+		cleanCtx := trace.ContextWithSpanContext(r.Context(), trace.SpanContext{})
+		if sc := extractRemoteSpanContext(cleanCtx, r.Header); sc.HasTraceID() && sc.IsRemote() {
 			// Use the extracted trace id only if it represents a remote
 			// context (i.e. came from incoming headers). `IsRemote()`
 			// indicates the propagator created this SpanContext from
