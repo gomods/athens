@@ -539,3 +539,6 @@ single option with which it can be customized:
         # Threshold for how long to wait in seconds for an in-progress GCP upload to
         # be considered to have failed to unlock.
         StaleThreshold = 120
+
+> If Athens served zips built by an old, buggy Go toolchain, see
+> [Verifying stored modules]({{< ref "verify-storage" >}}) to detect and purge them.

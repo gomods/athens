@@ -294,6 +294,7 @@ DownloadMode = "sync"
 # 3. fallback: only return storage versions, if VCS fails. Note this means that you may
 # see inconsistent results since fallback mode does a best effort of giving you what's
 # available at the time of requesting versions.
+# Env override: ATHENS_NETWORK_MODE
 NetworkMode = "strict"
 
 # DownloadURL is the URL that will be used if
