@@ -1,15 +1,18 @@
 package middleware
 
 import (
+	"context"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
 	"github.com/gomods/athens/pkg/requestid"
 	"github.com/google/uuid"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"go.opentelemetry.io/contrib/propagators/b3"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/propagation"
+	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 )
 
 func init() {
@@ -124,6 +127,49 @@ func TestWithRequestID(t *testing.T) {
 		h.ServeHTTP(w, req)
 		if givenRequestID != "fallback-id" {
 			t.Fatalf("expected fallback %q but got %q", "fallback-id", givenRequestID)
+		}
+	})
+
+	// Integration-style test for production ordering: WithRequestID runs
+	// inside otelhttp.NewHandler which creates a local server span.
+	t.Run("production ordering: otelhttp wrapper honors Athens-Request-ID when no trace headers", func(t *testing.T) {
+		// set a real tracer provider so otelhttp creates a span
+		tp := sdktrace.NewTracerProvider()
+		otel.SetTracerProvider(tp)
+		defer func() { _ = tp.Shutdown(context.Background()) }()
+
+		h := WithRequestID(handler)
+		outer := otelhttp.NewHandler(h, "test")
+
+		req := httptest.NewRequest("GET", "/", nil)
+		req.Header.Set(requestid.HeaderKey, "prod-fallback-id")
+		w := httptest.NewRecorder()
+		outer.ServeHTTP(w, req)
+
+		if givenRequestID != "prod-fallback-id" {
+			t.Fatalf("expected to honor Athens-Request-ID %q but got %q", "prod-fallback-id", givenRequestID)
+		}
+	})
+	t.Run("regression guard: ignore local span in request context", func(t *testing.T) {
+		tp := sdktrace.NewTracerProvider()
+		otel.SetTracerProvider(tp)
+		defer func() { _ = tp.Shutdown(context.Background()) }()
+
+		tracer := tp.Tracer("test")
+		ctx, span := tracer.Start(context.Background(), "local-span")
+		defer span.End()
+
+		h := WithRequestID(handler)
+
+		req := httptest.NewRequest("GET", "/", nil)
+		// attach the local span's context to the request
+		req = req.WithContext(ctx)
+		req.Header.Set(requestid.HeaderKey, "regression-guard-id")
+		w := httptest.NewRecorder()
+		h.ServeHTTP(w, req)
+
+		if givenRequestID != "regression-guard-id" {
+			t.Fatalf("regression: expected to honor Athens-Request-ID %q but got %q", "regression-guard-id", givenRequestID)
 		}
 	})
 }

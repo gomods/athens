@@ -18,7 +18,12 @@ import (
 func WithRequestID(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var requestID string
-		if sc := extractRemoteSpanContext(r.Context(), r.Header); sc.HasTraceID() {
+		if sc := extractRemoteSpanContext(r.Header); sc.HasTraceID() && sc.IsRemote() {
+			// Use the extracted trace id only if it represents a remote
+			// context (i.e. came from incoming headers). `IsRemote()`
+			// indicates the propagator created this SpanContext from
+			// incoming headers rather than it being a locally-created
+			// context (for example from otelhttp).
 			requestID = sc.TraceID().String()
 		} else if id := r.Header.Get(requestid.HeaderKey); id != "" {
 			requestID = id
@@ -34,7 +39,11 @@ func WithRequestID(h http.Handler) http.Handler {
 // extractRemoteSpanContext uses the global OTel propagator to extract
 // a span context from the request headers. Returns an empty SpanContext
 // if no valid trace headers are present.
-func extractRemoteSpanContext(ctx context.Context, headers http.Header) trace.SpanContext {
-	ctx = otel.GetTextMapPropagator().Extract(ctx, propagation.HeaderCarrier(headers))
+func extractRemoteSpanContext(headers http.Header) trace.SpanContext {
+	// Extract into a clean context so we don't pick up any locally
+	// created span context already present on the request context
+	// (for example from otelhttp). This ensures the extracted
+	// SpanContext reflects only incoming headers.
+	ctx := otel.GetTextMapPropagator().Extract(context.Background(), propagation.HeaderCarrier(headers))
 	return trace.SpanContextFromContext(ctx)
 }
