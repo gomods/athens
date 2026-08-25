@@ -20,6 +20,11 @@ type HandlerOpts struct {
 	Protocol     Protocol
 	Logger       *log.Logger
 	DownloadFile *mode.DownloadFile
+	// ContentCacheControl is the Cache-Control header value sent on the info,
+	// mod and zip endpoints. Those endpoints serve immutable module content, so
+	// a caching proxy in front of Athens can safely cache them. When empty (the
+	// default) no Cache-Control header is set on them.
+	ContentCacheControl string
 }
 
 // LogEntryHandler pulls a log entry from the request context. Thanks to the
@@ -50,9 +55,19 @@ func RegisterHandlers(r *mux.Router, opts *HandlerOpts) {
 	latestHandler := LogEntryHandler(LatestHandler, opts)
 	r.Handle(PathLatest, noCacheMw(latestHandler)).Methods(http.MethodGet)
 
-	r.Handle(PathVersionInfo, LogEntryHandler(InfoHandler, opts)).Methods(http.MethodGet)
-	r.Handle(PathVersionModule, LogEntryHandler(ModuleHandler, opts)).Methods(http.MethodGet)
-	r.Handle(PathVersionZip, LogEntryHandler(ZipHandler, opts)).Methods(http.MethodGet, http.MethodHead)
+	infoHandler := LogEntryHandler(InfoHandler, opts)
+	moduleHandler := LogEntryHandler(ModuleHandler, opts)
+	zipHandler := LogEntryHandler(ZipHandler, opts)
+	if opts.ContentCacheControl != "" {
+		cacheMw := middleware.CacheControl(opts.ContentCacheControl)
+		infoHandler = cacheMw(infoHandler)
+		moduleHandler = cacheMw(moduleHandler)
+		zipHandler = cacheMw(zipHandler)
+	}
+
+	r.Handle(PathVersionInfo, infoHandler).Methods(http.MethodGet)
+	r.Handle(PathVersionModule, moduleHandler).Methods(http.MethodGet)
+	r.Handle(PathVersionZip, zipHandler).Methods(http.MethodGet, http.MethodHead)
 }
 
 func getRedirectURL(base, downloadPath string) (string, error) {

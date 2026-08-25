@@ -63,6 +63,7 @@ type Config struct {
 	IndexType             string    `envconfig:"ATHENS_INDEX_TYPE"`
 	ShutdownTimeout       int       `envconfig:"ATHENS_SHUTDOWN_TIMEOUT"        validate:"min=0"`
 	StashTimeout          int       `envconfig:"ATHENS_STASH_TIMEOUT"`
+	ContentCacheControl   string    `envconfig:"ATHENS_CONTENT_CACHE_CONTROL"`
 	SingleFlight          *SingleFlight
 	Storage               *Storage
 	Index                 *Index
@@ -176,6 +177,7 @@ func defaultConfig() *Config {
 		IndexType:             "none",
 		ShutdownTimeout:       60,
 		StashTimeout:          600,
+		ContentCacheControl:   "",
 		SingleFlight: &SingleFlight{
 			Etcd:  &Etcd{"localhost:2379,localhost:22379,localhost:32379"},
 			Redis: &Redis{Endpoint: "127.0.0.1:6379", LockConfig: DefaultRedisLockConfig()},

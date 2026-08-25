@@ -340,6 +340,14 @@ IndexType = "none"
 # Env override: ATHENS_SHUTDOWN_TIMEOUT
 ShutdownTimeout = 60
 
+# ContentCacheControl is the Cache-Control header sent on the info, mod and zip
+# endpoints. These serve immutable module content, so a caching proxy in front of
+# Athens can be told to cache and periodically refresh them by setting a value such
+# as "public, max-age=300". When empty (the default) no Cache-Control header is sent
+# on these endpoints, which keeps the previous behavior.
+# Env override: ATHENS_CONTENT_CACHE_CONTROL
+ContentCacheControl = ""
+
 [SingleFlight]
     [SingleFlight.Etcd]
         # Endpoints are comma separated URLs that determine all distributed etcd servers.

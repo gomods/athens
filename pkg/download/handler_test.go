@@ -44,6 +44,50 @@ func TestRedirect(t *testing.T) {
 	}
 }
 
+func TestContentCacheControl(t *testing.T) {
+	contentPaths := [...]string{
+		"/github.com/gomods/athens/@v/v0.4.0.info",
+		"/github.com/gomods/athens/@v/v0.4.0.mod",
+		"/github.com/gomods/athens/@v/v0.4.0.zip",
+	}
+
+	t.Run("sets the header when configured", func(t *testing.T) {
+		const cacheControl = "public, max-age=300"
+		r := mux.NewRouter()
+		RegisterHandlers(r, &HandlerOpts{
+			Protocol:            &mockProtocol{},
+			Logger:              log.NoOpLogger(),
+			DownloadFile:        &mode.DownloadFile{Mode: mode.Redirect, DownloadURL: "https://gomods.io"},
+			ContentCacheControl: cacheControl,
+		})
+		for _, path := range contentPaths {
+			req := httptest.NewRequest("GET", path, nil)
+			w := httptest.NewRecorder()
+			r.ServeHTTP(w, req)
+			if got := w.Header().Get("Cache-Control"); got != cacheControl {
+				t.Fatalf("expected Cache-Control %q on %s but got %q", cacheControl, path, got)
+			}
+		}
+	})
+
+	t.Run("leaves the header off by default", func(t *testing.T) {
+		r := mux.NewRouter()
+		RegisterHandlers(r, &HandlerOpts{
+			Protocol:     &mockProtocol{},
+			Logger:       log.NoOpLogger(),
+			DownloadFile: &mode.DownloadFile{Mode: mode.Redirect, DownloadURL: "https://gomods.io"},
+		})
+		for _, path := range contentPaths {
+			req := httptest.NewRequest("GET", path, nil)
+			w := httptest.NewRecorder()
+			r.ServeHTTP(w, req)
+			if got := w.Header().Get("Cache-Control"); got != "" {
+				t.Fatalf("expected no Cache-Control on %s but got %q", path, got)
+			}
+		}
+	})
+}
+
 type mockProtocol struct {
 	Protocol
 }
