@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/gomods/athens/pkg/errors"
+	"go.opentelemetry.io/contrib/propagators/b3"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
 	"go.opentelemetry.io/otel/propagation"
@@ -20,6 +21,18 @@ const instrumentationName = "github.com/gomods/athens"
 
 // shutdownTimeout bounds how long provider shutdown may block while flushing.
 const shutdownTimeout = 5 * time.Second
+
+// RegisterPropagator installs the global OTel text map propagator with support
+// for W3C TraceContext and Zipkin B3 (single + multiple header). This is
+// registered unconditionally so that trace context can be extracted for log
+// correlation even when no trace exporter is configured.
+func RegisterPropagator() {
+	otel.SetTextMapPropagator(propagation.NewCompositeTextMapPropagator(
+		b3.New(),
+		propagation.TraceContext{},
+		propagation.Baggage{},
+	))
+}
 
 // RegisterExporter configures the OpenTelemetry TracerProvider used to export traces.
 //
@@ -79,10 +92,6 @@ func registerOTLPExporter(url, service, env string, samplingFraction float64) (f
 		sdktrace.WithSampler(sampler),
 	)
 	otel.SetTracerProvider(tp)
-	otel.SetTextMapPropagator(propagation.NewCompositeTextMapPropagator(
-		propagation.TraceContext{},
-		propagation.Baggage{},
-	))
 
 	return func() {
 		ctx, cancel := context.WithTimeout(context.Background(), shutdownTimeout)
