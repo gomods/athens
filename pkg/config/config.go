@@ -57,6 +57,7 @@ type Config struct {
 	NoSumPatterns         []string  `envconfig:"ATHENS_GONOSUM_PATTERNS"`
 	DownloadMode          mode.Mode `envconfig:"ATHENS_DOWNLOAD_MODE"`
 	DownloadURL           string    `envconfig:"ATHENS_DOWNLOAD_URL"`
+	CacheControl          string    `envconfig:"ATHENS_CACHE_CONTROL"`
 	NetworkMode           string    `envconfig:"ATHENS_NETWORK_MODE"            validate:"oneof=strict offline fallback"`
 	SingleFlightType      string    `envconfig:"ATHENS_SINGLE_FLIGHT_TYPE"`
 	RobotsFile            string    `envconfig:"ATHENS_ROBOTS_FILE"`

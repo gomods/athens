@@ -122,7 +122,7 @@ func addProxyRoutes(
 
 	dp := download.New(dpOpts, addons.WithPool(c.ProtocolWorkers))
 
-	handlerOpts := &download.HandlerOpts{Protocol: dp, Logger: l, DownloadFile: df}
+	handlerOpts := &download.HandlerOpts{Protocol: dp, Logger: l, DownloadFile: df, CacheControl: c.CacheControl}
 	download.RegisterHandlers(r, handlerOpts)
 
 	return nil
