@@ -301,6 +301,15 @@ NetworkMode = "strict"
 # Env override: ATHENS_DOWNLOAD_URL
 DownloadURL = ""
 
+# CacheControl sets the Cache-Control header that Athens returns on the
+# immutable module file endpoints (.info, .mod and .zip). Those responses
+# never change for a given module@version, so a value such as
+# "public, max-age=31536000, immutable" lets a caching proxy in front of
+# Athens serve them without hitting Athens again. When empty, no Cache-Control
+# header is set on these endpoints, which is the default behavior.
+# Env override: ATHENS_CACHE_CONTROL
+CacheControl = ""
+
 # SingleFlightType determines what mechanism Athens uses
 # to manage concurrency flowing into the Athens Backend.
 # This is important for the following scenario: if two concurrent requests
