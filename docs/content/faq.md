@@ -63,16 +63,17 @@ Yes, this is possible. Refer to the [filtering modules configuration](/configura
 
 ### Is there support for monitoring and observability for Proxy?
 
-Right now, we have structured logs for proxy. Along with that, we have added tracing to help developers identify critical code paths and debug latency issues. While there is no setup required for logs, tracing requires some installation. We currently support exporting traces with [Jaeger](https://www.jaegertracing.io/), [GCP Stackdriver](https://cloud.google.com/stackdriver/) & [Datadog](https://docs.datadoghq.com/tracing/) (untested). Further support for other exporters is in progress.
+Right now, we have structured logs for proxy. Along with that, we have added tracing to help developers identify critical code paths and debug latency issues. While there is no setup required for logs, tracing requires some installation. Athens exports traces over [OpenTelemetry's OTLP protocol](https://opentelemetry.io/docs/specs/otlp/), so you can send them to anything that speaks OTLP — [Jaeger](https://www.jaegertracing.io/), the [OpenTelemetry Collector](https://opentelemetry.io/docs/collector/), [Grafana Tempo](https://grafana.com/oss/tempo/), and most APM vendors all accept it. Metrics are exposed separately in Prometheus format on the `/metrics` endpoint.
 
 To try out tracing with Jaeger, do the following:
 
-- Set the environment to development (otherwise traces will be sampled)
-- Run `docker-compose up -d` that is found in the athens source root directory to initialize the services required
+- Set `ATHENS_TRACE_EXPORTER=otlp` and `ATHENS_TRACE_EXPORTER_URL` to your collector's OTLP endpoint (for example `http://localhost:4317`). The `docker-compose.yml` in the source root already wires this up for the `dev` service.
+- Keep the environment set to `development` (the default) so every trace is sampled
+- Run `docker-compose up -d` from the Athens source root to start the services, including a Jaeger instance with its OTLP receiver enabled
 - Run the walkthrough tutorial
 - Open `http://localhost:16686/search`
 
-  Observability is not a hard requirement for the Athens proxy. So, if the infrastructure is not properly set up, it will fail with an information log. For example, if Jaeger is not running or if the wrong URL to the exporter is provided, the proxy will continue to run. However, it will not collect any traces or metrics while the exporter backend is unavailable.
+  Observability is not a hard requirement for the Athens proxy. So, if the infrastructure is not properly set up, it will fail with an information log. For example, if the collector is not running or the wrong exporter URL is provided, the proxy will continue to run. However, it will not collect any traces while the exporter backend is unavailable.
 
 ### What VCS servers does Athens support?
 

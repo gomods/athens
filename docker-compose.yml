@@ -10,6 +10,8 @@ services:
       - ATHENS_MONGO_STORAGE_URL=mongodb://mongo:27017
       - TIMEOUT=20 # in case the mongo dependency takes longer to start up
       - ATHENS_STORAGE_TYPE=mongo
+      - ATHENS_TRACE_EXPORTER=otlp
+      - ATHENS_TRACE_EXPORTER_URL=http://jaeger:4317
     ports:
       - 3000:3000
     depends_on:
@@ -56,20 +58,14 @@ services:
     environment:
       MINIO_ACCESS_KEY: minio
       MINIO_SECRET_KEY: minio123
-  datadog:
-    environment:
-      - DD_API_KEY=
-      - DD_LOG_LEVEL=trace
-      - DD_APM_ENABLED=true
-    image:
-      datadog/agent:latest
-    ports:
-      - 8126:8126
   jaeger:
     environment:
       - COLLECTOR_ZIPKIN_HTTP_PORT=9441
+      - COLLECTOR_OTLP_ENABLED=true
     image: jaegertracing/all-in-one:latest
     ports:
+      - 4317:4317   # OTLP gRPC
+      - 4318:4318   # OTLP HTTP
       - 14268:14268
       - 9411:9411
       - 5775:5775/udp

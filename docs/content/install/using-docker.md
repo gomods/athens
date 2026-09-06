@@ -21,6 +21,14 @@ For a detailed tags list, check each image's Docker Hub
 
 This is a quick recap of the [Walkthrough](/walkthrough)
 
+**Run Athens with an init process.** Athens shells out to the Go toolchain (`go`, `git`,
+`ssh`), and the orphaned processes those leave behind must be reaped by PID 1. The official
+`gomods/athens` images run [tini](https://github.com/krallin/tini) as their entrypoint for
+this, so the commands below work as-is. If you run Athens any other way, such as a custom
+image that overrides the entrypoint or the `athens-proxy` binary on its own, run it under an
+init: `tini`, `docker`/`podman run --init`, or systemd. Without an init, orphaned processes
+pile up as zombies and requests may fail. See [`init` issues](#init-issues) for details.
+
 ### Using the `docker` cli
 
 In order to run the Athens Proxy using docker, we need first to create a directory that will store the persistant modules.
@@ -85,3 +93,9 @@ Docker 1.13 and greater includes `tini` and lets you enable it by passing the `-
 ```
 This is the "Athens-tini" complaining that it's not running as PID 1.
 There is no harm in that, since the zombie processes will be reaped by the `tini` included in Docker.
+
+Athens does not reap processes itself. Orphaned toolchain processes are reaped by whatever
+runs as PID 1, which is `tini` in the official image. If you bypass the tini entrypoint or
+run the binary directly as PID 1, provide an init (`--init`, `"init": true`, or `tini`), or
+orphaned processes accumulate as zombies over time. See the recommendation under
+[Running Athens as a Docker image](#running-athens-as-a-docker-image).

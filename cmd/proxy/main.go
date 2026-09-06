@@ -22,12 +22,17 @@ import (
 )
 
 var (
-	configFile = flag.String("config_file", "", "The path to the config file")
-	version    = flag.Bool("version", false, "Print version information and exit")
+	configFile    = flag.String("config_file", "", "The path to the config file")
+	version       = flag.Bool("version", false, "Print version information and exit")
+	verifyStorage = flag.Bool("verify-storage", false, "Verify stored module zips against the checksum database and report mismatches, then exit (does not start the server)")
+	purge         = flag.Bool("purge", false, "With -verify-storage, delete the mismatched module versions (requires -verify-storage)")
 )
 
 func main() {
 	flag.Parse()
+	if err := actions.ValidateVerifyFlags(*verifyStorage, *purge); err != nil {
+		stdlog.Fatalf("%v", err)
+	}
 	if *version {
 		fmt.Println(build.String())
 		os.Exit(0)
@@ -48,6 +53,21 @@ func main() {
 	// error level.
 	stdlog.SetOutput(logger.StdLogger(slog.LevelError).Writer())
 	stdlog.SetFlags(stdlog.Flags() &^ (stdlog.Ldate | stdlog.Ltime))
+
+	// Athens shells out to the Go toolchain (go, git, ssh) and relies on an init
+	// at PID 1 to reap the orphaned subprocesses they leave behind. Running as
+	// PID 1 means there is no init to do that, so warn the operator.
+	if os.Getpid() == 1 {
+		logger.Warnf("Athens is running as PID 1 with no init to reap subprocesses; " +
+			"run it under an init such as tini or `docker/podman run --init` to avoid zombie processes")
+	}
+
+	if *verifyStorage {
+		if err := actions.RunVerify(conf, *purge, os.Stdout); err != nil {
+			logger.Fatalf("verify-storage failed: %v", err)
+		}
+		return
+	}
 
 	handler, cleanup, err := actions.App(logger, conf)
 	if err != nil {
@@ -92,7 +112,6 @@ func main() {
 	}
 
 	signalCtx, signalStop := signal.NotifyContext(context.Background(), shutdown.GetSignals()...)
-	reaper := shutdown.ChildProcReaper(signalCtx, logger)
 
 	go func() {
 		defer signalStop()
@@ -117,5 +136,4 @@ func main() {
 	if err := srv.Shutdown(shutdownCtx); err != nil {
 		logger.Fatalf("Could not shut down server: %v", err)
 	}
-	<-reaper.Done()
 }

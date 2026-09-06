@@ -12,7 +12,7 @@ import (
 	"github.com/gomods/athens/pkg/observ"
 	"github.com/gorilla/mux"
 	"github.com/unrolled/secure"
-	"go.opencensus.io/plugin/ochttp"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 )
 
 // Service is the name of the service that we want to tag our processes with.
@@ -72,6 +72,11 @@ func App(logger *log.Logger, conf *config.Config) (http.Handler, func(), error) 
 	// RegisterExporter will register an exporter where we will export our traces to.
 	// The error from the RegisterExporter would be nil if the tracer was specified by
 	// the user and the trace exporter was created successfully.
+	// RegisterPropagator installs W3C TraceContext and B3 propagation so that
+	// incoming trace headers are extracted for log correlation, regardless of
+	// whether a trace exporter is configured.
+	observ.RegisterPropagator()
+
 	// RegisterExporter returns the cleanup function that flushes remaining traces
 	// and stops the exporter. The caller is responsible for calling it at shutdown.
 	cleanupTraces := noop
@@ -80,6 +85,7 @@ func App(logger *log.Logger, conf *config.Config) (http.Handler, func(), error) 
 		conf.TraceExporterURL,
 		Service,
 		conf.GoEnv,
+		conf.TraceSamplingFraction,
 	)
 	if err != nil {
 		logger.Infof("%v", err)
@@ -120,9 +126,7 @@ func App(logger *log.Logger, conf *config.Config) (http.Handler, func(), error) 
 	}
 
 	client := &http.Client{
-		Transport: &ochttp.Transport{
-			Base: http.DefaultTransport,
-		},
+		Transport: otelhttp.NewTransport(http.DefaultTransport),
 	}
 
 	// Having the hook set means we want to use it
@@ -143,9 +147,7 @@ func App(logger *log.Logger, conf *config.Config) (http.Handler, func(), error) 
 		return nil, cleanup, fmt.Errorf("adding proxy routes: %w", err)
 	}
 
-	h := &ochttp.Handler{
-		Handler: r,
-	}
+	h := otelhttp.NewHandler(r, Service)
 
 	return h, cleanup, nil
 }

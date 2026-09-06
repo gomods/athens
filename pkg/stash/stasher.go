@@ -10,7 +10,7 @@ import (
 	"github.com/gomods/athens/pkg/module"
 	"github.com/gomods/athens/pkg/observ"
 	"github.com/gomods/athens/pkg/storage"
-	"go.opencensus.io/trace"
+	"go.opentelemetry.io/otel/trace"
 	"golang.org/x/sync/singleflight"
 )
 
@@ -56,7 +56,7 @@ func (s *stasher) Stash(ctx context.Context, mod, ver string) (string, error) {
 	semver_, err, _ := s.sfg.Do(mod+"###"+ver, func() (any, error) {
 		// create a new context that ditches whatever deadline the caller passed
 		// but keep the tracing info so that we can properly trace the whole thing.
-		ctx, cancel := context.WithTimeout(trace.NewContext(context.Background(), span), s.timeout)
+		ctx, cancel := context.WithTimeout(trace.ContextWithSpan(context.Background(), span), s.timeout)
 		defer cancel()
 		v, err := s.fetchModule(ctx, mod, ver)
 		if err != nil {
