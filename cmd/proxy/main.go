@@ -22,12 +22,17 @@ import (
 )
 
 var (
-	configFile = flag.String("config_file", "", "The path to the config file")
-	version    = flag.Bool("version", false, "Print version information and exit")
+	configFile    = flag.String("config_file", "", "The path to the config file")
+	version       = flag.Bool("version", false, "Print version information and exit")
+	verifyStorage = flag.Bool("verify-storage", false, "Verify stored module zips against the checksum database and report mismatches, then exit (does not start the server)")
+	purge         = flag.Bool("purge", false, "With -verify-storage, delete the mismatched module versions (requires -verify-storage)")
 )
 
 func main() {
 	flag.Parse()
+	if err := actions.ValidateVerifyFlags(*verifyStorage, *purge); err != nil {
+		stdlog.Fatalf("%v", err)
+	}
 	if *version {
 		fmt.Println(build.String())
 		os.Exit(0)
@@ -55,6 +60,13 @@ func main() {
 	if os.Getpid() == 1 {
 		logger.Warnf("Athens is running as PID 1 with no init to reap subprocesses; " +
 			"run it under an init such as tini or `docker/podman run --init` to avoid zombie processes")
+	}
+
+	if *verifyStorage {
+		if err := actions.RunVerify(conf, *purge, os.Stdout); err != nil {
+			logger.Fatalf("verify-storage failed: %v", err)
+		}
+		return
 	}
 
 	handler, cleanup, err := actions.App(logger, conf)
