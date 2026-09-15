@@ -51,13 +51,13 @@ services:
     ports:
       - 27017:27017
   minio:
-    image: minio/minio:latest
+    image: quay.io/minio/minio:RELEASE.2025-09-07T16-13-09Z
     command: server /data
     ports:
       - "9001:9000"
     environment:
-      MINIO_ACCESS_KEY: minio
-      MINIO_SECRET_KEY: minio123
+      MINIO_ROOT_USER: minio
+      MINIO_ROOT_PASSWORD: minio123
   jaeger:
     environment:
       - COLLECTOR_ZIPKIN_HTTP_PORT=9441
