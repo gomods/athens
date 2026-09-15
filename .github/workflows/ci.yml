@@ -62,14 +62,6 @@ jobs:
         ports:
           - 27017:27017
 
-      minio:
-        image: minio/minio:edge-cicd
-        ports:
-          - 9000:9000
-        env:
-          MINIO_ACCESS_KEY: minio
-          MINIO_SECRET_KEY: minio123
-
       redis:
         image: redis
         ports:
@@ -125,6 +117,21 @@ jobs:
       - name: Download dependencies
         run: go mod download
         if: steps.install-go.outputs.cache-hit != 'true'
+
+      # The quay.io MinIO images ship no default command and a GitHub Actions
+      # service cannot pass one, so MinIO runs as a plain container here.
+      - name: Start MinIO
+        run: |
+          docker run -d --name minio -p 9000:9000 \
+            -e MINIO_ROOT_USER=minio -e MINIO_ROOT_PASSWORD=minio123 \
+            quay.io/minio/minio:RELEASE.2025-09-07T16-13-09Z server /data
+          for _ in $(seq 1 30); do
+            curl -sf http://localhost:9000/minio/health/live && exit 0
+            sleep 1
+          done
+          echo "MinIO did not become healthy" >&2
+          docker logs minio >&2
+          exit 1
 
       - name: Verify changes
         run: make verify
