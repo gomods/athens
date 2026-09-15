@@ -39,6 +39,26 @@ type Storage struct {
 func New(s3Conf *config.S3Config, timeout time.Duration, options ...func(*aws.Config)) (*Storage, error) {
 	const op errors.Op = "s3.New"
 
+	client, err := NewClient(s3Conf, options...)
+	if err != nil {
+		return nil, errors.E(op, err)
+	}
+
+	return &Storage{
+		bucket:               s3Conf.Bucket,
+		uploader:             transfermanager.New(client),
+		s3API:                client,
+		timeout:              timeout,
+		serverSideEncryption: types.ServerSideEncryption(s3Conf.ServerSideEncryption),
+		sseKMSKeyID:          s3Conf.SSEKMSKeyID,
+		bucketKeyEnabled:     s3Conf.BucketKeyEnabled,
+	}, nil
+}
+
+// NewClient creates an S3 API client from the Athens S3 configuration.
+func NewClient(s3Conf *config.S3Config, options ...func(*aws.Config)) (*s3.Client, error) {
+	const op errors.Op = "s3.NewClient"
+
 	awsConfig, err := awscfg.LoadDefaultConfig(context.TODO(), awscfg.WithRegion(s3Conf.Region))
 	if err != nil {
 		return nil, errors.E(op, err)
@@ -60,24 +80,12 @@ func New(s3Conf *config.S3Config, timeout time.Duration, options ...func(*aws.Co
 	}
 
 	// Create a session with creds.
-	sess := s3.NewFromConfig(awsConfig, func(o *s3.Options) {
+	return s3.NewFromConfig(awsConfig, func(o *s3.Options) {
 		o.UsePathStyle = s3Conf.ForcePathStyle
 		if s3Conf.Endpoint != "" {
 			o.BaseEndpoint = aws.String(s3Conf.Endpoint)
 		}
-	})
-
-	uploader := transfermanager.New(sess)
-
-	return &Storage{
-		bucket:               s3Conf.Bucket,
-		uploader:             uploader,
-		s3API:                sess,
-		timeout:              timeout,
-		serverSideEncryption: types.ServerSideEncryption(s3Conf.ServerSideEncryption),
-		sseKMSKeyID:          s3Conf.SSEKMSKeyID,
-		bucketKeyEnabled:     s3Conf.BucketKeyEnabled,
-	}, nil
+	}), nil
 }
 
 func endpointFrom(credentialsEndpoint, relativeURI string) string {
