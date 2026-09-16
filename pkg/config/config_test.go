@@ -307,6 +307,7 @@ func TestParseExampleConfig(t *testing.T) {
 		SingleFlight:          expSingleFlight,
 		SumDBs:                []string{"https://sum.golang.org"},
 		NoSumPatterns:         []string{},
+		GoDownloadListingTTL:  7200,
 		DownloadMode:          "sync",
 		RobotsFile:            "robots.txt",
 		IndexType:             "none",

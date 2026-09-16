@@ -6,13 +6,17 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"os"
 	"path"
+	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/download"
 	"github.com/gomods/athens/pkg/download/addons"
 	"github.com/gomods/athens/pkg/download/mode"
+	"github.com/gomods/athens/pkg/godl"
 	"github.com/gomods/athens/pkg/index"
 	"github.com/gomods/athens/pkg/index/mem"
 	"github.com/gomods/athens/pkg/index/mysql"
@@ -62,6 +66,10 @@ func addProxyRoutes(
 		r.PathPrefix(pathPrefix + "/").Handler(
 			http.StripPrefix(strings.TrimSuffix(c.PathPrefix, "/")+pathPrefix, sumHandler),
 		)
+	}
+
+	if err := addGoDownloadRoutes(r, c); err != nil {
+		return err
 	}
 
 	// Download Protocol:
@@ -200,4 +208,49 @@ func getIndex(c *config.Config) (index.Indexer, error) {
 		return postgres.New(c.Index.Postgres)
 	}
 	return nil, fmt.Errorf("unknown index type: %q", c.IndexType)
+}
+
+// goDownloadPrefix is where the Go toolchain download proxy is mounted, so
+// clients use <athens-url>/dl as their download base URL. It cannot collide
+// with module paths: those always contain /@v/ or /@latest.
+const (
+	goDownloadPrefix    = "/dl"
+	goDownloadRouteName = "godl"
+)
+
+// addGoDownloadRoutes mounts the Go toolchain download proxy, or a handler
+// explaining that it is disabled, so /dl/ never looks like a missing version.
+func addGoDownloadRoutes(r *mux.Router, c *config.Config) error {
+	h := godl.Disabled()
+
+	if c.GoDownloadURL != "" {
+		upstream, err := url.Parse(c.GoDownloadURL)
+		if err != nil {
+			return fmt.Errorf("GoDownloadURL: %w", err)
+		}
+
+		cacheDir := c.GoDownloadCacheDir
+		if cacheDir == "" {
+			cacheDir = filepath.Join(os.TempDir(), "athens-godl")
+		}
+
+		client := &http.Client{Timeout: c.TimeoutDuration()}
+		ttl := time.Duration(c.GoDownloadListingTTL) * time.Second
+
+		h, err = godl.New(upstream, cacheDir, client, ttl)
+		if err != nil {
+			return err
+		}
+	}
+
+	// A bare PathPrefix would also swallow /dl/@v/... requests for a module
+	// literally named "dl"; leave those to the download protocol.
+	r.PathPrefix(goDownloadPrefix + "/").
+		MatcherFunc(func(req *http.Request, _ *mux.RouteMatch) bool {
+			return !strings.Contains(req.URL.Path, "/@v/") && !strings.HasSuffix(req.URL.Path, "/@latest")
+		}).
+		Handler(http.StripPrefix(strings.TrimSuffix(c.PathPrefix, "/")+goDownloadPrefix, h)).
+		Name(goDownloadRouteName)
+
+	return nil
 }
