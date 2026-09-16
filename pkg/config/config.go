@@ -55,6 +55,9 @@ type Config struct {
 	TLSKeyFile            string    `envconfig:"ATHENS_TLSKEY_FILE"`
 	SumDBs                []string  `envconfig:"ATHENS_SUM_DBS"`
 	NoSumPatterns         []string  `envconfig:"ATHENS_GONOSUM_PATTERNS"`
+	GoDownloadURL         string    `envconfig:"ATHENS_GO_DOWNLOAD_URL"`
+	GoDownloadCacheDir    string    `envconfig:"ATHENS_GO_DOWNLOAD_CACHE_DIR"`
+	GoDownloadListingTTL  int       `envconfig:"ATHENS_GO_DOWNLOAD_LISTING_TTL" validate:"min=0"`
 	DownloadMode          mode.Mode `envconfig:"ATHENS_DOWNLOAD_MODE"`
 	DownloadURL           string    `envconfig:"ATHENS_DOWNLOAD_URL"`
 	CacheControl          string    `envconfig:"ATHENS_CACHE_CONTROL"`
@@ -170,6 +173,9 @@ func defaultConfig() *Config {
 		TraceSamplingFraction: 1.0,
 		SumDBs:                []string{"https://sum.golang.org"},
 		NoSumPatterns:         []string{},
+		GoDownloadURL:         "",
+		GoDownloadCacheDir:    "",
+		GoDownloadListingTTL:  7200,
 		DownloadMode:          "sync",
 		DownloadURL:           "",
 		NetworkMode:           "strict",

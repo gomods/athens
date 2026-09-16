@@ -110,3 +110,64 @@ func TestProxyRoutes(t *testing.T) {
 		})
 	}
 }
+
+func TestGoDownloadRoutes(t *testing.T) {
+	upstream := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch {
+		case r.URL.Path == "/dl/" && r.URL.Query().Get("mode") == "json":
+			_, _ = io.WriteString(w, `[{"version":"go1.27.1"}]`)
+		case r.URL.Path == "/dl/go1.27.1.linux-amd64.tar.gz":
+			_, _ = io.WriteString(w, "tarball")
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer upstream.Close()
+
+	r := mux.NewRouter()
+	s, err := mem.NewStorage()
+	require.NoError(t, err)
+	c, err := config.Load("")
+	require.NoError(t, err)
+	c.NoSumPatterns = []string{"*"}
+	c.PathPrefix = "/prefix"
+	c.GoDownloadURL = upstream.URL + "/dl"
+	c.GoDownloadCacheDir = t.TempDir()
+	subRouter := r.PathPrefix(c.PathPrefix).Subrouter()
+	require.NoError(t, addProxyRoutes(subRouter, s, log.NoOpLogger(), c))
+
+	for path, want := range map[string]string{
+		"/prefix/dl/?mode=json&include=all":      `[{"version":"go1.27.1"}]`,
+		"/prefix/dl/go1.27.1.linux-amd64.tar.gz": "tarball",
+	} {
+		w := httptest.NewRecorder()
+		r.ServeHTTP(w, httptest.NewRequest(http.MethodGet, path, nil))
+		assert.Equal(t, http.StatusOK, w.Code, path)
+		assert.Equal(t, want, w.Body.String(), path)
+	}
+
+	// A module named "dl" must still route to the download protocol, not the
+	// toolchain proxy.
+	for _, path := range []string{"/prefix/dl/@v/list", "/prefix/dl/@latest", "/prefix/dl/@v/v1.0.0.zip"} {
+		var match mux.RouteMatch
+		require.True(t, r.Match(httptest.NewRequest(http.MethodGet, path, nil), &match), path)
+		assert.NotEqual(t, goDownloadRouteName, match.Route.GetName(), path)
+	}
+}
+
+func TestGoDownloadRoutesDisabledByDefault(t *testing.T) {
+	r := mux.NewRouter()
+	s, err := mem.NewStorage()
+	require.NoError(t, err)
+	c, err := config.Load("")
+	require.NoError(t, err)
+	c.NoSumPatterns = []string{"*"}
+	require.NoError(t, addProxyRoutes(r, s, log.NoOpLogger(), c))
+
+	for _, path := range []string{"/dl/go1.27.1.linux-amd64.tar.gz", "/dl/?mode=json&include=all"} {
+		w := httptest.NewRecorder()
+		r.ServeHTTP(w, httptest.NewRequest(http.MethodGet, path, nil))
+		assert.Equal(t, http.StatusUnprocessableEntity, w.Code, path)
+		assert.Contains(t, w.Body.String(), "ATHENS_GO_DOWNLOAD_URL", path)
+	}
+}

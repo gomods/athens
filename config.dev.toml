@@ -261,6 +261,30 @@ SumDBs = ["https://sum.golang.org"]
 # Env override: ATHENS_GONOSUM_PATTERNS
 NoSumPatterns = []
 
+# GoDownloadURL enables a caching proxy for Go toolchain release downloads
+# under <athens-url>/dl/, shaped like https://go.dev/dl so that tools such as
+# actions/setup-go can use it as their download base URL:
+#   GO_DOWNLOAD_BASE_URL=<athens-url>/dl
+# Set it to the upstream to fetch from, typically "https://go.dev/dl" or
+# "https://aka.ms/golang/release/latest" for the Microsoft build of Go.
+# Leave empty to disable the endpoint.
+# Env override: ATHENS_GO_DOWNLOAD_URL
+GoDownloadURL = ""
+
+# GoDownloadCacheDir is where downloaded Go release archives are kept.
+# Releases are immutable and ~70 MB each, so a plain directory with no
+# eviction is enough; losing it (e.g. a pod restart) only costs a re-download.
+# If empty, a directory under the OS temporary directory is used.
+# Env override: ATHENS_GO_DOWNLOAD_CACHE_DIR
+GoDownloadCacheDir = ""
+
+# GoDownloadListingTTL is how long, in seconds, the upstream's version
+# listing (/dl/?mode=json) is reused before being fetched again. New Go
+# releases become visible to clients within this window. If the refresh
+# fails, the previous listing keeps being served.
+# Env override: ATHENS_GO_DOWNLOAD_LISTING_TTL
+GoDownloadListingTTL = 7200
+
 # DownloadMode defines how Athens behaves when a module@version
 # is not found in storage. There are 4 options:
 # 1. "sync" (default): download the module synchronously and
