@@ -10,6 +10,7 @@ import (
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/storage"
+	"github.com/gomods/athens/pkg/storage/artifactory"
 	"github.com/gomods/athens/pkg/storage/azureblob"
 	"github.com/gomods/athens/pkg/storage/external"
 	"github.com/gomods/athens/pkg/storage/fs"
@@ -70,6 +71,11 @@ func GetStorage(storageType string, storageConfig *config.Storage, timeout time.
 			return nil, errors.E(op, "Invalid External Storage Configuration")
 		}
 		return external.NewClient(storageConfig.External.URL, client), nil
+	case "artifactory":
+		if storageConfig.Artifactory == nil {
+			return nil, errors.E(op, "Invalid External Artifactory Configuration")
+		}
+		return artifactory.New(storageConfig.Artifactory, client)
 	default:
 		return nil, fmt.Errorf("storage type %s is unknown", storageType)
 	}
