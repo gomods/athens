@@ -175,6 +175,21 @@ After this you can pass your credentials inside `config.toml` file.  If the acce
             # Env override: ATHENS_S3_BUCKET_NAME
             Bucket = "MY_S3_BUCKET_NAME"
             
+            # Optional server-side encryption algorithm, for example "AES256" or "aws:kms".
+            # Leave empty to use the bucket's default encryption without sending an SSE header.
+            # Env override: ATHENS_S3_SERVER_SIDE_ENCRYPTION
+            ServerSideEncryption = ""
+
+            # Optional KMS key ID or ARN when using SSE-KMS.
+            # Leave empty to let S3 choose the KMS key.
+            # Env override: ATHENS_S3_SSE_KMS_KEY_ID
+            SSEKMSKeyID = ""
+
+            # Optional S3 Bucket Key setting for SSE-KMS ("aws:kms").
+            # Leave unset to preserve the bucket default; false explicitly disables it.
+            # Env override: ATHENS_S3_BUCKET_KEY_ENABLED
+            # BucketKeyEnabled = true
+
             # If true then path style url for s3 endpoint will be used
             # Env override: AWS_FORCE_PATH_STYLE
             ForcePathStyle = false
@@ -206,6 +221,32 @@ After this you can pass your credentials inside `config.toml` file.  If the acce
             # You must still provide a `Region` value when specifying an endpoint.
             # Env override: AWS_ENDPOINT
             Endpoint = ""
+
+### Explicit server-side encryption headers
+
+Buckets can require encryption headers on each upload, even when default encryption
+is already configured on the bucket. Set `ServerSideEncryption` to `"AES256"` for
+SSE-S3 or `"aws:kms"` for SSE-KMS. For SSE-KMS, `SSEKMSKeyID` optionally selects a
+KMS key ID or ARN; omit it to use the AWS-managed S3 key. AWS validates encryption
+algorithms and key settings.
+
+For example, configure SSE-KMS through environment variables:
+
+```console
+ATHENS_S3_SERVER_SIDE_ENCRYPTION=aws:kms
+ATHENS_S3_SSE_KMS_KEY_ID=arn:aws:kms:us-east-1:123456789012:key/your-key-id
+```
+
+`BucketKeyEnabled` (environment variable `ATHENS_S3_BUCKET_KEY_ENABLED`) optionally
+controls S3 Bucket Keys for SSE-KMS. Leaving it unset preserves the bucket default;
+setting it to `false` explicitly disables the bucket key for uploaded objects.
+
+These settings apply to `.info`, `.mod`, and `.zip` uploads, including multipart
+uploads. Leaving all three settings unset preserves the existing behavior: Athens
+sends no encryption headers and relies on the bucket's encryption configuration.
+No bucket or KMS key is created or modified by these settings. The uploading
+identity must have permission to use the selected KMS key; see the
+[AWS SSE-KMS documentation](https://docs.aws.amazon.com/AmazonS3/latest/userguide/UsingKMSEncryption.html).
 
 ## Minio
 

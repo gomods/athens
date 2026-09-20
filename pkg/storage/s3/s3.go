@@ -10,6 +10,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/credentials/endpointcreds"
 	"github.com/aws/aws-sdk-go-v2/feature/s3/transfermanager"
+	"github.com/aws/aws-sdk-go-v2/feature/s3/transfermanager/types"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/errors"
@@ -25,10 +26,13 @@ import (
 // - AWS_FORCE_PATH_STYLE	- [optional]
 // For information how to get your keyId and access key turn to official aws docs: https://docs.aws.amazon.com/sdk-for-go/v1/developer-guide/setting-up.html.
 type Storage struct {
-	bucket   string
-	uploader *transfermanager.Client
-	s3API    *s3.Client
-	timeout  time.Duration
+	bucket               string
+	uploader             *transfermanager.Client
+	s3API                *s3.Client
+	timeout              time.Duration
+	serverSideEncryption types.ServerSideEncryption
+	sseKMSKeyID          string
+	bucketKeyEnabled     *bool
 }
 
 // New creates a new AWS S3 CDN saver.
@@ -66,10 +70,13 @@ func New(s3Conf *config.S3Config, timeout time.Duration, options ...func(*aws.Co
 	uploader := transfermanager.New(sess)
 
 	return &Storage{
-		bucket:   s3Conf.Bucket,
-		uploader: uploader,
-		s3API:    sess,
-		timeout:  timeout,
+		bucket:               s3Conf.Bucket,
+		uploader:             uploader,
+		s3API:                sess,
+		timeout:              timeout,
+		serverSideEncryption: types.ServerSideEncryption(s3Conf.ServerSideEncryption),
+		sseKMSKeyID:          s3Conf.SSEKMSKeyID,
+		bucketKeyEnabled:     s3Conf.BucketKeyEnabled,
 	}, nil
 }
 

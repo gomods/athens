@@ -62,13 +62,19 @@ jobs:
         ports:
           - 27017:27017
 
-      minio:
-        image: minio/minio:edge-cicd
+      rustfs:
+        image: rustfs/rustfs:1.0.0
         ports:
           - 9000:9000
         env:
-          MINIO_ACCESS_KEY: minio
-          MINIO_SECRET_KEY: minio123
+          RUSTFS_ACCESS_KEY: minio
+          RUSTFS_SECRET_KEY: minio123
+          RUSTFS_CONSOLE_ENABLE: "false"
+        options: >-
+          --health-cmd "curl --fail --silent http://localhost:9000/health"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 12
 
       redis:
         image: redis
