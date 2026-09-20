@@ -538,6 +538,21 @@ ShutdownTimeout = 60
         # Env override: ATHENS_S3_BUCKET_NAME
         Bucket = "MY_S3_BUCKET_NAME"
 
+        # Optional server-side encryption algorithm, for example "AES256" or "aws:kms".
+        # Leave empty to use the bucket's default encryption without sending an SSE header.
+        # Env override: ATHENS_S3_SERVER_SIDE_ENCRYPTION
+        ServerSideEncryption = ""
+
+        # Optional KMS key ID or ARN when using SSE-KMS.
+        # Leave empty to let S3 choose the KMS key.
+        # Env override: ATHENS_S3_SSE_KMS_KEY_ID
+        SSEKMSKeyID = ""
+
+        # Optional S3 Bucket Key setting for SSE-KMS ("aws:kms").
+        # Leave unset to preserve the bucket default; false explicitly disables it.
+        # Env override: ATHENS_S3_BUCKET_KEY_ENABLED
+        # BucketKeyEnabled = true
+
         # If true then path style url for s3 endpoint will be used
         # Env override: AWS_FORCE_PATH_STYLE
         ForcePathStyle = false
