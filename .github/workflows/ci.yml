@@ -62,6 +62,20 @@ jobs:
         ports:
           - 27017:27017
 
+      rustfs:
+        image: rustfs/rustfs:1.0.0
+        ports:
+          - 9000:9000
+        env:
+          RUSTFS_ACCESS_KEY: minio
+          RUSTFS_SECRET_KEY: minio123
+          RUSTFS_CONSOLE_ENABLE: "false"
+        options: >-
+          --health-cmd "curl --fail --silent http://localhost:9000/health"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 12
+
       redis:
         image: redis
         ports:
@@ -121,25 +135,12 @@ jobs:
       - name: Verify changes
         run: make verify
 
-      - name: Start MinIO
-        run: |
-          docker run --detach --name athens-ci-minio \
-            --publish 127.0.0.1:9000:9000 \
-            --env MINIO_ROOT_USER=minio \
-            --env MINIO_ROOT_PASSWORD=minio123 \
-            quay.io/minio/minio:RELEASE.2025-09-07T16-13-09Z server /data
-          timeout 60s bash -c 'until curl --fail --silent http://localhost:9000/minio/health/ready; do sleep 1; done'
-
       - name: Unit tests
         run: go test -v -race ./...
 
       - name: End to end tests
         if: success() || failure()
         run: make test-e2e
-
-      - name: Stop MinIO
-        if: always()
-        run: docker rm --force athens-ci-minio
 
   build:
     runs-on: ubuntu-latest
