@@ -2,6 +2,8 @@ package stash
 
 import (
 	"context"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"strings"
 	"testing"
@@ -15,8 +17,95 @@ import (
 	"github.com/gomods/athens/pkg/storage"
 	"github.com/gomods/athens/pkg/storage/mem"
 	s3storage "github.com/gomods/athens/pkg/storage/s3"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"golang.org/x/sync/errgroup"
 )
+
+func TestS3LockEncryption(t *testing.T) {
+	tests := []struct {
+		name      string
+		algorithm string
+		keyID     string
+		bucketKey *bool
+	}{
+		{name: "bucket defaults"},
+		{name: "SSE-S3", algorithm: "AES256"},
+		{name: "SSE-KMS default key", algorithm: "aws:kms"},
+		{name: "SSE-KMS key", algorithm: "aws:kms", keyID: "test-key"},
+		{name: "bucket key enabled", algorithm: "aws:kms", keyID: "test-key", bucketKey: aws.Bool(true)},
+		{name: "bucket key disabled", algorithm: "aws:kms", bucketKey: aws.Bool(false)},
+	}
+	for _, tc := range tests {
+		for _, mode := range []string{"initial acquisition", "stale takeover"} {
+			t.Run(tc.name+"/"+mode, func(t *testing.T) {
+				writes := make(chan http.Header, 2)
+				server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+					switch r.Method {
+					case http.MethodHead:
+						w.Header().Set("ETag", `"old-lock"`)
+						w.Header().Set("Last-Modified", time.Now().Add(-time.Hour).UTC().Format(http.TimeFormat))
+					case http.MethodPut:
+						writes <- r.Header.Clone()
+						if mode == "stale takeover" && r.Header.Get("If-None-Match") == "*" {
+							w.Header().Set("Content-Type", "application/xml")
+							w.WriteHeader(http.StatusPreconditionFailed)
+							_, _ = w.Write([]byte(`<Error><Code>PreconditionFailed</Code></Error>`))
+							return
+						}
+						w.Header().Set("ETag", `"new-lock"`)
+					default:
+						t.Errorf("unexpected request: %s %s", r.Method, r.URL.Path)
+						w.WriteHeader(http.StatusBadRequest)
+					}
+				}))
+				t.Cleanup(server.Close)
+				wrapper, err := WithS3Lock(&config.S3Config{
+					Key: "test", Secret: "test", Bucket: "test-bucket", Region: "us-east-1",
+					Endpoint: server.URL, ForcePathStyle: true,
+					ServerSideEncryption: tc.algorithm, SSEKMSKeyID: tc.keyID, BucketKeyEnabled: tc.bucketKey,
+				}, config.DefaultS3Config(), nil)
+				require.NoError(t, err)
+				lock := wrapper(nil).(*s3Lock)
+				etag, err := lock.tryAcquire(t.Context(), "lock/example.com/module@v1.0.0")
+				require.NoError(t, err)
+				require.Equal(t, `"new-lock"`, etag)
+				wantWrites := 1
+				if mode == "stale takeover" {
+					wantWrites = 2
+				}
+				require.Len(t, writes, wantWrites)
+				for i := range wantWrites {
+					headers := <-writes
+					if i == 0 {
+						assert.Equal(t, "*", headers.Get("If-None-Match"))
+					} else {
+						assert.Equal(t, `"old-lock"`, headers.Get("If-Match"))
+					}
+					wantHeaders := map[string]string{
+						"X-Amz-Server-Side-Encryption":                tc.algorithm,
+						"X-Amz-Server-Side-Encryption-Aws-Kms-Key-Id": tc.keyID,
+					}
+					if tc.bucketKey != nil {
+						wantHeaders["X-Amz-Server-Side-Encryption-Bucket-Key-Enabled"] = "false"
+						if *tc.bucketKey {
+							wantHeaders["X-Amz-Server-Side-Encryption-Bucket-Key-Enabled"] = "true"
+						}
+					} else {
+						wantHeaders["X-Amz-Server-Side-Encryption-Bucket-Key-Enabled"] = ""
+					}
+					for name, value := range wantHeaders {
+						if value == "" {
+							assert.NotContains(t, headers, http.CanonicalHeaderKey(name))
+						} else {
+							assert.Equal(t, value, headers.Get(name), name)
+						}
+					}
+				}
+			})
+		}
+	}
+}
 
 // TestWithS3Lock ensures that 5 concurrent requests all get the first request's
 // response: only the first call to the underlying stasher succeeds, so if the lock

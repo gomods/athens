@@ -44,25 +44,31 @@ func WithS3Lock(s3Conf *config.S3Config, lockConf *config.S3, checker storage.Ch
 	}
 	return func(s Stasher) Stasher {
 		return &s3Lock{
-			client:     client,
-			bucket:     s3Conf.Bucket,
-			stasher:    s,
-			checker:    checker,
-			ttl:        time.Duration(lockConf.TTL) * time.Second,
-			timeout:    time.Duration(lockConf.Timeout) * time.Second,
-			maxRetries: lockConf.MaxRetries,
+			client:               client,
+			bucket:               s3Conf.Bucket,
+			stasher:              s,
+			checker:              checker,
+			ttl:                  time.Duration(lockConf.TTL) * time.Second,
+			timeout:              time.Duration(lockConf.Timeout) * time.Second,
+			maxRetries:           lockConf.MaxRetries,
+			serverSideEncryption: types.ServerSideEncryption(s3Conf.ServerSideEncryption),
+			sseKMSKeyID:          s3Conf.SSEKMSKeyID,
+			bucketKeyEnabled:     s3Conf.BucketKeyEnabled,
 		}
 	}, nil
 }
 
 type s3Lock struct {
-	client     *s3.Client
-	bucket     string
-	stasher    Stasher
-	checker    storage.Checker
-	ttl        time.Duration
-	timeout    time.Duration
-	maxRetries int
+	client               *s3.Client
+	bucket               string
+	stasher              Stasher
+	checker              storage.Checker
+	ttl                  time.Duration
+	timeout              time.Duration
+	maxRetries           int
+	serverSideEncryption types.ServerSideEncryption
+	sseKMSKeyID          string
+	bucketKeyEnabled     *bool
 }
 
 func (s *s3Lock) Stash(ctx context.Context, mod, ver string) (newVer string, err error) {
@@ -166,6 +172,11 @@ func (s *s3Lock) put(ctx context.Context, key string, in *s3.PutObjectInput) (st
 	in.Key = aws.String(key)
 	in.Body = strings.NewReader(uuid.NewString())
 	in.ContentType = aws.String("text/plain")
+	in.ServerSideEncryption = s.serverSideEncryption
+	in.BucketKeyEnabled = s.bucketKeyEnabled
+	if s.sseKMSKeyID != "" {
+		in.SSEKMSKeyId = aws.String(s.sseKMSKeyID)
+	}
 	out, err := s.client.PutObject(ctx, in)
 	if err != nil {
 		return "", err

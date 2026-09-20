@@ -589,7 +589,8 @@ extra infrastructure. While a module version is being saved, Athens holds a smal
 under the `lock/` prefix of the storage bucket. The lock is created with an S3 conditional
 write (`If-None-Match: *`), so when several Athens instances race to fill the same module only
 one of them fetches it from upstream; the others wait for the lock to be released and then
-serve the stored module. The lock object is deleted once the save finishes.
+serve the stored module. The lock object is deleted once the save finishes. Lock writes
+use the server-side encryption settings configured under `Storage.S3`, just like module uploads.
 
 Conditional writes are supported by Amazon S3 and by recent releases of S3-compatible stores such
 as MinIO. Verify that your store honours `If-None-Match` before enabling this mechanism, as a
