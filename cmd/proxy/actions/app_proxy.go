@@ -178,6 +178,14 @@ func getSingleFlight(l *log.Logger, c *config.Config, s storage.Backend, checker
 			return nil, fmt.Errorf("gcp SingleFlight only works with a gcp storage type and not: %v", c.StorageType)
 		}
 		return stash.WithGCSLock(c.SingleFlight.GCP.StaleThreshold, s)
+	case "s3":
+		if c.StorageType != "s3" {
+			return nil, fmt.Errorf("s3 SingleFlight only works with a s3 storage type and not: %v", c.StorageType)
+		}
+		if c.SingleFlight == nil || c.SingleFlight.S3 == nil {
+			return nil, errors.New("s3 config must be present")
+		}
+		return stash.WithS3Lock(c.Storage.S3, c.SingleFlight.S3, checker)
 	case "azureblob":
 		if c.StorageType != "azureblob" {
 			return nil, fmt.Errorf("azureblob SingleFlight only works with a azureblob storage type and not: %v", c.StorageType)

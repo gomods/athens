@@ -8,6 +8,7 @@ type SingleFlight struct {
 	Redis         *Redis
 	RedisSentinel *RedisSentinel
 	GCP           *GCP
+	S3            *S3
 }
 
 // Etcd holds client side configuration
@@ -63,5 +64,26 @@ type GCP struct {
 func DefaultGCPConfig() *GCP {
 	return &GCP{
 		StaleThreshold: 120,
+	}
+}
+
+// S3 is the configuration for S3 locking. The lock objects live in the
+// bucket configured under Storage.S3, so no connection settings are needed here.
+type S3 struct {
+	// TTL is the number of seconds after which a lock is considered stale
+	// and may be reclaimed by another instance.
+	TTL int `envconfig:"ATHENS_S3_LOCK_TTL"`
+	// Timeout is the number of seconds to wait for acquiring the lock.
+	Timeout int `envconfig:"ATHENS_S3_LOCK_TIMEOUT"`
+	// MaxRetries is the maximum number of acquire attempts.
+	MaxRetries int `envconfig:"ATHENS_S3_LOCK_MAX_RETRIES"`
+}
+
+// DefaultS3Config returns the default S3 locking configuration.
+func DefaultS3Config() *S3 {
+	return &S3{
+		TTL:        900,
+		Timeout:    15,
+		MaxRetries: 10,
 	}
 }
