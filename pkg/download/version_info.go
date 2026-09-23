@@ -27,7 +27,7 @@ func InfoHandler(dp Protocol, lggr log.Entry, df *mode.DownloadFile) http.Handle
 			severityLevel := errors.Expect(err, errors.KindNotFound, errors.KindRedirect)
 			lggr.SystemErr(errors.E(op, err, errors.M(mod), errors.V(ver), severityLevel))
 			if errors.Kind(err) == errors.KindRedirect {
-				url, err := getRedirectURL(df.URL(mod), r.URL.Path)
+				url, err := getRedirectURL(df.URL(mod), r)
 				if err != nil {
 					lggr.SystemErr(err)
 					w.WriteHeader(errors.Kind(err))
