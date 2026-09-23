@@ -53,6 +53,21 @@ func GetAllParams(r *http.Request) (*AllPathParams, error) {
 	return &AllPathParams{Module: mod, Version: version}, nil
 }
 
+// ProtocolPath returns the path of a module request starting at the module,
+// for example "/example.com/mod/@v/v1.0.0.info". Unlike r.URL.Path, it does
+// not include the prefix Athens is served under (ATHENS_PATH_PREFIX), so it
+// can be appended to the URL of another proxy.
+func ProtocolPath(r *http.Request) string {
+	module := mux.Vars(r)["module"]
+	if module == "" {
+		return r.URL.Path
+	}
+	if i := strings.LastIndex(r.URL.Path, "/"+module+"/@"); i >= 0 {
+		return r.URL.Path[i:]
+	}
+	return r.URL.Path
+}
+
 // MatchesPattern reports whether the path prefix of target matches
 // pattern (as defined by path.Match).
 //

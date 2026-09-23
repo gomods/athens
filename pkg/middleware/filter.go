@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"net/http"
-	"net/url"
 	"strings"
 
 	"github.com/gomods/athens/pkg/module"
@@ -37,7 +36,7 @@ func NewFilterMiddleware(mf *module.Filter, upstreamEndpoint string) mux.Middlew
 				return
 			case module.Direct:
 				// Direct: do not store modules locally, use upstream proxy
-				newURL := redirectToUpstreamURL(upstreamEndpoint, r.URL)
+				newURL := redirectToUpstreamURL(upstreamEndpoint, paths.ProtocolPath(r))
 				http.Redirect(w, r, newURL, http.StatusSeeOther)
 				return
 			}
@@ -47,6 +46,6 @@ func NewFilterMiddleware(mf *module.Filter, upstreamEndpoint string) mux.Middlew
 	}
 }
 
-func redirectToUpstreamURL(upstreamEndpoint string, u *url.URL) string {
-	return strings.TrimSuffix(upstreamEndpoint, "/") + u.Path
+func redirectToUpstreamURL(upstreamEndpoint, protocolPath string) string {
+	return strings.TrimSuffix(upstreamEndpoint, "/") + protocolPath
 }
