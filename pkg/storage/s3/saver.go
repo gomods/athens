@@ -33,10 +33,15 @@ func (s *Storage) upload(ctx context.Context, path, contentType string, stream i
 	defer span.End()
 
 	upParams := &transfermanager.UploadObjectInput{
-		Bucket:      aws.String(s.bucket),
-		Key:         aws.String(path),
-		Body:        stream,
-		ContentType: aws.String(contentType),
+		Bucket:               aws.String(s.bucket),
+		Key:                  aws.String(path),
+		Body:                 stream,
+		ContentType:          aws.String(contentType),
+		ServerSideEncryption: s.serverSideEncryption,
+		BucketKeyEnabled:     s.bucketKeyEnabled,
+	}
+	if s.sseKMSKeyID != "" {
+		upParams.SSEKMSKeyID = aws.String(s.sseKMSKeyID)
 	}
 
 	if _, err := s.uploader.UploadObject(ctx, upParams); err != nil {
