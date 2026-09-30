@@ -319,7 +319,7 @@ CacheControl = ""
 # and the second request will wait for the first one to finish so that
 # it doesn't override the storage.
 
-# Options are ["memory", "etcd", "redis", "redis-sentinel", "gcp", "azureblob"]
+# Options are ["memory", "etcd", "redis", "redis-sentinel", "gcp", "azureblob", "s3"]
 
 # The default option is "memory" which means that only one instance of Athens
 # should be used.
@@ -331,6 +331,9 @@ CacheControl = ""
 # and therefore it will use its strong-consistency features to ensure
 # that only one module is ever written even when concurrent saves happen
 # at the same time.
+# The "s3" single flight will assume that you have a "s3" StorageType
+# and will use S3 conditional writes to hold a lock object in the storage bucket
+# while a module is being saved, so no extra infrastructure is needed.
 # The "redis" single flight will use a single redis instance as a locking mechanism
 # for updating the underlying storage
 # The "redis-sentinel" single flight works similarly to "redis" but obtains a redis connection
@@ -423,6 +426,19 @@ ShutdownTimeout = 60
         # Threshold for how long to wait in seconds for an in-progress GCP upload to
         # be considered to have failed to unlock.
         StaleThreshold = 120
+    [SingleFlight.S3]
+        # The "s3" single flight stores a lock object per module version in the
+        # Storage.S3 bucket, created with a conditional (If-None-Match) write.
+        # TTL in seconds after which a lock left behind by a crashed instance is
+        # considered stale and reclaimed. Defaults to 900 seconds (15 minutes).
+        # Env override: ATHENS_S3_LOCK_TTL
+        TTL = 900
+        # Timeout for acquiring the lock in seconds. Defaults to 15 seconds.
+        # Env override: ATHENS_S3_LOCK_TIMEOUT
+        Timeout = 15
+        # Max retries while acquiring the lock. Defaults to 10.
+        # Env override: ATHENS_S3_LOCK_MAX_RETRIES
+        MaxRetries = 10
 [Storage]
     # Only storage backends that are specified in Proxy.StorageType are required here
     [Storage.CDN]
