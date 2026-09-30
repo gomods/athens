@@ -175,6 +175,21 @@ After this you can pass your credentials inside `config.toml` file.  If the acce
             # Env override: ATHENS_S3_BUCKET_NAME
             Bucket = "MY_S3_BUCKET_NAME"
             
+            # Optional server-side encryption algorithm, for example "AES256" or "aws:kms".
+            # Leave empty to use the bucket's default encryption without sending an SSE header.
+            # Env override: ATHENS_S3_SERVER_SIDE_ENCRYPTION
+            ServerSideEncryption = ""
+
+            # Optional KMS key ID or ARN when using SSE-KMS.
+            # Leave empty to let S3 choose the KMS key.
+            # Env override: ATHENS_S3_SSE_KMS_KEY_ID
+            SSEKMSKeyID = ""
+
+            # Optional S3 Bucket Key setting for SSE-KMS ("aws:kms").
+            # Leave unset to preserve the bucket default; false explicitly disables it.
+            # Env override: ATHENS_S3_BUCKET_KEY_ENABLED
+            # BucketKeyEnabled = true
+
             # If true then path style url for s3 endpoint will be used
             # Env override: AWS_FORCE_PATH_STYLE
             ForcePathStyle = false
@@ -206,6 +221,32 @@ After this you can pass your credentials inside `config.toml` file.  If the acce
             # You must still provide a `Region` value when specifying an endpoint.
             # Env override: AWS_ENDPOINT
             Endpoint = ""
+
+### Explicit server-side encryption headers
+
+Buckets can require encryption headers on each upload, even when default encryption
+is already configured on the bucket. Set `ServerSideEncryption` to `"AES256"` for
+SSE-S3 or `"aws:kms"` for SSE-KMS. For SSE-KMS, `SSEKMSKeyID` optionally selects a
+KMS key ID or ARN; omit it to use the AWS-managed S3 key. AWS validates encryption
+algorithms and key settings.
+
+For example, configure SSE-KMS through environment variables:
+
+```console
+ATHENS_S3_SERVER_SIDE_ENCRYPTION=aws:kms
+ATHENS_S3_SSE_KMS_KEY_ID=arn:aws:kms:us-east-1:123456789012:key/your-key-id
+```
+
+`BucketKeyEnabled` (environment variable `ATHENS_S3_BUCKET_KEY_ENABLED`) optionally
+controls S3 Bucket Keys for SSE-KMS. Leaving it unset preserves the bucket default;
+setting it to `false` explicitly disables the bucket key for uploaded objects.
+
+These settings apply to `.info`, `.mod`, and `.zip` uploads, including multipart
+uploads. Leaving all three settings unset preserves the existing behavior: Athens
+sends no encryption headers and relies on the bucket's encryption configuration.
+No bucket or KMS key is created or modified by these settings. The uploading
+identity must have permission to use the selected KMS key; see the
+[AWS SSE-KMS documentation](https://docs.aws.amazon.com/AmazonS3/latest/userguide/UsingKMSEncryption.html).
 
 ## Minio
 
@@ -406,9 +447,10 @@ Athens supports several distributed locking mechanisms:
 - `redis-sentinel`
 - `gcp` (available when using the `gcp` storage type)
 - `azureblob` (available when using the `azureblob` storage type)
+- `s3` (available when using the `s3` storage type)
 
 Setting the `SingleFlightType` (or `ATHENS_SINGLE_FLIGHT TYPE` in the environment) configuration
-value will enable usage of one of the above mechanisms. The `azureblob` and `gcp` types require
+value will enable usage of one of the above mechanisms. The `azureblob`, `gcp` and `s3` types require
 no extra configuration.
 
 ### Using etcd as the single flight mechanism
@@ -539,6 +581,37 @@ single option with which it can be customized:
         # Threshold for how long to wait in seconds for an in-progress GCP upload to
         # be considered to have failed to unlock.
         StaleThreshold = 120
+
+### Using S3 as a singleflight mechanism
+
+The S3 singleflight mechanism works out of the box with the `s3` storage type and needs no
+extra infrastructure. While a module version is being saved, Athens holds a small lock object
+under the `lock/` prefix of the storage bucket. The lock is created with an S3 conditional
+write (`If-None-Match: *`), so when several Athens instances race to fill the same module only
+one of them fetches it from upstream; the others wait for the lock to be released and then
+serve the stored module. The lock object is deleted once the save finishes. Lock writes
+use the server-side encryption settings configured under `Storage.S3`, just like module uploads.
+
+Conditional writes are supported by Amazon S3 and by recent releases of S3-compatible stores such
+as MinIO. Verify that your store honours `If-None-Match` before enabling this mechanism, as a
+store that ignores the header offers no protection.
+
+    SingleFlightType = "s3"
+
+    [SingleFlight.S3]
+        # TTL in seconds after which a lock left behind by a crashed instance is
+        # considered stale and reclaimed. Defaults to 900 seconds (15 minutes).
+        # Env override: ATHENS_S3_LOCK_TTL
+        TTL = 900
+        # Timeout for acquiring the lock in seconds. Defaults to 15 seconds.
+        # Env override: ATHENS_S3_LOCK_TIMEOUT
+        Timeout = 15
+        # Max retries while acquiring the lock. Defaults to 10.
+        # Env override: ATHENS_S3_LOCK_MAX_RETRIES
+        MaxRetries = 10
+
+The `TTL` only matters when an Athens instance dies while holding a lock: the lock is reclaimed
+once it is older than the TTL, so set it above the longest time a module save can take.
 
 > If Athens served zips built by an old, buggy Go toolchain, see
 > [Verifying stored modules]({{< ref "verify-storage" >}}) to detect and purge them.

@@ -8,6 +8,7 @@ import (
 	"github.com/gomods/athens/pkg/download/mode"
 	"github.com/gomods/athens/pkg/log"
 	"github.com/gomods/athens/pkg/middleware"
+	"github.com/gomods/athens/pkg/paths"
 	"github.com/gorilla/mux"
 )
 
@@ -67,11 +68,12 @@ func RegisterHandlers(r *mux.Router, opts *HandlerOpts) {
 	r.Handle(PathVersionZip, fileMw(LogEntryHandler(ZipHandler, opts))).Methods(http.MethodGet, http.MethodHead)
 }
 
-func getRedirectURL(base, downloadPath string) (string, error) {
+// getRedirectURL returns the URL at base that serves the module file requested by r.
+func getRedirectURL(base string, r *http.Request) (string, error) {
 	url, err := url.Parse(base)
 	if err != nil {
 		return "", err
 	}
-	url.Path = path.Join(url.Path, downloadPath)
+	url.Path = path.Join(url.Path, paths.ProtocolPath(r))
 	return url.String(), nil
 }

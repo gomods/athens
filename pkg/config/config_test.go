@@ -275,6 +275,7 @@ func TestParseExampleConfig(t *testing.T) {
 		},
 		Etcd: &Etcd{Endpoints: "localhost:2379,localhost:22379,localhost:32379"},
 		GCP:  DefaultGCPConfig(),
+		S3:   DefaultS3Config(),
 	}
 
 	expConf := &Config{
@@ -418,6 +419,11 @@ func getEnvMap(config *Config) map[string]string {
 			envVars["ATHENS_ETCD_ENDPOINTS"] = singleFlight.Etcd.Endpoints
 		} else if singleFlight.GCP != nil {
 			envVars["ATHENS_GCP_STALE_THRESHOLD"] = strconv.Itoa(singleFlight.GCP.StaleThreshold)
+		} else if singleFlight.S3 != nil {
+			envVars["ATHENS_SINGLE_FLIGHT_TYPE"] = "s3"
+			envVars["ATHENS_S3_LOCK_TTL"] = strconv.Itoa(singleFlight.S3.TTL)
+			envVars["ATHENS_S3_LOCK_TIMEOUT"] = strconv.Itoa(singleFlight.S3.Timeout)
+			envVars["ATHENS_S3_LOCK_MAX_RETRIES"] = strconv.Itoa(singleFlight.S3.MaxRetries)
 		}
 	}
 	return envVars

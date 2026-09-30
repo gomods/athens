@@ -190,6 +190,7 @@ func defaultConfig() *Config {
 				LockConfig:       DefaultRedisLockConfig(),
 			},
 			GCP: DefaultGCPConfig(),
+			S3:  DefaultS3Config(),
 		},
 		Index: &Index{
 			MySQL: &MySQL{
