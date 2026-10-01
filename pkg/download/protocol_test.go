@@ -94,8 +94,10 @@ type listModeTest struct {
 	upstreamList []string
 	upstreamErr  error
 	networkmode  string
+	downloadMode mode.Mode
 	wantTags     []string
 	wantErr      bool
+	wantUpstream bool
 }
 
 var listModeTests = []listModeTest{
@@ -112,6 +114,7 @@ var listModeTests = []listModeTest{
 		storageTags:  []string{"v0.0.4"},
 		upstreamList: []string{"v0.0.1", "v0.0.2", "v0.0.3"},
 		wantTags:     []string{"v0.0.1", "v0.0.2", "v0.0.3", "v0.0.4"},
+		wantUpstream: true,
 	},
 	{
 		name:        "offline",
@@ -128,6 +131,7 @@ var listModeTests = []listModeTest{
 		upstreamList: []string{},
 		upstreamErr:  errors.E("test", "unexpected error"),
 		wantTags:     []string{"v0.0.4"},
+		wantUpstream: true,
 	},
 	{
 		name:         "fallback upstream not found",
@@ -137,6 +141,7 @@ var listModeTests = []listModeTest{
 		upstreamList: []string{},
 		upstreamErr:  errors.E("test", "remote: Repository not found", errors.KindNotFound),
 		wantTags:     []string{"v0.0.4"},
+		wantUpstream: true,
 	},
 	{
 		name:         "fallback error with no storage",
@@ -147,6 +152,24 @@ var listModeTests = []listModeTest{
 		upstreamErr:  errors.E("test", "remote: Repository not found", errors.KindNotFound),
 		wantTags:     nil,
 		wantErr:      true,
+		wantUpstream: true,
+	},
+	{
+		name:         "download mode none returns stored versions without upstream in strict mode",
+		networkmode:  Strict,
+		downloadMode: mode.None,
+		path:         "company.gitlab.com/repo/c",
+		storageTags:  []string{"v0.0.4"},
+		upstreamList: []string{"v0.0.5"},
+		wantTags:     []string{"v0.0.4"},
+	},
+	{
+		name:         "download mode none returns empty list without upstream in fallback mode",
+		networkmode:  Fallback,
+		downloadMode: mode.None,
+		path:         "company.gitlab.com/repo/c",
+		upstreamList: []string{"v0.0.5"},
+		wantTags:     []string{},
 	},
 }
 
@@ -160,6 +183,7 @@ func TestListMode(t *testing.T) {
 			err:  tc.upstreamErr,
 		}
 		dp := &protocol{
+			df:          &mode.DownloadFile{Mode: tc.downloadMode},
 			storage:     strg,
 			lister:      ml,
 			networkMode: tc.networkmode,
@@ -170,15 +194,46 @@ func TestListMode(t *testing.T) {
 		}
 		t.Run(tc.name, func(t *testing.T) {
 			versions, err := dp.List(ctx, tc.path)
-			if err != nil && !tc.wantErr {
-				t.Fatal(err)
-			}
+			require.Equal(t, tc.wantErr, err != nil, "unexpected List error: %v", err)
 			require.EqualValues(t, tc.wantTags, versions)
-			if tc.networkmode == Offline && ml.called {
-				t.Fatal("upstream lister must not be called in offline mode")
-			}
+			require.Equal(t, tc.wantUpstream, ml.called, "unexpected upstream lookup")
 		})
 	}
+}
+
+func TestDownloadModeNonePattern(t *testing.T) {
+	ctx := t.Context()
+	strg, err := mem.NewStorage()
+	require.NoError(t, err)
+	const blocked = "company.gitlab.com/repo/c"
+	const allowed = "company.gitlab.com/repo/a"
+	require.NoError(t, strg.Save(ctx, blocked, "v1.0.0", []byte("mod"), bytes.NewReader([]byte("zip")), nil, []byte("info")))
+	df := &mode.DownloadFile{
+		Mode: mode.Sync,
+		Paths: []*mode.DownloadPath{
+			{Pattern: allowed, Mode: mode.Sync},
+			{Pattern: "company.gitlab.com/*", Mode: mode.None},
+		},
+	}
+	ml := &mockLister{list: []string{"v2.0.0"}}
+	dp := New(&Opts{Storage: strg, Lister: ml, DownloadFile: df, NetworkMode: Strict})
+
+	versions, err := dp.List(ctx, blocked)
+	require.NoError(t, err)
+	require.Equal(t, []string{"v1.0.0"}, versions)
+	require.False(t, ml.called, "blocked module must not query upstream")
+	_, err = dp.Latest(ctx, blocked)
+	require.True(t, errors.IsNotFoundErr(err))
+	require.False(t, ml.called, "blocked module must not query upstream")
+
+	info, err := dp.Info(ctx, blocked, "v1.0.0")
+	require.NoError(t, err)
+	require.Equal(t, []byte("info"), info, "download mode none must preserve cached artifact access")
+
+	versions, err = dp.List(ctx, allowed)
+	require.NoError(t, err)
+	require.Equal(t, []string{"v2.0.0"}, versions)
+	require.True(t, ml.called, "allowed module should query upstream")
 }
 
 func TestConcurrentLists(t *testing.T) {

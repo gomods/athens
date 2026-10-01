@@ -6,7 +6,7 @@ weight: 1
 
 Athens accepts an [HCL](https://github.com/hashicorp/hcl) formatted file that has instructions for how it should behave when a module@version isn't found in its storage. This functionality gives Athens the flexibility configure Athens to fit your organization's needs. The most popular uses of this download file are:
 
-- Configure Athens to never download or serve a module or group of modules
+- Configure Athens to avoid downloading a module or group of modules that is not already in storage
 - Redirect to a different module proxy for a module or group of modules
 
 This document will outline how to use this file - called the download mode file - to accomplish these tasks and more.
@@ -28,7 +28,7 @@ If Athens receives a request for the module `github.com/pkg/errors` at version `
 
 1. **`sync`**: Synchronously download the module from VCS via `go mod download`, persist it to the Athens storage, and serve it back to the user immediately. Note that this is the default behavior.
 2. **`async`**: Return a 404 to the client, and asynchronously download and persist the module@version to storage.
-3. **`none`**: Return a 404 and do nothing.
+3. **`none`**: Return a 404 for a module version that is not in storage and do nothing. `/@v/list` returns stored versions without contacting upstream, while `/@latest` returns a 404. Versions already in storage remain available.
 4. **`redirect`**: Redirect to an upstream proxy (such as proxy.golang.org) and do nothing after.
 5. **`async_redirect`**: Redirect to an upstream proxy (such as proxy.golang.org) and asynchronously download and persist the module@version to storage.
 
@@ -66,7 +66,7 @@ The rest of the file contains `download` blocks. These override the default beha
 
 The first block specifies that any module matching `github.com/gomods/*` (such as `github.com/gomods/athens`) will be downloaded from GitHub, stored, and then returned to the user.
 
-The second block specifies that any module matching `golang.org/x/*` (such as `golang.org/x/text`) will always return a HTTP 404 response code. This behavior ensures that Athens will _never_ store or serve any module names starting with `golang.org/x`.
+The second block specifies that Athens will not fetch a missing module matching `golang.org/x/*` (such as `golang.org/x/text`). Athens will still serve versions already in storage.
 
 If a user has their `GOPROXY` environment variable set with a comma separated list, their `go` command line tool will always try the option next in the list. For example, if a user has their `GOPROXY` environment variable set to `https://athens.azurefd.net,direct`, and then runs `go get golang.org/x/text`, they will still download `golang.org/x/text` to their machine. The module just won't come from Athens.
 
@@ -76,17 +76,29 @@ The last block specifies that any module matching `github.com/pkg/*` (such as `g
 
 The download mode file is versatile and allows you to configure Athens in a large variety of different ways. Below are some of the mode common.
 
-## Blocking certain modules
+## Preventing fetches for certain modules
 
-If you're running Athens to serve a team of Go developers, it might be useful to ensure that the team doesn't use a specific group or groups of modules (for example, because of licensing or security issues).
+If you're running Athens to serve a team of Go developers, you may want to prevent Athens from fetching a specific group of modules (for example, because of licensing or security issues).
 
-In this case, you would write this in your file:
+To prevent new downloads and upstream version lookups for these modules, write:
 
 ```hcl
 download "bad/module/repo/*" {
     mode = "none"
 }
 ```
+
+`none` is not an access-control rule: Athens can still serve versions already in storage. If clients must not access a module at all, use the [filter file's exclude rule](/configuration/filter) or enforce access at the proxy boundary. `NetworkMode = "offline"` disables upstream version lookups for every module, rather than for selected module patterns.
+
+For example, to allow only two repositories under a hostname, set `FilterFile` to a file containing:
+
+```text
+- company.gitlab.com
++ company.gitlab.com/repo/a
++ company.gitlab.com/repo/b
+```
+
+The filter applies to `/@v/list`, `/@latest`, and versioned artifact requests, including versions already in storage.
 
 ### Preventing storage overflow
 

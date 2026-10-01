@@ -88,6 +88,7 @@ func (p *protocol) List(ctx context.Context, mod string) ([]string, error) {
 	var strList, goList []string
 	var sErr, goErr error
 	var wg sync.WaitGroup
+	storageOnly := p.networkMode == Offline || (p.df != nil && p.df.Match(mod) == mode.None)
 
 	/*
 		TODO: potential refactor:
@@ -104,7 +105,7 @@ func (p *protocol) List(ctx context.Context, mod string) ([]string, error) {
 		strList, sErr = p.storage.List(ctx, mod)
 	})
 
-	if p.networkMode != Offline {
+	if !storageOnly {
 		wg.Go(func() {
 			_, goList, goErr = p.lister.List(ctx, mod)
 		})
@@ -118,8 +119,9 @@ func (p *protocol) List(ctx context.Context, mod string) ([]string, error) {
 		return nil, errors.E(op, sErr)
 	}
 
-	// if we're in offline mode, just return what came from storage.
-	if p.networkMode == Offline {
+	// Offline mode and download mode none must not query upstream.
+	// Stored versions remain available, as they do for versioned endpoints.
+	if storageOnly {
 		return strList, nil
 	}
 
@@ -183,6 +185,9 @@ func (p *protocol) Latest(ctx context.Context, mod string) (*storage.RevInfo, er
 		// Go never pings the /@latest endpoint _first_. It always tries /list and if that
 		// endpoint returns an empty list then it fallsback to calling /@latest.
 		return nil, errors.E(op, "Athens is in offline mode, use /list endpoint", errors.KindNotFound)
+	}
+	if p.df != nil && p.df.Match(mod) == mode.None {
+		return nil, errors.E(op, "upstream lookup disabled for module, use /list endpoint", errors.KindNotFound)
 	}
 	lr, _, err := p.lister.List(ctx, mod)
 	if err != nil {

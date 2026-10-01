@@ -3,6 +3,7 @@ package middleware
 import (
 	"encoding/json"
 	"net/http"
+	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"testing"
@@ -88,6 +89,43 @@ func Test_FilterMiddleware(t *testing.T) {
 	// Private, the proxy is working and returns a 200
 	res = w.JSON("/github.com/athens-artifacts/happy-path/@v/list").Get()
 	r.Equal(http.StatusOK, res.Code)
+}
+
+func TestFilterMiddlewareModuleAllowlist(t *testing.T) {
+	filterFile := filepath.Join(t.TempDir(), "filter.conf")
+	require.NoError(t, os.WriteFile(filterFile, []byte("- company.gitlab.com\n+ company.gitlab.com/repo/a\n+ company.gitlab.com/repo/b\n"), 0o600))
+	mf, err := module.NewFilter(filterFile)
+	require.NoError(t, err)
+
+	r := mux.NewRouter()
+	r.Use(NewFilterMiddleware(mf, ""))
+	for _, path := range []string{
+		pathList,
+		"/{module:.+}/@latest",
+		pathVersionInfo,
+		"/{module:.+}/@v/{version}.mod",
+		"/{module:.+}/@v/{version}.zip",
+	} {
+		r.HandleFunc(path, func(w http.ResponseWriter, _ *http.Request) {
+			w.WriteHeader(http.StatusNoContent)
+		})
+	}
+
+	for _, tc := range []struct {
+		module string
+		want   int
+	}{
+		{"company.gitlab.com/repo/a", http.StatusNoContent},
+		{"company.gitlab.com/repo/b", http.StatusNoContent},
+		{"company.gitlab.com/repo/c", http.StatusForbidden},
+	} {
+		for _, suffix := range []string{"/@v/list", "/@latest", "/@v/v1.0.0.info", "/@v/v1.0.0.mod", "/@v/v1.0.0.zip"} {
+			path := "/" + tc.module + suffix
+			w := httptest.NewRecorder()
+			r.ServeHTTP(w, httptest.NewRequest(http.MethodGet, path, nil))
+			require.Equal(t, tc.want, w.Code, path)
+		}
+	}
 }
 
 func hookFilterApp(hook string) *mux.Router {
