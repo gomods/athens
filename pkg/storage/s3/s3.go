@@ -55,6 +55,12 @@ func New(s3Conf *config.S3Config, timeout time.Duration, options ...func(*aws.Co
 	}, nil
 }
 
+// NewWithClient uses an already configured S3 client and bucket. It is useful
+// for S3-compatible backends that supply explicit configuration themselves.
+func NewWithClient(client *s3.Client, bucket string, timeout time.Duration) *Storage {
+	return &Storage{bucket: bucket, s3API: client, uploader: transfermanager.New(client), timeout: timeout}
+}
+
 // NewClient creates an S3 API client from the Athens S3 configuration.
 func NewClient(s3Conf *config.S3Config, options ...func(*aws.Config)) (*s3.Client, error) {
 	const op errors.Op = "s3.NewClient"

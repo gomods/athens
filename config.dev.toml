@@ -261,6 +261,30 @@ SumDBs = ["https://sum.golang.org"]
 # Env override: ATHENS_GONOSUM_PATTERNS
 NoSumPatterns = []
 
+# Go release downloads use the configured StorageType under <athens-url>/dl/.
+# Setting a URL also enables the feature for compatibility. Offline mirrors
+# can instead set GoDownloadEnabled=true with no upstream URL.
+# Env override: ATHENS_GO_DOWNLOAD_ENABLED
+GoDownloadEnabled = false
+# Env override: ATHENS_GO_DOWNLOAD_URL
+GoDownloadURL = ""
+# Stable distribution identity. Defaults to the upstream base URL, or
+# https://go.dev/dl when no URL is configured. Preserve it for offline reuse.
+# Env override: ATHENS_GO_DOWNLOAD_SOURCE
+GoDownloadSource = ""
+# Defaults to the global/default DownloadMode; module-path overrides do not
+# apply to release archives. Supports sync, none, async, redirect, async_redirect.
+# Env override: ATHENS_GO_DOWNLOAD_MODE
+GoDownloadMode = ""
+# Release-compatible redirect base, defaulting to GoDownloadURL. Module
+# DownloadURL is not used for toolchain archives.
+# Env override: ATHENS_GO_DOWNLOAD_REDIRECT_URL
+GoDownloadRedirectURL = ""
+# Upstream listing TTL in seconds. NetworkMode controls refresh failures.
+# Offline and none always use committed local archive inventory.
+# Env override: ATHENS_GO_DOWNLOAD_LISTING_TTL
+GoDownloadListingTTL = 7200
+
 # DownloadMode defines how Athens behaves when a module@version
 # is not found in storage. There are 4 options:
 # 1. "sync" (default): download the module synchronously and
@@ -308,6 +332,8 @@ DownloadURL = ""
 # "public, max-age=31536000, immutable" lets a caching proxy in front of
 # Athens serve them without hitting Athens again. When empty, no Cache-Control
 # header is set on these endpoints, which is the default behavior.
+# Release archive endpoints also use this setting, defaulting to private, no-cache
+# when empty. Only set public caching if unauthenticated sharing is intended.
 # Env override: ATHENS_CACHE_CONTROL
 CacheControl = ""
 

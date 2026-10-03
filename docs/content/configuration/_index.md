@@ -28,3 +28,8 @@ In this section we'll describe how the upstream proxy can be configured to fetch
 In this section we'll describe how to proxy a Checksum DB as per https://go.googlesource.com/proposal/+/master/design/25530-sumdb.md
 
 - [Checksum](/configuration/sumdb)
+
+### Proxying Go toolchain downloads
+In this section we'll describe how Athens can also serve the Go release archives from https://go.dev/dl, so that tools such as `actions/setup-go` download the Go toolchain itself through Athens.
+
+- [Go downloads](/configuration/go-download)

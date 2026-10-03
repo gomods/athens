@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"sync"
 
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/storage"
@@ -13,6 +14,7 @@ import (
 type storageImpl struct {
 	rootDir    string
 	filesystem afero.Fs
+	archiveMu  sync.Mutex
 }
 
 func (s *storageImpl) moduleLocation(module string) string {

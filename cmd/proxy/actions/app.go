@@ -1,6 +1,7 @@
 package actions
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"sync"
@@ -104,9 +105,11 @@ func App(logger *log.Logger, conf *config.Config) (http.Handler, func(), error) 
 		cleanupStats = flushStats
 	}
 
+	appContext, cancelWork := context.WithCancel(context.Background())
 	var once sync.Once
 	cleanup := func() {
 		once.Do(func() {
+			cancelWork()
 			cleanupTraces()
 			cleanupStats()
 		})
@@ -143,7 +146,7 @@ func App(logger *log.Logger, conf *config.Config) (http.Handler, func(), error) 
 	if subRouter != nil {
 		proxyRouter = subRouter
 	}
-	if err := addProxyRoutes(proxyRouter, store, logger, conf); err != nil {
+	if err := addProxyRoutes(appContext, proxyRouter, store, logger, conf); err != nil {
 		return nil, cleanup, fmt.Errorf("adding proxy routes: %w", err)
 	}
 

@@ -10,6 +10,7 @@ import (
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/observ"
 	"github.com/gomods/athens/pkg/paths"
+	"github.com/gomods/athens/pkg/storage/internal/toolchain"
 	"github.com/spf13/afero"
 )
 
@@ -32,6 +33,16 @@ func (s *storageImpl) Catalog(ctx context.Context, token string, pageSize int) (
 	count := pageSize
 
 	err = afero.Walk(s.filesystem, s.rootDir, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		relative, err := filepath.Rel(s.rootDir, path)
+		if err != nil {
+			return err
+		}
+		if info.IsDir() && filepath.ToSlash(relative) == strings.TrimSuffix(toolchain.Prefix, "/") {
+			return filepath.SkipDir
+		}
 		if strings.HasSuffix(info.Name(), ".info") {
 			verDir := filepath.Dir(path)
 			modVer, err := filepath.Rel(s.rootDir, verDir)

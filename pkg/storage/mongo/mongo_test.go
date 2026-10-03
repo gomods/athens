@@ -19,6 +19,7 @@ import (
 
 func TestBackend(t *testing.T) {
 	backend := getStorage(t)
+	compliance.RunToolchainTests(t, backend)
 	compliance.RunTests(t, backend, backend.clear)
 }
 
