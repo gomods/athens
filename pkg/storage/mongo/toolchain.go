@@ -48,6 +48,10 @@ type (
 		FileID bson.ObjectID `bson:"file_id"`
 		Size   int64         `bson:"size"`
 	}
+	// A fixed query schema keeps object keys as literal strings, never operators.
+	releaseKeyFilter struct {
+		Key string `bson:"_id"`
+	}
 )
 
 func (o *releaseObjects) collection() *mongo.Collection {
@@ -60,7 +64,7 @@ func (o *releaseObjects) bucket() *mongo.GridFSBucket {
 
 func (o *releaseObjects) Open(ctx context.Context, key string) (storage.SizeReadCloser, error) {
 	var obj releaseObject
-	err := o.collection().FindOne(ctx, bson.M{"_id": key}).Decode(&obj)
+	err := o.collection().FindOne(ctx, releaseKeyFilter{Key: key}).Decode(&obj)
 	if err != nil {
 		if errors.IsErr(err, mongo.ErrNoDocuments) {
 			return nil, errors.E("mongo.Archive", err, errors.KindNotFound)
@@ -121,7 +125,7 @@ func (o *releaseObjects) Keys(ctx context.Context, prefix string) ([]string, err
 
 func (o *releaseObjects) Delete(ctx context.Context, key string) error {
 	var obj releaseObject
-	err := o.collection().FindOneAndDelete(ctx, bson.M{"_id": key}).Decode(&obj)
+	err := o.collection().FindOneAndDelete(ctx, releaseKeyFilter{Key: key}).Decode(&obj)
 	if errors.IsErr(err, mongo.ErrNoDocuments) {
 		return errors.E("mongo.DeleteArchive", err, errors.KindNotFound)
 	}
