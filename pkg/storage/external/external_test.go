@@ -18,5 +18,6 @@ func TestExternal(t *testing.T) {
 	defer srv.Close()
 	externalStrg := NewClient(srv.URL, nil)
 	clear := strg.(interface{ Clear() error }).Clear
+	compliance.RunToolchainTests(t, externalStrg)
 	compliance.RunTests(t, externalStrg, clear)
 }

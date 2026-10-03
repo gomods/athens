@@ -54,6 +54,7 @@ func fetchModsAndVersions(objects []types.Object, elementsNum int) ([]paths.AllP
 	res := make([]paths.AllPathParams, 0)
 	lastKey := ""
 	for _, o := range objects {
+		lastKey = *o.Key
 		if !strings.HasSuffix(*o.Key, ".info") {
 			continue
 		}

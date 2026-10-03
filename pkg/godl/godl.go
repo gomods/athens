@@ -1,312 +1,189 @@
-// Package godl proxies and caches Go toolchain release downloads (the
-// contents of https://go.dev/dl) so that tools such as actions/setup-go can
-// point their download base URL at Athens instead of the public internet.
+// Package godl serves the Go release download protocol using Athens storage.
 package godl
 
 import (
 	"context"
-	"errors"
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 	"net/url"
-	"os"
-	"path"
-	"path/filepath"
 	"regexp"
 	"strings"
-	"sync"
-	"time"
 
-	"golang.org/x/sync/singleflight"
+	"github.com/gomods/athens/pkg/errors"
+	"github.com/gomods/athens/pkg/storage"
 )
 
-// DefaultListingTTL is how long a fetched version listing is reused when
-// New is given a zero TTL. New Go releases show up within this window for
-// callers that resolve a version spec such as "1.25" to the newest patch.
-const DefaultListingTTL = 2 * time.Hour
-
-// archiveMaxAge is the Cache-Control max-age for archives: releases never
-// change once published, so clients and intermediaries may keep them for as
-// long as HTTP allows.
-const archiveMaxAge = 365 * 24 * time.Hour
-
-// archiveRE accepts the release archive names published under go.dev/dl,
-// e.g. go1.27.1.linux-amd64.tar.gz or go1.27rc3.darwin-arm64.pkg. Anything
-// else is rejected before touching the upstream or the cache directory.
-// Checksum (.sha256) and signature (.asc) files are deliberately excluded:
-// go.dev/dl answers those with a 200 HTML page rather than the file.
 var archiveRE = regexp.MustCompile(`^go[0-9][A-Za-z0-9.\-]*\.(tar\.gz|zip|msi|pkg)$`)
 
-// Handler serves /?mode=json version listings and release archives from an
-// upstream go.dev/dl-compatible server, caching archives on local disk.
-type Handler struct {
-	upstream   *url.URL
-	cacheDir   string
-	client     *http.Client
-	listingTTL time.Duration
-	group      singleflight.Group
+// Handler adapts the Go release HTTP protocol to the release service.
+type Handler struct{ service *Service }
 
-	listingMu      sync.Mutex
-	listingBody    []byte
-	listingType    string
-	listingFetched time.Time
+func New(opts Options) (*Handler, error) {
+	service, err := NewService(opts)
+	if err != nil {
+		return nil, err
+	}
+	return &Handler{service: service}, nil
 }
 
-// New returns a Handler that fetches from upstream (e.g. https://go.dev/dl)
-// and caches archives under cacheDir, creating it if needed. The cache is
-// content-addressed by file name only; releases are immutable, so nothing is
-// ever evicted or revalidated. listingTTL is how long the version listing is
-// reused before being refetched; zero selects DefaultListingTTL.
-func New(upstream *url.URL, cacheDir string, client *http.Client, listingTTL time.Duration) (*Handler, error) {
-	if upstream.Scheme != "http" && upstream.Scheme != "https" {
-		return nil, fmt.Errorf("godl: upstream %q must have an http or https scheme", upstream)
-	}
-
-	if err := os.MkdirAll(cacheDir, 0o750); err != nil {
-		return nil, fmt.Errorf("godl: creating cache dir: %w", err)
-	}
-
-	if client == nil {
-		client = http.DefaultClient
-	}
-
-	if listingTTL <= 0 {
-		listingTTL = DefaultListingTTL
-	}
-
-	base := *upstream
-	base.Path = strings.TrimSuffix(base.Path, "/")
-
-	return &Handler{
-		upstream:   &base,
-		cacheDir:   cacheDir,
-		client:     client,
-		listingTTL: listingTTL,
-	}, nil
-}
-
-// Disabled returns the handler Athens mounts at the same path when
-// GoDownloadURL is unset, so clients get an explanation rather than a 404
-// that looks like a missing Go version.
 func Disabled() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
-		http.Error(w,
-			"Go toolchain downloads are disabled on this Athens server: set GoDownloadURL (ATHENS_GO_DOWNLOAD_URL) to enable them",
-			http.StatusUnprocessableEntity)
+		http.Error(w, "Go toolchain downloads are disabled: set GoDownloadEnabled or GoDownloadURL (ATHENS_GO_DOWNLOAD_URL)", http.StatusUnprocessableEntity)
 	})
 }
 
-// ServeHTTP implements http.Handler. It expects the path prefix Athens mounts
-// it under to have been stripped already.
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet && r.Method != http.MethodHead {
 		w.Header().Set("Allow", "GET, HEAD")
 		http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-
 		return
 	}
-
 	name := strings.TrimPrefix(r.URL.Path, "/")
-
 	switch {
 	case name == "" && r.URL.Query().Get("mode") == "json":
 		h.serveListing(w, r)
-	case name != "" && archiveRE.MatchString(name):
+	case archiveRE.MatchString(name):
 		h.serveArchive(w, r, name)
 	default:
 		http.NotFound(w, r)
 	}
 }
 
-// serveListing proxies the version listing, keeping one copy in memory for
-// listingTTL. The listing is small and changes rarely; the point is to keep
-// every CI job from hitting the upstream for it. If refreshing an expired
-// copy fails, the stale copy is served: an old listing is harmless compared
-// to failing the request, and the next request retries the upstream.
 func (h *Handler) serveListing(w http.ResponseWriter, r *http.Request) {
-	h.listingMu.Lock()
-	defer h.listingMu.Unlock()
-
-	now := time.Now()
-
-	if h.listingBody == nil || now.Sub(h.listingFetched) > h.listingTTL {
-		body, contentType, status, err := h.fetchListing(r.Context(), r.URL.RawQuery)
-
-		switch {
-		case err == nil && status == http.StatusOK:
-			h.listingBody = body
-			h.listingType = contentType
-			h.listingFetched = now
-		case h.listingBody != nil:
-			// Keep serving the stale copy below.
-		case err != nil:
-			http.Error(w, err.Error(), http.StatusBadGateway)
-
-			return
-		default:
-			// Some upstreams (e.g. the Microsoft build of Go) publish no
-			// listing; pass that through so clients fall back to direct
-			// archive URLs instead of treating the mirror as broken.
-			http.Error(w, http.StatusText(status), status)
-
+	q, err := url.ParseQuery(r.URL.RawQuery)
+	if err != nil {
+		http.Error(w, "invalid listing query", http.StatusBadRequest)
+		return
+	}
+	for key, values := range q {
+		if len(values) != 1 || (key != "mode" && key != "include") || (key == "include" && values[0] != "all" && values[0] != "") {
+			http.Error(w, "unsupported listing query", http.StatusBadRequest)
 			return
 		}
 	}
-
-	// Let clients and intermediaries reuse the response until the next
-	// refresh is due, and tell them how old what they got actually is.
-	maxAge := max(h.listingFetched.Add(h.listingTTL).Sub(now), 0)
-
-	w.Header().Set("Content-Type", h.listingType)
-	w.Header().Set("Content-Length", fmt.Sprint(len(h.listingBody)))
-	w.Header().Set("Last-Modified", h.listingFetched.UTC().Format(http.TimeFormat))
-	w.Header().Set("Cache-Control", fmt.Sprintf("public, max-age=%d", int(maxAge.Seconds())))
+	releases, modified, err := h.service.Listing(r.Context(), q.Get("include") == "all")
+	if err != nil {
+		h.writeError(w, r, err)
+		return
+	}
+	if releases == nil {
+		releases = []storage.Release{}
+	}
+	body, err := json.Marshal(releases)
+	if err != nil {
+		h.writeError(w, r, err)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Length", fmt.Sprint(len(body)))
+	// Discovery can change after archive publication/deletion. Do not let a
+	// downstream cache advertise artifacts no longer available in this mirror.
+	w.Header().Set("Cache-Control", "no-cache")
+	if !modified.IsZero() {
+		w.Header().Set("Last-Modified", modified.UTC().Format(http.TimeFormat))
+	}
 	w.WriteHeader(http.StatusOK)
-
 	if r.Method != http.MethodHead {
-		_, _ = w.Write(h.listingBody)
+		_, _ = w.Write(body)
 	}
 }
 
-func (h *Handler) fetchListing(ctx context.Context, rawQuery string) ([]byte, string, int, error) {
-	u := *h.upstream
-	u.Path += "/"
-	u.RawQuery = rawQuery
-
-	resp, err := h.get(ctx, u.String())
-	if err != nil {
-		return nil, "", 0, err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return nil, "", resp.StatusCode, nil
-	}
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, "", 0, fmt.Errorf("godl: reading listing from %s: %w", u.String(), err)
-	}
-
-	contentType := resp.Header.Get("Content-Type")
-	if contentType == "" {
-		contentType = "application/json"
-	}
-
-	return body, contentType, http.StatusOK, nil
-}
-
-// serveArchive serves name from the cache directory, filling it from the
-// upstream on a miss. Concurrent misses for the same file share one download.
 func (h *Handler) serveArchive(w http.ResponseWriter, r *http.Request, name string) {
-	local := filepath.Join(h.cacheDir, name)
+	info, body, err := h.service.Archive(r.Context(), name)
+	if err != nil {
+		h.writeError(w, r, err)
+		return
+	}
+	reader := &archiveSeeker{ctx: r.Context(), store: h.service.opts.Storage, source: h.service.opts.Source, name: name, info: info, body: body}
+	defer reader.Close()
+	w.Header().Set("ETag", `"sha256-`+strings.ToLower(info.SHA256)+`"`)
+	w.Header().Set("Cache-Control", h.service.opts.CacheControl)
+	http.ServeContent(w, r, name, info.SavedAt, reader)
+}
 
-	if _, err := os.Stat(local); err != nil {
-		// The download is shared with every request waiting on this file,
-		// so it must outlive the first requester's context.
-		ctx := context.WithoutCancel(r.Context())
+func (h *Handler) writeError(w http.ResponseWriter, r *http.Request, err error) {
+	if errors.Is(err, errors.KindRedirect) && h.service.opts.RedirectURL != nil {
+		u := *h.service.opts.RedirectURL
+		u.Path = strings.TrimRight(u.Path, "/") + r.URL.Path
+		u.RawQuery = r.URL.RawQuery
+		http.Redirect(w, r, u.String(), http.StatusTemporaryRedirect)
+		return
+	}
+	status := errors.Kind(err)
+	if status == 0 {
+		status = http.StatusInternalServerError
+	}
+	http.Error(w, err.Error(), status)
+}
 
-		_, err, _ = h.group.Do(name, func() (any, error) {
-			return nil, h.fill(ctx, name, local)
-		})
+// archiveSeeker provides ServeContent semantics over streaming backends. Seeks
+// reopen the stored archive and discard only the requested prefix; they never
+// refetch upstream or load an entire archive into memory.
+type archiveSeeker struct {
+	//nolint:containedctx // ServeContent requires io.ReadSeeker; reopening uses the HTTP request context.
+	ctx          context.Context
+	store        storage.ArchiveReader
+	source, name string
+	info         storage.ArchiveInfo
+	body         storage.SizeReadCloser
+	position     int64
+	needsOpen    bool
+}
 
-		var upstreamErr *upstreamStatusError
-		switch {
-		case errors.As(err, &upstreamErr):
-			http.Error(w, err.Error(), upstreamErr.status)
-
-			return
-		case err != nil:
-			http.Error(w, err.Error(), http.StatusBadGateway)
-
-			return
+func (s *archiveSeeker) Read(p []byte) (int, error) {
+	if s.position >= s.info.Size {
+		return 0, io.EOF
+	}
+	if s.needsOpen {
+		info, body, err := s.store.Archive(s.ctx, s.source, s.name)
+		if err != nil {
+			return 0, err
+		}
+		if info.SHA256 != s.info.SHA256 || info.Size != s.info.Size {
+			_ = body.Close()
+			return 0, fmt.Errorf("archive changed during response")
+		}
+		s.body = body
+		s.needsOpen = false
+		if _, err := io.CopyN(io.Discard, s.body, s.position); err != nil {
+			return 0, err
 		}
 	}
-
-	// ServeFile handles HEAD, Range and conditional requests, sets
-	// Last-Modified from the file, and derives Content-Type from the extension.
-	w.Header().Set("Cache-Control", fmt.Sprintf("public, max-age=%d, immutable", int(archiveMaxAge.Seconds())))
-	http.ServeFile(w, r, local)
+	n, err := s.body.Read(p)
+	s.position += int64(n)
+	return n, err
 }
 
-// upstreamStatusError reports a non-200 upstream response for an archive. A
-// 404 is passed through unchanged so clients see "no such version" rather
-// than a proxy failure.
-type upstreamStatusError struct {
-	url    string
-	status int
-}
-
-func (e *upstreamStatusError) Error() string {
-	return fmt.Sprintf("godl: upstream %s returned %d", e.url, e.status)
-}
-
-// fill downloads name from the upstream into local via a temp file in the
-// same directory, so a partial download is never visible as a cache hit.
-func (h *Handler) fill(ctx context.Context, name, local string) error {
-	u := *h.upstream
-	u.Path = path.Join(u.Path, name)
-
-	resp, err := h.get(ctx, u.String())
-	if err != nil {
-		return err
+func (s *archiveSeeker) Seek(offset int64, whence int) (int64, error) {
+	position := offset
+	switch whence {
+	case io.SeekStart:
+	case io.SeekCurrent:
+		position += s.position
+	case io.SeekEnd:
+		position += s.info.Size
+	default:
+		return 0, fmt.Errorf("invalid seek origin")
 	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		status := resp.StatusCode
-		if status != http.StatusNotFound {
-			status = http.StatusBadGateway
+	if position < 0 || position > s.info.Size {
+		return 0, fmt.Errorf("invalid archive offset")
+	}
+	if position != s.position {
+		if s.body != nil {
+			_ = s.body.Close()
+			s.body = nil
 		}
-
-		return &upstreamStatusError{url: u.String(), status: status}
+		s.position = position
+		s.needsOpen = true
 	}
+	return position, nil
+}
 
-	// go.dev/dl serves a 200 HTML "redirecting to documentation" page for
-	// names it does not know instead of a 404. Never cache that as an archive.
-	if strings.HasPrefix(resp.Header.Get("Content-Type"), "text/html") {
-		return &upstreamStatusError{url: u.String(), status: http.StatusNotFound}
+func (s *archiveSeeker) Close() error {
+	if s.body != nil {
+		return s.body.Close()
 	}
-
-	tmp, err := os.CreateTemp(h.cacheDir, "."+name+".*.part")
-	if err != nil {
-		return fmt.Errorf("godl: creating temp file: %w", err)
-	}
-
-	tmpName := tmp.Name()
-	defer os.Remove(tmpName)
-
-	written, err := io.Copy(tmp, resp.Body)
-	if closeErr := tmp.Close(); err == nil {
-		err = closeErr
-	}
-
-	if err != nil {
-		return fmt.Errorf("godl: downloading %s: %w", u.String(), err)
-	}
-
-	if resp.ContentLength >= 0 && written != resp.ContentLength {
-		return fmt.Errorf("godl: downloading %s: got %d bytes, want %d", u.String(), written, resp.ContentLength)
-	}
-
-	if err := os.Rename(tmpName, local); err != nil {
-		return fmt.Errorf("godl: committing %s to cache: %w", name, err)
-	}
-
 	return nil
-}
-
-func (h *Handler) get(ctx context.Context, rawURL string) (*http.Response, error) {
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, rawURL, nil)
-	if err != nil {
-		return nil, fmt.Errorf("godl: building request for %s: %w", rawURL, err)
-	}
-
-	resp, err := h.client.Do(req)
-	if err != nil {
-		return nil, fmt.Errorf("godl: fetching %s: %w", rawURL, err)
-	}
-
-	return resp, nil
 }

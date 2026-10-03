@@ -6,9 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
-	"os"
 	"path"
-	"path/filepath"
 	"strings"
 	"time"
 
@@ -28,9 +26,12 @@ import (
 	"github.com/gomods/athens/pkg/storage"
 	"github.com/gorilla/mux"
 	"github.com/spf13/afero"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 )
 
+//nolint:contextcheck // Existing module constructors own startup contexts; ctx governs release work.
 func addProxyRoutes(
+	ctx context.Context,
 	r *mux.Router,
 	s storage.Backend,
 	l *log.Logger,
@@ -68,7 +69,7 @@ func addProxyRoutes(
 		)
 	}
 
-	if err := addGoDownloadRoutes(r, c); err != nil {
+	if err := addGoDownloadRoutes(ctx, r, s, c); err != nil {
 		return err
 	}
 
@@ -228,27 +229,10 @@ const (
 
 // addGoDownloadRoutes mounts the Go toolchain download proxy, or a handler
 // explaining that it is disabled, so /dl/ never looks like a missing version.
-func addGoDownloadRoutes(r *mux.Router, c *config.Config) error {
-	h := godl.Disabled()
-
-	if c.GoDownloadURL != "" {
-		upstream, err := url.Parse(c.GoDownloadURL)
-		if err != nil {
-			return fmt.Errorf("GoDownloadURL: %w", err)
-		}
-
-		cacheDir := c.GoDownloadCacheDir
-		if cacheDir == "" {
-			cacheDir = filepath.Join(os.TempDir(), "athens-godl")
-		}
-
-		client := &http.Client{Timeout: c.TimeoutDuration()}
-		ttl := time.Duration(c.GoDownloadListingTTL) * time.Second
-
-		h, err = godl.New(upstream, cacheDir, client, ttl)
-		if err != nil {
-			return err
-		}
+func addGoDownloadRoutes(ctx context.Context, r *mux.Router, backend storage.Backend, c *config.Config) error {
+	h, err := goDownloadHandler(ctx, backend, c)
+	if err != nil {
+		return err
 	}
 
 	// A bare PathPrefix would also swallow /dl/@v/... requests for a module
@@ -261,4 +245,60 @@ func addGoDownloadRoutes(r *mux.Router, c *config.Config) error {
 		Name(goDownloadRouteName)
 
 	return nil
+}
+
+func goDownloadHandler(ctx context.Context, backend storage.Backend, c *config.Config) (http.Handler, error) {
+	if !c.GoDownloadEnabled && c.GoDownloadURL == "" {
+		return godl.Disabled(), nil
+	}
+
+	store, ok := backend.(storage.ToolchainStorage)
+	if !ok {
+		return nil, fmt.Errorf("go toolchain downloads are not supported by storage backend %q", c.StorageType)
+	}
+	if remote, ok := backend.(interface {
+		CheckToolchainStorage(ctx context.Context) error
+	}); ok {
+		checkCtx, cancel := context.WithTimeout(ctx, c.TimeoutDuration())
+		err := remote.CheckToolchainStorage(checkCtx)
+		cancel()
+		if err != nil {
+			return nil, err
+		}
+	}
+	var upstream, redirect *url.URL
+	var err error
+	if c.GoDownloadURL != "" {
+		upstream, err = url.Parse(c.GoDownloadURL)
+		if err != nil {
+			return nil, fmt.Errorf("GoDownloadURL: %w", err)
+		}
+	}
+	if c.GoDownloadRedirectURL != "" {
+		redirect, err = url.Parse(c.GoDownloadRedirectURL)
+		if err != nil {
+			return nil, fmt.Errorf("GoDownloadRedirectURL: %w", err)
+		}
+	}
+	source := c.GoDownloadSource
+	if source == "" {
+		source = strings.TrimRight(c.GoDownloadURL, "/")
+		if source == "" {
+			source = "https://go.dev/dl"
+		}
+	}
+	downloadMode := c.GoDownloadMode
+	if downloadMode == "" {
+		df, err := mode.NewFile(c.DownloadMode, c.DownloadURL)
+		if err != nil {
+			return nil, err
+		}
+		downloadMode = df.Mode
+	}
+	client := &http.Client{Transport: otelhttp.NewTransport(http.DefaultTransport), Timeout: c.TimeoutDuration()}
+	h, err := godl.New(godl.Options{Context: ctx, CacheControl: c.CacheControl, Storage: store, Upstream: upstream, Source: source, Client: client, ListingTTL: time.Duration(c.GoDownloadListingTTL) * time.Second, NetworkMode: c.NetworkMode, DownloadMode: downloadMode, RedirectURL: redirect, Workers: c.GoGetWorkers, Timeout: c.StashTimeoutDuration()})
+	if err != nil {
+		return nil, err
+	}
+	return h, nil
 }

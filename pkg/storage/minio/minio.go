@@ -5,13 +5,19 @@ import (
 	"strings"
 	"time"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/credentials"
+	awss3 "github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/storage"
+	"github.com/gomods/athens/pkg/storage/s3"
 	minio "github.com/minio/minio-go/v6"
 )
 
 type storageImpl struct {
+	storage.ToolchainStorage
+
 	minioClient *minio.Client
 	minioCore   *minio.Core
 	bucketName  string
@@ -52,7 +58,19 @@ func NewStorage(conf *config.MinioConfig, timeout time.Duration) (storage.Backen
 			return nil, errors.E(op, err)
 		}
 	}
-	return &storageImpl{minioClient, minioCore, bucketName}, nil
+	// The legacy MinIO client cannot conditionally publish objects. Reuse the
+	// Athens S3 adapter with the same endpoint, credentials and bucket for the
+	// release capability, so concurrent writers cannot replace stored archives.
+	scheme := "http"
+	if useSSL {
+		scheme = "https"
+	}
+	if region == "" {
+		region = "us-east-1"
+	}
+	client := awss3.NewFromConfig(aws.Config{Region: region, Credentials: credentials.NewStaticCredentialsProvider(accessKeyID, secretAccessKey, "")}, func(o *awss3.Options) { o.BaseEndpoint = aws.String(scheme + "://" + endpoint); o.UsePathStyle = true })
+	releases := s3.NewWithClient(client, bucketName, timeout)
+	return &storageImpl{minioClient: minioClient, minioCore: minioCore, bucketName: bucketName, ToolchainStorage: releases}, nil
 }
 
 // TrimHTTP trims "http://" or "https://" prefix from input string.

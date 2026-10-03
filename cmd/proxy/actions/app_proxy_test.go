@@ -35,7 +35,7 @@ func TestProxyRoutes(t *testing.T) {
 	c.NoSumPatterns = []string{"*"} // catch all patterns with noSumWrapper to ensure the sumdb handler doesn't make a real http request to the sumdb server.
 	c.PathPrefix = "/prefix"
 	subRouter := r.PathPrefix(c.PathPrefix).Subrouter()
-	err = addProxyRoutes(subRouter, s, l, c)
+	err = addProxyRoutes(t.Context(), subRouter, s, l, c)
 	require.NoError(t, err)
 
 	baseURL := "https://athens.azurefd.net" + c.PathPrefix
@@ -115,7 +115,7 @@ func TestGoDownloadRoutes(t *testing.T) {
 	upstream := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch {
 		case r.URL.Path == "/dl/" && r.URL.Query().Get("mode") == "json":
-			_, _ = io.WriteString(w, `[{"version":"go1.27.1"}]`)
+			_, _ = io.WriteString(w, `[{"version":"go1.27.1","stable":true,"files":[{"filename":"go1.27.1.linux-amd64.tar.gz","version":"go1.27.1","os":"linux","arch":"amd64","kind":"archive","size":7,"sha256":"db4b4d0d1cb480bf9aeea253771c00febe627f236765fa37d6a5614f079a3aa0"}]}]`)
 		case r.URL.Path == "/dl/go1.27.1.linux-amd64.tar.gz":
 			_, _ = io.WriteString(w, "tarball")
 		default:
@@ -132,18 +132,22 @@ func TestGoDownloadRoutes(t *testing.T) {
 	c.NoSumPatterns = []string{"*"}
 	c.PathPrefix = "/prefix"
 	c.GoDownloadURL = upstream.URL + "/dl"
-	c.GoDownloadCacheDir = t.TempDir()
+
 	subRouter := r.PathPrefix(c.PathPrefix).Subrouter()
-	require.NoError(t, addProxyRoutes(subRouter, s, log.NoOpLogger(), c))
+	require.NoError(t, addProxyRoutes(t.Context(), subRouter, s, log.NoOpLogger(), c))
 
 	for path, want := range map[string]string{
-		"/prefix/dl/?mode=json&include=all":      `[{"version":"go1.27.1"}]`,
+		"/prefix/dl/?mode=json&include=all":      `[{"version":"go1.27.1","stable":true,"files":[{"filename":"go1.27.1.linux-amd64.tar.gz","version":"go1.27.1","os":"linux","arch":"amd64","kind":"archive","size":7,"sha256":"db4b4d0d1cb480bf9aeea253771c00febe627f236765fa37d6a5614f079a3aa0"}]}]`,
 		"/prefix/dl/go1.27.1.linux-amd64.tar.gz": "tarball",
 	} {
 		w := httptest.NewRecorder()
 		r.ServeHTTP(w, httptest.NewRequest(http.MethodGet, path, nil))
 		assert.Equal(t, http.StatusOK, w.Code, path)
-		assert.Equal(t, want, w.Body.String(), path)
+		if len(want) > 0 && want[0] == '[' {
+			assert.JSONEq(t, want, w.Body.String(), path)
+		} else {
+			assert.Equal(t, want, w.Body.String(), path)
+		}
 	}
 
 	// A module named "dl" must still route to the download protocol, not the
@@ -162,12 +166,39 @@ func TestGoDownloadRoutesDisabledByDefault(t *testing.T) {
 	c, err := config.Load("")
 	require.NoError(t, err)
 	c.NoSumPatterns = []string{"*"}
-	require.NoError(t, addProxyRoutes(r, s, log.NoOpLogger(), c))
+	require.NoError(t, addProxyRoutes(t.Context(), r, s, log.NoOpLogger(), c))
 
 	for _, path := range []string{"/dl/go1.27.1.linux-amd64.tar.gz", "/dl/?mode=json&include=all"} {
 		w := httptest.NewRecorder()
 		r.ServeHTTP(w, httptest.NewRequest(http.MethodGet, path, nil))
 		assert.Equal(t, http.StatusUnprocessableEntity, w.Code, path)
 		assert.Contains(t, w.Body.String(), "ATHENS_GO_DOWNLOAD_URL", path)
+	}
+}
+
+func TestOfflineGoDownloadsUseAuthentication(t *testing.T) {
+	backend, err := mem.NewStorage()
+	require.NoError(t, err)
+	c, err := config.Load("")
+	require.NoError(t, err)
+	c.GoDownloadEnabled = true
+	c.NetworkMode = "offline"
+	c.PathPrefix = "/prefix"
+	router := mux.NewRouter()
+	router.Use(basicAuth("release-user", "release-password"))
+	require.NoError(t, addGoDownloadRoutes(t.Context(), router.PathPrefix(c.PathPrefix).Subrouter(), backend, c))
+	for _, authenticated := range []bool{false, true} {
+		req := httptest.NewRequest(http.MethodGet, "/prefix/dl/?mode=json&include=all", nil)
+		if authenticated {
+			req.SetBasicAuth("release-user", "release-password")
+		}
+		response := httptest.NewRecorder()
+		router.ServeHTTP(response, req)
+		if authenticated {
+			require.Equal(t, http.StatusOK, response.Code)
+			require.JSONEq(t, "[]", response.Body.String())
+		} else {
+			require.Equal(t, http.StatusUnauthorized, response.Code)
+		}
 	}
 }

@@ -46,6 +46,7 @@ func fetchModsAndVersions(objects []minio.ObjectInfo, elementsNum int) ([]paths.
 	lastKey := ""
 
 	for _, o := range objects {
+		lastKey = o.Key
 		if !strings.HasSuffix(o.Key, ".info") {
 			continue
 		}
