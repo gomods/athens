@@ -2,6 +2,7 @@ package godl
 
 import (
 	"bytes"
+	"context"
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
@@ -24,6 +25,20 @@ import (
 func testRelease(body []byte) storage.Release {
 	sum := sha256.Sum256(body)
 	return storage.Release{Version: "go1.25.1", Stable: true, Files: []storage.ReleaseFile{{Filename: "go1.25.1.linux-amd64.tar.gz", OS: "linux", Arch: "amd64", Version: "go1.25.1", SHA256: hex.EncodeToString(sum[:]), Size: int64(len(body)), Kind: "archive"}}}
+}
+
+// staleListingStorage presents an expired snapshot without relying on clock
+// resolution or replacing the backend's newer immutable listing snapshots.
+type staleListingStorage struct{ storage.ToolchainStorage }
+
+func (s staleListingStorage) Releases(ctx context.Context, source string) (*storage.ReleaseList, error) {
+	list, err := s.ToolchainStorage.Releases(ctx, source)
+	if list == nil {
+		return nil, err
+	}
+	stale := *list
+	stale.FetchedAt = time.Now().Add(-2 * DefaultListingTTL)
+	return &stale, err
 }
 
 func TestServicePolicyAndRestart(t *testing.T) {
@@ -53,7 +68,7 @@ func TestServicePolicyAndRestart(t *testing.T) {
 				backend, err := mem.NewStorage()
 				require.NoError(t, err)
 				store := backend.(storage.ToolchainStorage)
-				opts := Options{Storage: store, Upstream: u, Source: "official", NetworkMode: network, DownloadMode: m, ListingTTL: time.Nanosecond}
+				opts := Options{Storage: store, Upstream: u, Source: "official", NetworkMode: network, DownloadMode: m}
 				service, err := NewService(opts)
 				require.NoError(t, err)
 				t.Cleanup(service.Close)
@@ -93,14 +108,19 @@ func TestServicePolicyAndRestart(t *testing.T) {
 				require.Equal(t, []storage.Release{release}, listing)
 				failed.Store(true)
 				if network != download.Offline && m != mode.None {
-					online, err := NewService(optsWithNetwork(opts, network, u))
+					onlineOpts := optsWithNetwork(opts, network, u)
+					onlineOpts.Storage = staleListingStorage{store}
+					online, err := NewService(onlineOpts)
 					require.NoError(t, err)
 					t.Cleanup(online.Close)
-					_, _, err = online.Listing(t.Context(), true)
+					before = calls.Load()
+					listing, _, err = online.Listing(t.Context(), true)
+					require.Equal(t, before+1, calls.Load())
 					if network == download.Strict {
 						require.Error(t, err)
 					} else {
 						require.NoError(t, err)
+						require.Equal(t, []storage.Release{release}, listing)
 					}
 				}
 			})

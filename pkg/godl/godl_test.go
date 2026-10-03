@@ -201,7 +201,7 @@ func TestStrictAndFallbackRefresh(t *testing.T) {
 	h, up, _ := handlerFixture(t)
 	require.Equal(t, 200, get(t, h, "/"+archive).Code)
 	opts := h.service.opts
-	opts.ListingTTL = time.Nanosecond
+	opts.Storage = staleListingStorage{opts.Storage}
 	up.status.Store(503)
 	strict, err := New(opts)
 	require.NoError(t, err)
