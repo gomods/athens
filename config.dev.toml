@@ -295,7 +295,8 @@ GoDownloadListingTTL = 7200
 # with the base URL as the DownloadRedirectURL from below.
 # 4. "async_redirect": same as option number 3 but it will
 # asynchronously store the module to the backend.
-# 5. "none": return 404 if a module is not found and do nothing.
+# 5. "none": return 404 for missing versions without fetching. Version discovery
+# uses cached tags and commit metadata; see /configuration/network-mode in the docs.
 # 6. "file:<path>": will point to an HCL file that specifies
 # any of the 5 options above based on different import paths.
 # 7. "custom:<base64-encoded-hcl>" is the same as option 6
@@ -305,17 +306,18 @@ GoDownloadListingTTL = 7200
 # Env override: ATHENS_DOWNLOAD_MODE
 DownloadMode = "sync"
 
-# NetworkMode configures how Athens will return the results
-# of the /list endpoint as it can be assembled from both its own
-# storage and the upstream VCS.
+# NetworkMode controls version discovery through /@v/list and /@latest,
+# using Athens storage and the upstream VCS. DownloadMode separately controls
+# fetching missing versioned artifacts. For a fully offline module proxy, use
+# NetworkMode = "offline" together with DownloadMode = "none".
 # 
 # Note, that for better error messaging, this would also affect how other
 # endpoints behave.
 # 
 # Modes:
 # 1. strict: merge VCS versions with storage versions, but fail if either of them fails.
-# 2. offline: only get storage versions, never reach out to VCS.
-# 3. fallback: only return storage versions, if VCS fails. Note this means that you may
+# 2. offline: list cached tags and return cached latest metadata without VCS lookups.
+# 3. fallback: use cached discovery results if VCS fails. Note this means that you may
 # see inconsistent results since fallback mode does a best effort of giving you what's
 # available at the time of requesting versions.
 # Env override: ATHENS_NETWORK_MODE

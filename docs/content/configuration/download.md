@@ -28,7 +28,7 @@ If Athens receives a request for the module `github.com/pkg/errors` at version `
 
 1. **`sync`**: Synchronously download the module from VCS via `go mod download`, persist it to the Athens storage, and serve it back to the user immediately. Note that this is the default behavior.
 2. **`async`**: Return a 404 to the client, and asynchronously download and persist the module@version to storage.
-3. **`none`**: Return a 404 for a module version that is not in storage and do nothing. `/@v/list` returns stored versions without contacting upstream, while `/@latest` returns a 404. Versions already in storage remain available.
+3. **`none`**: Return a 404 for a module version that is not in storage and do nothing. `/@v/list` returns stored tagged versions and `/@latest` returns cached version metadata, without contacting upstream. Versions already in storage remain available. See [offline dependency resolution](/configuration/network-mode) for version selection and client fallback behavior.
 4. **`redirect`**: Redirect to an upstream proxy (such as proxy.golang.org) and do nothing after.
 5. **`async_redirect`**: Redirect to an upstream proxy (such as proxy.golang.org) and asynchronously download and persist the module@version to storage.
 
@@ -88,7 +88,7 @@ download "bad/module/repo/*" {
 }
 ```
 
-`none` is not an access-control rule: Athens can still serve versions already in storage. If clients must not access a module at all, use the [filter file's exclude rule](/configuration/filter) or enforce access at the proxy boundary. `NetworkMode = "offline"` disables upstream version lookups for every module, rather than for selected module patterns.
+`none` is not an access-control rule: Athens can still serve versions already in storage. If clients must not access a module at all, use the [filter file's exclude rule](/configuration/filter) or enforce access at the proxy boundary. [`NetworkMode = "offline"`](/configuration/network-mode) disables upstream version lookups for every module, rather than for selected module patterns.
 
 For example, to allow only two repositories under a hostname, set `FilterFile` to a file containing:
 

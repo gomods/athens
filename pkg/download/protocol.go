@@ -120,9 +120,9 @@ func (p *protocol) List(ctx context.Context, mod string) ([]string, error) {
 	}
 
 	// Offline mode and download mode none must not query upstream.
-	// Stored versions remain available, as they do for versioned endpoints.
+	// Pseudo-versions remain available through /@latest and versioned endpoints.
 	if storageOnly {
-		return strList, nil
+		return removePseudoVersions(strList), nil
 	}
 
 	// if i.e. github is unavailable we should fail as well so that the behavior of the proxy is stable.
@@ -132,10 +132,10 @@ func (p *protocol) List(ctx context.Context, mod string) ([]string, error) {
 		return nil, errors.E(op, goErr)
 	}
 
-	// if we're in fallback mode, and VCS is down, just return what we have in storage,
-	// don't remove any pseudo versions.
+	// If VCS is down, fallback mode lists cached tags. /@latest supplies the
+	// cached commit when no tag is suitable for the client's version query.
 	if isUnexpGoErr && p.networkMode == Fallback {
-		return strList, nil
+		return removePseudoVersions(strList), nil
 	}
 
 	isRepoNotFoundErr := goErr != nil && errors.IsRepoNotFoundErr(goErr)
@@ -152,6 +152,9 @@ func (p *protocol) List(ctx context.Context, mod string) ([]string, error) {
 	// we should only do that if exclusively pseudo-versions have been saved
 	// otherwise @latest would not return the latest stable version but latest commit
 	if isRepoNotFoundErr && len(strListSemVers) == 0 {
+		if p.networkMode == Fallback {
+			return strListSemVers, nil
+		}
 		return strList, nil
 	}
 	// if the repo exists we have to filter out pseudo versions to prevent following scenario:
@@ -166,7 +169,7 @@ func (p *protocol) List(ctx context.Context, mod string) ([]string, error) {
 var pseudoVersionRE = regexp.MustCompile(`^v[0-9]+\.(0\.0-|\d+\.\d+-([^+]*\.)?0\.)\d{14}-[A-Za-z0-9]+(\+incompatible)?$`)
 
 func removePseudoVersions(allVersions []string) []string {
-	var vers []string
+	vers := []string{}
 	for _, v := range allVersions {
 		// copied from go cmd https://github.com/golang/go/blob/master/src/cmd/go/internal/modfetch/pseudo.go#L93
 		isPseudoVersion := strings.Count(v, "-") >= 2 && pseudoVersionRE.MatchString(v)
@@ -181,20 +184,24 @@ func (p *protocol) Latest(ctx context.Context, mod string) (*storage.RevInfo, er
 	const op errors.Op = "protocol.Latest"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
-	if p.networkMode == Offline {
-		// Go never pings the /@latest endpoint _first_. It always tries /list and if that
-		// endpoint returns an empty list then it fallsback to calling /@latest.
-		return nil, errors.E(op, "Athens is in offline mode, use /list endpoint", errors.KindNotFound)
-	}
-	if p.df != nil && p.df.Match(mod) == mode.None {
-		return nil, errors.E(op, "upstream lookup disabled for module, use /list endpoint", errors.KindNotFound)
+	if p.networkMode == Offline || (p.df != nil && p.df.Match(mod) == mode.None) {
+		return p.latestFromStorage(ctx, mod)
 	}
 	lr, _, err := p.lister.List(ctx, mod)
-	if err != nil {
+	if err == nil {
+		return lr, nil
+	}
+	if p.networkMode != Fallback || ctx.Err() != nil {
 		return nil, errors.E(op, err)
 	}
-
-	return lr, nil
+	cached, cacheErr := p.latestFromStorage(ctx, mod)
+	if cacheErr == nil {
+		return cached, nil
+	}
+	if errors.IsNotFoundErr(cacheErr) {
+		return nil, errors.E(op, err)
+	}
+	return nil, errors.E(op, cacheErr)
 }
 
 func (p *protocol) Info(ctx context.Context, mod, ver string) ([]byte, error) {
