@@ -43,7 +43,7 @@ require (
 	go.etcd.io/etcd/server/v3 v3.6.10
 	go.mongodb.org/mongo-driver/v2 v2.7.0
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.68.0
-	go.opentelemetry.io/contrib/propagators/b3 v1.44.0
+	go.opentelemetry.io/contrib/propagators/b3 v1.46.0
 	go.opentelemetry.io/otel v1.46.0
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc v1.45.0
 	go.opentelemetry.io/otel/exporters/prometheus v0.68.0
