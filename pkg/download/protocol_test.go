@@ -207,7 +207,10 @@ func TestDownloadModeNonePattern(t *testing.T) {
 	require.NoError(t, err)
 	const blocked = "company.gitlab.com/repo/c"
 	const allowed = "company.gitlab.com/repo/a"
-	require.NoError(t, strg.Save(ctx, blocked, "v1.0.0", []byte("mod"), bytes.NewReader([]byte("zip")), nil, []byte("info")))
+	cachedInfo := &storage.RevInfo{Version: "v1.0.0", Time: time.Date(2026, 10, 1, 0, 0, 0, 0, time.UTC)}
+	cachedData, err := json.Marshal(cachedInfo)
+	require.NoError(t, err)
+	require.NoError(t, strg.Save(ctx, blocked, "v1.0.0", []byte("mod"), bytes.NewReader([]byte("zip")), nil, cachedData))
 	df := &mode.DownloadFile{
 		Mode: mode.Sync,
 		Paths: []*mode.DownloadPath{
@@ -222,13 +225,14 @@ func TestDownloadModeNonePattern(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, []string{"v1.0.0"}, versions)
 	require.False(t, ml.called, "blocked module must not query upstream")
-	_, err = dp.Latest(ctx, blocked)
-	require.True(t, errors.IsNotFoundErr(err))
+	latest, err := dp.Latest(ctx, blocked)
+	require.NoError(t, err)
+	require.Equal(t, cachedInfo, latest)
 	require.False(t, ml.called, "blocked module must not query upstream")
 
 	info, err := dp.Info(ctx, blocked, "v1.0.0")
 	require.NoError(t, err)
-	require.Equal(t, []byte("info"), info, "download mode none must preserve cached artifact access")
+	require.Equal(t, cachedData, info, "download mode none must preserve cached artifact access")
 
 	versions, err = dp.List(ctx, allowed)
 	require.NoError(t, err)
