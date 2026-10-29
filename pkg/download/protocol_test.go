@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"io"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -502,36 +503,71 @@ func TestDownloadProtocolWhenFetchFails(t *testing.T) {
 }
 
 func TestAsyncRedirect(t *testing.T) {
-	s, err := mem.NewStorage()
-	require.NoError(t, err)
-	ms := &mockStasher{s, make(chan bool)}
-	dp := New(&Opts{
-		Stasher: ms,
-		Storage: s,
-		DownloadFile: &mode.DownloadFile{
-			Mode:        mode.Async,
-			DownloadURL: "https://gomods.io",
+	testCases := []struct {
+		name     string
+		mode     mode.Mode
+		wantKind int
+	}{
+		{
+			name:     "async",
+			mode:     mode.Async,
+			wantKind: errors.KindNotFound,
 		},
-	})
-	mod, ver := "github.com/athens-artifacts/happy-path", "v0.0.1"
-	_, err = dp.Info(t.Context(), mod, ver)
-	if errors.Kind(err) != errors.KindNotFound {
-		t.Fatalf("expected async_redirect to enforce a 404 but got %v", errors.Kind(err))
+		{
+			name:     "async_redirect",
+			mode:     mode.AsyncRedirect,
+			wantKind: errors.KindRedirect,
+		},
 	}
-	<-ms.ch
-	info, err := dp.Info(t.Context(), mod, ver)
-	require.NoError(t, err)
-	require.Equal(t, string(info), "info", "expected async fetch to be successful")
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			s, err := mem.NewStorage()
+			require.NoError(t, err)
+			ms := &mockStasher{
+				s:     s,
+				start: make(chan struct{}),
+				ch:    make(chan error, 1),
+			}
+			dp := New(&Opts{
+				Stasher: ms,
+				Storage: s,
+				DownloadFile: &mode.DownloadFile{
+					Mode:        tc.mode,
+					DownloadURL: "https://gomods.io",
+				},
+			})
+			mod, ver := "github.com/athens-artifacts/happy-path", "v0.0.1"
+			reqCtx, reqCancel := context.WithCancel(t.Context())
+			_, err = dp.Info(reqCtx, mod, ver)
+			reqCancel()
+			if errors.Kind(err) != tc.wantKind {
+				t.Fatalf("expected %s to return status %v but got %v", tc.name, tc.wantKind, errors.Kind(err))
+			}
+			close(ms.start)
+			require.NoError(t, <-ms.ch)
+			info, err := dp.Info(t.Context(), mod, ver)
+			require.NoError(t, err)
+			require.Equal(t, string(info), "info", "expected async fetch to be successful")
+		})
+	}
 }
 
 type mockStasher struct {
-	s  storage.Backend
-	ch chan bool
+	s     storage.Backend
+	start chan struct{}
+	ch    chan error
 }
 
-func (ms *mockStasher) Stash(ctx context.Context, mod string, ver string) (string, error) {
+func (ms *mockStasher) Stash(ctx context.Context, mod, ver string) (string, error) {
+	if ms.start != nil {
+		<-ms.start
+	}
+	if err := ctx.Err(); err != nil {
+		ms.ch <- err
+		return "", err
+	}
 	err := ms.s.Save(ctx, mod, ver, []byte("mod"), strings.NewReader("zip"), nil, []byte("info"))
-	ms.ch <- true // signal async stashing is done
+	ms.ch <- err // signal async stashing is done
 	return ver, err
 }
 
@@ -568,20 +604,107 @@ func (*testEntry) Errorf(format string, args ...any)          {}
 func (*testEntry) WithFields(fields map[string]any) log.Entry { return nil }
 func (*testEntry) SystemErr(err error)                        {}
 
+type errStasher struct {
+	err error
+}
+
+func (es *errStasher) Stash(context.Context, string, string) (string, error) {
+	return "", es.err
+}
+
+type notifyLogWriter struct {
+	mu     sync.Mutex
+	buf    bytes.Buffer
+	logged chan struct{}
+}
+
+func (w *notifyLogWriter) Write(p []byte) (int, error) {
+	w.mu.Lock()
+	n, err := w.buf.Write(p)
+	w.mu.Unlock()
+	select {
+	case w.logged <- struct{}{}:
+	default:
+	}
+	return n, err
+}
+
+func (w *notifyLogWriter) String() string {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+	return w.buf.String()
+}
+
+func TestBackgroundStashErrorSeverity(t *testing.T) {
+	testCases := []struct {
+		name      string
+		mode      mode.Mode
+		stashErr  error
+		wantLevel string
+	}{
+		{
+			name:      "async not found logs info",
+			mode:      mode.Async,
+			stashErr:  errors.E("test", "not found", errors.KindNotFound),
+			wantLevel: "INFO",
+		},
+		{
+			name:      "async_redirect unexpected logs error",
+			mode:      mode.AsyncRedirect,
+			stashErr:  errors.E("test", "upstream down", errors.KindUnexpected),
+			wantLevel: "ERROR",
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			s, err := mem.NewStorage()
+			require.NoError(t, err)
+			dp := New(&Opts{
+				Stasher: &errStasher{err: tc.stashErr},
+				Storage: s,
+				DownloadFile: &mode.DownloadFile{
+					Mode:        tc.mode,
+					DownloadURL: "https://gomods.io",
+				},
+			})
+			lw := &notifyLogWriter{logged: make(chan struct{}, 1)}
+			logger := log.NewWithOutput(lw, "", slog.LevelDebug, "json")
+			reqCtx, reqCancel := context.WithCancel(log.SetEntryInContext(t.Context(), logger))
+			_, err = dp.Info(reqCtx, "github.com/athens-artifacts/happy-path", "v0.0.1")
+			reqCancel()
+			require.Error(t, err)
+			select {
+			case <-lw.logged:
+			case <-time.After(2 * time.Second):
+				t.Fatal("timed out waiting for background stash error log")
+			}
+			var record map[string]any
+			require.NoError(t, json.Unmarshal([]byte(lw.String()), &record))
+			require.Equal(t, tc.wantLevel, record["level"])
+		})
+	}
+}
+
 func Test_copyContextWithCustomTimeout(t *testing.T) {
+	type ctxKey struct{}
 	testEntry := &testEntry{}
 
-	// create a context with a logger entry
-	logctx := log.SetEntryInContext(t.Context(), testEntry)
+	// create a context with a logger entry and custom value, then cancel parent.
+	parentCtx, parentCancel := context.WithCancel(t.Context())
+	logctx := context.WithValue(log.SetEntryInContext(parentCtx, testEntry), ctxKey{}, "preserved")
 
 	// check the log work as expected
 	log.EntryFromContext(logctx).Debugf("first test")
 	require.Equal(t, "first test", testEntry.msg)
 
 	// use copyContextWithCustomTimeout to create a new context with a custom timeout,
-	// and the returned context should have the same logger entry
+	// and the returned context should have the same logger entry and survive parent cancel.
 	newCtx, cancel := copyContextWithCustomTimeout(logctx, 10*time.Second)
 	defer cancel()
+	parentCancel()
+
+	require.NoError(t, newCtx.Err())
+	require.Equal(t, "preserved", newCtx.Value(ctxKey{}))
 
 	// check the log work as expected
 	log.EntryFromContext(newCtx).Debugf("second test")
