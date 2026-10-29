@@ -502,36 +502,71 @@ func TestDownloadProtocolWhenFetchFails(t *testing.T) {
 }
 
 func TestAsyncRedirect(t *testing.T) {
-	s, err := mem.NewStorage()
-	require.NoError(t, err)
-	ms := &mockStasher{s, make(chan bool)}
-	dp := New(&Opts{
-		Stasher: ms,
-		Storage: s,
-		DownloadFile: &mode.DownloadFile{
-			Mode:        mode.Async,
-			DownloadURL: "https://gomods.io",
+	testCases := []struct {
+		name     string
+		mode     mode.Mode
+		wantKind int
+	}{
+		{
+			name:     "async",
+			mode:     mode.Async,
+			wantKind: errors.KindNotFound,
 		},
-	})
-	mod, ver := "github.com/athens-artifacts/happy-path", "v0.0.1"
-	_, err = dp.Info(t.Context(), mod, ver)
-	if errors.Kind(err) != errors.KindNotFound {
-		t.Fatalf("expected async_redirect to enforce a 404 but got %v", errors.Kind(err))
+		{
+			name:     "async_redirect",
+			mode:     mode.AsyncRedirect,
+			wantKind: errors.KindRedirect,
+		},
 	}
-	<-ms.ch
-	info, err := dp.Info(t.Context(), mod, ver)
-	require.NoError(t, err)
-	require.Equal(t, string(info), "info", "expected async fetch to be successful")
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			s, err := mem.NewStorage()
+			require.NoError(t, err)
+			ms := &mockStasher{
+				s:     s,
+				start: make(chan struct{}),
+				ch:    make(chan error, 1),
+			}
+			dp := New(&Opts{
+				Stasher: ms,
+				Storage: s,
+				DownloadFile: &mode.DownloadFile{
+					Mode:        tc.mode,
+					DownloadURL: "https://gomods.io",
+				},
+			})
+			mod, ver := "github.com/athens-artifacts/happy-path", "v0.0.1"
+			reqCtx, reqCancel := context.WithCancel(t.Context())
+			_, err = dp.Info(reqCtx, mod, ver)
+			reqCancel()
+			if errors.Kind(err) != tc.wantKind {
+				t.Fatalf("expected %s to return status %v but got %v", tc.name, tc.wantKind, errors.Kind(err))
+			}
+			close(ms.start)
+			require.NoError(t, <-ms.ch)
+			info, err := dp.Info(t.Context(), mod, ver)
+			require.NoError(t, err)
+			require.Equal(t, string(info), "info", "expected async fetch to be successful")
+		})
+	}
 }
 
 type mockStasher struct {
-	s  storage.Backend
-	ch chan bool
+	s     storage.Backend
+	start chan struct{}
+	ch    chan error
 }
 
 func (ms *mockStasher) Stash(ctx context.Context, mod string, ver string) (string, error) {
+	if ms.start != nil {
+		<-ms.start
+	}
+	if err := ctx.Err(); err != nil {
+		ms.ch <- err
+		return "", err
+	}
 	err := ms.s.Save(ctx, mod, ver, []byte("mod"), strings.NewReader("zip"), nil, []byte("info"))
-	ms.ch <- true // signal async stashing is done
+	ms.ch <- err // signal async stashing is done
 	return ver, err
 }
 

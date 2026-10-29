@@ -115,18 +115,42 @@ func TestEtcdStash(t *testing.T) {
 		})
 		require.NoError(t, err)
 
-		newVersion, err := w(&mockStasher{
+		st := w(&mockStasher{
 			t:           t,
 			wantModule:  someModule,
 			wantVersion: someVersion,
-		}).Stash(ctx, someModule, someVersion)
-		require.NoError(t, err)
+		})
 
+		newVersion, err := st.Stash(ctx, someModule, someVersion)
+		require.NoError(t, err)
+		assert.Equal(t, someVersion, newVersion)
+
+		// A second Stash call on the same instance reuses the existing session lease.
+		newVersion, err = st.Stash(ctx, someModule, someVersion)
+		require.NoError(t, err)
 		assert.Equal(t, someVersion, newVersion)
 
 		res, err := e.Server.LeaseLeases(ctx, &etcdserverpb.LeaseLeasesRequest{})
 		require.NoError(t, err)
 
+		assert.Len(t, res.Leases, 1)
+	})
+
+	t.Run("canceled context does not create session", func(t *testing.T) {
+		endpoint, e := startEtcdServer(t)
+
+		w, err := WithEtcd([]string{endpoint}, &mockChecker{t: t, e: e})
+		require.NoError(t, err)
+
+		ctx, cancel := context.WithCancel(t.Context())
+		cancel()
+
+		newVersion, err := w(&mockStasher{t: t}).Stash(ctx, "some module", "some version")
+		require.ErrorIs(t, err, context.Canceled)
+		assert.Empty(t, newVersion)
+
+		res, err := e.Server.LeaseLeases(t.Context(), &etcdserverpb.LeaseLeasesRequest{})
+		require.NoError(t, err)
 		assert.Empty(t, res.Leases)
 	})
 
