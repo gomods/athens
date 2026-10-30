@@ -37,6 +37,7 @@ func InfoHandler(dp Protocol, lggr log.Entry, df *mode.DownloadFile) http.Handle
 				return
 			}
 			w.WriteHeader(errors.Kind(err))
+			return
 		}
 
 		_, _ = w.Write(info)

@@ -21,10 +21,10 @@ type HandlerOpts struct {
 	Protocol     Protocol
 	Logger       *log.Logger
 	DownloadFile *mode.DownloadFile
-	// CacheControl, when non-empty, is sent as the Cache-Control header on the
-	// module file endpoints (.info, .mod and .zip). Those responses are immutable
-	// for a given module@version, so a value like "public, max-age=..." lets a
-	// caching proxy in front of Athens serve them without hitting Athens again.
+	// CacheControl, when non-empty, is sent as the Cache-Control header on HTTP 200
+	// responses for canonical module version endpoints (.info, .mod and .zip).
+	// Non-canonical versions, redirects, and error responses always receive
+	// middleware.CacheControlNoCache instead.
 	CacheControl string
 }
 
@@ -48,7 +48,7 @@ func RegisterHandlers(r *mux.Router, opts *HandlerOpts) {
 	if opts == nil || opts.Protocol == nil || opts.Logger == nil {
 		panic("absolutely unacceptable handler opts")
 	}
-	noCacheMw := middleware.CacheControl("no-cache, no-store, must-revalidate")
+	noCacheMw := middleware.CacheControl(middleware.CacheControlNoCache)
 
 	listHandler := LogEntryHandler(ListHandler, opts)
 	r.Handle(PathList, noCacheMw(listHandler))
