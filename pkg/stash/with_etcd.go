@@ -2,6 +2,7 @@ package stash
 
 import (
 	"context"
+	"sync"
 	"time"
 
 	"github.com/gomods/athens/pkg/config"
@@ -32,6 +33,30 @@ type etcd struct {
 	client  *clientv3.Client
 	stasher Stasher
 	checker storage.Checker
+
+	mu      sync.Mutex
+	session *concurrency.Session
+}
+
+func (s *etcd) getSession() (*concurrency.Session, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	if s.session != nil {
+		select {
+		case <-s.session.Done():
+			s.session = nil
+		default:
+			return s.session, nil
+		}
+	}
+
+	sess, err := concurrency.NewSession(s.client)
+	if err != nil {
+		return nil, err
+	}
+	s.session = sess
+	return sess, nil
 }
 
 func (s *etcd) Stash(ctx context.Context, mod, ver string) (newVer string, err error) {
@@ -39,17 +64,24 @@ func (s *etcd) Stash(ctx context.Context, mod, ver string) (newVer string, err e
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 
-	sess, err := concurrency.NewSession(s.client)
+	if err := ctx.Err(); err != nil {
+		return "", errors.E(op, err)
+	}
+
+	sess, err := s.getSession()
 	if err != nil {
 		return "", errors.E(op, err)
 	}
-	defer sess.Close()
 
 	m := concurrency.NewMutex(sess, config.FmtModVer(mod, ver))
 	if err := m.Lock(ctx); err != nil {
 		return "", errors.E(op, err)
 	}
-	defer m.Unlock(ctx)
+	defer func() {
+		unlockCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), 5*time.Second)
+		defer cancel()
+		_ = m.Unlock(unlockCtx)
+	}()
 
 	ok, err := s.checker.Exists(ctx, mod, ver)
 	if err != nil {

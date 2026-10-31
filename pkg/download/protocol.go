@@ -270,22 +270,30 @@ func (p *protocol) processDownload(ctx context.Context, mod, ver string, f func(
 	const op errors.Op = "protocol.processDownload"
 	// Create a new context with custom deadline and ditch whatever deadline was passed by the caller.
 	// This is needed so that the async go routines can continue even after the HTTP request is complete (which leads to context cancellation).
-	ctx, cancel := copyContextWithCustomTimeout(ctx, time.Minute*15)
-	defer cancel()
 	switch p.df.Match(mod) {
 	case mode.Sync:
+		ctx, cancel := copyContextWithCustomTimeout(ctx, time.Minute*15)
+		defer cancel()
 		newVer, err := p.stasher.Stash(ctx, mod, ver)
 		if err != nil {
 			return errors.E(op, err)
 		}
 		return f(newVer)
 	case mode.Async:
-		go func() { _, _ = p.stasher.Stash(ctx, mod, ver) }()
+		ctx, cancel := copyContextWithCustomTimeout(ctx, time.Minute*15)
+		go func() {
+			defer cancel()
+			_, _ = p.stasher.Stash(ctx, mod, ver)
+		}()
 		return errors.E(op, "async: module not found", errors.KindNotFound)
 	case mode.Redirect:
 		return errors.E(op, "redirect", errors.KindRedirect)
 	case mode.AsyncRedirect:
-		go func() { _, _ = p.stasher.Stash(ctx, mod, ver) }()
+		ctx, cancel := copyContextWithCustomTimeout(ctx, time.Minute*15)
+		go func() {
+			defer cancel()
+			_, _ = p.stasher.Stash(ctx, mod, ver)
+		}()
 		return errors.E(op, "async_redirect: module not found", errors.KindRedirect)
 	case mode.None:
 		return errors.E(op, "none", errors.KindNotFound)
