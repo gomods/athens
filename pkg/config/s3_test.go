@@ -90,3 +90,63 @@ Bucket = "test-bucket"
 		})
 	}
 }
+
+func TestS3CDNAndCacheControlConfig(t *testing.T) {
+	tests := []struct {
+		name         string
+		config       string
+		env          map[string]string
+		cdnEndpoint  string
+		cacheControl string
+	}{
+		{name: "unset"},
+		{
+			name: "from TOML",
+			config: `CDNEndpoint = "https://cdn.example.com"
+CacheControl = "public, max-age=31536000, immutable"`,
+			cdnEndpoint:  "https://cdn.example.com",
+			cacheControl: "public, max-age=31536000, immutable",
+		},
+		{
+			name: "from environment",
+			env: map[string]string{
+				"ATHENS_S3_CDN_ENDPOINT":  "https://r2.example.com",
+				"ATHENS_S3_CACHE_CONTROL": "public, max-age=86400",
+			},
+			cdnEndpoint:  "https://r2.example.com",
+			cacheControl: "public, max-age=86400",
+		},
+		{
+			name: "environment overrides TOML",
+			config: `CDNEndpoint = "https://old.example.com"
+CacheControl = "no-cache"`,
+			env: map[string]string{
+				"ATHENS_S3_CDN_ENDPOINT":  "https://new.example.com",
+				"ATHENS_S3_CACHE_CONTROL": "public, max-age=31536000, immutable",
+			},
+			cdnEndpoint:  "https://new.example.com",
+			cacheControl: "public, max-age=31536000, immutable",
+		},
+	}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			for _, key := range []string{"ATHENS_S3_CDN_ENDPOINT", "ATHENS_S3_CACHE_CONTROL"} {
+				t.Setenv(key, "")
+				require.NoError(t, os.Unsetenv(key))
+			}
+			for key, value := range tc.env {
+				t.Setenv(key, value)
+			}
+			file := filepath.Join(t.TempDir(), "athens.toml")
+			require.NoError(t, os.WriteFile(file, []byte(`StorageType = "s3"
+[Storage.S3]
+Region = "us-east-1"
+Bucket = "test-bucket"
+`+tc.config), 0o600))
+			cfg, err := ParseConfigFile(file)
+			require.NoError(t, err)
+			require.Equal(t, tc.cdnEndpoint, cfg.Storage.S3.CDNEndpoint)
+			require.Equal(t, tc.cacheControl, cfg.Storage.S3.CacheControl)
+		})
+	}
+}

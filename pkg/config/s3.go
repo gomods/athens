@@ -12,6 +12,8 @@ type S3Config struct {
 	CredentialsEndpoint                string `envconfig:"AWS_CREDENTIALS_ENDPOINT"`
 	AwsContainerCredentialsRelativeURI string `envconfig:"AWS_CONTAINER_CREDENTIALS_RELATIVE_URI"`
 	Endpoint                           string `envconfig:"AWS_ENDPOINT"`
+	CDNEndpoint                        string `envconfig:"ATHENS_S3_CDN_ENDPOINT"`
+	CacheControl                       string `envconfig:"ATHENS_S3_CACHE_CONTROL"`
 	ServerSideEncryption               string `envconfig:"ATHENS_S3_SERVER_SIDE_ENCRYPTION"`
 	SSEKMSKeyID                        string `envconfig:"ATHENS_S3_SSE_KMS_KEY_ID"`
 	BucketKeyEnabled                   *bool  `envconfig:"ATHENS_S3_BUCKET_KEY_ENABLED"`

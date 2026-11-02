@@ -222,6 +222,19 @@ After this you can pass your credentials inside `config.toml` file.  If the acce
             # Env override: AWS_ENDPOINT
             Endpoint = ""
 
+            # Optional CDN or custom-domain base URL (for example an R2 Custom Domain
+            # or CloudFront distribution) used for unsigned HTTP GET and HEAD reads
+            # of module artifacts (.info, .mod, .zip), while keeping S3 API operations
+            # (uploads, listings, and deletes) on Endpoint.
+            # Env override: ATHENS_S3_CDN_ENDPOINT
+            CDNEndpoint = ""
+
+            # Optional Cache-Control metadata header set on uploaded module objects
+            # (.info, .mod, .zip), for example "public, max-age=31536000, immutable".
+            # Leave empty to omit the Cache-Control header on upload.
+            # Env override: ATHENS_S3_CACHE_CONTROL
+            CacheControl = ""
+
 ### Explicit server-side encryption headers
 
 Buckets can require encryption headers on each upload, even when default encryption
@@ -247,6 +260,12 @@ sends no encryption headers and relies on the bucket's encryption configuration.
 No bucket or KMS key is created or modified by these settings. The uploading
 identity must have permission to use the selected KMS key; see the
 [AWS SSE-KMS documentation](https://docs.aws.amazon.com/AmazonS3/latest/userguide/UsingKMSEncryption.html).
+
+### CDN or custom-domain read endpoint and object Cache-Control
+
+When a CDN or custom domain (such as a Cloudflare R2 Custom Domain or Amazon CloudFront distribution) fronts the S3 bucket, set `CDNEndpoint` (environment variable `ATHENS_S3_CDN_ENDPOINT`) to route module artifact reads (`.info`, `.mod`, `.zip`) and existence checks (`HEAD`) through that domain using unsigned HTTP requests, while keeping S3 API operations (`Save`, `List`, `Catalog`, and `Delete`) on the S3 API `Endpoint`.
+
+Set `CacheControl` (environment variable `ATHENS_S3_CACHE_CONTROL`), for example `"public, max-age=31536000, immutable"`, to attach a `Cache-Control` metadata header when uploading `.info`, `.mod`, and `.zip` objects so the CDN can cache immutable module artifacts at the edge.
 
 ## Minio
 
