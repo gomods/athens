@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"net/http"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
@@ -83,6 +84,11 @@ func (s *Storage) open(ctx context.Context, path string) (storage.SizeReadCloser
 	const op errors.Op = "s3.open"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
+
+	if s.cdnEndpoint != nil {
+		return s.openFromCDN(ctx, path)
+	}
+
 	getParams := &s3.GetObjectInput{
 		Bucket: aws.String(s.bucket),
 		Key:    aws.String(path),
@@ -101,4 +107,29 @@ func (s *Storage) open(ctx context.Context, path string) (storage.SizeReadCloser
 		size = *goo.ContentLength
 	}
 	return storage.NewSizer(goo.Body, size), nil
+}
+
+func (s *Storage) openFromCDN(ctx context.Context, path string) (storage.SizeReadCloser, error) {
+	const op errors.Op = "s3.open"
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, s.cdnObjectURL(path), nil)
+	if err != nil {
+		return nil, errors.E(op, err)
+	}
+	resp, err := s.httpClient.Do(req)
+	if err != nil {
+		return nil, errors.E(op, err)
+	}
+	if resp.StatusCode != http.StatusOK {
+		_, _ = io.Copy(io.Discard, resp.Body)
+		_ = resp.Body.Close()
+		if resp.StatusCode == http.StatusNotFound {
+			return nil, errors.E(op, errors.KindNotFound)
+		}
+		return nil, errors.E(op, fmt.Errorf("unexpected CDN status %d for %s", resp.StatusCode, path))
+	}
+	var size int64
+	if resp.ContentLength > 0 {
+		size = resp.ContentLength
+	}
+	return storage.NewSizer(resp.Body, size), nil
 }

@@ -601,6 +601,19 @@ ShutdownTimeout = 60
         # Env override: AWS_ENDPOINT
         Endpoint = ""
 
+        # Optional CDN or custom-domain base URL (for example an R2 Custom Domain
+        # or CloudFront distribution) used for unsigned HTTP GET and HEAD reads
+        # of module artifacts (.info, .mod, .zip), while keeping S3 API operations
+        # (uploads, listings, and deletes) on Endpoint.
+        # Env override: ATHENS_S3_CDN_ENDPOINT
+        CDNEndpoint = ""
+
+        # Optional Cache-Control metadata header set on uploaded module objects
+        # (.info, .mod, .zip), for example "public, max-age=31536000, immutable".
+        # Leave empty to omit the Cache-Control header on upload.
+        # Env override: ATHENS_S3_CACHE_CONTROL
+        CacheControl = ""
+
    [Storage.AzureBlob]
         # Storage Account name for Azure Blob
         # Env override: ATHENS_AZURE_ACCOUNT_NAME

@@ -3,6 +3,9 @@ package s3
 import (
 	"context"
 	"fmt"
+	"net/http"
+	"net/url"
+	"strings"
 	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -29,7 +32,10 @@ type Storage struct {
 	bucket               string
 	uploader             *transfermanager.Client
 	s3API                *s3.Client
+	httpClient           aws.HTTPClient
+	cdnEndpoint          *url.URL
 	timeout              time.Duration
+	cacheControl         string
 	serverSideEncryption types.ServerSideEncryption
 	sseKMSKeyID          string
 	bucketKeyEnabled     *bool
@@ -38,6 +44,11 @@ type Storage struct {
 // New creates a new AWS S3 CDN saver.
 func New(s3Conf *config.S3Config, timeout time.Duration, options ...func(*aws.Config)) (*Storage, error) {
 	const op errors.Op = "s3.New"
+
+	cdnURL, err := parseCDNEndpoint(s3Conf.CDNEndpoint)
+	if err != nil {
+		return nil, errors.E(op, err)
+	}
 
 	client, err := NewClient(s3Conf, options...)
 	if err != nil {
@@ -48,7 +59,10 @@ func New(s3Conf *config.S3Config, timeout time.Duration, options ...func(*aws.Co
 		bucket:               s3Conf.Bucket,
 		uploader:             transfermanager.New(client),
 		s3API:                client,
+		httpClient:           httpClientFromS3(client),
+		cdnEndpoint:          cdnURL,
 		timeout:              timeout,
+		cacheControl:         s3Conf.CacheControl,
 		serverSideEncryption: types.ServerSideEncryption(s3Conf.ServerSideEncryption),
 		sseKMSKeyID:          s3Conf.SSEKMSKeyID,
 		bucketKeyEnabled:     s3Conf.BucketKeyEnabled,
@@ -58,7 +72,41 @@ func New(s3Conf *config.S3Config, timeout time.Duration, options ...func(*aws.Co
 // NewWithClient uses an already configured S3 client and bucket. It is useful
 // for S3-compatible backends that supply explicit configuration themselves.
 func NewWithClient(client *s3.Client, bucket string, timeout time.Duration) *Storage {
-	return &Storage{bucket: bucket, s3API: client, uploader: transfermanager.New(client), timeout: timeout}
+	return &Storage{
+		bucket:     bucket,
+		s3API:      client,
+		httpClient: httpClientFromS3(client),
+		uploader:   transfermanager.New(client),
+		timeout:    timeout,
+	}
+}
+
+func httpClientFromS3(client *s3.Client) aws.HTTPClient {
+	if client != nil && client.Options().HTTPClient != nil {
+		return client.Options().HTTPClient
+	}
+	return http.DefaultClient
+}
+
+func parseCDNEndpoint(raw string) (*url.URL, error) {
+	if raw == "" {
+		return nil, nil
+	}
+	if !strings.Contains(raw, "://") {
+		raw = "https://" + raw
+	}
+	u, err := url.Parse(raw)
+	if err != nil {
+		return nil, fmt.Errorf("invalid S3 CDN endpoint %q: %w", raw, err)
+	}
+	if (u.Scheme != "http" && u.Scheme != "https") || u.Host == "" {
+		return nil, fmt.Errorf("invalid S3 CDN endpoint %q: must be an http or https URL with a host", raw)
+	}
+	return u, nil
+}
+
+func (s *Storage) cdnObjectURL(key string) string {
+	return s.cdnEndpoint.JoinPath(key).String()
 }
 
 // NewClient creates an S3 API client from the Athens S3 configuration.
