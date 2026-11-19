@@ -1,0 +1,168 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Compute next version without tagging or releasing"
+        type: boolean
+        default: false
+  push:
+    tags:
+      - 'v*'
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+permissions: {}
+
+jobs:
+  resolve:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    outputs:
+      version: ${{ steps.out.outputs.version }}
+      proceed: ${{ steps.out.outputs.proceed }}
+    steps:
+      - name: Guard - releases may only be dispatched from main
+        if: github.event_name == 'workflow_dispatch' && github.ref_name != 'main'
+        env:
+          REF_NAME: ${{ github.ref_name }}
+        run: |
+          echo "::error::Releases must be dispatched from the 'main' branch (got '$REF_NAME'). Dispatching from another branch produces a pre-release and would move the 'latest' Docker tag to an untested build."
+          exit 1
+
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Compute next version (conventional commits)
+        id: tag
+        if: github.event_name == 'workflow_dispatch'
+        shell: bash
+        # No third-party action: the bump logic lives in scripts/next_version.sh.
+        # Prints nothing when there is nothing to release.
+        run: |
+          set -euo pipefail
+          next="$(bash scripts/next_version.sh)"
+          echo "next=${next}" >> "$GITHUB_OUTPUT"
+
+      - name: Create and push tag
+        if: github.event_name == 'workflow_dispatch' && !inputs.dry_run && steps.tag.outputs.next != ''
+        env:
+          NEW_TAG: ${{ steps.tag.outputs.next }}
+        run: |
+          git tag "$NEW_TAG"
+          git push origin "refs/tags/$NEW_TAG"
+
+      - name: Resolve outputs
+        id: out
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          REF_NAME: ${{ github.ref_name }}
+          NEW_TAG: ${{ steps.tag.outputs.next }}
+          DRY_RUN: ${{ inputs.dry_run }}
+        run: |
+          if [ "$EVENT_NAME" = "push" ]; then
+            echo "version=$REF_NAME" >> "$GITHUB_OUTPUT"
+            echo "proceed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "version=$NEW_TAG" >> "$GITHUB_OUTPUT"
+            if [ "$DRY_RUN" = "true" ]; then
+              echo "Dry run: computed version would be '${NEW_TAG:-<none>}'."
+              echo "proceed=false" >> "$GITHUB_OUTPUT"
+            elif [ -z "$NEW_TAG" ]; then
+              echo "No version-bumping commits since last tag; nothing to release."
+              echo "proceed=false" >> "$GITHUB_OUTPUT"
+            else
+              echo "Created tag $NEW_TAG."
+              echo "proceed=true" >> "$GITHUB_OUTPUT"
+            fi
+          fi
+
+  goreleaser:
+    needs: resolve
+    if: needs.resolve.outputs.proceed == 'true'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: refs/tags/${{ needs.resolve.outputs.version }}
+          fetch-depth: 0
+
+      - name: Set up Go
+        id: install-go
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: 'go.mod'
+
+      - name: Download dependencies
+        run: go mod download
+        if: steps.install-go.outputs.cache-hit != 'true'
+
+      - name: Capture Current Date
+        id: date
+        run: echo "date=$(date -u '+%Y-%m-%d-%H:%M:%S-%Z')" >> "$GITHUB_OUTPUT"
+
+      - name: Run GoReleaser
+        uses: goreleaser/goreleaser-action@a4f02ab5355a589de60d917a659ce617ed19b3de # v7.3.0
+        with:
+          distribution: goreleaser
+          version: "~> v2"
+          args: release --clean
+        env:
+          DATE: ${{ steps.date.outputs.date }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  docker:
+    needs: resolve
+    if: needs.resolve.outputs.proceed == 'true'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: refs/tags/${{ needs.resolve.outputs.version }}
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@99012661954931238ded8c8b007157a8430204e1 # v4.4.0
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+
+      - name: Login to GHCR
+        uses: docker/login-action@8aa5831fb8d48d8f76594c7ddde61ae58019f550 # v4.8.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6.2.0
+        with:
+          images: ghcr.io/${{ github.repository }}
+          tags: |
+            type=semver,pattern={{version}},value=${{ needs.resolve.outputs.version }}
+            type=semver,pattern={{major}}.{{minor}},value=${{ needs.resolve.outputs.version }}
+            type=raw,value=latest
+
+      - name: Build and push images
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: .
+          file: cmd/proxy/Dockerfile
+          build-args: VERSION=${{ needs.resolve.outputs.version }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          push: true
+          platforms: linux/amd64,linux/arm64
