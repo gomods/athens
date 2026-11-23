@@ -35,11 +35,18 @@ type Storage struct {
 	bucketKeyEnabled     *bool
 }
 
+// clientInitTimeout bounds loading the AWS configuration (which may query
+// remote credential sources) when creating a client.
+const clientInitTimeout = 30 * time.Second
+
 // New creates a new AWS S3 CDN saver.
 func New(s3Conf *config.S3Config, timeout time.Duration, options ...func(*aws.Config)) (*Storage, error) {
 	const op errors.Op = "s3.New"
 
-	client, err := NewClient(s3Conf, options...)
+	ctx, cancel := context.WithTimeout(context.Background(), clientInitTimeout)
+	defer cancel()
+
+	client, err := NewClient(ctx, s3Conf, options...)
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
@@ -62,10 +69,11 @@ func NewWithClient(client *s3.Client, bucket string, timeout time.Duration) *Sto
 }
 
 // NewClient creates an S3 API client from the Athens S3 configuration.
-func NewClient(s3Conf *config.S3Config, options ...func(*aws.Config)) (*s3.Client, error) {
+// The context bounds loading of the AWS configuration only; it is not retained by the client.
+func NewClient(ctx context.Context, s3Conf *config.S3Config, options ...func(*aws.Config)) (*s3.Client, error) {
 	const op errors.Op = "s3.NewClient"
 
-	awsConfig, err := awscfg.LoadDefaultConfig(context.TODO(), awscfg.WithRegion(s3Conf.Region))
+	awsConfig, err := awscfg.LoadDefaultConfig(ctx, awscfg.WithRegion(s3Conf.Region))
 	if err != nil {
 		return nil, errors.E(op, err)
 	}

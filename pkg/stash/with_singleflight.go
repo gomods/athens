@@ -22,6 +22,22 @@ func WithSingleflight(s Stasher) Stasher {
 	return sf
 }
 
+// WithLocalSingleflight returns a Wrapper that applies the distributed wrapper
+// and then coalesces, in this process, concurrent calls for the same
+// module@version in front of it. They share one call into distributed, so they
+// take its lock once and share its result and its error, instead of queueing up
+// for the lock one after another and each retrying a failed stash in turn.
+//
+// The flight is detached from the callers' cancellation: it keeps going, up to
+// the first caller's deadline, when every caller has gone. That includes
+// waiting for the distributed lock, which a lone caller would previously have
+// given up on as soon as it disconnected.
+func WithLocalSingleflight(distributed Wrapper) Wrapper {
+	return func(s Stasher) Stasher {
+		return WithSingleflight(distributed(s))
+	}
+}
+
 type sfResp struct {
 	newVer string
 	err    error
@@ -56,12 +72,28 @@ func (s *withsf) Stash(ctx context.Context, mod, ver string) (string, error) {
 	_, inFlight := s.subs[mv]
 	if !inFlight {
 		s.subs[mv] = []chan *sfResp{subCh}
-		go s.process(ctx, mod, ver)
+		// The work is shared by every subscriber, so it must not be
+		// cancelled just because the waiter that started it went away.
+		// WithoutCancel also drops the deadline, so carry it over: the flight
+		// stays bounded and a hung stash cannot wedge this module@version.
+		workCtx, cancelWork := context.WithoutCancel(ctx), context.CancelFunc(func() {})
+		if deadline, ok := ctx.Deadline(); ok {
+			workCtx, cancelWork = context.WithDeadline(workCtx, deadline)
+		}
+		go func() {
+			defer cancelWork()
+			s.process(workCtx, mod, ver)
+		}()
 	} else {
 		s.subs[mv] = append(s.subs[mv], subCh)
 	}
 	s.mu.Unlock()
 
-	resp := <-subCh
-	return resp.newVer, resp.err
+	// subCh is buffered, so process never blocks on a waiter that has left.
+	select {
+	case resp := <-subCh:
+		return resp.newVer, resp.err
+	case <-ctx.Done():
+		return "", errors.E(op, ctx.Err())
+	}
 }

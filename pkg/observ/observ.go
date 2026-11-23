@@ -52,7 +52,8 @@ func RegisterExporter(traceExporter, url, service, env string, samplingFraction 
 		return nil, errors.E(op, fmt.Sprintf(
 			"Exporter %q is no longer supported. Athens now exports traces via OpenTelemetry (OTLP). "+
 				"Set ATHENS_TRACE_EXPORTER=otlp and point ATHENS_TRACE_EXPORTER_URL "+
-				"(or OTEL_EXPORTER_OTLP_ENDPOINT) at an OTLP collector.", traceExporter))
+				"(or OTEL_EXPORTER_OTLP_ENDPOINT) at an OTLP collector.", traceExporter,
+		))
 	case "":
 		return nil, errors.E(op, "Exporter not specified. Traces won't be exported")
 	default:

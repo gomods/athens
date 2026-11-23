@@ -117,24 +117,46 @@ func (s *azblobLock) Stash(ctx context.Context, mod, ver string) (newVer string,
 	if ok {
 		return ver, nil
 	}
-	sChan := make(chan stashRes)
+	return waitForStash(ctx, op, s.stasher, mod, ver, leaseRenewInterval, func(ctx context.Context) error {
+		return s.renewLease(ctx, leaseBlobURL, leaseID)
+	})
+}
+
+// leaseRenewInterval is how often the lease is renewed while stashing.
+// Leases are acquired for 15 seconds, so this must stay below that.
+const leaseRenewInterval = 10 * time.Second
+
+// waitForStash runs the underlying stasher in a goroutine and waits for it
+// to finish, calling renew every interval in the meantime. It returns early
+// if renew fails or ctx is done.
+func waitForStash(
+	ctx context.Context,
+	op errors.Op,
+	stasher Stasher,
+	mod, ver string,
+	interval time.Duration,
+	renew func(context.Context) error,
+) (string, error) {
+	// Buffered so the goroutine can always deliver its result and exit,
+	// even if we return early and nobody receives from the channel.
+	sChan := make(chan stashRes, 1)
 	go func() {
-		v, err := s.stasher.Stash(ctx, mod, ver)
+		v, err := stasher.Stash(ctx, mod, ver)
 		sChan <- stashRes{v, err}
 	}()
+
+	ticker := time.NewTicker(interval)
+	defer ticker.Stop()
 
 	for {
 		select {
 		case sr := <-sChan:
 			if sr.err != nil {
-				err = errors.E(op, sr.err)
-				return ver, err
+				return ver, errors.E(op, sr.err)
 			}
-			newVer = sr.v
-			return newVer, nil
-		case <-time.After(10 * time.Second):
-			err := s.renewLease(ctx, leaseBlobURL, leaseID)
-			if err != nil {
+			return sr.v, nil
+		case <-ticker.C:
+			if err := renew(ctx); err != nil {
 				return ver, errors.E(op, err)
 			}
 		case <-ctx.Done():

@@ -3,6 +3,7 @@ package module
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/suite"
@@ -230,4 +231,34 @@ func tempFilterFile(t *testing.T) (path string) {
 		t.FailNow()
 	}
 	return filter.Name()
+}
+
+func (t *FilterTests) Test_NewFilterOverlongLine() {
+	r := t.Require()
+	filterFile := filepath.Join(t.T().TempDir(), "filter")
+
+	// A line longer than bufio.MaxScanTokenSize must not silently truncate the
+	// rules that follow it.
+	longComment := "# " + strings.Repeat("x", 70*1024)
+	content := "- github.com/blocked\n" + longComment + "\n- github.com/also-blocked\n"
+	r.NoError(os.WriteFile(filterFile, []byte(content), 0o600))
+
+	f, err := NewFilter(filterFile)
+	r.Error(err)
+	r.Nil(f)
+}
+
+func (t *FilterTests) Test_NewFilterNormalFile() {
+	r := t.Require()
+	filterFile := filepath.Join(t.T().TempDir(), "filter")
+
+	content := "- github.com/blocked\n# a comment\n- github.com/also-blocked\n"
+	r.NoError(os.WriteFile(filterFile, []byte(content), 0o600))
+
+	f, err := NewFilter(filterFile)
+	r.NoError(err)
+	r.NotNil(f)
+	r.Equal(Exclude, f.Rule("github.com/blocked", ""))
+	r.Equal(Exclude, f.Rule("github.com/also-blocked", ""))
+	r.Equal(Include, f.Rule("github.com/other", ""))
 }

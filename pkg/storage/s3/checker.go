@@ -33,7 +33,8 @@ func (s *Storage) Exists(ctx context.Context, module, version string) (bool, err
 				&s3.HeadObjectInput{
 					Bucket: aws.String(s.bucket),
 					Key:    aws.String(config.PackageVersionedName(module, version, file)),
-				})
+				},
+			)
 			errChan <- err
 		}(file)
 	}

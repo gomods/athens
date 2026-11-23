@@ -24,7 +24,7 @@ func Upload(ctx context.Context, module, version string, info, mod, zip io.Reade
 	defer cancel()
 
 	save := func(ext, contentType string, stream io.Reader) <-chan error {
-		ec := make(chan error)
+		ec := make(chan error, 1)
 
 		go func() {
 			defer close(ec)

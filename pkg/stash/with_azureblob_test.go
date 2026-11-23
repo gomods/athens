@@ -2,8 +2,10 @@ package stash
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
+	"runtime"
 	"strings"
 	"sync"
 	"testing"
@@ -102,6 +104,90 @@ func getAzureTestConfig(containerName string) *config.AzureBlobConfig {
 		ManagedIdentityResourceID: resourceId,
 		CredentialScope:           credentialScope,
 		ContainerName:             containerName,
+	}
+}
+
+// azureBlockingStasher blocks in Stash until release is closed.
+type azureBlockingStasher struct {
+	started chan struct{}
+	release chan struct{}
+}
+
+func newAzureBlockingStasher() *azureBlockingStasher {
+	return &azureBlockingStasher{
+		started: make(chan struct{}),
+		release: make(chan struct{}),
+	}
+}
+
+func (b *azureBlockingStasher) Stash(ctx context.Context, mod, ver string) (string, error) {
+	close(b.started)
+	<-b.release
+	return "v", nil
+}
+
+// waitForGoroutines fails the test unless the number of live goroutines
+// drops back to at most want, which means waitForStash's goroutine exited.
+func waitForGoroutines(t *testing.T, want int) {
+	t.Helper()
+	deadline := time.Now().Add(5 * time.Second)
+	for time.Now().Before(deadline) {
+		if runtime.NumGoroutine() <= want {
+			return
+		}
+		time.Sleep(10 * time.Millisecond)
+	}
+	t.Fatalf("stasher goroutine leaked: have %d goroutines, want <= %d", runtime.NumGoroutine(), want)
+}
+
+func TestWaitForStashNoGoroutineLeakOnContextCancel(t *testing.T) {
+	before := runtime.NumGoroutine()
+	st := newAzureBlockingStasher()
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	errCh := make(chan error, 1)
+	go func() {
+		_, err := waitForStash(ctx, "test", st, "mod", "v1.0.0", time.Hour, func(context.Context) error { return nil })
+		errCh <- err
+	}()
+
+	<-st.started
+	cancel()
+	if err := <-errCh; err == nil {
+		t.Fatal("expected error after context cancellation")
+	}
+
+	// waitForStash has returned and nobody receives from its result channel
+	// anymore. The stasher can now finish; its goroutine must still exit.
+	close(st.release)
+	waitForGoroutines(t, before)
+}
+
+func TestWaitForStashNoGoroutineLeakOnRenewFailure(t *testing.T) {
+	before := runtime.NumGoroutine()
+	st := newAzureBlockingStasher()
+	renewErr := errors.New("renew failed")
+
+	_, err := waitForStash(context.Background(), "test", st, "mod", "v1.0.0", time.Millisecond,
+		func(context.Context) error { return renewErr })
+	if err == nil || !strings.Contains(err.Error(), renewErr.Error()) {
+		t.Fatalf("expected renew error, got %v", err)
+	}
+
+	close(st.release)
+	waitForGoroutines(t, before)
+}
+
+func TestWaitForStashReturnsResult(t *testing.T) {
+	st := newAzureBlockingStasher()
+	close(st.release)
+	v, err := waitForStash(context.Background(), "test", st, "mod", "v1.0.0", time.Hour, func(context.Context) error { return nil })
+	if err != nil {
+		t.Fatal(err)
+	}
+	if v != "v" {
+		t.Fatalf("expected v, got %q", v)
 	}
 }
 

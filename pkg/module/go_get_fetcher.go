@@ -54,7 +54,7 @@ func NewGoGetFetcher(goBinaryName, gogetDir string, envVars []string, fs afero.F
 
 // Fetch downloads the sources from the go binary and returns the corresponding
 // .info, .mod, and .zip files.
-func (g *goGetFetcher) Fetch(ctx context.Context, mod, ver string) (*storage.Version, error) {
+func (g *goGetFetcher) Fetch(ctx context.Context, mod, ver string) (_ *storage.Version, err error) {
 	const op errors.Op = "goGetFetcher.Fetch"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
@@ -64,10 +64,17 @@ func (g *goGetFetcher) Fetch(ctx context.Context, mod, ver string) (*storage.Ver
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
+	// On success, ownership of goPathRoot transfers to the returned zipReadCloser,
+	// which clears it on Close. On every error return, clean it up here.
+	defer func() {
+		if err != nil {
+			_ = clearFiles(g.fs, goPathRoot)
+		}
+	}()
+
 	sourcePath := filepath.Join(goPathRoot, "src")
 	modPath := filepath.Join(sourcePath, getRepoDirName(mod, ver))
 	if err := g.fs.MkdirAll(modPath, os.ModeDir|os.ModePerm); err != nil {
-		_ = clearFiles(g.fs, goPathRoot)
 		return nil, errors.E(op, err)
 	}
 
@@ -81,7 +88,6 @@ func (g *goGetFetcher) Fetch(ctx context.Context, mod, ver string) (*storage.Ver
 		ver,
 	)
 	if err != nil {
-		_ = clearFiles(g.fs, goPathRoot)
 		return nil, errors.E(op, err)
 	}
 
@@ -157,33 +163,55 @@ func downloadModule(
 	cmd.Stdout = stdout
 	cmd.Stderr = stderr
 
-	err := cmd.Run()
-	if err != nil {
-		err = fmt.Errorf("%w: %s", err, stderr)
-		var m goModule
-		if jsonErr := json.NewDecoder(stdout).Decode(&m); jsonErr != nil {
-			return goModule{}, errors.E(op, err)
-		}
-		// github quota exceeded
-		if isLimitHit(m.Error) {
-			return goModule{}, errors.E(op, m.Error, errors.KindRateLimit)
-		}
-		return goModule{}, errors.E(op, m.Error, errors.KindNotFound)
-	}
+	runErr := cmd.Run()
 
+	// `go mod download -json` reports the outcome of the module as a JSON object
+	// on stdout whose Error field is set iff the download failed; the process
+	// exit code merely mirrors that field. We therefore classify from the JSON
+	// output, treating the exit code as advisory only.
 	var m goModule
-	if err = json.NewDecoder(stdout).Decode(&m); err != nil {
-		return goModule{}, errors.E(op, err)
-	}
-	if m.Error != "" {
-		return goModule{}, errors.E(op, m.Error)
-	}
+	jsonErr := json.NewDecoder(stdout).Decode(&m)
 
-	return m, nil
+	switch {
+	case jsonErr == nil && m.Error == "":
+		// go reported a successful download.
+		return m, nil
+	case jsonErr == nil:
+		// go reported a per-module failure (unknown revision, no go-import meta
+		// tags, invalid version, ...). Never a 5xx — see goGetErrKind.
+		return goModule{}, errors.E(op, m.Error, goGetErrKind(m.Error))
+	case runErr != nil:
+		// The process failed and left no parseable JSON on stdout (the
+		// diagnostic went only to stderr). Classify from stderr.
+		err := fmt.Errorf("%w: %s", runErr, stderr)
+		return goModule{}, errors.E(op, err, goGetErrKind(stderr.String()))
+	default:
+		// The process exited zero yet produced no parseable module metadata —
+		// nothing trustworthy to classify from. Surface as not-found so the go
+		// client falls back to ,direct instead of aborting on a fatal 500.
+		err := fmt.Errorf("go mod download produced no module metadata: %w: %s", jsonErr, stderr)
+		return goModule{}, errors.E(op, err, errors.KindNotFound)
+	}
 }
 
 func isLimitHit(o string) bool {
 	return strings.Contains(o, "403 response from api.github.com")
+}
+
+// goGetErrKind classifies a `go mod download` / `go list` failure message into
+// an errors.Kind. Any failure to fetch a specific module@version is reported as
+// KindNotFound (404), never KindUnexpected (500): when resolving `pkg@version`
+// the go command probes candidate module paths longest-to-shortest and treats
+// *any* non-404/410 status (including 500) as fatal, while the GOPROXY
+// `,direct` fallback only triggers on 404/410. Rate-limit responses keep their
+// dedicated kind so callers can back off.
+// See https://github.com/golang/go/issues/30134.
+func goGetErrKind(msg string) int {
+	if isLimitHit(msg) {
+		return errors.KindRateLimit
+	}
+
+	return errors.KindNotFound
 }
 
 // getRepoDirName takes a raw repository URI and a version and creates a directory name that the

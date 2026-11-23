@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"os"
 	"path/filepath"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -122,9 +123,9 @@ func (f *Filter) getAssociatedRule(version string, path ...string) FilterRule {
 		return f.root.rule
 	}
 
-	for i := len(rules) - 1; i >= 0; i-- {
-		if rules[i] != Default {
-			return rules[i]
+	for _, rule := range slices.Backward(rules) {
+		if rule != Default {
+			return rule
 		}
 	}
 
@@ -305,6 +306,12 @@ func getConfigLines(filterFile string) ([]string, error) {
 	var lines []string
 	for scanner.Scan() {
 		lines = append(lines, strings.TrimSpace(scanner.Text()))
+	}
+	// A scan error (e.g. bufio.ErrTooLong for a line over 64KB) would otherwise
+	// silently drop every later rule, failing open on an access-control file.
+	if err := scanner.Err(); err != nil {
+		_ = f.Close()
+		return nil, errors.E(op, err)
 	}
 
 	return lines, f.Close()

@@ -29,7 +29,8 @@ func RegisterStatsExporter(r *mux.Router, statsExporter, service string) (func()
 		return nil, errors.E(op, fmt.Sprintf(
 			"StatsExporter %q is no longer supported. Athens now collects metrics via OpenTelemetry "+
 				"and exposes them on the Prometheus /metrics endpoint. Set ATHENS_STATS_EXPORTER=prometheus "+
-				"and scrape metrics with an OTLP-capable collector if you need to forward them elsewhere.", statsExporter))
+				"and scrape metrics with an OTLP-capable collector if you need to forward them elsewhere.", statsExporter,
+		))
 	case "":
 		return nil, errors.E(op, "StatsExporter not specified. Stats won't be collected")
 	default:

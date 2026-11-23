@@ -4,7 +4,7 @@ updates:
   - package-ecosystem: gomod
     directory: /
     schedule:
-      interval: weekly
+      interval: daily
     commit-message:
       prefix: update-go-pkg
       include: scope
@@ -13,7 +13,7 @@ updates:
   - package-ecosystem: github-actions
     directory: /
     schedule:
-      interval: weekly
+      interval: daily
     commit-message:
       prefix: update-github-action
       include: scope
@@ -23,7 +23,7 @@ updates:
     directories:
       - /cmd/proxy
     schedule:
-      interval: weekly
+      interval: daily
     commit-message:
       prefix: update-docker-image
       include: scope

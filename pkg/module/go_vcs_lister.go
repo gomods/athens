@@ -80,36 +80,47 @@ func (l *vcsLister) List(ctx context.Context, module string) (*storage.RevInfo, 
 		defer func() { _ = clearFiles(l.fs, gopath) }()
 		cmd.Env = prepareEnv(gopath, l.env)
 
-		err = cmd.Run()
-		if err != nil {
-			err = fmt.Errorf("%w: %s", err, stderr)
-			if errors.IsErr(timeoutCtx.Err(), context.DeadlineExceeded) {
-				return nil, errors.E(op, err, errors.KindGatewayTimeout)
-			}
+		runErr := cmd.Run()
 
-			// as of now, we can't recognize between a true NotFound
-			// and an unexpected error, so we choose the more
-			// hopeful path of NotFound. This way the Go command
-			// will not log en error and we still get to log
-			// what happened here if someone wants to dig in more.
-			// Once, https://github.com/golang/go/issues/30134 is
-			// resolved, we can hopefully differentiate.
-			return nil, errors.E(op, err, errors.KindNotFound)
-		}
-
+		// `go list -m -versions -json` writes the version list as a JSON object
+		// on stdout on success, and writes diagnostics to stderr on failure. We
+		// decide success/failure from whether stdout parsed, treating the exit
+		// code as advisory only.
 		var lr listResp
-		err = json.NewDecoder(stdout).Decode(&lr)
-		if err != nil {
-			return nil, errors.E(op, err)
+		jsonErr := json.NewDecoder(stdout).Decode(&lr)
+		if jsonErr == nil {
+			rev := storage.RevInfo{
+				Time:    lr.Time,
+				Version: lr.Version,
+			}
+			return listSFResp{
+				rev:      &rev,
+				versions: lr.Versions,
+			}, nil
 		}
-		rev := storage.RevInfo{
-			Time:    lr.Time,
-			Version: lr.Version,
+
+		// `go list` did not produce a parseable version list. Build a
+		// diagnostic from stderr (populated for real failures) and fall back to
+		// jsonErr (e.g. io.EOF) when stderr is empty.
+		listErr := jsonErr
+		if runErr != nil {
+			listErr = fmt.Errorf("%w: %s", runErr, stderr)
+		} else if stderr.Len() > 0 {
+			listErr = fmt.Errorf("%w: %s", jsonErr, stderr)
 		}
-		return listSFResp{
-			rev:      &rev,
-			versions: lr.Versions,
-		}, nil
+
+		if errors.IsErr(timeoutCtx.Err(), context.DeadlineExceeded) {
+			return nil, errors.E(op, listErr, errors.KindGatewayTimeout)
+		}
+
+		// As of now, we can't reliably distinguish a true NotFound from an
+		// unexpected error (https://github.com/golang/go/issues/30134), so we
+		// choose the more hopeful path of NotFound (goGetErrKind defaults there,
+		// while still surfacing a GitHub rate limit as 429). This lets the go
+		// client fall back to `,direct` rather than treating the response as a
+		// fatal 500, while we still log the underlying error for anyone digging
+		// in.
+		return nil, errors.E(op, listErr, goGetErrKind(stderr.String()))
 	})
 	if err != nil {
 		return nil, nil, err

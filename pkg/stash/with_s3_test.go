@@ -244,7 +244,7 @@ func getS3LockTestConfig(t *testing.T) (*config.S3Config, *s3.Client) {
 		ForcePathStyle: true,
 		Endpoint:       endpoint,
 	}
-	client, err := s3storage.NewClient(s3Conf)
+	client, err := s3storage.NewClient(t.Context(), s3Conf)
 	if err != nil {
 		t.Fatal(err)
 	}

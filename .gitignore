@@ -35,3 +35,6 @@ config.toml
 
 # goreleaser output directory
 dist/
+
+# Claude Code local state and worktrees
+.claude/

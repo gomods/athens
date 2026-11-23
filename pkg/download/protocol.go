@@ -17,6 +17,9 @@ import (
 	"github.com/gomods/athens/pkg/storage"
 )
 
+// stashTimeout is the deadline given to a stash, independent of the caller's context.
+const stashTimeout = 15 * time.Minute
+
 // Protocol is the download protocol which mirrors
 // the http requests that cmd/go makes to the proxy.
 type Protocol interface {
@@ -268,29 +271,46 @@ func (p *protocol) Zip(ctx context.Context, mod, ver string) (storage.SizeReadCl
 
 func (p *protocol) processDownload(ctx context.Context, mod, ver string, f func(newVer string) error) error {
 	const op errors.Op = "protocol.processDownload"
-	// Create a new context with custom deadline and ditch whatever deadline was passed by the caller.
-	// This is needed so that the async go routines can continue even after the HTTP request is complete (which leads to context cancellation).
-	ctx, cancel := copyContextWithCustomTimeout(ctx, time.Minute*15)
-	defer cancel()
 	switch p.df.Match(mod) {
 	case mode.Sync:
+		ctx, cancel := copyContextWithCustomTimeout(ctx, stashTimeout)
+		defer cancel()
 		newVer, err := p.stasher.Stash(ctx, mod, ver)
 		if err != nil {
 			return errors.E(op, err)
 		}
 		return f(newVer)
 	case mode.Async:
-		go func() { _, _ = p.stasher.Stash(ctx, mod, ver) }()
+		p.stashInBackground(ctx, mod, ver)
 		return errors.E(op, "async: module not found", errors.KindNotFound)
 	case mode.Redirect:
 		return errors.E(op, "redirect", errors.KindRedirect)
 	case mode.AsyncRedirect:
-		go func() { _, _ = p.stasher.Stash(ctx, mod, ver) }()
+		p.stashInBackground(ctx, mod, ver)
 		return errors.E(op, "async_redirect: module not found", errors.KindRedirect)
 	case mode.None:
 		return errors.E(op, "none", errors.KindNotFound)
 	}
 	return nil
+}
+
+// stashInBackground stashes the module in a goroutine that outlives the caller.
+// The stash gets a new context with its own deadline, ditching whatever
+// deadline was passed by the caller, so that it can continue even after the
+// HTTP request is complete (which leads to context cancellation). The
+// goroutine owns the context's cancel func and releases it once done.
+func (p *protocol) stashInBackground(ctx context.Context, mod, ver string) {
+	const op errors.Op = "protocol.stashInBackground"
+	ctx, cancel := copyContextWithCustomTimeout(ctx, stashTimeout)
+	go func() {
+		defer cancel()
+		if _, err := p.stasher.Stash(ctx, mod, ver); err != nil {
+			// Same convention as the HTTP handlers: a missing module or a redirect
+			// is an expected outcome, not an error worth alerting on.
+			severity := errors.Expect(err, errors.KindNotFound, errors.KindRedirect)
+			log.EntryFromContext(ctx).SystemErr(errors.E(op, err, errors.M(mod), errors.V(ver), severity))
+		}
+	}()
 }
 
 // union concatenates two version lists and removes duplicates.

@@ -77,14 +77,14 @@ func (s *ModuleStore) Zip(ctx context.Context, module, vsn string) (storage.Size
 }
 
 // Query connects to and queries storage module.
-func query(ctx context.Context, s *ModuleStore, module, vsn string) (*storage.Module, error) {
+func query(ctx context.Context, s *ModuleStore, module, vsn string) (*moduleDocument, error) {
 	const op errors.Op = "mongo.query"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
 
 	c := s.client.Database(s.db).Collection(s.coll)
 
-	result := &storage.Module{}
+	result := &moduleDocument{}
 
 	tctx, cancel := context.WithTimeout(ctx, s.timeout)
 	defer cancel()

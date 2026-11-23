@@ -5,11 +5,14 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"path/filepath"
 	"runtime"
+	"testing"
 
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/spf13/afero"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func (s *ModuleSuite) TestNewGoGetFetcher() {
@@ -134,4 +137,38 @@ func (m *mockProxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Write(resp)
+}
+
+// TestGoGetFetcherFetchCleansUpOnLateError verifies that the GOPATH temp dir is
+// removed when the go binary reports success but the files it points at cannot
+// be read afterwards.
+func TestGoGetFetcherFetchCleansUpOnLateError(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("fake go binary is a shell script")
+	}
+
+	binDir := t.TempDir()
+	missing := filepath.Join(binDir, "missing")
+	// With no args (validGoBinary) the script just exits 0. For "mod download"
+	// it reports success with info/goMod/zip paths that do not exist.
+	script := "#!/bin/sh\n" +
+		"if [ \"$1\" = \"mod\" ]; then\n" +
+		"  echo '{\"path\":\"example.com/mod\",\"version\":\"v1.0.0\"," +
+		"\"info\":\"" + missing + ".info\",\"goMod\":\"" + missing + ".mod\",\"zip\":\"" + missing + ".zip\"}'\n" +
+		"fi\n" +
+		"exit 0\n"
+	goBin := filepath.Join(binDir, "go")
+	require.NoError(t, os.WriteFile(goBin, []byte(script), 0o755)) //nolint:gosec
+
+	gogetDir := t.TempDir()
+	fetcher, err := NewGoGetFetcher(goBin, gogetDir, nil, afero.NewOsFs())
+	require.NoError(t, err)
+
+	ver, err := fetcher.Fetch(t.Context(), "example.com/mod", "v1.0.0")
+	require.Error(t, err)
+	require.Nil(t, ver)
+
+	entries, err := os.ReadDir(gogetDir)
+	require.NoError(t, err)
+	require.Empty(t, entries, "GOPATH temp dir leaked after failed Fetch")
 }

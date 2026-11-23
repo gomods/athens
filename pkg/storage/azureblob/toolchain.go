@@ -11,6 +11,7 @@ import (
 )
 
 func (s *Storage) toolchains() *toolchain.Store { return &toolchain.Store{Objects: &releaseObjects{s}} }
+
 func (s *Storage) Archive(ctx context.Context, source, filename string) (storage.ArchiveInfo, storage.SizeReadCloser, error) {
 	return s.toolchains().Archive(ctx, source, filename)
 }

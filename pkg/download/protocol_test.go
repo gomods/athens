@@ -524,6 +524,65 @@ func TestAsyncRedirect(t *testing.T) {
 	require.Equal(t, string(info), "info", "expected async fetch to be successful")
 }
 
+// ctxRecordingStasher records the state of the context it is handed, both on
+// entry and once the test lets it proceed, so that tests can detect a context
+// that is cancelled before or while the background stash runs.
+type ctxRecordingStasher struct {
+	entered chan struct{} // closed when Stash is entered
+	proceed chan struct{} // closed by the test to let Stash continue
+	done    chan struct{} // closed when Stash returns
+
+	entryErr error
+	laterErr error
+}
+
+func (s *ctxRecordingStasher) Stash(ctx context.Context, mod, ver string) (string, error) {
+	defer close(s.done)
+	s.entryErr = ctx.Err()
+	close(s.entered)
+	<-s.proceed
+	s.laterErr = ctx.Err()
+	return ver, nil
+}
+
+// TestAsyncStashContextNotCancelled makes sure the background stash started by
+// the async modes is not handed a context that is cancelled when the request
+// returns.
+func TestAsyncStashContextNotCancelled(t *testing.T) {
+	for _, m := range []mode.Mode{mode.Async, mode.AsyncRedirect} {
+		t.Run(string(m), func(t *testing.T) {
+			s, err := mem.NewStorage()
+			require.NoError(t, err)
+			rs := &ctxRecordingStasher{
+				entered: make(chan struct{}),
+				proceed: make(chan struct{}),
+				done:    make(chan struct{}),
+			}
+			dp := New(&Opts{
+				Stasher: rs,
+				Storage: s,
+				DownloadFile: &mode.DownloadFile{
+					Mode:        m,
+					DownloadURL: "https://gomods.io",
+				},
+			})
+
+			// Info returns before the background stash is guaranteed to have started.
+			_, err = dp.Info(t.Context(), "github.com/athens-artifacts/happy-path", "v0.0.1")
+			require.Error(t, err)
+
+			<-rs.entered
+			// Let the stash continue only after Info has returned and the
+			// request-scoped cleanup has had its chance to cancel the context.
+			close(rs.proceed)
+			<-rs.done
+
+			require.NoError(t, rs.entryErr, "context was cancelled on entry to Stash")
+			require.NoError(t, rs.laterErr, "context was cancelled while Stash was running")
+		})
+	}
+}
+
 type mockStasher struct {
 	s  storage.Backend
 	ch chan bool

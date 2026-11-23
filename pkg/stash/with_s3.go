@@ -33,12 +33,12 @@ func WithS3Lock(s3Conf *config.S3Config, lockConf *config.S3, checker storage.Ch
 	if lockConf == nil || lockConf.TTL <= 0 || lockConf.Timeout <= 0 || lockConf.MaxRetries <= 0 {
 		return nil, errors.E(op, fmt.Errorf("invalid lock options"))
 	}
-	client, err := s3storage.NewClient(s3Conf)
+	ctx, cancel := context.WithTimeout(context.Background(), s3LockOpTimeout)
+	defer cancel()
+	client, err := s3storage.NewClient(ctx, s3Conf)
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), s3LockOpTimeout)
-	defer cancel()
 	if _, err := client.HeadBucket(ctx, &s3.HeadBucketInput{Bucket: aws.String(s3Conf.Bucket)}); err != nil {
 		return nil, errors.E(op, err)
 	}

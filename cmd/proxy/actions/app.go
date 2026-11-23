@@ -128,16 +128,14 @@ func App(logger *log.Logger, conf *config.Config) (http.Handler, func(), error) 
 		r.Use(mw.NewFilterMiddleware(mf, conf.GlobalEndpoint))
 	}
 
-	client := &http.Client{
-		Transport: otelhttp.NewTransport(http.DefaultTransport),
-	}
+	validatorClient, storageClient := newHTTPClients(conf.TimeoutDuration())
 
 	// Having the hook set means we want to use it
 	if vHook := conf.ValidatorHook; vHook != "" {
-		r.Use(mw.NewValidationMiddleware(client, vHook))
+		r.Use(mw.NewValidationMiddleware(validatorClient, vHook))
 	}
 
-	store, err := GetStorage(conf.StorageType, conf.Storage, conf.TimeoutDuration(), client)
+	store, err := GetStorage(conf.StorageType, conf.Storage, conf.TimeoutDuration(), storageClient)
 	if err != nil {
 		return nil, cleanup, fmt.Errorf("getting storage configuration: %w", err)
 	}

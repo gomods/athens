@@ -44,17 +44,34 @@ func (s *withpool) Stash(ctx context.Context, mod, ver string) (string, error) {
 	const op errors.Op = "stash.Pool"
 	ctx, span := observ.StartSpan(ctx, op.String())
 	defer span.End()
-	var err error
-	var newVer string
-	done := make(chan struct{}, 1)
-	s.jobCh <- func() {
-		newVer, err = s.stasher.Stash(ctx, mod, ver)
-		close(done)
-	}
-	<-done
-	if err != nil {
-		return "", errors.E(op, err)
+
+	// The result is passed through a buffered channel rather than captured
+	// variables so that the job can finish after Stash has returned early
+	// without racing with the caller and without blocking the worker.
+	resCh := make(chan poolResp, 1)
+	job := func() {
+		newVer, err := s.stasher.Stash(ctx, mod, ver)
+		resCh <- poolResp{newVer: newVer, err: err}
 	}
 
-	return newVer, nil
+	select {
+	case s.jobCh <- job:
+	case <-ctx.Done():
+		return "", errors.E(op, ctx.Err())
+	}
+
+	select {
+	case res := <-resCh:
+		if res.err != nil {
+			return "", errors.E(op, res.err)
+		}
+		return res.newVer, nil
+	case <-ctx.Done():
+		return "", errors.E(op, ctx.Err())
+	}
+}
+
+type poolResp struct {
+	newVer string
+	err    error
 }

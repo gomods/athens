@@ -25,7 +25,7 @@ func RunToolchainTests(t *testing.T, backend storage.Backend) {
 	ctx := t.Context()
 	body := []byte("verified archive contents")
 	sum := sha256.Sum256(body)
-	info := storage.ArchiveInfo{ReleaseFile: storage.ReleaseFile{Filename: "go1.25.1.linux-amd64.tar.gz", Version: "go1.25.1", OS: "linux", Arch: "amd64", Size: int64(len(body)), SHA256: hex.EncodeToString(sum[:]), Kind: "archive"}, Stable: true}
+	info := storage.ArchiveInfo{Filename: "go1.25.1.linux-amd64.tar.gz", Version: "go1.25.1", OS: "linux", Arch: "amd64", Size: int64(len(body)), SHA256: hex.EncodeToString(sum[:]), Kind: "archive", Stable: true}
 	_, _, err := store.Archive(ctx, source, info.Filename)
 	require.True(t, errors.Is(err, errors.KindNotFound))
 	require.Error(t, store.SaveArchive(ctx, source, info, bytes.NewReader([]byte("wrong"))))

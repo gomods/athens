@@ -21,7 +21,7 @@ func Delete(ctx context.Context, module, version string, del Deleter, timeout ti
 	defer cancel()
 
 	delFn := func(ext string) <-chan error {
-		ec := make(chan error)
+		ec := make(chan error, 1)
 
 		go func() {
 			defer close(ec)

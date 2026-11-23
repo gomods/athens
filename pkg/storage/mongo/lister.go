@@ -5,7 +5,6 @@ import (
 
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/observ"
-	"github.com/gomods/athens/pkg/storage"
 	multierror "github.com/hashicorp/go-multierror"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
@@ -27,10 +26,10 @@ func (s *ModuleStore) List(ctx context.Context, moduleName string) ([]string, er
 	if err != nil {
 		return nil, errors.E(op, err, errors.M(moduleName))
 	}
-	result := make([]storage.Module, 0)
+	result := make([]moduleDocument, 0)
 	var errs error
 	for cursor.Next(ctx) {
-		var module storage.Module
+		var module moduleDocument
 		if err = cursor.Decode(&module); err != nil {
 			kind := errors.KindUnexpected
 			if errors.IsErr(err, mongo.ErrNoDocuments) {

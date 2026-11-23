@@ -8,15 +8,18 @@ on:
     branches:
       - main
 
+permissions:
+  contents: read
+
 jobs:
   lint:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     env:
-      GOLANGCI_LINT_VERSION: v2.11.4
+      GOLANGCI_LINT_VERSION: v2.15.0
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       # We need to set a cache marker to ensure that the cache is individual for each job.
       - name: Add Cache Marker
@@ -24,7 +27,7 @@ jobs:
 
       - name: Set up Go
         id: install-go
-        uses: actions/setup-go@v7
+        uses: actions/setup-go@d8cbb8045d7f43706b9177cceb36c1f91a6644d5 # v7.1.0
         with:
           go-version-file: 'go.mod'
           cache-dependency-path: |
@@ -36,12 +39,12 @@ jobs:
         if: steps.install-go.outputs.cache-hit != 'true'
 
       - name: Lint code
-        uses: golangci/golangci-lint-action@v9
+        uses: golangci/golangci-lint-action@ba0d7d2ec06a0ea1cb5fa41b2e4a3ab91d21278a # v9.3.0
         with:
           version: ${{ env.GOLANGCI_LINT_VERSION }}
 
   test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     env:
       ATHENS_MONGO_STORAGE_URL: mongodb://localhost:27017
       ATHENS_MINIO_ENDPOINT: http://localhost:9000
@@ -113,7 +116,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       # We need to set a cache marker to ensure that the cache is individual for each job.
       - name: Add Cache Marker
@@ -121,7 +124,7 @@ jobs:
 
       - name: Set up Go
         id: install-go
-        uses: actions/setup-go@v7
+        uses: actions/setup-go@d8cbb8045d7f43706b9177cceb36c1f91a6644d5 # v7.1.0
         with:
           go-version-file: 'go.mod'
           cache-dependency-path: |
@@ -143,11 +146,11 @@ jobs:
         run: make test-e2e
 
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
 
@@ -157,7 +160,7 @@ jobs:
 
       - name: Set up Go
         id: install-go
-        uses: actions/setup-go@v7
+        uses: actions/setup-go@d8cbb8045d7f43706b9177cceb36c1f91a6644d5 # v7.1.0
         with:
           go-version-file: 'go.mod'
           cache-dependency-path: |
@@ -170,12 +173,12 @@ jobs:
 
       - name: Capture Current Date
         id: date
-        run: echo "::set-output name=date::$(date -u '+%Y-%m-%d-%H:%M:%S-%Z')"
+        run: echo "date=$(date -u '+%Y-%m-%d-%H:%M:%S-%Z')" >> "$GITHUB_OUTPUT"
 
       - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v7
+        uses: goreleaser/goreleaser-action@a4f02ab5355a589de60d917a659ce617ed19b3de # v7.3.0
         with:
-          version: latest
+          version: "~> v2"
           args: release --clean --snapshot
         env:
           DATE: ${{ steps.date.outputs.date }}

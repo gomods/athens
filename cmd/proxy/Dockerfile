@@ -5,7 +5,7 @@
 # You can override the Go version used to build the image.
 # See project Makefile if using make.
 # See docker --build-arg if building directly.
-ARG GOLANG_VERSION=1.26.10
+ARG GOLANG_VERSION=1.27.3
 
 FROM golang:${GOLANG_VERSION}-alpine AS builder
 
@@ -26,6 +26,11 @@ RUN DATE="$(date -u +%Y-%m-%d-%H:%M:%S-%Z)" && \
     -ldflags "-X github.com/gomods/athens/pkg/build.version=$VERSION -X github.com/gomods/athens/pkg/build.buildDate=$DATE -s -w" \
     -o /bin/athens-proxy ./cmd/proxy
 
+# Build git-credential-github-app from source so it carries the same
+# (current) Go toolchain as the rest of the image instead of the stale
+# stdlib baked into upstream release binaries.
+RUN GOBIN=/bin go install -ldflags "-s -w" github.com/bdellegrazie/git-credential-github-app@v0.4.5
+
 FROM alpine:3.24
 ARG TARGETARCH
 
@@ -41,13 +46,13 @@ COPY --from=builder /usr/local/go/go.env /usr/local/go/go.env
 RUN chmod 644 /config/config.toml
 
 # Add tini, see https://github.com/gomods/athens/issues/1155 for details.
-RUN apk add --update git git-lfs mercurial openssh-client subversion procps fossil tini tzdata
+# Upgrade preinstalled base-layer packages first so point-release security
+# fixes are picked up on every rebuild.
+RUN apk -U upgrade && \
+    apk add git git-lfs mercurial openssh-client subversion procps fossil tini tzdata
 
 # Add git-credential-github-app for native integration with GitHub Apps
-RUN if [ "${TARGETARCH}" = "arm64" ]; then ARCH="arm64"; else ARCH="x86_64"; fi \
-  && wget -O git-credential-github-app.tar.gz https://github.com/bdellegrazie/git-credential-github-app/releases/download/v0.3.4/git-credential-github-app_v0.3.4_Linux_${ARCH}.tar.gz \
-  && tar xvzf 'git-credential-github-app.tar.gz' git-credential-github-app -C /usr/local/bin \
-  && rm git-credential-github-app.tar.gz || true;
+COPY --from=builder /bin/git-credential-github-app /usr/local/bin/git-credential-github-app
 
 ARG USER=athens
 RUN adduser -D -h /home/$USER $USER

@@ -7,7 +7,6 @@ import (
 
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/observ"
-	"github.com/gomods/athens/pkg/storage"
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
 
@@ -44,7 +43,7 @@ func (s *ModuleStore) Save(ctx context.Context, module, version string, mod []by
 		return errors.E(op, e, errors.M(module), errors.V(version))
 	}
 
-	m := &storage.Module{
+	m := &moduleDocument{
 		Module:  module,
 		Version: version,
 		Mod:     mod,

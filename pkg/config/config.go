@@ -166,7 +166,7 @@ func defaultConfig() *Config {
 		EnablePprof:           false,
 		PprofPort:             ":3001",
 		StatsExporter:         "prometheus",
-		TimeoutConf:           TimeoutConf{Timeout: 300},
+		Timeout:               300,
 		HomeTemplatePath:      "/var/lib/athens/home.html",
 		StorageType:           "memory",
 		Port:                  ":3000",
@@ -373,9 +373,11 @@ func checkFilePerms(files ...string) error {
 			continue
 		}
 
-		// TODO: Do not ignore errors when a file is not found
-		// There is a subtle bug in the filter module which ignores the filter file if it does not find it.
-		// This check can be removed once that has been fixed
+		// A file that does not exist (or cannot be stat'ed) is skipped here on purpose:
+		// this function only validates permissions of files that are present.
+		// Missing or unreadable files are reported by their consumers, e.g. the
+		// filter module returns an error when the filter file cannot be opened,
+		// which fails startup.
 		fInfo, err := os.Stat(f)
 		if err != nil {
 			continue
