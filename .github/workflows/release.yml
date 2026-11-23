@@ -39,6 +39,18 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Release tag commit pointing check
+        if: github.event_name == 'push'
+        env:
+          TAG_REF: ${{ github.ref }}
+        run: |
+          set -euo pipefail
+          commit="$(git rev-parse "${TAG_REF}^{commit}")"
+          if ! git merge-base --is-ancestor "$commit" origin/main; then
+            echo "::error::Tag ${TAG_REF#refs/tags/} points at ${commit}, which is not on main. Release tags must be created from main."
+            exit 1
+          fi
+
       - name: Compute next version (conventional commits)
         id: tag
         if: github.event_name == 'workflow_dispatch'
