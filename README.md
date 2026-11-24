@@ -10,6 +10,11 @@
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com)
 [![Open Source Helpers](https://www.codetriage.com/gomods/athens/badges/users.svg)](https://www.codetriage.com/gomods/athens)
 
+> **Pantheon fork.** This is `pantheon-systems/athens`, a fork of `gomods/athens`. Releases publish to `ghcr.io/pantheon-systems/athens`.
+> GitHub opens pull requests against the upstream parent by default. To target this repository, run
+> `gh repo set-default pantheon-systems/athens` once in your clone, or pass `-R pantheon-systems/athens` to `gh pr create`.
+> In the web UI, check that the base repository is `pantheon-systems/athens` before opening a PR.
+
 Welcome to the Athens project! Athens is an open source, enterprise ready implementation of the [Go Module proxy](https://go.dev/ref/mod#module-proxy) for the [Go Modules download API](https://docs.gomods.io/intro/protocol/).
 
 See our documentation site [https://docs.gomods.io](https://docs.gomods.io) for more details on the project.
