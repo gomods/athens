@@ -150,6 +150,17 @@ func getSingleFlight(l *log.Logger, c *config.Config, s storage.Backend, checker
 	switch c.SingleFlightType {
 	case "", "memory":
 		return stash.WithSingleflight, nil
+	default:
+		distributed, err := newDistributedSingleFlight(l, c, s, checker)
+		if err != nil {
+			return nil, err
+		}
+		return stash.WithLocalSingleflight(distributed), nil
+	}
+}
+
+func newDistributedSingleFlight(l *log.Logger, c *config.Config, s storage.Backend, checker storage.Checker) (stash.Wrapper, error) {
+	switch c.SingleFlightType {
 	case "etcd":
 		if c.SingleFlight == nil || c.SingleFlight.Etcd == nil {
 			return nil, errors.New("etcd config must be present")
@@ -166,7 +177,8 @@ func getSingleFlight(l *log.Logger, c *config.Config, s storage.Backend, checker
 			c.SingleFlight.Redis.Password,
 			c.SingleFlight.Redis.Cluster,
 			checker,
-			c.SingleFlight.Redis.LockConfig)
+			c.SingleFlight.Redis.LockConfig,
+		)
 	case "redis-sentinel":
 		if c.SingleFlight == nil || c.SingleFlight.RedisSentinel == nil {
 			return nil, errors.New("redis config must be present")
