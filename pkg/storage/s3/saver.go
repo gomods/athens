@@ -40,6 +40,9 @@ func (s *Storage) upload(ctx context.Context, path, contentType string, stream i
 		ServerSideEncryption: s.serverSideEncryption,
 		BucketKeyEnabled:     s.bucketKeyEnabled,
 	}
+	if s.cacheControl != "" {
+		upParams.CacheControl = aws.String(s.cacheControl)
+	}
 	if s.sseKMSKeyID != "" {
 		upParams.SSEKMSKeyID = aws.String(s.sseKMSKeyID)
 	}
