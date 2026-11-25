@@ -22,6 +22,15 @@ func WithSingleflight(s Stasher) Stasher {
 	return sf
 }
 
+// WithLocalSingleflight wraps a distributed singleflight wrapper so concurrent
+// requests on the same Athens instance coalesce in memory before acquiring the
+// distributed lock.
+func WithLocalSingleflight(distributed Wrapper) Wrapper {
+	return func(s Stasher) Stasher {
+		return WithSingleflight(distributed(s))
+	}
+}
+
 type sfResp struct {
 	newVer string
 	err    error
@@ -56,12 +65,28 @@ func (s *withsf) Stash(ctx context.Context, mod, ver string) (string, error) {
 	_, inFlight := s.subs[mv]
 	if !inFlight {
 		s.subs[mv] = []chan *sfResp{subCh}
-		go s.process(ctx, mod, ver)
+		// Detach from caller cancellation so one canceled waiter cannot abort other waiters,
+		// while preserving any deadline from the initiating request.
+		workCtx := context.WithoutCancel(ctx)
+		var cancelWork context.CancelFunc
+		if deadline, ok := ctx.Deadline(); ok {
+			workCtx, cancelWork = context.WithDeadline(workCtx, deadline)
+		}
+		go func() {
+			if cancelWork != nil {
+				defer cancelWork()
+			}
+			s.process(workCtx, mod, ver)
+		}()
 	} else {
 		s.subs[mv] = append(s.subs[mv], subCh)
 	}
 	s.mu.Unlock()
 
-	resp := <-subCh
-	return resp.newVer, resp.err
+	select {
+	case resp := <-subCh:
+		return resp.newVer, resp.err
+	case <-ctx.Done():
+		return "", errors.E(op, ctx.Err())
+	}
 }
