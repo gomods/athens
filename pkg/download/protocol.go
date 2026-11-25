@@ -12,7 +12,6 @@ import (
 	"github.com/gomods/athens/pkg/log"
 	"github.com/gomods/athens/pkg/module"
 	"github.com/gomods/athens/pkg/observ"
-	"github.com/gomods/athens/pkg/requestid"
 	"github.com/gomods/athens/pkg/stash"
 	"github.com/gomods/athens/pkg/storage"
 )
@@ -47,6 +46,9 @@ type Opts struct {
 	DownloadFile *mode.DownloadFile
 	NetworkMode  string
 }
+
+// stashTimeout bounds the duration of a single module stash operation.
+const stashTimeout = 15 * time.Minute
 
 // NetworkMode constants.
 const (
@@ -268,29 +270,40 @@ func (p *protocol) Zip(ctx context.Context, mod, ver string) (storage.SizeReadCl
 
 func (p *protocol) processDownload(ctx context.Context, mod, ver string, f func(newVer string) error) error {
 	const op errors.Op = "protocol.processDownload"
-	// Create a new context with custom deadline and ditch whatever deadline was passed by the caller.
-	// This is needed so that the async go routines can continue even after the HTTP request is complete (which leads to context cancellation).
-	ctx, cancel := copyContextWithCustomTimeout(ctx, time.Minute*15)
-	defer cancel()
 	switch p.df.Match(mod) {
 	case mode.Sync:
+		ctx, cancel := copyContextWithCustomTimeout(ctx, stashTimeout)
+		defer cancel()
 		newVer, err := p.stasher.Stash(ctx, mod, ver)
 		if err != nil {
 			return errors.E(op, err)
 		}
 		return f(newVer)
 	case mode.Async:
-		go func() { _, _ = p.stasher.Stash(ctx, mod, ver) }()
+		p.stashInBackground(ctx, mod, ver)
 		return errors.E(op, "async: module not found", errors.KindNotFound)
 	case mode.Redirect:
 		return errors.E(op, "redirect", errors.KindRedirect)
 	case mode.AsyncRedirect:
-		go func() { _, _ = p.stasher.Stash(ctx, mod, ver) }()
+		p.stashInBackground(ctx, mod, ver)
 		return errors.E(op, "async_redirect: module not found", errors.KindRedirect)
 	case mode.None:
 		return errors.E(op, "none", errors.KindNotFound)
 	}
 	return nil
+}
+
+func (p *protocol) stashInBackground(ctx context.Context, mod, ver string) {
+	const op errors.Op = "protocol.stashInBackground"
+	// Detach from caller cancellation so background stashing finishes after the HTTP response is sent.
+	ctx, cancel := copyContextWithCustomTimeout(ctx, stashTimeout)
+	go func() {
+		defer cancel()
+		if _, err := p.stasher.Stash(ctx, mod, ver); err != nil {
+			severity := errors.Expect(err, errors.KindNotFound, errors.KindRedirect)
+			log.EntryFromContext(ctx).SystemErr(errors.E(op, err, errors.M(mod), errors.V(ver), severity))
+		}
+	}()
 }
 
 // union concatenates two version lists and removes duplicates.
@@ -314,8 +327,5 @@ func union(list1, list2 []string) []string {
 }
 
 func copyContextWithCustomTimeout(ctx context.Context, timeout time.Duration) (context.Context, context.CancelFunc) {
-	ctxCopy, cancel := context.WithTimeout(context.Background(), timeout)
-	ctxCopy = requestid.SetInContext(ctxCopy, requestid.FromContext(ctx))
-	ctxCopy = log.SetEntryInContext(ctxCopy, log.EntryFromContext(ctx))
-	return ctxCopy, cancel
+	return context.WithTimeout(context.WithoutCancel(ctx), timeout)
 }
