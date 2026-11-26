@@ -54,7 +54,7 @@ require (
 	golang.org/x/mod v0.43.0
 	golang.org/x/oauth2 v0.38.0
 	golang.org/x/sync v0.25.0
-	google.golang.org/api v0.312.0
+	google.golang.org/api v0.316.0
 )
 
 require (
