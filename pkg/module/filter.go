@@ -218,7 +218,8 @@ func matches(version, qualifier string) bool {
 		return false
 	}
 
-	q, err := getVersionSegments(qualifier[2:])
+	// The "v" after the modifier is optional: ^1.2.3 means ^v1.2.3.
+	q, err := getVersionSegments(strings.TrimPrefix(qualifier[1:], "v"))
 	if err != nil {
 		return false
 	}
