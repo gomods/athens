@@ -5,7 +5,7 @@
 # You can override the Go version used to build the image.
 # See project Makefile if using make.
 # See docker --build-arg if building directly.
-ARG GOLANG_VERSION=1.27.3
+ARG GOLANG_VERSION=1.27.4
 
 FROM golang:${GOLANG_VERSION}-alpine AS builder
 

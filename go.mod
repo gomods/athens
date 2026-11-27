@@ -1,6 +1,6 @@
 module github.com/gomods/athens
 
-go 1.27.3
+go 1.27.4
 
 require (
 	cloud.google.com/go/storage v1.71.0
